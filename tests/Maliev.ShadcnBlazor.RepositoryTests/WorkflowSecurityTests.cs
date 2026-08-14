@@ -38,6 +38,7 @@ public sealed class WorkflowSecurityTests
         Assert.Contains("types: [published]", release, StringComparison.Ordinal);
         Assert.Contains("id-token: write", release, StringComparison.Ordinal);
         Assert.Contains("environment: nuget", release, StringComparison.Ordinal);
+        Assert.Contains("runs-on: windows-2022", release, StringComparison.Ordinal);
         Assert.Contains("NuGet/login@", release, StringComparison.Ordinal);
         Assert.Contains("steps.nuget-login.outputs.NUGET_API_KEY", release, StringComparison.Ordinal);
         Assert.DoesNotContain("secrets.NUGET_API_KEY", release, StringComparison.Ordinal);
@@ -50,6 +51,7 @@ public sealed class WorkflowSecurityTests
         var ci = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "ci.yml"));
 
         Assert.Contains("dotnet workload restore", ci, StringComparison.Ordinal);
+        Assert.Contains("runs-on: windows-2022", ci, StringComparison.Ordinal);
         Assert.Contains("--locked-mode", ci, StringComparison.Ordinal);
         Assert.Contains("Verify-PublicSurface.ps1", ci, StringComparison.Ordinal);
         Assert.Contains("dotnet format", ci, StringComparison.Ordinal);

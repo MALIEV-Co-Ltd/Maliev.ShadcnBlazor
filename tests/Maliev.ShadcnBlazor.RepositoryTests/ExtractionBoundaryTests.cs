@@ -58,7 +58,8 @@ public sealed class ExtractionBoundaryTests
             "Maliev.ShadcnBlazor.BrowserTests.csproj"));
 
         var references = project.Descendants("ProjectReference")
-            .Select(element => Path.GetFileName((string?)element.Attribute("Include")))
+            .Select(element => ((string?)element.Attribute("Include"))?.Replace('\\', '/'))
+            .Select(include => Path.GetFileName(include))
             .OfType<string>()
             .ToArray();
 

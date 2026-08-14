@@ -58,7 +58,7 @@ jobs:
 
   browser:
     name: Browser tests
-    runs-on: ubuntu-24.04
+    runs-on: windows-2022
     timeout-minutes: 25
     steps:
       - name: Check out source
