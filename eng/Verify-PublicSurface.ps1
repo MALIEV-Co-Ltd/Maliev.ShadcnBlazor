@@ -61,9 +61,22 @@ if ($Package) {
                 continue
             }
 
-            $reader = [System.IO.StreamReader]::new($entry.Open(), [System.Text.Encoding]::UTF8, $true)
+            $stream = $entry.Open()
             try {
-                $text = $reader.ReadToEnd()
+                $buffer = [System.IO.MemoryStream]::new()
+                try {
+                    $stream.CopyTo($buffer)
+                    $bytes = $buffer.ToArray()
+                }
+                finally {
+                    $buffer.Dispose()
+                }
+
+                if ($bytes -contains 0) {
+                    continue
+                }
+
+                $text = [System.Text.Encoding]::UTF8.GetString($bytes)
                 foreach ($term in $forbidden) {
                     if ($text.Contains($term, [StringComparison]::OrdinalIgnoreCase)) {
                         $violations.Add("private identifier in package entry $($entry.FullName): $term")
@@ -74,7 +87,7 @@ if ($Package) {
                 }
             }
             finally {
-                $reader.Dispose()
+                $stream.Dispose()
             }
         }
     }
