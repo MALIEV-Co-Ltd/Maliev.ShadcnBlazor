@@ -6,6 +6,8 @@ selection, overlays, navigation, feedback, data display, and conversation
 workflow components, plus static web assets delivered by the Razor Class
 Library.
 
+[Explore every component in the live interactive demo](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/).
+
 ## Install
 
 ```bash
@@ -71,6 +73,7 @@ minor line.
 ## Repository
 
 - Source: <https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor>
+- Live interactive demo: <https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/>
 - Getting started: [docs/getting-started.md](docs/getting-started.md)
 - Component catalog: [docs/components.md](docs/components.md)
 - Theming: [docs/theming.md](docs/theming.md)

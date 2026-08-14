@@ -38,6 +38,19 @@ public sealed class PublicDocumentationTests
     }
 
     [Fact]
+    public void PublicDocumentationLinksTheLiveDemoAndExplainsReviewedVisualProof()
+    {
+        var root = RepositoryRoot.Find();
+        var readme = File.ReadAllText(Path.Combine(root, "README.md"));
+        var components = File.ReadAllText(Path.Combine(root, "docs", "components.md"));
+
+        Assert.Contains("https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/", readme, StringComparison.Ordinal);
+        Assert.Contains("SHADCN_UPDATE_VISUAL_BASELINES=1", components, StringComparison.Ordinal);
+        Assert.Contains("do not update baselines", components, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("inspect", components, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void SecurityPolicyUsesPrivateVulnerabilityReporting()
     {
         var root = RepositoryRoot.Find();

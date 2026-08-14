@@ -43,3 +43,32 @@ Attachment, Bubble, Marker, Message, Message Scroller, and Questionnaire.
 Public API compatibility is checked against the committed API snapshot. A
 breaking API change requires an intentional major-version decision and an
 updated migration note.
+
+## Interactive demo and visual proof
+
+The [public Showcase](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/)
+contains a searchable, interactive dossier for every component. Each dossier
+uses the package's public API and exposes live controls, source examples,
+accessibility notes, and reviewed evidence.
+
+Run the complete desktop-light and mobile-dark-RTL proof locally with:
+
+```powershell
+dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --filter ComponentCatalogVisualProofTests
+```
+
+Normal local and CI runs compare against the committed images under
+`docs/evidence/component-catalog-baselines` and do not update baselines.
+Screenshots and diffs are written to `artifacts/visual-proof` for inspection.
+
+An intentional baseline update must be explicit:
+
+```powershell
+$env:SHADCN_UPDATE_VISUAL_BASELINES='1' # SHADCN_UPDATE_VISUAL_BASELINES=1
+dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --filter ComponentCatalogVisualProofTests
+Remove-Item Env:SHADCN_UPDATE_VISUAL_BASELINES
+```
+
+Inspect every changed image at its original resolution, rerun without the
+environment variable, and commit the reviewed images separately. Pull-request
+automation never enables the update variable and cannot approve visual changes.

@@ -9,6 +9,8 @@ public sealed class WorkflowSecurityTests
     [InlineData(".github/workflows/codeql.yml")]
     [InlineData(".github/workflows/dependency-review.yml")]
     [InlineData(".github/workflows/release.yml")]
+    [InlineData(".github/workflows/pages.yml")]
+    [InlineData(".github/workflows/visual-proof.yml")]
     [InlineData(".github/dependabot.yml")]
     public void RequiredAutomationFilesExist(string relativePath)
     {
@@ -59,6 +61,39 @@ public sealed class WorkflowSecurityTests
     }
 
     [Fact]
+    public void PagesDeploymentUsesScopedOidcPermissionsAndCannotPublishPackages()
+    {
+        var pages = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "pages.yml"));
+
+        Assert.Contains("permissions:\n  contents: read", pages.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Contains("pages: write", pages, StringComparison.Ordinal);
+        Assert.Contains("id-token: write", pages, StringComparison.Ordinal);
+        Assert.Contains("environment:\n      name: github-pages", pages.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Contains("actions/upload-pages-artifact@", pages, StringComparison.Ordinal);
+        Assert.Contains("actions/deploy-pages@", pages, StringComparison.Ordinal);
+        Assert.DoesNotContain("NuGet/login", pages, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("dotnet nuget push", pages, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("secrets.", pages, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void VisualProofWorkflowIsReadOnlyAndAlwaysUploadsDiagnostics()
+    {
+        var workflow = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "visual-proof.yml"));
+
+        Assert.Contains("ComponentCatalogVisualProofTests", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: always()", workflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/visual-proof", workflow, StringComparison.Ordinal);
+        Assert.Contains("update-baselines:", workflow, StringComparison.Ordinal);
+        Assert.Contains("default: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("SHADCN_UPDATE_VISUAL_BASELINES: ${{ inputs.update-baselines && '1' || '0' }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("docs/evidence/component-catalog-baselines", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("SHADCN_UPDATE_VISUAL_BASELINES: 1", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("contents: write", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("secrets.", workflow, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void DotNetSdkAndWorkloadVersionsArePinnedTogether()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryRoot.Find(), "global.json")));
@@ -73,6 +108,8 @@ public sealed class WorkflowSecurityTests
     [InlineData(".github/workflows/ci.yml")]
     [InlineData(".github/workflows/codeql.yml")]
     [InlineData(".github/workflows/release.yml")]
+    [InlineData(".github/workflows/pages.yml")]
+    [InlineData(".github/workflows/visual-proof.yml")]
     public void DotNetWorkflowsInstallPinnedWorkloadManifests(string relativePath)
     {
         var workflow = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), relativePath));
