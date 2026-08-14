@@ -1,0 +1,12 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<template data-slot="navigation-menu-content-source" data-value="@Item.Registration.Value"></template>
+@code {
+    [CascadingParameter] private ShadcnNavigationMenuItemContext Item { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        parameters.TryGetValue<RenderFragment>(nameof(ChildContent), out var content);
+        await base.SetParametersAsync(parameters);
+        if (Item.Menu.RegisterContent(Item.Registration.Value, content)) Item.Menu.NotifyContentChanged();
+    }
+}

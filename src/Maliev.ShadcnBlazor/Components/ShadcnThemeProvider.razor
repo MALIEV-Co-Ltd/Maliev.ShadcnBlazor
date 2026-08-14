@@ -1,0 +1,108 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<ShadcnOptions> ConfiguredOptions
+
+<MudThemeProvider @ref="_themeProvider"
+                  Theme="@_theme"
+                  IsDarkMode="@EffectiveDarkMode"
+                  IsDarkModeChanged="HandleSystemDarkModeChanged"
+                  ObserveSystemDarkModeChange="@ObserveSystemDarkModeChange" />
+<div @attributes="AdditionalAttributes"
+     class="@RootClass"
+     style="@RootStyle"
+     data-shadcn-scope
+     data-shadcn-theme="@(EffectiveDarkMode ? "dark" : "light")"
+     data-shadcn-reduced-motion="@ReducedMotionPolicy"
+     dir="@(EffectiveDirection == ShadcnDirection.RightToLeft ? "rtl" : "ltr")">
+    <MudRTLProvider RightToLeft="@(EffectiveDirection == ShadcnDirection.RightToLeft)">
+        <MudPopoverProvider />
+        <MudDialogProvider BackgroundClass="@OverlayClass" CloseOnEscapeKey="true" />
+        <MudSnackbarProvider />
+        <CascadingValue Value="@Context">
+            @ChildContent
+        </CascadingValue>
+    </MudRTLProvider>
+</div>
+
+@code {
+    private MudTheme _theme = null!;
+    private MudThemeProvider _themeProvider = null!;
+    private ShadcnOptions _options = null!;
+    private bool _systemPreferenceSampled;
+
+    [Parameter] public bool? IsDarkMode { get; set; }
+    [Parameter] public bool ObserveSystemDarkModeChange { get; set; }
+    [Parameter] public EventCallback<bool> SystemDarkModeChanged { get; set; }
+    [Parameter] public ShadcnDirection? Direction { get; set; }
+    [Parameter] public ShadcnTheme? Theme { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool EffectiveDarkMode => IsDarkMode ?? _options.DefaultDarkMode;
+    private ShadcnDirection EffectiveDirection => Direction ?? _options.DefaultDirection;
+    private ShadcnContext Context => new(EffectiveDarkMode, EffectiveDirection);
+    private string RootClass => JoinValues(ShadcnCss.ScopeClass, Class, GetAdditionalAttribute("class"));
+    private string OverlayClass => JoinValues(
+        ShadcnCss.OverlayScopeClass,
+        Theme?.Metrics.ReducedMotionBehavior == ShadcnReducedMotionBehavior.AlwaysReduce
+            ? "shadcn-reduce-motion"
+            : null);
+    private string? ReducedMotionPolicy => Theme?.Metrics.ReducedMotionBehavior switch
+    {
+        ShadcnReducedMotionBehavior.RespectSystemPreference => "system",
+        ShadcnReducedMotionBehavior.AlwaysReduce => "always",
+        _ => null
+    };
+    private string RootStyle => JoinStyles(
+        Style,
+        GetAdditionalAttribute("style"),
+        Theme is null
+            ? $"--shadcn-font-sans: {_options.FontFamily}"
+            : ShadcnThemeCssWriter.WriteProperties(Theme, EffectiveDarkMode));
+
+    protected override void OnInitialized()
+    {
+        _options = ConfiguredOptions.Value;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!ObserveSystemDarkModeChange)
+            _systemPreferenceSampled = false;
+
+        if (!Enum.IsDefined(EffectiveDirection))
+            throw new ArgumentOutOfRangeException(nameof(Direction), EffectiveDirection,
+                "Shadcn direction must be LeftToRight or RightToLeft.");
+
+        _theme = Theme is null
+            ? ShadcnThemeFactory.Create(_options)
+            : ShadcnThemeFactory.Create(Theme);
+    }
+
+    private string? GetAdditionalAttribute(string name) => AdditionalAttributes?
+        .FirstOrDefault(attribute => string.Equals(attribute.Key, name, StringComparison.OrdinalIgnoreCase))
+        .Value?.ToString();
+
+    private static string JoinValues(params string?[] values) => string.Join(" ", values
+        .Where(value => !string.IsNullOrWhiteSpace(value))
+        .Select(value => value!.Trim()));
+
+    private static string JoinStyles(params string?[] values) => string.Join("; ", values
+        .Where(value => !string.IsNullOrWhiteSpace(value))
+        .Select(value => value!.Trim().TrimEnd(';')));
+
+    private Task HandleSystemDarkModeChanged(bool isDarkMode) => ObserveSystemDarkModeChange
+        ? SystemDarkModeChanged.InvokeAsync(isDarkMode)
+        : Task.CompletedTask;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!ObserveSystemDarkModeChange || _systemPreferenceSampled)
+            return;
+
+        _systemPreferenceSampled = true;
+        await SystemDarkModeChanged.InvokeAsync(await _themeProvider.GetSystemDarkModeAsync());
+    }
+}

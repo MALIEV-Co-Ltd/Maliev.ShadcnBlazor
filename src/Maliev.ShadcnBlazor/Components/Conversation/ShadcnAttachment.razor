@@ -1,0 +1,53 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment")" style="@MergeStyle(null)"
+     data-slot="attachment" data-state="@StateValue" data-size="@SizeValue" data-orientation="@OrientationValue"
+     role="@SemanticRole" aria-live="@LiveMode" aria-label="@AccessibleTitle" aria-description="@ErrorReason">
+    @if (ProgressRole is not null)
+    {
+        <div class="shadcn-attachment-progress" data-slot="attachment-progress" role="progressbar" aria-label="@ProgressAccessibleName" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@ProgressValue"><span style="width:@($"{ProgressValue}%")"></span></div>
+    }
+    <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+</div>
+@code {
+    [Parameter] public ShadcnAttachmentState State { get; set; } = ShadcnAttachmentState.Done;
+    [Parameter] public bool StateIsControlled { get; set; }
+    [Parameter] public EventCallback<ShadcnAttachmentState> StateChanged { get; set; }
+    [Parameter] public ShadcnAttachmentFile? File { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? ErrorReason { get; set; }
+    [Parameter] public ShadcnAttachmentSize Size { get; set; } = ShadcnAttachmentSize.Default;
+    [Parameter] public ShadcnAttachmentOrientation Orientation { get; set; } = ShadcnAttachmentOrientation.Horizontal;
+    [Parameter] public double? Progress { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+
+    private ShadcnAttachmentState _effectiveState;
+    private ShadcnAttachmentState _lastParameterState;
+    private bool _initialized;
+    internal ShadcnAttachmentState EffectiveState => StateIsControlled ? State : _effectiveState;
+    private bool ShowsProgress => EffectiveState is ShadcnAttachmentState.Uploading or ShadcnAttachmentState.Processing;
+    private string? ProgressRole => ShowsProgress && Progress.HasValue ? "progressbar" : null;
+    private string? SemanticRole => ShowsProgress && ProgressRole is null ? "status" : null;
+    private string? LiveMode => ProgressRole is null && ShowsProgress ? "polite" : null;
+    private string? ProgressValue => ProgressRole is null ? null : Progress!.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    private string? AccessibleTitle => Title ?? File?.Name;
+    private string ProgressAccessibleName => $"{AccessibleTitle ?? "Attachment"} upload progress";
+    private string StateValue => EffectiveState switch { ShadcnAttachmentState.Idle => "idle", ShadcnAttachmentState.Uploading => "uploading", ShadcnAttachmentState.Processing => "processing", ShadcnAttachmentState.Error => "error", ShadcnAttachmentState.Done => "done", _ => throw Unknown(nameof(State), EffectiveState) };
+    private string SizeValue => Size switch { ShadcnAttachmentSize.Default => "default", ShadcnAttachmentSize.Small => "sm", ShadcnAttachmentSize.ExtraSmall => "xs", _ => throw Unknown(nameof(Size), Size) };
+    private string OrientationValue => Orientation switch { ShadcnAttachmentOrientation.Horizontal => "horizontal", ShadcnAttachmentOrientation.Vertical => "vertical", _ => throw Unknown(nameof(Orientation), Orientation) };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "data-size", "data-orientation", "role", "aria-live", "aria-label", "aria-description");
+    protected override void OnParametersSet()
+    {
+        if (ChildContent is null) throw new InvalidOperationException("ShadcnAttachment requires child content.");
+        if (!Enum.IsDefined(State)) throw Unknown(nameof(State), State);
+        if (!Enum.IsDefined(Size)) throw Unknown(nameof(Size), Size);
+        if (!Enum.IsDefined(Orientation)) throw Unknown(nameof(Orientation), Orientation);
+        if (!_initialized || (!StateIsControlled && State != _lastParameterState)) { _effectiveState = State; _initialized = true; }
+        _lastParameterState = State;
+        if (StateIsControlled && !StateChanged.HasDelegate) throw new InvalidOperationException("Controlled attachment state requires StateChanged.");
+        if (File is not null && string.IsNullOrWhiteSpace(Title)) throw new InvalidOperationException("Typed attachments require a title.");
+        if (EffectiveState is ShadcnAttachmentState.Error && string.IsNullOrWhiteSpace(ErrorReason)) throw new InvalidOperationException("Error attachments require an error reason.");
+        if (Progress is < 0 or > 100 || double.IsNaN(Progress ?? 0) || double.IsInfinity(Progress ?? 0)) throw new ArgumentOutOfRangeException(nameof(Progress), Progress, "Attachment progress must be between 0 and 100.");
+    }
+    internal async Task RequestStateAsync(ShadcnAttachmentState state) { if (StateIsControlled) await StateChanged.InvokeAsync(state); else { _effectiveState = state; await StateChanged.InvokeAsync(state); StateHasChanged(); } }
+    private static ArgumentOutOfRangeException Unknown(string name, object value) => new(name, value, $"Unknown attachment {name.ToLowerInvariant()}.");
+}

@@ -1,0 +1,30 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<th @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table-head")" style="@MergeStyle(null)" data-slot="table-head" scope="@ScopeValue" colspan="@ColSpan" rowspan="@RowSpan">@ChildContent</th>
+@code {
+    [CascadingParameter] private ShadcnTableCompositionContext? Parent { get; set; }
+    [Parameter] public ShadcnTableHeadScope Scope { get; set; } = ShadcnTableHeadScope.Column;
+    [Parameter] public int? ColSpan { get; set; }
+    [Parameter] public int? RowSpan { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "scope", "colspan", "rowspan");
+    private string ScopeValue => Scope switch
+    {
+        ShadcnTableHeadScope.Column => "col",
+        ShadcnTableHeadScope.Row => "row",
+        ShadcnTableHeadScope.ColumnGroup => "colgroup",
+        ShadcnTableHeadScope.RowGroup => "rowgroup",
+        _ => throw new ArgumentOutOfRangeException(nameof(Scope), Scope, "Unknown table heading scope.")
+    };
+    protected override void OnParametersSet()
+    {
+        if (Parent?.Kind != ShadcnTableCompositionKind.Row) throw new InvalidOperationException("Table heading must be a direct table row child.");
+        if (ChildContent is null) throw new InvalidOperationException("Table heading content is required.");
+        _ = ScopeValue;
+        ValidateSpan(ColSpan, nameof(ColSpan));
+        ValidateSpan(RowSpan, nameof(RowSpan));
+    }
+    private static void ValidateSpan(int? value, string name)
+    {
+        if (value is < 1 or > 1000) throw new ArgumentOutOfRangeException(name, value, "Table spans must be between 1 and 1000.");
+    }
+}

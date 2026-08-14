@@ -1,0 +1,28 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JavaScript
+@if(Context.Owner.EffectiveOpen){<div class="shadcn-drawer-portal" data-slot="drawer-portal">@if(Context.Owner.ModalMode!=ShadcnDrawerModalMode.NonModal){<div class="shadcn-drawer-overlay" data-slot="drawer-overlay" data-state="open" @onclick="OutsideAsync"></div>}<div class="shadcn-drawer-viewport" data-slot="drawer-viewport"><div @ref="_element" @attributes="Forwarded" id="@Context.ContentId" class="@MergeClass("shadcn-drawer-content")" style="@MergeStyle(null)" data-slot="drawer-content" data-state="open" data-swipe-direction="@Context.Owner.DirectionValue" data-swipe-axis="@Context.Owner.Axis" data-snap-point="@Context.Owner.SnapPoint?.ToCss()" role="dialog" aria-modal="@(Context.Owner.ModalMode==ShadcnDrawerModalMode.Modal?"true":null)" aria-labelledby="@Context.TitleId" aria-describedby="@Context.DescriptionId" tabindex="-1">@if(Context.Owner.ShowSwipeHandle){<div class="shadcn-drawer-swipe-handle" data-slot="drawer-swipe-handle" aria-hidden="true"></div>}@ChildContent</div></div></div>}
+@code {
+    [CascadingParameter] private ShadcnDrawerContext Context { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ElementReference _element; private IJSObjectReference? _module; private DotNetObjectReference<ShadcnDrawer>? _ownerRef; private bool _attached, _aria; private string? _attachedElementId;
+    private IReadOnlyDictionary<string,object> Forwarded => AttributesExcept("id","data-slot","data-state","data-swipe-direction","data-swipe-axis","data-snap-point","role","aria-modal","aria-labelledby","aria-describedby","tabindex");
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if (!Context.Owner.EffectiveOpen) { await DetachAsync(); return; }
+        if (Context.TitleId is null) throw new InvalidOperationException("ShadcnDrawerContent requires a ShadcnDrawerTitle.");
+        if (!_aria) { _aria = true; await InvokeAsync(StateHasChanged); return; }
+        if (_attached && _attachedElementId == _element.Id && _module is not null && await _module.InvokeAsync<bool>("isDialogAttached", _element)) return;
+        if (_attached) await ResetInteropAsync();
+        _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
+        _ownerRef = DotNetObjectReference.Create(Context.Owner);
+        await _module.InvokeVoidAsync("attachDrawer", _element, _ownerRef, Context.Owner.DirectionValue, Context.Owner.ModalMode.ToString(), Context.Owner.DisablePointerDismissal, Context.Owner.SnapPoints.Select(x => x.ToCss()).ToArray());
+        _attached = true;
+        _attachedElementId = _element.Id;
+    }
+    private async Task OutsideAsync() { if (!Context.Owner.DisablePointerDismissal) await Context.Owner.SetOpenAsync(false); }
+    private async ValueTask DetachAsync() { if (_module is not null) { try { if (_attached) await _module.InvokeVoidAsync("detachDrawer", _element); await _module.DisposeAsync(); } catch (JSDisconnectedException) { } } ResetInterop(); }
+    private async ValueTask ResetInteropAsync() { if (_module is not null) { try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { } } ResetInterop(); }
+    private void ResetInterop() { _ownerRef?.Dispose(); _ownerRef=null; _module=null; _attached=false; _attachedElementId=null; }
+    public ValueTask DisposeAsync() => DetachAsync();
+}

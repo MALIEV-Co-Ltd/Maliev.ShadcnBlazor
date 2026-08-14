@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-dialog-trigger")" style="@MergeStyle(null)" data-slot="dialog-trigger" type="button" disabled="@Disabled" aria-haspopup="dialog" aria-controls="@Context.ContentId" aria-expanded="@(Context.Owner.EffectiveOpen ? "true" : "false")" @onclick="OpenAsync">@ChildContent</button>
+@code {
+    [CascadingParameter] private ShadcnDialogContext Context { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "disabled", "aria-haspopup", "aria-controls", "aria-expanded");
+    private async Task OpenAsync() { if (!Disabled) await Context.Owner.SetOpenAsync(true); }
+}

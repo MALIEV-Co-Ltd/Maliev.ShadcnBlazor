@@ -1,0 +1,19 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<CascadingValue Value="Context" IsFixed="true"><span @attributes="Forwarded" class="@MergeClass("shadcn-tooltip")" style="@MergeStyle(null)" data-slot="tooltip" data-state="@(EffectiveOpen ? "open" : "closed")" data-open-delay="@OpenDelayMs" data-close-delay="@CloseDelayMs">@ChildContent</span></CascadingValue>
+@code {
+    [CascadingParameter] private ShadcnTooltipProviderContext? Provider { get; set; }
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public TimeSpan? OpenDelay { get; set; }
+    [Parameter] public TimeSpan? CloseDelay { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _next; private readonly ShadcnTooltipContext _context; private bool _open, _last, _initialized;
+    public ShadcnTooltip() { var id = Interlocked.Increment(ref _next); _context = new(this, $"shadcn-tooltip-{id}-trigger", $"shadcn-tooltip-{id}-content"); }
+    private ShadcnTooltipContext Context => _context; internal bool EffectiveOpen => _open;
+    internal int OpenDelayMs => ShadcnPositionedOverlayValues.Milliseconds(OpenDelay ?? Provider?.OpenDelay ?? TimeSpan.Zero, nameof(OpenDelay));
+    internal int CloseDelayMs => ShadcnPositionedOverlayValues.Milliseconds(CloseDelay ?? Provider?.CloseDelay ?? TimeSpan.FromMilliseconds(100), nameof(CloseDelay));
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "data-state", "data-open-delay", "data-close-delay");
+    protected override void OnParametersSet() { _ = OpenDelayMs; _ = CloseDelayMs; if (!_initialized || Open != _last) _open = Open; _last = Open; _initialized = true; }
+    [JSInvokable] public Task RequestCloseAsync() => RequestOpenAsync(false);
+    [JSInvokable] public async Task RequestOpenAsync(bool value) { if (_open == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _open = value; await InvokeAsync(StateHasChanged); } }
+}

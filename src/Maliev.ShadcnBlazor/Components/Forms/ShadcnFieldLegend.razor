@@ -1,0 +1,22 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<legend @attributes="ForwardedAttributes"
+        class="@MergeClass("shadcn-field-legend")"
+        style="@MergeStyle(null)"
+        data-slot="field-legend"
+        data-variant="@VariantValue">
+    @ChildContent
+</legend>
+
+@code {
+    [Parameter] public ShadcnFieldLegendVariant Variant { get; set; } = ShadcnFieldLegendVariant.Legend;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string VariantValue => Variant == ShadcnFieldLegendVariant.Label ? "label" : "legend";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-variant");
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Variant))
+            throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown Shadcn field legend variant.");
+    }
+}

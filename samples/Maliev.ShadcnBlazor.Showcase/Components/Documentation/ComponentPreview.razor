@@ -1,0 +1,76 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Examples
+
+<section class="component-preview" aria-labelledby="@HeadingId" data-testid="component-preview">
+    <div class="component-dossier__heading">
+        <div>
+            <h2 id="@HeadingId">@Example.Title</h2>
+            <p>@Example.Description</p>
+        </div>
+        <ul class="component-state-tags" aria-label="Covered states">
+            @foreach (var tag in Example.StateTags)
+            {
+                <li>@tag</li>
+            }
+        </ul>
+    </div>
+
+    @if (Example.Controls.Count > 0)
+    {
+        <form class="component-preview__controls" aria-label="Preview parameters" @onsubmit:preventDefault="true">
+            @foreach (var control in Example.Controls)
+            {
+                <div class="component-preview__control">
+                    @if (control.Kind == ComponentParameterControlKind.Toggle)
+                    {
+                        <label for="@control.Id">
+                            <input id="@control.Id"
+                                   data-testid="control-@control.Id"
+                                   type="checkbox"
+                                   checked="@bool.Parse(control.Value)"
+                                   @onchange="args => Update(control, args.Value?.ToString() ?? bool.FalseString)" />
+                            @control.Label
+                        </label>
+                    }
+                    else if (control.Kind == ComponentParameterControlKind.Number)
+                    {
+                        <label for="@control.Id">@control.Label</label>
+                        <input id="@control.Id"
+                               data-testid="control-@control.Id"
+                               type="number"
+                               value="@control.Value"
+                               @onchange="args => Update(control, args.Value?.ToString() ?? string.Empty)" />
+                    }
+                    else
+                    {
+                        <label for="@control.Id">@control.Label</label>
+                        <select id="@control.Id"
+                                data-testid="control-@control.Id"
+                                value="@control.Value"
+                                @onchange="args => Update(control, args.Value?.ToString() ?? string.Empty)">
+                            @foreach (var option in control.Options)
+                            {
+                                <option value="@option">@option</option>
+                            }
+                        </select>
+                    }
+                </div>
+            }
+        </form>
+    }
+
+    <div class="component-preview__canvas" data-testid="component-preview-canvas">
+        @Example.Preview
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ComponentExampleDefinition Example { get; set; } = null!;
+
+    private string HeadingId => $"{Example.Id}-title";
+
+    private void Update(ComponentParameterControl control, string value)
+    {
+        control.Apply(value);
+        StateHasChanged();
+    }
+}

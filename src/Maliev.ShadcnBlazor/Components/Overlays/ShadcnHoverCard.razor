@@ -1,0 +1,17 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<CascadingValue Value="Context" IsFixed="true"><span @attributes="Forwarded" class="@MergeClass("shadcn-hover-card")" style="@MergeStyle(null)" data-slot="hover-card" data-state="@(EffectiveOpen ? "open" : "closed")" data-open-delay="@OpenDelayMs" data-close-delay="@CloseDelayMs">@ChildContent</span></CascadingValue>
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public TimeSpan OpenDelay { get; set; } = TimeSpan.FromMilliseconds(700);
+    [Parameter] public TimeSpan CloseDelay { get; set; } = TimeSpan.FromMilliseconds(300);
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _next; private readonly ShadcnHoverCardContext _context; private bool _open, _last, _initialized;
+    public ShadcnHoverCard() { var id = Interlocked.Increment(ref _next); _context = new(this, $"shadcn-hover-card-{id}-trigger", $"shadcn-hover-card-{id}-content"); }
+    private ShadcnHoverCardContext Context => _context; internal bool EffectiveOpen => _open;
+    internal int OpenDelayMs => ShadcnPositionedOverlayValues.Milliseconds(OpenDelay, nameof(OpenDelay)); internal int CloseDelayMs => ShadcnPositionedOverlayValues.Milliseconds(CloseDelay, nameof(CloseDelay));
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "data-state", "data-open-delay", "data-close-delay");
+    protected override void OnParametersSet() { _ = OpenDelayMs; _ = CloseDelayMs; if (!_initialized || Open != _last) _open = Open; _last = Open; _initialized = true; }
+    [JSInvokable] public Task RequestCloseAsync() => RequestOpenAsync(false);
+    [JSInvokable] public async Task RequestOpenAsync(bool value) { if (_open == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _open = value; await InvokeAsync(StateHasChanged); } }
+}

@@ -1,0 +1,542 @@
+using System.Globalization;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Maliev.ShadcnBlazor.Theming;
+
+namespace Maliev.ShadcnBlazor.Showcase.Theming;
+
+public enum ThemeStudioScheme { Light, Dark }
+public enum ThemeStudioMode { Light, Dark, System }
+public enum ThemeStudioLocale { English, Thai }
+public enum ThemeStudioMockup { OperationsDashboard, ManufacturingRequest, CustomerWorkspace }
+public enum ThemeStudioGroup { Colors, Typography, Geometry, Shadows, Focus, Motion }
+
+public sealed record ThemeStudioViewport(string Id, string DisplayName, int Width)
+{
+    public static ThemeStudioViewport Desktop { get; } = new("desktop", "Desktop", 1280);
+    public static ThemeStudioViewport Tablet { get; } = new("tablet", "Tablet", 768);
+    public static ThemeStudioViewport Mobile { get; } = new("mobile", "Mobile", 390);
+    public static IReadOnlyList<ThemeStudioViewport> All { get; } = [Desktop, Tablet, Mobile];
+}
+
+public sealed record ThemeStudioTokenDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
+public sealed record ThemeStudioMetricDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
+
+public static partial class ThemeStudioMetadata
+{
+    public static IReadOnlyList<ThemeStudioTokenDescriptor> Tokens { get; } = typeof(ShadcnColorScheme)
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .OrderBy(property => property.MetadataToken)
+        .Select(property => new ThemeStudioTokenDescriptor(
+            CamelCase(property.Name),
+            Humanize(property.Name),
+            property.Name.StartsWith("Shadow", StringComparison.Ordinal) ? ThemeStudioGroup.Shadows : ThemeStudioGroup.Colors,
+            property))
+        .ToArray();
+
+    public static IReadOnlyList<ThemeStudioMetricDescriptor> Metrics { get; } = typeof(ShadcnThemeMetrics)
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .OrderBy(property => property.MetadataToken)
+        .Select(property => new ThemeStudioMetricDescriptor(
+            CamelCase(property.Name),
+            Humanize(property.Name),
+            MetricGroup(property.Name),
+            property))
+        .ToArray();
+
+    private static ThemeStudioGroup MetricGroup(string name) => name switch
+    {
+        nameof(ShadcnThemeMetrics.FontFamily) or nameof(ShadcnThemeMetrics.MonospaceFontFamily) => ThemeStudioGroup.Typography,
+        nameof(ShadcnThemeMetrics.FocusRingWidthPx) or nameof(ShadcnThemeMetrics.FocusRingOffsetPx) => ThemeStudioGroup.Focus,
+        nameof(ShadcnThemeMetrics.MotionDurationMilliseconds) or nameof(ShadcnThemeMetrics.MotionEasing) or nameof(ShadcnThemeMetrics.ReducedMotionBehavior) => ThemeStudioGroup.Motion,
+        _ => ThemeStudioGroup.Geometry
+    };
+
+    private static string CamelCase(string value) => char.ToLowerInvariant(value[0]) + value[1..];
+    private static string Humanize(string value) => WordBoundary().Replace(value, " $1").Trim();
+
+    [GeneratedRegex("([A-Z0-9]+)", RegexOptions.CultureInvariant)]
+    private static partial Regex WordBoundary();
+}
+
+public sealed class ThemeStudioState(IThemeStudioStorage storage)
+{
+    private const int HistoryLimit = 50;
+    private readonly List<ThemeStudioSnapshot> _undo = [];
+    private readonly List<ThemeStudioSnapshot> _redo = [];
+    private readonly Dictionary<string, string> _tokenEditorValues = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _metricEditorValues = new(StringComparer.Ordinal);
+    private ShadcnTheme _baseline = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    private string? _pointerMutationKey;
+    private bool _pointerSnapshotCaptured;
+
+    public ShadcnTheme Draft { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    public ShadcnTheme Applied { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    public ThemeStudioMode Mode { get; private set; } = ThemeStudioMode.Light;
+    public ShadcnDirection Direction { get; private set; } = ShadcnDirection.LeftToRight;
+    public ThemeStudioLocale Locale { get; private set; } = ThemeStudioLocale.English;
+    public ThemeStudioViewport Viewport { get; private set; } = ThemeStudioViewport.Desktop;
+    public ThemeStudioMockup SelectedMockup { get; private set; } = ThemeStudioMockup.OperationsDashboard;
+    public string SelectedPresetId { get; private set; } = ShadcnThemePresets.BaseVegaNeutral.Id;
+    public bool CanUndo => _undo.Count > 0;
+    public bool CanRedo => _redo.Count > 0;
+    public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline;
+    public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    public string? StorageDiagnostic { get; private set; }
+    public string? ImportDiagnostic { get; private set; }
+    public bool SystemDarkMode { get; private set; }
+    public bool EffectiveDarkMode => Mode == ThemeStudioMode.Dark || Mode == ThemeStudioMode.System && SystemDarkMode;
+
+    public event EventHandler? Changed;
+
+    public async ValueTask InitializeAsync()
+    {
+        var result = await storage.LoadAsync();
+        StorageDiagnostic = result.Diagnostic;
+        if (result.Succeeded && result.Theme is not null)
+        {
+            var validation = ShadcnThemeValidator.Validate(result.Theme);
+            if (validation.IsValid)
+            {
+                Draft = Clone(result.Theme);
+                Applied = Clone(result.Theme);
+                Validation = validation;
+            }
+            else
+            {
+                StorageDiagnostic = "Stored theme failed validation and was not applied.";
+            }
+        }
+
+        RaiseChanged();
+    }
+
+    public async ValueTask PersistAsync()
+    {
+        if (!Validation.IsValid || _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0)
+            return;
+        var result = await storage.SaveAsync(Applied);
+        StorageDiagnostic = result.Diagnostic;
+    }
+
+    internal void ReportStorageDiagnostic(string diagnostic) => StorageDiagnostic = diagnostic;
+
+    public void SetToken(ThemeStudioScheme scheme, string token, string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+        value ??= string.Empty;
+        var descriptor = FindToken(token);
+        var editorKey = TokenEditorKey(scheme, descriptor.Name);
+        if (string.Equals(GetTokenValue(scheme, descriptor.Name), value, StringComparison.Ordinal))
+            return;
+
+        CaptureHistory(editorKey);
+        var candidate = WithToken(Draft, scheme, descriptor, value);
+        if (ShadcnThemeValidator.Validate(candidate).IsValid)
+        {
+            _tokenEditorValues.Remove(editorKey);
+            Draft = candidate;
+        }
+        else
+        {
+            _tokenEditorValues[editorKey] = value;
+        }
+        RevalidateAndApply();
+    }
+
+    public void SetMetric(string metric, string editorValue)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(metric);
+        editorValue ??= string.Empty;
+        var descriptor = FindMetric(metric);
+        if (string.Equals(GetMetricEditorValue(metric), editorValue, StringComparison.Ordinal))
+            return;
+
+        CaptureHistory($"metrics.{descriptor.Name}");
+        if (!TryConvertMetric(descriptor.Property.PropertyType, editorValue, out var value))
+        {
+            _metricEditorValues[descriptor.Name] = editorValue;
+            RevalidateAndApply();
+            return;
+        }
+
+        var candidate = WithMetric(Draft, descriptor, value);
+        if (ShadcnThemeValidator.Validate(candidate).IsValid)
+        {
+            _metricEditorValues.Remove(descriptor.Name);
+            Draft = candidate;
+        }
+        else
+        {
+            _metricEditorValues[descriptor.Name] = editorValue;
+        }
+        RevalidateAndApply();
+    }
+
+    public string GetMetricEditorValue(string metric)
+    {
+        var descriptor = FindMetric(metric);
+        if (_metricEditorValues.TryGetValue(descriptor.Name, out var editorValue))
+            return editorValue;
+        var value = descriptor.Property.GetValue(Draft.Metrics);
+        return value switch
+        {
+            double number => number.ToString("G17", CultureInfo.InvariantCulture),
+            int number => number.ToString(CultureInfo.InvariantCulture),
+            ShadcnReducedMotionBehavior behavior => behavior.ToString(),
+            _ => value?.ToString() ?? string.Empty
+        };
+    }
+
+    public string GetTokenValue(ThemeStudioScheme scheme, string token)
+    {
+        var descriptor = FindToken(token);
+        if (_tokenEditorValues.TryGetValue(TokenEditorKey(scheme, descriptor.Name), out var editorValue))
+            return editorValue;
+        return descriptor.Property.GetValue(GetScheme(Draft, scheme))?.ToString() ?? string.Empty;
+    }
+
+    public void ApplyPreset(string presetId)
+    {
+        var preset = ShadcnThemePresets.All.FirstOrDefault(item => string.Equals(item.Id, presetId, StringComparison.Ordinal))
+            ?? throw new ArgumentException($"Unknown theme preset '{presetId}'.", nameof(presetId));
+        CaptureHistory("preset");
+        var theme = preset.CreateTheme();
+        Draft = Clone(theme);
+        Applied = Clone(theme);
+        _baseline = Clone(theme);
+        _tokenEditorValues.Clear();
+        _metricEditorValues.Clear();
+        SelectedPresetId = preset.Id;
+        RevalidateAndApply();
+    }
+
+    public void ResetToken(ThemeStudioScheme scheme, string token)
+    {
+        var descriptor = FindToken(token);
+        var baselineValue = descriptor.Property.GetValue(GetScheme(_baseline, scheme))?.ToString() ?? string.Empty;
+        SetToken(scheme, token, baselineValue);
+    }
+
+    public void ResetGroup(ThemeStudioGroup group, ThemeStudioScheme? scheme = null)
+    {
+        if (group is ThemeStudioGroup.Colors or ThemeStudioGroup.Shadows)
+        {
+            if (scheme is null)
+                throw new ArgumentNullException(nameof(scheme), "A color scheme is required for color and shadow resets.");
+            var descriptors = ThemeStudioMetadata.Tokens.Where(item => item.Group == group).ToArray();
+            if (descriptors.All(item => Equals(item.Property.GetValue(GetScheme(Draft, scheme.Value)), item.Property.GetValue(GetScheme(_baseline, scheme.Value)))) &&
+                descriptors.All(item => !_tokenEditorValues.ContainsKey(TokenEditorKey(scheme.Value, item.Name))))
+                return;
+            CaptureHistory($"reset.{scheme}.{group}");
+            var target = GetScheme(Draft, scheme.Value) with { };
+            var baseline = GetScheme(_baseline, scheme.Value);
+            foreach (var descriptor in descriptors)
+            {
+                descriptor.Property.SetValue(target, descriptor.Property.GetValue(baseline));
+                _tokenEditorValues.Remove(TokenEditorKey(scheme.Value, descriptor.Name));
+            }
+            Draft = scheme == ThemeStudioScheme.Light ? Draft with { Light = target } : Draft with { Dark = target };
+        }
+        else
+        {
+            var descriptors = ThemeStudioMetadata.Metrics.Where(item => item.Group == group).ToArray();
+            if (descriptors.Length == 0)
+                return;
+            CaptureHistory($"reset.metrics.{group}");
+            var target = Draft.Metrics with { };
+            foreach (var descriptor in descriptors)
+            {
+                descriptor.Property.SetValue(target, descriptor.Property.GetValue(_baseline.Metrics));
+                _metricEditorValues.Remove(descriptor.Name);
+            }
+            Draft = Draft with { Metrics = target };
+        }
+        RevalidateAndApply();
+    }
+
+    public void ResetAll()
+    {
+        if (!IsDirty)
+            return;
+        CaptureHistory("reset.all");
+        Draft = Clone(_baseline);
+        _tokenEditorValues.Clear();
+        _metricEditorValues.Clear();
+        RevalidateAndApply();
+    }
+
+    public bool Undo()
+    {
+        if (_undo.Count == 0)
+            return false;
+        _redo.Add(CreateSnapshot());
+        Restore(Pop(_undo));
+        return true;
+    }
+
+    public bool Redo()
+    {
+        if (_redo.Count == 0)
+            return false;
+        AddBounded(_undo, CreateSnapshot());
+        Restore(Pop(_redo));
+        return true;
+    }
+
+    public bool Import(ShadcnTheme theme)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
+        var validation = ShadcnThemeValidator.Validate(theme);
+        if (!validation.IsValid)
+        {
+            ImportDiagnostic = "Imported theme failed validation; the current theme was not changed.";
+            RaiseChanged();
+            return false;
+        }
+
+        CaptureHistory("import");
+        Draft = Clone(theme);
+        _tokenEditorValues.Clear();
+        _metricEditorValues.Clear();
+        ImportDiagnostic = null;
+        RevalidateAndApply();
+        return true;
+    }
+
+    public void BeginPointerInteraction(string mutationKey)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mutationKey);
+        _pointerMutationKey = mutationKey;
+        _pointerSnapshotCaptured = false;
+    }
+
+    public void EndPointerInteraction()
+    {
+        _pointerMutationKey = null;
+        _pointerSnapshotCaptured = false;
+    }
+
+    public void SetMode(ThemeStudioMode mode)
+    {
+        ValidateWorkspaceValue(mode, nameof(mode));
+        if (Mode == mode) return;
+        Mode = mode;
+        RaiseChanged();
+    }
+
+    public void SetSystemDarkMode(bool isDarkMode)
+    {
+        if (SystemDarkMode == isDarkMode) return;
+        SystemDarkMode = isDarkMode;
+        if (Mode == ThemeStudioMode.System)
+            RaiseChanged();
+    }
+
+    public void SetDirection(ShadcnDirection direction)
+    {
+        ValidateWorkspaceValue(direction, nameof(direction));
+        if (Direction == direction) return;
+        Direction = direction;
+        RaiseChanged();
+    }
+
+    public void SetLocale(ThemeStudioLocale locale)
+    {
+        ValidateWorkspaceValue(locale, nameof(locale));
+        if (Locale == locale) return;
+        Locale = locale;
+        RaiseChanged();
+    }
+
+    public void SetSelectedMockup(ThemeStudioMockup mockup)
+    {
+        ValidateWorkspaceValue(mockup, nameof(mockup));
+        if (SelectedMockup == mockup) return;
+        SelectedMockup = mockup;
+        RaiseChanged();
+    }
+
+    public void SetViewport(ThemeStudioViewport viewport)
+    {
+        ArgumentNullException.ThrowIfNull(viewport);
+        if (!ThemeStudioViewport.All.Contains(viewport))
+            throw new ArgumentOutOfRangeException(nameof(viewport), viewport, "Unknown Theme Studio viewport.");
+        if (Viewport == viewport)
+            return;
+        Viewport = viewport;
+        RaiseChanged();
+    }
+
+    private static void ValidateWorkspaceValue<T>(T value, string parameterName) where T : struct, Enum
+    {
+        if (!Enum.IsDefined(value))
+            throw new ArgumentOutOfRangeException(parameterName, value, $"Unknown Theme Studio {parameterName}.");
+    }
+
+    private void CaptureHistory(string mutationKey)
+    {
+        if (_pointerMutationKey is not null && string.Equals(_pointerMutationKey, mutationKey, StringComparison.Ordinal))
+        {
+            if (_pointerSnapshotCaptured)
+                return;
+            _pointerSnapshotCaptured = true;
+        }
+        AddBounded(_undo, CreateSnapshot());
+        _redo.Clear();
+    }
+
+    private ThemeStudioSnapshot CreateSnapshot() => new(
+        Clone(Draft),
+        Clone(Applied),
+        Clone(_baseline),
+        new Dictionary<string, string>(_tokenEditorValues, StringComparer.Ordinal),
+        new Dictionary<string, string>(_metricEditorValues, StringComparer.Ordinal),
+        SelectedPresetId);
+
+    private void Restore(ThemeStudioSnapshot snapshot)
+    {
+        Draft = Clone(snapshot.Draft);
+        Applied = Clone(snapshot.Applied);
+        _baseline = Clone(snapshot.Baseline);
+        SelectedPresetId = snapshot.SelectedPresetId;
+        _tokenEditorValues.Clear();
+        foreach (var pair in snapshot.TokenEditorValues)
+            _tokenEditorValues[pair.Key] = pair.Value;
+        _metricEditorValues.Clear();
+        foreach (var pair in snapshot.MetricEditorValues)
+            _metricEditorValues[pair.Key] = pair.Value;
+        RevalidateAndApply(applyWhenValid: false);
+    }
+
+    private void RevalidateAndApply(bool applyWhenValid = true)
+    {
+        var validation = ShadcnThemeValidator.Validate(Draft);
+        if (_tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0)
+        {
+            var editorErrors = new List<ShadcnThemeValidationMessage>();
+            foreach (var item in _tokenEditorValues)
+            {
+                var separator = item.Key.IndexOf('.', StringComparison.Ordinal);
+                var scheme = item.Key[..separator] == "light" ? ThemeStudioScheme.Light : ThemeStudioScheme.Dark;
+                var descriptor = FindToken(item.Key[(separator + 1)..]);
+                var candidateValidation = ShadcnThemeValidator.Validate(WithToken(Draft, scheme, descriptor, item.Value));
+                if (candidateValidation.Errors.Count > 0)
+                    editorErrors.AddRange(candidateValidation.Errors);
+                else
+                    editorErrors.Add(new ShadcnThemeValidationMessage("invalid-editor-value", item.Key, "Color value is not valid for this field."));
+            }
+            foreach (var item in _metricEditorValues)
+            {
+                var descriptor = FindMetric(item.Key);
+                if (TryConvertMetric(descriptor.Property.PropertyType, item.Value, out var converted))
+                {
+                    var candidateValidation = ShadcnThemeValidator.Validate(WithMetric(Draft, descriptor, converted));
+                    if (candidateValidation.Errors.Count > 0)
+                    {
+                        editorErrors.AddRange(candidateValidation.Errors);
+                        continue;
+                    }
+                }
+                editorErrors.Add(new ShadcnThemeValidationMessage("invalid-editor-value", $"metrics.{item.Key}", "Metric value is not valid for this field."));
+            }
+            var errors = validation.Errors.Concat(editorErrors).ToArray();
+            validation = validation with { Errors = errors };
+        }
+        Validation = validation;
+        if (applyWhenValid && validation.IsValid)
+            Applied = Clone(Draft);
+        RaiseChanged();
+    }
+
+    private static string TokenEditorKey(ThemeStudioScheme scheme, string token) =>
+        $"{scheme.ToString().ToLowerInvariant()}.{token}";
+
+    private static ShadcnTheme WithToken(
+        ShadcnTheme theme,
+        ThemeStudioScheme scheme,
+        ThemeStudioTokenDescriptor descriptor,
+        string value)
+    {
+        var nextScheme = GetScheme(theme, scheme) with { };
+        descriptor.Property.SetValue(nextScheme, value);
+        return scheme == ThemeStudioScheme.Light
+            ? theme with { Light = nextScheme }
+            : theme with { Dark = nextScheme };
+    }
+
+    private static ShadcnTheme WithMetric(
+        ShadcnTheme theme,
+        ThemeStudioMetricDescriptor descriptor,
+        object? value)
+    {
+        var metrics = theme.Metrics with { };
+        descriptor.Property.SetValue(metrics, value);
+        return theme with { Metrics = metrics };
+    }
+
+    private static ShadcnColorScheme GetScheme(ShadcnTheme theme, ThemeStudioScheme scheme) => scheme switch
+    {
+        ThemeStudioScheme.Light => theme.Light,
+        ThemeStudioScheme.Dark => theme.Dark,
+        _ => throw new ArgumentOutOfRangeException(nameof(scheme), scheme, "Unknown Theme Studio color scheme.")
+    };
+
+    private static ThemeStudioTokenDescriptor FindToken(string token) =>
+        ThemeStudioMetadata.Tokens.FirstOrDefault(item => string.Equals(item.Name, token, StringComparison.Ordinal))
+        ?? throw new ArgumentException($"Unknown theme token '{token}'.", nameof(token));
+
+    private static ThemeStudioMetricDescriptor FindMetric(string metric) =>
+        ThemeStudioMetadata.Metrics.FirstOrDefault(item => string.Equals(item.Name, metric, StringComparison.Ordinal))
+        ?? throw new ArgumentException($"Unknown theme metric '{metric}'.", nameof(metric));
+
+    private static bool TryConvertMetric(Type type, string value, out object? converted)
+    {
+        if (type == typeof(string))
+        {
+            converted = value;
+            return true;
+        }
+        if (type == typeof(double) && double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var doubleValue))
+        {
+            converted = doubleValue;
+            return true;
+        }
+        if (type == typeof(int) && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
+        {
+            converted = intValue;
+            return true;
+        }
+        if (type == typeof(ShadcnReducedMotionBehavior) && Enum.TryParse<ShadcnReducedMotionBehavior>(value, false, out var behavior) && Enum.IsDefined(behavior))
+        {
+            converted = behavior;
+            return true;
+        }
+        converted = null;
+        return false;
+    }
+
+    private static void AddBounded(List<ThemeStudioSnapshot> history, ThemeStudioSnapshot snapshot)
+    {
+        history.Add(snapshot);
+        if (history.Count > HistoryLimit)
+            history.RemoveAt(0);
+    }
+
+    private static ThemeStudioSnapshot Pop(List<ThemeStudioSnapshot> history)
+    {
+        var index = history.Count - 1;
+        var snapshot = history[index];
+        history.RemoveAt(index);
+        return snapshot;
+    }
+
+    private static ShadcnTheme Clone(ShadcnTheme theme) => theme with
+    {
+        Light = theme.Light with { },
+        Dark = theme.Dark with { },
+        Metrics = theme.Metrics with { }
+    };
+
+    private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
+}

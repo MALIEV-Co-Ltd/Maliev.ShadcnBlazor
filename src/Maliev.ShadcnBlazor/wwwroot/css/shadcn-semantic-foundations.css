@@ -1,0 +1,623 @@
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset {
+    --shadcn-typeset-font-body: inherit;
+    --shadcn-typeset-font-heading: var(--shadcn-font-sans);
+    --shadcn-typeset-font-mono: var(--shadcn-font-mono);
+    --shadcn-typeset-size: 1em;
+    --shadcn-typeset-leading: 1.75;
+    --shadcn-typeset-flow: 1.25em;
+    min-width: 0;
+    color: var(--shadcn-foreground);
+    font-family: var(--shadcn-typeset-font-body);
+    font-size: var(--shadcn-typeset-size);
+    line-height: var(--shadcn-typeset-leading);
+    overflow-wrap: anywhere;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset > :first-child {
+    margin-block-start: 0;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset > :last-child {
+    margin-block-end: 0;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset > * + * {
+    margin-block-start: calc(var(--shadcn-typeset-flow) * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(h1, h2, h3, h4) {
+    color: var(--shadcn-foreground);
+    font-family: var(--shadcn-typeset-font-heading);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    text-wrap: balance;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset h1 { font-size: 2.25em; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset h2 { font-size: 1.75em; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset h3 { font-size: 1.375em; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset h4 { font-size: 1.125em; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(ul, ol) {
+    padding-inline-start: calc(1.5em * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset li + li {
+    margin-block-start: calc(var(--shadcn-typeset-flow) * 0.4 * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset blockquote {
+    border-inline-start: 0.125rem solid var(--shadcn-border);
+    color: var(--shadcn-muted-foreground);
+    font-style: italic;
+    padding-inline-start: calc(1.25em * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(code, kbd, pre) {
+    font-family: var(--shadcn-typeset-font-mono);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :not(pre) > code {
+    border-radius: var(--shadcn-radius-sm);
+    background: var(--shadcn-muted);
+    padding: calc(0.15em * var(--shadcn-spacing-multiplier)) calc(0.35em * var(--shadcn-spacing-multiplier));
+    font-size: 0.875em;
+    font-weight: 600;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset pre {
+    max-width: 100%;
+    overflow: auto;
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    padding: calc(1em * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset a {
+    color: var(--shadcn-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875em;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(th, td) {
+    border-bottom: 1px solid var(--shadcn-border);
+    padding: calc(0.625em * var(--shadcn-spacing-multiplier));
+    text-align: start;
+    vertical-align: top;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset th {
+    font-weight: 600;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography {
+    margin: 0;
+    color: var(--shadcn-foreground);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h1 {
+    scroll-margin-top: calc(5rem * var(--shadcn-spacing-multiplier));
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 2.5rem;
+    text-wrap: balance;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h2 {
+    scroll-margin-top: calc(5rem * var(--shadcn-spacing-multiplier));
+    border-bottom: 1px solid var(--shadcn-border);
+    padding-bottom: calc(0.5rem * var(--shadcn-spacing-multiplier));
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 2.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h3 {
+    scroll-margin-top: calc(5rem * var(--shadcn-spacing-multiplier));
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 2rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h4 {
+    scroll-margin-top: calc(5rem * var(--shadcn-spacing-multiplier));
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.75rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--paragraph {
+    line-height: 1.75;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--paragraph + .shadcn-typography--paragraph {
+    margin-top: calc(1.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--blockquote {
+    border-inline-start: 0.125rem solid var(--shadcn-border);
+    padding-inline-start: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    font-style: italic;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--inline-code {
+    border-radius: var(--shadcn-radius-sm);
+    background: var(--shadcn-muted);
+    padding: calc(0.2rem * var(--shadcn-spacing-multiplier)) calc(0.3rem * var(--shadcn-spacing-multiplier));
+    font-family: var(--shadcn-font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--lead {
+    color: var(--shadcn-muted-foreground);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--large {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--small {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--muted {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-typography--unordered-list, .shadcn-typography--ordered-list) {
+    margin-block: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    margin-inline-start: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--unordered-list { list-style-type: disc; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--ordered-list { list-style-type: decimal; }
+
+@media (min-width: 64rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h1 {
+        font-size: 3rem;
+        line-height: 1;
+    }
+}
+
+@media (max-width: 40rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset {
+        font-size: max(var(--shadcn-typeset-size), 1rem);
+    }
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-label,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-label,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-title {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.375;
+    user-select: none;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-field[data-disabled="true"] .shadcn-field-label, .shadcn-field[data-disabled="true"] .shadcn-field-title),
+:where(.shadcn-scope, .shadcn-overlay-scope) fieldset:disabled .shadcn-label {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-set {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-legend {
+    margin-bottom: calc(0.75rem * var(--shadcn-spacing-multiplier));
+    padding: 0;
+    font-weight: 500;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-legend[data-variant="legend"] { font-size: 1rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-legend[data-variant="label"] { font-size: 0.875rem; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-group {
+    container-type: inline-size;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    gap: calc(1.75rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    gap: calc(0.75rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="vertical"],
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] {
+    flex-direction: column;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"] {
+    flex-direction: row;
+    align-items: center;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"] > .shadcn-field-label,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"] > .shadcn-field-title {
+    flex: 1 1 auto;
+}
+
+@container (min-width: 28rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] > .shadcn-field-label,
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] > .shadcn-field-title {
+        flex: 1 1 auto;
+    }
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-invalid="true"] {
+    color: var(--shadcn-destructive);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-content {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0%;
+    flex-direction: column;
+    gap: calc(0.375rem * var(--shadcn-spacing-multiplier));
+    line-height: 1.375;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-description {
+    margin: 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-field-description, .shadcn-field-error) a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-error {
+    color: var(--shadcn-destructive);
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-error ul {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+    margin: 0 0 0 calc(1rem * var(--shadcn-spacing-multiplier));
+    padding: 0;
+    list-style: disc;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-separator {
+    position: relative;
+    display: flex;
+    height: 1.25rem;
+    align-items: center;
+    margin-block: -0.5rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-separator__line {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--shadcn-border);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-separator__content {
+    position: relative;
+    display: block;
+    width: fit-content;
+    margin-inline: auto;
+    background: var(--shadcn-background);
+    padding-inline: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-group {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--shadcn-radius-md);
+    color: var(--shadcn-foreground);
+    font-size: 0.875rem;
+    outline: none;
+    text-decoration: none;
+    transition: color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item[data-size="default"] {
+    gap: calc(1rem * var(--shadcn-spacing-multiplier));
+    padding: calc(1rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item[data-size="sm"] {
+    gap: calc(0.625rem * var(--shadcn-spacing-multiplier));
+    padding: calc(0.75rem * var(--shadcn-spacing-multiplier)) calc(1rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item[data-variant="outline"] { border-color: var(--shadcn-border); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item[data-variant="muted"] { background: color-mix(in oklch, var(--shadcn-muted) 50%, transparent); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) a.shadcn-item:hover {
+    background: color-mix(in oklch, var(--shadcn-accent) 50%, transparent);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item:focus-visible {
+    border-color: var(--shadcn-ring);
+    box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-media {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item:has(.shadcn-item-description) .shadcn-item-media {
+    align-self: flex-start;
+    transform: translateY(0.125rem);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-media[data-variant="icon"] {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-sm);
+    background: var(--shadcn-muted);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-media[data-variant="icon"] svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-media[data-variant="image"] {
+    width: 2.5rem;
+    height: 2.5rem;
+    overflow: hidden;
+    border-radius: var(--shadcn-radius-sm);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-media[data-variant="image"] img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-content {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0%;
+    flex-direction: column;
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-content + .shadcn-item-content { flex: 0 0 auto; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-title {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.375;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-wrap: balance;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-description a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-actions {
+    display: flex;
+    align-items: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-item-header, .shadcn-item-footer) {
+    display: flex;
+    flex-basis: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-item-separator {
+    margin: 0;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-separator {
+    flex: 0 0 auto;
+    background: var(--shadcn-border);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-separator[data-orientation="horizontal"] {
+    width: 100%;
+    height: 1px;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-separator[data-orientation="vertical"] {
+    width: 1px;
+    height: 100%;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-kbd {
+    pointer-events: none;
+    display: inline-flex;
+    width: fit-content;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+    border-radius: var(--shadcn-radius-sm);
+    background: var(--shadcn-muted);
+    padding-inline: calc(0.25rem * var(--shadcn-spacing-multiplier));
+    color: var(--shadcn-muted-foreground);
+    font-family: var(--shadcn-font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-kbd svg {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-kbd-group {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    border: 1px dashed transparent;
+    border-radius: var(--shadcn-radius-lg);
+    padding: calc(1.5rem * var(--shadcn-spacing-multiplier));
+    text-align: center;
+    text-wrap: balance;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-header {
+    display: flex;
+    width: 100%;
+    max-width: 24rem;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+    text-align: center;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-media {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-media[data-variant="icon"] {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-foreground);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-media[data-variant="icon"] svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-description {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.625;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-description a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty-content {
+    display: flex;
+    width: 100%;
+    max-width: 24rem;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(1rem * var(--shadcn-spacing-multiplier));
+    font-size: 0.875rem;
+    text-wrap: balance;
+}
+
+@media (min-width: 48rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-empty {
+        padding: calc(3rem * var(--shadcn-spacing-multiplier));
+    }
+}

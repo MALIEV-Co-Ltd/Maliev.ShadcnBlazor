@@ -1,0 +1,38 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+
+<CascadingValue Value="ItemContext" IsFixed="false">
+    <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-accordion-item")" style="@MergeStyle(null)" data-slot="accordion-item" data-state="@(ItemContext.IsOpen ? "open" : "closed")" data-disabled="@(ItemContext.IsDisabled ? "true" : null)">@ChildContent</div>
+</CascadingValue>
+
+@code {
+    [CascadingParameter] private ShadcnAccordionContext Accordion { get; set; } = default!;
+    [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _nextId;
+    private readonly string _id = $"shadcn-accordion-{Interlocked.Increment(ref _nextId)}";
+    private string? _registeredValue;
+    private ShadcnAccordionItemContext ItemContext => new(Accordion, Value, $"{_id}-trigger", $"{_id}-content", Disabled);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "data-disabled");
+
+    protected override void OnInitialized()
+    {
+        ArgumentNullException.ThrowIfNull(Accordion);
+        Accordion.Register(Value, $"{_id}-trigger", Disabled);
+        _registeredValue = Value;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Value)) throw new ArgumentException("Accordion item values cannot be empty.", nameof(Value));
+        if (_registeredValue is not null && !string.Equals(_registeredValue, Value, StringComparison.Ordinal))
+            throw new InvalidOperationException("Accordion item values cannot change after registration.");
+        Accordion.Update(Value, Disabled);
+    }
+
+    public void Dispose()
+    {
+        if (_registeredValue is not null) Accordion.Unregister(_registeredValue);
+    }
+}

@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-group-count")" style="@MergeStyle(null)" data-slot="avatar-group-count" data-size="@SizeValue">@ChildContent</span>
+@code {
+    [CascadingParameter] private ShadcnAvatarSize? GroupSize { get; set; }
+    [Parameter] public ShadcnAvatarSize? Size { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string SizeValue => (Size ?? GroupSize ?? ShadcnAvatarSize.Default) switch { ShadcnAvatarSize.Small => "sm", ShadcnAvatarSize.Default => "default", ShadcnAvatarSize.Large => "lg", _ => throw new ArgumentOutOfRangeException(nameof(Size)) };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-size");
+}

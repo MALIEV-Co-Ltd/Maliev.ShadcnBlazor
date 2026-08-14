@@ -1,0 +1,47 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Api
+
+<section class="component-api" aria-labelledby="component-api-title" data-testid="component-api">
+    <h2 id="component-api-title">Public API</h2>
+    @foreach (var descriptor in Descriptors)
+    {
+        <section class="component-api__type" aria-labelledby="@($"api-{descriptor.Name}")">
+            <h3 id="@($"api-{descriptor.Name}")"><code>@descriptor.Name</code></h3>
+            @if (descriptor.Parameters.Count == 0)
+            {
+                <p>No component parameters.</p>
+            }
+            else
+            {
+                <div class="component-api__scroller" tabindex="0" role="region" aria-label="@descriptor.Name parameters">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Default</th>
+                                <th scope="col">Binding</th>
+                                <th scope="col">Description and constraints</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var parameter in descriptor.Parameters)
+                            {
+                                <tr data-testid="api-row" data-parameter="@parameter.Name">
+                                    <th scope="row"><code>@parameter.Name</code>@if (parameter.Required) { <span> required</span> }</th>
+                                    <td><code>@parameter.FriendlyType</code></td>
+                                    <td><code>@parameter.DefaultValue</code></td>
+                                    <td>@(parameter.BindingPair ?? "—")</td>
+                                    <td>@parameter.Description <span class="component-api__constraint">@parameter.Constraints</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ComponentApiDescriptor> Descriptors { get; set; } = [];
+}

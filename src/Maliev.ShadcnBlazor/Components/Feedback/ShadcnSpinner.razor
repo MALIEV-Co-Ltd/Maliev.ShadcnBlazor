@@ -1,0 +1,19 @@
+@using Maliev.ShadcnBlazor.Components.Primitives
+@inherits ShadcnComponentBase
+<svg @attributes="ForwardedAttributes" class="@MergeClass("shadcn-spinner")" style="@SpinnerStyle" data-slot="spinner" role="@EffectiveRole" aria-label="@EffectiveLabel" aria-hidden="@(EffectiveRole is null ? "true" : null)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+@code {
+    [Parameter] public string? Label { get; set; } = "Loading";
+    [Parameter] public ShadcnSpinnerRole SpinnerRole { get; set; } = ShadcnSpinnerRole.Status;
+    [Parameter] public string Size { get; set; } = "1rem";
+    private string NormalizedSize { get; set; } = "1rem";
+    private string? EffectiveRole => SpinnerRole == ShadcnSpinnerRole.Status && Label is not null ? "status" : null;
+    private string? EffectiveLabel => EffectiveRole is null ? null : Label;
+    private string? SpinnerStyle => MergeStyle($"--shadcn-spinner-size: {NormalizedSize}");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "role", "aria-label", "aria-hidden", "viewBox", "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin");
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(SpinnerRole)) throw new ArgumentOutOfRangeException(nameof(SpinnerRole));
+        if (Label is not null && string.IsNullOrWhiteSpace(Label)) throw new ArgumentException("Spinner labels cannot be empty or whitespace.", nameof(Label));
+        NormalizedSize = ShadcnCssValue.OptionalSingleDeclarationValue(Size, nameof(Size))!;
+    }
+}

@@ -1,0 +1,8 @@
+<ShadcnDialog Open="@Open" OpenChanged="@OpenChanged" Modal="@Modal">
+    <ShadcnDialogContent ShowCloseButton="@ShowCloseButton" Class="shadcn-command-dialog-content">
+        <ShadcnDialogTitle Class="shadcn-sr-only">@Title</ShadcnDialogTitle>
+        @if (!string.IsNullOrWhiteSpace(Description)) { <ShadcnDialogDescription Class="shadcn-sr-only">@Description</ShadcnDialogDescription> }
+        <ShadcnCommand Label="@Title" Loop="@Loop">@ChildContent</ShadcnCommand>
+    </ShadcnDialogContent>
+</ShadcnDialog>
+@code { [Parameter]public bool Open{get;set;} [Parameter]public EventCallback<bool> OpenChanged{get;set;} [Parameter]public bool Modal{get;set;}=true; [Parameter]public bool ShowCloseButton{get;set;} [Parameter]public bool Loop{get;set;}=true; [Parameter,EditorRequired]public string Title{get;set;}=string.Empty; [Parameter]public string? Description{get;set;} [Parameter]public RenderFragment? ChildContent{get;set;} protected override void OnParametersSet(){if(string.IsNullOrWhiteSpace(Title))throw new ArgumentException("Command dialog title cannot be empty.",nameof(Title));} }

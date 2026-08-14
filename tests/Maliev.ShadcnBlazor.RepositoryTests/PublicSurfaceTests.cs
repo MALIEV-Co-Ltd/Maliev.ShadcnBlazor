@@ -7,7 +7,7 @@ public sealed class PublicSurfaceTests
     [Fact]
     public void TrackedFilesContainNoPrivateIdentifiers()
     {
-        var root = FindRepositoryRoot();
+        var root = RepositoryRoot.Find();
         var script = Path.Combine(root, "eng", "Verify-PublicSurface.ps1");
 
         var start = new ProcessStartInfo("pwsh")
@@ -29,12 +29,4 @@ public sealed class PublicSurfaceTests
         Assert.True(process.ExitCode == 0, output);
     }
 
-    private static string FindRepositoryRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, ".git")))
-            directory = directory.Parent;
-
-        return directory?.FullName ?? throw new InvalidOperationException("Repository root was not found.");
-    }
 }

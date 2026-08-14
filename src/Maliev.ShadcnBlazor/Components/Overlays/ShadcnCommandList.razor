@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="Forwarded" id="@Context.ListId" class="@MergeClass("shadcn-command-list")" style="@MergeStyle(null)" data-slot="command-list" role="listbox">@ChildContent</div>
+@code { [CascadingParameter]private ShadcnCommandContext Context{get;set;}=default!; [Parameter]public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("id","data-slot","role"); }

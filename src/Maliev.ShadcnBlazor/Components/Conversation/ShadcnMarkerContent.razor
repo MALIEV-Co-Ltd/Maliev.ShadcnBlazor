@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-marker-content")" style="@MergeStyle(null)" data-slot="marker-content" data-streaming="@(Streaming?"true":null)">@ChildContent</span>
+@code { [CascadingParameter] private ShadcnMarker? Owner{get;set;} [Parameter] public bool Streaming{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot","data-streaming"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("ShadcnMarkerContent must be inside ShadcnMarker.");} }

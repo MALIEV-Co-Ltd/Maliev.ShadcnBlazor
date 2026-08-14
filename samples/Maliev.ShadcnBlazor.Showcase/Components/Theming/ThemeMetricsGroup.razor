@@ -1,0 +1,96 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<section class="theme-inspector-group" data-testid="theme-metrics-@GroupId">
+    <div class="theme-inspector-group__heading">
+        <div>
+            <h3>@Title</h3>
+            <p>@Description</p>
+        </div>
+        <MudButton Variant="Variant.Text"
+                   Size="Size.Small"
+                   aria-label="@($"Reset {Title}")"
+                   data-testid="@ResetGroupTestId"
+                   OnClick="() => State.ResetGroup(Group)">Reset group</MudButton>
+    </div>
+    <div class="theme-control-grid">
+        @foreach (var metric in Metrics)
+        {
+            var label = metric.Label;
+            var testId = $"theme-metric-{metric.Name}";
+            @if (metric.Property.PropertyType == typeof(ShadcnReducedMotionBehavior))
+            {
+                <MudSelect T="string"
+                           Value="@State.GetMetricEditorValue(metric.Name)"
+                           ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
+                           Label="@label"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           aria-label="@label"
+                           data-theme-metric="@metric.Name"
+                           data-testid="@testId">
+                    @foreach (var behavior in Enum.GetNames<ShadcnReducedMotionBehavior>())
+                    {
+                        <MudSelectItem T="string" Value="@behavior">@behavior</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else if (metric.Name == "motionEasing")
+            {
+                <MudSelect T="string"
+                           Value="@State.GetMetricEditorValue(metric.Name)"
+                           ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
+                           Label="@label"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           aria-label="@label"
+                           data-theme-metric="@metric.Name"
+                           data-testid="@testId">
+                    @foreach (var easing in Easings)
+                    {
+                        <MudSelectItem T="string" Value="@easing">@easing</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else
+            {
+                <MudTextField T="string"
+                              Value="@State.GetMetricEditorValue(metric.Name)"
+                              ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
+                              Immediate="false"
+                              Label="@label"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              aria-label="@label"
+                              data-theme-metric="@metric.Name"
+                              data-testid="@testId" />
+            }
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly string[] Easings = ["linear", "ease", "ease-in", "ease-out", "ease-in-out"];
+
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter] public ThemeStudioGroup Group { get; set; }
+
+    private IEnumerable<ThemeStudioMetricDescriptor> Metrics => ThemeStudioMetadata.Metrics.Where(metric => metric.Group == Group);
+    private string GroupId => Group.ToString().ToLowerInvariant();
+    private string ResetGroupTestId => $"theme-reset-metrics-{GroupId}";
+    private string Title => Group switch
+    {
+        ThemeStudioGroup.Typography => "Typography",
+        ThemeStudioGroup.Geometry => "Geometry, density, and spacing",
+        ThemeStudioGroup.Focus => "Focus",
+        ThemeStudioGroup.Motion => "Motion",
+        _ => Group.ToString()
+    };
+    private string Description => Group switch
+    {
+        ThemeStudioGroup.Typography => "Set the sans-serif and monospace font stacks.",
+        ThemeStudioGroup.Geometry => "Tune radii, control heights, density, and spacing.",
+        ThemeStudioGroup.Focus => "Keep keyboard focus visible across themes.",
+        ThemeStudioGroup.Motion => "Set timing, easing, and reduced-motion behavior.",
+        _ => string.Empty
+    };
+}

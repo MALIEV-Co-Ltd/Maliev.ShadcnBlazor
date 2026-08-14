@@ -1,0 +1,64 @@
+@using System.Linq.Expressions
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<span class="shadcn-switch-root" data-slot="switch-root" data-state="@State" data-size="@SizeValue">
+    <input @attributes="ForwardedAttributes"
+           id="@EffectiveId"
+           class="@MergeClass("shadcn-switch")"
+           style="@MergeStyle(null)"
+           type="checkbox"
+           role="switch"
+           name="@Name"
+           value="@FormValue"
+           checked="@Value"
+           disabled="@EffectiveDisabled"
+           aria-checked="@(Value ? "true" : "false")"
+           aria-readonly="@(ReadOnly ? "true" : null)"
+           aria-invalid="@(EffectiveInvalid ? "true" : null)"
+           aria-describedby="@FieldContext?.AriaDescribedBy"
+           data-slot="switch"
+           data-state="@State"
+           data-size="@SizeValue"
+           @onclick:preventDefault="@ReadOnly"
+           @onchange="HandleChangeAsync" />
+    <span class="shadcn-switch-thumb" data-slot="switch-thumb" aria-hidden="true"></span>
+</span>
+
+@code {
+    [CascadingParameter] private ShadcnFieldContext? FieldContext { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<bool>>? ValueExpression { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public ShadcnSwitchSize Size { get; set; } = ShadcnSwitchSize.Default;
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string FormValue { get; set; } = "on";
+
+    private readonly string GeneratedId = $"shadcn-switch-{Guid.NewGuid():N}";
+    private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
+    private string State => Value ? "checked" : "unchecked";
+    private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
+    private string SizeValue => Size switch
+    {
+        ShadcnSwitchSize.Default => "default",
+        ShadcnSwitchSize.Small => "sm",
+        _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn switch size.")
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "role", "name", "value", "checked", "disabled", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state", "data-size");
+
+    protected override void OnParametersSet() => _ = SizeValue;
+
+    private async Task HandleChangeAsync(ChangeEventArgs args)
+    {
+        if (EffectiveDisabled || ReadOnly) return;
+        await ValueChanged.InvokeAsync(args.Value is bool value ? value : !Value);
+        if (EditContext is not null && ValueExpression is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+}

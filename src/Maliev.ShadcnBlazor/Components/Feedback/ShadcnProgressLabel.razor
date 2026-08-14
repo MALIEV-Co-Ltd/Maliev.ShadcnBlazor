@@ -1,0 +1,11 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+<span @attributes="ForwardedAttributes" id="@Context?.LabelId" class="@MergeClass("shadcn-progress-label")" style="@MergeStyle(null)" data-slot="progress-label">@ChildContent</span>
+@code {
+    [CascadingParameter] private ShadcnProgressContext? Context { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private bool _registered;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "data-slot");
+    protected override void OnParametersSet() { if (!_registered && Context is not null) { Context.RegisterLabel(); _registered = true; } }
+    public void Dispose() { if (_registered) Context?.UnregisterLabel(); }
+}

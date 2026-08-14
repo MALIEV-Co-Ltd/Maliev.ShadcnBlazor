@@ -1,0 +1,45 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+
+<section class="component-evidence" aria-labelledby="component-evidence-title">
+    <h2 id="component-evidence-title">Certification evidence</h2>
+    <dl>
+        <dt>Status</dt><dd>@Entry.Status</dd>
+        <dt>Classification</dt><dd>@Entry.Classification</dd>
+        <dt>Roadmap phase</dt><dd>@Entry.RoadmapPhase</dd>
+        <dt>Preview policy</dt><dd>@(Entry.Status == ComponentDocumentationStatus.Complete ? "Real RCL preview" : "No preview until ledger completion")</dd>
+    </dl>
+    <table class="component-evidence__matrix">
+        <caption>Authoritative ledger evidence</caption>
+        <thead>
+            <tr><th scope="col">Evidence</th><th scope="col">Certification</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in EvidenceItems)
+            {
+                <tr data-testid="evidence-row"
+                    data-evidence="@item.Id"
+                    data-complete="@item.Complete.ToString().ToLowerInvariant()">
+                    <th scope="row">@item.Label</th>
+                    <td>@(item.Complete ? "Certified" : "Not certified")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ComponentDocumentationEntry Entry { get; set; } = null!;
+
+    private IReadOnlyList<EvidenceItem> EvidenceItems =>
+    [
+        new("api", "Public API", Entry.Evidence.Api),
+        new("component-tests", "Component tests", Entry.Evidence.ComponentTests),
+        new("accessibility", "Accessibility", Entry.Evidence.Accessibility),
+        new("interaction", "Interaction", Entry.Evidence.Interaction),
+        new("computed-style", "Computed style", Entry.Evidence.ComputedStyle),
+        new("visual", "Visual", Entry.Evidence.Visual),
+        new("integration", "Integration integration", Entry.Evidence.Integration)
+    ];
+
+    private sealed record EvidenceItem(string Id, string Label, bool Complete);
+}

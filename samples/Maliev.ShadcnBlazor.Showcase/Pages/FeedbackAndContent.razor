@@ -1,0 +1,27 @@
+@page "/components/feedback-and-content"
+@inject IShadcnToastService Toasts
+
+<PageTitle>Feedback and content - Shadcn Blazor</PageTitle>
+<main class="documentation-page" data-testid="feedback-content-fixture">
+    <header><p class="documentation-eyebrow">Plan 5 component family</p><h1>Feedback and content</h1><p>Nine composable Blazor components audited against pinned Shadcn Base/Vega.</p></header>
+    <section><h2>Installation</h2><pre><code>dotnet add package Maliev.ShadcnBlazor
+@@using Maliev.ShadcnBlazor.Components.Feedback
+@@using Maliev.ShadcnBlazor.Components.Feedback.Toast</code></pre><p>Load <code>shadcn-feedback-content.css</code>. Toast timing is driven by the registered <code>TimeProvider</code>.</p></section>
+    <section data-component="alert"><h2>Alert</h2><ShadcnAlert><ShadcnAlertTitle>Payment processed</ShadcnAlertTitle><ShadcnAlertDescription>ชำระเงินสำเร็จ</ShadcnAlertDescription></ShadcnAlert></section>
+    <section data-component="avatar"><h2>Avatar</h2><ShadcnAvatar><ShadcnAvatarImage Source="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%236b7280'/%3E%3C/svg%3E" Alt="Thai operator" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback><ShadcnAvatarBadge>Online</ShadcnAvatarBadge></ShadcnAvatar></section>
+    <section data-component="badge"><h2>Badge</h2><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Ready</ShadcnBadge></section>
+    <section data-component="card"><h2>Card</h2><ShadcnCard><ShadcnCardHeader><ShadcnCardTitle>Machine status</ShadcnCardTitle><ShadcnCardDescription>Production cell A</ShadcnCardDescription></ShadcnCardHeader><ShadcnCardContent>Running</ShadcnCardContent><ShadcnCardFooter>Updated now</ShadcnCardFooter></ShadcnCard></section>
+    <section data-component="carousel"><h2>Carousel</h2><p>This package exposes a typed Blazor-native engine rather than an Embla JavaScript instance; the deviation is explicit in conformance evidence.</p><ShadcnCarousel Label="Production jobs"><ShadcnCarouselContent>@for (var i = 0; i < 3; i++) { var jobNumber = i + 1; <ShadcnCarouselItem Index="i"><ShadcnCard><ShadcnCardContent>Job @jobNumber</ShadcnCardContent></ShadcnCard></ShadcnCarouselItem> }</ShadcnCarouselContent><ShadcnCarouselPrevious /><ShadcnCarouselNext /></ShadcnCarousel></section>
+    <div data-testid="carousel-vertical"><ShadcnCarousel Label="Vertical jobs" Orientation="ShadcnCarouselOrientation.Vertical" Options="@(new ShadcnCarouselOptions { Loop = true })"><ShadcnCarouselContent>@for (var i = 0; i < 3; i++) { var item = i + 1; <ShadcnCarouselItem Index="i">Vertical @item</ShadcnCarouselItem> }</ShadcnCarouselContent><ShadcnCarouselPrevious /><ShadcnCarouselNext /></ShadcnCarousel></div>
+    <div data-testid="carousel-rtl"><ShadcnCarousel Label="RTL jobs" Options="@(new ShadcnCarouselOptions { Loop = true, RightToLeft = true })"><ShadcnCarouselContent>@for (var i = 0; i < 3; i++) { var item = i + 1; <ShadcnCarouselItem Index="i">RTL @item</ShadcnCarouselItem> }</ShadcnCarouselContent><ShadcnCarouselPrevious /><ShadcnCarouselNext /></ShadcnCarousel></div>
+    <section data-component="progress"><h2>Progress</h2><ShadcnProgress Value="64" Label="Upload" ShowValue="true" /></section>
+    <section data-component="skeleton"><h2>Skeleton</h2><ShadcnSkeleton Style="width: 8rem; height: 2rem" /></section>
+    <section data-component="spinner"><h2>Spinner</h2><ShadcnSpinner Label="กำลังโหลด" /></section>
+    <section data-component="toast"><h2>Toast</h2><ShadcnButton OnClick="ShowToast">Show toast</ShadcnButton><ShadcnButton OnClick="ShowLoadingToast">Show loading toast</ShadcnButton><ShadcnToaster CloseLabel="ปิดการแจ้งเตือน" ViewportLabel="การแจ้งเตือน" /></section>
+    <FeedbackContentPairFixtures />
+</main>
+
+@code {
+    private Task ShowToast() { Toasts.Show(new ShadcnToastOptions("บันทึกแล้ว", Type: ShadcnToastType.Success, Duration: TimeSpan.Zero)); return Task.CompletedTask; }
+    private Task ShowLoadingToast() { Toasts.Show(new ShadcnToastOptions("Loading", Type: ShadcnToastType.Loading, Duration: null)); return Task.CompletedTask; }
+}

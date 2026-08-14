@@ -1,0 +1,141 @@
+@page "/conversation-workflows"
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<PageTitle>Conversation workflow playground</PageTitle>
+
+<main class="documentation-page" data-testid="conversation-workflow-playground">
+    <h1>Conversation workflow playground</h1>
+
+    <section aria-labelledby="scroller-heading">
+        <h2 id="scroller-heading">Message scroller</h2>
+        <div class="component-control-row">
+            <button type="button" data-testid="prepend-message" @onclick="PrependMessage">Prepend</button>
+            <button type="button" data-testid="append-message" @onclick="AppendMessage">Append</button>
+        </div>
+        <ShadcnMessageScrollerProvider @ref="Scroller" AutoScroll="true" StateChanged="ScrollerChanged">
+            <ShadcnMessageScroller Style="height:14rem" data-testid="workflow-scroller">
+                <ShadcnMessageScrollerViewport AccessibleName="Conversation transcript">
+                    <ShadcnMessageScrollerContent>
+                        @foreach (var message in Messages)
+                        {
+                            <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="@message.Anchor" Style="display:block;min-height:5rem;padding:1rem">
+                                @message.Text
+                            </ShadcnMessageScrollerItem>
+                        }
+                    </ShadcnMessageScrollerContent>
+                </ShadcnMessageScrollerViewport>
+                <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.Start" Behavior="ShadcnMessageScrollBehavior.Auto" AccessibleName="Go to first message" data-testid="scroll-start">First</ShadcnMessageScrollerButton>
+                <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" Behavior="ShadcnMessageScrollBehavior.Auto" AccessibleName="Go to latest message" data-testid="jump-latest">Latest</ShadcnMessageScrollerButton>
+            </ShadcnMessageScroller>
+        </ShadcnMessageScrollerProvider>
+        <button type="button" data-testid="scroll-message" @onclick="ScrollToMessage">Focus turn 3</button>
+        <button type="button" data-testid="focus-end" @onclick="FocusEnd">Focus latest</button>
+        <button type="button" data-testid="queue-missing-message" @onclick="QueueMissingMessage">Queue delayed row</button>
+        <output data-testid="queued-message-result">@QueuedMessageResult</output>
+        <ShadcnMessageScrollerProvider @ref="EmptyScroller">
+            <ShadcnMessageScroller Style="height:8rem" data-testid="empty-workflow-scroller">
+                <ShadcnMessageScrollerViewport AccessibleName="Delayed transcript">
+                    <ShadcnMessageScrollerContent>
+                        @foreach (var message in PendingMessages)
+                        {
+                            <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" Style="display:block;min-height:5rem;padding:1rem">@message.Text</ShadcnMessageScrollerItem>
+                        }
+                    </ShadcnMessageScrollerContent>
+                </ShadcnMessageScrollerViewport>
+            </ShadcnMessageScroller>
+        </ShadcnMessageScrollerProvider>
+        <button type="button" data-testid="queue-before-first-message" @onclick="QueueBeforeFirstMessage">Queue before first row</button>
+        <output data-testid="first-message-result">@FirstMessageResult</output>
+        <output data-testid="scroller-state">following:@ScrollerState.Following unread:@ScrollerState.Unread visible:@string.Join(',', ScrollerState.VisibleMessageIds)</output>
+    </section>
+
+    <section aria-labelledby="questionnaire-heading" dir="rtl">
+        <h2 id="questionnaire-heading">แบบสอบถาม</h2>
+        <button type="button" data-testid="reset-questionnaire" @onclick="ResetQuestionnaire">เริ่มใหม่</button>
+        <button type="button" data-testid="resume-questionnaire" @onclick="ResumeQuestionnaire">ทำต่อ</button>
+        <ShadcnQuestionnaire @ref="Questionnaire" Items="QuestionnaireItems" DefaultAnswers="@ResumeAnswers" Shortcuts="ShadcnQuestionnaireShortcutMode.Numbers" ValidateItem="ValidateItem" Validate="ValidateQuestionnaire" StateChanged="QuestionnaireChanged" OnSubmit="QuestionnaireSubmitted" AccessibleName="ขอบเขตงาน">
+            <ShadcnQuestionnaireProgress AccessibleName="ความคืบหน้า" />
+            <ShadcnQuestionnaireItem Name="scope">
+                <ShadcnQuestionnaireTitle>เลือกขอบเขต</ShadcnQuestionnaireTitle>
+                <ShadcnQuestionnaireChoices>
+                    <ShadcnQuestionnaireChoice Value="component">คอมโพเนนต์</ShadcnQuestionnaireChoice>
+                    <ShadcnQuestionnaireChoice Value="feature">ฟีเจอร์</ShadcnQuestionnaireChoice>
+                </ShadcnQuestionnaireChoices>
+                <ShadcnQuestionnaireError />
+            </ShadcnQuestionnaireItem>
+            <ShadcnQuestionnaireItem Name="notes">
+                <ShadcnQuestionnaireTitle>รายละเอียด</ShadcnQuestionnaireTitle>
+                <ShadcnQuestionnaireInput AccessibleName="รายละเอียด" />
+                <ShadcnQuestionnaireError />
+            </ShadcnQuestionnaireItem>
+            <ShadcnQuestionnaireActions>
+                <ShadcnQuestionnairePrevious>ก่อนหน้า</ShadcnQuestionnairePrevious>
+                <ShadcnQuestionnaireSkip>ข้าม</ShadcnQuestionnaireSkip>
+                <ShadcnQuestionnaireNext data-testid="questionnaire-next">ถัดไป</ShadcnQuestionnaireNext>
+                <ShadcnQuestionnaireSubmit data-testid="questionnaire-submit">ส่ง</ShadcnQuestionnaireSubmit>
+            </ShadcnQuestionnaireActions>
+        </ShadcnQuestionnaire>
+        <output data-testid="questionnaire-result">@QuestionnaireResult</output>
+        <output data-testid="questionnaire-validation-count">@QuestionnaireValidationCount</output>
+        <output data-testid="questionnaire-answer">@(ResumeAnswers?.GetValueOrDefault("notes")?.InputValue)</output>
+    </section>
+</main>
+
+@code {
+    private sealed record MessageRow(string Id, string Text, bool Anchor = false);
+    private readonly List<MessageRow> Messages = Enumerable.Range(1, 8).Select(index => new MessageRow($"turn-{index}", $"ข้อความ {index}", index == 8)).ToList();
+    private readonly List<MessageRow> PendingMessages = [];
+    private static readonly ShadcnQuestionnaireItemDefinition[] QuestionnaireItems =
+    [
+        new("scope", Required: true, Choices: [new("component"), new("feature")]),
+        new("notes", Required: true, AllowsFreeform: true)
+    ];
+    private ShadcnMessageScrollerState ScrollerState { get; set; } = new(new(false, false), null, [], true, false);
+    private string QuestionnaireResult { get; set; } = "ยังไม่ได้ส่ง";
+    private IReadOnlyDictionary<string, ShadcnQuestionnaireAnswer>? ResumeAnswers { get; set; }
+    private int SubmitCount { get; set; }
+    private int QuestionnaireValidationCount { get; set; }
+    private int _nextMessage = 9;
+    private ShadcnMessageScrollerProvider? Scroller { get; set; }
+    private ShadcnMessageScrollerProvider? EmptyScroller { get; set; }
+    private string QueuedMessageResult { get; set; } = "pending";
+    private string FirstMessageResult { get; set; } = "pending";
+    private ShadcnQuestionnaire? Questionnaire { get; set; }
+
+    private void AppendMessage() => Messages.Add(new($"turn-{_nextMessage}", $"ข้อความใหม่ {_nextMessage++}", true));
+    private void PrependMessage() => Messages.Insert(0, new($"turn-before-{_nextMessage}", $"ข้อความก่อนหน้า {_nextMessage++}"));
+    private async Task ScrollToMessage() { if (Scroller is not null) await Scroller.ScrollToMessageAsync("turn-3", new(Behavior: ShadcnMessageScrollBehavior.Smooth, FocusViewport: true)); }
+    private async Task FocusEnd() { if (Scroller is not null) await Scroller.ScrollToEndAsync(focusViewport: true); }
+    private async Task QueueMissingMessage()
+    {
+        if (Scroller is null) return;
+        QueuedMessageResult = await Scroller.ScrollToMessageAsync("turn-missing", new(FocusViewport: true)) ? "handled" : "missed";
+    }
+    private async Task QueueBeforeFirstMessage()
+    {
+        if (EmptyScroller is null) return;
+        var command = EmptyScroller.ScrollToMessageAsync("turn-delayed", new(FocusViewport: true));
+        await Task.Delay(50);
+        PendingMessages.Add(new("turn-delayed", "ข้อความมาถึงภายหลัง", true));
+        await InvokeAsync(StateHasChanged);
+        FirstMessageResult = await command ? "handled" : "missed";
+    }
+    private Task ScrollerChanged(ShadcnMessageScrollerState state) { ScrollerState = state; return InvokeAsync(StateHasChanged); }
+    private async ValueTask<string?> ValidateItem(ShadcnQuestionnaireItemDefinition item, ShadcnQuestionnaireAnswer answer, CancellationToken _)
+    {
+        QuestionnaireValidationCount++;
+        await Task.Delay(100);
+        return item.Required && answer.Status is ShadcnQuestionnaireItemStatus.Unanswered ? "กรุณาเลือกหรือกรอกข้อมูล" : null;
+    }
+    private static ValueTask<IReadOnlyDictionary<string, string>> ValidateQuestionnaire(ShadcnQuestionnaireState state, CancellationToken _)
+    {
+        IReadOnlyDictionary<string, string> errors = string.Equals(state.Answers["notes"].InputValue, "blocked", StringComparison.OrdinalIgnoreCase)
+            ? new Dictionary<string, string> { ["notes"] = "รายละเอียดนี้ใช้ไม่ได้" }
+            : new Dictionary<string, string>();
+        return ValueTask.FromResult(errors);
+    }
+    private async Task QuestionnaireChanged(ShadcnQuestionnaireState state) { await Task.Delay(75); ResumeAnswers = state.Answers; }
+    private async Task QuestionnaireSubmitted(ShadcnQuestionnaireState state) { SubmitCount++; await Task.Delay(150); QuestionnaireResult = $"{state.Answers["notes"].InputValue ?? "ส่งแล้ว"} ครั้ง:{SubmitCount}"; }
+    private async Task ResetQuestionnaire() { if (Questionnaire is not null) await Questionnaire.ResetAsync(); QuestionnaireResult = "เริ่มใหม่"; }
+    private async Task ResumeQuestionnaire() { if (Questionnaire is not null) await Questionnaire.ResumeAsync("notes", ResumeAnswers); QuestionnaireResult = "ทำต่อจากรายละเอียด"; }
+}

@@ -1,0 +1,15 @@
+@implements IShadcnMenuOwner
+@implements IDisposable
+<CascadingValue Value="this" IsFixed="true"><CascadingValue Value="MenuContext" IsFixed="true"><CascadingValue Value="ItemContext" IsFixed="true">@ChildContent</CascadingValue></CascadingValue></CascadingValue>
+@code {
+    [CascadingParameter] private ShadcnMenubarContext Menubar { get; set; } = default!;
+    [Parameter] public bool Open { get; set; } [Parameter] public EventCallback<bool> OpenChanged { get; set; } [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _next; private bool _open, _last, _initialized; private readonly string _triggerId, _contentId; private int _index = -1;
+    public ShadcnMenubarMenu() { var id = Interlocked.Increment(ref _next); _triggerId = $"shadcn-menubar-{id}-trigger"; _contentId = $"shadcn-menubar-{id}-content"; }
+    private ShadcnMenuContext MenuContext => new(this, "menubar"); private ShadcnMenubarMenuContext ItemContext => new(_index);
+    public bool EffectiveOpen => _open; public string TriggerId => _triggerId; public string ContentId => _contentId;
+    protected override void OnParametersSet() { _index = Menubar.Register(this); if (!_initialized || Open != _last) _open = Open; _last = Open; _initialized = true; }
+    public async ValueTask SetOpenAsync(bool value) { if (_open == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _open = value; await InvokeAsync(StateHasChanged); } }
+    internal ValueTask ToggleAsync() => Menubar.OpenAsync(this);
+    public void Dispose() => Menubar.Unregister(this);
+}

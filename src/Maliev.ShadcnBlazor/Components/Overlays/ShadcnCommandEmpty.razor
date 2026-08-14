@@ -1,0 +1,4 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+<div @attributes="Forwarded" class="@MergeClass("shadcn-command-empty")" style="@MergeStyle(null)" data-slot="command-empty" role="status" hidden="@(Context.HasMatch?true:null)">@ChildContent</div>
+@code { [CascadingParameter]private ShadcnCommandContext Context{get;set;}=default!; [Parameter]public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","role","hidden"); protected override void OnInitialized()=>Context.StateChanged+=Refresh; private void Refresh()=>_=InvokeAsync(StateHasChanged); public void Dispose()=>Context.StateChanged-=Refresh; }

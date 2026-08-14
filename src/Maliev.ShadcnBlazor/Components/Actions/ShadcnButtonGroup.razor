@@ -1,0 +1,32 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<CascadingValue Value="@Context" IsFixed="true">
+    <div @attributes="ForwardedAttributes"
+         class="@MergeClass("shadcn-button-group")"
+         style="@MergeStyle(null)"
+         data-slot="button-group"
+         data-orientation="@OrientationValue"
+         role="group">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public ShadcnButtonGroupOrientation Orientation { get; set; } = ShadcnButtonGroupOrientation.Horizontal;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private ShadcnButtonGroupContext Context => new(Orientation);
+    private string OrientationValue => Orientation switch
+    {
+        ShadcnButtonGroupOrientation.Horizontal => "horizontal",
+        ShadcnButtonGroupOrientation.Vertical => "vertical",
+        _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn button group orientation.")
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "role");
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Orientation))
+            throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn button group orientation.");
+    }
+}

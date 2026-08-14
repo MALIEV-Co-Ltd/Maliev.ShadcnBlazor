@@ -1,0 +1,35 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+<ShadcnQuestionnaire Items="Items" AccessibleName="workflow" OnSubmit="Submitted">
+    <ShadcnQuestionnaireProgress AccessibleName="Workflow progress" />
+    <ShadcnQuestionnaireItem Name="scope">
+        <ShadcnQuestionnaireTitle>What may change?</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireDescription>Choose scope</ShadcnQuestionnaireDescription>
+        <ShadcnQuestionnaireChoices>
+            <ShadcnQuestionnaireChoice Value="component">Component</ShadcnQuestionnaireChoice>
+            <ShadcnQuestionnaireChoice Value="feature">Feature</ShadcnQuestionnaireChoice>
+        </ShadcnQuestionnaireChoices>
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireItem Name="checks">
+        <ShadcnQuestionnaireTitle>Checks?</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireChoices><ShadcnQuestionnaireChoice Value="tests">Tests</ShadcnQuestionnaireChoice></ShadcnQuestionnaireChoices>
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireItem Name="notes">
+        <ShadcnQuestionnaireTitle>Notes?</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireInput AccessibleName="Notes" />
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireActions>
+        <ShadcnQuestionnairePrevious data-testid="previous">Previous</ShadcnQuestionnairePrevious>
+        <ShadcnQuestionnaireSkip data-testid="skip">Skip</ShadcnQuestionnaireSkip>
+        <ShadcnQuestionnaireNext data-testid="next">Next</ShadcnQuestionnaireNext>
+        <ShadcnQuestionnaireSubmit data-testid="submit">Submit</ShadcnQuestionnaireSubmit>
+    </ShadcnQuestionnaireActions>
+</ShadcnQuestionnaire>
+@if (_submitted) { <span>submitted</span> }
+@code {
+ private bool _submitted;
+ private static readonly ShadcnQuestionnaireItemDefinition[] Items = [new("scope", Required:true, Choices:[new("component"),new("feature")]),new("checks",Choices:[new("tests")]),new("notes",AllowsFreeform:true)];
+ private Task Submitted(ShadcnQuestionnaireState _) { _submitted=true; return Task.CompletedTask; }
+}

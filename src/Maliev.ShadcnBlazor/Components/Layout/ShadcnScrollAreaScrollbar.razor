@@ -1,0 +1,10 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-scroll-area-scrollbar")" style="@MergeStyle(null)" data-slot="scroll-area-scrollbar" data-orientation="@OrientationValue" aria-hidden="true">@ChildContent</div>
+@code {
+    [CascadingParameter] private ShadcnScrollAreaContext Context { get; set; } = default!;
+    [Parameter] public ShadcnScrollAreaOrientation Orientation { get; set; } = ShadcnScrollAreaOrientation.Vertical;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string OrientationValue => Orientation switch { ShadcnScrollAreaOrientation.Vertical => "vertical", ShadcnScrollAreaOrientation.Horizontal => "horizontal", _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown scroll area orientation.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "aria-hidden");
+    protected override void OnParametersSet() => _ = OrientationValue;
+}

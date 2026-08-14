@@ -1,0 +1,22 @@
+@using System.Globalization
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-item")" style="@ItemStyle" data-slot="carousel-item" data-selected="@(Context?.IsSelected(_registrationId) == true ? "true" : null)" role="group" aria-roledescription="slide" aria-label="@EffectiveLabel">@ChildContent</div>
+@code {
+    [CascadingParameter] private ShadcnCarouselContext? Context { get; set; }
+    [Parameter] public int Index { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public double BasisPercent { get; set; } = 100;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private readonly Guid _registrationId = Guid.NewGuid();
+    private string EffectiveLabel => Label ?? Context?.SlideLabel(_registrationId) ?? $"Slide {Index + 1}";
+    private string? ItemStyle => MergeStyle($"--shadcn-carousel-basis: {BasisPercent.ToString("0.###", CultureInfo.InvariantCulture)}%");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-selected", "role", "aria-roledescription", "aria-label");
+    protected override void OnParametersSet()
+    {
+        if (Index < 0) throw new ArgumentOutOfRangeException(nameof(Index));
+        if (!double.IsFinite(BasisPercent) || BasisPercent <= 0 || BasisPercent > 100) throw new ArgumentOutOfRangeException(nameof(BasisPercent));
+        Context?.Register(_registrationId, Index, BasisPercent);
+    }
+    public void Dispose() => Context?.Unregister(_registrationId);
+}

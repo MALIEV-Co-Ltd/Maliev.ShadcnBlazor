@@ -1,0 +1,155 @@
+@page "/docs/components/{Slug}"
+@inject Maliev.ShadcnBlazor.Showcase.Documentation.IComponentDocumentationCatalog Catalog
+@inject Maliev.ShadcnBlazor.Showcase.Documentation.Examples.IComponentExampleRegistry Examples
+@inject Maliev.ShadcnBlazor.Showcase.Documentation.Api.ComponentApiCatalog ApiCatalog
+
+<PageTitle>@(Entry?.Name ?? "Component not found") documentation</PageTitle>
+
+@if (Entry is null)
+{
+    <ShadcnEmpty>
+        <ShadcnEmptyHeader>
+            <ShadcnEmptyTitle>Component not found</ShadcnEmptyTitle>
+            <ShadcnEmptyDescription>The requested documentation entry does not exist.</ShadcnEmptyDescription>
+        </ShadcnEmptyHeader>
+        <ShadcnEmptyContent><a href="/docs/components">Return to the component catalog</a></ShadcnEmptyContent>
+    </ShadcnEmpty>
+}
+else
+{
+    <article class="component-dossier" aria-labelledby="component-documentation-title" data-testid="component-dossier">
+        <header class="component-dossier__hero">
+            <p class="documentation-eyebrow">Component dossier</p>
+            <h1 id="component-documentation-title">@Entry.Name</h1>
+            <p>@Entry.Summary</p>
+            <p>
+                @if (Entry.PrimaryType is not null && Entry.Namespace is not null)
+                {
+                    <code>@Entry.Namespace.@Entry.PrimaryType</code>
+                }
+                else
+                {
+                    <span>Not yet implemented</span>
+                }
+            </p>
+        </header>
+
+        @foreach (var example in _examples)
+        {
+            <ComponentPreview Example="@example" />
+            <ComponentCodeExample Title="@example.Title" Source="@example.RazorSource" />
+        }
+
+        @if (Entry.Status == Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationStatus.Planned)
+        {
+            <section class="component-dossier__planned" aria-label="Approved roadmap" data-testid="planned-component-notice">
+                <h2>Certification in progress</h2>
+                <p>The implementation and review preview are available, but this component remains planned until every required evidence axis passes.</p>
+            </section>
+        }
+        @if (Entry.PrimaryType is not null && Entry.Namespace is not null)
+        {
+            <ComponentApiTable Descriptors="@_apiDescriptors" />
+            <ComponentAccessibilityNotes Entry="@Entry" />
+            <section class="component-token-guidance" aria-labelledby="component-token-guidance-title" data-testid="component-token-guidance">
+                <h2 id="component-token-guidance-title">Customization tokens</h2>
+                <p>Customize this component through the scoped semantic token contract; no component CSS fork is required.</p>
+                <ul>
+                    @foreach (var group in Entry.TokenGroups)
+                    {
+                        <li><code>@group</code></li>
+                    }
+                </ul>
+                <a href="/theme">Open the live theme studio and export an integration bundle</a>
+            </section>
+            @if (UpstreamPaths.Count > 0)
+            {
+                <section class="component-reference" aria-labelledby="component-reference-title" data-testid="component-reference">
+                    <h2 id="component-reference-title">Official reference</h2>
+                    <p>Audited against the pinned Shadcn Base/Vega source and the current official component documentation.</p>
+                    <ul>
+                        @foreach (var upstreamPath in UpstreamPaths)
+                        {
+                            <li><a href="@PinnedSourceUrl(upstreamPath)">Pinned source <code>@upstreamPath.Split('/').Last()</code> at @PinnedCommit[..12]</a></li>
+                        }
+                        <li><a href="@CurrentDocumentationUrl">Current official documentation</a></li>
+                    </ul>
+                </section>
+            }
+        }
+
+        <ComponentStatusEvidence Entry="@Entry" />
+    </article>
+}
+
+@code {
+    [Parameter] public string? Slug { get; set; }
+
+    private IReadOnlyList<Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleDefinition> _examples = [];
+    private IReadOnlyList<Maliev.ShadcnBlazor.Showcase.Documentation.Api.ComponentApiDescriptor> _apiDescriptors = [];
+    private const string PinnedCommit = "6261bd89f72d794aea491482cc2acfd8dc3d63e2";
+
+    private Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry? Entry =>
+        string.IsNullOrWhiteSpace(Slug) ? null : Catalog.FindBySlug(Slug);
+
+    private IReadOnlyList<string> UpstreamPaths => Slug switch
+    {
+        "alert" => ["apps/v4/registry/bases/base/ui/alert.tsx"],
+        "avatar" => ["apps/v4/registry/bases/base/ui/avatar.tsx"],
+        "badge" => ["apps/v4/registry/bases/base/ui/badge.tsx"],
+        "button" => ["apps/v4/registry/bases/base/ui/button.tsx"],
+        "button-group" => ["apps/v4/registry/bases/base/ui/button-group.tsx"],
+        "checkbox" => ["apps/v4/registry/bases/base/ui/checkbox.tsx"],
+        "radio-group" => ["apps/v4/registry/bases/base/ui/radio-group.tsx"],
+        "slider" => ["apps/v4/registry/bases/base/ui/slider.tsx"],
+        "switch" => ["apps/v4/registry/bases/base/ui/switch.tsx"],
+        "toggle" => ["apps/v4/registry/bases/base/ui/toggle.tsx"],
+        "toggle-group" => ["apps/v4/registry/bases/base/ui/toggle-group.tsx"],
+        "calendar" => ["apps/v4/registry/bases/base/ui/calendar.tsx"],
+        "card" => ["apps/v4/registry/bases/base/ui/card.tsx"],
+        "carousel" => ["apps/v4/registry/bases/base/ui/carousel.tsx"],
+        "combobox" => ["apps/v4/registry/bases/base/ui/combobox.tsx"],
+        "date-picker" => ["apps/v4/registry/bases/base/ui/calendar.tsx", "apps/v4/registry/bases/base/ui/popover.tsx", "apps/v4/registry/bases/base/ui/button.tsx"],
+        "input" => ["apps/v4/registry/bases/base/ui/input.tsx"],
+        "input-group" => ["apps/v4/registry/bases/base/ui/input-group.tsx"],
+        "input-otp" => ["apps/v4/registry/bases/base/ui/input-otp.tsx"],
+        "native-select" => ["apps/v4/registry/bases/base/ui/native-select.tsx"],
+        "progress" => ["apps/v4/registry/bases/base/ui/progress.tsx"],
+        "select" => ["apps/v4/registry/bases/base/ui/select.tsx"],
+        "skeleton" => ["apps/v4/registry/bases/base/ui/skeleton.tsx"],
+        "spinner" => ["apps/v4/registry/bases/base/ui/spinner.tsx"],
+        "textarea" => ["apps/v4/registry/bases/base/ui/textarea.tsx"],
+        "toast" => ["apps/v4/registry/bases/base/ui/toast.tsx"],
+        "alert-dialog" => ["apps/v4/registry/bases/base/ui/alert-dialog.tsx"],
+        "command" => ["apps/v4/registry/bases/base/ui/command.tsx"],
+        "context-menu" => ["apps/v4/registry/bases/base/ui/context-menu.tsx"],
+        "dialog" => ["apps/v4/registry/bases/base/ui/dialog.tsx"],
+        "drawer" => ["apps/v4/registry/bases/base/ui/drawer.tsx"],
+        "dropdown-menu" => ["apps/v4/registry/bases/base/ui/dropdown-menu.tsx"],
+        "hover-card" => ["apps/v4/registry/bases/base/ui/hover-card.tsx"],
+        "menubar" => ["apps/v4/registry/bases/base/ui/menubar.tsx"],
+        "popover" => ["apps/v4/registry/bases/base/ui/popover.tsx"],
+        "sheet" => ["apps/v4/registry/bases/base/ui/sheet.tsx"],
+        "tooltip" => ["apps/v4/registry/bases/base/ui/tooltip.tsx"],
+        "chart" => ["apps/v4/registry/new-york-v4/ui/chart.tsx"],
+        "data-table" => ["apps/v4/registry/new-york-v4/examples/data-table-demo.tsx"],
+        "table" => ["apps/v4/registry/new-york-v4/ui/table.tsx"],
+        "attachment" => ["apps/v4/registry/bases/base/ui/attachment.tsx"],
+        "bubble" => ["apps/v4/registry/bases/base/ui/bubble.tsx"],
+        "marker" => ["apps/v4/registry/bases/base/ui/marker.tsx"],
+        "message" => ["apps/v4/registry/bases/base/ui/message.tsx"],
+        "message-scroller" => ["apps/v4/registry/bases/base/ui/message-scroller.tsx", "packages/react/src/message-scroller/types.ts"],
+        "questionnaire" => ["apps/v4/registry/bases/base/ui/questionnaire.tsx", "packages/react/src/questionnaire/types.ts"],
+        _ => []
+    };
+
+    private static string PinnedSourceUrl(string upstreamPath) => $"https://github.com/shadcn-ui/ui/blob/{PinnedCommit}/{upstreamPath}";
+    private string CurrentDocumentationUrl => $"https://ui.shadcn.com/docs/components/base/{Slug}";
+
+    protected override void OnParametersSet()
+    {
+        var entry = Entry;
+        _examples = entry is null ? [] : Examples.GetBySlug(entry.Slug);
+        _apiDescriptors = entry is null ? [] : ApiCatalog.GetByEntry(entry);
+    }
+}

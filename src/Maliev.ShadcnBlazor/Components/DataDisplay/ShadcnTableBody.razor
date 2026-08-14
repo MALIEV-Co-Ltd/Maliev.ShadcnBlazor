@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<tbody @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table-body")" style="@MergeStyle(null)" data-slot="table-body"><CascadingValue Value="SectionContext" IsFixed="true">@ChildContent</CascadingValue></tbody>
+@code {
+    [CascadingParameter] private ShadcnTableCompositionContext? Parent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+    private static ShadcnTableCompositionContext SectionContext { get; } = new(ShadcnTableCompositionKind.Section);
+    protected override void OnParametersSet() => ShadcnTableHeader.ValidateSection(Parent, ChildContent, "Table body");
+}

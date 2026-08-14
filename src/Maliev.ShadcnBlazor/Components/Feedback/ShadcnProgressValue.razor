@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-progress-value")" style="@MergeStyle(null)" data-slot="progress-value">@(ChildContent is null ? Context?.FormattedValue : ChildContent)</span>
+@code { [CascadingParameter] private ShadcnProgressContext? Context { get; set; } [Parameter] public RenderFragment? ChildContent { get; set; } private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot"); }

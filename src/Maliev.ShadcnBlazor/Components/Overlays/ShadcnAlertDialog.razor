@@ -1,0 +1,14 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<CascadingValue Value="Context" IsFixed="true"><div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-alert-dialog")" style="@MergeStyle(null)" data-slot="alert-dialog" data-state="@(EffectiveOpen ? "open" : "closed")">@ChildContent</div></CascadingValue>
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public bool CloseOnEscape { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _nextId; private readonly ShadcnAlertDialogContext _context; private bool _effectiveOpen; private bool _last; private bool _initialized;
+    public ShadcnAlertDialog() { var id = Interlocked.Increment(ref _nextId); _context = new(this, $"shadcn-alert-dialog-{id}-content"); }
+    private ShadcnAlertDialogContext Context => _context; internal bool EffectiveOpen => _effectiveOpen;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state");
+    protected override void OnParametersSet() { if (!_initialized || Open != _last) _effectiveOpen = Open; _last = Open; _initialized = true; }
+    internal async ValueTask SetOpenAsync(bool value) { if (_effectiveOpen == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _effectiveOpen = value; await InvokeAsync(StateHasChanged); } }
+}

@@ -1,0 +1,14 @@
+<ShadcnCard Size="Size" Spacing="@(CompactSpacing ? "0.75rem" : null)">
+    <ShadcnCardHeader>
+        <ShadcnCardTitle>Machine status</ShadcnCardTitle>
+        @if (Action) { <ShadcnCardAction>Open</ShadcnCardAction> }
+    </ShadcnCardHeader>
+    <ShadcnCardContent>Running</ShadcnCardContent>
+    <ShadcnCardFooter>Updated now</ShadcnCardFooter>
+</ShadcnCard>
+
+@code {
+    [Parameter] public ShadcnCardSize Size { get; set; }
+    [Parameter] public bool CompactSpacing { get; set; }
+    [Parameter] public bool Action { get; set; } = true;
+}

@@ -1,0 +1,60 @@
+@typeparam TValue
+@using Microsoft.AspNetCore.Components.Forms
+@inherits ShadcnFormComponentBase<TValue>
+
+@if (IsFileInput)
+{
+<InputFile @attributes="ForwardedAttributes"
+       class="@MergeClass(InputClass)"
+       style="@MergeStyle()"
+       data-slot="@Slot"
+       name="@Name"
+       accept="@Accept"
+       multiple="@Multiple"
+       capture="@Capture"
+       disabled="@EffectiveDisabled"
+       required="@Required"
+       aria-invalid="@(EffectiveInvalid ? "true" : null)"
+       aria-describedby="@DescribedBy"
+       OnChange="FilesChanged" />
+}
+else
+{
+<input @attributes="ForwardedAttributes"
+       class="@MergeClass(InputClass)"
+       style="@MergeStyle()"
+       data-slot="@Slot"
+       type="@Type"
+       name="@Name"
+       value="@RenderedValue"
+       placeholder="@Placeholder"
+       inputmode="@InputMode"
+       autocomplete="@AutoComplete"
+       disabled="@EffectiveDisabled"
+       readonly="@ReadOnly"
+       required="@Required"
+       aria-invalid="@(EffectiveInvalid ? "true" : null)"
+       aria-describedby="@DescribedBy"
+       @oninput="HandleInputAsync" />
+}
+
+@code {
+    [CascadingParameter] private ShadcnInputGroupContext? InputGroup { get; set; }
+    [Parameter] public string Type { get; set; } = "text";
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? InputMode { get; set; }
+    [Parameter] public string? AutoComplete { get; set; }
+    [Parameter] public string? Accept { get; set; }
+    [Parameter] public bool Multiple { get; set; }
+    [Parameter] public string? Capture { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> FilesChanged { get; set; }
+    private bool IsFileInput => string.Equals(Type, "file", StringComparison.OrdinalIgnoreCase);
+    private string? RenderedValue => string.Equals(Type, "file", StringComparison.OrdinalIgnoreCase) ? null : CurrentValueAsString;
+    private string InputClass => InputGroup is null ? "shadcn-input" : "shadcn-input shadcn-input-group-control";
+    private string Slot => InputGroup is null ? "input" : "input-group-control";
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot", "type", "name", "value", "placeholder", "inputmode", "autocomplete", "accept", "multiple", "capture", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
+
+    private Task HandleInputAsync(ChangeEventArgs args) => SetCurrentValueFromStringAsync(args.Value?.ToString());
+}

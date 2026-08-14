@@ -1,0 +1,23 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<CascadingValue Value="Context" IsFixed="true">
+    <span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar")" style="@MergeStyle(null)" data-slot="avatar" data-size="@SizeValue">@ChildContent</span>
+</CascadingValue>
+
+@code {
+    [Parameter] public ShadcnAvatarSize Size { get; set; } = ShadcnAvatarSize.Default;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ShadcnAvatarContext Context { get; set; } = default!;
+    private string SizeValue => Size switch
+    {
+        ShadcnAvatarSize.Small => "sm", ShadcnAvatarSize.Default => "default", ShadcnAvatarSize.Large => "lg",
+        _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn avatar size.")
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-size");
+    protected override void OnInitialized() => Context = new ShadcnAvatarContext(ImageStateChangedAsync);
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn avatar size.");
+    }
+    private Task ImageStateChangedAsync(bool _) => InvokeAsync(StateHasChanged);
+}

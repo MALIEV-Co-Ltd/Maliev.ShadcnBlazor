@@ -1,0 +1,8 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+<ShadcnQuestionnaire Items="Items" AccessibleName="disabled workflow">
+    <ShadcnQuestionnaireItem Name="active"><ShadcnQuestionnaireTitle>Active</ShadcnQuestionnaireTitle></ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireItem Name="disabled"><ShadcnQuestionnaireTitle>Disabled</ShadcnQuestionnaireTitle></ShadcnQuestionnaireItem>
+</ShadcnQuestionnaire>
+@code {
+    private static readonly ShadcnQuestionnaireItemDefinition[] Items = [new("active"), new("disabled", Disabled: true)];
+}

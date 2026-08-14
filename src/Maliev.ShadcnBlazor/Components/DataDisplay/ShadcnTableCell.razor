@@ -1,0 +1,21 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<td @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table-cell")" style="@MergeStyle(null)" data-slot="table-cell" colspan="@ColSpan" rowspan="@RowSpan" headers="@Headers">@ChildContent</td>
+@code {
+    [CascadingParameter] private ShadcnTableCompositionContext? Parent { get; set; }
+    [Parameter] public int? ColSpan { get; set; }
+    [Parameter] public int? RowSpan { get; set; }
+    [Parameter] public string? Headers { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "colspan", "rowspan", "headers");
+    protected override void OnParametersSet()
+    {
+        if (Parent?.Kind != ShadcnTableCompositionKind.Row) throw new InvalidOperationException("Table cell must be a direct table row child.");
+        if (ChildContent is null) throw new InvalidOperationException("Table cell content is required.");
+        ValidateSpan(ColSpan, nameof(ColSpan));
+        ValidateSpan(RowSpan, nameof(RowSpan));
+    }
+    private static void ValidateSpan(int? value, string name)
+    {
+        if (value is < 1 or > 1000) throw new ArgumentOutOfRangeException(name, value, "Table spans must be between 1 and 1000.");
+    }
+}

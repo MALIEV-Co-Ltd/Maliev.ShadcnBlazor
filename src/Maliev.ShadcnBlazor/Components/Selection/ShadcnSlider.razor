@@ -1,0 +1,165 @@
+@using System.Globalization
+@using System.Linq.Expressions
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @ref="RootReference"
+     @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-slider")"
+     style="@MergeStyle(RootStyle)"
+     data-slot="slider"
+     data-orientation="@OrientationValue"
+     data-disabled="@(EffectiveDisabled ? "true" : null)">
+    <span class="shadcn-slider-track" data-slot="slider-track" aria-hidden="true">
+        <span class="shadcn-slider-range" data-slot="slider-range"></span>
+    </span>
+    @for (var i = 0; i < Values.Count; i++)
+    {
+        var index = i;
+        var attributes = ThumbConfiguration(index);
+        <input @attributes="ThumbAdditionalAttributes(attributes)"
+               id="@ThumbId(index, attributes)"
+               class="shadcn-slider-thumb"
+               type="range"
+               name="@(attributes?.Name ?? Name)"
+               form="@(attributes?.Form ?? Form)"
+               required="@(attributes?.Required == true || Required)"
+               value="@Format(Values[index])"
+               min="@Format(Minimum)"
+               max="@Format(Maximum)"
+               step="@Format(Step)"
+               disabled="@EffectiveDisabled"
+               aria-label="@ThumbLabel(index, attributes)"
+               aria-labelledby="@(attributes?.AriaLabelledBy ?? RootAriaLabelledBy)"
+               aria-orientation="@OrientationValue"
+               aria-valuemin="@Format(Minimum)"
+               aria-valuemax="@Format(Maximum)"
+               aria-valuenow="@Format(Values[index])"
+               aria-readonly="@(ReadOnly ? "true" : null)"
+               aria-invalid="@(EffectiveInvalid ? "true" : null)"
+               aria-describedby="@FieldContext?.AriaDescribedBy"
+               data-slot="slider-thumb"
+               data-index="@index"
+               data-minimum="@Format(Minimum)"
+               data-maximum="@Format(Maximum)"
+               data-orientation="@OrientationValue"
+               @oninput="args => HandleChangeAsync(index, args)" />
+    }
+</div>
+
+@code {
+    [CascadingParameter] private ShadcnFieldContext? FieldContext { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public IReadOnlyList<double> Values { get; set; } = new[] { 0d };
+    [Parameter] public EventCallback<IReadOnlyList<double>> ValuesChanged { get; set; }
+    [Parameter] public Expression<Func<IReadOnlyList<double>>>? ValueExpression { get; set; }
+    [Parameter] public double Minimum { get; set; }
+    [Parameter] public double Maximum { get; set; } = 100;
+    [Parameter] public double Step { get; set; } = 1;
+    [Parameter] public ShadcnSliderOrientation Orientation { get; set; } = ShadcnSliderOrientation.Horizontal;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? Form { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public Func<int, string>? ThumbLabelFormatter { get; set; }
+    [Parameter] public IReadOnlyList<ShadcnSliderThumbAttributes>? ThumbAttributes { get; set; }
+
+    private ElementReference RootReference;
+    private IJSObjectReference? Module;
+    private readonly List<string> GeneratedThumbIds = [];
+    private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
+    private string OrientationValue => Orientation switch
+    {
+        ShadcnSliderOrientation.Horizontal => "horizontal",
+        ShadcnSliderOrientation.Vertical => "vertical",
+        _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn slider orientation.")
+    };
+    private string RootStyle => $"--shadcn-slider-start: {(Values.Count == 1 ? 0 : Percent(Values[0])).ToString(CultureInfo.InvariantCulture)}%; --shadcn-slider-end: {Percent(Values[^1]).ToString(CultureInfo.InvariantCulture)}%";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-disabled");
+
+    protected override void OnParametersSet()
+    {
+        if (!double.IsFinite(Minimum) || !double.IsFinite(Maximum) || Maximum <= Minimum)
+            throw new ArgumentOutOfRangeException(nameof(Maximum), Maximum, "Maximum must be finite and greater than Minimum.");
+        if (!double.IsFinite(Step) || Step <= 0)
+            throw new ArgumentOutOfRangeException(nameof(Step), Step, "Step must be finite and greater than zero.");
+        _ = OrientationValue;
+        if (Values is null || Values.Count == 0)
+            throw new ArgumentException("A slider requires at least one value.", nameof(Values));
+        for (var i = 0; i < Values.Count; i++)
+        {
+            if (!double.IsFinite(Values[i]) || Values[i] < Minimum || Values[i] > Maximum)
+                throw new ArgumentOutOfRangeException(nameof(Values), Values[i], "Slider values must be finite and within the configured range.");
+            if (i > 0 && Values[i] < Values[i - 1])
+                throw new ArgumentException("Slider values must be ordered from smallest to largest.", nameof(Values));
+        }
+        if (ThumbAttributes is not null && ThumbAttributes.Count != Values.Count)
+            throw new ArgumentException("ThumbAttributes must contain exactly one entry per slider value.", nameof(ThumbAttributes));
+        while (GeneratedThumbIds.Count < Values.Count)
+            GeneratedThumbIds.Add($"shadcn-slider-thumb-{Guid.NewGuid():N}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("attachSlider", RootReference, ReadOnly);
+    }
+
+    private double InputMinimum(int index) => index == 0 ? Minimum : Values[index - 1];
+    private double InputMaximum(int index) => index == Values.Count - 1 ? Maximum : Values[index + 1];
+    private double Percent(double value) => (value - Minimum) / (Maximum - Minimum) * 100;
+    private static string Format(double value) => value.ToString("G17", CultureInfo.InvariantCulture);
+    private ShadcnSliderThumbAttributes? ThumbConfiguration(int index) => ThumbAttributes is null ? null : ThumbAttributes[index];
+    private string ThumbId(int index, ShadcnSliderThumbAttributes? attributes) => attributes?.Id ?? GeneratedThumbIds[index];
+    private string? RootAriaLabel => AttributeValue("aria-label");
+    private string? RootAriaLabelledBy => AttributeValue("aria-labelledby");
+    private string? ThumbLabel(int index, ShadcnSliderThumbAttributes? attributes)
+    {
+        if (attributes?.AriaLabelledBy is not null || RootAriaLabelledBy is not null)
+            return null;
+        if (attributes?.AriaLabel is not null || ThumbLabelFormatter is not null)
+            return attributes?.AriaLabel ?? ThumbLabelFormatter!(index);
+        if (RootAriaLabel is not null)
+            return Values.Count == 1 ? RootAriaLabel : $"{RootAriaLabel} {index + 1}";
+        return Values.Count == 1 ? "Value" : $"Value {index + 1}";
+    }
+    private string? AttributeValue(string name) => AdditionalAttributes?
+        .FirstOrDefault(attribute => string.Equals(attribute.Key, name, StringComparison.OrdinalIgnoreCase))
+        .Value?.ToString();
+    private static IReadOnlyDictionary<string, object>? ThumbAdditionalAttributes(ShadcnSliderThumbAttributes? attributes) =>
+        attributes?.AdditionalAttributes is null
+            ? null
+            : new Dictionary<string, object>(attributes.AdditionalAttributes.Where(pair => pair.Key is not ("id" or "class" or "type" or "name" or "form" or "required" or "value" or "min" or "max" or "step" or "disabled" or "aria-label" or "aria-labelledby" or "aria-orientation" or "aria-valuemin" or "aria-valuemax" or "aria-valuenow" or "aria-readonly" or "aria-invalid" or "aria-describedby" or "data-slot" or "data-index" or "data-minimum" or "data-maximum" or "data-orientation")), StringComparer.OrdinalIgnoreCase);
+
+    private async Task HandleChangeAsync(int index, ChangeEventArgs args)
+    {
+        if (EffectiveDisabled || ReadOnly || !double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+            return;
+        var snapped = Minimum + Math.Round((raw - Minimum) / Step, MidpointRounding.AwayFromZero) * Step;
+        var next = Values.ToArray();
+        next[index] = Math.Clamp(snapped, InputMinimum(index), InputMaximum(index));
+        await ValuesChanged.InvokeAsync(next);
+        if (EditContext is not null && ValueExpression is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Module is null) return;
+        try
+        {
+            await Module.InvokeVoidAsync("detach", RootReference);
+            await Module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

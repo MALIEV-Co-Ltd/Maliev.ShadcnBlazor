@@ -1,0 +1,10 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-breadcrumb-link")" style="@MergeStyle(null)" data-slot="breadcrumb-link" href="@Href" target="@Target" @onclick="HandleClickAsync">@ChildContent</a>
+@code {
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "href", "target");
+    private Task HandleClickAsync(MouseEventArgs args) => OnClick.InvokeAsync(args);
+}

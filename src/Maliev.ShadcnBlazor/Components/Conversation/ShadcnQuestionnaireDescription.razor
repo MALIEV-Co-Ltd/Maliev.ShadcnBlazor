@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<p @attributes="ForwardedAttributes" class="@MergeClass("shadcn-questionnaire-description")" style="@MergeStyle(null)" data-slot="questionnaire-description" id="@Owner!.DescriptionId">@ChildContent</p>
+@code { [CascadingParameter] private ShadcnQuestionnaireItem? Owner{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot","id"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("QuestionnaireDescription must be inside an item.");Owner.Owner!.RegisterDescription(Owner.Name!);} }

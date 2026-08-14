@@ -1,0 +1,26 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<div @ref="Handle" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-resizable-handle")" style="@MergeStyle(null)" data-slot="resizable-handle" data-left-panel-id="@CurrentLeftPanelId" data-direction="@DirectionValue" data-disabled="@(Context.Owner.Disabled ? "true" : null)" role="separator" aria-label="@Label" aria-orientation="@AriaOrientation" aria-valuemin="@Format(Range.Minimum)" aria-valuemax="@Format(Range.Maximum)" aria-valuenow="@Format(Range.Current)" tabindex="@(Context.Owner.Disabled ? "-1" : "0")" @onkeydown="HandleKeyAsync">@if (WithHandle) { <span data-slot="resizable-handle-grip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /></svg></span> }</div>
+@code {
+    [CascadingParameter] private ShadcnResizableContext Context { get; set; } = default!;
+    [CascadingParameter] private ShadcnContext? Shadcn { get; set; }
+    [Parameter] public bool WithHandle { get; set; }
+    [Parameter] public string Label { get; set; } = "Resize panels";
+    private int _initialIndex; private string _leftPanelId = string.Empty; private ElementReference Handle; private IJSObjectReference? _module;
+    private int CurrentIndex { get { var byId = Context.IndexOf(_leftPanelId); return byId >= 0 ? byId : Math.Min(_initialIndex, Context.Panels.Count - 2); } }
+    private string CurrentLeftPanelId => CurrentIndex >= 0 ? Context.Panels[CurrentIndex].Id : string.Empty;
+    private (double Minimum, double Maximum, double Current) Range => Context.Owner.RangeAt(CurrentIndex);
+    private string DirectionValue => Context.Owner.Direction == ShadcnResizableDirection.Horizontal ? "horizontal" : "vertical";
+    private string AriaOrientation => Context.Owner.Direction == ShadcnResizableDirection.Horizontal ? "vertical" : "horizontal";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-left-panel-id", "data-direction", "data-disabled", "role", "aria-label", "aria-orientation", "aria-valuemin", "aria-valuemax", "aria-valuenow", "tabindex");
+    protected override void OnInitialized() { _initialIndex = Math.Max(0, Context.Panels.Count - 1); _leftPanelId = Context.Panels.Count == 0 ? string.Empty : Context.Panels[_initialIndex].Id; }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (!firstRender) return; _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("attachResizableHandle", Handle, Context.Owner.DotNetReference, DirectionValue, Shadcn?.Direction == ShadcnDirection.RightToLeft); await _module.InvokeVoidAsync("attachKeyGuard", Handle, new[] { "ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End" }); }
+    private async Task HandleKeyAsync(KeyboardEventArgs args)
+    {
+        var index = CurrentIndex; if (Context.Owner.Disabled || index < 0) return; var delta = args.Key switch { "ArrowRight" when Context.Owner.Direction == ShadcnResizableDirection.Horizontal => Shadcn?.Direction == ShadcnDirection.RightToLeft ? -Context.Owner.KeyboardStep : Context.Owner.KeyboardStep, "ArrowLeft" when Context.Owner.Direction == ShadcnResizableDirection.Horizontal => Shadcn?.Direction == ShadcnDirection.RightToLeft ? Context.Owner.KeyboardStep : -Context.Owner.KeyboardStep, "ArrowDown" when Context.Owner.Direction == ShadcnResizableDirection.Vertical => Context.Owner.KeyboardStep, "ArrowUp" when Context.Owner.Direction == ShadcnResizableDirection.Vertical => -Context.Owner.KeyboardStep, _ => 0 }; if (args.Key == "Home") await Context.Owner.ResizeToAsync(index, Range.Minimum); else if (args.Key == "End") await Context.Owner.ResizeToAsync(index, Range.Maximum); else if (delta != 0) await Context.Owner.ResizeByAsync(index, delta);
+    }
+    private static string Format(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    public async ValueTask DisposeAsync() { if (_module is not null) { await _module.InvokeVoidAsync("detachKeyGuard", Handle); await _module.InvokeVoidAsync("detachResizableHandle", Handle); await _module.DisposeAsync(); } }
+}

@@ -1,0 +1,23 @@
+using Maliev.ShadcnBlazor;
+using Maliev.ShadcnBlazor.Showcase;
+using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
+using Maliev.ShadcnBlazor.Showcase.MockSites;
+using Maliev.ShadcnBlazor.Showcase.Theming;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+builder.Services.AddMalievShadcn();
+builder.Services.AddScoped<ShowcaseState>();
+builder.Services.AddSingleton<IComponentDocumentationCatalog, ComponentDocumentationCatalog>();
+builder.Services.AddSingleton<ComponentApiCatalog>();
+builder.Services.AddTransient<IComponentExampleRegistry, ComponentExampleRegistry>();
+builder.Services.AddScoped<ThemeStudioStorage>();
+builder.Services.AddScoped<IThemeStudioStorage>(services => services.GetRequiredService<ThemeStudioStorage>());
+builder.Services.AddScoped<ThemeStudioState>();
+builder.Services.AddScoped<MockSiteState>();
+await builder.Build().RunAsync();

@@ -1,0 +1,119 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+@inherits LayoutComponentBase
+@inject ShowcaseState ThemeState
+@implements IDisposable
+
+<ShadcnThemeProvider IsDarkMode="@ThemeState.IsDarkMode" Direction="@ThemeState.Direction" Class="documentation-root">
+    <div class="documentation-shell" data-testid="documentation-workbench" @onkeydown="HandleKeyDown">
+        <a class="documentation-skip-link"
+           href="#documentation-catalog"
+           @onclick="OpenCatalogFromSkipLink"
+           @onclick:preventDefault="true">Skip to component navigation</a>
+        <a class="documentation-skip-link" href="#documentation-content">Skip to documentation content</a>
+
+        <DocumentationHeader @ref="_header" State="@NavigationState" />
+
+        <div class="documentation-workbench">
+            <button type="button"
+                    class="documentation-backdrop"
+                    aria-label="Close open documentation panel"
+                    data-open="@AnyDrawerOpen.ToString().ToLowerInvariant()"
+                    @onclick="CloseActiveDrawerAsync"></button>
+
+            <nav @ref="_catalogNavigation"
+                 id="documentation-catalog"
+                 class="documentation-catalog"
+                 aria-label="Component documentation"
+                 data-open="@NavigationState.CatalogOpen.ToString().ToLowerInvariant()"
+                 tabindex="-1">
+                <DocumentationCatalogRail State="@NavigationState" CloseRequested="CloseCatalogDrawerAsync" />
+            </nav>
+
+            <main id="documentation-content" class="documentation-content" tabindex="-1">
+                @Body
+            </main>
+
+            <aside id="documentation-theme"
+                   class="documentation-theme"
+                   aria-label="Documentation theme studio"
+                   data-open="@NavigationState.ThemeDockOpen.ToString().ToLowerInvariant()"
+                   tabindex="-1">
+                <DocumentationThemeDock State="@NavigationState" CloseRequested="CloseThemeDrawerAsync" />
+            </aside>
+        </div>
+    </div>
+</ShadcnThemeProvider>
+
+@code {
+    private DocumentationHeader? _header;
+    private ElementReference _catalogNavigation;
+    private bool _focusCatalogAfterRender;
+    private bool AnyDrawerOpen => NavigationState.CatalogOpen || NavigationState.ThemeDockOpen;
+
+    public DocumentationNavigationState NavigationState { get; } = new();
+
+    protected override void OnInitialized()
+    {
+        NavigationState.Changed += OnChanged;
+        ThemeState.Changed += OnChanged;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (!string.Equals(args.Key, "Escape", StringComparison.Ordinal) || !AnyDrawerOpen)
+            return;
+
+        await CloseActiveDrawerAsync();
+    }
+
+    private async Task CloseActiveDrawerAsync()
+    {
+        if (NavigationState.CatalogOpen)
+            await CloseCatalogDrawerAsync();
+        else if (NavigationState.ThemeDockOpen)
+            await CloseThemeDrawerAsync();
+    }
+
+    private void OpenCatalogFromSkipLink()
+    {
+        _focusCatalogAfterRender = true;
+        NavigationState.CatalogOpen = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusCatalogAfterRender)
+            return;
+
+        _focusCatalogAfterRender = false;
+        await _catalogNavigation.FocusAsync();
+    }
+
+    private async Task CloseCatalogDrawerAsync()
+    {
+        if (!NavigationState.CatalogOpen || _header is null)
+            return;
+
+        NavigationState.CatalogOpen = false;
+        await InvokeAsync(StateHasChanged);
+        await _header.FocusCatalogTriggerAsync();
+    }
+
+    private async Task CloseThemeDrawerAsync()
+    {
+        if (!NavigationState.ThemeDockOpen || _header is null)
+            return;
+
+        NavigationState.ThemeDockOpen = false;
+        await InvokeAsync(StateHasChanged);
+        await _header.FocusThemeDockTriggerAsync();
+    }
+
+    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        NavigationState.Changed -= OnChanged;
+        ThemeState.Changed -= OnChanged;
+    }
+}

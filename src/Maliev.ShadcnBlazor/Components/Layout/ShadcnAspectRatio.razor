@@ -1,0 +1,32 @@
+@using System.Globalization
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-aspect-ratio")"
+     style="@MergeStyle(FrameworkStyle)"
+     data-slot="aspect-ratio">
+    <div class="shadcn-aspect-ratio__content"
+         style="position: absolute; inset: 0;"
+         data-slot="aspect-ratio-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public double Ratio { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string FrameworkStyle =>
+        $"position: relative; width: 100%; aspect-ratio: {Ratio.ToString("G17", CultureInfo.InvariantCulture)}";
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+
+    protected override void OnParametersSet()
+    {
+        if (!double.IsFinite(Ratio) || Ratio <= 0)
+            throw new ArgumentOutOfRangeException(nameof(Ratio), Ratio, "Aspect ratio must be positive and finite.");
+    }
+}

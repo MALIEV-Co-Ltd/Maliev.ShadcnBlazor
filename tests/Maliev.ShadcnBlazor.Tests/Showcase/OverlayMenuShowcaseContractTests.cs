@@ -1,0 +1,71 @@
+using Bunit;
+using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
+
+namespace Maliev.ShadcnBlazor.Tests.Showcase;
+
+public sealed class OverlayMenuShowcaseContractTests : BunitContext
+{
+    private static readonly string[] Slugs = ["alert-dialog", "command", "context-menu", "dialog", "drawer", "dropdown-menu", "hover-card", "menubar", "popover", "sheet", "tooltip"];
+
+    public OverlayMenuShowcaseContractTests() => JSInterop.Mode = JSRuntimeMode.Loose;
+
+    [Fact]
+    public void ShowcaseRegistersExampleRegistryWithNonCachingLifetime()
+    {
+        var source = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Program.cs"));
+        Assert.Contains("AddTransient<IComponentExampleRegistry, ComponentExampleRegistry>()", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("AddSingleton<IComponentExampleRegistry, ComponentExampleRegistry>()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EveryPlanSevenComponentHasARealCompleteDossierAndAuthoritativeApi()
+    {
+        var catalog = new ComponentDocumentationCatalog(); var api = new ComponentApiCatalog(); var registry = new ComponentExampleRegistry(catalog);
+        foreach (var slug in Slugs)
+        {
+            var entry = Assert.IsType<ComponentDocumentationEntry>(catalog.FindBySlug(slug));
+            Assert.Equal(ComponentDocumentationStatus.Complete, entry.Status);
+            Assert.All(new[] { entry.Evidence.Api, entry.Evidence.ComponentTests, entry.Evidence.Accessibility, entry.Evidence.Interaction, entry.Evidence.ComputedStyle, entry.Evidence.Visual, entry.Evidence.Integration }, Assert.True);
+            Assert.Equal("Maliev.ShadcnBlazor.Components.Overlays", entry.Namespace);
+            Assert.NotNull(entry.PrimaryType);
+            Assert.True(api.GetByEntry(entry).Count >= 3, $"{slug} API ownership is incomplete.");
+            var example = Assert.Single(registry.GetBySlug(slug));
+            Assert.Equal($"{slug}-primary", example.Id);
+            Assert.NotEmpty(example.Controls); Assert.NotEmpty(example.StateTags);
+            Assert.Contains("<Shadcn", example.RazorSource, StringComparison.Ordinal);
+            Assert.NotEmpty(Render(example.Preview).FindAll("[data-slot]"));
+        }
+    }
+
+    [Fact]
+    public void EveryPlanSevenDossierControlMutatesItsRenderedCanvas()
+    {
+        foreach (var slug in Slugs)
+            foreach (var controlId in new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single().Controls.Select(control => control.Id).ToArray())
+            {
+                var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
+                var control = example.Controls.Single(candidate => candidate.Id == controlId);
+                var before = Render(example.Preview).Markup;
+                control.Apply(bool.Parse(control.Value) ? "false" : "true");
+                Assert.NotEqual(before, Render(example.Preview).Markup);
+            }
+    }
+
+    [Fact]
+    public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
+    {
+        var root = FindRoot();
+        var route = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));
+        foreach (var slug in Slugs)
+        {
+            Assert.Contains($"\"{slug}\" =>", route, StringComparison.Ordinal);
+            Assert.Contains($"ui/{slug}.tsx", route, StringComparison.Ordinal);
+        }
+        Assert.Contains("6261bd89f72d794aea491482cc2acfd8dc3d63e2", route, StringComparison.Ordinal);
+        Assert.Contains("https://ui.shadcn.com/docs/components/base/", route, StringComparison.Ordinal);
+    }
+
+    private static string FindRoot() { var directory = new DirectoryInfo(AppContext.BaseDirectory); while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx"))) directory = directory.Parent; return directory?.FullName ?? throw new DirectoryNotFoundException(); }
+}

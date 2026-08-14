@@ -1,0 +1,57 @@
+@page "/evidence/overlays-menus"
+@layout EvidenceLayout
+@using global::Maliev.ShadcnBlazor.Components.Overlays
+
+<PageTitle>Overlays and menus evidence</PageTitle>
+<ShadcnThemeProvider IsDarkMode="@IsDark" Direction="@Direction">
+<main class="overlays-menus-evidence" data-testid="overlays-menus-evidence">
+    <section data-pair-id="@Case" class="overlays-menus-reference-crop">
+        @switch (Case)
+        {
+            case "alert-dialog-open":
+                <ShadcnAlertDialog Open="true"><ShadcnAlertDialogContent><ShadcnAlertDialogHeader><ShadcnAlertDialogTitle>Delete quotation?</ShadcnAlertDialogTitle><ShadcnAlertDialogDescription>This action cannot be undone.</ShadcnAlertDialogDescription></ShadcnAlertDialogHeader><ShadcnAlertDialogFooter><ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel><ShadcnAlertDialogAction>Delete</ShadcnAlertDialogAction></ShadcnAlertDialogFooter></ShadcnAlertDialogContent></ShadcnAlertDialog>
+                break;
+            case "command-filtered":
+                <ShadcnCommand Label="Commands"><ShadcnCommandInput Value="orders" Placeholder="Search commands..." /><ShadcnCommandList><ShadcnCommandEmpty>No results</ShadcnCommandEmpty><ShadcnCommandGroup Heading="Navigation"><ShadcnCommandItem Value="orders">Orders</ShadcnCommandItem><ShadcnCommandItem Value="customers">Customers</ShadcnCommandItem></ShadcnCommandGroup></ShadcnCommandList></ShadcnCommand>
+                break;
+            case "context-menu-open":
+                <ShadcnContextMenu Open="true"><ShadcnContextMenuTrigger>Right-click this surface</ShadcnContextMenuTrigger><ShadcnContextMenuContent><ShadcnContextMenuItem>New quotation</ShadcnContextMenuItem></ShadcnContextMenuContent></ShadcnContextMenu>
+                break;
+            case "dialog-open":
+                <ShadcnDialog Open="true"><ShadcnDialogContent><ShadcnDialogHeader><ShadcnDialogTitle>Edit profile</ShadcnDialogTitle><ShadcnDialogDescription>Update customer details.</ShadcnDialogDescription></ShadcnDialogHeader></ShadcnDialogContent></ShadcnDialog>
+                break;
+            case "drawer-open":
+                <ShadcnDrawer Open="true" ShowSwipeHandle="true" SnapPoints="DrawerPoints" SnapPoint="DrawerPoint"><ShadcnDrawerContent><ShadcnDrawerHeader><ShadcnDrawerTitle>Order details</ShadcnDrawerTitle><ShadcnDrawerDescription>Swipe to dismiss.</ShadcnDrawerDescription></ShadcnDrawerHeader></ShadcnDrawerContent></ShadcnDrawer>
+                break;
+            case "dropdown-menu-open":
+                <ShadcnDropdownMenu Open="true"><ShadcnDropdownMenuTrigger>Actions</ShadcnDropdownMenuTrigger><ShadcnDropdownMenuContent><ShadcnDropdownMenuItem>Duplicate</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu>
+                break;
+            case "hover-card-open":
+                <ShadcnHoverCard Open="true"><ShadcnHoverCardTrigger Href="#maliev">@@maliev</ShadcnHoverCardTrigger><ShadcnHoverCardContent>Thai digital manufacturing platform.</ShadcnHoverCardContent></ShadcnHoverCard>
+                break;
+            case "menubar-open":
+                <ShadcnMenubar Label="Application menu"><ShadcnMenubarMenu Open="true"><ShadcnMenubarTrigger>File</ShadcnMenubarTrigger><ShadcnMenubarContent><ShadcnMenubarItem>New quotation</ShadcnMenubarItem></ShadcnMenubarContent></ShadcnMenubarMenu></ShadcnMenubar>
+                break;
+            case "popover-open":
+                <ShadcnPopover Open="true"><ShadcnPopoverTrigger>Open popover</ShadcnPopoverTrigger><ShadcnPopoverContent Side="ShadcnOverlaySide.Right" Align="ShadcnOverlayAlign.Start">Set part dimensions.</ShadcnPopoverContent></ShadcnPopover>
+                break;
+            case "sheet-open":
+                <ShadcnSheet Open="true"><ShadcnSheetContent Side="ShadcnSheetSide.Left"><ShadcnSheetHeader><ShadcnSheetTitle>Settings</ShadcnSheetTitle><ShadcnSheetDescription>Configure the workspace.</ShadcnSheetDescription></ShadcnSheetHeader></ShadcnSheetContent></ShadcnSheet>
+                break;
+            case "tooltip-open":
+                <ShadcnTooltipProvider><ShadcnTooltip Open="true"><ShadcnTooltipTrigger>Save</ShadcnTooltipTrigger><ShadcnTooltipContent>Save quotation</ShadcnTooltipContent></ShadcnTooltip></ShadcnTooltipProvider>
+                break;
+        }
+    </section>
+</main>
+</ShadcnThemeProvider>
+
+@code {
+    [SupplyParameterFromQuery(Name = "case")] public string Case { get; set; } = "dialog-open";
+    [SupplyParameterFromQuery(Name = "theme")] public string? RequestedTheme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? RequestedDirection { get; set; }
+    private static readonly IReadOnlyList<ShadcnDrawerSnapPoint> DrawerPoints = [ShadcnDrawerSnapPoint.Pixels(240), ShadcnDrawerSnapPoint.Rem(20), ShadcnDrawerSnapPoint.Fraction(.5), ShadcnDrawerSnapPoint.Fraction(1)];
+    private static readonly ShadcnDrawerSnapPoint DrawerPoint = ShadcnDrawerSnapPoint.Pixels(240);
+    private bool IsDark => string.Equals(RequestedTheme, "dark", StringComparison.OrdinalIgnoreCase);
+    private ShadcnDirection Direction => string.Equals(RequestedDirection, "rtl", StringComparison.OrdinalIgnoreCase) ? ShadcnDirection.RightToLeft : ShadcnDirection.LeftToRight;
+}

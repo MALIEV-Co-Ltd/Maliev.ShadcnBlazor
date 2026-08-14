@@ -1,0 +1,37 @@
+@inject ShowcaseState ThemeState
+@implements IDisposable
+
+<div class="documentation-theme-dock">
+    <div class="documentation-rail__heading">
+        <div>
+            <p class="documentation-eyebrow">Preview</p>
+            <h2>Theme studio</h2>
+        </div>
+        <button type="button" class="documentation-panel-close" aria-label="Close theme studio" @onclick="RequestCloseAsync">Close</button>
+    </div>
+    <p>Review documentation in both supported theme and reading directions.</p>
+    <div class="documentation-theme-actions">
+        <button type="button" data-testid="documentation-theme-toggle" @onclick="ThemeState.ToggleTheme">
+            @(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")
+        </button>
+        <button type="button" data-testid="documentation-direction-toggle" @onclick="ThemeState.ToggleDirection">
+            @(ThemeState.Direction == ShadcnDirection.LeftToRight ? "Use RTL" : "Use LTR")
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Maliev.ShadcnBlazor.Showcase.Documentation.DocumentationNavigationState State { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public EventCallback CloseRequested { get; set; }
+
+    protected override void OnInitialized() => ThemeState.Changed += OnThemeChanged;
+
+    private Task RequestCloseAsync() => CloseRequested.InvokeAsync();
+
+    private void OnThemeChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
+}

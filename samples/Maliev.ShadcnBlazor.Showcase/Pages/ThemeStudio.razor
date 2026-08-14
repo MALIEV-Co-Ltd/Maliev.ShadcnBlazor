@@ -1,0 +1,138 @@
+@page "/theme"
+@layout ThemeStudioLayout
+@implements IDisposable
+@inject ThemeStudioState State
+@inject MockSiteState MockSites
+@inject ILogger<ThemeStudio> Logger
+
+<PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
+
+<a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
+<a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
+
+<div class="theme-studio" data-testid="theme-studio" lang="@LocaleCode">
+    <header class="theme-studio-hero">
+        <div>
+            <span class="theme-studio-eyebrow">Theme Studio</span>
+            <h1>@Text("Build a production-ready semantic theme", "สร้างธีมเชิงความหมายที่พร้อมใช้งานจริง")</h1>
+            <p>@Text("Edit every supported token and metric. Valid changes flow through the real ShadcnThemeProvider and persist locally.", "แก้ไขโทเค็นและเมตริกที่รองรับทั้งหมด การเปลี่ยนแปลงที่ถูกต้องจะแสดงผ่าน ShadcnThemeProvider จริงและบันทึกในเครื่อง")</p>
+        </div>
+        <a class="theme-studio-docs-link" href="/docs">Component docs</a>
+    </header>
+
+    <PreviewToolbar State="State" />
+
+    <div class="theme-studio-workbench">
+        <ThemeInspector State="State" />
+        <main class="theme-preview-region" id="theme-preview" tabindex="-1">
+            <div class="theme-preview-stage"
+                 data-testid="theme-preview-stage"
+                 data-preview-width="@State.Viewport.Width"
+                 style="@($"--theme-preview-width: {State.Viewport.Width}px")">
+                <div class="theme-preview-scope">
+                    <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+@code {
+    private bool _initialized;
+    private bool _persisting;
+    private bool _persistRequested;
+    private bool _disposed;
+    private Task _persistenceTask = Task.CompletedTask;
+    private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.Changed += OnStateChanged;
+        _selectedMockup = State.SelectedMockup;
+        await State.InitializeAsync();
+        if (_disposed) return;
+        _initialized = true;
+    }
+
+    private void OnStateChanged(object? sender, EventArgs args)
+    {
+        if (_disposed) return;
+        if (_selectedMockup != State.SelectedMockup)
+        {
+            MockSites.Reset(State.SelectedMockup);
+            _selectedMockup = State.SelectedMockup;
+        }
+        var shouldPersist = _initialized;
+        _persistenceTask = ObservePersistenceAsync(shouldPersist);
+    }
+
+    private async Task ObservePersistenceAsync(bool shouldPersist)
+    {
+        try
+        {
+            await InvokeAsync(async () =>
+            {
+                if (_disposed) return;
+                StateHasChanged();
+                if (!shouldPersist) return;
+                _persistRequested = true;
+                await DrainPersistenceAsync();
+            });
+        }
+        catch (Exception exception) when (_disposed &&
+            exception is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Theme Studio persistence failed.");
+            if (_disposed) return;
+
+            State.ReportStorageDiagnostic($"Theme could not be saved locally: {exception.Message}");
+            try
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception renderException) when (_disposed &&
+                renderException is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
+            {
+            }
+            catch (Exception renderException)
+            {
+                Logger.LogError(renderException, "Theme Studio persistence diagnostic could not be rendered.");
+            }
+        }
+    }
+
+    private async Task DrainPersistenceAsync()
+    {
+        if (_persisting || _disposed)
+            return;
+
+        _persisting = true;
+        try
+        {
+            while (!_disposed && _persistRequested)
+            {
+                _persistRequested = false;
+                await State.PersistAsync();
+                if (!_disposed)
+                    StateHasChanged();
+            }
+        }
+        finally
+        {
+            _persisting = false;
+        }
+    }
+
+    private string Text(string english, string thai) => State.Locale == ThemeStudioLocale.Thai ? thai : english;
+    private ThemeStudioMockup _selectedMockup;
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _persistRequested = false;
+        State.Changed -= OnStateChanged;
+    }
+}

@@ -1,0 +1,103 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IShadcnToastService Toasts
+@inject IJSRuntime JS
+
+<div @ref="_viewport" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-toast-viewport")" style="@MergeStyle(null)" data-slot="toast-viewport" data-placement="@PlacementValue" data-maximum-visible="@MaximumVisible" data-reduced-motion="@(ReducedMotion ? "true" : null)" data-expanded="@(_expanded ? "true" : "false")" aria-label="@ViewportLabel" tabindex="-1" @onkeydown="HandleKeyDownAsync" @onmouseenter="() => SetExpanded(true)" @onmouseleave="() => SetExpanded(false)" @onfocusin="() => SetExpanded(true)" @onfocusout="() => SetExpanded(false)">
+    @foreach (var presentation in PresentedItems)
+    {
+        var item = presentation.Item;
+        <div @key="item.Id" class="shadcn-toast" style="@SwipeStyle(item.Id)" data-slot="toast" data-type="@TypeValue(item.Type)" data-priority="@item.Priority.ToString().ToLowerInvariant()" data-state="@item.State" data-swipe="@SwipeState(item.Id)" data-limited="@(presentation.Limited ? "true" : null)" inert="@(presentation.Limited ? "" : null)" aria-hidden="@(presentation.Limited ? "true" : null)" role="@(item.Live == "assertive" ? "alert" : "status")" aria-live="@item.Live" @onmouseenter="() => PausePointer(item.Id)" @onmouseleave="() => ResumePointer(item.Id)" @onfocusin="() => PauseFocus(item.Id)" @onfocusout="() => ResumeFocus(item.Id)" @onpointerdown="args => PointerDown(item.Id, args)" @onpointermove="args => PointerMove(item.Id, args)" @onpointerup="args => PointerUp(item.Id, args)" @onpointercancel="() => CancelPointer(item.Id)">
+            <div class="shadcn-toast-content" data-slot="toast-content">
+                @if (item.Icon is not null || Icon(item.Type).Length > 0) { <span class="shadcn-toast-icon" data-slot="toast-icon" aria-hidden="true">@if (item.Icon is not null) { @item.Icon } else { @Icon(item.Type) }</span> }
+                <div class="shadcn-toast-copy"><div class="shadcn-toast-title" data-slot="toast-title">@item.Title</div>@if (item.Description is not null) { <div class="shadcn-toast-description" data-slot="toast-description">@item.Description</div> }</div>
+                @if (item.Action is not null) { <button class="shadcn-toast-action" data-slot="toast-action" type="button" @onpointerdown:stopPropagation @onclick="() => Toasts.InvokeActionAsync(item.Id)">@item.ActionLabel</button> }
+                <button class="shadcn-toast-close" data-slot="toast-close" type="button" aria-label="@CloseLabel" @onpointerdown:stopPropagation @onclick="() => Close(item.Id)">×</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int MaximumVisible { get; set; } = 3;
+    [Parameter] public ShadcnToastPlacement Placement { get; set; } = ShadcnToastPlacement.BottomEnd;
+    [Parameter] public string CloseLabel { get; set; } = "Close toast";
+    [Parameter] public string ViewportLabel { get; set; } = "Notifications";
+    [Parameter] public double SwipeThreshold { get; set; } = 50;
+    [Parameter] public ShadcnToastSwipeDirections SwipeDirections { get; set; } = ShadcnToastSwipeDirections.All;
+    [Parameter] public TimeSpan ExitDuration { get; set; } = TimeSpan.FromMilliseconds(180);
+    [Parameter] public bool ReducedMotion { get; set; }
+    private readonly Dictionary<string, (double X, double Y, long Id)> _pointerStarts = [];
+    private readonly Dictionary<string, (double X, double Y)> _pointerOffsets = [];
+    private ElementReference _viewport;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<ShadcnToaster>? _self;
+    private bool _expanded;
+    private bool _systemReducedMotion;
+    private IReadOnlyList<ShadcnToastItem> VisibleItems => Toasts.Items
+        .OrderByDescending(item => item.Priority)
+        .ThenByDescending(item => long.TryParse(item.Id, out var sequence) ? sequence : long.MinValue)
+        .Take(MaximumVisible)
+        .OrderBy(item => long.TryParse(item.Id, out var sequence) ? sequence : long.MaxValue)
+        .ToArray();
+    private IReadOnlyList<ToastPresentation> PresentedItems => VisibleItems.Select(item => new ToastPresentation(item, false))
+        .Concat(Toasts.Items.Except(VisibleItems).Select(item => new ToastPresentation(item with { Live = "off" }, true)))
+        .ToArray();
+    private sealed record ToastPresentation(ShadcnToastItem Item, bool Limited);
+    private string PlacementValue => Placement switch { ShadcnToastPlacement.BottomEnd => "bottom-end", ShadcnToastPlacement.BottomStart => "bottom-start", ShadcnToastPlacement.TopEnd => "top-end", ShadcnToastPlacement.TopStart => "top-start", _ => throw new ArgumentOutOfRangeException(nameof(Placement), Placement, "Unknown toast placement.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-placement", "data-maximum-visible", "data-reduced-motion", "aria-label", "tabindex");
+    protected override void OnInitialized() => Toasts.Changed += HandleChanged;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "/_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js");
+        _self = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("attachToaster", _viewport, _self);
+    }
+    protected override void OnParametersSet() { if (MaximumVisible <= 0) throw new ArgumentOutOfRangeException(nameof(MaximumVisible)); if (!Enum.IsDefined(Placement)) _ = PlacementValue; if (!double.IsFinite(SwipeThreshold) || SwipeThreshold < 0) throw new ArgumentOutOfRangeException(nameof(SwipeThreshold)); if ((SwipeDirections & ~ShadcnToastSwipeDirections.All) != 0) throw new ArgumentOutOfRangeException(nameof(SwipeDirections)); if (ExitDuration < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(ExitDuration)); }
+    private void HandleChanged() => _ = InvokeAsync(StateHasChanged);
+    public async ValueTask DisposeAsync()
+    {
+        Toasts.Changed -= HandleChanged;
+        if (_module is not null) { await _module.InvokeVoidAsync("detachToaster", _viewport); await _module.DisposeAsync(); }
+        _self?.Dispose();
+    }
+    private static string TypeValue(ShadcnToastType type) => type.ToString().ToLowerInvariant();
+    private static string Icon(ShadcnToastType type) => type switch { ShadcnToastType.Success => "✓", ShadcnToastType.Info => "i", ShadcnToastType.Warning => "!", ShadcnToastType.Error => "×", ShadcnToastType.Loading => "◌", _ => string.Empty };
+    private void PointerDown(string id, PointerEventArgs args) => _pointerStarts[id] = (args.ClientX, args.ClientY, args.PointerId);
+    private void PointerMove(string id, PointerEventArgs args)
+    {
+        if (!_pointerStarts.TryGetValue(id, out var start) || start.Id != args.PointerId) return;
+        _pointerOffsets[id] = (args.ClientX - start.X, args.ClientY - start.Y);
+    }
+    private void PointerUp(string id, PointerEventArgs args)
+    {
+        if (!_pointerStarts.Remove(id, out var start) || start.Id != args.PointerId) return;
+        var dx = args.ClientX - start.X; var dy = args.ClientY - start.Y;
+        var direction = Math.Abs(dx) >= Math.Abs(dy) ? (dx >= 0 ? ShadcnToastSwipeDirections.Right : ShadcnToastSwipeDirections.Left) : (dy >= 0 ? ShadcnToastSwipeDirections.Down : ShadcnToastSwipeDirections.Up);
+        _pointerOffsets.Remove(id);
+        if (Math.Max(Math.Abs(dx), Math.Abs(dy)) >= SwipeThreshold && SwipeDirections.HasFlag(direction)) Close(id);
+    }
+    private void CancelPointer(string id) { _pointerStarts.Remove(id); _pointerOffsets.Remove(id); }
+    private string? SwipeState(string id) => _pointerOffsets.ContainsKey(id) ? "move" : null;
+    private string? SwipeStyle(string id) => _pointerOffsets.TryGetValue(id, out var value) ? FormattableString.Invariant($"--shadcn-toast-swipe-x: {value.X:0.###}px; --shadcn-toast-swipe-y: {value.Y:0.###}px") : null;
+    private void SetExpanded(bool value) => _expanded = value;
+    private bool PausePointer(string id) => Toasts.Pause(id, "pointer");
+    private bool ResumePointer(string id) => Toasts.Resume(id, "pointer");
+    private bool PauseFocus(string id) => Toasts.Pause(id, "focus");
+    private bool ResumeFocus(string id) => Toasts.Resume(id, "focus");
+    [JSInvokable] public void SetDocumentPaused(bool paused)
+    {
+        if (Toasts is ShadcnToastService service) { if (paused) service.PauseAll(); else service.ResumeAll(); return; }
+        foreach (var item in Toasts.Items) { if (paused) Toasts.Pause(item.Id); else Toasts.Resume(item.Id); }
+    }
+    [JSInvokable] public void SetSystemReducedMotion(bool reduced) => _systemReducedMotion = reduced;
+    private async Task HandleKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape" && VisibleItems.LastOrDefault() is { } item) Close(item.Id);
+        else if (args.Key == "F6") await _viewport.FocusAsync();
+    }
+    private bool Close(string id) => Toasts.BeginDismiss(id, ReducedMotion || _systemReducedMotion ? TimeSpan.Zero : ExitDuration);
+}

@@ -1,0 +1,12 @@
+@using Maliev.ShadcnBlazor.Components.Primitives
+@inherits ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-group")" style="@GroupStyle" data-slot="avatar-group"><CascadingValue Value="Size" IsFixed="true">@ChildContent</CascadingValue></div>
+@code {
+    [Parameter] public ShadcnAvatarSize Size { get; set; } = ShadcnAvatarSize.Default;
+    [Parameter] public string? Overlap { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string? NormalizedOverlap { get; set; }
+    private string? GroupStyle => MergeStyle(NormalizedOverlap is null ? null : $"--shadcn-avatar-overlap: {NormalizedOverlap}");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+    protected override void OnParametersSet() { if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size)); NormalizedOverlap = ShadcnCssValue.OptionalSingleDeclarationValue(Overlap, nameof(Overlap)); }
+}

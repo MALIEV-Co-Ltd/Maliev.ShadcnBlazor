@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-indicator")" style="@MergeStyle(null)" data-slot="navigation-menu-indicator" data-state="@(Menu.Owner.EffectiveValue is null ? "closed" : "visible")" aria-hidden="true"><div /></div>
+@code { [CascadingParameter] private ShadcnNavigationMenuContext Menu { get; set; } = default!; private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "aria-hidden"); }

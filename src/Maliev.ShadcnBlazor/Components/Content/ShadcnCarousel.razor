@@ -1,0 +1,145 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IShadcnCarouselApi
+@implements IAsyncDisposable
+@inject Microsoft.JSInterop.IJSRuntime JS
+
+<CascadingValue Value="Context" IsFixed="true">
+    <div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel")" style="@MergeStyle(null)" data-slot="carousel" data-orientation="@OrientationValue" data-align="@AlignValue" data-loop="@(Options.Loop ? "true" : null)" data-rtl="@(Options.RightToLeft ? "true" : null)" data-reduced-motion="@(Options.ReducedMotion ? "true" : null)" role="region" aria-roledescription="carousel" aria-label="@Label" @onkeydown="HandleKeyDownAsync">@ChildContent@if (Context.Count > 0) { <span class="shadcn-sr-only" data-slot="carousel-announcement" aria-live="polite">@Context.SlideLabel(_effectiveSelectedIndex)</span> }</div>
+</CascadingValue>
+
+@code {
+    [Parameter] public int SelectedIndex { get; set; }
+    [Parameter] public EventCallback<int> SelectedIndexChanged { get; set; }
+    [Parameter] public ShadcnCarouselOrientation Orientation { get; set; } = ShadcnCarouselOrientation.Horizontal;
+    [Parameter] public ShadcnCarouselOptions Options { get; set; } = new();
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string Label { get; set; } = "Carousel";
+    [Parameter] public string PreviousLabel { get; set; } = "Previous slide";
+    [Parameter] public string NextLabel { get; set; } = "Next slide";
+    [Parameter] public Func<int, int, string> SlideLabelFormatter { get; set; } = (index, count) => $"Slide {index + 1} of {count}";
+    [Parameter] public IReadOnlyList<IShadcnCarouselPlugin> Plugins { get; set; } = [];
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ShadcnCarouselContext Context { get; set; } = default!;
+    private bool _pluginsInitialized;
+    private readonly List<IShadcnCarouselPlugin> _initializedPlugins = [];
+    private bool _selectionInitialized;
+    private int _effectiveSelectedIndex;
+    private int _lastParameterSelectedIndex;
+    private (double X, double Y, long Id)? _pointerStart;
+    private (double X, double Y)? _pointerOffset;
+    private ElementReference Root;
+    private Microsoft.JSInterop.IJSObjectReference? _module;
+    private bool _itemsChanged;
+    int IShadcnCarouselApi.Count => Context.Count;
+    int IShadcnCarouselApi.SelectedIndex => _effectiveSelectedIndex;
+    internal int EffectiveSelectedIndex => _effectiveSelectedIndex;
+    private string OrientationValue => Orientation == ShadcnCarouselOrientation.Horizontal ? "horizontal" : "vertical";
+    private string AlignValue => Options.Align switch { ShadcnCarouselAlign.Start => "start", ShadcnCarouselAlign.Center => "center", ShadcnCarouselAlign.End => "end", _ => throw new ArgumentOutOfRangeException(nameof(Options.Align)) };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-align", "data-loop", "data-rtl", "data-reduced-motion", "role", "aria-roledescription", "aria-label");
+    protected override void OnInitialized() => Context = new(this);
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown carousel orientation.");
+        Options.Validate();
+        ArgumentNullException.ThrowIfNull(SlideLabelFormatter);
+        ArgumentNullException.ThrowIfNull(Plugins);
+        if (!_initializedPlugins.SequenceEqual(Plugins)) _pluginsInitialized = false;
+        if (!_selectionInitialized || SelectedIndex != _lastParameterSelectedIndex)
+        {
+            _effectiveSelectedIndex = Math.Max(0, SelectedIndex);
+            _selectionInitialized = true;
+        }
+        _lastParameterSelectedIndex = SelectedIndex;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_itemsChanged)
+        {
+            _itemsChanged = false;
+            await InvokeAsync(StateHasChanged);
+        }
+        if (Context.Count > 0)
+        {
+            var normalized = Options.Loop ? ((_effectiveSelectedIndex % Context.Count) + Context.Count) % Context.Count : Math.Clamp(_effectiveSelectedIndex, 0, Context.Count - 1);
+            if (normalized != _effectiveSelectedIndex) { _effectiveSelectedIndex = normalized; await InvokeAsync(StateHasChanged); }
+        }
+        if (!_pluginsInitialized && Context.Count > 0)
+        {
+            foreach (var plugin in _initializedPlugins) await plugin.DisposeAsync();
+            _initializedPlugins.Clear();
+            foreach (var plugin in Plugins) { plugin.Initialize(this); _initializedPlugins.Add(plugin); }
+            _pluginsInitialized = true;
+        }
+        _module ??= await JS.InvokeAsync<Microsoft.JSInterop.IJSObjectReference>("import", "/_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js");
+        if (_module is not null) await _module.InvokeVoidAsync("syncCarousel", Root);
+    }
+    internal void NotifyItemsChanged() => _itemsChanged = true;
+    public ValueTask PreviousAsync() => SelectRelativeAsync(-Options.SlidesToScroll);
+    public ValueTask NextAsync() => SelectRelativeAsync(Options.SlidesToScroll);
+    public ValueTask GoToAsync(int index) => SelectAsync(index);
+    public async ValueTask ReinitializeAsync() { _pluginsInitialized = false; await InvokeAsync(StateHasChanged); }
+    public ValueTask DispatchAsync(Func<ValueTask> callback)
+    {
+        ArgumentNullException.ThrowIfNull(callback);
+        return new ValueTask(InvokeAsync(async () => await callback()));
+    }
+    private ValueTask SelectRelativeAsync(int delta) => SelectAsync(_effectiveSelectedIndex + delta);
+    private async ValueTask SelectAsync(int requested)
+    {
+        if (Disabled || Context.Count == 0) return;
+        var target = Options.Loop ? ((requested % Context.Count) + Context.Count) % Context.Count : Math.Clamp(requested, 0, Context.Count - 1);
+        if (target == _effectiveSelectedIndex) return;
+        if (SelectedIndexChanged.HasDelegate)
+            await SelectedIndexChanged.InvokeAsync(target);
+        else
+        {
+            _effectiveSelectedIndex = target;
+            await InvokeAsync(StateHasChanged);
+        }
+        foreach (var plugin in Plugins) plugin.Selected(target);
+    }
+    private async Task HandleKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Home") await GoToAsync(0);
+        else if (args.Key == "End") await GoToAsync(Context.Count - 1);
+        else if (Orientation == ShadcnCarouselOrientation.Vertical && args.Key == "ArrowUp") await PreviousAsync();
+        else if (Orientation == ShadcnCarouselOrientation.Vertical && args.Key == "ArrowDown") await NextAsync();
+        else if (Orientation == ShadcnCarouselOrientation.Horizontal && args.Key == "ArrowLeft") await (Options.RightToLeft ? NextAsync() : PreviousAsync());
+        else if (Orientation == ShadcnCarouselOrientation.Horizontal && args.Key == "ArrowRight") await (Options.RightToLeft ? PreviousAsync() : NextAsync());
+    }
+    internal ValueTask PointerDownAsync(double x, double y, long pointerId)
+    {
+        if (!Disabled) { _pointerStart = (x, y, pointerId); foreach (var plugin in Plugins) plugin.Selected(_effectiveSelectedIndex); }
+        return ValueTask.CompletedTask;
+    }
+    internal ValueTask PointerMoveAsync(double x, double y, long pointerId)
+    {
+        if (_pointerStart is { } start && start.Id == pointerId) { _pointerOffset = (x - start.X, y - start.Y); StateHasChanged(); }
+        return ValueTask.CompletedTask;
+    }
+    internal ValueTask PointerCancelAsync() { _pointerStart = null; _pointerOffset = null; StateHasChanged(); return ValueTask.CompletedTask; }
+    internal string? DragStyle => _pointerOffset is { } value ? FormattableString.Invariant($"--shadcn-carousel-drag-x: {value.X:0.###}px; --shadcn-carousel-drag-y: {value.Y:0.###}px") : null;
+    internal async ValueTask PointerUpAsync(double x, double y, long pointerId)
+    {
+        if (_pointerStart is not { } start || start.Id != pointerId) return;
+        _pointerStart = null;
+        _pointerOffset = null;
+        var delta = Orientation == ShadcnCarouselOrientation.Horizontal ? x - start.X : y - start.Y;
+        if (Math.Abs(delta) < Options.DragThreshold) return;
+        var forward = delta < 0;
+        if (Orientation == ShadcnCarouselOrientation.Horizontal && Options.RightToLeft) forward = !forward;
+        await (forward ? NextAsync() : PreviousAsync());
+    }
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var plugin in _initializedPlugins) await plugin.DisposeAsync();
+        _initializedPlugins.Clear();
+        if (_module is not null)
+        {
+            await _module.InvokeVoidAsync("detachCarousel", Root);
+            await _module.DisposeAsync();
+        }
+    }
+}

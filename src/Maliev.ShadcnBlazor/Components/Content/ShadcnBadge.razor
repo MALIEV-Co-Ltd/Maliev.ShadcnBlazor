@@ -1,0 +1,31 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@Element
+@code {
+    [Parameter] public ShadcnBadgeVariant Variant { get; set; } = ShadcnBadgeVariant.Default;
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string VariantValue => Variant switch
+    {
+        ShadcnBadgeVariant.Default => "default", ShadcnBadgeVariant.Secondary => "secondary",
+        ShadcnBadgeVariant.Destructive => "destructive", ShadcnBadgeVariant.Outline => "outline",
+        ShadcnBadgeVariant.Ghost => "ghost", ShadcnBadgeVariant.Link => "link",
+        _ => throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown Shadcn badge variant.")
+    };
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, Href is null ? "span" : "a");
+        builder.AddMultipleAttributes(1, AttributesExcept("href", "data-slot", "data-variant"));
+        builder.AddAttribute(2, "class", MergeClass("shadcn-badge"));
+        builder.AddAttribute(3, "style", MergeStyle(null));
+        if (Href is not null) builder.AddAttribute(4, "href", Href);
+        builder.AddAttribute(5, "data-slot", "badge");
+        builder.AddAttribute(6, "data-variant", VariantValue);
+        builder.AddContent(7, ChildContent);
+        builder.CloseElement();
+    };
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Variant)) throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown Shadcn badge variant.");
+    }
+}

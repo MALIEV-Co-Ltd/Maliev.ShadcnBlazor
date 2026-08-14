@@ -1,0 +1,40 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+@if (HasContent)
+{
+    <div @attributes="ForwardedAttributes" id="@EffectiveId" class="@MergeClass("shadcn-field-error")" style="@MergeStyle(null)" role="alert" data-slot="field-error">
+        @if (ChildContent is not null)
+        {
+            @ChildContent
+        }
+        else if (UniqueErrors.Count == 1)
+        {
+            @UniqueErrors[0]
+        }
+        else
+        {
+            <ul>
+                @foreach (var error in UniqueErrors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] public ShadcnFieldContext Context { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public IReadOnlyList<string?>? Errors { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string? EffectiveId => Id ?? Context.ErrorId;
+    private IReadOnlyList<string> UniqueErrors => Errors?
+        .Where(error => !string.IsNullOrWhiteSpace(error))
+        .Select(error => error!.Trim())
+        .Distinct(StringComparer.Ordinal)
+        .ToArray() ?? [];
+    private bool HasContent => ChildContent is not null || UniqueErrors.Count > 0;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "role", "data-slot");
+}

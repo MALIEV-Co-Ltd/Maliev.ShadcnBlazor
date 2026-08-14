@@ -1,0 +1,29 @@
+@typeparam TValue
+@inherits ShadcnFormComponentBase<TValue>
+
+<textarea @attributes="ForwardedAttributes"
+          class="@MergeClass(TextareaClass)"
+          style="@MergeStyle()"
+          data-slot="@Slot"
+          name="@Name"
+          placeholder="@Placeholder"
+          rows="@Rows"
+          disabled="@EffectiveDisabled"
+          readonly="@ReadOnly"
+          required="@Required"
+          aria-invalid="@(EffectiveInvalid ? "true" : null)"
+          aria-describedby="@DescribedBy"
+          @oninput="HandleInputAsync">@CurrentValueAsString</textarea>
+
+@code {
+    [CascadingParameter] private ShadcnInputGroupContext? InputGroup { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public int? Rows { get; set; }
+    private string TextareaClass => InputGroup is null ? "shadcn-textarea" : "shadcn-textarea shadcn-input-group-control";
+    private string Slot => InputGroup is null ? "textarea" : "input-group-control";
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot", "name", "placeholder", "rows", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
+
+    private Task HandleInputAsync(ChangeEventArgs args) => SetCurrentValueFromStringAsync(args.Value?.ToString());
+}

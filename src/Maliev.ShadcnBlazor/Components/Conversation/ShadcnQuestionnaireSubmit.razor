@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-questionnaire-navigation")" style="@MergeStyle(null)" data-slot="questionnaire-submit" type="button" hidden="@(Owner!.State.Current!=Owner.State.Total)" disabled="@Owner.Busy" @onclick="Owner.SubmitAsync">@ChildContent</button>
+@code { [CascadingParameter] private ShadcnQuestionnaire? Owner{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot","type","hidden","disabled"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("QuestionnaireSubmit must be inside a questionnaire.");} }

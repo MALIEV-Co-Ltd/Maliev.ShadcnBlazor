@@ -1,0 +1,15 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<label @attributes="ForwardedAttributes"
+       class="@MergeClass("shadcn-label")"
+       style="@MergeStyle(null)"
+       data-slot="label"
+       for="@For">
+    @ChildContent
+</label>
+
+@code {
+    [Parameter] public string? For { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "for");
+}

@@ -1,0 +1,136 @@
+@namespace Maliev.ShadcnBlazor.Showcase.MockSites
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<article class="mock-site mock-customer" data-mock-site="customer" data-testid="customer-workspace-mock" lang="@LocaleCode">
+    <header class="mock-product-header">
+        <div class="mock-brand"><div class="mock-brand-mark" aria-hidden="true">M</div><div><strong>MALIEV WORKSPACE</strong><span>@Text("Customer delivery hub", "ศูนย์งานลูกค้า")</span></div></div>
+        <div class="mock-header-actions"><button type="button" class="mock-icon-button" aria-label="@Text("Notifications", "การแจ้งเตือน")"><span aria-hidden="true">●</span></button><div class="mock-avatar" role="img" aria-label="@Text("Signed in as MALIEV engineering", "ลงชื่อเข้าใช้ในนามทีมวิศวกรรม MALIEV")">ME</div></div>
+    </header>
+
+    <main class="mock-customer-content">
+        <nav aria-label="@Text("Breadcrumb", "เส้นทางนำทาง")" class="mock-breadcrumb"><ol><li><a href="#workspace">@Text("Workspace", "พื้นที่ทำงาน")</a></li><li aria-current="page">@Text("Customers", "ลูกค้า")</li></ol></nav>
+        <header class="mock-page-heading">
+            <div><ShadcnTypography Variant="ShadcnTypographyVariant.H2" data-testid="customer-title">@Text("Customer projects", "โครงการลูกค้า")</ShadcnTypography><ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("Review project activity, drawings, and local messages.", "ตรวจสอบกิจกรรมโครงการ แบบงาน และข้อความจำลอง")</ShadcnTypography></div>
+            <button type="button" class="mock-button" @onclick="Reset">@Text("Reset workspace", "รีเซ็ตพื้นที่ทำงาน")</button>
+        </header>
+
+        <section class="mock-customer-toolbar" aria-label="@Text("Customer filters", "ตัวกรองลูกค้า")">
+            <label class="mock-search"><span class="visually-hidden">@Text("Search customer records", "ค้นหารายการลูกค้า")</span><input list="customer-suggestions" data-testid="customer-query" value="@State.Customers.Query" @oninput="QueryChanged" placeholder="@Text("Search projects, companies, or customers", "ค้นหาโครงการ บริษัท หรือลูกค้า")" /></label>
+            <datalist id="customer-suggestions">@foreach (var suggestion in State.Customers.Records) { <option value="@suggestion.Name"></option> }</datalist>
+            <div class="mock-state-controls" role="group" aria-label="@Text("Workspace data state", "สถานะข้อมูลพื้นที่ทำงาน")">
+                <button data-testid="customer-state-ready" @onclick="() => SetDisplay(MockDisplayState.Ready)">@Text("Ready", "พร้อม")</button>
+                <button data-testid="customer-state-loading" @onclick="() => SetDisplay(MockDisplayState.Loading)">@Text("Loading", "กำลังโหลด")</button>
+                <button data-testid="customer-state-empty" @onclick="() => SetDisplay(MockDisplayState.Empty)">@Text("Empty", "ว่าง")</button>
+                <button data-testid="customer-state-error" @onclick="() => SetDisplay(MockDisplayState.Error)">@Text("Error", "ข้อผิดพลาด")</button>
+            </div>
+        </section>
+
+        <section class="mock-table-card" aria-labelledby="customer-table-title">
+            <header><div><strong id="customer-table-title">@Text("Active customer records", "รายการลูกค้าที่ใช้งาน")</strong><span>@Text("Fictional Thai contacts and deterministic projects", "ผู้ติดต่อชาวไทยและโครงการจำลอง")</span></div><span class="mock-count">@State.FilteredCustomers.Count</span></header>
+            @switch (State.Customers.DisplayState)
+            {
+                case MockDisplayState.Loading:
+                    <div class="mock-skeleton-stack" data-testid="customer-skeleton" aria-label="@Text("Loading customer records", "กำลังโหลดรายการลูกค้า")"><span></span><span></span><span></span></div>
+                    break;
+                case MockDisplayState.Empty:
+                    <ShadcnEmpty data-testid="customer-empty"><ShadcnEmptyHeader><ShadcnEmptyTitle>@Text("No matching customers", "ไม่พบลูกค้าที่ตรงกัน")</ShadcnEmptyTitle><ShadcnEmptyDescription>@Text("Reset the workspace to restore the fixture.", "รีเซ็ตพื้นที่ทำงานเพื่อคืนค่าข้อมูลจำลอง")</ShadcnEmptyDescription></ShadcnEmptyHeader><ShadcnEmptyContent><button type="button" class="mock-button mock-button-outline" @onclick="Reset">@Text("Reset", "รีเซ็ต")</button></ShadcnEmptyContent></ShadcnEmpty>
+                    break;
+                case MockDisplayState.Error:
+                    <div class="mock-alert" role="alert" data-testid="customer-error"><strong>@Text("Workspace unavailable", "พื้นที่ทำงานไม่พร้อมใช้งาน")</strong><span>@Text("This is a local error fixture; no request failed.", "นี่คือข้อผิดพลาดจำลองในเครื่อง ไม่มีคำขอเครือข่ายล้มเหลว")</span><button type="button" class="mock-button mock-button-outline" @onclick="Reset">@Text("Restore records", "คืนค่ารายการ")</button></div>
+                    break;
+                default:
+                    <div class="mock-table-scroll"><table data-testid="customer-table"><thead><tr><th scope="col">@Text("Customer", "ลูกค้า")</th><th scope="col">@Text("Project", "โครงการ")</th><th scope="col">@Text("Status", "สถานะ")</th><th scope="col">@Text("Latest activity", "กิจกรรมล่าสุด")</th><th scope="col"><span class="visually-hidden">@Text("Actions", "การกระทำ")</span></th></tr></thead><tbody>
+                        @foreach (var record in State.FilteredCustomers)
+                        {
+                            <tr><th scope="row"><div class="mock-customer-name"><span class="mock-avatar" aria-hidden="true">@record.Initials</span><span><strong>@record.Name</strong><small>@record.Company</small></span></div></th><td>@record.Project</td><td><span class="mock-badge">@CustomerStatusText(record.Status)</span></td><td>@ActivityText(record.LastActivity)</td><td><button type="button" class="mock-table-action" id="@($"customer-opener-{record.Id}")" data-testid="@($"customer-open-{record.Id}")" @onclick="() => Open(record.Id)">@Text("Open", "เปิด")</button></td></tr>
+                        }
+                    </tbody></table></div>
+                    break;
+            }
+        </section>
+
+        @if (State.Customers.DetailOpen && State.SelectedCustomer is { } customer)
+        {
+            <div class="mock-sheet-backdrop" @onclick="CloseAsync" @onkeydown="SheetKeyDown">
+                <aside class="mock-detail-sheet" data-testid="customer-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="customer-detail-title" @onclick:stopPropagation="true" @ref="_sheet">
+                    <header><div class="mock-customer-name"><span class="mock-avatar" aria-hidden="true">@customer.Initials</span><span><ShadcnTypography Variant="ShadcnTypographyVariant.H3" data-testid="customer-detail-title">@customer.Name</ShadcnTypography><small>@customer.Company</small></span></div><button type="button" class="mock-icon-button" aria-label="@Text("Close customer detail", "ปิดรายละเอียดลูกค้า")" data-testid="customer-detail-close" @onclick="CloseAsync">×</button></header>
+                    <div role="tablist" aria-label="@Text("Customer detail sections", "ส่วนรายละเอียดลูกค้า")" class="mock-tabs">
+                        <button type="button" id="customer-tab-overview" role="tab" aria-controls="customer-panel-overview" aria-selected="@AriaSelected(CustomerWorkspaceTab.Overview)" tabindex="@(State.Customers.ActiveTab == CustomerWorkspaceTab.Overview ? 0 : -1)" @onclick="() => SetTab(CustomerWorkspaceTab.Overview)" @onkeydown="args => TabKeyDown(args, CustomerWorkspaceTab.Overview)" data-testid="customer-tab-overview">@Text("Overview", "ภาพรวม")</button>
+                        <button type="button" id="customer-tab-activity" role="tab" aria-controls="customer-panel-activity" aria-selected="@AriaSelected(CustomerWorkspaceTab.Activity)" tabindex="@(State.Customers.ActiveTab == CustomerWorkspaceTab.Activity ? 0 : -1)" @onclick="() => SetTab(CustomerWorkspaceTab.Activity)" @onkeydown="args => TabKeyDown(args, CustomerWorkspaceTab.Activity)" data-testid="customer-tab-activity">@Text("Activity", "กิจกรรม")</button>
+                        <button type="button" id="customer-tab-messages" role="tab" aria-controls="customer-panel-messages" aria-selected="@AriaSelected(CustomerWorkspaceTab.Messages)" tabindex="@(State.Customers.ActiveTab == CustomerWorkspaceTab.Messages ? 0 : -1)" @onclick="() => SetTab(CustomerWorkspaceTab.Messages)" @onkeydown="args => TabKeyDown(args, CustomerWorkspaceTab.Messages)" data-testid="customer-tab-messages">@Text("Messages", "ข้อความ")</button>
+                    </div>
+                    <section role="tabpanel" class="mock-detail-panel" id="@PanelId" aria-labelledby="@TabId">
+                        @switch (State.Customers.ActiveTab)
+                        {
+                            case CustomerWorkspaceTab.Overview:
+                                <ShadcnItemGroup><ShadcnItem Variant="ShadcnItemVariant.Outline"><ShadcnItemContent><ShadcnItemDescription>@Text("Active project", "โครงการที่ใช้งาน")</ShadcnItemDescription><ShadcnItemTitle>@customer.Project</ShadcnItemTitle></ShadcnItemContent><ShadcnItemActions><span class="mock-badge">@CustomerStatusText(customer.Status)</span></ShadcnItemActions></ShadcnItem><ShadcnItem><ShadcnItemContent><ShadcnItemDescription>@Text("Latest activity", "กิจกรรมล่าสุด")</ShadcnItemDescription><ShadcnItemTitle>@ActivityText(customer.LastActivity)</ShadcnItemTitle></ShadcnItemContent></ShadcnItem></ShadcnItemGroup>
+                                <div class="mock-context-actions"><button type="button" class="mock-button">@Text("Review project", "ตรวจสอบโครงการ")</button><button type="button" class="mock-button mock-button-outline">@Text("Share update", "แชร์การอัปเดต")</button></div>
+                                break;
+                            case CustomerWorkspaceTab.Activity:
+                                <ol class="mock-timeline"><li><span></span><div><strong>@Text("Drawing approved", "อนุมัติแบบแล้ว")</strong><small>@Text("Revision B is the manufacturing baseline.", "แก้ไข B เป็นข้อมูลอ้างอิงการผลิต")</small></div></li><li><span></span><div><strong>@Text("Quote shared", "แชร์ใบเสนอราคาแล้ว")</strong><small>@Text("Deterministic reference QT-240812.", "เลขอ้างอิงจำลอง QT-240812")</small></div></li></ol>
+                                break;
+                            case CustomerWorkspaceTab.Messages:
+                                <div class="mock-message-list">@foreach (var message in State.Customers.Messages) { <article><header><strong>@MessageAuthorText(message.Author)</strong><time>@message.DisplayTime</time></header><p>@MessageText(message)</p></article> }</div>
+                                <ShadcnField DescriptionId="customer-message-description"><ShadcnFieldLabel For="customer-message">@Text("Message", "ข้อความ")</ShadcnFieldLabel><textarea id="customer-message" data-testid="customer-message" value="@State.Customers.MessageDraft" @oninput="MessageChanged" aria-describedby="customer-message-description"></textarea><ShadcnFieldDescription Id="customer-message-description">@Text("This message stays inside the local fixture.", "ข้อความนี้อยู่ในข้อมูลจำลองภายในเครื่อง")</ShadcnFieldDescription></ShadcnField>
+                                <button type="button" class="mock-button" @onclick="Send" data-testid="customer-send-message" disabled="@string.IsNullOrWhiteSpace(State.Customers.MessageDraft)">@Text("Send message", "ส่งข้อความ")</button>
+                                break;
+                        }
+                    </section>
+                </aside>
+            </div>
+        }
+        <div class="mock-toast" role="status" aria-live="polite" data-testid="customer-announcement">@AnnouncementText</div>
+    </main>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public MockSiteState State { get; set; } = null!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    private string LocaleCode => Locale == ThemeStudioLocale.Thai ? "th" : "en";
+    private void QueryChanged(ChangeEventArgs args) => State.SetCustomerQuery(args.Value?.ToString());
+    private void MessageChanged(ChangeEventArgs args) => State.SetCustomerMessage(args.Value?.ToString());
+    private void SetDisplay(MockDisplayState value) => State.SetCustomerDisplayState(value);
+    private ElementReference _sheet;
+    private bool _focusSheet;
+    private bool _overlayActive;
+    private string? _customerOpenerId;
+    private string PanelId => $"customer-panel-{State.Customers.ActiveTab.ToString().ToLowerInvariant()}";
+    private string TabId => $"customer-tab-{State.Customers.ActiveTab.ToString().ToLowerInvariant()}";
+    private string AriaSelected(CustomerWorkspaceTab tab) => (State.Customers.ActiveTab == tab).ToString().ToLowerInvariant();
+    private void Open(string id) { _customerOpenerId = $"customer-opener-{id}"; State.OpenCustomer(id); _focusSheet = true; }
+    private async Task CloseAsync() { await CleanupOverlayAsync(); State.CloseCustomer(); if (_customerOpenerId is not null) await JavaScript.InvokeVoidAsync("mockSiteOverlay.focusById", _customerOpenerId); }
+    private void SetTab(CustomerWorkspaceTab tab) => State.SetCustomerTab(tab);
+    private void Send() => State.SendCustomerMessage();
+    private void Reset() => State.Reset(ThemeStudioMockup.CustomerWorkspace);
+    private string Text(string english, string thai) => Locale == ThemeStudioLocale.Thai ? thai : english;
+    private string CustomerStatusText(CustomerStatus status) => status switch { CustomerStatus.Review => Text("Review", "รอตรวจสอบ"), CustomerStatus.Active => Text("Active", "ใช้งานอยู่"), CustomerStatus.Waiting => Text("Waiting", "กำลังรอ"), _ => string.Empty };
+    private string ActivityText(CustomerActivity activity) => activity switch { CustomerActivity.DrawingApproved => Text("Drawing approved", "อนุมัติแบบแล้ว"), CustomerActivity.QuoteShared => Text("Quote shared", "แชร์ใบเสนอราคาแล้ว"), CustomerActivity.RevisionRequested => Text("Revision requested", "ขอแก้ไขแล้ว"), _ => string.Empty };
+    private string MessageAuthorText(CustomerMessageAuthor author) => author == CustomerMessageAuthor.Engineering ? Text("MALIEV engineering", "ทีมวิศวกรรม MALIEV") : Text("Customer", "ลูกค้า");
+    private string MessageText(CustomerMessage message) => message.Kind switch { CustomerMessageKind.DfmReviewReady => Text("The DFM review is complete and ready for your approval.", "การตรวจสอบ DFM เสร็จสมบูรณ์และพร้อมให้คุณอนุมัติ"), CustomerMessageKind.PreserveMountingPattern => Text("Please keep the M6 mounting pattern from revision B.", "กรุณาคงรูปแบบรูยึด M6 จากฉบับแก้ไข B"), _ => message.Text ?? string.Empty };
+    private string AnnouncementText => State.Customers.Announcement == MockAnnouncement.CustomerMessageSent ? Text($"Message sent to {State.Customers.AnnouncementSubject}.", $"ส่งข้อความถึง {State.Customers.AnnouncementSubject} แล้ว") : string.Empty;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusSheet) { _focusSheet = false; await JavaScript.InvokeVoidAsync("mockSiteOverlay.open", _sheet); _overlayActive = true; }
+        else if (_overlayActive && !State.Customers.DetailOpen) await CleanupOverlayAsync();
+    }
+    private async Task SheetKeyDown(KeyboardEventArgs args) { if (args.Key == "Escape") await CloseAsync(); }
+    private async Task TabKeyDown(KeyboardEventArgs args, CustomerWorkspaceTab current)
+    {
+        var target = args.Key switch { "ArrowRight" => (CustomerWorkspaceTab)(((int)current + 1) % 3), "ArrowLeft" => (CustomerWorkspaceTab)(((int)current + 2) % 3), "Home" => CustomerWorkspaceTab.Overview, "End" => CustomerWorkspaceTab.Messages, _ => current };
+        if (target == current && args.Key is not "Home" and not "End") return;
+        SetTab(target);
+        await JavaScript.InvokeVoidAsync("mockSiteOverlay.focusById", $"customer-tab-{target.ToString().ToLowerInvariant()}");
+    }
+    private async ValueTask CleanupOverlayAsync()
+    {
+        if (!_overlayActive) return;
+        await JavaScript.InvokeVoidAsync("mockSiteOverlay.close", _sheet);
+        _overlayActive = false;
+    }
+    public async ValueTask DisposeAsync()
+    {
+        try { await CleanupOverlayAsync(); }
+        catch (Exception exception) when (exception is JSDisconnectedException or ObjectDisposedException or TaskCanceledException or OperationCanceledException) { }
+    }
+}

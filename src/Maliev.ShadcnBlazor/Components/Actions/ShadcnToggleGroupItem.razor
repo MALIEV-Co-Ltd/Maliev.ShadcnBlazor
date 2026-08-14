@@ -1,0 +1,60 @@
+@typeparam TValue
+@using Microsoft.AspNetCore.Components.Web
+@implements IDisposable
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<button @attributes="ForwardedAttributes"
+        class="@MergeClass("shadcn-toggle shadcn-toggle-group-item")"
+        style="@MergeStyle(null)"
+        type="button"
+        disabled="@EffectiveDisabled"
+        tabindex="@TabIndex"
+        aria-pressed="@(Selected ? "true" : "false")"
+        data-slot="toggle-group-item"
+        data-state="@(Selected ? "on" : "off")"
+        data-variant="@VariantValue"
+        data-size="@SizeValue"
+        data-spacing="@Context?.Spacing.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+        @onclick="HandleClickAsync">
+    @if (LeadingIcon is not null)
+    {
+        <span data-slot="toggle-group-item-leading-icon" data-icon="inline-start">@LeadingIcon</span>
+    }
+    @ChildContent
+    @if (TrailingIcon is not null)
+    {
+        <span data-slot="toggle-group-item-trailing-icon" data-icon="inline-end">@TrailingIcon</span>
+    }
+</button>
+
+@code {
+    [CascadingParameter] internal ShadcnToggleGroupContext<TValue>? Context { get; set; }
+    [Parameter, EditorRequired] public TValue Value { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? LeadingIcon { get; set; }
+    [Parameter] public RenderFragment? TrailingIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private Guid RegistrationKey;
+
+    private bool EffectiveDisabled => Disabled || Context?.Disabled == true;
+    private bool Selected => Context?.IsSelected(Value) == true;
+    private string VariantValue => ShadcnToggleValues.Variant(Context?.Variant ?? ShadcnToggleVariant.Default);
+    private string SizeValue => ShadcnToggleValues.Size(Context?.Size ?? ShadcnToggleSize.Default);
+    private int TabIndex => Context?.GetTabIndex(RegistrationKey) ?? -1;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("type", "disabled", "tabindex", "aria-pressed", "data-slot", "data-state", "data-variant", "data-size", "data-spacing");
+
+    protected override void OnInitialized()
+    {
+        if (Context is not null)
+            RegistrationKey = Context.Register(Value, () => Disabled);
+    }
+
+    private Task HandleClickAsync() => EffectiveDisabled || Context is null ? Task.CompletedTask : Context.ToggleAsync(Value);
+
+    public void Dispose()
+    {
+        if (RegistrationKey != Guid.Empty)
+            Context?.Unregister(RegistrationKey);
+    }
+}

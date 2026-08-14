@@ -1,0 +1,170 @@
+@namespace Maliev.ShadcnBlazor.Showcase.MockSites
+
+<article class="mock-site mock-operations" data-mock-site="operations" data-testid="operations-dashboard-mock" lang="@LocaleCode">
+    <header class="mock-site-mobile-header">
+        <div class="mock-brand-mark" aria-hidden="true">M</div>
+        <strong>MALIEV OPS</strong>
+        <ShadcnKbd>⌘ K</ShadcnKbd>
+    </header>
+
+    <aside class="mock-sidebar">
+        <div class="mock-brand">
+            <div class="mock-brand-mark" aria-hidden="true">M</div>
+            <div><strong>MALIEV OPS</strong><span>@Text("Manufacturing control", "ศูนย์ควบคุมการผลิต")</span></div>
+        </div>
+        <nav aria-label="@Text("Operations navigation", "การนำทางฝ่ายปฏิบัติการ")">
+            <ShadcnItemGroup>
+                <ShadcnItem Variant="ShadcnItemVariant.Muted" data-testid="operations-nav-overview">
+                    <ShadcnItemMedia Variant="ShadcnItemMediaVariant.Icon"><span aria-hidden="true">⌂</span></ShadcnItemMedia>
+                    <ShadcnItemContent><ShadcnItemTitle>@Text("Overview", "ภาพรวม")</ShadcnItemTitle></ShadcnItemContent>
+                </ShadcnItem>
+                <ShadcnItem>
+                    <ShadcnItemMedia Variant="ShadcnItemMediaVariant.Icon"><span aria-hidden="true">◇</span></ShadcnItemMedia>
+                    <ShadcnItemContent><ShadcnItemTitle>@Text("Production", "การผลิต")</ShadcnItemTitle></ShadcnItemContent>
+                    <ShadcnItemActions><span class="mock-count">8</span></ShadcnItemActions>
+                </ShadcnItem>
+                <ShadcnItem>
+                    <ShadcnItemMedia Variant="ShadcnItemMediaVariant.Icon"><span aria-hidden="true">✓</span></ShadcnItemMedia>
+                    <ShadcnItemContent><ShadcnItemTitle>@Text("Quality", "คุณภาพ")</ShadcnItemTitle></ShadcnItemContent>
+                </ShadcnItem>
+            </ShadcnItemGroup>
+        </nav>
+        <div class="mock-sidebar-note">
+            <ShadcnTypography Variant="ShadcnTypographyVariant.Small">@Text("Offline fixture", "ข้อมูลจำลองออฟไลน์")</ShadcnTypography>
+            <ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("Deterministic · no services", "คงที่ · ไม่ใช้บริการภายนอก")</ShadcnTypography>
+        </div>
+    </aside>
+
+    <main class="mock-site-content">
+        <header class="mock-page-heading">
+            <div>
+                <ShadcnTypography Variant="ShadcnTypographyVariant.H2" data-testid="operations-title">@Text("Production overview", "ภาพรวมการผลิต")</ShadcnTypography>
+                <ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("Track today's manufacturing workload and delivery risk.", "ติดตามภาระงานการผลิตและความเสี่ยงด้านการส่งมอบวันนี้")</ShadcnTypography>
+            </div>
+            <button type="button" class="mock-button" @onclick="Reset">@Text("Reset demo", "รีเซ็ตตัวอย่าง")</button>
+        </header>
+
+        <section class="mock-summary-grid" aria-label="@Text("Production summary", "สรุปการผลิต")">
+            @foreach (var summary in Summaries)
+            {
+                <article class="mock-summary-card">
+                    <span>@summary.Label</span>
+                    <strong>@summary.Value</strong>
+                    <small>@summary.Note</small>
+                </article>
+            }
+        </section>
+
+        <section class="mock-content-grid">
+            <figure class="mock-chart-card" aria-labelledby="operations-chart-title">
+                <figcaption>
+                    <div><strong id="operations-chart-title">@Text("Weekly throughput", "ผลผลิตรายสัปดาห์")</strong><span>@Text("Completed jobs", "งานที่เสร็จสมบูรณ์")</span></div>
+                    <span class="mock-badge">+12.4%</span>
+                </figcaption>
+                <div class="mock-chart" role="img" aria-label="@Text("Completed jobs increased from 32 to 58 across seven days", "งานที่เสร็จสมบูรณ์เพิ่มจาก 32 เป็น 58 งานภายในเจ็ดวัน")">
+                    @foreach (var bar in ChartBars)
+                    {
+                        <div class="mock-chart-column"><span style="@($"height:{bar.Height}%")"></span><small>@bar.Label</small></div>
+                    }
+                </div>
+            </figure>
+            <section class="mock-queue-card" aria-labelledby="queue-health-title">
+                <strong id="queue-health-title">@Text("Queue health", "สถานะคิว")</strong>
+                <dl>
+                    <div><dt>@Text("On schedule", "ตามกำหนด")</dt><dd>14</dd></div>
+                    <div><dt>@Text("At risk", "มีความเสี่ยง")</dt><dd>3</dd></div>
+                    <div><dt>@Text("Blocked", "ติดขัด")</dt><dd>1</dd></div>
+                </dl>
+                <div class="mock-progress-track" aria-label="@Text("78 percent of jobs on schedule", "งานร้อยละ 78 เป็นไปตามกำหนด")" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"><span style="width:78%"></span></div>
+            </section>
+        </section>
+
+        <section class="mock-table-card" aria-labelledby="operations-table-title">
+            <header>
+                <div><strong id="operations-table-title">@Text("Production queue", "คิวการผลิต")</strong><span>@Text("Five deterministic work orders", "ใบสั่งงานจำลองห้ารายการ")</span></div>
+                <div class="mock-inline-actions">
+                    <label class="mock-search"><span class="visually-hidden">@Text("Filter work orders", "กรองใบสั่งงาน")</span><input data-testid="operations-query" value="@State.Operations.Query" @oninput="OnQuery" placeholder="@Text("Filter work orders", "กรองใบสั่งงาน")" /></label>
+                    <button type="button" class="mock-button mock-button-outline" @onclick="Sort" data-testid="operations-sort">@Text("Sort due", "เรียงตามกำหนด")</button>
+                    <details data-testid="operations-actions" class="mock-action-menu">
+                        <summary>@Text("View states", "ดูสถานะ")</summary>
+                        <div>
+                            <button type="button" data-testid="operations-state-ready" @onclick="() => SetDisplay(MockDisplayState.Ready)">@Text("Ready", "พร้อม")</button>
+                            <button type="button" data-testid="operations-state-loading" @onclick="() => SetDisplay(MockDisplayState.Loading)">@Text("Loading", "กำลังโหลด")</button>
+                            <button type="button" data-testid="operations-state-empty" @onclick="() => SetDisplay(MockDisplayState.Empty)">@Text("Empty", "ว่าง")</button>
+                            <button type="button" data-testid="operations-state-error" @onclick="() => SetDisplay(MockDisplayState.Error)">@Text("Error", "ข้อผิดพลาด")</button>
+                        </div>
+                    </details>
+                </div>
+            </header>
+
+            @switch (State.Operations.DisplayState)
+            {
+                case MockDisplayState.Loading:
+                    <div class="mock-skeleton-stack" data-testid="operations-skeleton" aria-label="@Text("Loading production queue", "กำลังโหลดคิวการผลิต")"><span></span><span></span><span></span></div>
+                    break;
+                case MockDisplayState.Empty:
+                    <ShadcnEmpty data-testid="operations-empty">
+                        <ShadcnEmptyHeader><ShadcnEmptyTitle>@Text("No work orders", "ไม่มีใบสั่งงาน")</ShadcnEmptyTitle><ShadcnEmptyDescription>@Text("Clear the filters or reset the deterministic fixture.", "ล้างตัวกรองหรือรีเซ็ตข้อมูลจำลอง")</ShadcnEmptyDescription></ShadcnEmptyHeader>
+                        <ShadcnEmptyContent><button type="button" class="mock-button mock-button-outline" @onclick="Reset">@Text("Reset queue", "รีเซ็ตคิว")</button></ShadcnEmptyContent>
+                    </ShadcnEmpty>
+                    break;
+                case MockDisplayState.Error:
+                    <div class="mock-alert" role="alert" data-testid="operations-error"><strong>@Text("Queue unavailable", "ไม่สามารถแสดงคิว")</strong><span>@Text("This simulated error never calls a service.", "ข้อผิดพลาดจำลองนี้ไม่เรียกใช้บริการภายนอก")</span><button type="button" class="mock-button mock-button-outline" @onclick="Reset">@Text("Try fixture again", "ลองข้อมูลจำลองอีกครั้ง")</button></div>
+                    break;
+                default:
+                    <div class="mock-table-scroll">
+                        <table data-testid="operations-table">
+                            <thead><tr><th scope="col">@Text("Order", "ใบสั่งงาน")</th><th scope="col">@Text("Part", "ชิ้นส่วน")</th><th scope="col">@Text("Material", "วัสดุ")</th><th scope="col">@Text("Due", "กำหนด")</th><th scope="col">@Text("Status", "สถานะ")</th><th scope="col"><span class="visually-hidden">@Text("Actions", "การกระทำ")</span></th></tr></thead>
+                            <tbody>
+                                @foreach (var job in State.FilteredOperations)
+                                {
+                                    <tr><th scope="row">@job.Id</th><td><strong>@job.Part</strong><span>@job.Process</span></td><td>@job.Material</td><td>@DueDateText(job.DueDate)</td><td><span class="mock-badge" data-status="@job.Status.ToString().ToLowerInvariant()">@StatusText(job.Status)</span></td><td><button type="button" class="mock-table-action" data-testid="@($"operation-complete-{job.Id}")" @onclick="() => Complete(job.Id)">@Text("Complete", "เสร็จสิ้น")</button></td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <footer class="mock-pagination"><span>@Text($"Page {State.Operations.Page} of {State.OperationsPageCount}", $"หน้า {State.Operations.Page} จาก {State.OperationsPageCount}")</span><div><button type="button" aria-label="@Text("Previous page", "หน้าก่อนหน้า")" @onclick="Previous">‹</button><button type="button" aria-label="@Text("Next page", "หน้าถัดไป")" @onclick="Next">›</button></div></footer>
+                    break;
+            }
+        </section>
+        <div class="mock-toast" role="status" aria-live="polite" data-testid="operations-announcement">@AnnouncementText</div>
+    </main>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public MockSiteState State { get; set; } = null!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    private string LocaleCode => Locale == ThemeStudioLocale.Thai ? "th" : "en";
+    private (string Label, string Value, string Note)[] Summaries =>
+    [
+        (Text("Active jobs", "งานที่ดำเนินการ"), "18", Text("3 due today", "3 งานครบกำหนดวันนี้")),
+        (Text("Machine utilization", "การใช้งานเครื่องจักร"), "84%", Text("+6% this week", "+6% สัปดาห์นี้")),
+        (Text("First-pass yield", "ผ่านครั้งแรก"), "96.2%", Text("Target 95%", "เป้าหมาย 95%")),
+        (Text("On-time delivery", "ส่งมอบตรงเวลา"), "91%", Text("14 of 16 jobs", "14 จาก 16 งาน"))
+    ];
+    private (string Label, int Height)[] ChartBars => [(Text("Mon", "จ."), 45), (Text("Tue", "อ."), 58), (Text("Wed", "พ."), 50), (Text("Thu", "พฤ."), 72), (Text("Fri", "ศ."), 67), (Text("Sat", "ส."), 88), (Text("Sun", "อา."), 78)];
+    private string AnnouncementText => State.Operations.Announcement switch
+    {
+        MockAnnouncement.OperationCompleted => Text($"{State.Operations.AnnouncementSubject} moved to completed.", $"ย้าย {State.Operations.AnnouncementSubject} ไปยังสถานะเสร็จสมบูรณ์แล้ว"),
+        _ => string.Empty
+    };
+    private string StatusText(OperationStatus status) => status switch
+    {
+        OperationStatus.InProgress => Text("In progress", "กำลังดำเนินการ"),
+        OperationStatus.Queued => Text("Queued", "อยู่ในคิว"),
+        OperationStatus.QualityCheck => Text("Quality check", "ตรวจสอบคุณภาพ"),
+        OperationStatus.Completed => Text("Completed", "เสร็จสมบูรณ์"),
+        _ => string.Empty
+    };
+    private string DueDateText(DateOnly dueDate) => Locale == ThemeStudioLocale.Thai
+        ? $"{dueDate.Day} {new[] { "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค." }[dueDate.Month - 1]} {dueDate.Year + 543}"
+        : dueDate.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+    private void OnQuery(ChangeEventArgs args) => State.SetOperationsQuery(args.Value?.ToString());
+    private void Sort() => State.ToggleOperationsSort();
+    private void Previous() => State.PreviousOperationsPage();
+    private void Next() => State.NextOperationsPage();
+    private void Complete(string id) => State.CompleteOperation(id);
+    private void SetDisplay(MockDisplayState value) => State.SetOperationsDisplayState(value);
+    private void Reset() => State.Reset(ThemeStudioMockup.OperationsDashboard);
+    private string Text(string english, string thai) => Locale == ThemeStudioLocale.Thai ? thai : english;
+}

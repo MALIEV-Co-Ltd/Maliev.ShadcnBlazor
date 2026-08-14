@@ -1,0 +1,221 @@
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button {
+    appearance: none;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: calc(0.375rem * var(--shadcn-spacing-multiplier));
+    height: var(--shadcn-control-height);
+    border: 1px solid transparent;
+    border-radius: var(--shadcn-radius-md);
+    padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier));
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: default;
+    outline: none;
+    transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-pointer-cursor="true"] { cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button:active:not([aria-haspopup]) { transform: translateY(1px); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="default"] { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="default"]:hover { background: color-mix(in oklch, var(--shadcn-primary) 80%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="destructive"] { background: color-mix(in oklch, var(--shadcn-destructive) 10%, transparent); color: var(--shadcn-destructive); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="destructive"]:hover { background: color-mix(in oklch, var(--shadcn-destructive) 20%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="outline"] { border-color: var(--shadcn-border); background: var(--shadcn-background); color: var(--shadcn-foreground); box-shadow: var(--shadcn-shadow-xs); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="outline"][aria-expanded="true"] { background: var(--shadcn-muted); color: var(--shadcn-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="outline"]:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-button[data-variant="outline"] { border-color: var(--shadcn-input); background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-button[data-variant="outline"]:hover { background: color-mix(in oklch, var(--shadcn-input) 50%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="secondary"] { background: var(--shadcn-secondary); color: var(--shadcn-secondary-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="secondary"][aria-expanded="true"] { background: var(--shadcn-secondary); color: var(--shadcn-secondary-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="secondary"]:hover { background: color-mix(in oklch, var(--shadcn-secondary) 80%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="ghost"] { background: transparent; color: var(--shadcn-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="ghost"][aria-expanded="true"] { background: var(--shadcn-muted); color: var(--shadcn-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="ghost"]:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="link"] { background: transparent; color: var(--shadcn-primary); text-underline-offset: 0.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-variant="link"]:hover { text-decoration: underline; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button:focus-visible {
+    border-color: var(--shadcn-ring);
+    box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent);
+}
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[aria-invalid="true"] { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 20%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-button[aria-invalid="true"] { border-color: color-mix(in oklch, var(--shadcn-destructive) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 40%, transparent); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="xs"] { height: 1.5rem; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.75rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="sm"] { height: 2rem; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="lg"] { height: 2.5rem; padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="xs"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="xs"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="sm"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="sm"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button[data-size="default"], .shadcn-button[data-size="lg"]):has([data-icon="inline-start"]) { padding-inline-start: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button[data-size="default"], .shadcn-button[data-size="lg"]):has([data-icon="inline-end"]) { padding-inline-end: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="icon"] { width: var(--shadcn-control-height); padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="icon-xs"] { width: 1.5rem; height: 1.5rem; padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="icon-sm"] { width: var(--shadcn-control-height-sm); height: var(--shadcn-control-height-sm); padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[data-size="icon-lg"] { width: var(--shadcn-control-height-lg); height: var(--shadcn-control-height-lg); padding: 0; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button svg,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button [data-slot$="-icon"] { width: 1rem; height: 1rem; flex: 0 0 auto; pointer-events: none; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button:disabled,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[aria-disabled="true"] { pointer-events: none; opacity: 0.5; cursor: default; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group { display: inline-flex; width: fit-content; align-items: stretch; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group:has(> [data-slot="button-group"]) { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] { flex-direction: column; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot] ~ [data-slot] { border-left-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot]:not(:has(~ [data-slot])) { border-top-right-radius: var(--shadcn-radius-md); border-bottom-right-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot] ~ [data-slot] { border-top-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot]:not(:has(~ [data-slot])) { border-bottom-right-radius: var(--shadcn-radius-md); border-bottom-left-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group > :focus-visible { position: relative; z-index: 1; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group-text { display: inline-flex; align-items: center; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-muted); padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-foreground); font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; box-shadow: var(--shadcn-shadow-xs); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group-separator { align-self: stretch; flex: 0 0 auto; background: var(--shadcn-input); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group-separator[aria-orientation="vertical"] { width: 1px; height: auto; margin-block: 1px; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group-separator[aria-orientation="horizontal"] { width: auto; height: 1px; margin-inline: 1px; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+    height: var(--shadcn-control-height);
+    border: 0 solid transparent;
+    border-radius: var(--shadcn-radius-md);
+    background: transparent;
+    padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier));
+    color: var(--shadcn-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: default;
+    outline: none;
+    transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
+}
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle:hover { background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-variant="outline"] { border-width: 1px; border-color: var(--shadcn-input); background: transparent; box-shadow: var(--shadcn-shadow-xs); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-variant="outline"]:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-state="on"] { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle { min-width: 2.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="default"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="default"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="sm"] { min-width: 2rem; height: 2rem; padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="sm"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="sm"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="lg"] { min-width: 2.5rem; height: 2.5rem; padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="lg"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="lg"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle:focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle:disabled { pointer-events: none; opacity: 0.5; cursor: default; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle svg { width: 1rem; height: 1rem; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle [data-icon] { display: inline-flex; width: 1rem; height: 1rem; flex: 0 0 auto; align-items: center; justify-content: center; pointer-events: none; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group { display: flex; width: fit-content; align-items: center; gap: calc(var(--shadcn-toggle-group-gap) * 0.25rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-orientation="vertical"] { flex-direction: column; align-items: stretch; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"] { gap: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"] .shadcn-toggle-group-item + .shadcn-toggle-group-item { margin-inline-start: -1px; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="vertical"] .shadcn-toggle-group-item + .shadcn-toggle-group-item { margin-block-start: -1px; margin-inline-start: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-variant="outline"] { border-radius: var(--shadcn-radius-md); box-shadow: var(--shadcn-shadow-xs); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"] .shadcn-toggle-group-item { border-radius: 0; box-shadow: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="horizontal"] .shadcn-toggle-group-item[data-variant="outline"] + .shadcn-toggle-group-item[data-variant="outline"] { border-inline-start-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="vertical"] .shadcn-toggle-group-item[data-variant="outline"] + .shadcn-toggle-group-item[data-variant="outline"] { border-block-start-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="horizontal"] .shadcn-toggle-group-item:first-child { border-start-start-radius: var(--shadcn-radius-md); border-end-start-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="horizontal"] .shadcn-toggle-group-item:last-child { border-start-end-radius: var(--shadcn-radius-md); border-end-end-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="vertical"] .shadcn-toggle-group-item:first-child { border-start-start-radius: var(--shadcn-radius-md); border-start-end-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group[data-spacing="0"][data-orientation="vertical"] .shadcn-toggle-group-item:last-child { border-end-start-radius: var(--shadcn-radius-md); border-end-end-radius: var(--shadcn-radius-md); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox-root, .shadcn-switch-root, .shadcn-radio-item-root) { position: relative; display: inline-flex; flex: 0 0 auto; align-items: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox-root, .shadcn-switch-root, .shadcn-radio-item-root)::after { content: ""; position: absolute; inset: -0.5rem -0.75rem; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item) { appearance: none; margin: 0; outline: none; cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-radio-group-item) { width: 1rem; height: 1rem; border: 1px solid var(--shadcn-input); background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-xs); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox { border-radius: 0.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox:checked,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox[data-state="indeterminate"] { border-color: var(--shadcn-primary); background: var(--shadcn-primary); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-indicator { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; color: var(--shadcn-primary-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-root[data-state="checked"] .shadcn-checkbox-indicator::after { content: ""; width: 0.25rem; height: 0.5rem; border: solid currentColor; border-width: 0 0.125rem 0.125rem 0; transform: translateY(-0.0625rem) rotate(45deg); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-root[data-state="indeterminate"] .shadcn-checkbox-indicator::after { content: ""; width: 0.5rem; height: 0.125rem; border-radius: 999px; background: currentColor; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root { width: 2rem; height: 1.15rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-size="sm"] { width: 1.5rem; height: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch { width: 100%; height: 100%; border: 1px solid transparent; border-radius: 999px; background: var(--shadcn-input); box-shadow: var(--shadcn-shadow-xs); transition: background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch:checked { background: var(--shadcn-primary); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-thumb { position: absolute; inset-inline-start: 0.0625rem; top: 50%; width: 1rem; height: 1rem; border-radius: 50%; background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-xs); pointer-events: none; transform: translateY(-50%); transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-size="sm"] .shadcn-switch-thumb { width: 0.75rem; height: 0.75rem; inset-inline-start: 0.0625rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-state="checked"] .shadcn-switch-thumb { background: var(--shadcn-primary-foreground); transform: translate(0.875rem, -50%); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-switch-root[data-state="unchecked"] .shadcn-switch-thumb { background: var(--shadcn-foreground); }
+:where([dir="rtl"]) :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-state="checked"] .shadcn-switch-thumb { transform: translate(-0.875rem, -50%); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group { display: grid; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group[data-orientation="horizontal"] { display: flex; flex-wrap: wrap; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item { border-radius: 50%; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item:checked { border-color: var(--shadcn-primary); background: var(--shadcn-primary); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-indicator { position: absolute; inset-inline-start: 0.25rem; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--shadcn-primary-foreground); opacity: 0; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-state="checked"] .shadcn-radio-indicator { opacity: 1; }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):disabled { cursor: default; opacity: 0.5; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item)[aria-invalid="true"] { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 20%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item)[aria-invalid="true"] { border-color: color-mix(in oklch, var(--shadcn-destructive) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 40%, transparent); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider { position: relative; display: flex; width: 100%; min-width: 6rem; touch-action: none; user-select: none; align-items: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-orientation="vertical"] { width: 1.25rem; min-width: 0; height: 10rem; flex-direction: column; justify-content: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-track { position: relative; display: block; overflow: hidden; border-radius: 999px; background: var(--shadcn-muted); width: 100%; height: 0.375rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-orientation="vertical"] .shadcn-slider-track { width: 0.375rem; height: 100%; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-range { position: absolute; inset-block: 0; inset-inline-start: var(--shadcn-slider-start); width: calc(var(--shadcn-slider-end) - var(--shadcn-slider-start)); background: var(--shadcn-primary); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-orientation="vertical"] .shadcn-slider-range { inset-inline: 0; inset-block-start: calc(100% - var(--shadcn-slider-end)); width: auto; height: calc(var(--shadcn-slider-end) - var(--shadcn-slider-start)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb { appearance: none; position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; border: 0; background: transparent; outline: none; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-orientation="vertical"] .shadcn-slider-thumb { writing-mode: vertical-lr; direction: rtl; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb::-webkit-slider-thumb { appearance: none; width: 1rem; height: 1rem; border: 1px solid var(--shadcn-primary); border-radius: 50%; background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-sm); pointer-events: auto; cursor: grab; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb::-moz-range-thumb { width: 1rem; height: 1rem; border: 1px solid var(--shadcn-primary); border-radius: 50%; background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-sm); pointer-events: auto; cursor: grab; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-disabled="true"] { opacity: 0.5; }
+
+@media (pointer: coarse) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox-root, .shadcn-switch-root, .shadcn-radio-item-root) {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        justify-content: center;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb::-webkit-slider-thumb { width: 2.75rem; height: 2.75rem; border-width: 0.875rem; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider-thumb::-moz-range-thumb { width: 2.75rem; height: 2.75rem; border-width: 0.875rem; }
+}
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-pointer-cursor="true"] { cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[aria-invalid="true"] { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 20%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-toggle[aria-invalid="true"] { box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 40%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-switch, .shadcn-switch-thumb, .shadcn-slider-thumb) {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item, .shadcn-slider-thumb) {
+        border-color: ButtonText;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle {
+        border-width: 1px;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-radio-group-item):checked,
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch:checked,
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-state="on"] {
+        forced-color-adjust: none;
+        background: Highlight;
+        color: HighlightText;
+    }
+}

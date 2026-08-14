@@ -1,0 +1,11 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-skeleton")" style="@MergeStyle(null)" data-slot="skeleton" data-shape="@ShapeValue" data-animation="@AnimationValue" aria-hidden="@(Decorative ? "true" : null)"></div>
+@code {
+    [Parameter] public ShadcnSkeletonShape Shape { get; set; } = ShadcnSkeletonShape.Default;
+    [Parameter] public ShadcnSkeletonAnimation Animation { get; set; } = ShadcnSkeletonAnimation.Pulse;
+    [Parameter] public bool Decorative { get; set; } = true;
+    private string ShapeValue => Shape switch { ShadcnSkeletonShape.Default => "default", ShadcnSkeletonShape.Circle => "circle", _ => throw new ArgumentOutOfRangeException(nameof(Shape), Shape, "Unknown skeleton shape.") };
+    private string AnimationValue => Animation switch { ShadcnSkeletonAnimation.Pulse => "pulse", ShadcnSkeletonAnimation.None => "none", _ => throw new ArgumentOutOfRangeException(nameof(Animation), Animation, "Unknown skeleton animation.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-shape", "data-animation", "aria-hidden");
+    protected override void OnParametersSet() { if (!Enum.IsDefined(Shape)) _ = ShapeValue; if (!Enum.IsDefined(Animation)) _ = AnimationValue; }
+}

@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-scroll-area-viewport")" style="@MergeStyle(null)" data-slot="scroll-area-viewport" tabindex="@TabIndex" role="@(Label is null ? null : "region")" aria-label="@Label"><div data-slot="scroll-area-content">@ChildContent</div></div>
+@code {
+    [CascadingParameter] private ShadcnScrollAreaContext Context { get; set; } = default!;
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public int TabIndex { get; set; } = 0;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "tabindex", "role", "aria-label");
+}

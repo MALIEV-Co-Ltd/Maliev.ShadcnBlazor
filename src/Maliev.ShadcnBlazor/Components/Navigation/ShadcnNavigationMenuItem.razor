@@ -1,0 +1,16 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+<CascadingValue Value="ItemContext" IsFixed="false"><li @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-item")" style="@MergeStyle(null)" data-slot="navigation-menu-item" data-state="@(ItemContext.Open ? "open" : "closed")">@ChildContent</li></CascadingValue>
+@code {
+    [CascadingParameter] private ShadcnNavigationMenuContext Menu { get; set; } = default!;
+    [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private static long _nextId; private readonly string _id = $"shadcn-navigation-menu-{Interlocked.Increment(ref _nextId)}"; private string? _registered;
+    private ShadcnNavigationMenuRegistration Registration => new(Value, $"{_id}-trigger", $"{_id}-content", Disabled);
+    private ShadcnNavigationMenuItemContext ItemContext => new(Menu, Registration);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state");
+    protected override void OnInitialized() { Menu.Register(Registration); _registered = Value; }
+    protected override void OnParametersSet() { if (_registered is not null && _registered != Value) throw new InvalidOperationException("Navigation menu values cannot change after registration."); Menu.Update(Value, Disabled); }
+    public void Dispose() { if (_registered is not null) Menu.Unregister(_registered); }
+}

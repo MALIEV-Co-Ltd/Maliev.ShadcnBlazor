@@ -1,0 +1,6 @@
+.data-display-evidence { width:720px; height:480px; background:var(--shadcn-background); color:var(--shadcn-foreground); }
+.data-display-reference-crop { box-sizing:border-box; width:720px; height:480px; padding:32px; overflow:hidden; background:var(--shadcn-background); }
+.data-display-reference-crop ::deep [data-evidence-loading="true"] [data-slot="data-table-toolbar"],
+.data-display-reference-crop ::deep [data-evidence-loading="true"] [data-slot="data-table-footer"] { display:none; }
+.data-display-reference-crop ::deep [data-evidence-loading="true"] [data-slot="data-table-loading"] { display:block; }
+.data-display-reference-crop[data-pair-id="chart-tooltip"] ::deep [data-slot="chart-tooltip-content"] { top:232px; right:auto !important; left:338px !important; translate:0 0; }

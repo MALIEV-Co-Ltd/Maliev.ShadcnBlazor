@@ -1,0 +1,77 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+
+<section class="component-accessibility" aria-labelledby="component-accessibility-title">
+    <h2 id="component-accessibility-title">Accessibility</h2>
+    <ul>
+        <li>Use a visible label or accessible name whenever this component accepts interaction.</li>
+        <li>Preserve native keyboard, focus, disabled, and read-only behavior in composed examples.</li>
+        <li>Validate rendered roles, names, relationships, and state attributes in browser tests.</li>
+        @if (Entry.Slug == "direction")
+        {
+            <li>Keep the document language independent from reading direction and test both LTR and RTL content.</li>
+        }
+        else if (Entry.Slug == "separator")
+        {
+            <li>Use a semantic separator only when the division conveys structure; otherwise keep it decorative.</li>
+        }
+        else if (Entry.Slug == "button")
+        {
+            <li>Use button content as the accessible name; icon-only sizes require an explicit <code>aria-label</code>.</li>
+            <li>Use the native button root for actions and the link root only for navigation.</li>
+        }
+        else if (Entry.Slug == "button-group")
+        {
+            <li>Give the group an accessible name and keep separator orientation aligned with the visual axis.</li>
+        }
+        else if (Entry.Slug == "checkbox")
+        {
+            <li>Associate a visible label with the stable input ID and announce the indeterminate state through the native checkbox.</li>
+        }
+        else if (Entry.Slug == "radio-group")
+        {
+            <li>Provide a radiogroup name; Arrow keys, Home, and End use one roving tab stop and skip disabled choices.</li>
+        }
+        else if (Entry.Slug == "slider")
+        {
+            <li>Name every thumb, expose minimum, maximum, and current values, and test horizontal, vertical, and RTL keyboard behavior.</li>
+        }
+        else if (Entry.Slug == "switch")
+        {
+            <li>Use a concise label that describes the setting; checked state is exposed with native checkbox semantics and <code>role="switch"</code>.</li>
+        }
+        else if (Entry.Slug == "toggle")
+        {
+            <li>The label must describe the action while <code>aria-pressed</code> communicates its persistent two-state value.</li>
+        }
+        else if (Entry.Slug == "toggle-group")
+        {
+            <li>Name the group; Arrow keys, Home, and End move the single tab stop without activating disabled items.</li>
+        }
+        else if (Entry.Slug is "input" or "textarea" or "native-select" or "input-group")
+        {
+            <li>Associate the native control with a visible label, merge every description ID, and keep validation messages attached through the active <code>EditContext</code>.</li>
+            <li>For read-only <code>native-select</code>, keep focus available and restore the controlled DOM value after attempted changes.</li>
+        }
+        else if (Entry.Slug == "input-otp")
+        {
+            <li>Expose one native input for focus, paste, autocomplete, and validation; visual slots remain presentational and follow grapheme-aware caret position.</li>
+        }
+        else if (Entry.Slug is "select" or "combobox")
+        {
+            <li>Keep <code>aria-controls</code> and <code>aria-activedescendant</code> synchronized with stable option IDs, and return focus when the listbox closes.</li>
+            <li>Arrow keys, Home, End, Enter, Escape, and Tab must preserve native editable behavior where applicable and skip disabled options.</li>
+        }
+        else if (Entry.Slug == "calendar")
+        {
+            <li>Maintain exactly one enabled roving tab stop in the labelled date grid and reconcile it whenever bounds or disabled-date rules change.</li>
+        }
+        else if (Entry.Slug == "date-picker")
+        {
+            <li>Name the trigger and text input, associate parse errors with the active form context, and restore trigger focus when the calendar dialog closes.</li>
+        }
+    </ul>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ComponentDocumentationEntry Entry { get; set; } = null!;
+}

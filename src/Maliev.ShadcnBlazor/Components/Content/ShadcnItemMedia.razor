@@ -1,0 +1,10 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-item-media")" style="@MergeStyle(null)" data-slot="item-media" data-variant="@VariantValue">@ChildContent</div>
+@code {
+    [Parameter] public ShadcnItemMediaVariant Variant { get; set; } = ShadcnItemMediaVariant.Default;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-variant");
+    private string VariantValue => Variant switch { ShadcnItemMediaVariant.Default => "default", ShadcnItemMediaVariant.Icon => "icon", ShadcnItemMediaVariant.Image => "image", _ => throw Unknown() };
+    protected override void OnParametersSet() { if (!Enum.IsDefined(Variant)) throw Unknown(); }
+    private ArgumentOutOfRangeException Unknown() => new(nameof(Variant), Variant, "Unknown Shadcn item media variant.");
+}

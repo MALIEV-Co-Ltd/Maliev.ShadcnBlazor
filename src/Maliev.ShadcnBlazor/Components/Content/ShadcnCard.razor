@@ -1,0 +1,19 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-card")" style="@CardStyle" data-slot="card" data-size="@SizeValue">@ChildContent</div>
+@code {
+    [Parameter] public ShadcnCardSize Size { get; set; } = ShadcnCardSize.Default;
+    [Parameter] public string? Spacing { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string SizeValue => Size switch
+    {
+        ShadcnCardSize.Default => "default", ShadcnCardSize.Small => "sm",
+        _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn card size.")
+    };
+    private string? CardStyle => MergeStyle(Spacing is null ? null : $"--shadcn-card-spacing: {Spacing.Trim()}");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-size");
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn card size.");
+        _ = Maliev.ShadcnBlazor.Components.Primitives.ShadcnCssValue.OptionalSingleDeclarationValue(Spacing, nameof(Spacing));
+    }
+}

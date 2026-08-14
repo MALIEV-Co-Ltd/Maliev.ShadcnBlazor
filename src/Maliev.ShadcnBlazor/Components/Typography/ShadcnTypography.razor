@@ -1,0 +1,71 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+@Element
+
+@code {
+    [Parameter]
+    public ShadcnTypographyVariant Variant { get; set; } = ShadcnTypographyVariant.Paragraph;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string ElementName => Variant switch
+    {
+        ShadcnTypographyVariant.H1 => "h1",
+        ShadcnTypographyVariant.H2 => "h2",
+        ShadcnTypographyVariant.H3 => "h3",
+        ShadcnTypographyVariant.H4 => "h4",
+        ShadcnTypographyVariant.Paragraph => "p",
+        ShadcnTypographyVariant.Blockquote => "blockquote",
+        ShadcnTypographyVariant.InlineCode => "code",
+        ShadcnTypographyVariant.Lead => "p",
+        ShadcnTypographyVariant.Large => "div",
+        ShadcnTypographyVariant.Small => "small",
+        ShadcnTypographyVariant.Muted => "p",
+        ShadcnTypographyVariant.UnorderedList => "ul",
+        ShadcnTypographyVariant.OrderedList => "ol",
+        _ => throw UnknownVariant()
+    };
+
+    private string VariantValue => Variant switch
+    {
+        ShadcnTypographyVariant.H1 => "h1",
+        ShadcnTypographyVariant.H2 => "h2",
+        ShadcnTypographyVariant.H3 => "h3",
+        ShadcnTypographyVariant.H4 => "h4",
+        ShadcnTypographyVariant.Paragraph => "paragraph",
+        ShadcnTypographyVariant.Blockquote => "blockquote",
+        ShadcnTypographyVariant.InlineCode => "inline-code",
+        ShadcnTypographyVariant.Lead => "lead",
+        ShadcnTypographyVariant.Large => "large",
+        ShadcnTypographyVariant.Small => "small",
+        ShadcnTypographyVariant.Muted => "muted",
+        ShadcnTypographyVariant.UnorderedList => "unordered-list",
+        ShadcnTypographyVariant.OrderedList => "ordered-list",
+        _ => throw UnknownVariant()
+    };
+
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, ElementName);
+        builder.AddMultipleAttributes(1, AttributesExcept("data-slot", "data-variant"));
+        builder.AddAttribute(2, "class", MergeClass($"shadcn-typography shadcn-typography--{VariantValue}"));
+        builder.AddAttribute(3, "style", MergeStyle(null));
+        builder.AddAttribute(4, "data-slot", "typography");
+        builder.AddAttribute(5, "data-variant", VariantValue);
+        builder.AddContent(6, ChildContent);
+        builder.CloseElement();
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Variant))
+            throw UnknownVariant();
+    }
+
+    private ArgumentOutOfRangeException UnknownVariant() => new(
+        nameof(Variant),
+        Variant,
+        "Unknown Shadcn typography variant.");
+}

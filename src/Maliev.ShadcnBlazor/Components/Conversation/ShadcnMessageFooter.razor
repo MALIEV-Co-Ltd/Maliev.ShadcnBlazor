@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-footer")" style="@MergeStyle(null)" data-slot="message-footer">@ChildContent</div>
+@code { [CascadingParameter] private ShadcnMessageContent? Owner{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("ShadcnMessageFooter must be inside ShadcnMessageContent.");} }

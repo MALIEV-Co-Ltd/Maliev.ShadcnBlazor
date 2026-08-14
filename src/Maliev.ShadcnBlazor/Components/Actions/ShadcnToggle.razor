@@ -1,0 +1,55 @@
+@using Microsoft.AspNetCore.Components.Web
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<button @attributes="ForwardedAttributes"
+        class="@MergeClass("shadcn-toggle")"
+        style="@MergeStyle(null)"
+        type="button"
+        disabled="@Disabled"
+        aria-pressed="@(Pressed ? "true" : "false")"
+        data-slot="toggle"
+        data-state="@(Pressed ? "on" : "off")"
+        data-variant="@VariantValue"
+        data-size="@SizeValue"
+        data-pointer-cursor="@(PointerCursor ? "true" : null)"
+        @onclick="HandleClickAsync">
+    @if (LeadingIcon is not null)
+    {
+        <span data-slot="toggle-leading-icon" data-icon="inline-start">@LeadingIcon</span>
+    }
+    @ChildContent
+    @if (TrailingIcon is not null)
+    {
+        <span data-slot="toggle-trailing-icon" data-icon="inline-end">@TrailingIcon</span>
+    }
+</button>
+
+@code {
+    [Parameter] public bool Pressed { get; set; }
+    [Parameter] public EventCallback<bool> PressedChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool PointerCursor { get; set; }
+    [Parameter] public ShadcnToggleVariant Variant { get; set; } = ShadcnToggleVariant.Default;
+    [Parameter] public ShadcnToggleSize Size { get; set; } = ShadcnToggleSize.Default;
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? LeadingIcon { get; set; }
+    [Parameter] public RenderFragment? TrailingIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string VariantValue => ShadcnToggleValues.Variant(Variant);
+    private string SizeValue => ShadcnToggleValues.Size(Size);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("type", "disabled", "aria-pressed", "data-slot", "data-state", "data-variant", "data-size", "data-pointer-cursor");
+
+    protected override void OnParametersSet()
+    {
+        _ = VariantValue;
+        _ = SizeValue;
+    }
+
+    private async Task HandleClickAsync(MouseEventArgs args)
+    {
+        if (Disabled) return;
+        await PressedChanged.InvokeAsync(!Pressed);
+        await OnClick.InvokeAsync(args);
+    }
+}

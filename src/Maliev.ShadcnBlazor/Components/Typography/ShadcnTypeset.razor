@@ -1,0 +1,66 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+@Element
+
+@code {
+    private static readonly HashSet<string> AllowedTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "div",
+        "article",
+        "section"
+    };
+
+    [Parameter]
+    public string Tag { get; set; } = "div";
+
+    [Parameter]
+    public string? Size { get; set; }
+
+    [Parameter]
+    public string? Leading { get; set; }
+
+    [Parameter]
+    public string? Flow { get; set; }
+
+    [Parameter]
+    public string? MaxWidth { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, Tag);
+        builder.AddMultipleAttributes(1, AttributesExcept("data-slot"));
+        builder.AddAttribute(2, "class", MergeClass("shadcn-typeset"));
+        builder.AddAttribute(3, "style", MergeStyle(BuildRhythmStyle()));
+        builder.AddAttribute(4, "data-slot", "typeset");
+        builder.AddContent(5, ChildContent);
+        builder.CloseElement();
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Tag) || !AllowedTags.Contains(Tag))
+            throw new ArgumentOutOfRangeException(nameof(Tag), Tag, "Typeset tag must be div, article, or section.");
+
+        Tag = Tag.ToLowerInvariant();
+    }
+
+    private string? BuildRhythmStyle()
+    {
+        var declarations = new List<string>();
+        AddVariable(declarations, "--shadcn-typeset-size", Size);
+        AddVariable(declarations, "--shadcn-typeset-leading", Leading);
+        AddVariable(declarations, "--shadcn-typeset-flow", Flow);
+        AddVariable(declarations, "max-width", MaxWidth);
+        return declarations.Count == 0 ? null : string.Join("; ", declarations);
+    }
+
+    private static void AddVariable(ICollection<string> declarations, string name, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+            declarations.Add($"{name}: {value.Trim().TrimEnd(';')}");
+    }
+}

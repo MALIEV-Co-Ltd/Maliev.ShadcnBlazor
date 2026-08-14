@@ -1,0 +1,119 @@
+@page "/components/semantic-foundations"
+@inject ShowcaseState State
+
+<PageTitle>Semantic Foundations Fixture</PageTitle>
+
+<section class="semantic-foundations" data-testid="semantic-foundations-fixture" data-locale="@EffectiveLocale" data-fixture="@Fixture">
+    <ShadcnTypography Variant="ShadcnTypographyVariant.H1">Semantic foundations</ShadcnTypography>
+    <ShadcnTypography Variant="ShadcnTypographyVariant.Lead">
+        @Text("Reusable structure, rhythm, fields, items, and empty states.", "โครงสร้าง จังหวะ ฟิลด์ รายการ และสถานะว่างที่นำกลับมาใช้ได้")
+    </ShadcnTypography>
+
+    <section class="semantic-fixture-grid" aria-label="Typography and layout fixtures">
+        <article class="semantic-fixture-card" data-testid="typography-fixture">
+            <ShadcnTypography Variant="ShadcnTypographyVariant.H2">Typography</ShadcnTypography>
+            <ShadcnTypeset Size="15px" Leading="1.7" Flow="1.25em">
+                <h3>@Text("Production-ready reading rhythm", "จังหวะการอ่านที่พร้อมใช้งานจริง")</h3>
+                <p>@Text("Plain HTML inherits semantic colors, fonts, spacing, and responsive readability.", "HTML ปกติสืบทอดสี ฟอนต์ ระยะห่าง และความอ่านง่ายตามหน้าจอ")</p>
+                <blockquote>@Text("One owned stylesheet, customizable by the consumer.", "สไตล์ชีตหนึ่งชุดที่ผู้ใช้ปรับแต่งได้")</blockquote>
+            </ShadcnTypeset>
+        </article>
+
+        <article class="semantic-fixture-card" data-testid="aspect-ratio-fixture">
+            <ShadcnTypography Variant="ShadcnTypographyVariant.H2">Aspect Ratio</ShadcnTypography>
+            <div class="ratio-grid">
+                <ShadcnAspectRatio Ratio="@(16d / 9d)" data-ratio="landscape"><span>16:9</span></ShadcnAspectRatio>
+                <ShadcnAspectRatio Ratio="1" data-ratio="square"><span>1:1</span></ShadcnAspectRatio>
+                <ShadcnAspectRatio Ratio="@(9d / 16d)" data-ratio="portrait"><span>9:16</span></ShadcnAspectRatio>
+            </div>
+        </article>
+    </section>
+
+    <section class="semantic-fixture-card" data-testid="field-fixture" aria-labelledby="field-fixture-title">
+        <ShadcnTypography Variant="ShadcnTypographyVariant.H2" id="field-fixture-title">Field</ShadcnTypography>
+        <ShadcnFieldSet>
+            <ShadcnFieldLegend Variant="ShadcnFieldLegendVariant.Legend">@Text("Account details", "รายละเอียดบัญชี")</ShadcnFieldLegend>
+            <ShadcnFieldGroup>
+                <ShadcnField DescriptionId="display-name-help">
+                    <ShadcnFieldLabel For="display-name">@Text("Display name", "ชื่อที่แสดง")</ShadcnFieldLabel>
+                    <input id="display-name" aria-describedby="display-name-help" value="MALIEV" />
+                    <ShadcnFieldDescription>@Text("Shown to your teammates.", "แสดงให้เพื่อนร่วมทีมเห็น")</ShadcnFieldDescription>
+                </ShadcnField>
+                <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal" Disabled="true">
+                    <ShadcnFieldContent>
+                        <ShadcnFieldTitle>@Text("Managed setting", "การตั้งค่าที่จัดการ")</ShadcnFieldTitle>
+                        <ShadcnFieldDescription>@Text("Controlled by your organization.", "ควบคุมโดยองค์กรของคุณ")</ShadcnFieldDescription>
+                    </ShadcnFieldContent>
+                    <input type="checkbox" disabled />
+                </ShadcnField>
+                <ShadcnField Orientation="ShadcnFieldOrientation.Responsive" data-testid="responsive-field">
+                    <ShadcnFieldLabel For="workspace-code">@Text("Workspace code", "รหัสพื้นที่งาน")</ShadcnFieldLabel>
+                    <input id="workspace-code" value="MFG-01" />
+                </ShadcnField>
+                <ShadcnFieldSeparator>@Text("Validation", "การตรวจสอบ")</ShadcnFieldSeparator>
+                <ShadcnField Invalid="true" DescriptionId="email-help" ErrorId="email-error">
+                    <ShadcnFieldLabel For="email">Email</ShadcnFieldLabel>
+                    <input id="email" aria-invalid="true" aria-describedby="email-help email-error" value="invalid" />
+                    <ShadcnFieldDescription>@Text("Use a work email address.", "ใช้อีเมลที่ทำงาน")</ShadcnFieldDescription>
+                    <ShadcnFieldError Errors="FieldErrors" />
+                </ShadcnField>
+            </ShadcnFieldGroup>
+        </ShadcnFieldSet>
+    </section>
+
+    <section class="semantic-fixture-grid" aria-label="Item and empty fixtures">
+        <article class="semantic-fixture-card" data-testid="item-fixture">
+            <ShadcnTypography Variant="ShadcnTypographyVariant.H2">Item</ShadcnTypography>
+            <ShadcnItemGroup>
+                <ShadcnItem Variant="ShadcnItemVariant.Outline" Href="#item-fixture">
+                    <ShadcnItemMedia Variant="ShadcnItemMediaVariant.Icon"><span aria-hidden="true">M</span></ShadcnItemMedia>
+                    <ShadcnItemContent>
+                        <ShadcnItemTitle>@Text("Manufacturing workspace", "พื้นที่งานการผลิต")</ShadcnItemTitle>
+                        <ShadcnItemDescription>@Text("Keyboard-ready reusable item composition.", "องค์ประกอบรายการที่ใช้คีย์บอร์ดและนำกลับมาใช้ได้")</ShadcnItemDescription>
+                    </ShadcnItemContent>
+                    <ShadcnItemActions><ShadcnKbdGroup><ShadcnKbd>Ctrl</ShadcnKbd><span>+</span><ShadcnKbd>K</ShadcnKbd></ShadcnKbdGroup></ShadcnItemActions>
+                </ShadcnItem>
+                <ShadcnItemSeparator />
+                <ShadcnItem Variant="ShadcnItemVariant.Muted" Size="ShadcnItemSize.Small">@Text("Compact item", "รายการแบบกะทัดรัด")</ShadcnItem>
+            </ShadcnItemGroup>
+        </article>
+
+        <article class="semantic-fixture-card" data-testid="empty-fixture">
+            <ShadcnEmpty>
+                <ShadcnEmptyHeader>
+                    <ShadcnEmptyMedia Variant="ShadcnEmptyMediaVariant.Icon"><span aria-hidden="true">+</span></ShadcnEmptyMedia>
+                    <ShadcnEmptyTitle>@Text("No projects yet", "ยังไม่มีโครงการ")</ShadcnEmptyTitle>
+                    <ShadcnEmptyDescription>@Text("Create a project to start manufacturing.", "สร้างโครงการเพื่อเริ่มงานการผลิต")</ShadcnEmptyDescription>
+                </ShadcnEmptyHeader>
+                <ShadcnEmptyContent><button type="button">@Text("Create project", "สร้างโครงการ")</button></ShadcnEmptyContent>
+            </ShadcnEmpty>
+        </article>
+    </section>
+
+    <ShadcnDirectionProvider Direction="ShadcnDirection.RightToLeft" data-testid="nested-direction-fixture">
+        <ShadcnTypography Variant="ShadcnTypographyVariant.Small">اتجاه متداخل من اليمين إلى اليسار</ShadcnTypography>
+    </ShadcnDirectionProvider>
+</section>
+
+@code {
+    private static readonly IReadOnlyList<string?> FieldErrors = ["Invalid email address.", "Invalid email address."];
+
+    [SupplyParameterFromQuery(Name = "theme")] public string? Theme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? Direction { get; set; }
+    [SupplyParameterFromQuery(Name = "locale")] public string? Locale { get; set; }
+    [SupplyParameterFromQuery(Name = "fixture")] public string? Fixture { get; set; }
+
+    private string EffectiveLocale => string.Equals(Locale, "th", StringComparison.OrdinalIgnoreCase) ? "th" : "en";
+
+    protected override void OnParametersSet()
+    {
+        if (Theme is not null)
+            State.SetTheme(string.Equals(Theme, "dark", StringComparison.OrdinalIgnoreCase));
+        if (Direction is not null)
+            State.SetDirection(string.Equals(Direction, "rtl", StringComparison.OrdinalIgnoreCase)
+                ? ShadcnDirection.RightToLeft
+                : ShadcnDirection.LeftToRight);
+    }
+
+    private string Text(string english, string thai) => EffectiveLocale == "th" ? thai : english;
+}

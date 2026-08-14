@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="samples/Maliev.ShadcnBlazor.Showcase/Maliev.ShadcnBlazor.Showcase.csproj" />
+  <Project Path="src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj" />
+  <Project Path="tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj" />
   <Project Path="tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj" />
+  <Project Path="tests/Maliev.ShadcnBlazor.Tests/Maliev.ShadcnBlazor.Tests.csproj" />
 </Solution>

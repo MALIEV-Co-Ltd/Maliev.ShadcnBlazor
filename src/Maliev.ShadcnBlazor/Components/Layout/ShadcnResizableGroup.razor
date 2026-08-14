@@ -1,0 +1,76 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
+<CascadingValue Value="Context" IsFixed="true"><div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-resizable-group")" style="@MergeStyle(null)" data-slot="resizable-group" data-direction="@DirectionValue" data-disabled="@(Disabled ? "true" : null)">@ChildContent</div></CascadingValue>
+@code {
+    [Parameter] public IReadOnlyList<double> Sizes { get; set; } = [];
+    [Parameter] public EventCallback<IReadOnlyList<double>> SizesChanged { get; set; }
+    [Parameter] public ShadcnResizableDirection Direction { get; set; } = ShadcnResizableDirection.Horizontal;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public double KeyboardStep { get; set; } = 5;
+    [Parameter] public string? PersistenceKey { get; set; }
+    [Parameter] public IShadcnResizableStateStore? StateStore { get; set; }
+    [Parameter] public EventCallback<Exception> OnPersistenceError { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private readonly List<double> _effectiveSizes = [];
+    private string _signature = string.Empty; private bool _layoutChanged; private bool _loaded; private bool _disposed;
+    private ShadcnResizableContext Context { get; set; } = default!;
+    private ElementReference Root;
+    internal DotNetObjectReference<ShadcnResizableGroup> DotNetReference { get; private set; } = default!;
+    private string DirectionValue => Direction == ShadcnResizableDirection.Horizontal ? "horizontal" : "vertical";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-direction", "data-disabled");
+    protected override void OnInitialized() { Context = new(this); DotNetReference = Microsoft.JSInterop.DotNetObjectReference.Create(this); }
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Direction)) throw new ArgumentOutOfRangeException(nameof(Direction), Direction, "Unknown resizable direction.");
+        if (!double.IsFinite(KeyboardStep) || KeyboardStep <= 0 || KeyboardStep > 100) throw new ArgumentOutOfRangeException(nameof(KeyboardStep));
+        ArgumentNullException.ThrowIfNull(Sizes);
+        if (Sizes.Any(size => !double.IsFinite(size) || size < 0)) throw new ArgumentException("Resizable sizes must be finite and non-negative.", nameof(Sizes));
+        var signature = string.Join('|', Sizes.Select(size => size.ToString("R", System.Globalization.CultureInfo.InvariantCulture)));
+        if (signature != _signature) { SetEffective(Sizes); _signature = signature; }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_loaded && StateStore is not null && !string.IsNullOrWhiteSpace(PersistenceKey))
+        {
+            _loaded = true;
+            try { var loaded = await StateStore.LoadAsync(PersistenceKey); if (loaded is { Count: > 0 }) { ValidateLayout(loaded); if (SizesChanged.HasDelegate) await SizesChanged.InvokeAsync(loaded); else { SetEffective(loaded); await InvokeAsync(StateHasChanged); } } }
+            catch (Exception error) { await OnPersistenceError.InvokeAsync(error); }
+        }
+        if (_layoutChanged) { _layoutChanged = false; if (_effectiveSizes.Count == 0 && Context.Panels.Count > 0) { SetEffective(Context.Panels.Select(panel => panel.DefaultSize)); await InvokeAsync(StateHasChanged); } else ValidateLayout(_effectiveSizes); }
+    }
+    internal void NotifyLayoutChanged() => _layoutChanged = true;
+    internal double SizeAt(int index) => index >= 0 && index < _effectiveSizes.Count ? _effectiveSizes[index] : Context.Panels.Count == 0 ? 100 : 100d / Context.Panels.Count;
+    internal (double Minimum, double Maximum, double Current) RangeAt(int handleIndex)
+    {
+        if (handleIndex < 0 || handleIndex + 1 >= Context.Panels.Count) return (0, 100, 0);
+        var left = Context.Panels[handleIndex]; var right = Context.Panels[handleIndex + 1]; var total = SizeAt(handleIndex) + SizeAt(handleIndex + 1);
+        var leftMinimum = left.Collapsible ? left.CollapsedSize : left.MinimumSize; var rightMinimum = right.Collapsible ? right.CollapsedSize : right.MinimumSize;
+        return (Math.Max(leftMinimum, total - right.MaximumSize), Math.Min(left.MaximumSize, total - rightMinimum), SizeAt(handleIndex));
+    }
+    internal ValueTask ResizeByAsync(int handleIndex, double delta) => ResizeAsync(handleIndex, SizeAt(handleIndex) + delta);
+    internal ValueTask ResizeToAsync(int handleIndex, double target) => ResizeAsync(handleIndex, target);
+    [JSInvokable] public Task ResizeFromPointerAsync(int handleIndex, double deltaPercent) => ResizeByAsync(handleIndex, deltaPercent).AsTask();
+    [JSInvokable] public Task ResizeFromPointerByPanelIdAsync(string panelId, double deltaPercent) => ResizeByAsync(Context.IndexOf(panelId), deltaPercent).AsTask();
+    private async ValueTask ResizeAsync(int handleIndex, double target)
+    {
+        if (Disabled || handleIndex < 0 || handleIndex + 1 >= Context.Panels.Count) return;
+        var (min, max, current) = RangeAt(handleIndex); var left = Context.Panels[handleIndex]; var right = Context.Panels[handleIndex + 1]; var pairTotal = SizeAt(handleIndex) + SizeAt(handleIndex + 1); var nextLeft = Math.Clamp(target, min, max);
+        if (left.Collapsible && nextLeft > left.CollapsedSize && nextLeft < left.MinimumSize) nextLeft = target <= (left.CollapsedSize + left.MinimumSize) / 2 ? left.CollapsedSize : left.MinimumSize;
+        var nextRight = pairTotal - nextLeft;
+        if (right.Collapsible && nextRight > right.CollapsedSize && nextRight < right.MinimumSize) { nextRight = nextRight <= (right.CollapsedSize + right.MinimumSize) / 2 ? right.CollapsedSize : right.MinimumSize; nextLeft = pairTotal - nextRight; }
+        if (Math.Abs(nextLeft - current) < .0001) return;
+        var next = _effectiveSizes.Count == Context.Panels.Count ? _effectiveSizes.ToArray() : Enumerable.Repeat(100d / Context.Panels.Count, Context.Panels.Count).ToArray();
+        pairTotal = next[handleIndex] + next[handleIndex + 1]; next[handleIndex] = nextLeft; next[handleIndex + 1] = pairTotal - nextLeft;
+        if (SizesChanged.HasDelegate) await SizesChanged.InvokeAsync(next);
+        else { SetEffective(next); await InvokeAsync(StateHasChanged); }
+        if (StateStore is not null && !string.IsNullOrWhiteSpace(PersistenceKey)) try { await StateStore.SaveAsync(PersistenceKey, next); } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); }
+    }
+    private void SetEffective(IEnumerable<double> sizes)
+    {
+        var source = sizes.ToArray(); _effectiveSizes.Clear(); if (source.Length == 0) return; var total = source.Sum(); if (total <= 0) throw new ArgumentException("Resizable sizes must have a positive total.", nameof(Sizes)); _effectiveSizes.AddRange(source.Select(size => size / total * 100));
+    }
+    private void ValidateCount(IReadOnlyList<double> sizes) { if (Context.Panels.Count > 0 && sizes.Count != Context.Panels.Count) throw new InvalidOperationException($"Resizable layout has {sizes.Count} sizes for {Context.Panels.Count} panels."); }
+    private void ValidateLayout(IReadOnlyList<double> sizes) { ValidateCount(sizes); for (var index = 0; index < sizes.Count; index++) { var panel = Context.Panels[index]; var minimum = panel.Collapsible && Math.Abs(sizes[index] - panel.CollapsedSize) < .0001 ? panel.CollapsedSize : panel.MinimumSize; if (sizes[index] < minimum || sizes[index] > panel.MaximumSize) throw new InvalidOperationException($"Resizable panel '{panel.Id}' size is outside its constraints."); } }
+    public void Dispose() { if (_disposed) return; _disposed = true; DotNetReference.Dispose(); }
+}

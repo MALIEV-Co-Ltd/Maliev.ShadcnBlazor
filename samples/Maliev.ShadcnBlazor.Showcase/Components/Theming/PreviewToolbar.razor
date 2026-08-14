@@ -1,0 +1,50 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<div class="theme-preview-toolbar" role="toolbar" aria-label="Theme preview controls" data-testid="theme-preview-toolbar">
+    <div class="theme-toolbar-group" aria-label="Preview viewport">
+        @foreach (var viewport in ThemeStudioViewport.All)
+        {
+            var viewportTestId = $"viewport-{viewport.Id}";
+            <MudButton Variant="@(State.Viewport == viewport ? Variant.Filled : Variant.Outlined)"
+                       aria-label="@($"Preview {viewport.DisplayName} at {viewport.Width} pixels")"
+                       aria-pressed="@(State.Viewport == viewport ? "true" : "false")"
+                       data-testid="@viewportTestId"
+                       OnClick="() => State.SetViewport(viewport)">@viewport.DisplayName <span aria-hidden="true">@viewport.Width</span></MudButton>
+        }
+    </div>
+    <div class="theme-toolbar-group" aria-label="Preview color mode">
+        @foreach (var mode in Enum.GetValues<ThemeStudioMode>())
+        {
+            var modeTestId = $"mode-{mode.ToString().ToLowerInvariant()}";
+            <MudButton Variant="@(State.Mode == mode ? Variant.Filled : Variant.Outlined)"
+                       aria-label="@($"Use {mode} preview mode")"
+                       aria-pressed="@(State.Mode == mode ? "true" : "false")"
+                       data-testid="@modeTestId"
+                       OnClick="() => State.SetMode(mode)">@mode</MudButton>
+        }
+    </div>
+    <div class="theme-toolbar-group" aria-label="Preview direction">
+        <MudButton Variant="@(State.Direction == ShadcnDirection.LeftToRight ? Variant.Filled : Variant.Outlined)" aria-label="Use left-to-right direction" data-testid="direction-ltr" OnClick="() => State.SetDirection(ShadcnDirection.LeftToRight)">LTR</MudButton>
+        <MudButton Variant="@(State.Direction == ShadcnDirection.RightToLeft ? Variant.Filled : Variant.Outlined)" aria-label="Use right-to-left direction" data-testid="direction-rtl" OnClick="() => State.SetDirection(ShadcnDirection.RightToLeft)">RTL</MudButton>
+    </div>
+    <div class="theme-toolbar-group" aria-label="Preview locale">
+        <MudButton Variant="@(State.Locale == ThemeStudioLocale.English ? Variant.Filled : Variant.Outlined)" aria-label="Use English locale" data-testid="locale-english" OnClick="() => State.SetLocale(ThemeStudioLocale.English)">English</MudButton>
+        <MudButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? Variant.Filled : Variant.Outlined)" aria-label="Use Thai locale" data-testid="locale-thai" OnClick="() => State.SetLocale(ThemeStudioLocale.Thai)">ไทย</MudButton>
+    </div>
+    <MudSelect T="ThemeStudioMockup"
+               Value="@State.SelectedMockup"
+               ValueChanged="State.SetSelectedMockup"
+               Label="Preview composition"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               aria-label="Preview composition"
+               data-testid="mockup-select">
+        <MudSelectItem Value="ThemeStudioMockup.OperationsDashboard">Operations dashboard</MudSelectItem>
+        <MudSelectItem Value="ThemeStudioMockup.ManufacturingRequest">Manufacturing request</MudSelectItem>
+        <MudSelectItem Value="ThemeStudioMockup.CustomerWorkspace">Customer workspace</MudSelectItem>
+    </MudSelect>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+}

@@ -1,0 +1,44 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<section class="theme-validation-summary"
+         data-testid="theme-validation-summary"
+         data-valid="@(State.Validation.IsValid ? "true" : "false")"
+         aria-live="polite"
+         aria-atomic="true">
+    <h3>@(State.Validation.IsValid ? "Theme is valid" : "Theme is invalid")</h3>
+    <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count warnings · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
+    @if (State.Validation.Errors.Count > 0)
+    {
+        <ul class="theme-validation-list" aria-label="Theme errors">
+            @foreach (var error in State.Validation.Errors)
+            {
+                <li><strong>@error.Path</strong>: @error.Message</li>
+            }
+        </ul>
+    }
+    @if (State.Validation.Warnings.Count > 0)
+    {
+        <details>
+            <summary>Review contrast warnings</summary>
+            <ul class="theme-validation-list">
+                @foreach (var warning in State.Validation.Warnings)
+                {
+                    <li><strong>@warning.Path</strong>: @warning.Message</li>
+                }
+            </ul>
+        </details>
+    }
+    @if (!string.IsNullOrWhiteSpace(State.StorageDiagnostic))
+    {
+        <p role="status">@State.StorageDiagnostic</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(State.ImportDiagnostic))
+    {
+        <p role="alert">@State.ImportDiagnostic</p>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    private int PassingContrastCount => State.Validation.ContrastResults.Count(result => result.Passes);
+}

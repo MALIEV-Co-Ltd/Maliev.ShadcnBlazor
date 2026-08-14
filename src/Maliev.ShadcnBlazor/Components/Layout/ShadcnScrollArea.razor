@@ -1,0 +1,17 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<CascadingValue Value="Context" IsFixed="true"><div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-scroll-area")" style="@MergeStyle(null)" data-slot="scroll-area" data-type="@TypeValue" data-hide-delay="@HideDelay">@ChildContent</div></CascadingValue>
+@code {
+    [Parameter] public ShadcnScrollAreaType Type { get; set; } = ShadcnScrollAreaType.Hover;
+    [Parameter] public int HideDelay { get; set; } = 600;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ElementReference Root; private IJSObjectReference? _module;
+    private ShadcnScrollAreaContext Context => new(this);
+    private string TypeValue => Type switch { ShadcnScrollAreaType.Hover => "hover", ShadcnScrollAreaType.Scroll => "scroll", ShadcnScrollAreaType.Auto => "auto", ShadcnScrollAreaType.Always => "always", _ => throw new ArgumentOutOfRangeException(nameof(Type), Type, "Unknown scroll area type.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-type", "data-hide-delay");
+    protected override void OnParametersSet() { _ = TypeValue; if (HideDelay < 0) throw new ArgumentOutOfRangeException(nameof(HideDelay)); }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (!firstRender) return; _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("syncScrollArea", Root, HideDelay); }
+    public async ValueTask DisposeAsync() { if (_module is not null) { await _module.InvokeVoidAsync("detachScrollArea", Root); await _module.DisposeAsync(); } }
+}

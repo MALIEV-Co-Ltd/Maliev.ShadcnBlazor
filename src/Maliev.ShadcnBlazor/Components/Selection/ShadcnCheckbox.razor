@@ -1,0 +1,81 @@
+@using System.Linq.Expressions
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<span class="shadcn-checkbox-root" data-slot="checkbox-root" data-state="@State">
+    <input @ref="InputReference"
+           @attributes="ForwardedAttributes"
+           id="@EffectiveId"
+           class="@MergeClass("shadcn-checkbox")"
+           style="@MergeStyle(null)"
+           type="checkbox"
+           name="@Name"
+           value="@FormValue"
+           checked="@(Value == true)"
+           disabled="@EffectiveDisabled"
+           aria-checked="@AriaChecked"
+           aria-readonly="@(ReadOnly ? "true" : null)"
+           aria-invalid="@(EffectiveInvalid ? "true" : null)"
+           aria-describedby="@FieldContext?.AriaDescribedBy"
+           data-slot="checkbox"
+           data-state="@State"
+           @onclick:preventDefault="@ReadOnly"
+           @onchange="HandleChangeAsync" />
+    <span class="shadcn-checkbox-indicator" data-slot="checkbox-indicator" aria-hidden="true"></span>
+</span>
+
+@code {
+    [CascadingParameter] private ShadcnFieldContext? FieldContext { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public bool? Value { get; set; }
+    [Parameter] public EventCallback<bool?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<bool?>>? ValueExpression { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string FormValue { get; set; } = "on";
+
+    private readonly string GeneratedId = $"shadcn-checkbox-{Guid.NewGuid():N}";
+    private ElementReference InputReference;
+    private IJSObjectReference? Module;
+    private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
+    private string State => Value switch { true => "checked", false => "unchecked", null => "indeterminate" };
+    private string AriaChecked => Value?.ToString().ToLowerInvariant() ?? "mixed";
+    private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "name", "value", "checked", "disabled", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state");
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("setIndeterminate", InputReference, Value is null);
+    }
+
+    private async Task HandleChangeAsync(ChangeEventArgs args)
+    {
+        if (EffectiveDisabled || ReadOnly) return;
+        var next = args.Value is bool value ? value : !Value.GetValueOrDefault();
+        await ValueChanged.InvokeAsync(next);
+        NotifyFieldChanged();
+    }
+
+    private void NotifyFieldChanged()
+    {
+        if (EditContext is not null && ValueExpression is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Module is not null)
+        {
+            try { await Module.DisposeAsync(); }
+            catch (JSDisconnectedException) { }
+        }
+    }
+}

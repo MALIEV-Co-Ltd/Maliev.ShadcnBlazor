@@ -1,0 +1,12 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-input-group-button")" style="@MergeStyle(null)" type="@Type" disabled="@Disabled" data-slot="input-group-button" data-size="@SizeValue" @onclick="OnClick" @onclick:stopPropagation="true">@ChildContent</button>
+@code {
+    [Parameter] public ShadcnInputGroupButtonSize Size { get; set; } = ShadcnInputGroupButtonSize.ExtraSmall;
+    [Parameter] public string Type { get; set; } = "button";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string SizeValue => Size switch { ShadcnInputGroupButtonSize.ExtraSmall => "xs", ShadcnInputGroupButtonSize.Small => "sm", ShadcnInputGroupButtonSize.IconExtraSmall => "icon-xs", ShadcnInputGroupButtonSize.IconSmall => "icon-sm", _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown input group button size.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("type", "disabled", "data-slot", "data-size");
+    protected override void OnParametersSet() { base.OnParametersSet(); _ = SizeValue; }
+}

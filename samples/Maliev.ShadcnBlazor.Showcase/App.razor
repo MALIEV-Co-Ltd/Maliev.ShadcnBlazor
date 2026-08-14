@@ -1,0 +1,13 @@
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@GetDefaultLayout(routeData)" />
+    </Found>
+    <NotFound><LayoutView Layout="@typeof(MainLayout)"><p>Fixture not found.</p></LayoutView></NotFound>
+</Router>
+
+@code {
+    private static Type GetDefaultLayout(RouteData routeData) =>
+        routeData.PageType.Namespace?.StartsWith("Maliev.ShadcnBlazor.Showcase.Pages.Docs", StringComparison.Ordinal) == true
+            ? typeof(DocumentationLayout)
+            : typeof(MainLayout);
+}

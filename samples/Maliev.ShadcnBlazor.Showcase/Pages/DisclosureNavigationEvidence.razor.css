@@ -1,0 +1,13 @@
+.evidence-fixture { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; width:1240px; padding:32px; }
+.evidence-crop { box-sizing:border-box; min-width:0; overflow:hidden; padding:16px; border:1px solid var(--shadcn-border); border-radius:12px; background:var(--shadcn-background); }
+.evidence-standard { min-height:150px; }
+.evidence-resizable { width:360px; height:180px; }
+.evidence-scroll { width:280px; height:180px; }
+.evidence-sidebar { grid-column:span 2; width:760px; height:420px; padding:0; position:relative; }
+.panel-content { display:flex; height:100%; align-items:center; justify-content:center; padding:16px; }
+.scroll-content { width:520px; height:360px; padding:16px; background:linear-gradient(135deg,var(--shadcn-muted),var(--shadcn-background)); }
+.navigation-content { display:flex; width:260px; flex-direction:column; align-items:flex-start; padding:16px; }
+.navigation-content ::deep [data-slot="navigation-menu-link"] { padding-inline:8px; font-weight:400; }
+.sidebar-header { display:flex; height:56px; align-items:center; padding-inline:16px; }
+.sidebar-body { padding:16px; }
+.evidence-sidebar ::deep [data-slot="sidebar-wrapper"] { min-height:420px; height:420px; }

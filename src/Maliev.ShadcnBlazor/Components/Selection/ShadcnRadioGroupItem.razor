@@ -1,0 +1,61 @@
+@typeparam TValue
+@using System.Globalization
+@implements IDisposable
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State">
+    <input @attributes="ForwardedAttributes"
+           id="@EffectiveId"
+           class="@MergeClass("shadcn-radio-group-item")"
+           style="@MergeStyle(null)"
+           type="radio"
+           name="@Context?.Name"
+           value="@SerializedValue"
+           checked="@Selected"
+           disabled="@EffectiveDisabled"
+           tabindex="@TabIndex"
+           aria-checked="@(Selected ? "true" : "false")"
+           aria-readonly="@(Context?.ReadOnly == true ? "true" : null)"
+           aria-invalid="@(Context?.Invalid == true ? "true" : null)"
+           aria-describedby="@Context?.AriaDescribedBy"
+           data-slot="radio-group-item"
+           data-state="@State"
+           @onclick:preventDefault="@(Context?.ReadOnly == true)"
+           @onchange="HandleChangeAsync" />
+    <span class="shadcn-radio-indicator" data-slot="radio-group-indicator" aria-hidden="true"></span>
+    @if (ChildContent is not null)
+    {
+        <span class="shadcn-radio-label" data-slot="radio-group-label">@ChildContent</span>
+    }
+</label>
+
+@code {
+    [CascadingParameter] internal ShadcnRadioGroupContext<TValue>? Context { get; set; }
+    [Parameter, EditorRequired] public TValue Value { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly string GeneratedId = $"shadcn-radio-item-{Guid.NewGuid():N}";
+    private Guid RegistrationKey;
+    private bool Selected => Context?.IsSelected(Value) == true;
+    private bool EffectiveDisabled => Disabled || Context?.Disabled == true;
+    private string State => Selected ? "checked" : "unchecked";
+    private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
+    private string? SerializedValue => Convert.ToString(Value, CultureInfo.InvariantCulture);
+    private int TabIndex => Context?.GetTabIndex(RegistrationKey) ?? -1;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "name", "value", "checked", "disabled", "tabindex", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state");
+
+    protected override void OnInitialized()
+    {
+        if (Context is not null)
+            RegistrationKey = Context.Register(Value, () => Disabled);
+    }
+
+    private Task HandleChangeAsync() => EffectiveDisabled || Context is null ? Task.CompletedTask : Context.SelectAsync(Value);
+
+    public void Dispose()
+    {
+        if (RegistrationKey != Guid.Empty)
+            Context?.Unregister(RegistrationKey);
+    }
+}

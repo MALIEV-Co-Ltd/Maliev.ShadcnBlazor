@@ -1,0 +1,24 @@
+@if (Group)
+{
+    <ShadcnAvatarGroup>
+        @Avatar
+        <ShadcnAvatarGroupCount Size="Size">+2</ShadcnAvatarGroupCount>
+    </ShadcnAvatarGroup>
+}
+else
+{
+    @Avatar
+}
+
+@code {
+    [Parameter] public ShadcnAvatarSize Size { get; set; }
+    [Parameter] public bool Failed { get; set; }
+    [Parameter] public bool Badge { get; set; }
+    [Parameter] public bool Group { get; set; }
+
+    private RenderFragment Avatar => @<ShadcnAvatar Size="Size">
+        <ShadcnAvatarImage Source="@(Failed ? "/missing-avatar.webp" : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E")" Alt="Thai operator" />
+        <ShadcnAvatarFallback>NO</ShadcnAvatarFallback>
+        @if (Badge) { <ShadcnAvatarBadge /> }
+    </ShadcnAvatar>;
+}

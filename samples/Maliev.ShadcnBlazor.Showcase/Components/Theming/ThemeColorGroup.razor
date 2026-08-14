@@ -1,0 +1,82 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<section class="theme-inspector-group" data-testid="theme-@SchemeId-@GroupId">
+    <div class="theme-inspector-group__heading">
+        <div>
+            <h3>@Title</h3>
+            <p>@Description</p>
+        </div>
+        <MudButton Variant="Variant.Text"
+                   Size="Size.Small"
+                   aria-label="@($"Reset {Title}")"
+                   data-testid="@ResetGroupTestId"
+                   OnClick="ResetGroup">Reset group</MudButton>
+    </div>
+    <div class="theme-control-grid">
+        @foreach (var token in Tokens)
+        {
+            var testId = $"theme-token-{SchemeId}-{token.Name}";
+            var label = $"{SchemeName} {token.Label}";
+            var mutationKey = $"{SchemeId}.{token.Name}";
+            <div class="theme-token-control">
+                <MudTextField T="string"
+                              Value="@State.GetTokenValue(Scheme, token.Name)"
+                              ValueChanged="value => State.SetToken(Scheme, token.Name, value ?? string.Empty)"
+                              Immediate="false"
+                              Label="@label"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              aria-label="@label"
+                              data-theme-token="@($"{SchemeId}.{token.Name}")"
+                              data-testid="@testId" />
+                @if (token.Group == ThemeStudioGroup.Colors)
+                {
+                    <input class="theme-color-picker"
+                           type="color"
+                           value="@PickerValue(token.Name)"
+                           aria-label="@($"Pick {label}")"
+                           data-testid="@($"{testId}-picker")"
+                           @onpointerdown="() => State.BeginPointerInteraction(mutationKey)"
+                           @onpointerup="State.EndPointerInteraction"
+                           @onpointercancel="State.EndPointerInteraction"
+                           @oninput="args => SetPickerValue(token.Name, args.Value?.ToString())" />
+                }
+                <MudIconButton Icon="@Icons.Material.Outlined.RestartAlt"
+                               Size="Size.Small"
+                               aria-label="@($"Reset {label}")"
+                               data-testid="@($"{testId}-reset")"
+                               OnClick="() => State.ResetToken(Scheme, token.Name)" />
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter] public ThemeStudioScheme Scheme { get; set; }
+    [Parameter] public ThemeStudioGroup Group { get; set; } = ThemeStudioGroup.Colors;
+
+    private IEnumerable<ThemeStudioTokenDescriptor> Tokens => ThemeStudioMetadata.Tokens.Where(token => token.Group == Group);
+    private string SchemeId => Scheme.ToString().ToLowerInvariant();
+    private string SchemeName => Scheme.ToString();
+    private string GroupId => Group.ToString().ToLowerInvariant();
+    private string ResetGroupTestId => $"theme-reset-{SchemeId}-{GroupId}";
+    private string Title => $"{SchemeName} {GroupId}";
+    private string Description => Group == ThemeStudioGroup.Colors
+        ? "Edit semantic surfaces, content, actions, charts, and sidebar colors."
+        : "Edit elevation for compact, regular, and raised surfaces.";
+
+    private void ResetGroup() => State.ResetGroup(Group, Scheme);
+
+    private string PickerValue(string token)
+    {
+        var value = State.GetTokenValue(Scheme, token);
+        return value.Length is 4 or 7 && value.StartsWith('#') ? value : "#808080";
+    }
+
+    private void SetPickerValue(string token, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+            State.SetToken(Scheme, token, value);
+    }
+}

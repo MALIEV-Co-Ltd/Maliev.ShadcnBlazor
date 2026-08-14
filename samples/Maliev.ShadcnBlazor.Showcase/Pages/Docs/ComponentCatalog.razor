@@ -1,0 +1,18 @@
+@page "/docs/components"
+@inject Maliev.ShadcnBlazor.Showcase.Documentation.IComponentDocumentationCatalog Catalog
+
+<PageTitle>Component catalog</PageTitle>
+
+<section aria-labelledby="component-catalog-title">
+    <h1 id="component-catalog-title">Component catalog</h1>
+    <p>@Catalog.All.Count components are listed from the certification ledger.</p>
+    <ul>
+        @foreach (var component in Catalog.All)
+        {
+            <li>
+                <a href="@component.DocumentationUrl">@component.Name</a>
+                <span aria-label="Status: @component.Status">@component.Status</span>
+            </li>
+        }
+    </ul>
+</section>

@@ -1,0 +1,14 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@if (Selected || ForceMount)
+{
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs-content")" style="@MergeStyle(null)" data-slot="tabs-content" data-state="@(Selected ? "active" : "inactive")" id="@Registration.ContentId" role="tabpanel" aria-labelledby="@Registration.TriggerId" tabindex="@(Selected ? "0" : "-1")" hidden="@(!Selected)" inert="@(!Selected)">@ChildContent</div>
+}
+@code {
+    [CascadingParameter] private ShadcnTabsContext Context { get; set; } = default!;
+    [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
+    [Parameter] public bool ForceMount { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ShadcnTabsRegistration Registration => Context.Get(Value);
+    private bool Selected => Context.Owner.EffectiveValue == Value;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "id", "role", "aria-labelledby", "tabindex", "hidden");
+}

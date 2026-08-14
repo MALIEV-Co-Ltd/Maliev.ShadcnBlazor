@@ -1,0 +1,41 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+
+<header class="documentation-header">
+    <a class="documentation-brand" href="/docs">Maliev Shadcn Blazor</a>
+    <div class="documentation-header__actions" role="group" aria-label="Documentation panels">
+        <button @ref="_catalogTrigger"
+                type="button"
+                class="documentation-trigger documentation-trigger--catalog"
+                data-testid="catalog-trigger"
+                aria-controls="documentation-catalog"
+                aria-expanded="@State.CatalogOpen.ToString().ToLowerInvariant()"
+                @onclick="ToggleCatalog">
+            Components
+        </button>
+        <button @ref="_themeDockTrigger"
+                type="button"
+                class="documentation-trigger documentation-trigger--theme"
+                data-testid="theme-dock-trigger"
+                aria-controls="documentation-theme"
+                aria-expanded="@State.ThemeDockOpen.ToString().ToLowerInvariant()"
+                @onclick="ToggleThemeDock">
+            Theme
+        </button>
+    </div>
+</header>
+
+@code {
+    private ElementReference _catalogTrigger;
+    private ElementReference _themeDockTrigger;
+
+    [Parameter, EditorRequired]
+    public DocumentationNavigationState State { get; set; } = null!;
+
+    public ValueTask FocusCatalogTriggerAsync() => _catalogTrigger.FocusAsync();
+
+    public ValueTask FocusThemeDockTriggerAsync() => _themeDockTrigger.FocusAsync();
+
+    private void ToggleCatalog() => State.CatalogOpen = !State.CatalogOpen;
+
+    private void ToggleThemeDock() => State.ThemeDockOpen = !State.ThemeDockOpen;
+}

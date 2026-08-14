@@ -1,0 +1,13 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<p @attributes="ForwardedAttributes" id="@EffectiveId" class="@MergeClass("shadcn-field-description")" style="@MergeStyle(null)" data-slot="field-description">
+    @ChildContent
+</p>
+
+@code {
+    [CascadingParameter] public ShadcnFieldContext Context { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string? EffectiveId => Id ?? Context.DescriptionId;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "data-slot");
+}

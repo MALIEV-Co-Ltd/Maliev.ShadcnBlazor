@@ -1,0 +1,117 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<CascadingValue Value="Context" IsFixed="true">
+    <div @ref="_root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-accordion")" style="@MergeStyle(null)" data-slot="accordion" data-orientation="@OrientationValue" data-disabled="@(Disabled ? "true" : null)" role="@(Label is null ? null : "group")" aria-label="@Label" dir="@DirectionValue">@ChildContent</div>
+</CascadingValue>
+
+@code {
+    [CascadingParameter] private ShadcnContext? Shadcn { get; set; }
+    [Parameter] public IReadOnlyCollection<string> Values { get; set; } = [];
+    [Parameter] public EventCallback<IReadOnlyCollection<string>> ValuesChanged { get; set; }
+    [Parameter] public bool Multiple { get; set; }
+    [Parameter] public bool Collapsible { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Loop { get; set; } = true;
+    [Parameter] public ShadcnAccordionOrientation Orientation { get; set; } = ShadcnAccordionOrientation.Vertical;
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly HashSet<string> _effectiveValues = new(StringComparer.Ordinal);
+    private string _parameterSignature = string.Empty;
+    private IJSObjectReference? _module;
+    private ElementReference _root;
+    private string? _guardSignature;
+    private ShadcnAccordionContext Context { get; set; } = default!;
+    private string OrientationValue => Orientation == ShadcnAccordionOrientation.Vertical ? "vertical" : "horizontal";
+    private bool IsRtl => Shadcn?.Direction == ShadcnDirection.RightToLeft;
+    private string DirectionValue => IsRtl ? "rtl" : "ltr";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-disabled", "role", "aria-label", "dir");
+
+    protected override void OnInitialized() => Context = new(this);
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown accordion orientation.");
+        ArgumentNullException.ThrowIfNull(Values);
+        if (!Multiple && Values.Count > 1) throw new ArgumentException("A single accordion accepts at most one open value.", nameof(Values));
+        if (Values.Any(string.IsNullOrWhiteSpace)) throw new ArgumentException("Accordion values cannot contain empty entries.", nameof(Values));
+        if (Values.Count != Values.Distinct(StringComparer.Ordinal).Count()) throw new ArgumentException("Accordion values must be unique.", nameof(Values));
+        var signature = string.Join('\u001f', Values);
+        if (!string.Equals(signature, _parameterSignature, StringComparison.Ordinal))
+        {
+            _effectiveValues.Clear();
+            _effectiveValues.UnionWith(Values);
+            _parameterSignature = signature;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
+        var keys = Orientation == ShadcnAccordionOrientation.Horizontal ? new[] { "Home", "End", "ArrowLeft", "ArrowRight" } : new[] { "Home", "End", "ArrowUp", "ArrowDown" };
+        var signature = string.Join('|', keys);
+        if (_guardSignature == signature) return;
+        if (_guardSignature is not null) await _module.InvokeVoidAsync("detachKeyGuard", _root);
+        await _module.InvokeVoidAsync("attachKeyGuard", _root, keys);
+        _guardSignature = signature;
+    }
+
+    internal bool IsOpen(string value) => _effectiveValues.Contains(value);
+
+    internal async ValueTask ToggleAsync(string value, bool itemDisabled)
+    {
+        if (Disabled || itemDisabled) return;
+        var next = new HashSet<string>(_effectiveValues, StringComparer.Ordinal);
+        if (next.Contains(value))
+        {
+            if (!Collapsible && (!Multiple || next.Count == 1)) return;
+            next.Remove(value);
+        }
+        else
+        {
+            if (!Multiple) next.Clear();
+            next.Add(value);
+        }
+        var requested = Context.Items.Select(item => item.Value).Where(next.Contains).Concat(next.Where(value => Context.Items.All(item => item.Value != value))).ToArray();
+        if (ValuesChanged.HasDelegate)
+            await ValuesChanged.InvokeAsync(requested);
+        else
+        {
+            _effectiveValues.Clear();
+            _effectiveValues.UnionWith(requested);
+            _parameterSignature = string.Join('\u001f', requested);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    internal async ValueTask FocusFromAsync(string value, string key)
+    {
+        var enabled = Context.Items.Where(item => !Disabled && !item.Disabled).ToArray();
+        var current = Array.FindIndex(enabled, item => string.Equals(item.Value, value, StringComparison.Ordinal));
+        if (current < 0 || enabled.Length == 0) return;
+        var direction = key switch
+        {
+            "Home" => -int.MaxValue,
+            "End" => int.MaxValue,
+            "ArrowDown" when Orientation == ShadcnAccordionOrientation.Vertical => 1,
+            "ArrowUp" when Orientation == ShadcnAccordionOrientation.Vertical => -1,
+            "ArrowRight" when Orientation == ShadcnAccordionOrientation.Horizontal => IsRtl ? -1 : 1,
+            "ArrowLeft" when Orientation == ShadcnAccordionOrientation.Horizontal => IsRtl ? 1 : -1,
+            _ => 0
+        };
+        if (direction == 0) return;
+        var target = direction == -int.MaxValue ? 0 : direction == int.MaxValue ? enabled.Length - 1 : current + direction;
+        if (Loop) target = (target + enabled.Length) % enabled.Length;
+        else target = Math.Clamp(target, 0, enabled.Length - 1);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
+        await _module.InvokeVoidAsync("focusById", enabled[target].TriggerId);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null) { await _module.InvokeVoidAsync("detachKeyGuard", _root); await _module.DisposeAsync(); }
+    }
+}

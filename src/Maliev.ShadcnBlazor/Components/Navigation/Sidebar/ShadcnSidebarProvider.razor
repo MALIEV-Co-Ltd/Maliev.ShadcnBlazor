@@ -1,0 +1,52 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<CascadingValue Value="Context" IsFixed="true"><div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-wrapper")" style="@MergeStyle(ProviderStyle)" data-slot="sidebar-wrapper" data-state="@(EffectiveOpen ? "expanded" : "collapsed")" data-device="@(IsMobile ? "mobile" : "desktop")">@ChildContent</div></CascadingValue>
+@code {
+    [Parameter] public bool Open { get; set; } = true;
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public bool MobileOpen { get; set; }
+    [Parameter] public EventCallback<bool> MobileOpenChanged { get; set; }
+    [Parameter] public string Width { get; set; } = "16rem";
+    [Parameter] public string MobileWidth { get; set; } = "18rem";
+    [Parameter] public string IconWidth { get; set; } = "3rem";
+    [Parameter] public string Shortcut { get; set; } = "b";
+    [Parameter] public string ToggleLabel { get; set; } = "Toggle sidebar";
+    [Parameter] public string CloseLabel { get; set; } = "Close sidebar";
+    [Parameter] public string? StateKey { get; set; }
+    [Parameter] public IShadcnSidebarStateStore? StateStore { get; set; }
+    [Parameter] public EventCallback<Exception> OnPersistenceError { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private bool _effectiveOpen; private bool _effectiveMobileOpen; private bool _initialized; private bool _loaded; private bool _lastOpen; private bool _lastMobileOpen; private ElementReference Root; private IJSObjectReference? _module; private DotNetObjectReference<ShadcnSidebarProvider>? _dotNet;
+    private readonly Dictionary<string, (object Owner, ShadcnSidebarCollapsible Value)> _sidebars = new(StringComparer.Ordinal);
+    internal bool EffectiveOpen => _effectiveOpen; internal bool EffectiveMobileOpen => _effectiveMobileOpen; internal bool IsMobile { get; private set; } internal bool CanToggle => _sidebars.Count == 0 || _sidebars.Values.Any(entry => entry.Value != ShadcnSidebarCollapsible.None);
+    internal ShadcnSidebarContext Context => new(this);
+    private string ProviderStyle => $"--shadcn-sidebar-width: {Safe(Width, nameof(Width))}; --shadcn-sidebar-width-mobile: {Safe(MobileWidth, nameof(MobileWidth))}; --shadcn-sidebar-width-icon: {Safe(IconWidth, nameof(IconWidth))}";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "data-device");
+    protected override void OnParametersSet()
+    {
+        _ = ProviderStyle;
+        if (Shortcut.Length != 1 || char.IsControl(Shortcut[0])) throw new ArgumentOutOfRangeException(nameof(Shortcut), "Sidebar shortcut must be one printable character.");
+        if ((StateStore is null) != string.IsNullOrWhiteSpace(StateKey)) throw new InvalidOperationException("Sidebar StateStore and StateKey must be supplied together.");
+        if (!_initialized || Open != _lastOpen) _effectiveOpen = Open;
+        if (!_initialized || MobileOpen != _lastMobileOpen) _effectiveMobileOpen = MobileOpen;
+        _lastOpen = Open; _lastMobileOpen = MobileOpen; _initialized = true;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { _dotNet = DotNetObjectReference.Create(this); _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("attachSidebarProvider", Root, _dotNet, Shortcut); }
+        if (!_loaded && StateStore is not null && StateKey is not null) { _loaded = true; try { var loaded = await StateStore.LoadAsync(StateKey); if (loaded.HasValue) { if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(loaded.Value); else { _effectiveOpen = loaded.Value; await InvokeAsync(StateHasChanged); } } } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); } }
+    }
+    internal bool CanToggleTarget(string? id) => id is null ? CanToggle : _sidebars.TryGetValue(id, out var entry) && entry.Value != ShadcnSidebarCollapsible.None;
+    internal ValueTask ToggleAsync(string? id = null) => !CanToggleTarget(id) ? ValueTask.CompletedTask : IsMobile ? SetMobileOpenAsync(!_effectiveMobileOpen) : SetOpenAsync(!_effectiveOpen);
+    internal void RegisterSidebar(string id, object owner, ShadcnSidebarCollapsible value) { if (_sidebars.TryGetValue(id, out var existing) && !ReferenceEquals(existing.Owner, owner)) throw new InvalidOperationException($"Sidebar ID '{id}' is already registered."); _sidebars[id] = (owner, value); }
+    internal void UnregisterSidebar(string id, object owner) { if (_sidebars.TryGetValue(id, out var existing) && ReferenceEquals(existing.Owner, owner)) _sidebars.Remove(id); }
+    internal async ValueTask SetOpenAsync(bool value) { if (value == _effectiveOpen) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _effectiveOpen = value; await InvokeAsync(StateHasChanged); } if (StateStore is not null && StateKey is not null) try { await StateStore.SaveAsync(StateKey, value); } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); } }
+    internal async ValueTask SetMobileOpenAsync(bool value) { if (value == _effectiveMobileOpen) return; if (MobileOpenChanged.HasDelegate) await MobileOpenChanged.InvokeAsync(value); else { _effectiveMobileOpen = value; await InvokeAsync(StateHasChanged); } }
+    [JSInvokable] public async Task SetMobileAsync(bool value) { if (IsMobile == value) return; IsMobile = value; if (!value && _effectiveMobileOpen) await SetMobileOpenAsync(false); await InvokeAsync(StateHasChanged); }
+    [JSInvokable] public Task ToggleFromShortcutAsync() => ToggleAsync().AsTask();
+    [JSInvokable] public Task CloseMobileFromOverlayAsync() => SetMobileOpenAsync(false).AsTask();
+    private static string Safe(string value, string name) => Maliev.ShadcnBlazor.Components.Primitives.ShadcnCssValue.OptionalSingleDeclarationValue(value, name)!;
+    public async ValueTask DisposeAsync() { if (_module is not null) { await _module.InvokeVoidAsync("detachSidebarProvider", Root); await _module.DisposeAsync(); } _dotNet?.Dispose(); }
+}

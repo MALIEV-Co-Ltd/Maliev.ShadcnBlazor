@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<CascadingValue Value="Context" IsFixed="true"><div @attributes="Forwarded" class="@MergeClass("shadcn-menubar-radio-group")" style="@MergeStyle(null)" data-slot="menubar-radio-group" role="group">@ChildContent</div></CascadingValue>
+@code { [Parameter]public string? Value{get;set;} [Parameter]public EventCallback<string?> ValueChanged{get;set;} [Parameter]public RenderFragment? ChildContent{get;set;} private ShadcnMenuRadioContext Context=>new(Value,ValueChanged); private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","role"); }

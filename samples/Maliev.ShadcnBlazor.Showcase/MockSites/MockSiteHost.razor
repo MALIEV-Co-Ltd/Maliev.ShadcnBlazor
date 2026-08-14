@@ -1,0 +1,35 @@
+@namespace Maliev.ShadcnBlazor.Showcase.MockSites
+<section class="mock-site-host"
+         data-testid="mock-site-host"
+         data-preview-width="@Viewport.Width"
+         style="@($"--mock-site-preview-width: {Viewport.Width}px")">
+    @switch (Mockup)
+    {
+        case ThemeStudioMockup.OperationsDashboard:
+            <OperationsDashboardMock State="State" Locale="Locale" />
+            break;
+        case ThemeStudioMockup.ManufacturingRequest:
+            <ManufacturingRequestMock State="State" Locale="Locale" />
+            break;
+        case ThemeStudioMockup.CustomerWorkspace:
+            <CustomerWorkspaceMock State="State" Locale="Locale" />
+            break;
+        default:
+            throw new ArgumentOutOfRangeException(nameof(Mockup), Mockup, "Unknown Theme Studio mockup.");
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public MockSiteState State { get; set; } = null!;
+    [Parameter] public ThemeStudioMockup Mockup { get; set; } = ThemeStudioMockup.OperationsDashboard;
+    [Parameter] public ThemeStudioLocale Locale { get; set; } = ThemeStudioLocale.English;
+    [Parameter] public ThemeStudioViewport Viewport { get; set; } = ThemeStudioViewport.Desktop;
+
+    protected override void OnParametersSet()
+    {
+        ArgumentNullException.ThrowIfNull(State);
+        ArgumentNullException.ThrowIfNull(Viewport);
+        if (!Enum.IsDefined(Mockup)) throw new ArgumentOutOfRangeException(nameof(Mockup), Mockup, "Unknown Theme Studio mockup.");
+        if (!Enum.IsDefined(Locale)) throw new ArgumentOutOfRangeException(nameof(Locale), Locale, "Unknown Theme Studio locale.");
+    }
+}

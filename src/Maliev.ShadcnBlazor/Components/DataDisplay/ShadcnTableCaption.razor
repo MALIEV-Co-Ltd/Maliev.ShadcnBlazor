@@ -1,0 +1,12 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<caption @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table-caption")" style="@MergeStyle(null)" data-slot="table-caption">@ChildContent</caption>
+@code {
+    [CascadingParameter] private ShadcnTableCompositionContext? Parent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+    protected override void OnParametersSet()
+    {
+        if (Parent?.Kind != ShadcnTableCompositionKind.Table) throw new InvalidOperationException("Table caption must be a direct table child.");
+        if (ChildContent is null) throw new InvalidOperationException("Table caption content is required.");
+    }
+}

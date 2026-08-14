@@ -1,0 +1,14 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+<ShadcnQuestionnaire Items="Items" Answers="Answers" AnswersChanged="Changed" AccessibleName="controlled workflow">
+    <ShadcnQuestionnaireItem Name="scope">
+        <ShadcnQuestionnaireDescription>Choose scope</ShadcnQuestionnaireDescription>
+        <ShadcnQuestionnaireChoices><ShadcnQuestionnaireChoice Value="component">Component</ShadcnQuestionnaireChoice></ShadcnQuestionnaireChoices>
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireNext>Next</ShadcnQuestionnaireNext>
+</ShadcnQuestionnaire>
+@code {
+    private static readonly ShadcnQuestionnaireItemDefinition[] Items = [new("scope", Required: true, Choices: [new("component")])];
+    private static readonly IReadOnlyDictionary<string, ShadcnQuestionnaireAnswer> Answers = new Dictionary<string, ShadcnQuestionnaireAnswer>();
+    private static Task Changed(IReadOnlyDictionary<string, ShadcnQuestionnaireAnswer> _) => Task.CompletedTask;
+}

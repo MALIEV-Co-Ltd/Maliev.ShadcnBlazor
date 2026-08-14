@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-separator")" style="@MergeStyle(null)" data-slot="sidebar-separator">@ChildContent</div>
+@code { [Parameter] public RenderFragment? ChildContent { get; set; } private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot"); }

@@ -1,0 +1,25 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ThemeStudioState State
+
+<ShadcnThemeProvider Theme="State.Applied"
+                     IsDarkMode="State.EffectiveDarkMode"
+                     ObserveSystemDarkModeChange="@(State.Mode == ThemeStudioMode.System)"
+                     SystemDarkModeChanged="State.SetSystemDarkMode"
+                     Direction="State.Direction"
+                     Class="showcase-root theme-studio-provider"
+                     data-testid="theme-preview-scope"
+                     data-preview-mode="@State.Mode.ToString().ToLowerInvariant()">
+    <div class="showcase-shell">
+        <main class="showcase-main">@Body</main>
+        <footer class="showcase-footer">Maliev.ShadcnBlazor Theme Studio · local and deterministic</footer>
+    </div>
+</ShadcnThemeProvider>
+
+@code {
+    protected override void OnInitialized() => State.Changed += OnChanged;
+
+    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() => State.Changed -= OnChanged;
+}

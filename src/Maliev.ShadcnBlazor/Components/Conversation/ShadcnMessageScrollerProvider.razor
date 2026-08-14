@@ -1,0 +1,180 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+@code {
+    [Parameter] public bool AutoScroll { get; set; }
+    [Parameter] public ShadcnMessageDefaultScrollPosition DefaultScrollPosition { get; set; } = ShadcnMessageDefaultScrollPosition.End;
+    [Parameter] public double ScrollEdgeThreshold { get; set; } = 8;
+    [Parameter] public double ScrollPreviousItemPeek { get; set; } = 64;
+    [Parameter] public double ScrollMargin { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<ShadcnMessageScrollerState> StateChanged { get; set; }
+    [Parameter] public EventCallback<string> AttachFailed { get; set; }
+    private ShadcnMessageScrollerController? _controller;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _instance;
+    private DotNetObjectReference<ShadcnMessageScrollerProvider>? _reference;
+    private ShadcnMessageScrollerOptions? _activeOptions;
+    private sealed record PendingCommand(Func<Task<bool>> Command, TaskCompletionSource<bool> Completion, CancellationTokenSource Timeout);
+    private readonly List<PendingCommand> _pending = [];
+    private bool _optionsChanged;
+    private long _lastSequence;
+    public string? AttachError { get; private set; }
+    public ShadcnMessageScrollerState CurrentState => State;
+    internal ShadcnMessageScrollerState State => _controller?.State ?? new(new(false,false), null, Array.Empty<string>(), AutoScroll, false);
+
+    protected override void OnParametersSet()
+    {
+        if (ChildContent is null) throw new InvalidOperationException("ShadcnMessageScrollerProvider requires content.");
+        var options = new ShadcnMessageScrollerOptions(AutoScroll, DefaultScrollPosition, ScrollEdgeThreshold, ScrollPreviousItemPeek, ScrollMargin);
+        _ = new ShadcnMessageScrollerController(options);
+        if (_activeOptions != options) { _activeOptions = options; if (_controller is null) _controller = new(options); else _controller.UpdateOptions(options); _optionsChanged = true; }
+    }
+
+    internal async ValueTask AttachAsync(ElementReference root)
+    {
+        if (_instance is not null) return;
+        try
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-message-scroller.js");
+            _reference = DotNetObjectReference.Create(this);
+            _instance = await _module.InvokeAsync<IJSObjectReference>("attach", root, _reference);
+            AttachError = null;
+            await DrainPendingAsync();
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            AttachError = exception.Message;
+            await AttachFailed.InvokeAsync(AttachError);
+            foreach (var pending in _pending.ToArray()) { pending.Timeout.Cancel(); pending.Timeout.Dispose(); pending.Completion.TrySetResult(false); }
+            _pending.Clear();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnScrollerMeasurementAsync(ShadcnMessageScrollerSnapshot snapshot)
+    {
+        if (snapshot.Sequence > 0 && snapshot.Sequence <= _lastSequence) return;
+        if (snapshot.Sequence > 0) _lastSequence = snapshot.Sequence;
+        var result = _controller!.OnContentChanged(new(snapshot.ScrollTop, snapshot.ViewportHeight, snapshot.ContentHeight), snapshot.Items, snapshot.PreserveScrollOnPrepend);
+        if (result.TargetScrollTop.HasValue && _instance is not null) await _instance.InvokeVoidAsync("scrollTo", result.TargetScrollTop.Value, "auto");
+        await DrainPendingAsync();
+        await StateChanged.InvokeAsync(_controller.State);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task OnScrollerUserIntentAsync() { _controller!.OnUserIntent(); return StateChanged.InvokeAsync(_controller.State); }
+
+    public Task<bool> ScrollToStartAsync(ShadcnMessageScrollBehavior behavior = ShadcnMessageScrollBehavior.Auto, bool focusViewport = false) => QueueOrRunAsync(() => ScrollDirectionCoreAsync(ShadcnMessageScrollDirection.Start, behavior, focusViewport));
+    public Task<bool> ScrollToEndAsync(ShadcnMessageScrollBehavior behavior = ShadcnMessageScrollBehavior.Auto, bool focusViewport = false) => QueueOrRunAsync(() => ScrollDirectionCoreAsync(ShadcnMessageScrollDirection.End, behavior, focusViewport));
+    public async Task<bool> ScrollToMessageAsync(string messageId, ShadcnMessageScrollOptions? options = null)
+    {
+        if (string.IsNullOrWhiteSpace(messageId)) throw new ArgumentException("Message id is required.", nameof(messageId));
+        var command = () => ScrollMessageCoreAsync(messageId, options ?? new());
+        if (_instance is null) return await EnqueueAsync(command);
+        if (await command()) return true;
+        return await HasTranscriptRowsAsync() ? false : await EnqueueAsync(command);
+    }
+    internal Task ScrollAsync(ShadcnMessageScrollDirection direction, ShadcnMessageScrollBehavior behavior) => direction is ShadcnMessageScrollDirection.Start ? ScrollToStartAsync(behavior) : ScrollToEndAsync(behavior);
+    private async Task<bool> QueueOrRunAsync(Func<Task<bool>> command)
+    {
+        if (_instance is not null)
+        {
+            var handled = await command();
+            return handled;
+        }
+        return await EnqueueAsync(command);
+    }
+    private async Task<bool> EnqueueAsync(Func<Task<bool>> command)
+    {
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var pending = new PendingCommand(command, completion, timeout);
+        _pending.Add(pending);
+        _ = RetryPendingAsync(pending);
+        return await completion.Task;
+    }
+
+    private async Task RetryPendingAsync(PendingCommand pending)
+    {
+        try
+        {
+            while (!pending.Timeout.IsCancellationRequested)
+            {
+                await Task.Delay(50, pending.Timeout.Token);
+                if (!_pending.Contains(pending)) return;
+                var handled = false;
+                if (_instance is not null) await InvokeAsync(async () => handled = await pending.Command());
+                if (handled)
+                {
+                    _pending.Remove(pending); pending.Timeout.Cancel(); pending.Completion.TrySetResult(true); return;
+                }
+                if (_instance is not null && await HasTranscriptRowsAsync())
+                {
+                    _pending.Remove(pending); pending.Timeout.Cancel(); pending.Completion.TrySetResult(false); return;
+                }
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            if (_pending.Remove(pending)) pending.Completion.TrySetResult(false);
+        }
+    }
+    private async Task<bool> HasTranscriptRowsAsync() => _instance is not null && (await _instance.InvokeAsync<ShadcnMessageScrollerSnapshot>("measure")).Items.Count > 0;
+
+    private async Task DrainPendingAsync()
+    {
+        foreach (var pending in _pending.ToArray())
+        {
+            try
+            {
+                if (!await pending.Command())
+                {
+                    if (await HasTranscriptRowsAsync()) { _pending.Remove(pending); pending.Timeout.Cancel(); pending.Timeout.Dispose(); pending.Completion.TrySetResult(false); }
+                    continue;
+                }
+                _pending.Remove(pending); pending.Timeout.Cancel(); pending.Timeout.Dispose(); pending.Completion.TrySetResult(true);
+            }
+            catch (Exception exception)
+            {
+                _pending.Remove(pending); pending.Timeout.Cancel(); pending.Timeout.Dispose(); pending.Completion.TrySetException(exception);
+            }
+        }
+    }
+    private async Task<bool> ScrollDirectionCoreAsync(ShadcnMessageScrollDirection direction, ShadcnMessageScrollBehavior behavior, bool focusViewport)
+    {
+        if (_instance is null) return false;
+        var measurement = await _instance.InvokeAsync<ShadcnMessageScrollerMeasurement>("measure");
+        var result = direction is ShadcnMessageScrollDirection.End ? _controller!.ScrollToEnd(measurement) : _controller!.ScrollToStart(behavior);
+        await _instance.InvokeVoidAsync("scrollTo", result.TargetScrollTop ?? 0, behavior is ShadcnMessageScrollBehavior.Smooth ? "smooth" : "auto", focusViewport);
+        await StateChanged.InvokeAsync(_controller.State);
+        await InvokeAsync(StateHasChanged);
+        return true;
+    }
+    private async Task<bool> ScrollMessageCoreAsync(string messageId, ShadcnMessageScrollOptions options)
+    {
+        if (_instance is null) return false;
+        var snapshot = await _instance.InvokeAsync<ShadcnMessageScrollerSnapshot>("measure");
+        var result = _controller!.ScrollToMessage(messageId, new(snapshot.ScrollTop, snapshot.ViewportHeight, snapshot.ContentHeight), snapshot.Items, options);
+        if (!result.Handled) return false;
+        await _instance.InvokeVoidAsync("scrollTo", result.TargetScrollTop ?? snapshot.ScrollTop, result.Behavior is ShadcnMessageScrollBehavior.Smooth ? "smooth" : "auto", options.FocusViewport);
+        return true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender && _optionsChanged && _instance is not null) await _instance.InvokeVoidAsync("refresh");
+        _optionsChanged = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var pending in _pending.ToArray()) { pending.Timeout.Cancel(); pending.Timeout.Dispose(); pending.Completion.TrySetResult(false); }
+        _pending.Clear();
+        if (_instance is not null) { try { await _instance.InvokeVoidAsync("dispose"); await _instance.DisposeAsync(); } catch (JSDisconnectedException) { } }
+        if (_module is not null) { try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { } }
+        _reference?.Dispose();
+    }
+}

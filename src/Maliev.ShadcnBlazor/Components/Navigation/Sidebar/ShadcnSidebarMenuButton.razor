@@ -1,0 +1,15 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@if (Href is not null) { <a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-menu-button")" style="@MergeStyle(null)" data-slot="sidebar-menu-button" data-size="@SizeValue" data-variant="@VariantValue" data-active="@(Active ? "true" : null)" href="@(Disabled ? null : Href)" target="@Target" title="@EffectiveTooltip" aria-describedby="@TooltipId" aria-current="@(Active ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync">@ChildContent</a> }
+else { <button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-menu-button")" style="@MergeStyle(null)" data-slot="sidebar-menu-button" data-size="@SizeValue" data-variant="@VariantValue" data-active="@(Active ? "true" : null)" type="button" disabled="@Disabled" title="@EffectiveTooltip" aria-describedby="@TooltipId" aria-current="@(Active ? "page" : null)" @onclick="HandleClickAsync">@ChildContent</button> }
+@if (EffectiveTooltip is not null) { <span id="@TooltipId" role="tooltip" class="shadcn-sidebar-menu-tooltip">@EffectiveTooltip</span> }
+@code {
+    [CascadingParameter] private ShadcnSidebarContext? Context { get; set; }
+    [Parameter] public string? Href { get; set; } [Parameter] public string? Target { get; set; } [Parameter] public bool Active { get; set; } [Parameter] public bool Disabled { get; set; } [Parameter] public string? Tooltip { get; set; } [Parameter] public ShadcnSidebarMenuButtonSize Size { get; set; } = ShadcnSidebarMenuButtonSize.Default; [Parameter] public ShadcnSidebarMenuButtonVariant Variant { get; set; } = ShadcnSidebarMenuButtonVariant.Default; [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; } [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string SizeValue => Size switch { ShadcnSidebarMenuButtonSize.Small => "sm", ShadcnSidebarMenuButtonSize.Default => "default", ShadcnSidebarMenuButtonSize.Large => "lg", _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown sidebar menu button size.") };
+    private string VariantValue => Variant switch { ShadcnSidebarMenuButtonVariant.Default => "default", ShadcnSidebarMenuButtonVariant.Outline => "outline", _ => throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown sidebar menu button variant.") };
+    private string? EffectiveTooltip => Context is null || (!Context.IsMobile && !Context.Open) ? Tooltip : null;
+    private static long _nextId; private readonly string _tooltipId = $"shadcn-sidebar-tooltip-{Interlocked.Increment(ref _nextId)}";
+    private string? TooltipId => EffectiveTooltip is null ? null : _tooltipId;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-size", "data-variant", "data-active", "href", "target", "type", "disabled", "title", "aria-describedby", "aria-current", "aria-disabled", "tabindex");
+    private Task HandleClickAsync(MouseEventArgs args) => Disabled ? Task.CompletedTask : OnClick.InvokeAsync(args);
+}

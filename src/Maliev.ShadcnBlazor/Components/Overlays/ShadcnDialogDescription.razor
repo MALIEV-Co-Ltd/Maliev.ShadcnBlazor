@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<p @attributes="ForwardedAttributes" id="@Id" class="@MergeClass("shadcn-dialog-description")" style="@MergeStyle(null)" data-slot="dialog-description">@ChildContent</p>
+@code {
+    [CascadingParameter] private ShadcnDialogContext Context { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string Id => $"{Context.ContentId}-description";
+    protected override void OnInitialized() => Context.DescriptionId = Id;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "data-slot");
+}

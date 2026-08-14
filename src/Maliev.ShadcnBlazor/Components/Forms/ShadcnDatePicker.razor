@@ -1,0 +1,154 @@
+@using System.Globalization
+@using System.Linq.Expressions
+@using Maliev.ShadcnBlazor.Theming
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @ref="Root" class="@MergeClass("shadcn-date-picker")" style="@MergeStyle(null)" data-slot="date-picker" data-open="@(Open ? "true" : null)" @onkeydown="HandleKeyDownAsync">
+    <button @ref="Trigger" @attributes="ForwardedAttributes" class="shadcn-date-picker-trigger" type="button" data-slot="date-picker-trigger" disabled="@EffectiveDisabled" aria-haspopup="dialog" aria-expanded="@Open.ToString().ToLowerInvariant()" aria-controls="@DialogId" aria-readonly="@(ReadOnly ? "true" : null)" aria-required="@(Required ? "true" : null)" aria-invalid="@(EffectiveInvalid || ParseInvalid ? "true" : null)" aria-describedby="@DescribedBy" @onclick="ToggleAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z" /></svg><span data-placeholder="@(!HasSelection ? "true" : null)">@TriggerText</span></button>
+    @if (AllowTextInput) { <input class="shadcn-date-picker-input" data-slot="date-picker-input" value="@TextInputValue" placeholder="@Placeholder" disabled="@EffectiveDisabled" readonly="@ReadOnly" required="@Required" aria-label="@TextInputLabel" aria-describedby="@DescribedBy" aria-invalid="@(EffectiveInvalid || ParseInvalid ? "true" : null)" @onchange="ParseInputAsync" /> }
+    @if (Clearable && HasSelection && !EffectiveDisabled && !ReadOnly) { <button type="button" data-slot="date-picker-clear" aria-label="@ClearLabel" @onclick="ClearAsync">×</button> }
+    @if (Open)
+    {
+        <div id="@DialogId" class="shadcn-date-picker-content" data-slot="date-picker-content" role="dialog" aria-label="@CalendarLabel">
+            <ShadcnCalendar Mode="@Mode" Value="@Value" ValueChanged="SelectAsync" Range="@Range" RangeChanged="SelectRangeAsync" VisibleMonth="@EffectiveVisibleMonth" VisibleMonthChanged="VisibleMonthChanged" Today="@Today" Culture="@Culture" FirstDayOfWeek="@FirstDayOfWeek" ShowOutsideDays="@ShowOutsideDays" ShowWeekNumbers="@ShowWeekNumbers" Min="@Min" Max="@Max" IsDateDisabled="@IsDateDisabled" Disabled="@EffectiveDisabled" ReadOnly="@ReadOnly" Invalid="@EffectiveInvalid" Direction="@EffectiveDirection" CaptionLayout="@CaptionLayout" FromYear="@FromYear" ToYear="@ToYear" />
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Name) && Mode == ShadcnCalendarSelectionMode.Single) { <input class="shadcn-form-control-proxy" data-slot="date-picker-form-control" aria-label="@CalendarLabel" name="@(ParseInvalid ? null : Name)" value="@(ParseInvalid ? string.Empty : Value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" disabled="@EffectiveDisabled" required="@Required" /> }
+    @if (!string.IsNullOrWhiteSpace(Name) && Mode == ShadcnCalendarSelectionMode.Range) { <input class="shadcn-form-control-proxy" data-slot="date-picker-range-start-control" aria-label="@($"{CalendarLabel} start")" name="@(ParseInvalid ? null : $"{Name}.start")" value="@(ParseInvalid ? string.Empty : Range?.Start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" disabled="@EffectiveDisabled" required="@Required" /><input class="shadcn-form-control-proxy" data-slot="date-picker-range-end-control" aria-label="@($"{CalendarLabel} end")" name="@(ParseInvalid ? null : $"{Name}.end")" value="@(ParseInvalid ? string.Empty : Range?.End?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" disabled="@EffectiveDisabled" required="@Required" /> }
+</div>
+
+@code {
+    [CascadingParameter] private ShadcnContext ThemeContext { get; set; }
+    [CascadingParameter] private ShadcnFieldContext? FieldContext { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public DateOnly? Value { get; set; }
+    [Parameter] public EventCallback<DateOnly?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<DateOnly?>>? ValueExpression { get; set; }
+    [Parameter] public ShadcnCalendarSelectionMode Mode { get; set; } = ShadcnCalendarSelectionMode.Single;
+    [Parameter] public ShadcnDateRange? Range { get; set; }
+    [Parameter] public EventCallback<ShadcnDateRange?> RangeChanged { get; set; }
+    [Parameter] public Expression<Func<ShadcnDateRange?>>? RangeExpression { get; set; }
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public DateOnly VisibleMonth { get; set; }
+    [Parameter] public EventCallback<DateOnly> VisibleMonthChanged { get; set; }
+    [Parameter] public DateOnly Today { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Parameter] public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
+    [Parameter] public string Format { get; set; } = "d MMM yyyy";
+    [Parameter] public string Placeholder { get; set; } = "Pick a date";
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public bool Clearable { get; set; }
+    [Parameter] public string ClearLabel { get; set; } = "Clear date";
+    [Parameter] public string CalendarLabel { get; set; } = "Choose date";
+    [Parameter] public bool AllowTextInput { get; set; }
+    [Parameter] public string TextInputLabel { get; set; } = "Enter date";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public DayOfWeek? FirstDayOfWeek { get; set; }
+    [Parameter] public bool ShowOutsideDays { get; set; } = true;
+    [Parameter] public bool ShowWeekNumbers { get; set; }
+    [Parameter] public DateOnly? Min { get; set; }
+    [Parameter] public DateOnly? Max { get; set; }
+    [Parameter] public Func<DateOnly, bool>? IsDateDisabled { get; set; }
+    [Parameter] public ShadcnDirection? Direction { get; set; }
+    [Parameter] public ShadcnCalendarCaptionLayout CaptionLayout { get; set; } = ShadcnCalendarCaptionLayout.Label;
+    [Parameter] public int? FromYear { get; set; }
+    [Parameter] public int? ToYear { get; set; }
+    private bool ParseInvalid;
+    private readonly string DialogId = $"shadcn-date-picker-{Guid.NewGuid():N}";
+    private ElementReference Root;
+    private ElementReference Trigger;
+    private IJSObjectReference? Module;
+    private DotNetObjectReference<ShadcnDatePicker>? SelfReference;
+    private bool IsObserving;
+    private string? InputBuffer;
+    private ValidationMessageStore? ParseMessages;
+    private EditContext? ParseMessageContext;
+    private EditContext? ValidationEditContext;
+    private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private ShadcnDirection EffectiveDirection => Direction ?? ThemeContext.Direction;
+    private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true || EditContext is not null && (ValueExpression is not null && EditContext.GetValidationMessages(FieldIdentifier.Create(ValueExpression)).Any() || RangeExpression is not null && EditContext.GetValidationMessages(FieldIdentifier.Create(RangeExpression)).Any());
+    private DateOnly EffectiveVisibleMonth { get { var anchor = Value ?? Range?.Start ?? Today; return VisibleMonth == default ? new(anchor.Year, anchor.Month, 1) : new(VisibleMonth.Year, VisibleMonth.Month, 1); } }
+    private bool HasSelection => Mode == ShadcnCalendarSelectionMode.Single ? Value is not null : Range is not null;
+    private string TriggerText => Mode == ShadcnCalendarSelectionMode.Range && Range is not null ? $"{Range.Start.ToString(Format, Culture)} – {(Range.End?.ToString(Format, Culture) ?? "…")}" : Value?.ToString(Format, Culture) ?? Placeholder;
+    private string TextInputValue => ParseInvalid && InputBuffer is not null ? InputBuffer : HasSelection ? TriggerText : string.Empty;
+    private string? DescribedBy => MergeIds(FieldContext?.AriaDescribedBy, AttributeText("aria-describedby"));
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "type", "data-slot", "disabled", "aria-haspopup", "aria-expanded", "aria-controls", "aria-readonly", "aria-required", "aria-invalid", "aria-describedby");
+    private async Task ToggleAsync() { if (!EffectiveDisabled && !ReadOnly) await OpenChanged.InvokeAsync(!Open); }
+    private async Task SelectAsync(DateOnly? date) { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); await ValueChanged.InvokeAsync(date); Notify(); await CloseAndFocusAsync(); }
+    private async Task SelectRangeAsync(ShadcnDateRange? range) { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); await RangeChanged.InvokeAsync(range); NotifyRange(); if (range?.End is not null) await CloseAndFocusAsync(); }
+    private async Task ClearAsync() { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); if (Mode == ShadcnCalendarSelectionMode.Range) { await RangeChanged.InvokeAsync(null); NotifyRange(); } else { await ValueChanged.InvokeAsync(null); Notify(); } }
+    private async Task ParseInputAsync(ChangeEventArgs args)
+    {
+        if (EffectiveDisabled || ReadOnly) return;
+        var text = args.Value?.ToString() ?? string.Empty;
+        InputBuffer = text;
+        if (Mode == ShadcnCalendarSelectionMode.Range)
+        {
+            var parts = text.Split(" – ", StringSplitOptions.TrimEntries);
+            var start = default(DateOnly);
+            var end = default(DateOnly);
+            ParseInvalid = parts.Length != 2 || !DateOnly.TryParseExact(parts[0], Format, Culture, DateTimeStyles.None, out start) || !DateOnly.TryParseExact(parts[1], Format, Culture, DateTimeStyles.None, out end) || end < start;
+            if (!ParseInvalid) { InputBuffer = null; ClearParseMessage(); await RangeChanged.InvokeAsync(new(start, end)); NotifyRange(); }
+        }
+        else
+        {
+            ParseInvalid = !DateOnly.TryParseExact(text, Format, Culture, DateTimeStyles.None, out var date);
+            if (!ParseInvalid) { InputBuffer = null; ClearParseMessage(); await ValueChanged.InvokeAsync(date); Notify(); }
+        }
+        if (ParseInvalid) { AddParseMessage(); Notify(); NotifyRange(); }
+    }
+    private void Notify() { if (EditContext is not null && ValueExpression is not null) EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression)); }
+    private void NotifyRange() { if (EditContext is not null && RangeExpression is not null) EditContext.NotifyFieldChanged(FieldIdentifier.Create(RangeExpression)); }
+    private void EnsureParseMessages()
+    {
+        if (ReferenceEquals(ParseMessageContext, EditContext)) return;
+        ReplaceParseMessageContext(EditContext);
+    }
+    private void ReplaceParseMessageContext(EditContext? nextContext)
+    {
+        var oldContext = ParseMessageContext;
+        if (oldContext is not null && ParseMessages is not null)
+        {
+            ParseMessages.Clear();
+            oldContext.NotifyValidationStateChanged();
+        }
+        ParseMessageContext = nextContext;
+        ParseMessages = nextContext is null ? null : new ValidationMessageStore(nextContext);
+        ParseInvalid = false;
+        InputBuffer = null;
+    }
+    private FieldIdentifier? ParseField() => Mode == ShadcnCalendarSelectionMode.Range ? RangeExpression is null ? null : FieldIdentifier.Create(RangeExpression) : ValueExpression is null ? null : FieldIdentifier.Create(ValueExpression);
+    private void ClearParseMessage() { EnsureParseMessages(); var field = ParseField(); if (field is not null) ParseMessages?.Clear(field.Value); EditContext?.NotifyValidationStateChanged(); }
+    private void AddParseMessage() { EnsureParseMessages(); var field = ParseField(); if (field is not null) { ParseMessages?.Clear(field.Value); ParseMessages?.Add(field.Value, $"The {field.Value.FieldName} field is not a valid date."); EditContext?.NotifyValidationStateChanged(); } }
+    private async Task HandleKeyDownAsync(KeyboardEventArgs args) { if (args.Key == "Escape" && Open) await CloseAndFocusAsync(); }
+    private async Task CloseAndFocusAsync() { await OpenChanged.InvokeAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
+    private string? AttributeText(string name) => AdditionalAttributes?.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase)).Value?.ToString();
+    private static string? MergeIds(params string?[] values) { var ids = values.Where(value => !string.IsNullOrWhiteSpace(value)).SelectMany(value => value!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Distinct(StringComparer.Ordinal).ToArray(); return ids.Length == 0 ? null : string.Join(' ', ids); }
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Range?.End is not null && Range.End.Value < Range.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
+        if (!ReferenceEquals(ValidationEditContext, EditContext))
+        {
+            if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged;
+            ValidationEditContext = EditContext;
+            ReplaceParseMessageContext(EditContext);
+            if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged += HandleValidationStateChanged;
+        }
+    }
+    private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Open && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "date-picker"); await Module.InvokeVoidAsync("focusCalendarInPopup", Root); IsObserving = true; }
+        else if (!Open && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
+    }
+    [JSInvokable] public async Task DismissPopup() { if (Open) await CloseAndFocusAsync(); }
+    public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; ReplaceParseMessageContext(null); if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
+}

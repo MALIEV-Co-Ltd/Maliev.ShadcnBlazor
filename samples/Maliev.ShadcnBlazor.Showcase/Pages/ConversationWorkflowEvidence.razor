@@ -1,0 +1,51 @@
+@page "/evidence/conversation-workflows"
+@layout EvidenceLayout
+@using global::Maliev.ShadcnBlazor.Components.Conversation
+
+<PageTitle>Conversation workflow evidence</PageTitle>
+<ShadcnThemeProvider IsDarkMode="@IsDark" Direction="@Direction">
+    <main class="conversation-workflow-evidence" data-testid="conversation-workflow-evidence">
+        <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Conversation workflow evidence</h1>
+        <section data-pair-id="@Case" class="conversation-reference-crop">
+            @if (Case.StartsWith("attachment", StringComparison.Ordinal))
+            {
+                <ShadcnAttachment State="@(Case.EndsWith("error") ? ShadcnAttachmentState.Error : ShadcnAttachmentState.Uploading)" Title="drawing.step" ErrorReason="@(Case.EndsWith("error") ? "Upload failed" : null)" Progress="@(Case.EndsWith("error") ? null : 64)">
+                    <ShadcnAttachmentMedia>📄</ShadcnAttachmentMedia><ShadcnAttachmentContent><ShadcnAttachmentTitle>drawing.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>4.2 MB · STEP</ShadcnAttachmentDescription></ShadcnAttachmentContent>
+                    <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="Remove">Remove</ShadcnAttachmentAction><ShadcnAttachmentAction Action="@(Case.EndsWith("error") ? ShadcnAttachmentActionKind.Retry : ShadcnAttachmentActionKind.Cancel)" AccessibleName="@(Case.EndsWith("error") ? "Retry" : "Cancel")">@(Case.EndsWith("error") ? "Retry" : "Cancel")</ShadcnAttachmentAction></ShadcnAttachmentActions>
+                </ShadcnAttachment>
+            }
+            else if (Case.StartsWith("bubble", StringComparison.Ordinal))
+            {
+                <ShadcnBubbleGroup><ShadcnBubble Variant="@(Case.EndsWith("end-reaction") ? ShadcnBubbleVariant.Secondary : ShadcnBubbleVariant.Default)" Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)"><ShadcnBubbleContent>The quotation is ready for review.</ShadcnBubbleContent><ShadcnBubbleReactions Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)"><button aria-label="Helpful">👍</button><button aria-label="Copy">Copy</button></ShadcnBubbleReactions></ShadcnBubble></ShadcnBubbleGroup>
+            }
+            else if (Case.StartsWith("marker", StringComparison.Ordinal))
+            {
+                <ShadcnMarker Variant="@ShadcnMarkerVariant.Separator" Live="@Case.EndsWith("streaming")">@if (Case.EndsWith("streaming")){<ShadcnMarkerIcon>●</ShadcnMarkerIcon>}<ShadcnMarkerContent>@(Case.EndsWith("streaming") ? "MALIEV is replying •••" : "Today")</ShadcnMarkerContent></ShadcnMarker>
+            }
+            else if (Case.StartsWith("message-scroller", StringComparison.Ordinal))
+            {
+                <ShadcnMessageScrollerProvider AutoScroll="@(!Case.EndsWith("unread"))" DefaultScrollPosition="@(Case.EndsWith("unread") ? ShadcnMessageDefaultScrollPosition.Start : ShadcnMessageDefaultScrollPosition.End)"><ShadcnMessageScroller Style="width:420px;height:287px" data-following="@(!Case.EndsWith("unread") ? "true" : null)"><ShadcnMessageScrollerViewport AccessibleName="Conversation transcript"><ShadcnMessageScrollerContent>@foreach (var row in Rows){<ShadcnMessageScrollerItem Style="min-height:64px;padding:14px" MessageId="@row.Id" ScrollAnchor="@row.Anchor">@row.Text</ShadcnMessageScrollerItem>}</ShadcnMessageScrollerContent></ShadcnMessageScrollerViewport><ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="@(Case.EndsWith("unread") ? "New messages" : "Latest")">@(Case.EndsWith("unread") ? "New messages" : "Latest")</ShadcnMessageScrollerButton></ShadcnMessageScroller></ShadcnMessageScrollerProvider>
+            }
+            else if (Case.StartsWith("message-", StringComparison.Ordinal))
+            {
+                <ShadcnMessage Align="@(Case.EndsWith("end") ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)"><ShadcnMessageAvatar AccessibleName="Maliev">ม</ShadcnMessageAvatar><ShadcnMessageContent><ShadcnMessageHeader>Maliev</ShadcnMessageHeader><p>ตรวจสอบไฟล์เรียบร้อยแล้ว</p><ShadcnMessageFooter><button>Reply</button><button>Copy</button></ShadcnMessageFooter></ShadcnMessageContent></ShadcnMessage>
+            }
+            else
+            {
+                <ShadcnQuestionnaire Items="QuestionnaireItems" DefaultItem="@(Case.EndsWith("freeform") ? "notes" : "scope")" DefaultAnswers="@QuestionnaireAnswers" AccessibleName="Project questionnaire"><ShadcnQuestionnaireProgress AccessibleName="Progress"/><ShadcnQuestionnaireItem Name="scope"><ShadcnQuestionnaireTitle>เลือกขอบเขต</ShadcnQuestionnaireTitle><ShadcnQuestionnaireDescription>เลือกประเภทงานที่ต้องการ</ShadcnQuestionnaireDescription><ShadcnQuestionnaireChoices><ShadcnQuestionnaireChoice Value="component">คอมโพเนนต์<ShadcnQuestionnaireChoiceDescription>ส่วนประกอบใหม่</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice><ShadcnQuestionnaireChoice Value="feature">ฟีเจอร์<ShadcnQuestionnaireChoiceDescription>ความสามารถเพิ่มเติม</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice></ShadcnQuestionnaireChoices></ShadcnQuestionnaireItem><ShadcnQuestionnaireItem Name="notes"><ShadcnQuestionnaireTitle>รายละเอียด</ShadcnQuestionnaireTitle><ShadcnQuestionnaireDescription>อธิบายชิ้นงานที่ต้องการ</ShadcnQuestionnaireDescription><ShadcnQuestionnaireInput AccessibleName="รายละเอียด"/></ShadcnQuestionnaireItem><ShadcnQuestionnaireActions>@if (Case.EndsWith("freeform")){<ShadcnQuestionnairePrevious>Previous</ShadcnQuestionnairePrevious><ShadcnQuestionnaireSubmit>Submit</ShadcnQuestionnaireSubmit>}else{<ShadcnQuestionnaireNext>Next</ShadcnQuestionnaireNext>}</ShadcnQuestionnaireActions></ShadcnQuestionnaire>
+            }
+        </section>
+    </main>
+</ShadcnThemeProvider>
+
+@code {
+    private sealed record Row(string Id, string Text, bool Anchor = false);
+    [SupplyParameterFromQuery(Name = "state")] public string Case { get; set; } = "attachment-uploading";
+    [SupplyParameterFromQuery(Name = "theme")] public string? RequestedTheme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? RequestedDirection { get; set; }
+    private bool IsDark => string.Equals(RequestedTheme, "dark", StringComparison.OrdinalIgnoreCase);
+    private ShadcnDirection Direction => string.Equals(RequestedDirection, "rtl", StringComparison.OrdinalIgnoreCase) ? ShadcnDirection.RightToLeft : ShadcnDirection.LeftToRight;
+    private static readonly Row[] Rows = [new("turn-1", "ได้รับไฟล์แล้ว"), new("turn-2", "กำลังตรวจสอบแบบ"), new("turn-3", "ยืนยันชนิดวัสดุ"), new("turn-4", "ประเมินเวลาผลิต"), new("turn-5", "ตรวจสอบค่าความคลาดเคลื่อน"), new("turn-6", "เตรียมใบเสนอราคา"), new("turn-7", "พร้อมส่งมอบ", true)];
+    private static readonly ShadcnQuestionnaireItemDefinition[] QuestionnaireItems = [new("scope", Required: true, Choices: [new("component"), new("feature")]), new("notes", AllowsFreeform: true)];
+    private IReadOnlyDictionary<string, ShadcnQuestionnaireAnswer> QuestionnaireAnswers => Case.EndsWith("freeform") ? new Dictionary<string, ShadcnQuestionnaireAnswer> { ["scope"] = new(ShadcnQuestionnaireItemStatus.Answered, ["component"], null), ["notes"] = new(ShadcnQuestionnaireItemStatus.Answered, [], "ผลิตชิ้นส่วนทดสอบ") } : new Dictionary<string, ShadcnQuestionnaireAnswer> { ["scope"] = new(ShadcnQuestionnaireItemStatus.Answered, ["component"], null) };
+}

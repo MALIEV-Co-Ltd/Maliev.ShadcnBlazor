@@ -1,0 +1,3 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<li @attributes="ForwardedAttributes" class="@MergeClass("shadcn-breadcrumb-separator")" style="@MergeStyle(null)" data-slot="breadcrumb-separator" role="presentation" aria-hidden="true">@if (ChildContent is not null) { @ChildContent } else { <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg> }</li>
+@code { [Parameter] public RenderFragment? ChildContent { get; set; } private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "role", "aria-hidden"); }

@@ -1,0 +1,93 @@
+@typeparam TValue
+@using System.Linq.Expressions
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<CascadingValue Value="@_context">
+    <div @ref="GroupReference"
+         @attributes="ForwardedAttributes"
+         class="@MergeClass("shadcn-radio-group")"
+         style="@MergeStyle(null)"
+         role="radiogroup"
+         aria-invalid="@(EffectiveInvalid ? "true" : null)"
+         aria-describedby="@FieldContext?.AriaDescribedBy"
+         aria-orientation="@OrientationValue"
+         data-slot="radio-group"
+         data-orientation="@OrientationValue">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [CascadingParameter] private ShadcnFieldContext? FieldContext { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<TValue>>? ValueExpression { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public ShadcnRadioGroupOrientation Orientation { get; set; } = ShadcnRadioGroupOrientation.Vertical;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly string GeneratedName = $"shadcn-radio-{Guid.NewGuid():N}";
+    private ShadcnRadioGroupContext<TValue> _context = default!;
+    private ElementReference GroupReference;
+    private IJSObjectReference? Module;
+    private int RenderedRegistrationVersion = -1;
+    private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
+    private string EffectiveName => string.IsNullOrWhiteSpace(Name) ? GeneratedName : Name;
+    private string OrientationValue => Orientation switch
+    {
+        ShadcnRadioGroupOrientation.Vertical => "vertical",
+        ShadcnRadioGroupOrientation.Horizontal => "horizontal",
+        _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn radio group orientation.")
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "aria-invalid", "aria-describedby", "aria-orientation", "data-slot", "data-orientation");
+
+    protected override void OnInitialized() => _context = new(SelectAsync);
+
+    protected override void OnParametersSet()
+    {
+        _ = OrientationValue;
+        _context.Update(Value, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("attachRovingGroup", GroupReference, "radio", OrientationValue, ReadOnly);
+        if (RenderedRegistrationVersion != _context.RegistrationVersion)
+        {
+            RenderedRegistrationVersion = _context.RegistrationVersion;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task SelectAsync(TValue value)
+    {
+        if (EffectiveDisabled || ReadOnly) return;
+        await ValueChanged.InvokeAsync(value);
+        if (EditContext is not null && ValueExpression is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Module is null) return;
+        try
+        {
+            await Module.InvokeVoidAsync("detach", GroupReference);
+            await Module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

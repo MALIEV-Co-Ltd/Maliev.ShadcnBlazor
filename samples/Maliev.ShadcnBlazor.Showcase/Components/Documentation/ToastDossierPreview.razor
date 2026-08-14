@@ -1,0 +1,15 @@
+@inject IShadcnToastService Toasts
+
+<div data-testid="toast-dossier-preview">
+    <ShadcnButton OnClick="Show">Show localized toast</ShadcnButton>
+    <ShadcnToaster MaximumVisible="MaximumVisible" Placement="Placement" ReducedMotion="ReducedMotion" CloseLabel="ปิดการแจ้งเตือน" ViewportLabel="การแจ้งเตือน" />
+</div>
+
+@code {
+    [Parameter] public int MaximumVisible { get; set; } = 3;
+    [Parameter] public ShadcnToastPlacement Placement { get; set; } = ShadcnToastPlacement.BottomEnd;
+    [Parameter] public bool ReducedMotion { get; set; }
+    [Parameter] public ShadcnToastType Type { get; set; } = ShadcnToastType.Success;
+    [Parameter] public ShadcnToastPriority Priority { get; set; } = ShadcnToastPriority.Normal;
+    private Task Show() { Toasts.Show(new("บันทึกแล้ว — Saved", Type: Type, ActionLabel: "เลิกทำ", Action: () => Task.CompletedTask, Priority: Priority)); return Task.CompletedTask; }
+}

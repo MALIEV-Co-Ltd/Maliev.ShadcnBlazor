@@ -1,0 +1,1613 @@
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnButton
+  ShadcnButtonType ButtonType
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Href
+  RenderFragment LeadingIcon
+  EventCallback<MouseEventArgs> OnClick
+  Boolean PointerCursor
+  ShadcnButtonSize Size
+  RenderFragment TrailingIcon
+  ShadcnButtonVariant Variant
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroup
+  RenderFragment ChildContent
+  ShadcnButtonGroupOrientation Orientation
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroupOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroupSeparator
+  Nullable<ShadcnButtonGroupOrientation> Orientation
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroupText
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonSize: Default, ExtraSmall, Small, Large, Icon, IconExtraSmall, IconSmall, IconLarge
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonType: Button, Submit, Reset
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonVariant: Default, Destructive, Outline, Secondary, Ghost, Link
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggle
+  RenderFragment ChildContent
+  Boolean Disabled
+  RenderFragment LeadingIcon
+  EventCallback<MouseEventArgs> OnClick
+  Boolean PointerCursor
+  Boolean Pressed
+  EventCallback<Boolean> PressedChanged
+  ShadcnToggleSize Size
+  RenderFragment TrailingIcon
+  ShadcnToggleVariant Variant
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroupItem`1
+  RenderFragment ChildContent
+  Boolean Disabled
+  RenderFragment LeadingIcon
+  RenderFragment TrailingIcon
+  TValue Value
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroupOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroup`1
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Multiple
+  ShadcnToggleGroupOrientation Orientation
+  ShadcnToggleSize Size
+  Double Spacing
+  IReadOnlyCollection<TValue> Values
+  EventCallback<IReadOnlyCollection<TValue>> ValuesChanged
+  ShadcnToggleVariant Variant
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleSize: Default, Small, Large
+enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleVariant: Default, Outline
+type Maliev.ShadcnBlazor.Components.Content.IShadcnCarouselApi
+type Maliev.ShadcnBlazor.Components.Content.IShadcnCarouselPlugin
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatar
+  RenderFragment ChildContent
+  ShadcnAvatarSize Size
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarBadge
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarFallback
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroup
+  RenderFragment ChildContent
+  String Overlap
+  ShadcnAvatarSize Size
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroupCount
+  RenderFragment ChildContent
+  Nullable<ShadcnAvatarSize> Size
+type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarImage
+  String Alt
+  EventCallback<EventArgs> OnError
+  EventCallback<EventArgs> OnLoad
+  String Source
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarSize: Small, Default, Large
+type Maliev.ShadcnBlazor.Components.Content.ShadcnBadge
+  RenderFragment ChildContent
+  String Href
+  ShadcnBadgeVariant Variant
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnBadgeVariant: Default, Secondary, Destructive, Outline, Ghost, Link
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCard
+  RenderFragment ChildContent
+  ShadcnCardSize Size
+  String Spacing
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardAction
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardHeader
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnCardSize: Default, Small
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCardTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarousel
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+  String NextLabel
+  ShadcnCarouselOptions Options
+  ShadcnCarouselOrientation Orientation
+  IReadOnlyList<IShadcnCarouselPlugin> Plugins
+  String PreviousLabel
+  Int32 SelectedIndex
+  EventCallback<Int32> SelectedIndexChanged
+  Func<Int32, Int32, String> SlideLabelFormatter
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAlign: Start, Center, End
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAutoplayPlugin
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselItem
+  Double BasisPercent
+  RenderFragment ChildContent
+  Int32 Index
+  String Label
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselNext
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselOptions
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselPrevious
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmpty
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyMedia
+  RenderFragment ChildContent
+  ShadcnEmptyMediaVariant Variant
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyMediaVariant: Default, Icon
+type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItem
+  RenderFragment ChildContent
+  String Href
+  ShadcnItemSize Size
+  ShadcnItemVariant Variant
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemActions
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemMedia
+  RenderFragment ChildContent
+  ShadcnItemMediaVariant Variant
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnItemMediaVariant: Default, Icon, Image
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemSeparator
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnItemSize: Default, Small
+type Maliev.ShadcnBlazor.Components.Content.ShadcnItemTitle
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnItemVariant: Default, Outline, Muted
+type Maliev.ShadcnBlazor.Components.Content.ShadcnKbd
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnKbdGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Content.ShadcnSeparator
+  Boolean Decorative
+  ShadcnSeparatorOrientation Orientation
+enum Maliev.ShadcnBlazor.Components.Content.ShadcnSeparatorOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachment
+  RenderFragment ChildContent
+  String ErrorReason
+  ShadcnAttachmentFile File
+  ShadcnAttachmentOrientation Orientation
+  Nullable<Double> Progress
+  ShadcnAttachmentSize Size
+  ShadcnAttachmentState State
+  EventCallback<ShadcnAttachmentState> StateChanged
+  Boolean StateIsControlled
+  String Title
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentAction
+  String AccessibleName
+  ShadcnAttachmentActionKind Action
+  RenderFragment ChildContent
+  Boolean Disabled
+  EventCallback<ShadcnAttachmentActionKind> OnAction
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentActionKind: None, Remove, Retry, Cancel, Download, Custom
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentActions
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentFile
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentGroup
+  String AccessibleName
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentMedia
+  RenderFragment ChildContent
+  String ImageAlt
+  ShadcnAttachmentMediaVariant Variant
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentMediaVariant: Icon, Image
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentOrientation: Horizontal, Vertical
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentSize: Default, Small, ExtraSmall
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentState: Idle, Uploading, Processing, Error, Done
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentTrigger
+  String AccessibleName
+  RenderFragment ChildContent
+  String DialogTarget
+  Boolean Disabled
+  String Href
+  EventCallback OnActivate
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationError
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationOptions
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationResult
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidator
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubble
+  ShadcnLogicalAlign Align
+  RenderFragment ChildContent
+  ShadcnBubbleVariant Variant
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleContent
+  RenderFragment ChildContent
+  String Href
+  EventCallback OnActivate
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactions
+  String AccessibleName
+  ShadcnLogicalAlign Align
+  RenderFragment ChildContent
+  ShadcnReactionSide Side
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleVariant: Default, Secondary, Muted, Tinted, Outline, Ghost, Destructive
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnLogicalAlign: Start, End
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarker
+  String AccessibleName
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Href
+  Boolean Live
+  EventCallback OnActivate
+  ShadcnMarkerVariant Variant
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerContent
+  RenderFragment ChildContent
+  Boolean Streaming
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerIcon
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerVariant: Default, Separator, Border
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessage
+  ShadcnLogicalAlign Align
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageAvatar
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageContent
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageDefaultScrollPosition: Start, End, LastAnchor
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageHeader
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollAlign: Start, Center, End, Nearest
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollBehavior: Auto, Smooth
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollDirection: Start, End
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollOptions
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollResult
+  ShadcnMessageScrollBehavior Behavior
+  Boolean Handled
+  Nullable<Double> TargetScrollTop
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScroller
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerButton
+  String AccessibleName
+  ShadcnMessageScrollBehavior Behavior
+  RenderFragment ChildContent
+  ShadcnMessageScrollDirection Direction
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerContent
+  String AriaLive
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerController
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerGeometry
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerItem
+  RenderFragment ChildContent
+  String MessageId
+  Boolean ScrollAnchor
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerItemGeometry
+  Double Height
+  String MessageId
+  Boolean ScrollAnchor
+  Double Top
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerMeasurement
+  Double ContentHeight
+  Double ScrollTop
+  Double ViewportHeight
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerOptions
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerProvider
+  EventCallback<String> AttachFailed
+  Boolean AutoScroll
+  RenderFragment ChildContent
+  ShadcnMessageDefaultScrollPosition DefaultScrollPosition
+  Double ScrollEdgeThreshold
+  Double ScrollMargin
+  Double ScrollPreviousItemPeek
+  EventCallback<ShadcnMessageScrollerState> StateChanged
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerScrollable
+  Boolean End
+  Boolean Start
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerSnapshot
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerState
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerViewport
+  String AccessibleName
+  RenderFragment ChildContent
+  Boolean PreserveScrollOnPrepend
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerVisibility
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaire
+  String AccessibleName
+  IReadOnlyDictionary<String, ShadcnQuestionnaireAnswer> Answers
+  EventCallback<IReadOnlyDictionary<String, ShadcnQuestionnaireAnswer>> AnswersChanged
+  RenderFragment ChildContent
+  IReadOnlyDictionary<String, ShadcnQuestionnaireAnswer> DefaultAnswers
+  String DefaultItem
+  String Id
+  String Item
+  EventCallback<String> ItemChanged
+  IReadOnlyList<ShadcnQuestionnaireItemDefinition> Items
+  EventCallback<ShadcnQuestionnaireState> OnSubmit
+  ShadcnQuestionnaireShortcutMode Shortcuts
+  EventCallback<ShadcnQuestionnaireState> StateChanged
+  ShadcnQuestionnaireValidate Validate
+  ShadcnQuestionnaireValidateItem ValidateItem
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireActions
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireAnswer
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoice
+  RenderFragment ChildContent
+  String Value
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDefinition
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoices
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireController
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireError
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireInput
+  String AccessibleName
+  String Type
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireItem
+  RenderFragment ChildContent
+  String Name
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireItemDefinition
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireItemStatus: Unanswered, Answered, Skipped
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireNavigationResult
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireNext
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnairePrevious
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireProgress
+  String AccessibleName
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireShortcutMode: None, Letters, Numbers
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireSkip
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireState
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireSubmit
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireValidate
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireValidateItem
+enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnReactionSide: Top, Bottom
+type Maliev.ShadcnBlazor.Components.DataDisplay.IShadcnIdAllocator
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChart
+  Boolean Animated
+  Double BarRadius
+  IReadOnlyList<String> Categories
+  String CategoryLabel
+  ShadcnChartConfig Config
+  String Description
+  ShadcnDirection Direction
+  String EmptyText
+  String Error
+  Boolean HideLegendIcon
+  Boolean HideTooltipIndicator
+  Boolean HideTooltipLabel
+  String Id
+  ShadcnChartIndicator Indicator
+  Double InitialHeight
+  Double InitialWidth
+  String LabelKey
+  Boolean LegendInteractive
+  ShadcnChartLegendPlacement LegendPlacement
+  RenderFragment<IReadOnlyList<ShadcnChartSeries>> LegendTemplate
+  Boolean Loading
+  String LoadingText
+  String NameKey
+  IReadOnlyList<ShadcnChartSeries> Series
+  Boolean ShowAxis
+  Boolean ShowGrid
+  Boolean ShowLegend
+  Boolean ShowTicks
+  Boolean Stacked
+  Double StrokeWidth
+  String Title
+  RenderFragment<ShadcnChartTooltipContext> TooltipTemplate
+  ShadcnChartType Type
+  Func<Double, String> ValueFormatter
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartConfig
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartGeometry
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartIndicator: Dot, Line, Dashed
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartItemConfig
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartLegendContent
+  ShadcnChartConfig Config
+  IReadOnlySet<String> HiddenKeys
+  Boolean HideIcon
+  Boolean Interactive
+  String NameKey
+  IReadOnlyList<ShadcnChartSeries> Series
+  EventCallback<String> Toggled
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartLegendPlacement: Top, Bottom
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartSeries
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartShape
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTheme
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTooltipContent
+  String Category
+  ShadcnChartConfig Config
+  Boolean HideIndicator
+  Boolean HideLabel
+  ShadcnChartIndicator Indicator
+  String NameKey
+  Int32 PointIndex
+  IReadOnlyList<ShadcnChartSeries> Series
+  Func<Double, String> ValueFormatter
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTooltipContext
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartType: Bar, Line, Area, Pie, Donut
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableColumn`1
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableEngine
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableRequest
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableResult`1
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableSort
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableState
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTable`1
+  String ActionsLabel
+  Func<TItem, Boolean> CanSelect
+  String ColumnFilterLabel
+  IReadOnlyList<ShadcnDataTableColumn<TItem>> Columns
+  String ColumnsLabel
+  String EmptyText
+  String Error
+  String FilterPlaceholder
+  Func<TItem, Boolean> FilterPredicate
+  String FirstLabel
+  IReadOnlyList<TItem> Items
+  String LastLabel
+  Boolean Loading
+  RenderFragment LoadingContent
+  String LoadingText
+  Boolean Manual
+  String NextLabel
+  String PageSizeLabel
+  IReadOnlyList<Int32> PageSizeOptions
+  Func<Int32, Int32, String> PageSummary
+  String PreviousLabel
+  EventCallback<ShadcnDataTableRequest> RequestChanged
+  RenderFragment<TItem> RowActionTemplate
+  Func<TItem, String> RowKey
+  String SelectAllLabel
+  Func<TItem, String> SelectRowLabel
+  Boolean Selectable
+  Func<Int32, Int32, String> SelectionSummary
+  ShadcnDataTableState State
+  EventCallback<ShadcnDataTableState> StateChanged
+  Int32 TotalCount
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnIdAllocator
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSelectionState: Unchecked, Indeterminate, Checked
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSortDirection: Ascending, Descending
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTable
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableAlignment: Start, Center, End
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableBody
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableCaption
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableCell
+  RenderFragment ChildContent
+  Nullable<Int32> ColSpan
+  String Headers
+  Nullable<Int32> RowSpan
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableHead
+  RenderFragment ChildContent
+  Nullable<Int32> ColSpan
+  Nullable<Int32> RowSpan
+  ShadcnTableHeadScope Scope
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableHeadScope: Column, Row, ColumnGroup, RowGroup
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableRow
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Expanded
+  Boolean Selected
+type Maliev.ShadcnBlazor.Components.Direction.ShadcnDirectionProvider
+  RenderFragment ChildContent
+  Nullable<ShadcnDirection> Direction
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordion
+  RenderFragment ChildContent
+  Boolean Collapsible
+  Boolean Disabled
+  String Label
+  Boolean Loop
+  Boolean Multiple
+  ShadcnAccordionOrientation Orientation
+  IReadOnlyCollection<String> Values
+  EventCallback<IReadOnlyCollection<String>> ValuesChanged
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionItem
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Value
+enum Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionOrientation: Vertical, Horizontal
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionTrigger
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsible
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsibleContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsibleTrigger
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlert
+  ShadcnAlertRole AlertRole
+  RenderFragment ChildContent
+  ShadcnAlertVariant Variant
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertAction
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertIcon
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertRole: Alert, Status, None
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertTitle
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlertVariant: Default, Destructive
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnProgress
+  RenderFragment ChildContent
+  String Label
+  Double Maximum
+  Double Minimum
+  Boolean ShowValue
+  Nullable<Double> Value
+  Func<Double, String> ValueFormatter
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnProgressIndicator
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnProgressLabel
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnProgressTrack
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnProgressValue
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnSkeleton
+  ShadcnSkeletonAnimation Animation
+  Boolean Decorative
+  ShadcnSkeletonShape Shape
+enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSkeletonAnimation: Pulse, None
+enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSkeletonShape: Default, Circle
+type Maliev.ShadcnBlazor.Components.Feedback.ShadcnSpinner
+  String Label
+  String Size
+  ShadcnSpinnerRole SpinnerRole
+enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSpinnerRole: Status, None
+type Maliev.ShadcnBlazor.Components.Feedback.Toast.IShadcnToastService
+type Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastItem
+type Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastOptions
+enum Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastPlacement: BottomEnd, BottomStart, TopEnd, TopStart
+enum Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastPriority: Low, Normal, High
+type Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastService
+enum Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastSwipeDirections: None, Left, Right, Up, Down, All
+enum Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToastType: Default, Success, Info, Warning, Error, Loading
+type Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToaster
+  String CloseLabel
+  TimeSpan ExitDuration
+  Int32 MaximumVisible
+  ShadcnToastPlacement Placement
+  Boolean ReducedMotion
+  ShadcnToastSwipeDirections SwipeDirections
+  Double SwipeThreshold
+  String ViewportLabel
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendar
+  ShadcnCalendarCaptionLayout CaptionLayout
+  CultureInfo Culture
+  Nullable<ShadcnDirection> Direction
+  Boolean Disabled
+  Nullable<DayOfWeek> FirstDayOfWeek
+  Nullable<Int32> FromYear
+  Boolean Invalid
+  Func<DateOnly, Boolean> IsDateDisabled
+  Nullable<DateOnly> Max
+  Nullable<DateOnly> Min
+  ShadcnCalendarSelectionMode Mode
+  String NextLabel
+  String PreviousLabel
+  ShadcnDateRange Range
+  EventCallback<ShadcnDateRange> RangeChanged
+  Boolean ReadOnly
+  Boolean ShowOutsideDays
+  Boolean ShowWeekNumbers
+  Nullable<Int32> ToYear
+  DateOnly Today
+  Boolean UseCultureCalendarYears
+  Nullable<DateOnly> Value
+  EventCallback<Nullable<DateOnly>> ValueChanged
+  DateOnly VisibleMonth
+  EventCallback<DateOnly> VisibleMonthChanged
+  String WeekLabel
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarCaptionLayout: Label, Dropdown
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarSelectionMode: Single, Range
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnComboboxOption`1
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnCombobox`1
+  String ClearLabel
+  Boolean Disabled
+  String EmptyText
+  Boolean Invalid
+  RenderFragment<ShadcnComboboxOption<TValue>> ItemTemplate
+  Boolean Multiple
+  String Name
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  IReadOnlyList<ShadcnComboboxOption<TValue>> Options
+  String Placeholder
+  String Query
+  EventCallback<String> QueryChanged
+  Boolean ReadOnly
+  Boolean Required
+  Boolean ShowClear
+  Boolean ShowTrigger
+  String TriggerLabel
+  TValue Value
+  EventCallback<TValue> ValueChanged
+  Expression<Func<TValue>> ValueExpression
+  IReadOnlyList<TValue> Values
+  EventCallback<IReadOnlyList<TValue>> ValuesChanged
+  Expression<Func<IReadOnlyList<TValue>>> ValuesExpression
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnControlSize: Default, Small
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
+  Boolean AllowTextInput
+  String CalendarLabel
+  ShadcnCalendarCaptionLayout CaptionLayout
+  String ClearLabel
+  Boolean Clearable
+  CultureInfo Culture
+  Nullable<ShadcnDirection> Direction
+  Boolean Disabled
+  Nullable<DayOfWeek> FirstDayOfWeek
+  String Format
+  Nullable<Int32> FromYear
+  Boolean Invalid
+  Func<DateOnly, Boolean> IsDateDisabled
+  Nullable<DateOnly> Max
+  Nullable<DateOnly> Min
+  ShadcnCalendarSelectionMode Mode
+  String Name
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  String Placeholder
+  ShadcnDateRange Range
+  EventCallback<ShadcnDateRange> RangeChanged
+  Expression<Func<ShadcnDateRange>> RangeExpression
+  Boolean ReadOnly
+  Boolean Required
+  Boolean ShowOutsideDays
+  Boolean ShowWeekNumbers
+  String TextInputLabel
+  Nullable<Int32> ToYear
+  DateOnly Today
+  Nullable<DateOnly> Value
+  EventCallback<Nullable<DateOnly>> ValueChanged
+  Expression<Func<Nullable<DateOnly>>> ValueExpression
+  DateOnly VisibleMonth
+  EventCallback<DateOnly> VisibleMonthChanged
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDateRange
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnField
+  RenderFragment ChildContent
+  String DescriptionId
+  Boolean Disabled
+  String ErrorId
+  Boolean Invalid
+  ShadcnFieldOrientation Orientation
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldContext
+  String AriaDescribedBy
+  String DescriptionId
+  Boolean Disabled
+  String ErrorId
+  Boolean Invalid
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldDescription
+  RenderFragment ChildContent
+  String Id
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldError
+  RenderFragment ChildContent
+  IReadOnlyList<String> Errors
+  String Id
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldLabel
+  RenderFragment ChildContent
+  String For
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldLegend
+  RenderFragment ChildContent
+  ShadcnFieldLegendVariant Variant
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldLegendVariant: Legend, Label
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldOrientation: Vertical, Horizontal, Responsive
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldSeparator
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldSet
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFieldTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnFormComponentBase`1
+  IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]
+  String Class
+  Boolean Disabled
+  Boolean Invalid
+  String Name
+  Boolean ReadOnly
+  Boolean Required
+  String Style
+  TValue Value
+  EventCallback<TValue> ValueChanged
+  Expression<Func<TValue>> ValueExpression
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupAddon
+  ShadcnInputGroupAlignment Alignment
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupAlignment: InlineStart, InlineEnd, BlockStart, BlockEnd
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupButton
+  RenderFragment ChildContent
+  Boolean Disabled
+  EventCallback<MouseEventArgs> OnClick
+  ShadcnInputGroupButtonSize Size
+  String Type
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupButtonSize: ExtraSmall, Small, IconExtraSmall, IconSmall
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupText
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtp
+  String AutoComplete
+  RenderFragment ChildContent
+  String InputMode
+  Int32 MaxLength
+  String Pattern
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpContext
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpSeparator
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpSlot
+  Int32 Index
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnInput`1
+  String Accept
+  String AutoComplete
+  String Capture
+  EventCallback<InputFileChangeEventArgs> FilesChanged
+  String InputMode
+  Boolean Multiple
+  String Placeholder
+  String Type
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnLabel
+  RenderFragment ChildContent
+  String For
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnNativeSelectOptGroup
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnNativeSelectOption`1
+  RenderFragment ChildContent
+  Boolean Disabled
+  TValue Value
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnNativeSelect`1
+  RenderFragment ChildContent
+  String ControlClass
+  String ControlStyle
+  ShadcnControlSize Size
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelectOption`1
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelect`1
+  String ClearLabel
+  Boolean Clearable
+  RenderFragment<ShadcnSelectOption<TValue>> ItemTemplate
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  IReadOnlyList<ShadcnSelectOption<TValue>> Options
+  String Placeholder
+  ShadcnControlSize Size
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnTextarea`1
+  String Placeholder
+  Nullable<Int32> Rows
+type Maliev.ShadcnBlazor.Components.Layout.IShadcnResizableStateStore
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio
+  RenderFragment ChildContent
+  Double Ratio
+enum Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableDirection: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableGroup
+  RenderFragment ChildContent
+  ShadcnResizableDirection Direction
+  Boolean Disabled
+  Double KeyboardStep
+  EventCallback<Exception> OnPersistenceError
+  String PersistenceKey
+  IReadOnlyList<Double> Sizes
+  EventCallback<IReadOnlyList<Double>> SizesChanged
+  IShadcnResizableStateStore StateStore
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableHandle
+  String Label
+  Boolean WithHandle
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizablePanel
+  RenderFragment ChildContent
+  Double CollapsedSize
+  Boolean Collapsible
+  Double DefaultSize
+  String Id
+  Double MaximumSize
+  Double MinimumSize
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollArea
+  RenderFragment ChildContent
+  Int32 HideDelay
+  ShadcnScrollAreaType Type
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaCorner
+enum Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaOrientation: Vertical, Horizontal
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaScrollbar
+  RenderFragment ChildContent
+  ShadcnScrollAreaOrientation Orientation
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaThumb
+enum Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaType: Hover, Scroll, Auto, Always
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollAreaViewport
+  RenderFragment ChildContent
+  String Label
+  Int32 TabIndex
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumb
+  RenderFragment ChildContent
+  String Label
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbEllipsis
+  String Label
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbItem
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbLink
+  RenderFragment ChildContent
+  String Href
+  EventCallback<MouseEventArgs> OnClick
+  String Target
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbList
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbPage
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbSeparator
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenu
+  RenderFragment ChildContent
+  Int32 CloseDelay
+  Boolean Disabled
+  String Label
+  Boolean Loop
+  Int32 OpenDelay
+  ShadcnNavigationMenuOrientation Orientation
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuIndicator
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuItem
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Value
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuLink
+  RenderFragment ChildContent
+  Boolean Current
+  String Href
+  EventCallback<MouseEventArgs> OnClick
+  String Target
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuList
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuTrigger
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuViewport
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPagination
+  RenderFragment ChildContent
+  String Label
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationEllipsis
+  String Label
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationItem
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationLink
+  RenderFragment ChildContent
+  Boolean Current
+  Boolean Disabled
+  String Href
+  EventCallback<MouseEventArgs> OnClick
+  ShadcnPaginationLinkSize Size
+enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationLinkSize: Default, Icon
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationNext
+  Boolean Disabled
+  String Href
+  String Label
+  EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPrevious
+  Boolean Disabled
+  String Href
+  String Label
+  EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabs
+  ShadcnTabsActivationMode ActivationMode
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Loop
+  ShadcnTabsOrientation Orientation
+  String Value
+  EventCallback<String> ValueChanged
+enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsActivationMode: Automatic, Manual
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsContent
+  RenderFragment ChildContent
+  Boolean ForceMount
+  String Value
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsList
+  RenderFragment ChildContent
+  String Label
+enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Value
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.IShadcnSidebarStateStore
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebar
+  RenderFragment ChildContent
+  ShadcnSidebarCollapsible Collapsible
+  String Id
+  String Label
+  ShadcnSidebarSide Side
+  ShadcnSidebarVariant Variant
+enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarCollapsible: OffCanvas, Icon, None
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupAction
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+  EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupLabel
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarInput
+  Boolean Disabled
+  String Label
+  String Placeholder
+  String Type
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarInset
+  RenderFragment ChildContent
+  String Role
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenu
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuAction
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+  EventCallback<MouseEventArgs> OnClick
+  Boolean ShowOnHover
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuBadge
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButton
+  Boolean Active
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Href
+  EventCallback<MouseEventArgs> OnClick
+  ShadcnSidebarMenuButtonSize Size
+  String Target
+  String Tooltip
+  ShadcnSidebarMenuButtonVariant Variant
+enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButtonSize: Small, Default, Large
+enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButtonVariant: Default, Outline
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuItem
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSkeleton
+  Boolean ShowIcon
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSub
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSubButton
+  Boolean Active
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Href
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSubItem
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarProvider
+  RenderFragment ChildContent
+  String CloseLabel
+  String IconWidth
+  Boolean MobileOpen
+  EventCallback<Boolean> MobileOpenChanged
+  String MobileWidth
+  EventCallback<Exception> OnPersistenceError
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  String Shortcut
+  String StateKey
+  IShadcnSidebarStateStore StateStore
+  String ToggleLabel
+  String Width
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarRail
+  String TargetId
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarSeparator
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarSide: Left, Right
+type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarTrigger
+  RenderFragment ChildContent
+  String TargetId
+enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarVariant: Sidebar, Floating, Inset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialog
+  RenderFragment ChildContent
+  Boolean CloseOnEscape
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogAction
+  RenderFragment ChildContent
+  Boolean Disabled
+  EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogCancel
+  RenderFragment ChildContent
+  Boolean Disabled
+  EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogContent
+  RenderFragment ChildContent
+  ShadcnAlertDialogSize Size
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogMedia
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogSize: Default, Small
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommand
+  RenderFragment ChildContent
+  String Label
+  Boolean Loop
+  Boolean ShouldFilter
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandDialog
+  RenderFragment ChildContent
+  String Description
+  Boolean Loop
+  Boolean Modal
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  Boolean ShowCloseButton
+  String Title
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandEmpty
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandGroup
+  RenderFragment ChildContent
+  String Heading
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandInput
+  String AccessibleLabel
+  String Placeholder
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandItem
+  RenderFragment ChildContent
+  Boolean Disabled
+  IReadOnlyList<String> Keywords
+  EventCallback<String> OnSelect
+  String TextValue
+  String Value
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandList
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandSeparator
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandShortcut
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenu
+  RenderFragment ChildContent
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuCheckboxItem
+  Boolean Checked
+  EventCallback<Boolean> CheckedChanged
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuItem
+  RenderFragment ChildContent
+  Boolean CloseOnSelect
+  Boolean Disabled
+  Boolean Inset
+  EventCallback<MouseEventArgs> OnSelect
+  String TextValue
+  ShadcnMenuItemVariant Variant
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuLabel
+  RenderFragment ChildContent
+  Boolean Inset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuPortal
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuRadioGroup
+  RenderFragment ChildContent
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuRadioItem
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Value
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSeparator
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuShortcut
+  Boolean AriaHidden
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSub
+  RenderFragment ChildContent
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSubContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSubTrigger
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuTrigger
+  RenderFragment ChildContent
+  Boolean Focusable
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialog
+  RenderFragment ChildContent
+  Boolean CloseOnEscape
+  Boolean CloseOnOutsidePress
+  Boolean Modal
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogClose
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogContent
+  RenderFragment ChildContent
+  String CloseLabel
+  Boolean ShowCloseButton
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawer
+  RenderFragment ChildContent
+  Boolean DisablePointerDismissal
+  ShadcnDrawerModalMode ModalMode
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  Boolean ShowSwipeHandle
+  Nullable<ShadcnDrawerSnapPoint> SnapPoint
+  EventCallback<Nullable<ShadcnDrawerSnapPoint>> SnapPointChanged
+  IReadOnlyList<ShadcnDrawerSnapPoint> SnapPoints
+  ShadcnDrawerSwipeDirection SwipeDirection
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerClose
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerHeader
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerModalMode: Modal, NonModal, TrapFocus
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerSnapPoint
+  ShadcnDrawerSnapPointUnit Unit
+  Double Value
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerSnapPointUnit: Fraction, Pixels, Rem
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerSwipeDirection: Up, Right, Down, Left
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenu
+  RenderFragment ChildContent
+  Boolean Loop
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuCheckboxItem
+  Boolean Checked
+  EventCallback<Boolean> CheckedChanged
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuContent
+  ShadcnOverlayAlign Align
+  RenderFragment ChildContent
+  ShadcnOverlaySide Side
+  Double SideOffset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuItem
+  RenderFragment ChildContent
+  Boolean CloseOnSelect
+  Boolean Disabled
+  Boolean Inset
+  EventCallback<MouseEventArgs> OnSelect
+  String TextValue
+  ShadcnMenuItemVariant Variant
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuLabel
+  RenderFragment ChildContent
+  Boolean Inset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuPortal
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuRadioGroup
+  RenderFragment ChildContent
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuRadioItem
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Value
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSeparator
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuShortcut
+  Boolean AriaHidden
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSub
+  RenderFragment ChildContent
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSubContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSubTrigger
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCard
+  RenderFragment ChildContent
+  TimeSpan CloseDelay
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  TimeSpan OpenDelay
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCardContent
+  ShadcnOverlayAlign Align
+  Double AlignOffset
+  RenderFragment ChildContent
+  Double CollisionPadding
+  ShadcnOverlaySide Side
+  Double SideOffset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCardTrigger
+  RenderFragment ChildContent
+  String Href
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenuItemVariant: Default, Destructive
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubar
+  RenderFragment ChildContent
+  String Label
+  Boolean Loop
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarCheckboxItem
+  Boolean Checked
+  EventCallback<Boolean> CheckedChanged
+  RenderFragment ChildContent
+  Boolean CloseOnSelect
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarContent
+  ShadcnOverlayAlign Align
+  RenderFragment ChildContent
+  ShadcnOverlaySide Side
+  Double SideOffset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarGroup
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarItem
+  RenderFragment ChildContent
+  Boolean CloseOnSelect
+  Boolean Disabled
+  Boolean Inset
+  EventCallback<MouseEventArgs> OnSelect
+  String TextValue
+  ShadcnMenuItemVariant Variant
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarLabel
+  RenderFragment ChildContent
+  Boolean Inset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarMenu
+  RenderFragment ChildContent
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarPortal
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarRadioGroup
+  RenderFragment ChildContent
+  String Value
+  EventCallback<String> ValueChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarRadioItem
+  RenderFragment ChildContent
+  Boolean CloseOnSelect
+  Boolean Disabled
+  String Value
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSeparator
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarShortcut
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSub
+  RenderFragment ChildContent
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSubContent
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSubTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+  String TextValue
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnOverlayAlign: Start, Center, End
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnOverlaySide: Top, Right, Bottom, Left
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopover
+  RenderFragment ChildContent
+  Boolean CloseOnEscape
+  Boolean CloseOnOutsidePress
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverContent
+  ShadcnOverlayAlign Align
+  Double AlignOffset
+  RenderFragment ChildContent
+  Double CollisionPadding
+  ShadcnOverlaySide Side
+  Double SideOffset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverHeader
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheet
+  RenderFragment ChildContent
+  Boolean CloseOnEscape
+  Boolean CloseOnOutsidePress
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetClose
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Label
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetContent
+  RenderFragment ChildContent
+  String CloseLabel
+  Boolean ShowCloseButton
+  ShadcnSheetSide Side
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetDescription
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetFooter
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetHeader
+  RenderFragment ChildContent
+enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetSide: Top, Right, Bottom, Left
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetTitle
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetTrigger
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltip
+  RenderFragment ChildContent
+  Nullable<TimeSpan> CloseDelay
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  Nullable<TimeSpan> OpenDelay
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltipContent
+  ShadcnOverlayAlign Align
+  Double AlignOffset
+  RenderFragment ChildContent
+  Double CollisionPadding
+  ShadcnOverlaySide Side
+  Double SideOffset
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltipProvider
+  RenderFragment ChildContent
+  TimeSpan CloseDelay
+  TimeSpan OpenDelay
+type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltipTrigger
+  String AccessibleLabel
+  RenderFragment ChildContent
+  Boolean Disabled
+type Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+  IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]
+  String Class
+  String Style
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnCheckbox
+  Boolean Disabled
+  String FormValue
+  Boolean Invalid
+  String Name
+  Boolean ReadOnly
+  Nullable<Boolean> Value
+  EventCallback<Nullable<Boolean>> ValueChanged
+  Expression<Func<Nullable<Boolean>>> ValueExpression
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupItem`1
+  RenderFragment ChildContent
+  Boolean Disabled
+  TValue Value
+enum Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupOrientation: Vertical, Horizontal
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Invalid
+  String Name
+  ShadcnRadioGroupOrientation Orientation
+  Boolean ReadOnly
+  TValue Value
+  EventCallback<TValue> ValueChanged
+  Expression<Func<TValue>> ValueExpression
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnSlider
+  Boolean Disabled
+  String Form
+  Boolean Invalid
+  Double Maximum
+  Double Minimum
+  String Name
+  ShadcnSliderOrientation Orientation
+  Boolean ReadOnly
+  Boolean Required
+  Double Step
+  IReadOnlyList<ShadcnSliderThumbAttributes> ThumbAttributes
+  Func<Int32, String> ThumbLabelFormatter
+  Expression<Func<IReadOnlyList<Double>>> ValueExpression
+  IReadOnlyList<Double> Values
+  EventCallback<IReadOnlyList<Double>> ValuesChanged
+enum Maliev.ShadcnBlazor.Components.Selection.ShadcnSliderOrientation: Horizontal, Vertical
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnSliderThumbAttributes
+  IReadOnlyDictionary<String, Object> AdditionalAttributes
+  String AriaLabel
+  String AriaLabelledBy
+  String Form
+  String Id
+  String Name
+  Boolean Required
+type Maliev.ShadcnBlazor.Components.Selection.ShadcnSwitch
+  Boolean Disabled
+  String FormValue
+  Boolean Invalid
+  String Name
+  Boolean ReadOnly
+  ShadcnSwitchSize Size
+  Boolean Value
+  EventCallback<Boolean> ValueChanged
+  Expression<Func<Boolean>> ValueExpression
+enum Maliev.ShadcnBlazor.Components.Selection.ShadcnSwitchSize: Default, Small
+type Maliev.ShadcnBlazor.Components.ShadcnThemeProvider
+  IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]
+  RenderFragment ChildContent
+  String Class
+  Nullable<ShadcnDirection> Direction
+  Nullable<Boolean> IsDarkMode
+  Boolean ObserveSystemDarkModeChange
+  String Style
+  EventCallback<Boolean> SystemDarkModeChanged
+  ShadcnTheme Theme
+type Maliev.ShadcnBlazor.Components.Typography.ShadcnTypeset
+  RenderFragment ChildContent
+  String Flow
+  String Leading
+  String MaxWidth
+  String Size
+  String Tag
+type Maliev.ShadcnBlazor.Components.Typography.ShadcnTypography
+  RenderFragment ChildContent
+  ShadcnTypographyVariant Variant
+enum Maliev.ShadcnBlazor.Components.Typography.ShadcnTypographyVariant: H1, H2, H3, H4, Paragraph, Blockquote, InlineCode, Lead, Large, Small, Muted, UnorderedList, OrderedList
+type Maliev.ShadcnBlazor.Theming.ShadcnColorScheme
+  String Accent
+  String AccentForeground
+  String Background
+  String Border
+  String Card
+  String CardForeground
+  String Chart1
+  String Chart2
+  String Chart3
+  String Chart4
+  String Chart5
+  String Destructive
+  String DestructiveForeground
+  String Foreground
+  String Input
+  String Muted
+  String MutedForeground
+  String Popover
+  String PopoverForeground
+  String Primary
+  String PrimaryForeground
+  String Ring
+  String Secondary
+  String SecondaryForeground
+  String ShadowExtraSmall
+  String ShadowMedium
+  String ShadowSmall
+  String Sidebar
+  String SidebarAccent
+  String SidebarAccentForeground
+  String SidebarBorder
+  String SidebarForeground
+  String SidebarPrimary
+  String SidebarPrimaryForeground
+  String SidebarRing
+type Maliev.ShadcnBlazor.Theming.ShadcnContext
+  ShadcnDirection Direction
+  Boolean IsDarkMode
+enum Maliev.ShadcnBlazor.Theming.ShadcnContrastKind: Text, FocusRing, Boundary, DestructiveAdjacency, DisabledState
+type Maliev.ShadcnBlazor.Theming.ShadcnContrastResult
+  String BackgroundToken
+  String ForegroundToken
+  ShadcnContrastKind Kind
+  Boolean Passes
+  Double Ratio
+  Double RequiredRatio
+  String Scheme
+type Maliev.ShadcnBlazor.Theming.ShadcnCss
+  const String OverlayScopeClass
+  const String ScopeClass
+  const String StylesheetPath
+enum Maliev.ShadcnBlazor.Theming.ShadcnDirection: LeftToRight, RightToLeft
+type Maliev.ShadcnBlazor.Theming.ShadcnOptions
+  Boolean DefaultDarkMode
+  ShadcnDirection DefaultDirection
+  String FontFamily
+  TimeSpan ToastDuration
+  TimeSpan ToastExitDuration
+enum Maliev.ShadcnBlazor.Theming.ShadcnReducedMotionBehavior: RespectSystemPreference, AlwaysReduce
+type Maliev.ShadcnBlazor.Theming.ShadcnTheme
+  const Int32 CurrentSchemaVersion
+  ShadcnColorScheme Dark
+  ShadcnColorScheme Light
+  ShadcnThemeMetrics Metrics
+  String Name
+  Int32 SchemaVersion
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeCSharpWriter
+  method String Write(ShadcnTheme theme)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeCssWriter
+  method String Write(ShadcnTheme theme)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeFactory
+  method MudTheme Create(ShadcnOptions options)
+  method MudTheme Create(ShadcnTheme theme)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeMetrics
+  Double ControlHeightLargeRem
+  Double ControlHeightRem
+  Double ControlHeightSmallRem
+  Double FocusRingOffsetPx
+  Double FocusRingWidthPx
+  String FontFamily
+  String MonospaceFontFamily
+  Int32 MotionDurationMilliseconds
+  String MotionEasing
+  Double Radius2ExtraLargeScale
+  Double Radius3ExtraLargeScale
+  Double Radius4ExtraLargeScale
+  Double RadiusExtraLargeScale
+  Double RadiusLargeScale
+  Double RadiusMediumScale
+  Double RadiusRem
+  Double RadiusSmallScale
+  ShadcnReducedMotionBehavior ReducedMotionBehavior
+  Double SpacingScaleMultiplier
+type Maliev.ShadcnBlazor.Theming.ShadcnThemePreset
+  String DisplayName
+  String Id
+  ShadcnTheme Theme
+  method ShadcnTheme CreateTheme()
+type Maliev.ShadcnBlazor.Theming.ShadcnThemePresets
+  IReadOnlyList<ShadcnThemePreset> All
+  ShadcnThemePreset BaseVegaNeutral
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeSerializer
+  method ShadcnTheme Deserialize(String json)
+  method String Serialize(ShadcnTheme theme)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidationMessage
+  String Code
+  String Message
+  String Path
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidationResult
+  IReadOnlyList<ShadcnContrastResult> ContrastResults
+  IReadOnlyList<ShadcnThemeValidationMessage> Errors
+  Boolean IsValid
+  IReadOnlyList<ShadcnThemeValidationMessage> Warnings
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidator
+  const Double NonTextContrastRatio
+  const Double TextContrastRatio
+  method ShadcnThemeValidationResult Validate(ShadcnTheme theme)

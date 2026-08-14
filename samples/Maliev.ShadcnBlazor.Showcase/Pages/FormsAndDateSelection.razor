@@ -1,0 +1,152 @@
+@page "/components/forms-and-date-selection"
+@using System.Globalization
+@inject ShowcaseState State
+
+<PageTitle>Forms and date selection - Shadcn Blazor</PageTitle>
+
+<main class="documentation-page" data-testid="forms-date-fixture">
+    <header>
+        <p class="documentation-eyebrow">Plan 4 component family</p>
+        <h1>Forms and date selection</h1>
+        <p>Typed Blazor controls modeled on the pinned Shadcn Base primitives and Vega theme.</p>
+    </header>
+
+    <section aria-labelledby="install-heading">
+        <h2 id="install-heading">Installation</h2>
+        <pre><code>dotnet add package Maliev.ShadcnBlazor
+@@using Maliev.ShadcnBlazor.Components.Forms</code></pre>
+        <p>Load <code>shadcn-base.css</code>, <code>shadcn-forms.css</code>, and <code>shadcn-forms.js</code> from the package static assets.</p>
+    </section>
+
+    <form data-testid="forms-native-form" @onsubmit:preventDefault="true">
+    <section aria-labelledby="primitives-heading" data-testid="form-primitives">
+        <h2 id="primitives-heading">Input, Textarea, Native Select, and Input Group</h2>
+        <label>Part name <ShadcnInput TValue="string" @bind-Value="PartName" Name="partName" Placeholder="ชิ้นส่วน" /></label>
+        <label>Notes <ShadcnTextarea TValue="string" @bind-Value="Notes" Name="notes" Placeholder="Manufacturing notes" /></label>
+        <label>Priority
+            <ShadcnNativeSelect TValue="string" @bind-Value="Priority" Name="priority">
+                <ShadcnNativeSelectOptGroup Label="Production">
+                    <ShadcnNativeSelectOption TValue="string" Value="@("standard")">Standard</ShadcnNativeSelectOption>
+                    <ShadcnNativeSelectOption TValue="string" Value="@("urgent")">Urgent</ShadcnNativeSelectOption>
+                </ShadcnNativeSelectOptGroup>
+            </ShadcnNativeSelect>
+        </label>
+        <label>Read-only priority
+            <ShadcnNativeSelect TValue="string" @bind-Value="ReadOnlyPriority" ReadOnly="true" data-testid="forms-native-select-readonly">
+                <ShadcnNativeSelectOption TValue="string" Value="@("standard")">Standard</ShadcnNativeSelectOption>
+                <ShadcnNativeSelectOption TValue="string" Value="@("urgent")">Urgent</ShadcnNativeSelectOption>
+            </ShadcnNativeSelect>
+        </label>
+        <ShadcnInputGroup>
+            <ShadcnInputGroupAddon>THB</ShadcnInputGroupAddon>
+            <ShadcnInput TValue="decimal" @bind-Value="Budget" Name="budget" Type="number" InputMode="decimal" aria-label="Budget" />
+            <ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd">per part</ShadcnInputGroupAddon>
+        </ShadcnInputGroup>
+    </section>
+
+    <section aria-labelledby="otp-heading" data-testid="otp-evidence">
+        <h2 id="otp-heading">Input OTP</h2>
+        <ShadcnInputOtp @bind-Value="Otp" MaxLength="6" Pattern="[0-9]" Name="verificationCode" aria-label="Verification code">
+            <ShadcnInputOtpGroup>
+                @for (var index = 0; index < 3; index++) { <ShadcnInputOtpSlot Index="index" /> }
+            </ShadcnInputOtpGroup>
+            <ShadcnInputOtpSeparator />
+            <ShadcnInputOtpGroup>
+                @for (var index = 3; index < 6; index++) { <ShadcnInputOtpSlot Index="index" /> }
+            </ShadcnInputOtpGroup>
+        </ShadcnInputOtp>
+        <div dir="rtl" data-testid="forms-thai-otp-root">
+            <ShadcnInputOtp @bind-Value="ThaiOtp" MaxLength="4" InputMode="text" dir="rtl" data-testid="forms-thai-otp" aria-label="Thai verification code">
+                <ShadcnInputOtpGroup>
+                    @for (var index = 0; index < 4; index++) { <ShadcnInputOtpSlot Index="index" /> }
+                </ShadcnInputOtpGroup>
+            </ShadcnInputOtp>
+        </div>
+        <p>One native input owns focus, paste, autocomplete, and form submission; visual slots are presentational.</p>
+    </section>
+
+    <section aria-labelledby="choice-heading" data-testid="select-combobox-evidence">
+        <h2 id="choice-heading">Select and Combobox</h2>
+        <ShadcnSelect TValue="string" @bind-Value="Process" @bind-Open="SelectOpen" Options="ProcessOptions" Name="process" Required="true" Clearable="true" Placeholder="Choose a process" data-testid="forms-select" />
+        <ShadcnCombobox TValue="string" @bind-Value="Material" @bind-Query="MaterialQuery" @bind-Open="ComboboxOpen" Options="MaterialOptions" Name="material" Required="true" ShowClear="true" Placeholder="Search materials" aria-label="Material" data-testid="forms-combobox" />
+        <ShadcnCombobox TValue="string" Multiple="true" @bind-Values="Materials" @bind-Query="MultipleMaterialQuery" @bind-Open="MultipleComboboxOpen" Options="MaterialOptions" Name="materials" Placeholder="Select materials" aria-label="Materials" data-testid="forms-multiple-combobox" />
+    </section>
+
+    <section aria-labelledby="calendar-heading" data-testid="calendar-picker-evidence">
+        <h2 id="calendar-heading">Calendar and Date Picker</h2>
+        <ShadcnCalendar Mode="ShadcnCalendarSelectionMode.Range" @bind-Range="DeliveryWindow" @bind-VisibleMonth="VisibleMonth" Culture="ThaiCulture" ShowWeekNumbers="true" CaptionLayout="ShadcnCalendarCaptionLayout.Dropdown" FromYear="2025" ToYear="2030" data-testid="forms-calendar" />
+        <ShadcnDatePicker @bind-Value="DeliveryDate" @bind-Open="DatePickerOpen" Name="deliveryDate" Required="true" VisibleMonth="VisibleMonth" Culture="ThaiCulture" AllowTextInput="true" Clearable="true" Min="MinDate" Max="MaxDate" data-testid="forms-date-picker" />
+        <div dir="rtl" data-testid="rtl-calendar">
+            <ShadcnCalendar Value="DeliveryDate" VisibleMonth="VisibleMonth" Direction="ShadcnDirection.RightToLeft" Culture="ArabicCulture" />
+        </div>
+    </section>
+    </form>
+
+    <section aria-labelledby="visual-pairs-heading">
+        <h2 id="visual-pairs-heading">Pinned visual parity fixtures</h2>
+        <p>These deterministic states pair each Blazor control with the immutable Shadcn Base and Vega reference host.</p>
+        <div class="forms-reference-pairs">
+            <div data-pair-id="input-default" class="forms-reference-crop forms-reference-input"><ShadcnInput TValue="string" Value="@("Housing")" ReadOnly="true" aria-label="Part name" /></div>
+            <div data-pair-id="textarea-default" class="forms-reference-crop forms-reference-textarea"><ShadcnTextarea TValue="string" Value="@("Deburr all edges")" ReadOnly="true" aria-label="Notes" /></div>
+            <div data-pair-id="input-group-affixes" class="forms-reference-crop forms-reference-input-group"><ShadcnInputGroup><ShadcnInputGroupAddon>THB</ShadcnInputGroupAddon><ShadcnInput TValue="string" Value="@("1250")" ReadOnly="true" aria-label="Budget" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd">per part</ShadcnInputGroupAddon></ShadcnInputGroup></div>
+            <div data-pair-id="input-otp-partial" class="forms-reference-crop forms-reference-otp"><ShadcnInputOtp Value="123" MaxLength="6" ReadOnly="true" aria-label="Verification code"><ShadcnInputOtpGroup>@for (var index = 0; index < 3; index++) { <ShadcnInputOtpSlot Index="index" /> }</ShadcnInputOtpGroup><ShadcnInputOtpSeparator /><ShadcnInputOtpGroup>@for (var index = 3; index < 6; index++) { <ShadcnInputOtpSlot Index="index" /> }</ShadcnInputOtpGroup></ShadcnInputOtp></div>
+            <div data-pair-id="native-select-selected" class="forms-reference-crop forms-reference-native-select"><ShadcnNativeSelect TValue="string" Value="@("standard")" aria-label="Priority"><ShadcnNativeSelectOption TValue="string" Value="@("standard")">Standard</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("urgent")">Urgent</ShadcnNativeSelectOption></ShadcnNativeSelect></div>
+            <div data-pair-id="select-selected" class="forms-reference-crop forms-reference-select"><ShadcnSelect TValue="string" Value="@("cnc")" Options="VisualProcessOptions" aria-label="Process" /></div>
+            <div data-pair-id="combobox-selected" class="forms-reference-crop forms-reference-combobox"><ShadcnCombobox TValue="string" Value="@("Aluminium 6061")" Options="VisualMaterialOptions" ShowClear="true" aria-label="Material" /></div>
+            <div data-pair-id="calendar-range" class="forms-reference-crop forms-reference-calendar"><ShadcnCalendar Mode="ShadcnCalendarSelectionMode.Range" Range="VisualDeliveryWindow" VisibleMonth="VisibleMonth" Culture="InvariantCulture" /></div>
+            <div data-pair-id="date-picker-open" class="forms-reference-crop forms-reference-date-picker"><ShadcnDatePicker Value="DeliveryDate" @bind-Open="VisualDatePickerOpen" VisibleMonth="VisibleMonth" Culture="InvariantCulture" Format="MMMM d, yyyy" aria-label="Delivery date" /></div>
+        </div>
+    </section>
+
+    <section aria-labelledby="forms-heading">
+        <h2 id="forms-heading">Binding and forms</h2>
+        <p>Use <code>@@bind-Value</code>, <code>@@bind-Values</code>, or <code>@@bind-Range</code>. Name, Form, Required, Disabled, ReadOnly, Invalid, ValueExpression, and EditContext integration preserve native submission and validation semantics.</p>
+        <h3>Accessibility</h3>
+        <p>Always provide a visible label or accessible name. Field descriptions and caller-provided <code>aria-describedby</code> are merged. OTP uses one input; Select and Combobox expose listbox state; Calendar uses a labelled grid.</p>
+        <h3>Keyboard support</h3>
+        <p>Select and Combobox support arrows, Home, End, Enter, Escape, and typeahead. Calendar additionally supports Page Up/Down and Shift+Page Up/Down for year navigation.</p>
+        <h3>Customization</h3>
+        <p>Use Class, Style, AdditionalAttributes, control-specific class/style parameters, typed option templates, culture, format, date constraints, caption layout, logical direction, CSS tokens, and the live theme editor.</p>
+    </section>
+</main>
+
+@code {
+    [SupplyParameterFromQuery(Name = "theme")] public string? RequestedTheme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? RequestedDirection { get; set; }
+    private string PartName { get; set; } = "Housing";
+    private string Notes { get; set; } = "Deburr all edges";
+    private string Priority { get; set; } = "standard";
+    private string ReadOnlyPriority { get; set; } = "standard";
+    private decimal Budget { get; set; } = 1250m;
+    private string Otp { get; set; } = "123";
+    private string ThaiOtp { get; set; } = string.Empty;
+    private string Process { get; set; } = "cnc";
+    private string Material { get; set; } = "al6061";
+    private string MaterialQuery { get; set; } = string.Empty;
+    private string MultipleMaterialQuery { get; set; } = string.Empty;
+    private IReadOnlyList<string> Materials { get; set; } = ["al6061"];
+    private DateOnly VisibleMonth { get; set; } = new(2026, 8, 1);
+    private DateOnly? DeliveryDate { get; set; } = new DateOnly(2026, 8, 20);
+    private ShadcnDateRange? DeliveryWindow { get; set; } = new(new DateOnly(2026, 8, 18), new DateOnly(2026, 8, 22));
+    private DateOnly MinDate { get; } = new(2026, 1, 1);
+    private DateOnly MaxDate { get; } = new(2026, 12, 31);
+    private CultureInfo ThaiCulture { get; } = CultureInfo.GetCultureInfo("th-TH");
+    private CultureInfo ArabicCulture { get; } = CultureInfo.GetCultureInfo("ar-SA");
+    private CultureInfo InvariantCulture { get; } = CultureInfo.InvariantCulture;
+    private bool SelectOpen { get; set; }
+    private bool ComboboxOpen { get; set; }
+    private bool MultipleComboboxOpen { get; set; }
+    private bool DatePickerOpen { get; set; }
+    private bool VisualDatePickerOpen { get; set; }
+    private IReadOnlyList<ShadcnSelectOption<string>> ProcessOptions { get; } = [new("cnc", "CNC machining", "Subtractive"), new("slm", "Metal 3D printing", "Additive"), new("legacy", "Unavailable", "Other", true)];
+    private IReadOnlyList<ShadcnComboboxOption<string>> MaterialOptions { get; } = [new("al6061", "Aluminum 6061", "Metals"), new("ss316", "Stainless 316L", "Metals"), new("peek", "PEEK", "Polymers")];
+    private IReadOnlyList<ShadcnSelectOption<string>> VisualProcessOptions { get; } = [new("cnc", "CNC machining"), new("printing", "3D printing")];
+    private IReadOnlyList<ShadcnComboboxOption<string>> VisualMaterialOptions { get; } = [new("Aluminium 6061", "Aluminium 6061")];
+    private ShadcnDateRange VisualDeliveryWindow { get; } = new(new DateOnly(2026, 8, 18), new DateOnly(2026, 8, 22));
+
+    protected override void OnParametersSet()
+    {
+        if (RequestedTheme is not null) State.SetTheme(string.Equals(RequestedTheme, "dark", StringComparison.OrdinalIgnoreCase));
+        if (RequestedDirection is not null) State.SetDirection(string.Equals(RequestedDirection, "rtl", StringComparison.OrdinalIgnoreCase) ? ShadcnDirection.RightToLeft : ShadcnDirection.LeftToRight);
+    }
+}

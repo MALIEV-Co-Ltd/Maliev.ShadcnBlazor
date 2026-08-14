@@ -1,0 +1,19 @@
+.overlays-menus-evidence {
+    box-sizing: border-box;
+    width: 100vw;
+    min-height: 100vh;
+    padding: 32px;
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+}
+
+.overlays-menus-reference-crop {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    padding: 16px;
+    overflow: visible;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 12px;
+    background: var(--shadcn-background);
+}

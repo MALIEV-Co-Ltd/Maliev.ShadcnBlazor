@@ -1,0 +1,240 @@
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Theming
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-calendar")" style="@MergeStyle(null)" data-slot="calendar" dir="@DirectionValue" aria-invalid="@(Invalid ? "true" : null)">
+    <div class="shadcn-calendar-nav" data-slot="calendar-nav">
+        <button type="button" data-slot="calendar-previous" aria-label="@PreviousLabel" disabled="@(!CanNavigatePrevious || Disabled)" @onclick="PreviousAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6" /></svg></button>
+        @if (CaptionLayout == ShadcnCalendarCaptionLayout.Label)
+        {
+            <div class="shadcn-calendar-caption" data-slot="calendar-caption" aria-live="polite">@MonthLabel</div>
+        }
+        else
+        {
+            <div class="shadcn-calendar-dropdowns" data-slot="calendar-caption" aria-label="@MonthLabel">
+                <select data-slot="calendar-month-select" aria-label="Month" value="@EffectiveMonth.Month" disabled="@Disabled" @onchange="ChangeMonthAsync">
+                    @for (var month = 1; month <= 12; month++) { <option value="@month">@Culture.DateTimeFormat.GetMonthName(month)</option> }
+                </select>
+                <select data-slot="calendar-year-select" aria-label="Year" value="@EffectiveMonth.Year" disabled="@Disabled" @onchange="ChangeYearAsync">
+                    @for (var year = EffectiveFromYear; year <= EffectiveToYear; year++) { <option value="@year">@FormatYear(year)</option> }
+                </select>
+            </div>
+        }
+        <button type="button" data-slot="calendar-next" aria-label="@NextLabel" disabled="@(!CanNavigateNext || Disabled)" @onclick="NextAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg></button>
+    </div>
+    <div class="shadcn-calendar-grid" role="grid" aria-label="@MonthLabel" data-slot="calendar-grid">
+        <div class="shadcn-calendar-weekdays" role="row">
+            @if (ShowWeekNumbers) { <div role="columnheader" aria-label="@WeekLabel" data-slot="calendar-week-number-header">#</div> }
+            @foreach (var weekday in Weekdays) { <div class="shadcn-calendar-weekday" role="columnheader" data-slot="calendar-weekday"><abbr title="@weekday.Full">@weekday.Short</abbr></div> }
+        </div>
+        @foreach (var week in Weeks)
+        {
+            <div class="shadcn-calendar-week" role="row" data-slot="calendar-week">
+                @if (ShowWeekNumbers) { <div class="shadcn-calendar-week-number" role="rowheader">@WeekNumber(week[0])</div> }
+                @foreach (var date in week)
+                {
+                    var outside = date.Month != EffectiveMonth.Month;
+                    var disabled = IsDisabled(date);
+                    <div class="shadcn-calendar-day" role="gridcell" data-slot="calendar-cell" data-outside="@(outside ? "true" : null)" data-selected="@(IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)">
+                        @if (ShowOutsideDays || !outside)
+                        {
+                            <button class="shadcn-calendar-day-button" type="button" data-slot="calendar-day" data-day="@date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" data-today="@(date == Today ? "true" : null)" data-outside="@(outside ? "true" : null)" data-selected-single="@(Mode == ShadcnCalendarSelectionMode.Single && IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)" aria-label="@date.ToString("dddd, d MMMM yyyy", Culture)" aria-selected="@IsSelected(date).ToString().ToLowerInvariant()" aria-disabled="@(disabled ? "true" : null)" disabled="@(Disabled || disabled)" tabindex="@(date == FocusedDate && !disabled ? "0" : "-1")" @onclick="() => SelectAsync(date)" @onkeydown="args => HandleKeyDownAsync(date, args)">@date.Day</button>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private ShadcnContext ThemeContext { get; set; }
+    [Parameter] public ShadcnCalendarSelectionMode Mode { get; set; } = ShadcnCalendarSelectionMode.Single;
+    [Parameter] public ShadcnCalendarCaptionLayout CaptionLayout { get; set; } = ShadcnCalendarCaptionLayout.Label;
+    [Parameter] public int? FromYear { get; set; }
+    [Parameter] public int? ToYear { get; set; }
+    [Parameter] public DateOnly? Value { get; set; }
+    [Parameter] public EventCallback<DateOnly?> ValueChanged { get; set; }
+    [Parameter] public ShadcnDateRange? Range { get; set; }
+    [Parameter] public EventCallback<ShadcnDateRange?> RangeChanged { get; set; }
+    [Parameter] public DateOnly VisibleMonth { get; set; } = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    [Parameter] public EventCallback<DateOnly> VisibleMonthChanged { get; set; }
+    [Parameter] public DateOnly Today { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Parameter] public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
+    [Parameter] public DayOfWeek? FirstDayOfWeek { get; set; }
+    [Parameter] public bool ShowOutsideDays { get; set; } = true;
+    [Parameter] public bool ShowWeekNumbers { get; set; }
+    [Parameter] public DateOnly? Min { get; set; }
+    [Parameter] public DateOnly? Max { get; set; }
+    [Parameter] public Func<DateOnly, bool>? IsDateDisabled { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public ShadcnDirection? Direction { get; set; }
+    [Parameter] public string PreviousLabel { get; set; } = "Previous month";
+    [Parameter] public string NextLabel { get; set; } = "Next month";
+    [Parameter] public string WeekLabel { get; set; } = "Week";
+    [Parameter] public bool UseCultureCalendarYears { get; set; } = true;
+    private DateOnly FocusedDate;
+    private ElementReference Root;
+    private IJSObjectReference? Module;
+    private DateOnly? LastValue;
+    private ShadcnDateRange? LastRange;
+    private DateOnly LastVisibleMonth;
+    private DateOnly? PendingFocus;
+    private DateOnly EffectiveMonth => new(VisibleMonth.Year, VisibleMonth.Month, 1);
+    private DayOfWeek EffectiveFirstDay => FirstDayOfWeek ?? Culture.DateTimeFormat.FirstDayOfWeek;
+    private ShadcnDirection EffectiveDirection => Direction ?? ThemeContext.Direction;
+    private string DirectionValue => EffectiveDirection switch { ShadcnDirection.LeftToRight => "ltr", ShadcnDirection.RightToLeft => "rtl", _ => throw new ArgumentOutOfRangeException(nameof(Direction), EffectiveDirection, "Unknown direction.") };
+    private string MonthLabel => EffectiveMonth.ToString("MMMM yyyy", Culture);
+    private int EffectiveFromYear => FromYear ?? Min?.Year ?? EffectiveMonth.Year - 100;
+    private int EffectiveToYear => ToYear ?? Max?.Year ?? EffectiveMonth.Year + 100;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "dir", "aria-invalid");
+    private IReadOnlyList<(string Short, string Full)> Weekdays => Enumerable.Range(0, 7).Select(offset => (DayOfWeek)(((int)EffectiveFirstDay + offset) % 7)).Select(day => (Culture.DateTimeFormat.GetShortestDayName(day), Culture.DateTimeFormat.GetDayName(day))).ToArray();
+    private IReadOnlyList<DateOnly[]> Weeks { get { var offset = ((int)EffectiveMonth.DayOfWeek - (int)EffectiveFirstDay + 7) % 7; var start = EffectiveMonth.AddDays(-offset); return Enumerable.Range(0, 6).Select(week => Enumerable.Range(0, 7).Select(day => start.AddDays(week * 7 + day)).ToArray()).ToArray(); } }
+    private bool CanNavigatePrevious => Min is null || EffectiveMonth.AddDays(-1) >= Min.Value;
+    private bool CanNavigateNext => Max is null || EffectiveMonth.AddMonths(1) <= Max.Value;
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet(); _ = DirectionValue;
+        if (Min > Max) throw new ArgumentException("Min cannot be later than Max.");
+        if (Range?.End is not null && Range.End.Value < Range.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
+        if (EffectiveFromYear > EffectiveToYear) throw new ArgumentException("FromYear cannot be later than ToYear.");
+        if (FocusedDate == default || Value != LastValue || !Equals(Range, LastRange) || VisibleMonth != LastVisibleMonth || !IsVisibleEnabled(FocusedDate))
+        {
+            var candidate = PendingFocus is not null && PendingFocus.Value.Year == EffectiveMonth.Year && PendingFocus.Value.Month == EffectiveMonth.Month ? PendingFocus.Value
+                : Value is not null && Value.Value.Year == EffectiveMonth.Year && Value.Value.Month == EffectiveMonth.Month ? Value.Value
+                : Range?.Start is not null && Range.Start.Year == EffectiveMonth.Year && Range.Start.Month == EffectiveMonth.Month ? Range.Start
+                : Today.Year == EffectiveMonth.Year && Today.Month == EffectiveMonth.Month ? Today : EffectiveMonth;
+            FocusedDate = FindEnabledInMonth(candidate);
+        }
+        LastValue = Value; LastRange = Range; LastVisibleMonth = VisibleMonth;
+    }
+    private bool IsVisibleEnabled(DateOnly date)
+    {
+        var grid = Weeks;
+        return date >= grid[0][0] && date <= grid[^1][^1] && !IsDisabled(date);
+    }
+    private DateOnly FindEnabledInMonth(DateOnly candidate)
+    {
+        var monthStart = EffectiveMonth;
+        var monthEnd = EffectiveMonth.AddMonths(1).AddDays(-1);
+        var lower = Min is not null && Min.Value > monthStart ? Min.Value : monthStart;
+        var upper = Max is not null && Max.Value < monthEnd ? Max.Value : monthEnd;
+        if (lower > upper) return FindEnabled(candidate, 1);
+        var origin = candidate < lower ? lower : candidate > upper ? upper : candidate;
+        if (!IsDisabled(origin)) return origin;
+        var days = upper.DayNumber - lower.DayNumber;
+        for (var distance = 1; distance <= days; distance++)
+        {
+            var next = origin.AddDays(distance);
+            if (next <= upper && !IsDisabled(next)) return next;
+            var previous = origin.AddDays(-distance);
+            if (previous >= lower && !IsDisabled(previous)) return previous;
+        }
+        return FindEnabled(candidate, 1);
+    }
+    private bool IsDisabled(DateOnly date) => date < Min || date > Max || IsDateDisabled?.Invoke(date) == true;
+    private bool IsSelected(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Single ? Value == date : Range is not null && date >= Range.Start && date <= (Range.End ?? Range.Start);
+    private bool IsRangeStart(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.Start == date;
+    private bool IsRangeEnd(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End == date;
+    private bool IsRangeMiddle(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End is not null && date > Range.Start && date < Range.End;
+    private int WeekNumber(DateOnly date) => Culture.Calendar.GetWeekOfYear(date.ToDateTime(TimeOnly.MinValue), Culture.DateTimeFormat.CalendarWeekRule, EffectiveFirstDay);
+    private async Task PreviousAsync() { if (CanNavigatePrevious && !Disabled) await VisibleMonthChanged.InvokeAsync(EffectiveMonth.AddMonths(-1)); }
+    private async Task NextAsync() { if (CanNavigateNext && !Disabled) await VisibleMonthChanged.InvokeAsync(EffectiveMonth.AddMonths(1)); }
+    private async Task ChangeMonthAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var month) && month is >= 1 and <= 12) await VisibleMonthChanged.InvokeAsync(new(EffectiveMonth.Year, month, 1)); }
+    private async Task ChangeYearAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var year) && year >= EffectiveFromYear && year <= EffectiveToYear) await VisibleMonthChanged.InvokeAsync(new(year, EffectiveMonth.Month, 1)); }
+    private async Task SelectAsync(DateOnly date)
+    {
+        if (Disabled || ReadOnly || IsDisabled(date)) return;
+        FocusedDate = date;
+        if (Mode == ShadcnCalendarSelectionMode.Single) await ValueChanged.InvokeAsync(date);
+        else if (Range is null || Range.End is not null) await RangeChanged.InvokeAsync(new(date, null));
+        else await RangeChanged.InvokeAsync(date < Range.Start ? new(date, Range.Start) : new(Range.Start, date));
+    }
+    private async Task HandleKeyDownAsync(DateOnly date, KeyboardEventArgs args)
+    {
+        if (Disabled) return;
+        var horizontal = EffectiveDirection == ShadcnDirection.RightToLeft ? -1 : 1;
+        var requested = args.Key switch
+        {
+            "ArrowRight" => date.AddDays(horizontal), "ArrowLeft" => date.AddDays(-horizontal), "ArrowDown" => date.AddDays(7), "ArrowUp" => date.AddDays(-7),
+            "Home" => date.AddDays(-((int)date.DayOfWeek - (int)EffectiveFirstDay + 7) % 7),
+            "End" => date.AddDays(6 - ((int)date.DayOfWeek - (int)EffectiveFirstDay + 7) % 7),
+            "PageUp" => args.ShiftKey ? date.AddYears(-1) : date.AddMonths(-1), "PageDown" => args.ShiftKey ? date.AddYears(1) : date.AddMonths(1), _ => FocusedDate
+        };
+        var direction = requested >= date ? 1 : -1;
+        requested = ClampToBounds(requested);
+        var focusTarget = FindEnabledWithinBounds(requested, direction);
+        var gridStart = Weeks[0][0];
+        var gridEnd = Weeks[^1][^1];
+        if (focusTarget < gridStart || focusTarget > gridEnd)
+        {
+            PendingFocus = focusTarget;
+            await VisibleMonthChanged.InvokeAsync(new(focusTarget.Year, focusTarget.Month, 1));
+        }
+        else
+        {
+            FocusedDate = focusTarget;
+            if (FocusedDate.Year != EffectiveMonth.Year || FocusedDate.Month != EffectiveMonth.Month) await VisibleMonthChanged.InvokeAsync(new(FocusedDate.Year, FocusedDate.Month, 1));
+        }
+        if (args.Key is "Enter" or " ") await SelectAsync(FocusedDate);
+        if (args.Key is "ArrowRight" or "ArrowLeft" or "ArrowDown" or "ArrowUp" or "Home" or "End" or "PageUp" or "PageDown")
+        {
+            PendingFocus = focusTarget;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private DateOnly ClampToBounds(DateOnly date) => date < Min ? Min!.Value : date > Max ? Max!.Value : date;
+    private DateOnly FindEnabledWithinBounds(DateOnly candidate, int direction)
+    {
+        const int maximumSearchDaysPerDirection = 366;
+        var lower = Min ?? DateOnly.MinValue;
+        var upper = Max ?? DateOnly.MaxValue;
+        var origin = candidate < lower ? lower : candidate > upper ? upper : candidate;
+        if (!IsDisabled(origin)) return origin;
+        var searched = 0;
+        for (var dayNumber = origin.DayNumber + direction; dayNumber >= lower.DayNumber && dayNumber <= upper.DayNumber && searched < maximumSearchDaysPerDirection; dayNumber += direction, searched++)
+        {
+            var date = DateOnly.FromDayNumber(dayNumber);
+            if (!IsDisabled(date)) return date;
+        }
+        searched = 0;
+        for (var dayNumber = origin.DayNumber - direction; dayNumber >= lower.DayNumber && dayNumber <= upper.DayNumber && searched < maximumSearchDaysPerDirection; dayNumber -= direction, searched++)
+        {
+            var date = DateOnly.FromDayNumber(dayNumber);
+            if (!IsDisabled(date)) return date;
+        }
+        return FocusedDate != default && !IsDisabled(FocusedDate) ? FocusedDate : origin;
+    }
+    private DateOnly FindEnabled(DateOnly candidate, int direction)
+    {
+        var grid = Weeks;
+        var lower = grid[0][0] < (Min ?? grid[0][0]) ? Min!.Value : grid[0][0];
+        var upper = grid[^1][^1] > (Max ?? grid[^1][^1]) ? Max!.Value : grid[^1][^1];
+        var origin = candidate < lower ? lower : candidate > upper ? upper : candidate;
+        if (!IsDisabled(origin)) return origin;
+        var days = upper.DayNumber - lower.DayNumber;
+        for (var distance = 1; distance <= days; distance++)
+        {
+            var primary = origin.AddDays(distance * direction);
+            if (primary >= lower && primary <= upper && !IsDisabled(primary)) return primary;
+            var secondary = origin.AddDays(-distance * direction);
+            if (secondary >= lower && secondary <= upper && !IsDisabled(secondary)) return secondary;
+        }
+        return origin;
+    }
+    private string FormatYear(int year) => UseCultureCalendarYears ? Culture.Calendar.GetYear(new DateTime(year, 1, 1)).ToString(CultureInfo.InvariantCulture) : year.ToString(CultureInfo.InvariantCulture);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (PendingFocus is null) return;
+        var target = PendingFocus.Value;
+        PendingFocus = null;
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+        await Module.InvokeVoidAsync("focusCalendarDay", Root, target.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+    }
+    public async ValueTask DisposeAsync() { if (Module is not null) try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } }
+}

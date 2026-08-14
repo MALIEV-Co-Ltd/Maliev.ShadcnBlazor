@@ -1,0 +1,13 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<h3 class="shadcn-accordion-heading" data-slot="accordion-heading">
+    <button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-accordion-trigger")" style="@MergeStyle(null)" data-slot="accordion-trigger" data-state="@(Item.IsOpen ? "open" : "closed")" id="@Item.TriggerId" type="button" disabled="@Item.IsDisabled" aria-expanded="@(Item.IsOpen ? "true" : "false")" aria-controls="@Item.ContentId" @onclick="ToggleAsync" @onkeydown="HandleKeyDownAsync"><span data-slot="accordion-trigger-content">@ChildContent</span><svg data-slot="accordion-chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg></button>
+</h3>
+
+@code {
+    [CascadingParameter] private ShadcnAccordionItemContext Item { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "id", "type", "disabled", "aria-expanded", "aria-controls");
+    private Task ToggleAsync() => Item.Accordion.Owner.ToggleAsync(Item.Value, Item.Disabled).AsTask();
+    private Task HandleKeyDownAsync(KeyboardEventArgs args) => Item.Accordion.Owner.FocusFromAsync(Item.Value, args.Key).AsTask();
+}

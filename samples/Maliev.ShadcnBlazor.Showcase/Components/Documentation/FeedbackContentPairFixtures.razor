@@ -1,0 +1,65 @@
+<div class="feedback-pair-grid" data-testid="feedback-content-pairs" aria-label="Pinned-reference comparison fixtures">
+    <div class="feedback-pair-crop" data-pair-id="alert">
+        <ShadcnAlert>
+            <ShadcnAlertTitle>Payment processed</ShadcnAlertTitle>
+            <ShadcnAlertDescription>Production payment confirmed.</ShadcnAlertDescription>
+            <ShadcnAlertAction>Open</ShadcnAlertAction>
+        </ShadcnAlert>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="avatar">
+        <ShadcnAvatar>
+            <ShadcnAvatarFallback>NO</ShadcnAvatarFallback>
+            <ShadcnAvatarBadge />
+        </ShadcnAvatar>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="badge">
+        <ShadcnBadge>Ready</ShadcnBadge>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="card">
+        <ShadcnCard>
+            <ShadcnCardHeader>
+                <ShadcnCardTitle>Machine status</ShadcnCardTitle>
+                <ShadcnCardDescription>Production cell A</ShadcnCardDescription>
+                <ShadcnCardAction>Open</ShadcnCardAction>
+            </ShadcnCardHeader>
+            <ShadcnCardContent>Running</ShadcnCardContent>
+            <ShadcnCardFooter>Updated now</ShadcnCardFooter>
+        </ShadcnCard>
+    </div>
+    <div class="feedback-pair-crop feedback-pair-crop--carousel" data-pair-id="carousel">
+        <ShadcnCarousel Label="Carousel">
+            <ShadcnCarouselContent>
+                @for (var index = 0; index < 3; index++)
+                {
+                    var jobNumber = index + 1;
+                    <ShadcnCarouselItem Index="index">Job @jobNumber</ShadcnCarouselItem>
+                }
+            </ShadcnCarouselContent>
+            <ShadcnCarouselPrevious />
+            <ShadcnCarouselNext />
+        </ShadcnCarousel>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="progress">
+        <ShadcnProgress Value="64">
+            <ShadcnProgressLabel>Upload</ShadcnProgressLabel>
+            <ShadcnProgressValue />
+        </ShadcnProgress>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="skeleton">
+        <ShadcnSkeleton Style="width:128px;height:32px" />
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="spinner">
+        <ShadcnSpinner Label="Loading" />
+    </div>
+    <div class="feedback-pair-crop feedback-pair-crop--toast" data-pair-id="toast">
+        <span>Toast is rendered by the page toaster portal.</span>
+    </div>
+    <div class="feedback-pair-crop" data-pair-id="alert-destructive"><ShadcnAlert Variant="ShadcnAlertVariant.Destructive"><ShadcnAlertTitle>Machine stopped</ShadcnAlertTitle><ShadcnAlertDescription>Inspect cell A.</ShadcnAlertDescription></ShadcnAlert></div>
+    <div class="feedback-pair-crop" data-pair-id="avatar-group"><ShadcnAvatarGroup><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>AA</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>BB</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatarGroupCount Size="ShadcnAvatarSize.Small">+2</ShadcnAvatarGroupCount></ShadcnAvatarGroup></div>
+    <div class="feedback-pair-crop" data-pair-id="badge-outline"><ShadcnBadge Variant="ShadcnBadgeVariant.Outline" Href="#badge">Review</ShadcnBadge></div>
+    <div class="feedback-pair-crop" data-pair-id="card-small"><ShadcnCard Size="ShadcnCardSize.Small"><ShadcnCardHeader><ShadcnCardTitle>Compact card</ShadcnCardTitle></ShadcnCardHeader><ShadcnCardContent>Ready</ShadcnCardContent></ShadcnCard></div>
+    <div class="feedback-pair-crop" data-pair-id="progress-indeterminate"><ShadcnProgress><ShadcnProgressLabel>Loading</ShadcnProgressLabel></ShadcnProgress></div>
+    <div class="feedback-pair-crop feedback-pair-crop--vertical" data-pair-id="carousel-vertical"><ShadcnCarousel Orientation="ShadcnCarouselOrientation.Vertical" Label="Carousel"><ShadcnCarouselContent>@for (var index = 0; index < 3; index++) { var job = index + 1; <ShadcnCarouselItem Index="index">Job @job</ShadcnCarouselItem> }</ShadcnCarouselContent><ShadcnCarouselPrevious /><ShadcnCarouselNext /></ShadcnCarousel></div>
+    <div class="feedback-pair-crop" data-pair-id="avatar-loaded"><ShadcnAvatar><ShadcnAvatarImage Source="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%236b7280'/%3E%3C/svg%3E" Alt="Operator" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback></ShadcnAvatar></div>
+    <div class="feedback-pair-crop" data-pair-id="avatar-error"><ShadcnAvatar><ShadcnAvatarImage Source="/missing-avatar.webp" Alt="Unavailable operator" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback></ShadcnAvatar></div>
+</div>

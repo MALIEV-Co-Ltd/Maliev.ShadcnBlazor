@@ -1,0 +1,46 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<CascadingValue Value="Context" IsFixed="true"><nav @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu")" style="@MergeStyle(null)" data-slot="navigation-menu" data-orientation="@OrientationValue" data-state="@(EffectiveValue is null ? "closed" : "open")" aria-label="@Label">@ChildContent</nav></CascadingValue>
+@code {
+    [CascadingParameter] private ShadcnContext? Shadcn { get; set; }
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Loop { get; set; } = true;
+    [Parameter] public ShadcnNavigationMenuOrientation Orientation { get; set; } = ShadcnNavigationMenuOrientation.Horizontal;
+    [Parameter] public int OpenDelay { get; set; } = 200;
+    [Parameter] public int CloseDelay { get; set; } = 150;
+    [Parameter] public string Label { get; set; } = "Main navigation";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string? _effectiveValue; private string? _lastValue; private bool _initialized; private bool _contentRegisteredRender; private IJSObjectReference? _module; private CancellationTokenSource? _hover;
+    private ShadcnNavigationMenuContext Context { get; set; } = default!;
+    internal string? EffectiveValue => _effectiveValue;
+    private bool IsRtl => Shadcn?.Direction == ShadcnDirection.RightToLeft;
+    private string OrientationValue => Orientation == ShadcnNavigationMenuOrientation.Horizontal ? "horizontal" : "vertical";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-state", "aria-label");
+    protected override void OnInitialized() => Context = new(this);
+    protected override void OnParametersSet() { if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown navigation menu orientation."); if (OpenDelay < 0) throw new ArgumentOutOfRangeException(nameof(OpenDelay)); if (CloseDelay < 0) throw new ArgumentOutOfRangeException(nameof(CloseDelay)); if (!_initialized || Value != _lastValue) { _effectiveValue = Value; Context?.NotifyContentChanged(); } _lastValue = Value; _initialized = true; }
+    protected override Task OnAfterRenderAsync(bool firstRender) { if (!_contentRegisteredRender) { _contentRegisteredRender = true; StateHasChanged(); } return Task.CompletedTask; }
+    internal async ValueTask SetValueAsync(string? value) { if (Disabled || value == _effectiveValue) return; if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(value); else { _effectiveValue = value; await InvokeAsync(StateHasChanged); } }
+    internal void CancelScheduledValue() { _hover?.Cancel(); _hover?.Dispose(); _hover = null; }
+    internal async ValueTask ScheduleValueAsync(string? value, bool opening)
+    {
+        _hover?.Cancel(); _hover?.Dispose(); _hover = new();
+        try { await Task.Delay(opening ? OpenDelay : CloseDelay, _hover.Token); await SetValueAsync(value); }
+        catch (OperationCanceledException) { }
+    }
+    internal async ValueTask FocusTriggerAsync(string id) { _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("focusById", id); }
+    private async ValueTask FocusContentAsync(string id) { _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("focusFirstInId", id); }
+    internal async ValueTask HandleTriggerKeyAsync(string value, string key)
+    {
+        var enabled = Context.Items.Where(item => !item.Disabled).ToArray(); var current = Array.FindIndex(enabled, item => item.Value == value); if (current < 0) return;
+        if (key is "Enter" or " ") { await SetValueAsync(value); return; }
+        if (key == "ArrowDown" && Orientation == ShadcnNavigationMenuOrientation.Horizontal) { await SetValueAsync(value); await FocusContentAsync(enabled[current].ContentId); return; }
+        if (key == "Escape") { await SetValueAsync(null); await FocusTriggerAsync(enabled[current].TriggerId); return; }
+        var delta = key switch { "Home" => -int.MaxValue, "End" => int.MaxValue, "ArrowRight" when Orientation == ShadcnNavigationMenuOrientation.Horizontal => IsRtl ? -1 : 1, "ArrowLeft" when Orientation == ShadcnNavigationMenuOrientation.Horizontal => IsRtl ? 1 : -1, "ArrowDown" when Orientation == ShadcnNavigationMenuOrientation.Vertical => 1, "ArrowUp" when Orientation == ShadcnNavigationMenuOrientation.Vertical => -1, _ => 0 }; if (delta == 0) return;
+        var target = delta == -int.MaxValue ? 0 : delta == int.MaxValue ? enabled.Length - 1 : current + delta; target = Loop ? (target + enabled.Length) % enabled.Length : Math.Clamp(target, 0, enabled.Length - 1); await FocusTriggerAsync(enabled[target].TriggerId);
+    }
+    public async ValueTask DisposeAsync() { _hover?.Cancel(); _hover?.Dispose(); if (_module is not null) await _module.DisposeAsync(); }
+}

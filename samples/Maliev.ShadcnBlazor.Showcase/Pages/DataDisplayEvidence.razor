@@ -1,0 +1,55 @@
+@page "/evidence/data-display"
+@layout EvidenceLayout
+@using global::Maliev.ShadcnBlazor.Components.DataDisplay
+
+<PageTitle>Data display evidence</PageTitle>
+<ShadcnThemeProvider IsDarkMode="@IsDark" Direction="@Direction">
+    <main class="data-display-evidence" data-testid="data-display-evidence">
+        <section data-pair-id="@Case" data-page="@(Case == "data-table-paged" ? "2" : null)" class="data-display-reference-crop">
+            @if (Case.StartsWith("table-", StringComparison.Ordinal))
+            {
+                <ShadcnTable>
+                    <ShadcnTableCaption>Recent invoices</ShadcnTableCaption>
+                    <ShadcnTableHeader><ShadcnTableRow><ShadcnTableHead>Invoice</ShadcnTableHead><ShadcnTableHead>Status</ShadcnTableHead><ShadcnTableHead>Amount</ShadcnTableHead></ShadcnTableRow></ShadcnTableHeader>
+                    <ShadcnTableBody><ShadcnTableRow Selected="@(Case == "table-selected")" Expanded="@(Case == "table-expanded")"><ShadcnTableCell>INV001</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>฿8,500</ShadcnTableCell></ShadcnTableRow></ShadcnTableBody>
+                </ShadcnTable>
+            }
+            else if (Case.StartsWith("data-table-", StringComparison.Ordinal))
+            {
+                <ShadcnDataTable TItem="Payment" Items="Payments" Columns="Columns" RowKey="@(row => row.Id)" State="DataState" StateChanged="OnStateChanged" Loading="@(Case == "data-table-loading")" LoadingContent="LoadingFixture" FilterPlaceholder="Filter emails..." EmptyText="No results." RowActionTemplate="RowAction" data-evidence-loading="@(Case == "data-table-loading" ? "true" : null)" />
+            }
+            else
+            {
+                <ShadcnChart Id="data-display-evidence" Title="Visitors" Description="January through March" Type="ChartType" Config="ChartConfig" Categories="Categories" Series="Series" Direction="Direction" ShowGrid="true" ShowLegend="true" LegendInteractive="true" InitialWidth="656" InitialHeight="320" data-evidence-state="@Case" />
+            }
+        </section>
+    </main>
+</ShadcnThemeProvider>
+
+@code {
+    private sealed record Payment(string Id, string Email, string Status, double Amount);
+    [SupplyParameterFromQuery(Name = "state")] public string Case { get; set; } = "table-selected";
+    [SupplyParameterFromQuery(Name = "theme")] public string? RequestedTheme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? RequestedDirection { get; set; }
+    private static readonly Payment[] Payments = [new("1", "ken99@example.com", "success", 316), new("2", "Abe45@example.com", "success", 242), new("3", "Monserrat44@example.com", "processing", 837), new("4", "Silas22@example.com", "success", 874), new("5", "carmella@example.com", "failed", 721)];
+    private static readonly ShadcnDataTableColumn<Payment>[] Columns = [new("status", "Status", row => row.Status), new("email", "Email", row => row.Email) { Sortable = true, Filterable = true }, new("amount", "Amount", row => row.Amount) { Sortable = true, Alignment = ShadcnTableAlignment.End }];
+    private static readonly string[] Categories = ["Jan", "Feb", "Mar"];
+    private static readonly ShadcnChartConfig ChartConfig = new() { ["desktop"] = new("Desktop") { Theme = new("oklch(0.646 0.222 41.116)", "oklch(0.488 0.243 264.376)") }, ["mobile"] = new("Mobile") { Theme = new("oklch(0.6 0.118 184.704)", "oklch(0.696 0.17 162.48)") } };
+    private static readonly ShadcnChartSeries[] Series = [new("desktop", [186, 305, 237]), new("mobile", [80, 200, 120])];
+    private ShadcnDataTableState DataState { get; set; } = new() { PageSize = 2 };
+    private bool IsDark => string.Equals(RequestedTheme, "dark", StringComparison.OrdinalIgnoreCase);
+    private ShadcnDirection Direction => string.Equals(RequestedDirection, "rtl", StringComparison.OrdinalIgnoreCase) ? ShadcnDirection.RightToLeft : ShadcnDirection.LeftToRight;
+    // Dedicated states: chart-bar, chart-line, chart-area, chart-donut, chart-tooltip, chart-legend.
+    private ShadcnChartType ChartType => Case switch { "chart-line" => ShadcnChartType.Line, "chart-area" => ShadcnChartType.Area, "chart-donut" => ShadcnChartType.Donut, _ => ShadcnChartType.Bar };
+    private RenderFragment<Payment> RowAction => item => builder => { builder.OpenElement(0, "button"); builder.AddAttribute(1, "aria-label", $"Open {item.Email}"); builder.AddContent(2, "•••"); builder.CloseElement(); };
+    private RenderFragment LoadingFixture => builder => { builder.OpenElement(0, "div"); builder.AddAttribute(1, "data-slot", "data-table-loading-filter"); builder.AddAttribute(2, "style", "width:24rem;height:2.25rem;border-radius:var(--shadcn-radius-md);background:var(--shadcn-muted)"); builder.CloseElement(); builder.OpenElement(3, "div"); builder.AddAttribute(4, "data-slot", "data-table-loading-frame"); builder.AddAttribute(5, "style", "height:16rem;margin-top:1rem;border:1px solid var(--shadcn-border);border-radius:var(--shadcn-radius-md);background:var(--shadcn-muted)"); builder.CloseElement(); };
+    protected override void OnParametersSet() => DataState = Case switch
+    {
+        "data-table-sorted" => new() { PageSize = 10, Sorts = [new("email", ShadcnSortDirection.Ascending)] },
+        "data-table-filtered" => new() { PageSize = 10, Query = "ken99" },
+        "data-table-selected" => new() { PageSize = 10, SelectedKeys = new HashSet<string>(["1"], StringComparer.Ordinal) },
+        "data-table-paged" => new() { PageSize = 2, PageIndex = 1 },
+        _ => new() { PageSize = 10 }
+    };
+    private Task OnStateChanged(ShadcnDataTableState state) { DataState = state; return InvokeAsync(StateHasChanged); }
+}

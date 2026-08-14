@@ -1,0 +1,25 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-separator")"
+     style="@MergeStyle(null)"
+     role="@Role"
+     aria-hidden="@(Decorative ? "true" : null)"
+     aria-orientation="@AriaOrientation"
+     data-slot="separator"
+     data-orientation="@OrientationValue"></div>
+
+@code {
+    [Parameter] public ShadcnSeparatorOrientation Orientation { get; set; } = ShadcnSeparatorOrientation.Horizontal;
+    [Parameter] public bool Decorative { get; set; } = true;
+    private string OrientationValue => Orientation == ShadcnSeparatorOrientation.Vertical ? "vertical" : "horizontal";
+    private string Role => Decorative ? "none" : "separator";
+    private string? AriaOrientation => Decorative ? null : OrientationValue;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "role", "aria-hidden", "aria-orientation", "data-slot", "data-orientation");
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Orientation))
+            throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn separator orientation.");
+    }
+}

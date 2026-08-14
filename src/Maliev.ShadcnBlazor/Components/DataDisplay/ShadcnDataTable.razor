@@ -1,0 +1,227 @@
+@typeparam TItem
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-data-table")" style="@MergeStyle(null)" data-slot="data-table" aria-busy="@(Loading ? "true" : null)">
+    <div class="shadcn-data-table-toolbar" data-slot="data-table-toolbar">
+        <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
+        <fieldset class="shadcn-data-table-visibility" data-slot="data-table-visibility">
+            <legend class="shadcn-sr-only">@ColumnsLabel</legend>
+            @foreach (var column in OrderedColumns.Where(column => column.Hideable))
+            {
+                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@(!CurrentState.HiddenColumnKeys.Contains(column.Key))" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /> @column.Label</label>
+            }
+        </fieldset>
+        @foreach (var column in OrderedColumns.Where(column => column.Filterable))
+        {
+            var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
+            <input type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
+        }
+    </div>
+    @if (Loading)
+    {
+        <div data-slot="data-table-loading" role="status">@(LoadingContent ?? Text(LoadingText))</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <div data-slot="data-table-error" role="alert">@Error</div>
+    }
+    else
+    {
+        <div class="shadcn-data-table-frame">
+            <ShadcnTable>
+                <ShadcnTableHeader>
+                    <ShadcnTableRow>
+                        @if (Selectable)
+                        {
+                            <ShadcnTableHead Class="shadcn-data-table-select-cell">
+                                <input type="checkbox" data-slot="data-table-select-all" aria-label="@SelectAllLabel" aria-checked="@PageSelectionAria" checked="@(PageSelection == ShadcnSelectionState.Checked)" @onchange="OnSelectPage" />
+                            </ShadcnTableHead>
+                        }
+                        @foreach (var column in VisibleColumns)
+                        {
+                            <ShadcnTableHead Style="@ColumnStyle(column)" AdditionalAttributes="@(new Dictionary<string, object> { ["data-column"] = column.Key, ["aria-sort"] = SortAria(column) })">
+                                @if (column.Sortable)
+                                {
+                                    <button type="button" class="shadcn-data-table-sort" data-column="@column.Key" data-sort="@SortValue(column)" @onclick="eventArgs => ToggleSortAsync(column, eventArgs.ShiftKey)">
+                                        @(column.HeaderTemplate ?? Text(column.Label))<span aria-hidden="true">↕</span>
+                                    </button>
+                                }
+                                else { @(column.HeaderTemplate ?? Text(column.Label)) }
+                            </ShadcnTableHead>
+                        }
+                        @if (RowActionTemplate is not null) { <ShadcnTableHead><span class="shadcn-sr-only">@ActionsLabel</span></ShadcnTableHead> }
+                    </ShadcnTableRow>
+                </ShadcnTableHeader>
+                <ShadcnTableBody>
+                    @if (Result.PageRows.Count == 0)
+                    {
+                        <ShadcnTableRow><ShadcnTableCell ColSpan="@RenderedColumnCount" Class="shadcn-data-table-empty"><span data-slot="data-table-empty">@EmptyText</span></ShadcnTableCell></ShadcnTableRow>
+                    }
+                    else
+                    {
+                        @foreach (var item in Result.PageRows)
+                        {
+                            var key = RowKey(item);
+                            var selected = CurrentState.SelectedKeys.Contains(key);
+                            var enabled = CanSelect?.Invoke(item) != false;
+                            <ShadcnTableRow Selected="@selected" Disabled="@(!enabled)" AdditionalAttributes="@(new Dictionary<string, object> { ["data-row-key"] = key })">
+                                @if (Selectable)
+                                {
+                                    <ShadcnTableCell Class="shadcn-data-table-select-cell"><input type="checkbox" data-row-key="@key" aria-label="@SelectRowLabel(item)" checked="@selected" disabled="@(!enabled)" @onchange="eventArgs => OnRowSelectionChanged(item, eventArgs)" /></ShadcnTableCell>
+                                }
+                                @foreach (var column in VisibleColumns)
+                                {
+                                    <ShadcnTableCell Style="@ColumnStyle(column)" AdditionalAttributes="@(new Dictionary<string, object> { ["data-column"] = column.Key })">@(column.CellTemplate?.Invoke(item) ?? Text(column.Value(item)?.ToString() ?? string.Empty))</ShadcnTableCell>
+                                }
+                                @if (RowActionTemplate is not null) { <ShadcnTableCell>@RowActionTemplate(item)</ShadcnTableCell> }
+                            </ShadcnTableRow>
+                        }
+                    }
+                </ShadcnTableBody>
+            </ShadcnTable>
+        </div>
+    }
+    <div class="shadcn-data-table-footer" data-slot="data-table-footer">
+        <span data-slot="data-table-selection-summary" aria-live="polite">@SelectionSummary(Result.FilteredSelectedCount, Result.TotalCount)</span>
+        <span data-slot="data-table-page-summary">@PageSummary(Result.PageIndex + 1, Result.PageCount)</span>
+        <label><span class="shadcn-sr-only">@PageSizeLabel</span><select data-slot="data-table-page-size" aria-label="@PageSizeLabel" value="@CurrentState.PageSize" @onchange="OnPageSizeChanged">@foreach (var size in PageSizeOptions) { <option value="@size">@size</option> }</select></label>
+        <button type="button" data-slot="data-table-first" disabled="@(Result.PageIndex == 0)" @onclick="FirstPageAsync">@FirstLabel</button>
+        <button type="button" data-slot="data-table-previous" disabled="@(Result.PageIndex == 0)" @onclick="PreviousPageAsync">@PreviousLabel</button>
+        <button type="button" data-slot="data-table-next" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="NextPageAsync">@NextLabel</button>
+        <button type="button" data-slot="data-table-last" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="LastPageAsync">@LastLabel</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
+    [Parameter, EditorRequired] public IReadOnlyList<ShadcnDataTableColumn<TItem>> Columns { get; set; } = [];
+    [Parameter, EditorRequired] public Func<TItem, string> RowKey { get; set; } = default!;
+    [Parameter] public ShadcnDataTableState? State { get; set; }
+    [Parameter] public EventCallback<ShadcnDataTableState> StateChanged { get; set; }
+    [Parameter] public bool Manual { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public Func<TItem, bool>? FilterPredicate { get; set; }
+    [Parameter] public Func<TItem, bool>? CanSelect { get; set; }
+    [Parameter] public bool Selectable { get; set; } = true;
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public RenderFragment? LoadingContent { get; set; }
+    [Parameter] public RenderFragment<TItem>? RowActionTemplate { get; set; }
+    [Parameter] public string FilterPlaceholder { get; set; } = "Filter rows...";
+    [Parameter] public string ColumnsLabel { get; set; } = "Columns";
+    [Parameter] public string ColumnFilterLabel { get; set; } = "Filter {0}";
+    [Parameter] public string ActionsLabel { get; set; } = "Actions";
+    [Parameter] public string SelectAllLabel { get; set; } = "Select all";
+    [Parameter] public Func<TItem, string> SelectRowLabel { get; set; } = _ => "Select row";
+    [Parameter] public string EmptyText { get; set; } = "No results.";
+    [Parameter] public string LoadingText { get; set; } = "Loading...";
+    [Parameter] public string PreviousLabel { get; set; } = "Previous";
+    [Parameter] public string NextLabel { get; set; } = "Next";
+    [Parameter] public string FirstLabel { get; set; } = "First";
+    [Parameter] public string LastLabel { get; set; } = "Last";
+    [Parameter] public string PageSizeLabel { get; set; } = "Rows per page";
+    [Parameter] public IReadOnlyList<int> PageSizeOptions { get; set; } = [10, 25, 50, 100];
+    [Parameter] public EventCallback<ShadcnDataTableRequest> RequestChanged { get; set; }
+    [Parameter] public Func<int, int, string> SelectionSummary { get; set; } = (selected, total) => $"{selected} of {total} row(s) selected.";
+    [Parameter] public Func<int, int, string> PageSummary { get; set; } = (page, pages) => $"Page {page} of {pages}";
+
+    private ShadcnDataTableState _internalState = new();
+    private ShadcnDataTableState? _pendingReconciliation;
+    private ShadcnDataTableState CurrentState => State ?? _internalState;
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> OrderedColumns => Columns.OrderBy(column => column.Order).ThenBy(column => Array.IndexOf(Columns.ToArray(), column)).ToList();
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> VisibleColumns => OrderedColumns.Where(column => !CurrentState.HiddenColumnKeys.Contains(column.Key)).ToList();
+    private ShadcnDataTableResult<TItem> Result => Manual
+        ? ShadcnDataTableEngine.EvaluateManual(Items, CurrentState, TotalCount, RowKey)
+        : ShadcnDataTableEngine.Evaluate(Items, Columns, CurrentState, RowKey, FilterPredicate);
+    private ShadcnSelectionState PageSelection => ShadcnDataTableEngine.GetPageSelectionState(Result.PageRows, CurrentState.SelectedKeys, RowKey, CanSelect);
+    private string PageSelectionAria => PageSelection switch { ShadcnSelectionState.Checked => "true", ShadcnSelectionState.Indeterminate => "mixed", _ => "false" };
+    private int RenderedColumnCount => VisibleColumns.Count + (Selectable ? 1 : 0) + (RowActionTemplate is null ? 0 : 1);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "aria-busy");
+
+    protected override void OnParametersSet()
+    {
+        if (RowKey is null) throw new InvalidOperationException("Data table RowKey is required.");
+        if (State is not null && !StateChanged.HasDelegate) throw new InvalidOperationException("Controlled data-table State requires StateChanged.");
+        if (PageSizeOptions.Count == 0 || PageSizeOptions.Any(size => size < 1)) throw new InvalidOperationException("Page-size options must contain positive values.");
+        ShadcnDataTableEngine.ValidateColumns(Columns);
+        var result = Result;
+        if (!Manual)
+        {
+            var reconciled = ShadcnDataTableEngine.Reconcile(Items, Columns, CurrentState, RowKey);
+            reconciled = reconciled with { PageIndex = result.PageIndex };
+            if (reconciled.PageIndex != CurrentState.PageIndex || !reconciled.SelectedKeys.SetEquals(CurrentState.SelectedKeys)) _pendingReconciliation = reconciled;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingReconciliation is not { } reconciled) return;
+        _pendingReconciliation = null;
+        await PublishAsync(reconciled);
+    }
+
+    private async Task PublishAsync(ShadcnDataTableState next)
+    {
+        if (State is null) _internalState = next;
+        await StateChanged.InvokeAsync(next);
+        if (Manual) await RequestChanged.InvokeAsync(ShadcnDataTableRequest.FromState(next));
+    }
+
+    private Task OnFilterInput(ChangeEventArgs args) => PublishAsync(CurrentState with { Query = args.Value?.ToString() ?? string.Empty, PageIndex = 0 });
+    private Task ToggleSortAsync(ShadcnDataTableColumn<TItem> column, bool preserveExisting)
+    {
+        var current = CurrentState.Sorts.FirstOrDefault(sort => sort.ColumnKey == column.Key);
+        var next = preserveExisting
+            ? CurrentState.Sorts.Where(sort => sort.ColumnKey != column.Key).ToList()
+            : [];
+        var replacement = current switch
+        {
+            null => new ShadcnDataTableSort(column.Key, ShadcnSortDirection.Ascending),
+            { Direction: ShadcnSortDirection.Ascending } => new ShadcnDataTableSort(column.Key, ShadcnSortDirection.Descending),
+            _ => null
+        };
+        if (replacement is not null) next.Add(replacement);
+        return PublishAsync(CurrentState with { Sorts = next, PageIndex = 0 });
+    }
+    private Task OnColumnFilterInput(ShadcnDataTableColumn<TItem> column, ChangeEventArgs args)
+    {
+        var filters = new Dictionary<string, string>(CurrentState.ColumnFilters, StringComparer.Ordinal);
+        var value = args.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(value)) filters.Remove(column.Key); else filters[column.Key] = value;
+        return PublishAsync(CurrentState with { ColumnFilters = filters, PageIndex = 0 });
+    }
+    private Task OnVisibilityChanged(ShadcnDataTableColumn<TItem> column, ChangeEventArgs args)
+    {
+        var visible = args.Value as bool? ?? bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+        var hidden = new HashSet<string>(CurrentState.HiddenColumnKeys, StringComparer.Ordinal);
+        if (visible) hidden.Remove(column.Key); else hidden.Add(column.Key);
+        return PublishAsync(CurrentState with { HiddenColumnKeys = hidden });
+    }
+    private Task OnRowSelectionChanged(TItem item, ChangeEventArgs args)
+    {
+        var selected = args.Value as bool? ?? bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+        var keys = new HashSet<string>(CurrentState.SelectedKeys, StringComparer.Ordinal);
+        if (selected) keys.Add(RowKey(item)); else keys.Remove(RowKey(item));
+        return PublishAsync(CurrentState with { SelectedKeys = keys });
+    }
+    private Task OnSelectPage(ChangeEventArgs _) => PublishAsync(CurrentState with { SelectedKeys = ShadcnDataTableEngine.TogglePageSelection(Result.PageRows, CurrentState.SelectedKeys, RowKey, CanSelect) });
+    private Task PreviousPageAsync() => PublishAsync(CurrentState with { PageIndex = Math.Max(0, Result.PageIndex - 1) });
+    private Task NextPageAsync() => PublishAsync(CurrentState with { PageIndex = Math.Min(Result.PageCount - 1, Result.PageIndex + 1) });
+    private Task FirstPageAsync() => PublishAsync(CurrentState with { PageIndex = 0 });
+    private Task LastPageAsync() => PublishAsync(CurrentState with { PageIndex = Result.PageCount - 1 });
+    private Task OnPageSizeChanged(ChangeEventArgs args)
+    {
+        if (!int.TryParse(args.Value?.ToString(), out var size) || size < 1) return Task.CompletedTask;
+        return PublishAsync(CurrentState with { PageSize = size, PageIndex = 0 });
+    }
+    private static string ColumnStyle(ShadcnDataTableColumn<TItem> column)
+    {
+        var declarations = new List<string> { $"text-align: {column.Alignment.ToString().ToLowerInvariant()}" };
+        if (!string.IsNullOrWhiteSpace(column.Width)) declarations.Add($"width: {column.Width}");
+        if (!string.IsNullOrWhiteSpace(column.MinWidth)) declarations.Add($"min-width: {column.MinWidth}");
+        if (!string.IsNullOrWhiteSpace(column.MaxWidth)) declarations.Add($"max-width: {column.MaxWidth}");
+        return string.Join("; ", declarations);
+    }
+    private string SortValue(ShadcnDataTableColumn<TItem> column) => CurrentState.Sorts.FirstOrDefault(sort => sort.ColumnKey == column.Key)?.Direction switch { ShadcnSortDirection.Ascending => "ascending", ShadcnSortDirection.Descending => "descending", _ => "none" };
+    private string SortAria(ShadcnDataTableColumn<TItem> column) => SortValue(column);
+    private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+}

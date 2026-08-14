@@ -1,0 +1,9 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-accordion-content")" style="@MergeStyle(null)" data-slot="accordion-content" data-state="@(Item.IsOpen ? "open" : "closed")" id="@Item.ContentId" role="region" aria-labelledby="@Item.TriggerId" hidden="@(!Item.IsOpen)"><div data-slot="accordion-content-inner">@ChildContent</div></div>
+
+@code {
+    [CascadingParameter] private ShadcnAccordionItemContext Item { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "id", "role", "aria-labelledby", "hidden");
+}

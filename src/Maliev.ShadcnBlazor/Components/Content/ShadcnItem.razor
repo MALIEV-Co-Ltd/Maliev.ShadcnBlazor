@@ -1,0 +1,48 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+@Element
+
+@code {
+    [Parameter] public ShadcnItemVariant Variant { get; set; } = ShadcnItemVariant.Default;
+    [Parameter] public ShadcnItemSize Size { get; set; } = ShadcnItemSize.Default;
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string VariantValue => Variant switch
+    {
+        ShadcnItemVariant.Default => "default",
+        ShadcnItemVariant.Outline => "outline",
+        ShadcnItemVariant.Muted => "muted",
+        _ => throw Unknown(nameof(Variant), Variant)
+    };
+    private string SizeValue => Size switch
+    {
+        ShadcnItemSize.Default => "default",
+        ShadcnItemSize.Small => "sm",
+        _ => throw Unknown(nameof(Size), Size)
+    };
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, Href is null ? "div" : "a");
+        builder.AddMultipleAttributes(1, AttributesExcept("href", "data-slot", "data-variant", "data-size"));
+        builder.AddAttribute(2, "class", MergeClass("shadcn-item"));
+        builder.AddAttribute(3, "style", MergeStyle(null));
+        if (Href is not null)
+            builder.AddAttribute(4, "href", Href);
+        builder.AddAttribute(5, "data-slot", "item");
+        builder.AddAttribute(6, "data-variant", VariantValue);
+        builder.AddAttribute(7, "data-size", SizeValue);
+        builder.AddContent(8, ChildContent);
+        builder.CloseElement();
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Variant)) throw Unknown(nameof(Variant), Variant);
+        if (!Enum.IsDefined(Size)) throw Unknown(nameof(Size), Size);
+    }
+
+    private static ArgumentOutOfRangeException Unknown(string name, object value) =>
+        new(name, value, $"Unknown Shadcn item {name.ToLowerInvariant()}.");
+}

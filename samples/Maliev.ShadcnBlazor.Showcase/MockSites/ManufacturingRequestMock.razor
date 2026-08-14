@@ -1,0 +1,216 @@
+@namespace Maliev.ShadcnBlazor.Showcase.MockSites
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<article class="mock-site mock-manufacturing" data-mock-site="manufacturing" data-testid="manufacturing-request-mock" lang="@LocaleCode">
+    <header class="mock-product-header">
+        <div class="mock-brand"><div class="mock-brand-mark" aria-hidden="true">M</div><div><strong>MALIEV MAKE</strong><span>@Text("Manufacturing request", "คำขอผลิต")</span></div></div>
+        <nav aria-label="@Text("Request progress", "ความคืบหน้าคำขอ")"><ol class="mock-stepper"><li data-active="@(State.Manufacturing.Stage == ManufacturingStage.Details)"><span>1</span>@Text("Details", "รายละเอียด")</li><li data-active="@(State.Manufacturing.Stage == ManufacturingStage.Review)"><span>2</span>@Text("Review", "ตรวจสอบ")</li><li data-active="@(State.Manufacturing.Stage == ManufacturingStage.Success)"><span>3</span>@Text("Complete", "สำเร็จ")</li></ol></nav>
+    </header>
+
+    <main class="mock-request-content">
+        @if (State.Manufacturing.Stage == ManufacturingStage.Success)
+        {
+            <section class="mock-success-state" data-testid="manufacturing-success" role="status" aria-live="polite">
+                <div class="mock-success-icon" aria-hidden="true">✓</div>
+                <div data-testid="manufacturing-success-focus" tabindex="-1" @ref="_successResult"><ShadcnTypography Variant="ShadcnTypographyVariant.H2">@Text("Request received", "ได้รับคำขอแล้ว")</ShadcnTypography></div>
+                <ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("Your deterministic manufacturing request is ready for engineering review.", "คำขอผลิตจำลองพร้อมสำหรับการตรวจสอบโดยวิศวกร")</ShadcnTypography>
+                <ShadcnItem Variant="ShadcnItemVariant.Outline">
+                    <ShadcnItemContent><ShadcnItemTitle>@State.Manufacturing.RequestId</ShadcnItemTitle><ShadcnItemDescription>@State.Manufacturing.Project · @State.Manufacturing.Part</ShadcnItemDescription></ShadcnItemContent>
+                    <ShadcnItemActions><span class="mock-badge">@Text("Submitted", "ส่งแล้ว")</span></ShadcnItemActions>
+                </ShadcnItem>
+                <button type="button" class="mock-button" @onclick="Reset">@Text("Create another request", "สร้างคำขอใหม่")</button>
+            </section>
+        }
+        else
+        {
+            <header class="mock-page-heading">
+                <div><ShadcnTypography Variant="ShadcnTypographyVariant.H2">@Text("Request a manufactured part", "ขอผลิตชิ้นส่วน")</ShadcnTypography><ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("Configure a local, deterministic request. Nothing is uploaded.", "กำหนดค่าคำขอจำลองในเครื่อง ไม่มีการอัปโหลดข้อมูล")</ShadcnTypography></div>
+                <button type="button" class="mock-button mock-button-ghost" @onclick="Reset">@Text("Reset", "รีเซ็ต")</button>
+            </header>
+
+            <div class="mock-state-controls" role="group" aria-label="@Text("Preview request state", "ดูตัวอย่างสถานะคำขอ")">
+                <button type="button" data-testid="manufacturing-state-ready" @onclick="() => SetDisplayState(MockDisplayState.Ready)">@Text("Ready", "พร้อม")</button>
+                <button type="button" data-testid="manufacturing-state-loading" @onclick="() => SetDisplayState(MockDisplayState.Loading)">@Text("Loading", "กำลังโหลด")</button>
+                <button type="button" data-testid="manufacturing-state-empty" @onclick="() => SetDisplayState(MockDisplayState.Empty)">@Text("Empty", "ว่าง")</button>
+                <button type="button" data-testid="manufacturing-state-error" @onclick="() => SetDisplayState(MockDisplayState.Error)">@Text("Error", "ข้อผิดพลาด")</button>
+            </div>
+
+            @if (State.Manufacturing.DisplayState == MockDisplayState.Loading)
+            {
+                <div class="mock-skeleton-stack" data-testid="manufacturing-skeleton" aria-label="@Text("Loading request form", "กำลังโหลดแบบฟอร์มคำขอ")"><span></span><span></span><span></span></div>
+            }
+            else if (State.Manufacturing.DisplayState == MockDisplayState.Empty)
+            {
+                <ShadcnEmpty data-testid="manufacturing-empty"><ShadcnEmptyHeader><ShadcnEmptyTitle>@Text("No saved request", "ไม่มีคำขอที่บันทึกไว้")</ShadcnEmptyTitle><ShadcnEmptyDescription>@Text("Start with a new part configuration.", "เริ่มต้นด้วยการกำหนดค่าชิ้นส่วนใหม่")</ShadcnEmptyDescription></ShadcnEmptyHeader></ShadcnEmpty>
+            }
+            else if (State.Manufacturing.DisplayState == MockDisplayState.Error)
+            {
+                <div class="mock-alert" role="alert" data-testid="manufacturing-state-error-alert"><strong>@Text("Request form unavailable", "แบบฟอร์มคำขอไม่พร้อมใช้งาน")</strong><p>@Text("This local error preview is safe to retry.", "ตัวอย่างข้อผิดพลาดในเครื่องนี้สามารถลองใหม่ได้อย่างปลอดภัย")</p></div>
+            }
+            else
+            {
+                <div class="mock-request-grid">
+                <section class="mock-form-card" aria-labelledby="manufacturing-form-title">
+                    <ShadcnTypography Variant="ShadcnTypographyVariant.H3" data-testid="manufacturing-form-title">@Text("Part details", "รายละเอียดชิ้นส่วน")</ShadcnTypography>
+                    <ShadcnFieldGroup>
+                        <ShadcnField Invalid="@HasProjectError" DescriptionId="project-description" ErrorId="project-error">
+                            <ShadcnFieldLabel For="manufacturing-project">@Text("Project name", "ชื่อโครงการ")</ShadcnFieldLabel>
+                            <input id="manufacturing-project" data-testid="manufacturing-project" value="@State.Manufacturing.Project" @oninput="ProjectChanged" aria-invalid="@HasProjectError.ToString().ToLowerInvariant()" aria-describedby="@(HasProjectError ? "project-error" : "project-description")" />
+                            <ShadcnFieldDescription Id="project-description">@Text("A short reference for your team.", "ชื่ออ้างอิงสั้น ๆ สำหรับทีมของคุณ")</ShadcnFieldDescription>
+                            @if (HasProjectError) { <ShadcnFieldError Id="project-error" Errors="ProjectErrors" /> }
+                        </ShadcnField>
+                        <ShadcnField Invalid="@HasPartError" DescriptionId="part-description" ErrorId="part-error">
+                            <ShadcnFieldLabel For="manufacturing-part">@Text("Part name", "ชื่อชิ้นส่วน")</ShadcnFieldLabel>
+                            <input id="manufacturing-part" data-testid="manufacturing-part" value="@State.Manufacturing.Part" @oninput="PartChanged" aria-invalid="@HasPartError.ToString().ToLowerInvariant()" aria-describedby="@(HasPartError ? "part-error" : "part-description")" />
+                            <ShadcnFieldDescription Id="part-description">@Text("Use the drawing or assembly name.", "ใช้ชื่อแบบหรือชื่อชุดประกอบ")</ShadcnFieldDescription>
+                            @if (HasPartError) { <ShadcnFieldError Id="part-error" Errors="PartErrors" /> }
+                        </ShadcnField>
+                        <ShadcnField Invalid="@HasAttachmentError" DescriptionId="attachment-description" ErrorId="attachment-error">
+                            <ShadcnFieldLabel>@Text("CAD attachment", "ไฟล์ CAD")</ShadcnFieldLabel>
+                            <button type="button" class="mock-drop-zone" data-testid="manufacturing-attach" @onclick="Attach"><strong>@(State.Manufacturing.Attachment ?? Text("Choose a STEP file", "เลือกไฟล์ STEP"))</strong><span>@Text("Local simulation only · STEP, STL, or PDF", "จำลองในเครื่องเท่านั้น · STEP, STL หรือ PDF")</span></button>
+                            <ShadcnFieldDescription Id="attachment-description">@Text("File contents never leave this showcase.", "เนื้อหาไฟล์จะไม่ออกจากหน้าตัวอย่างนี้")</ShadcnFieldDescription>
+                            @if (HasAttachmentError) { <ShadcnFieldError Id="attachment-error" Errors="AttachmentErrors" /> }
+                        </ShadcnField>
+                        <div class="mock-field-row">
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-material">@Text("Material", "วัสดุ")</ShadcnFieldLabel><select id="manufacturing-material" value="@State.Manufacturing.Material" @onchange="MaterialChanged"><option>Aluminum 6061</option><option>Stainless 304</option><option>PA-CF</option></select></ShadcnField>
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-process">@Text("Process", "กระบวนการ")</ShadcnFieldLabel><select id="manufacturing-process" value="@State.Manufacturing.Process" @onchange="ProcessChanged"><option>CNC milling</option><option>CNC turning</option><option>FDM printing</option></select></ShadcnField>
+                        </div>
+                        <div class="mock-field-row">
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-finish">@Text("Finish", "ผิวสำเร็จ")</ShadcnFieldLabel><select id="manufacturing-finish" value="@State.Manufacturing.Finish" @onchange="FinishChanged"><option>As machined</option><option>Bead blasted</option><option>Black anodized</option></select></ShadcnField>
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-date">@Text("Required date", "วันที่ต้องการ")</ShadcnFieldLabel><input type="date" id="manufacturing-date" value="@State.Manufacturing.RequiredDate" @onchange="DateChanged" /></ShadcnField>
+                        </div>
+                        <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal">
+                            <input type="checkbox" class="mock-checkbox" checked="@State.Manufacturing.InspectionReport" @onchange="InspectionChanged" aria-label="@Text("Include dimensional inspection report", "รวมรายงานตรวจสอบมิติ")" />
+                            <ShadcnFieldContent><ShadcnFieldTitle>@Text("Dimensional inspection report", "รายงานตรวจสอบมิติ")</ShadcnFieldTitle><ShadcnFieldDescription>@Text("Add a measured first-article report.", "เพิ่มรายงานวัดชิ้นงานตัวอย่างแรก")</ShadcnFieldDescription></ShadcnFieldContent>
+                        </ShadcnField>
+                    </ShadcnFieldGroup>
+                    @if (State.Manufacturing.Errors.Count > 0)
+                    {
+                        <div class="mock-alert" role="alert" data-testid="manufacturing-errors"><strong>@Text("Check the request", "ตรวจสอบคำขอ")</strong><ul>@foreach (var error in State.Manufacturing.Errors) { <li>@ValidationText(error)</li> }</ul></div>
+                    }
+                    <div class="mock-form-actions">
+                        @if (State.Manufacturing.Stage == ManufacturingStage.Details)
+                        {
+                            <button type="button" class="mock-button" @onclick="Review" data-testid="manufacturing-review">@Text("Review request", "ตรวจสอบคำขอ")</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="mock-button" @onclick="OpenConfirmation" @ref="_confirmationOpener" data-testid="manufacturing-open-confirmation">@Text("Submit request", "ส่งคำขอ")</button>
+                            <button type="button" class="mock-button mock-button-outline" @onclick="BackToDetails">@Text("Edit details", "แก้ไขรายละเอียด")</button>
+                        }
+                    </div>
+                </section>
+
+                <aside class="mock-quote-card" aria-labelledby="quote-summary-title">
+                    <ShadcnTypography Variant="ShadcnTypographyVariant.H3" data-testid="quote-summary-title">@Text("Request summary", "สรุปคำขอ")</ShadcnTypography>
+                    <ShadcnItemGroup>
+                        <ShadcnItem Size="ShadcnItemSize.Small"><ShadcnItemContent><ShadcnItemDescription>@Text("Process", "กระบวนการ")</ShadcnItemDescription><ShadcnItemTitle>@State.Manufacturing.Process</ShadcnItemTitle></ShadcnItemContent></ShadcnItem>
+                        <ShadcnItem Size="ShadcnItemSize.Small"><ShadcnItemContent><ShadcnItemDescription>@Text("Material", "วัสดุ")</ShadcnItemDescription><ShadcnItemTitle>@State.Manufacturing.Material</ShadcnItemTitle></ShadcnItemContent></ShadcnItem>
+                        <ShadcnItem Size="ShadcnItemSize.Small"><ShadcnItemContent><ShadcnItemDescription>@Text("Finish", "ผิวสำเร็จ")</ShadcnItemDescription><ShadcnItemTitle>@State.Manufacturing.Finish</ShadcnItemTitle></ShadcnItemContent></ShadcnItem>
+                    </ShadcnItemGroup>
+                    <ShadcnSeparator />
+                    <div class="mock-estimate"><span>@Text("Illustrative estimate", "ราคาประเมินตัวอย่าง")</span><strong>฿12,480</strong><small>@Text("Excludes VAT and shipping", "ไม่รวมภาษีมูลค่าเพิ่มและค่าขนส่ง")</small></div>
+                    <div class="mock-progress-track" role="progressbar" aria-label="@Text("Request completeness", "ความสมบูรณ์ของคำขอ")" aria-valuenow="@Completeness" aria-valuemin="0" aria-valuemax="100"><span style="@($"width:{Completeness}%")"></span></div>
+                    <small>@Text($"{Completeness}% request complete", $"คำขอสมบูรณ์ {Completeness}%")</small>
+                </aside>
+                </div>
+            }
+        }
+
+        @if (State.Manufacturing.ConfirmationOpen)
+        {
+             <div class="mock-dialog-backdrop" @onkeydown="DialogKeyDown">
+                <section class="mock-dialog" role="dialog" aria-modal="true" aria-labelledby="manufacturing-confirm-title" @ref="_dialog">
+                    <ShadcnTypography Variant="ShadcnTypographyVariant.H3" data-testid="manufacturing-confirm-title">@Text("Submit manufacturing request?", "ส่งคำขอผลิตหรือไม่")</ShadcnTypography>
+                    <ShadcnTypography Variant="ShadcnTypographyVariant.Muted">@Text("This demo creates a local confirmation only. No information is sent.", "ตัวอย่างนี้สร้างการยืนยันในเครื่องเท่านั้น ไม่มีการส่งข้อมูล")</ShadcnTypography>
+                    <div class="mock-dialog-actions"><button type="button" class="mock-button" @onclick="ConfirmAsync" data-testid="manufacturing-confirm">@Text("Confirm request", "ยืนยันคำขอ")</button><button type="button" class="mock-button mock-button-outline" @onclick="CloseConfirmationAsync" data-testid="manufacturing-cancel">@Text("Cancel", "ยกเลิก")</button></div>
+                </section>
+            </div>
+        }
+        <div class="visually-hidden" role="status" aria-live="polite">@AnnouncementText</div>
+    </main>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public MockSiteState State { get; set; } = null!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    private string LocaleCode => Locale == ThemeStudioLocale.Thai ? "th" : "en";
+    private ElementReference _confirmationOpener;
+    private ElementReference _dialog;
+    private ElementReference _successResult;
+    private bool _focusDialog;
+    private bool _focusSuccess;
+    private bool _overlayActive;
+    private bool HasProjectError => State.Manufacturing.Errors.Contains(ManufacturingValidationError.ProjectRequired);
+    private bool HasPartError => State.Manufacturing.Errors.Contains(ManufacturingValidationError.PartRequired);
+    private bool HasAttachmentError => State.Manufacturing.Errors.Contains(ManufacturingValidationError.AttachmentRequired);
+    private IReadOnlyList<string?> ProjectErrors => HasProjectError ? [ValidationText(ManufacturingValidationError.ProjectRequired)] : [];
+    private IReadOnlyList<string?> PartErrors => HasPartError ? [ValidationText(ManufacturingValidationError.PartRequired)] : [];
+    private IReadOnlyList<string?> AttachmentErrors => HasAttachmentError ? [ValidationText(ManufacturingValidationError.AttachmentRequired)] : [];
+    private int Completeness => new[] { State.Manufacturing.Project, State.Manufacturing.Part, State.Manufacturing.Attachment }.Count(value => !string.IsNullOrWhiteSpace(value)) * 25 + 25;
+    private void ProjectChanged(ChangeEventArgs args) => State.SetManufacturingProject(args.Value?.ToString());
+    private void PartChanged(ChangeEventArgs args) => State.SetManufacturingPart(args.Value?.ToString());
+    private void MaterialChanged(ChangeEventArgs args) => State.SetManufacturingMaterial(args.Value?.ToString());
+    private void ProcessChanged(ChangeEventArgs args) => State.SetManufacturingProcess(args.Value?.ToString());
+    private void FinishChanged(ChangeEventArgs args) => State.SetManufacturingFinish(args.Value?.ToString());
+    private void DateChanged(ChangeEventArgs args) => State.SetManufacturingRequiredDate(args.Value?.ToString());
+    private void InspectionChanged(ChangeEventArgs args) => State.SetManufacturingInspectionReport(args.Value is true);
+    private void Attach() => State.AttachManufacturingFile();
+    private void Review() => State.ReviewManufacturingRequest();
+    private void BackToDetails() => State.SetManufacturingStage(ManufacturingStage.Details);
+    private void OpenConfirmation() { if (State.OpenManufacturingConfirmation()) _focusDialog = true; }
+    private async Task CloseConfirmationAsync() { await CleanupOverlayAsync(); State.CloseManufacturingConfirmation(); await _confirmationOpener.FocusAsync(); }
+    private async Task ConfirmAsync() { await CleanupOverlayAsync(); State.ConfirmManufacturingRequest(); _focusSuccess = true; }
+    private void Reset() => State.Reset(ThemeStudioMockup.ManufacturingRequest);
+    private void SetDisplayState(MockDisplayState value) => State.SetManufacturingDisplayState(value);
+    private string Text(string english, string thai) => Locale == ThemeStudioLocale.Thai ? thai : english;
+    private string ValidationText(ManufacturingValidationError error) => error switch
+    {
+        ManufacturingValidationError.ProjectRequired => Text("Project name is required.", "กรุณาระบุชื่อโครงการ"),
+        ManufacturingValidationError.PartRequired => Text("Part name is required.", "กรุณาระบุชื่อชิ้นส่วน"),
+        ManufacturingValidationError.AttachmentRequired => Text("A CAD attachment is required.", "กรุณาแนบไฟล์ CAD"),
+        _ => string.Empty
+    };
+    private string AnnouncementText => State.Manufacturing.Announcement switch
+    {
+        MockAnnouncement.AttachmentAdded => Text($"{State.Manufacturing.AnnouncementSubject} attached.", $"แนบไฟล์ {State.Manufacturing.AnnouncementSubject} แล้ว"),
+        MockAnnouncement.ValidationFailed => Text("Please resolve the highlighted fields.", "กรุณาแก้ไขช่องข้อมูลที่ระบุ"),
+        MockAnnouncement.ReviewReady => Text("Request ready for final review.", "คำขอพร้อมสำหรับการตรวจสอบขั้นสุดท้าย"),
+        MockAnnouncement.ManufacturingConfirmed => Text($"Manufacturing request {State.Manufacturing.AnnouncementSubject} created successfully.", $"สร้างคำขอผลิต {State.Manufacturing.AnnouncementSubject} สำเร็จแล้ว"),
+        _ => string.Empty
+    };
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusDialog)
+        {
+            _focusDialog = false;
+            await JavaScript.InvokeVoidAsync("mockSiteOverlay.open", _dialog);
+            _overlayActive = true;
+        }
+        else if (_overlayActive && !State.Manufacturing.ConfirmationOpen)
+        {
+            await CleanupOverlayAsync();
+        }
+        if (_focusSuccess)
+        {
+            _focusSuccess = false;
+            await _successResult.FocusAsync();
+        }
+    }
+    private async Task DialogKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape") await CloseConfirmationAsync();
+    }
+    private async ValueTask CleanupOverlayAsync()
+    {
+        if (!_overlayActive) return;
+        await JavaScript.InvokeVoidAsync("mockSiteOverlay.close", _dialog);
+        _overlayActive = false;
+    }
+    public async ValueTask DisposeAsync()
+    {
+        try { await CleanupOverlayAsync(); }
+        catch (Exception exception) when (exception is JSDisconnectedException or ObjectDisposedException or TaskCanceledException or OperationCanceledException) { }
+    }
+}

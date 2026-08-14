@@ -1,0 +1,28 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<span @attributes="ForwardedAttributes"
+      class="@MergeClass("shadcn-button-group-separator")"
+      style="@MergeStyle(null)"
+      data-slot="button-group-separator"
+      role="separator"
+      aria-orientation="@OrientationValue"></span>
+
+@code {
+    [CascadingParameter] internal ShadcnButtonGroupContext? Context { get; set; }
+    [Parameter] public ShadcnButtonGroupOrientation? Orientation { get; set; }
+
+    private ShadcnButtonGroupOrientation EffectiveOrientation => Orientation ?? ShadcnButtonGroupOrientation.Vertical;
+    private string OrientationValue => EffectiveOrientation switch
+    {
+        ShadcnButtonGroupOrientation.Horizontal => "horizontal",
+        ShadcnButtonGroupOrientation.Vertical => "vertical",
+        _ => throw new ArgumentOutOfRangeException(nameof(Orientation), EffectiveOrientation, "Unknown Shadcn button group separator orientation.")
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "role", "aria-orientation");
+
+    protected override void OnParametersSet()
+    {
+        if (Orientation is not null && !Enum.IsDefined(Orientation.Value))
+            throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn button group separator orientation.");
+    }
+}

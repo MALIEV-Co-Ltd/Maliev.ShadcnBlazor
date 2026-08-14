@@ -1,0 +1,38 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-direction")"
+     style="@MergeStyle(null)"
+     data-slot="direction"
+     dir="@DirectionValue">
+    <CascadingValue Value="EffectiveContext">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    [CascadingParameter]
+    public ShadcnContext ParentContext { get; set; }
+
+    [Parameter]
+    public ShadcnDirection? Direction { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private ShadcnDirection EffectiveDirection => Direction ?? ParentContext.Direction;
+    private ShadcnContext EffectiveContext => new(ParentContext.IsDarkMode, EffectiveDirection);
+    private string DirectionValue => EffectiveDirection == ShadcnDirection.RightToLeft ? "rtl" : "ltr";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "dir");
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(EffectiveDirection))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(Direction),
+                EffectiveDirection,
+                "Shadcn direction must be LeftToRight or RightToLeft.");
+        }
+    }
+}

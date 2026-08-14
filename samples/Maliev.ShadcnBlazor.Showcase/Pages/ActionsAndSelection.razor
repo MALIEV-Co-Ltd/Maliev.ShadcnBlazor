@@ -1,0 +1,232 @@
+@page "/components/actions-and-selection"
+@inject ShowcaseState State
+
+<PageTitle>Actions and selection - Shadcn Blazor</PageTitle>
+
+<main class="actions-selection-fixture" data-testid="actions-selection-fixture" data-locale="@Locale">
+    <header>
+        <p class="documentation-eyebrow">Plan 3 certified family</p>
+        <h1>@Text("Actions and selection", "การกระทำและการเลือก")</h1>
+        <p>@Text("Native, typed controls with Shadcn Base and Vega behavior.", "คอนโทรลแบบเนทีฟที่มีชนิดข้อมูลและพฤติกรรม Shadcn Base / Vega")</p>
+    </header>
+
+    <section aria-labelledby="actions-heading">
+        <h2 id="actions-heading">@Text("Actions", "การกระทำ")</h2>
+        <div class="actions-evidence-crop" data-testid="button-evidence" data-evidence-state="variants sizes disabled invalid expanded icon active focus">
+        <div class="actions-fixture-row" data-testid="button-variants">
+            @foreach (var variant in Enum.GetValues<ShadcnButtonVariant>())
+            {
+                <ShadcnButton Variant="@variant" data-testid="@($"button-{variant.ToString().ToLowerInvariant()}")">@variant</ShadcnButton>
+            }
+        </div>
+        <div class="actions-fixture-row" data-testid="button-sizes">
+            @foreach (var size in Enum.GetValues<ShadcnButtonSize>())
+            {
+                <ShadcnButton Size="@size" aria-label="@size.ToString()">@(size.ToString().StartsWith("Icon", StringComparison.Ordinal) ? "+" : size)</ShadcnButton>
+            }
+        </div>
+        <div class="actions-fixture-row" aria-label="Button states">
+            <ShadcnButton OnClick="CountAction" data-testid="button-action">Invoked @ActionCount</ShadcnButton>
+            <ShadcnButton Disabled="true" OnClick="CountAction" data-testid="button-disabled">Disabled</ShadcnButton>
+            <ShadcnButton Href="#action-link" data-testid="button-link">Link root</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" aria-expanded="true" data-testid="button-expanded">Expanded</ShadcnButton>
+            <ShadcnButton aria-invalid="true" data-testid="button-invalid">Invalid</ShadcnButton>
+            <ShadcnButton PointerCursor="true" data-testid="button-with-icons">
+                <LeadingIcon><span aria-hidden="true">←</span></LeadingIcon>
+                <ChildContent>Move</ChildContent>
+                <TrailingIcon><span aria-hidden="true">→</span></TrailingIcon>
+            </ShadcnButton>
+        </div>
+        </div>
+        <div class="actions-evidence-crop" data-testid="button-group-evidence" data-evidence-state="horizontal vertical separator nested text disabled focus-order">
+        <ShadcnButtonGroup aria-label="Drawing actions" data-testid="button-group">
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline">Archive</ShadcnButton>
+            <ShadcnButtonGroupSeparator />
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline">Report</ShadcnButton>
+        </ShadcnButtonGroup>
+        <ShadcnButtonGroup Orientation="ShadcnButtonGroupOrientation.Vertical" aria-label="Vertical nested actions" data-testid="button-group-vertical">
+            <ShadcnButtonGroupText>Grouped</ShadcnButtonGroupText>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline">Vertical first</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline">Vertical second</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="true">Vertical disabled</ShadcnButton>
+            <ShadcnButtonGroup aria-label="Nested actions">
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline">Nested first</ShadcnButton>
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline">Nested second</ShadcnButton>
+            </ShadcnButtonGroup>
+        </ShadcnButtonGroup>
+        </div>
+        <div class="actions-evidence-crop" data-testid="toggle-evidence" data-evidence-state="on off default outline sm lg disabled invalid icons rtl">
+        <ShadcnToggle Pressed="@Bold" PressedChanged="SetBold" PointerCursor="true" data-testid="toggle-bold">Bold</ShadcnToggle>
+        <ShadcnToggle Pressed="true" Disabled="true" data-testid="toggle-disabled">Disabled</ShadcnToggle>
+        <ShadcnToggle aria-invalid="true" data-testid="toggle-invalid">Invalid</ShadcnToggle>
+        <ShadcnToggle data-testid="toggle-no-icon">No icon</ShadcnToggle>
+        <ShadcnToggle Size="ShadcnToggleSize.Small" data-testid="toggle-leading-icon"><LeadingIcon><span aria-hidden="true">←</span></LeadingIcon><ChildContent>Leading</ChildContent></ShadcnToggle>
+        <ShadcnToggle Size="ShadcnToggleSize.Large" dir="rtl" data-testid="toggle-trailing-icon"><ChildContent>Trailing RTL</ChildContent><TrailingIcon><span aria-hidden="true">→</span></TrailingIcon></ShadcnToggle>
+        </div>
+        <div class="actions-evidence-crop" data-testid="toggle-group-evidence" data-evidence-state="single multiple spacing connected horizontal vertical roving-focus disabled-item outline sizes rtl">
+        <ShadcnToggleGroup TValue="string" Values="@Formats" ValuesChanged="SetFormats" Multiple="true" Variant="ShadcnToggleVariant.Outline" data-testid="toggle-group" aria-label="Text formatting">
+            <ShadcnToggleGroupItem TValue="string" Value="@("bold")">Bold</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("italic")">Italic</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("underline")" Disabled="true">Underline</ShadcnToggleGroupItem>
+        </ShadcnToggleGroup>
+        <ShadcnToggleGroup TValue="string" Values="@(Array.Empty<string>())" Size="ShadcnToggleSize.Small" Variant="ShadcnToggleVariant.Outline" aria-label="Icon alignment">
+            <ShadcnToggleGroupItem TValue="string" Value="@("align")" data-testid="toggle-group-icon-item"><LeadingIcon><span aria-hidden="true">↤</span></LeadingIcon><ChildContent>Align</ChildContent></ShadcnToggleGroupItem>
+        </ShadcnToggleGroup>
+        <ShadcnToggleGroup TValue="string" Values="@ConnectedFormats" ValuesChanged="SetConnectedFormats" Multiple="true" Variant="ShadcnToggleVariant.Outline" Spacing="0" data-testid="toggle-group-connected" aria-label="Connected formatting">
+            <ShadcnToggleGroupItem TValue="string" Value="@("left")">Left</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("center")">Center</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("right")">Right</ShadcnToggleGroupItem>
+        </ShadcnToggleGroup>
+        <ShadcnToggleGroup TValue="string" Values="@VerticalFormats" ValuesChanged="SetVerticalFormats" Multiple="true" Orientation="ShadcnToggleGroupOrientation.Vertical" Variant="ShadcnToggleVariant.Outline" data-testid="toggle-group-vertical" aria-label="Vertical formatting">
+            <ShadcnToggleGroupItem TValue="string" Value="@("bold")">Vertical bold</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("italic")">Vertical italic</ShadcnToggleGroupItem>
+            <ShadcnToggleGroupItem TValue="string" Value="@("underline")" Disabled="true">Vertical underline</ShadcnToggleGroupItem>
+        </ShadcnToggleGroup>
+        </div>
+    </section>
+
+    <section aria-labelledby="selection-heading">
+        <h2 id="selection-heading">@Text("Selection controls", "คอนโทรลการเลือก")</h2>
+        <div class="actions-evidence-crop" data-testid="checkbox-evidence" data-evidence-state="unchecked checked indeterminate disabled read-only invalid form">
+        <label class="action-control-label"><ShadcnCheckbox @bind-Value="Accepted" Name="accepted" data-testid="checkbox" />@Text("Accept terms", "ยอมรับข้อกำหนด")</label>
+        <label class="action-control-label"><ShadcnCheckbox Value="@((bool?)null)" aria-label="Partially selected" data-testid="checkbox-indeterminate" />@Text("Partially selected", "เลือกบางส่วน")</label>
+        <label class="action-control-label"><ShadcnCheckbox Value="true" ReadOnly="true" aria-label="Read-only checkbox" data-testid="checkbox-readonly" />@Text("Read-only", "อ่านอย่างเดียว")</label>
+        <label class="action-control-label"><ShadcnCheckbox Value="false" Disabled="true" aria-label="Disabled checkbox" data-testid="checkbox-disabled" />@Text("Disabled", "ปิดใช้งาน")</label>
+        <label class="action-control-label"><ShadcnCheckbox Value="false" Invalid="true" aria-label="Invalid checkbox" data-testid="checkbox-invalid" data-invalid-fixture="true" />@Text("Invalid", "ไม่ถูกต้อง")</label>
+        </div>
+        <div class="actions-evidence-crop" data-testid="radio-group-evidence" data-evidence-state="selected unselected disabled-item horizontal vertical rtl wrap roving-focus read-only invalid form">
+        <ShadcnRadioGroup TValue="string" Value="@Density" ValueChanged="SetDensity" Name="density" Orientation="ShadcnRadioGroupOrientation.Horizontal" data-testid="radio-group" aria-label="Density">
+            <ShadcnRadioGroupItem TValue="string" Value="@("default")">Default</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("comfortable")">Comfortable</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("compact")" Disabled="true">Compact</ShadcnRadioGroupItem>
+        </ShadcnRadioGroup>
+        <ShadcnRadioGroup TValue="string" Value="@("locked")" ReadOnly="true" Name="locked-density" data-testid="radio-readonly" aria-label="Read-only density">
+            <ShadcnRadioGroupItem TValue="string" Value="@("locked")">Locked</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("alternate")">Alternate</ShadcnRadioGroupItem>
+        </ShadcnRadioGroup>
+        <ShadcnRadioGroup TValue="string" Value="@VerticalDensity" ValueChanged="SetVerticalDensity" Name="vertical-density" Orientation="ShadcnRadioGroupOrientation.Vertical" data-testid="radio-vertical" aria-label="Vertical density">
+            <ShadcnRadioGroupItem TValue="string" Value="@("first")">Vertical first</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("second")">Vertical second</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("disabled")" Disabled="true">Vertical disabled</ShadcnRadioGroupItem>
+            <ShadcnRadioGroupItem TValue="string" Value="@("last")">Vertical last</ShadcnRadioGroupItem>
+        </ShadcnRadioGroup>
+        <ShadcnRadioGroup TValue="string" Value="@("invalid")" Name="invalid-density" Invalid="true" data-testid="radio-invalid" aria-label="Invalid density">
+            <ShadcnRadioGroupItem TValue="string" Value="@("invalid")" data-invalid-fixture="true">Invalid radio</ShadcnRadioGroupItem>
+        </ShadcnRadioGroup>
+        </div>
+        <div class="actions-evidence-crop" data-testid="switch-evidence" data-evidence-state="checked unchecked default sm disabled read-only invalid form rtl">
+        <label class="action-control-label"><ShadcnSwitch @bind-Value="Notifications" data-testid="switch" />@Text("Notifications", "การแจ้งเตือน")</label>
+        <label class="action-control-label"><ShadcnSwitch Value="true" Size="ShadcnSwitchSize.Small" aria-label="Small switch" data-testid="switch-small" />@Text("Small switch", "สวิตช์ขนาดเล็ก")</label>
+        <label class="action-control-label"><ShadcnSwitch Value="true" ReadOnly="true" data-testid="switch-readonly" />@Text("Read-only switch", "สวิตช์อ่านอย่างเดียว")</label>
+        <label class="action-control-label"><ShadcnSwitch Value="false" Disabled="true" data-testid="switch-disabled" />@Text("Disabled switch", "สวิตช์ปิดใช้งาน")</label>
+        <label class="action-control-label"><ShadcnSwitch Value="false" Invalid="true" data-invalid-fixture="true" data-testid="switch-invalid" />@Text("Invalid switch", "สวิตช์ไม่ถูกต้อง")</label>
+        </div>
+        <div class="actions-evidence-crop" data-testid="slider-evidence" data-evidence-state="single range multiple horizontal vertical keyboard pointer rtl page disabled read-only invalid form">
+        <div class="actions-slider-row">
+            <span id="budget-label">@Text("Budget range", "ช่วงงบประมาณ")</span>
+            <span data-testid="slider-default-evidence"><ShadcnSlider Values="@Budget" ValuesChanged="SetBudget" Minimum="0" Maximum="100" Step="5" Name="budget" Form="slider-form" Required="true" aria-labelledby="budget-label" data-testid="slider" /></span>
+        </div>
+        <div class="actions-slider-row actions-slider-row--vertical">
+            <span id="vertical-level-label">@Text("Vertical level", "ระดับแนวตั้ง")</span>
+            <span data-testid="slider-vertical-evidence"><ShadcnSlider Values="@VerticalLevel" ValuesChanged="SetVerticalLevel" Orientation="ShadcnSliderOrientation.Vertical" aria-labelledby="vertical-level-label" data-testid="slider-vertical" /></span>
+            <ShadcnSlider Values="@LockedLevel" ReadOnly="true" aria-label="Read-only level" data-testid="slider-readonly" />
+        </div>
+        <ShadcnSlider Values="@(new double[] { 20d, 50d, 80d })" Invalid="true" aria-label="Invalid multiple values" data-invalid-fixture="true" data-testid="slider-multiple-invalid" />
+        <ShadcnSlider Values="@(new double[] { 30d })" Disabled="true" aria-label="Disabled level" data-testid="slider-disabled" />
+        <div dir="rtl" data-testid="rtl-controls">
+            <ShadcnToggleGroup TValue="string" Values="@RtlView" ValuesChanged="SetRtlView" aria-label="طريقة العرض" data-testid="rtl-toggle-group">
+                <ShadcnToggleGroupItem TValue="string" Value="@("list")">قائمة</ShadcnToggleGroupItem>
+                <ShadcnToggleGroupItem TValue="string" Value="@("grid")">شبكة</ShadcnToggleGroupItem>
+                <ShadcnToggleGroupItem TValue="string" Value="@("cards")">بطاقات</ShadcnToggleGroupItem>
+            </ShadcnToggleGroup>
+            <ShadcnSlider Values="@RtlSlider" ValuesChanged="SetRtlSlider" Name="level" Form="slider-form" aria-label="RTL value" data-testid="rtl-slider" />
+        </div>
+        <form id="slider-form" data-testid="slider-form" @onsubmit:preventDefault="true"></form>
+        </div>
+    </section>
+
+    <section class="actions-reference-pairs" aria-labelledby="reference-pairs-heading" data-testid="pinned-reference-pairs">
+        <h2 id="reference-pairs-heading">@Text("Pinned reference pairs", "คู่เปรียบเทียบอ้างอิงแบบตรึงรุ่น")</h2>
+        <p>@Text("Deterministic, content-matched states used by the pinned Shadcn visual review.", "สถานะที่กำหนดแน่นอนและมีเนื้อหาตรงกันสำหรับการตรวจภาพ Shadcn แบบตรึงรุ่น")</p>
+
+        <div class="action-reference-crop action-reference-crop--button" data-testid="pair-button-default"><ShadcnButton>Default</ShadcnButton></div>
+        <div class="action-reference-crop action-reference-crop--button" data-testid="pair-button-invalid-focus"><ShadcnButton aria-invalid="true">Invalid</ShadcnButton></div>
+
+        <div class="action-reference-crop action-reference-crop--button-group" data-testid="pair-button-group-default">
+            <ShadcnButtonGroup aria-label="Drawing actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline">Archive</ShadcnButton><ShadcnButtonGroupSeparator /><ShadcnButton Variant="ShadcnButtonVariant.Outline">Report</ShadcnButton></ShadcnButtonGroup>
+        </div>
+        <div class="action-reference-crop action-reference-crop--button-group-vertical" data-testid="pair-button-group-vertical-focus-disabled">
+            <ShadcnButtonGroup Orientation="ShadcnButtonGroupOrientation.Vertical" aria-label="Vertical nested actions"><ShadcnButtonGroupText>Grouped</ShadcnButtonGroupText><ShadcnButton Variant="ShadcnButtonVariant.Outline" data-pair-focus="button-group">Vertical first</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline">Vertical second</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="true">Vertical disabled</ShadcnButton><ShadcnButtonGroup aria-label="Nested actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline">Nested first</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline">Nested second</ShadcnButton></ShadcnButtonGroup></ShadcnButtonGroup>
+        </div>
+
+        <div class="action-reference-crop action-reference-crop--control" data-testid="pair-checkbox-default"><ShadcnCheckbox Value="false" aria-label="Accept terms" /></div>
+        <div class="action-reference-crop action-reference-crop--control" data-testid="pair-checkbox-indeterminate"><ShadcnCheckbox Value="@((bool?)null)" aria-label="Partially selected" /></div>
+
+        <div class="action-reference-crop action-reference-crop--radio" data-testid="pair-radio-group-default">
+            <ShadcnRadioGroup TValue="string" Value="@("comfortable")" Orientation="ShadcnRadioGroupOrientation.Horizontal" aria-label="Density"><ShadcnRadioGroupItem TValue="string" Value="@("default")">Default</ShadcnRadioGroupItem><ShadcnRadioGroupItem TValue="string" Value="@("comfortable")">Comfortable</ShadcnRadioGroupItem><ShadcnRadioGroupItem TValue="string" Value="@("compact")" Disabled="true">Compact</ShadcnRadioGroupItem></ShadcnRadioGroup>
+        </div>
+        <div class="action-reference-crop action-reference-crop--radio-vertical" data-testid="pair-radio-group-vertical-checked-disabled">
+            <ShadcnRadioGroup TValue="string" Value="@("second")" Orientation="ShadcnRadioGroupOrientation.Vertical" aria-label="Vertical density"><ShadcnRadioGroupItem TValue="string" Value="@("first")">Vertical first</ShadcnRadioGroupItem><ShadcnRadioGroupItem TValue="string" Value="@("second")">Vertical second</ShadcnRadioGroupItem><ShadcnRadioGroupItem TValue="string" Value="@("disabled")" Disabled="true">Vertical disabled</ShadcnRadioGroupItem><ShadcnRadioGroupItem TValue="string" Value="@("last")">Vertical last</ShadcnRadioGroupItem></ShadcnRadioGroup>
+        </div>
+
+        <div class="action-reference-crop action-reference-crop--slider" data-testid="pair-slider-default"><ShadcnSlider Values="@(new double[] { 20d, 80d })" data-pair-state="horizontal-range" aria-label="Budget range" /></div>
+        <div class="action-reference-crop action-reference-crop--slider-vertical" data-testid="pair-slider-vertical-focus"><ShadcnSlider Values="@(new double[] { 45d })" Orientation="ShadcnSliderOrientation.Vertical" aria-label="Vertical level" /></div>
+
+        <div class="action-reference-crop action-reference-crop--switch" data-testid="pair-switch-default"><ShadcnSwitch Value="true" aria-label="Notifications" /></div>
+        <div class="action-reference-crop action-reference-crop--switch" data-testid="pair-switch-invalid"><ShadcnSwitch Value="false" Invalid="true" aria-label="Invalid switch" /></div>
+
+        <div class="action-reference-crop action-reference-crop--toggle" data-testid="pair-toggle-default"><ShadcnToggle aria-label="No icon">No icon</ShadcnToggle></div>
+        <div class="action-reference-crop action-reference-crop--toggle" data-testid="pair-toggle-invalid"><ShadcnToggle aria-invalid="true">Invalid</ShadcnToggle></div>
+
+        <div class="action-reference-crop action-reference-crop--toggle-group" data-testid="pair-toggle-group-default"><ShadcnToggleGroup TValue="string" Values="@(new[] { "bold" })" Multiple="true" data-pair-state="default-group" aria-label="Text formatting"><ShadcnToggleGroupItem TValue="string" Value="@("bold")">Bold</ShadcnToggleGroupItem><ShadcnToggleGroupItem TValue="string" Value="@("italic")">Italic</ShadcnToggleGroupItem><ShadcnToggleGroupItem TValue="string" Value="@("underline")" Disabled="true">Underline</ShadcnToggleGroupItem></ShadcnToggleGroup></div>
+        <div class="action-reference-crop action-reference-crop--toggle-group-vertical" data-testid="pair-toggle-group-vertical-pressed-disabled-focus"><ShadcnToggleGroup TValue="string" Values="@(new[] { "bold" })" Multiple="true" Orientation="ShadcnToggleGroupOrientation.Vertical" Variant="ShadcnToggleVariant.Outline" data-pair-state="vertical-group" aria-label="Vertical formatting"><ShadcnToggleGroupItem TValue="string" Value="@("bold")">Vertical bold</ShadcnToggleGroupItem><ShadcnToggleGroupItem TValue="string" Value="@("italic")">Vertical italic</ShadcnToggleGroupItem><ShadcnToggleGroupItem TValue="string" Value="@("underline")" Disabled="true">Vertical underline</ShadcnToggleGroupItem></ShadcnToggleGroup></div>
+    </section>
+
+    <output class="actions-selection-status" aria-live="polite" data-testid="selection-status">
+        @Text("Selected", "เลือกแล้ว"): @Density · @string.Join(", ", Formats) · @string.Join("–", Budget)
+    </output>
+</main>
+
+@code {
+    [SupplyParameterFromQuery(Name = "theme")] public string? RequestedTheme { get; set; }
+    [SupplyParameterFromQuery(Name = "dir")] public string? RequestedDirection { get; set; }
+    [SupplyParameterFromQuery(Name = "locale")] public string? RequestedLocale { get; set; }
+    private string Locale => string.Equals(RequestedLocale, "th", StringComparison.OrdinalIgnoreCase) ? "th" : "en";
+    private bool Bold { get; set; } = true;
+    private int ActionCount { get; set; }
+    private IReadOnlyCollection<string> Formats { get; set; } = ["bold"];
+    private IReadOnlyCollection<string> ConnectedFormats { get; set; } = ["left"];
+    private IReadOnlyCollection<string> VerticalFormats { get; set; } = ["bold"];
+    private bool? Accepted { get; set; }
+    private string Density { get; set; } = "comfortable";
+    private string VerticalDensity { get; set; } = "second";
+    private bool Notifications { get; set; } = true;
+    private IReadOnlyList<double> Budget { get; set; } = [20d, 80d];
+    private IReadOnlyList<double> VerticalLevel { get; set; } = [45d];
+    private IReadOnlyList<double> LockedLevel { get; set; } = [60d];
+    private IReadOnlyCollection<string> RtlView { get; set; } = ["list"];
+    private IReadOnlyList<double> RtlSlider { get; set; } = [35d];
+
+    private string Text(string english, string thai) => Locale == "th" ? thai : english;
+    protected override void OnParametersSet()
+    {
+        if (RequestedTheme is not null)
+            State.SetTheme(string.Equals(RequestedTheme, "dark", StringComparison.OrdinalIgnoreCase));
+        if (RequestedDirection is not null)
+            State.SetDirection(string.Equals(RequestedDirection, "rtl", StringComparison.OrdinalIgnoreCase)
+                ? ShadcnDirection.RightToLeft
+                : ShadcnDirection.LeftToRight);
+    }
+
+    private Task CountAction() { ActionCount++; return Task.CompletedTask; }
+    private Task SetBold(bool value) { Bold = value; return Task.CompletedTask; }
+    private Task SetFormats(IReadOnlyCollection<string> values) { Formats = values; return Task.CompletedTask; }
+    private Task SetConnectedFormats(IReadOnlyCollection<string> values) { ConnectedFormats = values; return Task.CompletedTask; }
+    private Task SetVerticalFormats(IReadOnlyCollection<string> values) { VerticalFormats = values; return Task.CompletedTask; }
+    private Task SetDensity(string value) { Density = value; return Task.CompletedTask; }
+    private Task SetVerticalDensity(string value) { VerticalDensity = value; return Task.CompletedTask; }
+    private Task SetBudget(IReadOnlyList<double> values) { Budget = values; return Task.CompletedTask; }
+    private Task SetVerticalLevel(IReadOnlyList<double> values) { VerticalLevel = values; return Task.CompletedTask; }
+    private Task SetRtlView(IReadOnlyCollection<string> values) { RtlView = values; return Task.CompletedTask; }
+    private Task SetRtlSlider(IReadOnlyList<double> values) { RtlSlider = values; return Task.CompletedTask; }
+}

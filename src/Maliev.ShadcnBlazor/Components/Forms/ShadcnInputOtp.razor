@@ -1,0 +1,73 @@
+@using System.Globalization
+@using System.Text.RegularExpressions
+@using Microsoft.JSInterop
+@using Maliev.ShadcnBlazor.Components.Primitives
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits ShadcnFormComponentBase<string>
+
+<CascadingValue Value="Context">
+    <div class="@MergeClass("shadcn-input-otp")" style="@MergeStyle()" data-slot="input-otp-root" data-disabled="@(EffectiveDisabled ? "true" : null)">
+        <input @ref="InputElement" @attributes="ForwardedAttributes" class="shadcn-input-otp-input" data-slot="input-otp" data-pattern="@Pattern" type="text" name="@Name" value="@Value" inputmode="@InputMode" autocomplete="@AutoComplete" spellcheck="false" disabled="@EffectiveDisabled" readonly="@ReadOnly" required="@Required" aria-invalid="@(EffectiveInvalid ? "true" : null)" aria-describedby="@DescribedBy" @oninput="HandleInputAsync" />
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public int MaxLength { get; set; } = 6;
+    [Parameter] public string? Pattern { get; set; }
+    [Parameter] public string InputMode { get; set; } = "numeric";
+    [Parameter] public string AutoComplete { get; set; } = "one-time-code";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ShadcnInputOtpContext Context { get; } = new();
+    private int ActiveIndex;
+    private ElementReference InputElement;
+    private IJSObjectReference? Module;
+    private DotNetObjectReference<ShadcnInputOtp>? SelfReference;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "data-pattern", "type", "name", "value", "maxlength", "inputmode", "autocomplete", "pattern", "spellcheck", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
+    protected override void OnParametersSet() { base.OnParametersSet(); if (MaxLength <= 0) throw new ArgumentOutOfRangeException(nameof(MaxLength)); Context.Update(Value ?? string.Empty, null); }
+    private async Task HandleInputAsync(ChangeEventArgs args)
+    {
+        var value = Normalize(args.Value?.ToString() ?? string.Empty);
+        ActiveIndex = Math.Min(StringInfo.ParseCombiningCharacters(value).Length, MaxLength - 1);
+        Context.Update(value, null);
+        await SetCurrentValueFromStringAsync(value);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+        SelfReference = DotNetObjectReference.Create(this);
+        await Module.InvokeVoidAsync("observeOtpSelection", InputElement, SelfReference, MaxLength);
+    }
+
+    [JSInvokable]
+    public void UpdateOtpSelection(int graphemeIndex, bool focused)
+    {
+        ActiveIndex = Math.Clamp(graphemeIndex, 0, MaxLength - 1);
+        Context.Update(Value ?? string.Empty, focused ? ActiveIndex : null);
+        _ = InvokeAsync(StateHasChanged);
+    }
+    private string Normalize(string value)
+    {
+        var elements = StringInfo.GetTextElementEnumerator(value);
+        var accepted = new List<string>();
+        while (elements.MoveNext() && accepted.Count < MaxLength)
+        {
+            var element = elements.GetTextElement();
+            if (string.IsNullOrWhiteSpace(Pattern) || Regex.IsMatch(element, $"^(?:{Pattern})$", RegexOptions.CultureInvariant)) accepted.Add(element);
+        }
+        return string.Concat(accepted);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (Module is not null)
+        {
+            try { await Module.InvokeVoidAsync("disconnectOtpSelection", InputElement); } catch (JSDisconnectedException) { }
+            try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { }
+        }
+        SelfReference?.Dispose();
+    }
+}

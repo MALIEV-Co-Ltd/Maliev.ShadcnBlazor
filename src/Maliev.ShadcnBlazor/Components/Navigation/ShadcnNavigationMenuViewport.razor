@@ -1,0 +1,32 @@
+@using Microsoft.JSInterop
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+<div @ref="_position" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-viewport-position")" style="@MergeStyle(null)" data-slot="navigation-menu-viewport-position" data-state="@(Menu.Owner.EffectiveValue is null ? "closed" : "open")" popover="manual">
+    <div class="shadcn-navigation-menu-viewport" data-slot="navigation-menu-viewport">
+        @if (Menu.ActiveRegistration is { } registration)
+        {
+            <div class="shadcn-navigation-menu-content" data-slot="navigation-menu-content" data-state="open" id="@registration.ContentId" aria-labelledby="@registration.TriggerId" @onmouseenter="KeepOpenAsync" @onmouseleave="CloseDelayedAsync" @onkeydown="args => HandleKeyAsync(args, registration)">
+                <CascadingValue TValue="ShadcnNavigationMenuItemContext" Value="@ActiveItemContext" IsFixed="true">
+                    @if (Menu.ActiveContent is { } content)
+                    {
+                        @content
+                    }
+                </CascadingValue>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    [CascadingParameter] private ShadcnNavigationMenuContext Menu { get; set; } = default!;
+    private ShadcnNavigationMenuItemContext ActiveItemContext => Menu.ActiveItemContext!;
+    private ElementReference _position; private IJSObjectReference? _module;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "popover");
+    protected override void OnInitialized() => Menu.ContentChanged += HandleContentChanged;
+    private void HandleContentChanged() => _ = InvokeAsync(StateHasChanged);
+    private Task KeepOpenAsync() => Menu.Owner.ScheduleValueAsync(Menu.Owner.EffectiveValue, true).AsTask();
+    private Task CloseDelayedAsync() => Menu.Owner.ScheduleValueAsync(null, false).AsTask();
+    private async Task HandleKeyAsync(KeyboardEventArgs args, ShadcnNavigationMenuRegistration registration) { if (args.Key == "Escape") { await Menu.Owner.SetValueAsync(null); await Menu.Owner.FocusTriggerAsync(registration.TriggerId); } }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (!firstRender) return; _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("attachNavigationViewport", _position); }
+    public async ValueTask DisposeAsync() { Menu.ContentChanged -= HandleContentChanged; if (_module is not null) { await _module.InvokeVoidAsync("detachNavigationViewport", _position); await _module.DisposeAsync(); } }
+}

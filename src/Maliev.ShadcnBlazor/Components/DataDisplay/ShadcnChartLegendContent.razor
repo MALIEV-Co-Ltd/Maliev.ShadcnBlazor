@@ -1,0 +1,30 @@
+<div class="shadcn-chart-legend" data-slot="chart-legend">
+    @foreach (var item in Series)
+    {
+        @if (Interactive)
+        {
+            <button type="button" data-slot="chart-legend-item" data-legend-series="@item.Key" class="shadcn-chart-legend-item" aria-pressed="@(!HiddenKeys.Contains(item.Key) ? "true" : "false")" @onclick="() => Toggled.InvokeAsync(item.Key)">@Icon(item.Key)<span>@ItemLabel(item)</span></button>
+        }
+        else { <div data-slot="chart-legend-item" class="shadcn-chart-legend-item">@Icon(item.Key)<span>@ItemLabel(item)</span></div> }
+    }
+</div>
+@code {
+    [Parameter, EditorRequired] public ShadcnChartConfig Config { get; set; } = new();
+    [Parameter, EditorRequired] public IReadOnlyList<ShadcnChartSeries> Series { get; set; } = [];
+    [Parameter] public bool HideIcon { get; set; }
+    [Parameter] public string? NameKey { get; set; }
+    [Parameter] public bool Interactive { get; set; }
+    [Parameter] public EventCallback<string> Toggled { get; set; }
+    [Parameter] public IReadOnlySet<string> HiddenKeys { get; set; } = new HashSet<string>();
+    private string ItemLabel(ShadcnChartSeries series)
+    {
+        var key = NameKey is not null && series.Names.TryGetValue(NameKey, out var named) ? named : series.Key;
+        return Config.TryGetValue(key, out var item) ? item.Label : key;
+    }
+    private RenderFragment Icon(string key) => builder =>
+    {
+        if (HideIcon) return;
+        if (Config[key].Icon is { } icon) { builder.AddContent(0, icon); return; }
+        builder.OpenElement(1, "span"); builder.AddAttribute(2, "class", "shadcn-chart-legend-icon"); builder.AddAttribute(3, "style", $"background: var(--color-{key})"); builder.CloseElement();
+    };
+}

@@ -1,0 +1,26 @@
+@using System.Globalization
+<div class="shadcn-chart-tooltip" data-slot="chart-tooltip-content" data-indicator="@IndicatorValue" role="status" aria-live="polite">
+    @if (!HideLabel) { <div data-slot="chart-tooltip-label" class="shadcn-chart-tooltip-label">@Category</div> }
+    @foreach (var item in Payload)
+    {
+        <div class="shadcn-chart-tooltip-item">@if (!HideIndicator) { <span data-slot="chart-tooltip-indicator" class="shadcn-chart-tooltip-indicator" data-indicator="@IndicatorValue" style="--color-bg: var(--color-@item.Series.Key)"></span> }<span>@ItemLabel(item.Series)</span><span class="shadcn-chart-tooltip-value">@ValueFormatter(item.Value)</span></div>
+    }
+</div>
+@code {
+    [Parameter, EditorRequired] public ShadcnChartConfig Config { get; set; } = new();
+    [Parameter, EditorRequired] public string Category { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public IReadOnlyList<ShadcnChartSeries> Series { get; set; } = [];
+    [Parameter] public int PointIndex { get; set; }
+    [Parameter] public ShadcnChartIndicator Indicator { get; set; }
+    [Parameter] public bool HideLabel { get; set; }
+    [Parameter] public bool HideIndicator { get; set; }
+    [Parameter] public string? NameKey { get; set; }
+    [Parameter] public Func<double, string> ValueFormatter { get; set; } = value => value.ToString("N0", CultureInfo.CurrentCulture);
+    private IEnumerable<(ShadcnChartSeries Series, double Value)> Payload => Series.Where(item => PointIndex >= 0 && PointIndex < item.Values.Count && item.Values[PointIndex].HasValue).Select(item => (item, item.Values[PointIndex]!.Value));
+    private string ItemLabel(ShadcnChartSeries series)
+    {
+        var key = NameKey is not null && series.Names.TryGetValue(NameKey, out var named) ? named : series.Key;
+        return Config.TryGetValue(key, out var item) ? item.Label : key;
+    }
+    private string IndicatorValue => Indicator switch { ShadcnChartIndicator.Dot => "dot", ShadcnChartIndicator.Line => "line", ShadcnChartIndicator.Dashed => "dashed", _ => throw new ArgumentOutOfRangeException(nameof(Indicator)) };
+}

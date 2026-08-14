@@ -1,0 +1,47 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-alert")"
+     style="@MergeStyle(null)"
+     data-slot="alert"
+     data-variant="@VariantValue"
+     role="@RoleValue"
+     aria-live="@LiveValue">@ChildContent</div>
+
+@code {
+    [Parameter] public ShadcnAlertVariant Variant { get; set; } = ShadcnAlertVariant.Default;
+    [Parameter] public ShadcnAlertRole AlertRole { get; set; } = ShadcnAlertRole.Alert;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string VariantValue => Variant switch
+    {
+        ShadcnAlertVariant.Default => "default",
+        ShadcnAlertVariant.Destructive => "destructive",
+        _ => throw Unknown(nameof(Variant), Variant)
+    };
+    private string? RoleValue => AlertRole switch
+    {
+        ShadcnAlertRole.Alert => "alert",
+        ShadcnAlertRole.Status => "status",
+        ShadcnAlertRole.None => null,
+        _ => throw Unknown(nameof(AlertRole), AlertRole)
+    };
+    private string? LiveValue => AlertRole switch
+    {
+        ShadcnAlertRole.Alert => "assertive",
+        ShadcnAlertRole.Status => "polite",
+        ShadcnAlertRole.None => null,
+        _ => throw Unknown(nameof(AlertRole), AlertRole)
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes =>
+        AttributesExcept("data-slot", "data-variant", "role", "aria-live");
+
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Variant)) throw Unknown(nameof(Variant), Variant);
+        if (!Enum.IsDefined(AlertRole)) throw Unknown(nameof(AlertRole), AlertRole);
+    }
+
+    private static ArgumentOutOfRangeException Unknown(string name, object value) =>
+        new(name, value, $"Unknown Shadcn alert {name.ToLowerInvariant()}.");
+}

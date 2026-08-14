@@ -1,0 +1,18 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @ref="Element" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-input-group-addon")" style="@MergeStyle(null)" role="group" data-slot="input-group-addon" data-align="@AlignmentValue">@ChildContent</div>
+
+@code {
+    [Parameter] public ShadcnInputGroupAlignment Alignment { get; set; } = ShadcnInputGroupAlignment.InlineStart;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ElementReference Element;
+    private IJSObjectReference? Module;
+    private string AlignmentValue => Alignment switch { ShadcnInputGroupAlignment.InlineStart => "inline-start", ShadcnInputGroupAlignment.InlineEnd => "inline-end", ShadcnInputGroupAlignment.BlockStart => "block-start", ShadcnInputGroupAlignment.BlockEnd => "block-end", _ => throw new ArgumentOutOfRangeException(nameof(Alignment), Alignment, "Unknown input group alignment.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "data-slot", "data-align");
+    protected override void OnParametersSet() { base.OnParametersSet(); _ = AlignmentValue; }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (!firstRender) return; Module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); await Module.InvokeVoidAsync("wireGroupAddon", Element); }
+    public async ValueTask DisposeAsync() { if (Module is not null) { try { await Module.InvokeVoidAsync("unwireGroupAddon", Element); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } }
+}

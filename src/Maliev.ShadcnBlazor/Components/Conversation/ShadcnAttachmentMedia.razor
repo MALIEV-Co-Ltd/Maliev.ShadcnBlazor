@@ -1,0 +1,11 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment-media")" style="@MergeStyle(null)" data-slot="attachment-media" data-variant="@VariantValue" role="@(Variant is ShadcnAttachmentMediaVariant.Image?"img":null)" aria-label="@ImageAlt">@ChildContent</div>
+@code {
+    [CascadingParameter] private ShadcnAttachment? Owner { get; set; }
+    [Parameter] public ShadcnAttachmentMediaVariant Variant { get; set; } = ShadcnAttachmentMediaVariant.Icon;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? ImageAlt { get; set; }
+    private string VariantValue => Variant switch { ShadcnAttachmentMediaVariant.Icon => "icon", ShadcnAttachmentMediaVariant.Image => "image", _ => throw new ArgumentOutOfRangeException(nameof(Variant)) };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-variant", "role", "aria-label");
+    protected override void OnParametersSet() { if (Owner is null) throw new InvalidOperationException("ShadcnAttachmentMedia must be inside ShadcnAttachment."); if (!Enum.IsDefined(Variant)) throw new ArgumentOutOfRangeException(nameof(Variant)); if (Variant is ShadcnAttachmentMediaVariant.Image && string.IsNullOrWhiteSpace(ImageAlt)) throw new InvalidOperationException("Image attachment media requires alternative text."); }
+}

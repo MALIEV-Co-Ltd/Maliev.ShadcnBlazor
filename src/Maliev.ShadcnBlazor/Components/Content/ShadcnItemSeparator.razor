@@ -1,0 +1,5 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-item-separator")" style="@MergeStyle(null)" data-slot="item-separator">
+    <ShadcnSeparator Orientation="ShadcnSeparatorOrientation.Horizontal" Decorative="false" />
+</div>
+@code { private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot"); }

@@ -1,0 +1,14 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@if (Role == "main")
+{
+    <main @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-inset")" style="@MergeStyle(null)" data-slot="sidebar-inset">@ChildContent</main>
+}
+else
+{
+    <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-inset")" style="@MergeStyle(null)" data-slot="sidebar-inset" role="@Role">@ChildContent</div>
+}
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Role { get; set; } = "main";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "role");
+}

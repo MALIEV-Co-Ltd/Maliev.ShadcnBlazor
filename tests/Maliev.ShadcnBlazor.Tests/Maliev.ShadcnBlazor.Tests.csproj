@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VSTestTestCaseFilter)' == ''">
+    <VSTestTestCaseFilter>Category!=ReleaseGate</VSTestTestCaseFilter>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor\Maliev.ShadcnBlazor.csproj" />
+    <ProjectReference Include="..\..\samples\Maliev.ShadcnBlazor.Showcase\Maliev.ShadcnBlazor.Showcase.csproj" />
+  </ItemGroup>
+</Project>
