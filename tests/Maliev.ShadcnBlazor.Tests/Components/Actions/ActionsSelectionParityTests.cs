@@ -188,6 +188,7 @@ public sealed class ActionsSelectionParityTests : BunitContext
     public void ActionStylesMatchPinnedVegaGeometryAndStateTreatment()
     {
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+        var normalizedCss = css.ReplaceLineEndings("\n");
 
         Assert.Contains("background: color-mix(in oklch, var(--shadcn-destructive) 10%, transparent)", css, StringComparison.Ordinal);
         Assert.Contains("color: var(--shadcn-destructive)", css, StringComparison.Ordinal);
@@ -197,7 +198,7 @@ public sealed class ActionsSelectionParityTests : BunitContext
         Assert.Contains("height: 0.375rem", css, StringComparison.Ordinal);
         Assert.Contains("@media (pointer: coarse)", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
-        Assert.Contains(".shadcn-toggle {\n        border-width: 1px;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-toggle {\n        border-width: 1px;", normalizedCss, StringComparison.Ordinal);
         Assert.Contains(".shadcn-toggle {", css, StringComparison.Ordinal);
         Assert.Contains("border: 0 solid transparent", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-toggle[data-variant=\"outline\"] { border-width: 1px", css, StringComparison.Ordinal);
