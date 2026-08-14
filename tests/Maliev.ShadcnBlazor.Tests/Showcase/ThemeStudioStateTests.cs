@@ -397,7 +397,8 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         var cut = Render<ThemeStudio>();
 
         await cut.InvokeAsync(() => state.SetToken(ThemeStudioScheme.Light, "primary", "#111111"));
-        cut.WaitForAssertion(() => Assert.Equal(1, storage.SaveCount));
+        await storage.FirstSaveStarted.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.Equal(1, storage.SaveCount);
         cut.Instance.Dispose();
         cut.Dispose();
         storage.ReleaseFirstSave();
@@ -504,9 +505,11 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     private sealed class DelayedStorage(bool releaseFirstImmediately = false) : IThemeStudioStorage
     {
         private readonly TaskCompletionSource _firstSaveRelease = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _firstSaveStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly TaskCompletionSource _firstSaveCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int SaveCount { get; private set; }
         public ShadcnTheme? LastSaved { get; private set; }
+        public Task FirstSaveStarted => _firstSaveStarted.Task;
         public Task FirstSaveCompleted => _firstSaveCompleted.Task;
 
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => LoadLaterAsync();
@@ -521,6 +524,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         {
             SaveCount++;
             LastSaved = theme;
+            _firstSaveStarted.TrySetResult();
             if (SaveCount == 1 && !releaseFirstImmediately)
                 await _firstSaveRelease.Task;
             if (SaveCount == 1)
