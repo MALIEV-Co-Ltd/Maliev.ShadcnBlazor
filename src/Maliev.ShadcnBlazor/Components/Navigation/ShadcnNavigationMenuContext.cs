@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
 namespace Maliev.ShadcnBlazor.Components.Navigation;
+
 internal sealed class ShadcnNavigationMenuContext(ShadcnNavigationMenu owner)
 {
     private readonly List<ShadcnNavigationMenuRegistration> _items = [];

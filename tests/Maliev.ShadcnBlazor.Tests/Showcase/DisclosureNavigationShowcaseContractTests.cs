@@ -55,17 +55,17 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         var alternates = new Dictionary<ComponentParameterControlKind, string> { [ComponentParameterControlKind.Toggle] = "true", [ComponentParameterControlKind.Number] = "3" };
         foreach (var slug in Slugs)
         {
-        Assert.Equal(expectedControls[slug], new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single().Controls.Select(control => control.Id));
-        foreach (var controlId in new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single().Controls.Select(control => control.Id).ToArray())
-        {
-            var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
-            var control = example.Controls.Single(candidate => candidate.Id == controlId);
-            var before = Render(example.Preview).Markup;
-            var alternate = control.Kind == ComponentParameterControlKind.Select ? control.Options.First(option => option != control.Value) : alternates[control.Kind];
-            if (control.Value.Equals(alternate, StringComparison.OrdinalIgnoreCase)) alternate = "false";
-            control.Apply(alternate);
-            Assert.NotEqual(before, Render(example.Preview).Markup);
-        }
+            Assert.Equal(expectedControls[slug], new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single().Controls.Select(control => control.Id));
+            foreach (var controlId in new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single().Controls.Select(control => control.Id).ToArray())
+            {
+                var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
+                var control = example.Controls.Single(candidate => candidate.Id == controlId);
+                var before = Render(example.Preview).Markup;
+                var alternate = control.Kind == ComponentParameterControlKind.Select ? control.Options.First(option => option != control.Value) : alternates[control.Kind];
+                if (control.Value.Equals(alternate, StringComparison.OrdinalIgnoreCase)) alternate = "false";
+                control.Apply(alternate);
+                Assert.NotEqual(before, Render(example.Preview).Markup);
+            }
         }
     }
 

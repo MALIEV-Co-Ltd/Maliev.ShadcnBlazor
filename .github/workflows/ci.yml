@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  quality:
+    name: Build, test, and pack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v4.2.2
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore locked dependencies
+        run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
+      - name: Build
+        run: dotnet build Maliev.ShadcnBlazor.slnx -c Release --no-restore
+      - name: Verify formatting
+        run: dotnet format Maliev.ShadcnBlazor.slnx --verify-no-changes --no-restore
+      - name: Run repository tests
+        run: dotnet test tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj -c Release --no-build --no-restore
+      - name: Run component tests
+        run: dotnet test tests/Maliev.ShadcnBlazor.Tests/Maliev.ShadcnBlazor.Tests.csproj -c Release --no-build --no-restore
+      - name: Pack
+        run: dotnet pack src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj -c Release --no-build --no-restore -o artifacts/package
+      - name: Verify public surface and package
+        shell: pwsh
+        run: ./eng/Verify-PublicSurface.ps1 -Root . -Package artifacts/package/Maliev.ShadcnBlazor.1.0.0.nupkg
+      - name: Upload packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nuget-package
+          path: artifacts/package/*.*nupkg
+          if-no-files-found: error
+          retention-days: 7
+
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v4.2.2
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore locked dependencies
+        run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
+      - name: Build browser tests
+        run: dotnet build tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --no-restore
+      - name: Install Chromium
+        shell: pwsh
+        run: ./tests/Maliev.ShadcnBlazor.BrowserTests/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
+      - name: Run browser tests
+        run: dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --no-build --no-restore

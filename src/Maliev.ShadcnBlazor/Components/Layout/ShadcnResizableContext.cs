@@ -1,4 +1,5 @@
 namespace Maliev.ShadcnBlazor.Components.Layout;
+
 internal sealed class ShadcnResizableContext(ShadcnResizableGroup owner)
 {
     private readonly List<ShadcnResizablePanelRegistration> _panels = [];

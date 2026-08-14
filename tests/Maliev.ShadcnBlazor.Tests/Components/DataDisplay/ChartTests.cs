@@ -293,8 +293,10 @@ public sealed class ChartTests : BunitContext
     {
         var config = new ShadcnChartConfig
         {
-            ["desktop"] = Config["desktop"], ["mobile"] = Config["mobile"],
-            ["web"] = new("เว็บ") { Color = "red" }, ["app"] = new("แอป") { Color = "blue" }
+            ["desktop"] = Config["desktop"],
+            ["mobile"] = Config["mobile"],
+            ["web"] = new("เว็บ") { Color = "red" },
+            ["app"] = new("แอป") { Color = "blue" }
         };
         var named = new[]
         {

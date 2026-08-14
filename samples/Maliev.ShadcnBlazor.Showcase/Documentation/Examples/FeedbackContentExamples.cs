@@ -11,8 +11,16 @@ internal static class FeedbackContentExamples
 {
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "alert" => [Alert()], "avatar" => [Avatar()], "badge" => [Badge()], "card" => [Card()], "carousel" => [Carousel()],
-        "progress" => [Progress()], "skeleton" => [Skeleton()], "spinner" => [Spinner()], "toast" => [Toast()], _ => []
+        "alert" => [Alert()],
+        "avatar" => [Avatar()],
+        "badge" => [Badge()],
+        "card" => [Card()],
+        "carousel" => [Carousel()],
+        "progress" => [Progress()],
+        "skeleton" => [Skeleton()],
+        "spinner" => [Spinner()],
+        "toast" => [Toast()],
+        _ => []
     };
 
     private static ComponentExampleDefinition Alert()

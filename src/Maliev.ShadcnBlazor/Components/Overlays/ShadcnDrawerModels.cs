@@ -31,5 +31,6 @@ public readonly record struct ShadcnDrawerSnapPoint
 
 internal sealed class ShadcnDrawerContext(ShadcnDrawer owner, string contentId)
 {
-    internal ShadcnDrawer Owner { get; } = owner; internal string ContentId { get; } = contentId; internal string? TitleId { get; set; } internal string? DescriptionId { get; set; }
+    internal ShadcnDrawer Owner { get; } = owner; internal string ContentId { get; } = contentId; internal string? TitleId { get; set; }
+    internal string? DescriptionId { get; set; }
 }

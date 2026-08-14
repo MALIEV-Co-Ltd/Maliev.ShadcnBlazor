@@ -8,9 +8,18 @@ internal static class OverlayMenuExamples
 {
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "dialog" => [Dialog(false)], "alert-dialog" => [Dialog(true)], "sheet" => [Sheet()], "drawer" => [Drawer()],
-        "popover" => [Popover()], "hover-card" => [HoverCard()], "tooltip" => [Tooltip()],
-        "dropdown-menu" => [Menu(false)], "context-menu" => [Menu(true)], "menubar" => [Menubar()], "command" => [Command()], _ => []
+        "dialog" => [Dialog(false)],
+        "alert-dialog" => [Dialog(true)],
+        "sheet" => [Sheet()],
+        "drawer" => [Drawer()],
+        "popover" => [Popover()],
+        "hover-card" => [HoverCard()],
+        "tooltip" => [Tooltip()],
+        "dropdown-menu" => [Menu(false)],
+        "context-menu" => [Menu(true)],
+        "menubar" => [Menubar()],
+        "command" => [Command()],
+        _ => []
     };
 
     private static ComponentExampleDefinition Dialog(bool alert)

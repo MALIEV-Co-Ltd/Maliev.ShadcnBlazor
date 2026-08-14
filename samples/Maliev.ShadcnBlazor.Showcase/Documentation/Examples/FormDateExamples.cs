@@ -14,9 +14,16 @@ internal static class FormDateExamples
 
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "input" => [Input()], "textarea" => [Textarea()], "native-select" => [NativeSelect()],
-        "input-group" => [InputGroup()], "input-otp" => [InputOtp()], "select" => [Select()],
-        "combobox" => [Combobox()], "calendar" => [Calendar()], "date-picker" => [DatePicker()], _ => []
+        "input" => [Input()],
+        "textarea" => [Textarea()],
+        "native-select" => [NativeSelect()],
+        "input-group" => [InputGroup()],
+        "input-otp" => [InputOtp()],
+        "select" => [Select()],
+        "combobox" => [Combobox()],
+        "calendar" => [Calendar()],
+        "date-picker" => [DatePicker()],
+        _ => []
     };
 
     private static ComponentExampleDefinition Input()

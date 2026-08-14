@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Usage questions
+    url: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/discussions
+    about: Ask installation and component-composition questions in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/security/advisories/new
+    about: Report vulnerabilities privately.

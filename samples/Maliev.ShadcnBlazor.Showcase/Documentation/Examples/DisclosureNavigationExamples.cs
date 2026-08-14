@@ -11,9 +11,16 @@ internal static class DisclosureNavigationExamples
 {
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "accordion" => [Accordion()], "breadcrumb" => [Breadcrumb()], "collapsible" => [Collapsible()],
-        "navigation-menu" => [NavigationMenu()], "pagination" => [Pagination()], "resizable" => [Resizable()],
-        "scroll-area" => [ScrollArea()], "sidebar" => [Sidebar()], "tabs" => [Tabs()], _ => []
+        "accordion" => [Accordion()],
+        "breadcrumb" => [Breadcrumb()],
+        "collapsible" => [Collapsible()],
+        "navigation-menu" => [NavigationMenu()],
+        "pagination" => [Pagination()],
+        "resizable" => [Resizable()],
+        "scroll-area" => [ScrollArea()],
+        "sidebar" => [Sidebar()],
+        "tabs" => [Tabs()],
+        _ => []
     };
 
     private static ComponentExampleDefinition Accordion()

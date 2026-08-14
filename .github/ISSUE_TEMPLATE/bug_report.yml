@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible component or package defect.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not disclose security vulnerabilities here. Use private vulnerability reporting instead.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest Razor example and exact steps.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include .NET, MudBlazor, browser, theme, direction, and accessibility preference details.
+    validations:
+      required: true
