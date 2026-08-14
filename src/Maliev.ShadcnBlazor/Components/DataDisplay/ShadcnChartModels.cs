@@ -68,7 +68,16 @@ public sealed class ShadcnChartConfig : Dictionary<string, ShadcnChartItemConfig
 
     private static void ValidateColor(string color, string key)
     {
-        if (!SafeColor.IsMatch(color.Trim())) throw new ArgumentException($"Chart color for '{key}' is not a safe CSS color.");
+        var normalized = color.Trim();
+        if (normalized.Length is 0 or > 128 ||
+            normalized.Any(char.IsControl) ||
+            normalized.IndexOfAny([';', '{', '}', '<', '>']) >= 0 ||
+            normalized.Contains("/*", StringComparison.Ordinal) ||
+            normalized.Contains("*/", StringComparison.Ordinal) ||
+            !SafeColor.IsMatch(normalized))
+        {
+            throw new ArgumentException($"Chart color for '{key}' is not a safe CSS color.");
+        }
     }
 }
 

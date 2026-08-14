@@ -25,6 +25,7 @@ public sealed class ChartModelTests
     {
         Assert.Throws<ArgumentException>(() => new ShadcnChartConfig { ["bad key"] = new("Bad") { Color = "red" } }.Validate());
         Assert.Throws<ArgumentException>(() => new ShadcnChartConfig { ["bad"] = new("Bad") { Color = "red;display:none" } }.Validate());
+        Assert.Throws<ArgumentException>(() => new ShadcnChartConfig { ["bad"] = new("Bad") { Color = "rgb(0 </style><script>alert(1)</script>)" } }.Validate());
         Assert.Throws<ArgumentException>(() => new ShadcnChartConfig { ["bad"] = new("Bad") { Color = "red", Theme = new("red", "blue") } }.Validate());
     }
 
