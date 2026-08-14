@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class WorkflowSecurityTests
@@ -51,5 +53,16 @@ public sealed class WorkflowSecurityTests
         Assert.Contains("Verify-PublicSurface.ps1", ci, StringComparison.Ordinal);
         Assert.Contains("dotnet format", ci, StringComparison.Ordinal);
         Assert.Contains("playwright.ps1 install chromium", ci, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DotNetSdkAndWorkloadVersionsArePinnedTogether()
+    {
+        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryRoot.Find(), "global.json")));
+        var sdk = document.RootElement.GetProperty("sdk");
+
+        Assert.Equal("10.0.111", sdk.GetProperty("version").GetString());
+        Assert.Equal("10.0.111", sdk.GetProperty("workloadVersion").GetString());
+        Assert.Equal("disable", sdk.GetProperty("rollForward").GetString());
     }
 }
