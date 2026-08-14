@@ -47,19 +47,20 @@
 
 - [ ] **Step 1: Write the failing repository tests**
 
-Add tests that require the script, reject source-tree mutation, and inspect the script contract:
+Add a test that copies a minimal published artifact to a temporary directory,
+executes the real PowerShell script, and asserts its observable outputs:
 
 ```csharp
 [Fact]
 public void PagesPreparationIsRepositoryScopedAndCreatesSpaFallback()
 {
-    var script = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), "eng", "Prepare-GitHubPages.ps1"));
-    Assert.Contains("[Parameter(Mandatory = $true)][string]$PublishDirectory", script, StringComparison.Ordinal);
-    Assert.Contains("[Parameter(Mandatory = $true)][string]$BasePath", script, StringComparison.Ordinal);
-    Assert.Contains("<base href=\"$BasePath\" />", script, StringComparison.Ordinal);
-    Assert.Contains("404.html", script, StringComparison.Ordinal);
-    Assert.Contains(".nojekyll", script, StringComparison.Ordinal);
-    Assert.DoesNotContain("samples\\Maliev.ShadcnBlazor.Showcase\\wwwroot\\index.html", script, StringComparison.OrdinalIgnoreCase);
+    using var fixture = GitHubPagesFixture.Create();
+    var result = fixture.RunPreparation("/Maliev.ShadcnBlazor/");
+    Assert.Equal(0, result.ExitCode);
+    Assert.Contains("<base href=\"/Maliev.ShadcnBlazor/\" />", fixture.Read("index.html"), StringComparison.Ordinal);
+    Assert.Equal(fixture.Read("index.html"), fixture.Read("404.html"));
+    Assert.True(fixture.Exists(".nojekyll"));
+    Assert.Equal(fixture.OriginalSourceIndex, fixture.ReadSourceIndex());
 }
 ```
 
@@ -327,4 +328,3 @@ https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/docs/components/button
 ```
 
 Confirm the root and nested dossier return the Blazor application, the Button dossier is interactive, static assets load under `/Maliev.ShadcnBlazor/`, the README and repository website metadata link to the demo, and no internal identifiers or secrets appear in the published artifact.
-
