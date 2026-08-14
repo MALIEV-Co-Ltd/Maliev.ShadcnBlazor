@@ -34,6 +34,8 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/packages.lock.json'
+      - name: Restore workload manifests
+        run: dotnet workload restore Maliev.ShadcnBlazor.slnx
       - name: Validate release version
         id: version
         shell: bash

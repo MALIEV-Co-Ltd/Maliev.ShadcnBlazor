@@ -49,6 +49,7 @@ public sealed class WorkflowSecurityTests
     {
         var ci = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "ci.yml"));
 
+        Assert.Contains("dotnet workload restore", ci, StringComparison.Ordinal);
         Assert.Contains("--locked-mode", ci, StringComparison.Ordinal);
         Assert.Contains("Verify-PublicSurface.ps1", ci, StringComparison.Ordinal);
         Assert.Contains("dotnet format", ci, StringComparison.Ordinal);
@@ -64,5 +65,16 @@ public sealed class WorkflowSecurityTests
         Assert.Equal("10.0.111", sdk.GetProperty("version").GetString());
         Assert.Equal("10.0.111", sdk.GetProperty("workloadVersion").GetString());
         Assert.Equal("disable", sdk.GetProperty("rollForward").GetString());
+    }
+
+    [Theory]
+    [InlineData(".github/workflows/ci.yml")]
+    [InlineData(".github/workflows/codeql.yml")]
+    [InlineData(".github/workflows/release.yml")]
+    public void DotNetWorkflowsInstallPinnedWorkloadManifests(string relativePath)
+    {
+        var workflow = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), relativePath));
+
+        Assert.Contains("dotnet workload restore Maliev.ShadcnBlazor.slnx", workflow, StringComparison.Ordinal);
     }
 }

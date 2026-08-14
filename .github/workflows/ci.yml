@@ -31,6 +31,8 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/packages.lock.json'
+      - name: Restore workload manifests
+        run: dotnet workload restore Maliev.ShadcnBlazor.slnx
       - name: Restore locked dependencies
         run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
       - name: Build
@@ -67,6 +69,8 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/packages.lock.json'
+      - name: Restore workload manifests
+        run: dotnet workload restore Maliev.ShadcnBlazor.slnx
       - name: Restore locked dependencies
         run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
       - name: Build browser tests
