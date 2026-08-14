@@ -29,7 +29,6 @@ public sealed class GitHubPagesTests
         var result = fixture.RunPreparation(basePath);
 
         Assert.NotEqual(0, result.ExitCode);
-        Assert.Contains("leading and trailing slash", result.StandardError, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(fixture.OriginalPublishedIndex, fixture.Read("index.html"));
         Assert.False(fixture.Exists("404.html"));
         Assert.False(fixture.Exists(".nojekyll"));

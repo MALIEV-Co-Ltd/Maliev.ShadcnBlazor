@@ -84,7 +84,11 @@ public sealed class WorkflowSecurityTests
         Assert.Contains("ComponentCatalogVisualProofTests", workflow, StringComparison.Ordinal);
         Assert.Contains("if: always()", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/visual-proof", workflow, StringComparison.Ordinal);
-        Assert.DoesNotContain("SHADCN_UPDATE_VISUAL_BASELINES", workflow, StringComparison.Ordinal);
+        Assert.Contains("update-baselines:", workflow, StringComparison.Ordinal);
+        Assert.Contains("default: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("SHADCN_UPDATE_VISUAL_BASELINES: ${{ inputs.update-baselines && '1' || '0' }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("docs/evidence/component-catalog-baselines", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("SHADCN_UPDATE_VISUAL_BASELINES: 1", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("contents: write", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("secrets.", workflow, StringComparison.OrdinalIgnoreCase);
     }
