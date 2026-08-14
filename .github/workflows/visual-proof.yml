@@ -1,0 +1,52 @@
+name: Component visual proof
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  proof:
+    name: Review all component dossiers
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v4.2.2
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore workload manifests
+        run: dotnet workload restore Maliev.ShadcnBlazor.slnx
+      - name: Restore locked dependencies
+        run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
+      - name: Build visual proof
+        run: dotnet build tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --no-restore
+      - name: Install Chromium
+        shell: pwsh
+        run: ./tests/Maliev.ShadcnBlazor.BrowserTests/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
+      - name: Compare all reviewed component dossiers
+        run: dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --no-build --no-restore --filter ComponentCatalogVisualProofTests
+      - name: Upload screenshots and diffs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: component-visual-proof
+          path: artifacts/visual-proof
+          if-no-files-found: warn
+          retention-days: 7
