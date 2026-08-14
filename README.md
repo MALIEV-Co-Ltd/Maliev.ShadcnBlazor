@@ -32,9 +32,26 @@ with `ShadcnThemeProvider`:
 </ShadcnThemeProvider>
 ```
 
-Load MudBlazor followed by the component stylesheets distributed under
-`_content/Maliev.ShadcnBlazor`. The repository Showcase demonstrates every
-component family and can be started with `dotnet run` from its sample project.
+Load the stylesheets in this order:
+
+```html
+<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-disclosure-navigation.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-forms.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-feedback-content.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-overlays-menus.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-conversation.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
+<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+```
+
+See the [getting started guide](docs/getting-started.md) for provider setup,
+asset selection, and a first component. The repository Showcase demonstrates
+every component family.
 
 ## Highlights
 
@@ -54,5 +71,11 @@ minor line.
 ## Repository
 
 - Source: <https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor>
+- Getting started: [docs/getting-started.md](docs/getting-started.md)
+- Component catalog: [docs/components.md](docs/components.md)
+- Theming: [docs/theming.md](docs/theming.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Support: [SUPPORT.md](SUPPORT.md)
+- Security policy: [SECURITY.md](SECURITY.md)
 Maliev.ShadcnBlazor is licensed under the [MIT License](LICENSE). Third-party
 attribution is recorded in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
