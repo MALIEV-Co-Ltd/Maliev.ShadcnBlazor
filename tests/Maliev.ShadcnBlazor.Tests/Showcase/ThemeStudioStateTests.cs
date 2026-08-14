@@ -398,6 +398,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
 
         await cut.InvokeAsync(() => state.SetToken(ThemeStudioScheme.Light, "primary", "#111111"));
         cut.WaitForAssertion(() => Assert.Equal(1, storage.SaveCount));
+        cut.Instance.Dispose();
         cut.Dispose();
         storage.ReleaseFirstSave();
         await storage.FirstSaveCompleted;
