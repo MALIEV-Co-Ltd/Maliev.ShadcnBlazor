@@ -15,7 +15,7 @@ public sealed record ComponentDocumentationEntry(
     IReadOnlyList<string> RelatedSlugs,
     IReadOnlyList<string> TokenGroups)
 {
-    public string DocumentationUrl => $"/docs/components/{Slug}";
+    public string DocumentationUrl => $"docs/components/{Slug}";
 
     public int RoadmapPhase { get; init; }
 }

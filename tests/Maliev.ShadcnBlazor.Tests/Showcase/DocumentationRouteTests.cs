@@ -23,7 +23,7 @@ public sealed class DocumentationRouteTests : BunitContext
         var cut = Render<ComponentDocumentation>(parameters => parameters.Add(component => component.Slug, "missing-component"));
 
         Assert.Equal("empty", cut.Find("[data-slot='empty']").GetAttribute("data-slot"));
-        Assert.Equal("/docs/components", cut.Find("[data-slot='empty-content'] a").GetAttribute("href"));
+        Assert.Equal("docs/components", cut.Find("[data-slot='empty-content'] a").GetAttribute("href"));
     }
 
     [Fact]

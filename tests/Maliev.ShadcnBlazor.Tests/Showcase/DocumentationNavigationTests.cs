@@ -66,7 +66,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationCatalogRail>(parameters => parameters.Add(x => x.State, state));
 
         Assert.Equal("1 component found", cut.Find("[data-testid='documentation-result-count']").TextContent.Trim());
-        Assert.Equal("page", cut.Find("a[href='/docs/components/kbd']").GetAttribute("aria-current"));
+        Assert.Equal("page", cut.Find("a[href='docs/components/kbd']").GetAttribute("aria-current"));
     }
 
     [Fact]

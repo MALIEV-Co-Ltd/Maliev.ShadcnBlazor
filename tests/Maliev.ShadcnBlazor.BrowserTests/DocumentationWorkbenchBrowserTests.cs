@@ -56,7 +56,7 @@ public sealed class DocumentationWorkbenchBrowserTests(
         Assert.Equal(
             ["accordion", "calendar", "combobox", "command", "context-menu", "dropdown-menu", "kbd", "navigation-menu", "resizable", "select", "toast"],
             await page.Locator(".documentation-component-list a").EvaluateAllAsync<string[]>("links => links.map(link => new URL(link.href).pathname.split('/').pop())"));
-        await Assertions.Expect(page.Locator("a[href='/docs/components/kbd']")).ToHaveAttributeAsync("aria-current", "page");
+        await Assertions.Expect(page.Locator("a[href='docs/components/kbd']")).ToHaveAttributeAsync("aria-current", "page");
 
         if (width <= 768)
         {
