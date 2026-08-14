@@ -55,8 +55,10 @@ public sealed class ThemeControlsBrowserTests(
         Assert.Equal(20, customized.PaddingInlineStart);
         Assert.Equal(0.2, customized.TransitionDuration, 3);
         Assert.Equal("linear, linear, linear, linear", customized.TransitionTimingFunction);
-        Assert.Contains("2px", customized.BoxShadow, StringComparison.Ordinal);
-        Assert.Contains("7px", customized.BoxShadow, StringComparison.Ordinal);
+        Assert.Equal("5px", customized.FocusRingWidth);
+        Assert.Equal("2px", customized.FocusRingOffset);
+        Assert.NotEqual("none", customized.BoxShadow);
+        Assert.Contains("0px 0px 0px", customized.BoxShadow, StringComparison.Ordinal);
         Assert.Contains("Courier New", await inlineCode.AsElement()!
             .EvaluateAsync<string>("element => getComputedStyle(element).fontFamily"), StringComparison.Ordinal);
     }
@@ -102,7 +104,9 @@ public sealed class ThemeControlsBrowserTests(
                     paddingInlineStart: parseFloat(style.paddingInlineStart),
                     transitionDuration: parseFloat(style.transitionDuration),
                     transitionTimingFunction: style.transitionTimingFunction,
-                    boxShadow: style.boxShadow
+                    boxShadow: style.boxShadow,
+                    focusRingWidth: style.getPropertyValue('--shadcn-focus-ring-width').trim(),
+                    focusRingOffset: style.getPropertyValue('--shadcn-focus-ring-offset').trim()
                 };
             }
             """);
@@ -117,5 +121,7 @@ public sealed class ThemeControlsBrowserTests(
         public double TransitionDuration { get; set; }
         public string TransitionTimingFunction { get; set; } = string.Empty;
         public string BoxShadow { get; set; } = string.Empty;
+        public string FocusRingWidth { get; set; } = string.Empty;
+        public string FocusRingOffset { get; set; } = string.Empty;
     }
 }
