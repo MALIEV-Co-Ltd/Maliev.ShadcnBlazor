@@ -1,9 +1,33 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class GitHubPagesTests
 {
+    [Fact]
+    public void ShowcaseInternalLinksRespectThePublishedBasePath()
+    {
+        var root = RepositoryRoot.Find();
+        var showcase = Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase");
+        var rootRelativeAttribute = new Regex("(?:href|Href)=\\\"/(?!/)", RegexOptions.CultureInvariant);
+
+        var offenders = Directory
+            .EnumerateFiles(showcase, "*.razor", SearchOption.AllDirectories)
+            .SelectMany(path => File.ReadLines(path).Select((line, index) => new { path, line, number = index + 1 }))
+            .Where(candidate => rootRelativeAttribute.IsMatch(candidate.line))
+            .Select(candidate => $"{Path.GetRelativePath(root, candidate.path)}:{candidate.number}")
+            .ToArray();
+
+        Assert.Empty(offenders);
+
+        var documentationEntry = File.ReadAllText(Path.Combine(
+            showcase,
+            "Documentation",
+            "ComponentDocumentationEntry.cs"));
+        Assert.DoesNotContain("$\"/docs/components/", documentationEntry, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void PreparationTransformsOnlyThePublishedArtifact()
     {

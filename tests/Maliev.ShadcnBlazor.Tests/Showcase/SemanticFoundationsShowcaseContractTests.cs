@@ -11,7 +11,7 @@ public sealed class SemanticFoundationsShowcaseContractTests
         var page = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "SemanticFoundations.razor"));
 
         Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css", index, StringComparison.Ordinal);
-        Assert.Contains("/components/semantic-foundations", layout, StringComparison.Ordinal);
+        Assert.Contains("components/semantic-foundations", layout, StringComparison.Ordinal);
         Assert.Contains("@page \"/components/semantic-foundations\"", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnAspectRatio", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnField", page, StringComparison.Ordinal);
