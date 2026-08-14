@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/TestResults/
+**/playwright-report/
+**/node_modules/
+**/dist/
+artifacts/
+.artifacts/
+.vs/
+.idea/
+*.user
+*.suo
+*.nupkg
+*.snupkg
