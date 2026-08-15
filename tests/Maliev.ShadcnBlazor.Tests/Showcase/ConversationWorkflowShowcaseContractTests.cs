@@ -112,6 +112,38 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void ScrollerDossierShowsAReadableTranscriptWithAnchorsAndLatestAction()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message-scroller").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("[data-slot='message-scroller']"));
+        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item']").Count);
+        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
+        Assert.Equal(5, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Single(cut.FindAll("[data-slot='message-scroller-button']"));
+        Assert.Contains("ตรวจสอบชิ้นงาน", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void QuestionnaireDossierShowsProgressDescriptionsChoiceCardsAndActions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("questionnaire").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("form[data-slot='questionnaire']"));
+        Assert.Single(cut.FindAll("[data-slot='questionnaire-progress']"));
+        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-item']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-choice']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-choice-description']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-description']").Count);
+        Assert.Single(cut.FindAll("[data-slot='questionnaire-actions']"));
+        Assert.Contains("เลือกประเภทการตรวจ", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryExactPlanNinePinnedSource()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));
