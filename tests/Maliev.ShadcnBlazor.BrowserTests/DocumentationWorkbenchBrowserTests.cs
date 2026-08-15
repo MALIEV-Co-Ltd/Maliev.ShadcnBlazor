@@ -43,7 +43,23 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await page.GetByTestId("documentation-workbench").WaitForAsync();
 
         var catalog = page.Locator("#documentation-catalog");
-        var theme = page.Locator("#documentation-theme");
+        var outline = page.Locator("#documentation-outline");
+        var content = page.Locator("#documentation-content");
+        await Assertions.Expect(outline.Locator("a[href='#installation']")).ToHaveTextAsync("Installation");
+        await Assertions.Expect(outline.Locator("a[href='#api-reference']")).ToHaveTextAsync("API Reference");
+        await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("@using Maliev.ShadcnBlazor");
+        if (width > 1280)
+        {
+            var catalogBox = await catalog.BoundingBoxAsync();
+            var contentBox = await content.BoundingBoxAsync();
+            var outlineBox = await outline.BoundingBoxAsync();
+            Assert.NotNull(catalogBox);
+            Assert.NotNull(contentBox);
+            Assert.NotNull(outlineBox);
+            Assert.True(catalogBox.X < contentBox.X);
+            Assert.True(contentBox.X < outlineBox.X);
+        }
+
         if (width <= 768)
         {
             await page.GetByTestId("catalog-trigger").ClickAsync();
@@ -55,7 +71,7 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await Assertions.Expect(page.GetByTestId("documentation-result-count")).ToHaveTextAsync("11 components found");
         Assert.Equal(
             ["accordion", "calendar", "combobox", "command", "context-menu", "dropdown-menu", "kbd", "navigation-menu", "resizable", "select", "toast"],
-            await page.Locator(".documentation-component-list a").EvaluateAllAsync<string[]>("links => links.map(link => new URL(link.href).pathname.split('/').pop())"));
+            (await page.Locator(".documentation-component-list a").EvaluateAllAsync<string[]>("links => links.map(link => new URL(link.href).pathname.split('/').pop())")).Order());
         await Assertions.Expect(page.Locator("a[href='docs/components/kbd']")).ToHaveAttributeAsync("aria-current", "page");
 
         if (width <= 768)
@@ -65,18 +81,25 @@ public sealed class DocumentationWorkbenchBrowserTests(
             await Assertions.Expect(page.GetByTestId("catalog-trigger")).ToBeFocusedAsync();
         }
 
-        if (width <= 1024)
+        if (width <= 1280)
         {
-            await page.GetByTestId("theme-dock-trigger").ClickAsync();
-            await Assertions.Expect(theme).ToHaveAttributeAsync("data-open", "true");
+            await page.GetByTestId("outline-trigger").ClickAsync();
+            await Assertions.Expect(outline).ToHaveAttributeAsync("data-open", "true");
             await page.Keyboard.PressAsync("Escape");
-            await Assertions.Expect(theme).ToHaveAttributeAsync("data-open", "false");
-            await Assertions.Expect(page.GetByTestId("theme-dock-trigger")).ToBeFocusedAsync();
+            await Assertions.Expect(outline).ToHaveAttributeAsync("data-open", "false");
+            await Assertions.Expect(page.GetByTestId("outline-trigger")).ToBeFocusedAsync();
         }
+
+        await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("documentation-theme-toggle")).ToHaveAccessibleNameAsync("Use light theme");
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("documentation-direction-toggle")).ToHaveAccessibleNameAsync("Use left-to-right direction");
 
         var overflow = await page.EvaluateAsync<double>(
             "Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)");
-        Assert.InRange(overflow, 0, 1);
+        var overflowSources = await page.EvaluateAsync<string[]>(
+            "Array.from(document.querySelectorAll('*')).map(element => ({ element, rect: element.getBoundingClientRect() })).filter(item => item.rect.right > document.documentElement.clientWidth + 1 || item.rect.left < -1).map(item => `${item.element.tagName.toLowerCase()}.${item.element.className || ''} [${item.rect.left}, ${item.rect.right}]`)");
+        Assert.True(overflow is >= 0 and <= 1, $"Horizontal overflow was {overflow}px. Sources: {string.Join("; ", overflowSources)}");
         Assert.Empty(errors);
     }
 
@@ -125,13 +148,13 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await page.Keyboard.PressAsync("Enter");
         await Assertions.Expect(page.GetByTestId("catalog-trigger")).ToBeFocusedAsync();
 
-        await page.GetByTestId("theme-dock-trigger").ClickAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Close theme studio" }).ClickAsync();
-        await Assertions.Expect(page.GetByTestId("theme-dock-trigger")).ToBeFocusedAsync();
+        await page.GetByTestId("outline-trigger").ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Close page outline" }).ClickAsync();
+        await Assertions.Expect(page.GetByTestId("outline-trigger")).ToBeFocusedAsync();
 
-        await page.GetByTestId("theme-dock-trigger").ClickAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Close theme studio" }).FocusAsync();
+        await page.GetByTestId("outline-trigger").ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Close page outline" }).FocusAsync();
         await page.Keyboard.PressAsync("Enter");
-        await Assertions.Expect(page.GetByTestId("theme-dock-trigger")).ToBeFocusedAsync();
+        await Assertions.Expect(page.GetByTestId("outline-trigger")).ToBeFocusedAsync();
     }
 }

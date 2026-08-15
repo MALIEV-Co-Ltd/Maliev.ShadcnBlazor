@@ -15,6 +15,7 @@ public sealed class DocumentationRouteTests : BunitContext
         Services.AddSingleton<IComponentDocumentationCatalog>(catalog);
         Services.AddSingleton<ComponentApiCatalog>();
         Services.AddSingleton<IComponentExampleRegistry>(new ComponentExampleRegistry(catalog));
+        Services.AddScoped<DocumentationPageState>();
     }
 
     [Fact]
@@ -50,5 +51,29 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Equal(7, rows.Count);
         Assert.Equal(6, rows.Count(row => row.GetAttribute("data-complete") == "true"));
         Assert.Equal("false", cut.Find("[data-evidence='integration']").GetAttribute("data-complete"));
+    }
+
+    [Fact]
+    public void CompleteSlug_RendersAConsumptionArticleAndPublishesItsOutline()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        Services.AddMalievShadcn();
+
+        var cut = Render<ComponentDocumentation>(parameters => parameters.Add(component => component.Slug, "button"));
+        var expectedSections = new[]
+        {
+            "overview", "preview", "installation", "usage", "composition", "accessibility",
+            "api-reference", "theming", "evidence", "references"
+        };
+
+        Assert.All(expectedSections, id => Assert.Single(cut.FindAll($"#{id}")));
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("@using Maliev.ShadcnBlazor.Components.Actions", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("ShadcnButton", cut.Markup, StringComparison.Ordinal);
+
+        var outline = Services.GetRequiredService<DocumentationPageState>().Sections;
+        Assert.Equal(expectedSections, outline.Select(section => section.Id));
+        Assert.Contains(cut.FindAll(".component-dossier__pagination a"), link => link.TextContent.Contains("Previous", StringComparison.Ordinal));
+        Assert.Contains(cut.FindAll(".component-dossier__pagination a"), link => link.TextContent.Contains("Next", StringComparison.Ordinal));
     }
 }

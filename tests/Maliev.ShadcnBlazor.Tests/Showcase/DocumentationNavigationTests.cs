@@ -17,6 +17,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         Services.AddMalievShadcn();
         Services.AddSingleton<IComponentDocumentationCatalog>(new ComponentDocumentationCatalog());
         Services.AddScoped<ShowcaseState>();
+        Services.AddScoped<DocumentationPageState>();
     }
 
     [Fact]
@@ -42,12 +43,12 @@ public sealed class DocumentationNavigationTests : BunitContext
         var state = new DocumentationNavigationState();
 
         state.CatalogOpen = true;
-        state.ThemeDockOpen = true;
+        state.OutlineOpen = true;
 
         Assert.False(state.CatalogOpen);
-        Assert.True(state.ThemeDockOpen);
+        Assert.True(state.OutlineOpen);
         Assert.True(state.CloseDrawers());
-        Assert.False(state.ThemeDockOpen);
+        Assert.False(state.OutlineOpen);
         Assert.False(state.CloseDrawers());
     }
 
@@ -70,6 +71,67 @@ public sealed class DocumentationNavigationTests : BunitContext
     }
 
     [Fact]
+    public void CatalogRail_GroupsEveryComponentAndOffersRecoveryForEmptySearch()
+    {
+        var state = new DocumentationNavigationState();
+        var cut = Render<DocumentationCatalogRail>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal(64, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(
+            new[] { "Composition", "Data", "Feedback", "Forms", "Foundation", "Layout", "Overlays" },
+            cut.FindAll(".documentation-category h3").Select(heading => heading.TextContent.Trim()));
+
+        state.Query = "no-such-component";
+
+        Assert.Equal("No components found", cut.Find("[role='status']").TextContent.Trim());
+        Assert.Equal("Clear search", cut.Find("[data-testid='clear-component-search']").TextContent.Trim());
+        cut.Find("[data-testid='clear-component-search']").Click();
+        Assert.Equal(64, cut.FindAll(".documentation-component-list a").Count);
+    }
+
+    [Fact]
+    public void PageState_NormalizesUniqueSectionsAndClearsWithoutDuplicateNotifications()
+    {
+        var state = new DocumentationPageState();
+        var changes = 0;
+        state.Changed += (_, _) => changes++;
+
+        state.SetSections([
+            new DocumentationSection(" usage ", " Usage "),
+            new DocumentationSection("usage", "Duplicate"),
+            new DocumentationSection("api-reference", "API Reference")
+        ]);
+        state.SetSections(state.Sections);
+
+        Assert.Equal(
+            [new DocumentationSection("usage", "Usage"), new DocumentationSection("api-reference", "API Reference")],
+            state.Sections);
+        Assert.Equal(1, changes);
+
+        state.Clear();
+        state.Clear();
+        Assert.Empty(state.Sections);
+        Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public void OnThisPage_RendersOnlyPublishedSections()
+    {
+        var state = new DocumentationPageState();
+        state.SetSections([
+            new DocumentationSection("overview", "Overview"),
+            new DocumentationSection("usage", "Usage")
+        ]);
+
+        var cut = Render<DocumentationOnThisPage>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal("On This Page", cut.Find("h2").TextContent.Trim());
+        Assert.Equal(new[] { "#overview", "#usage" }, cut.FindAll("a").Select(link => link.GetAttribute("href")));
+        state.Clear();
+        Assert.Empty(cut.FindAll("nav"));
+    }
+
+    [Fact]
     public void Layout_HasLandmarkSkipTargetsAndEscapeClosesDrawersWithoutMutatingTheme()
     {
         var theme = Services.GetRequiredService<ShowcaseState>();
@@ -82,7 +144,10 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Single(cut.FindAll("header"));
         Assert.Single(cut.FindAll("nav#documentation-catalog"));
         Assert.Single(cut.FindAll("main#documentation-content"));
-        Assert.Single(cut.FindAll("aside#documentation-theme"));
+        Assert.Single(cut.FindAll("aside#documentation-outline"));
+        Assert.Empty(cut.FindAll("#documentation-theme"));
+        Assert.Single(cut.FindAll("[data-testid='documentation-theme-toggle']"));
+        Assert.Single(cut.FindAll("[data-testid='documentation-direction-toggle']"));
 
         navigation.CatalogOpen = true;
         cut.Find(".documentation-shell").KeyDown(new KeyboardEventArgs { Key = "Escape" });
@@ -117,12 +182,12 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.False(navigation.CatalogOpen);
         Assert.True(CountFocusCalls() > catalogFocusCalls);
 
-        cut.Find("[data-testid='theme-dock-trigger']").Click();
-        var themeFocusCalls = CountFocusCalls();
-        cut.Find("[aria-label='Close theme studio']").Click();
+        cut.Find("[data-testid='outline-trigger']").Click();
+        var outlineFocusCalls = CountFocusCalls();
+        cut.Find("[aria-label='Close page outline']").Click();
 
-        Assert.False(navigation.ThemeDockOpen);
-        Assert.True(CountFocusCalls() > themeFocusCalls);
+        Assert.False(navigation.OutlineOpen);
+        Assert.True(CountFocusCalls() > outlineFocusCalls);
     }
 
     [Fact]
@@ -133,12 +198,17 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(x => x.State, state));
 
         cut.Find("[data-testid='catalog-trigger']").Click();
-        cut.Find("[data-testid='theme-dock-trigger']").Click();
+        cut.Find("[data-testid='outline-trigger']").Click();
 
         Assert.False(theme.IsDarkMode);
         Assert.Equal(ShadcnDirection.LeftToRight, theme.Direction);
         Assert.False(state.CatalogOpen);
-        Assert.True(state.ThemeDockOpen);
+        Assert.True(state.OutlineOpen);
+
+        cut.Find("[data-testid='documentation-theme-toggle']").Click();
+        cut.Find("[data-testid='documentation-direction-toggle']").Click();
+        Assert.True(theme.IsDarkMode);
+        Assert.Equal(ShadcnDirection.RightToLeft, theme.Direction);
     }
 
     [Fact]
@@ -147,7 +217,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
         var actions = cut.Find(".documentation-header__actions");
         Assert.Equal("group", actions.GetAttribute("role"));
-        Assert.Equal("Documentation panels", actions.GetAttribute("aria-label"));
+        Assert.Equal("Documentation actions", actions.GetAttribute("aria-label"));
     }
 
     private IRenderedComponent<DocumentationLayout> RenderDocumentationLayout() => Render<DocumentationLayout>(parameters => parameters

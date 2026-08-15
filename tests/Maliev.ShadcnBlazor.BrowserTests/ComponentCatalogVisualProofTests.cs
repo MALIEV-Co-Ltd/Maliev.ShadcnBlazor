@@ -68,12 +68,10 @@ public sealed class ComponentCatalogVisualProofTests(
 
             if (mode.Dark)
             {
-                await page.GetByTestId("theme-dock-trigger").EvaluateAsync("element => element.click()");
                 await page.GetByTestId("documentation-theme-toggle").EvaluateAsync("element => element.click()");
                 await page.GetByTestId("documentation-direction-toggle").EvaluateAsync("element => element.click()");
                 await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("data-shadcn-theme", "dark");
                 await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
-                await page.GetByTestId("theme-dock-trigger").EvaluateAsync("element => element.click()");
             }
 
             await page.EvaluateAsync("document.fonts.ready");

@@ -2,6 +2,8 @@
 @inject Maliev.ShadcnBlazor.Showcase.Documentation.IComponentDocumentationCatalog Catalog
 @inject Maliev.ShadcnBlazor.Showcase.Documentation.Examples.IComponentExampleRegistry Examples
 @inject Maliev.ShadcnBlazor.Showcase.Documentation.Api.ComponentApiCatalog ApiCatalog
+@inject Maliev.ShadcnBlazor.Showcase.Documentation.DocumentationPageState PageState
+@implements IDisposable
 
 <PageTitle>@(Entry?.Name ?? "Component not found") documentation</PageTitle>
 
@@ -18,8 +20,7 @@
 else
 {
     <article class="component-dossier" aria-labelledby="component-documentation-title" data-testid="component-dossier">
-        <header class="component-dossier__hero">
-            <p class="documentation-eyebrow">Component dossier</p>
+        <header id="overview" class="component-dossier__hero">
             <h1 id="component-documentation-title">@Entry.Name</h1>
             <p>@Entry.Summary</p>
             <p>
@@ -34,11 +35,14 @@ else
             </p>
         </header>
 
-        @foreach (var example in _examples)
-        {
-            <ComponentPreview Example="@example" />
-            <ComponentCodeExample Title="@example.Title" Source="@example.RazorSource" />
-        }
+        <section id="preview" class="component-dossier__preview" aria-labelledby="preview-title">
+            <h2 id="preview-title">Preview</h2>
+            @foreach (var example in _examples)
+            {
+                <ComponentPreview Example="@example" />
+                <ComponentCodeExample Title="@example.Title" Heading="Example source" Source="@example.RazorSource" />
+            }
+        </section>
 
         @if (Entry.Status == Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationStatus.Planned)
         {
@@ -49,9 +53,10 @@ else
         }
         @if (Entry.PrimaryType is not null && Entry.Namespace is not null)
         {
-            <ComponentApiTable Descriptors="@_apiDescriptors" />
-            <ComponentAccessibilityNotes Entry="@Entry" />
-            <section class="component-token-guidance" aria-labelledby="component-token-guidance-title" data-testid="component-token-guidance">
+            <ComponentConsumptionGuide Entry="@Entry" Descriptors="@_apiDescriptors" Example="@_examples.FirstOrDefault()" />
+            <section id="accessibility"><ComponentAccessibilityNotes Entry="@Entry" /></section>
+            <section id="api-reference"><ComponentApiTable Descriptors="@_apiDescriptors" /></section>
+            <section id="theming" class="component-token-guidance" aria-labelledby="component-token-guidance-title" data-testid="component-token-guidance">
                 <h2 id="component-token-guidance-title">Customization tokens</h2>
                 <p>Customize this component through the scoped semantic token contract; no component CSS fork is required.</p>
                 <ul>
@@ -62,9 +67,10 @@ else
                 </ul>
                 <a href="theme">Open the live theme studio and export an integration bundle</a>
             </section>
+            <section id="evidence"><ComponentStatusEvidence Entry="@Entry" /></section>
             @if (UpstreamPaths.Count > 0)
             {
-                <section class="component-reference" aria-labelledby="component-reference-title" data-testid="component-reference">
+                <section id="references" class="component-reference" aria-labelledby="component-reference-title" data-testid="component-reference">
                     <h2 id="component-reference-title">Official reference</h2>
                     <p>Audited against the pinned Shadcn Base/Vega source and the current official component documentation.</p>
                     <ul>
@@ -77,8 +83,21 @@ else
                 </section>
             }
         }
+        else
+        {
+            <section id="evidence"><ComponentStatusEvidence Entry="@Entry" /></section>
+        }
 
-        <ComponentStatusEvidence Entry="@Entry" />
+        <nav class="component-dossier__pagination" aria-label="Adjacent component documentation">
+            @if (PreviousEntry is not null)
+            {
+                <a href="@PreviousEntry.DocumentationUrl"><span>Previous</span><strong>@PreviousEntry.Name</strong></a>
+            }
+            @if (NextEntry is not null)
+            {
+                <a href="@NextEntry.DocumentationUrl"><span>Next</span><strong>@NextEntry.Name</strong></a>
+            }
+        </nav>
     </article>
 }
 
@@ -146,10 +165,55 @@ else
     private static string PinnedSourceUrl(string upstreamPath) => $"https://github.com/shadcn-ui/ui/blob/{PinnedCommit}/{upstreamPath}";
     private string CurrentDocumentationUrl => $"https://ui.shadcn.com/docs/components/base/{Slug}";
 
+    private Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry? PreviousEntry => AdjacentEntry(-1);
+
+    private Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry? NextEntry => AdjacentEntry(1);
+
     protected override void OnParametersSet()
     {
         var entry = Entry;
         _examples = entry is null ? [] : Examples.GetBySlug(entry.Slug);
         _apiDescriptors = entry is null ? [] : ApiCatalog.GetByEntry(entry);
+        PageState.SetSections(entry is null ? [] : Sections(entry));
+    }
+
+    public void Dispose() => PageState.Clear();
+
+    private Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry? AdjacentEntry(int offset)
+    {
+        var entry = Entry;
+        if (entry is null)
+            return null;
+
+        var index = Catalog.All.ToList().FindIndex(item => item.Slug == entry.Slug);
+        var adjacent = index + offset;
+        return adjacent >= 0 && adjacent < Catalog.All.Count ? Catalog.All[adjacent] : null;
+    }
+
+    private IReadOnlyList<Maliev.ShadcnBlazor.Showcase.Documentation.DocumentationSection> Sections(
+        Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry entry)
+    {
+        var sections = new List<Maliev.ShadcnBlazor.Showcase.Documentation.DocumentationSection>
+        {
+            new("overview", "Overview"),
+            new("preview", "Preview")
+        };
+
+        if (entry.PrimaryType is not null && entry.Namespace is not null)
+        {
+            sections.AddRange([
+                new("installation", "Installation"),
+                new("usage", "Usage"),
+                new("composition", "Composition"),
+                new("accessibility", "Accessibility"),
+                new("api-reference", "API Reference"),
+                new("theming", "Theming")
+            ]);
+        }
+
+        sections.Add(new("evidence", "Evidence"));
+        if (UpstreamPaths.Count > 0)
+            sections.Add(new("references", "References"));
+        return sections;
     }
 }

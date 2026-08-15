@@ -1,8 +1,9 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
+@inject ShowcaseState ThemeState
+@implements IDisposable
 
 <header class="documentation-header">
-    <a class="documentation-brand" href="docs">Maliev Shadcn Blazor</a>
-    <div class="documentation-header__actions" role="group" aria-label="Documentation panels">
+    <div class="documentation-header__leading">
         <button @ref="_catalogTrigger"
                 type="button"
                 class="documentation-trigger documentation-trigger--catalog"
@@ -12,30 +13,45 @@
                 @onclick="ToggleCatalog">
             Components
         </button>
-        <button @ref="_themeDockTrigger"
+        <a class="documentation-brand" href="docs">Maliev Shadcn Blazor</a>
+    </div>
+    <div class="documentation-header__actions" role="group" aria-label="Documentation actions">
+        <button @ref="_outlineTrigger"
                 type="button"
-                class="documentation-trigger documentation-trigger--theme"
-                data-testid="theme-dock-trigger"
-                aria-controls="documentation-theme"
-                aria-expanded="@State.ThemeDockOpen.ToString().ToLowerInvariant()"
-                @onclick="ToggleThemeDock">
-            Theme
+                class="documentation-trigger documentation-trigger--outline"
+                data-testid="outline-trigger"
+                aria-controls="documentation-outline"
+                aria-expanded="@State.OutlineOpen.ToString().ToLowerInvariant()"
+                @onclick="ToggleOutline">
+            On This Page
+        </button>
+        <button type="button" class="documentation-icon-action" data-testid="documentation-theme-toggle" aria-label="@(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")" @onclick="ThemeState.ToggleTheme">
+            @(ThemeState.IsDarkMode ? "Light" : "Dark")
+        </button>
+        <button type="button" class="documentation-icon-action" data-testid="documentation-direction-toggle" aria-label="@(ThemeState.Direction == ShadcnDirection.LeftToRight ? "Use right-to-left direction" : "Use left-to-right direction")" @onclick="ThemeState.ToggleDirection">
+            @(ThemeState.Direction == ShadcnDirection.LeftToRight ? "RTL" : "LTR")
         </button>
     </div>
 </header>
 
 @code {
     private ElementReference _catalogTrigger;
-    private ElementReference _themeDockTrigger;
+    private ElementReference _outlineTrigger;
 
     [Parameter, EditorRequired]
     public DocumentationNavigationState State { get; set; } = null!;
 
     public ValueTask FocusCatalogTriggerAsync() => _catalogTrigger.FocusAsync();
 
-    public ValueTask FocusThemeDockTriggerAsync() => _themeDockTrigger.FocusAsync();
+    public ValueTask FocusOutlineTriggerAsync() => _outlineTrigger.FocusAsync();
 
     private void ToggleCatalog() => State.CatalogOpen = !State.CatalogOpen;
 
-    private void ToggleThemeDock() => State.ThemeDockOpen = !State.ThemeDockOpen;
+    private void ToggleOutline() => State.OutlineOpen = !State.OutlineOpen;
+
+    protected override void OnInitialized() => ThemeState.Changed += OnThemeChanged;
+
+    private void OnThemeChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
 }

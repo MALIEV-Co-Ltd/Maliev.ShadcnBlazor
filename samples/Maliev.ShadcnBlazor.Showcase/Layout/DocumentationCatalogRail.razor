@@ -21,44 +21,37 @@
                @oninput="OnQueryChanged" />
     </label>
 
-    <div class="documentation-filters">
-        <label class="documentation-field">
-            <span>Category</span>
-            <select value="@State.Category" @onchange="OnCategoryChanged">
-                <option value="">All categories</option>
-                @foreach (var category in Categories)
-                {
-                    <option value="@category">@category</option>
-                }
-            </select>
-        </label>
-        <label class="documentation-field">
-            <span>Status</span>
-            <select value="@StatusValue" @onchange="OnStatusChanged">
-                <option value="">All statuses</option>
-                <option value="Complete">Complete</option>
-                <option value="Planned">Planned</option>
-            </select>
-        </label>
-    </div>
-
     <p class="documentation-result-count" data-testid="documentation-result-count" role="status" aria-live="polite">
         @ResultAnnouncement
     </p>
 
-    <ul class="documentation-component-list">
-        @foreach (var component in Results)
+    @if (Results.Count == 0)
+    {
+        <button type="button" class="documentation-clear-search" data-testid="clear-component-search" @onclick="ClearSearch">
+            Clear search
+        </button>
+    }
+    else
+    {
+        @foreach (var group in Groups)
         {
-            <li>
-                <a href="@component.DocumentationUrl"
-                   aria-current="@(IsActive(component) ? "page" : null)"
-                   @onclick="CloseCatalog">
-                    <span>@component.Name</span>
-                    <small>@component.Status</small>
-                </a>
-            </li>
+            <section class="documentation-category" aria-labelledby="@CategoryId(group.Key)">
+                <h3 id="@CategoryId(group.Key)">@group.Key</h3>
+                <ul class="documentation-component-list">
+                    @foreach (var component in group)
+                    {
+                        <li>
+                            <a href="@component.DocumentationUrl"
+                               aria-current="@(IsActive(component) ? "page" : null)"
+                               @onclick="CloseCatalog">
+                                <span>@component.Name</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
         }
-    </ul>
+    }
 </div>
 
 @code {
@@ -68,21 +61,20 @@
     [Parameter, EditorRequired]
     public EventCallback CloseRequested { get; set; }
 
-    private IReadOnlyList<string> Categories => Catalog.All
-        .Select(entry => entry.Category)
-        .Distinct(StringComparer.Ordinal)
-        .Order(StringComparer.Ordinal)
-        .ToArray();
-
     private IReadOnlyList<ComponentDocumentationEntry> Results => Catalog.Search(
         State.Query,
         new DocumentationCatalogFilter(Category: State.Category, Status: State.Status));
 
-    private string StatusValue => State.Status?.ToString() ?? string.Empty;
+    private IEnumerable<IGrouping<string, ComponentDocumentationEntry>> Groups => Results
+        .GroupBy(entry => entry.Category, StringComparer.Ordinal)
+        .OrderBy(group => group.Key, StringComparer.Ordinal);
 
-    private string ResultAnnouncement => Results.Count == 1
-        ? "1 component found"
-        : $"{Results.Count} components found";
+    private string ResultAnnouncement => Results.Count switch
+    {
+        0 => "No components found",
+        1 => "1 component found",
+        _ => $"{Results.Count} components found"
+    };
 
     protected override void OnInitialized()
     {
@@ -98,14 +90,13 @@
 
     private void OnQueryChanged(ChangeEventArgs args) => State.Query = args.Value?.ToString() ?? string.Empty;
 
-    private void OnCategoryChanged(ChangeEventArgs args) => State.Category = args.Value?.ToString();
-
-    private void OnStatusChanged(ChangeEventArgs args) => State.Status =
-        Enum.TryParse<ComponentDocumentationStatus>(args.Value?.ToString(), out var status) ? status : null;
-
     private Task RequestCloseAsync() => CloseRequested.InvokeAsync();
 
     private void CloseCatalog() => State.CatalogOpen = false;
+
+    private void ClearSearch() => State.Query = string.Empty;
+
+    private static string CategoryId(string category) => $"documentation-category-{category.ToLowerInvariant().Replace(' ', '-')}";
 
     private void OnStateChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
 

@@ -1,0 +1,42 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Api
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Examples
+
+<section id="installation" class="component-guide" aria-labelledby="installation-title">
+    <h2 id="installation-title">Installation</h2>
+    <p>Add the package to a Blazor project, then register the component services and stylesheet once in the host.</p>
+    <ComponentCodeExample Title="@($"{Entry.Name} installation")"
+                          Heading="Package installation"
+                          Nested="true"
+                          Source="dotnet add package Maliev.ShadcnBlazor" />
+</section>
+
+<section id="usage" class="component-guide" aria-labelledby="usage-title">
+    <h2 id="usage-title">Usage</h2>
+    <p>Import the component namespace and compose the primitive directly in Razor.</p>
+    <ComponentCodeExample Title="@($"{Entry.Name} usage")"
+                          Heading="Razor example"
+                          Nested="true"
+                          Source="@UsageSource" />
+</section>
+
+<section id="composition" class="component-guide" aria-labelledby="composition-title">
+    <h2 id="composition-title">Composition</h2>
+    <p>Build the component from its public primitives. Each primitive keeps its native semantics and forwards supported attributes.</p>
+    <ul class="component-guide__composition">
+        @foreach (var descriptor in Descriptors)
+        {
+            <li><code>@descriptor.Name</code></li>
+        }
+    </ul>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ComponentDocumentationEntry Entry { get; set; } = null!;
+
+    [Parameter, EditorRequired] public IReadOnlyList<ComponentApiDescriptor> Descriptors { get; set; } = [];
+
+    [Parameter] public ComponentExampleDefinition? Example { get; set; }
+
+    private string UsageSource => $"@using {Entry.Namespace}{Environment.NewLine}{Environment.NewLine}{Example?.RazorSource ?? $"<{Entry.PrimaryType} />"}";
+}

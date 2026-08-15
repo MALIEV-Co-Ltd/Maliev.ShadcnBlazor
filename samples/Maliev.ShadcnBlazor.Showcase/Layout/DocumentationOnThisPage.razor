@@ -1,0 +1,26 @@
+@using Maliev.ShadcnBlazor.Showcase.Documentation
+@implements IDisposable
+
+@if (State.Sections.Count > 0)
+{
+    <nav class="documentation-on-this-page" aria-labelledby="documentation-outline-title">
+        <h2 id="documentation-outline-title">On This Page</h2>
+        <ul>
+            @foreach (var item in State.Sections)
+            {
+                <li><a href="@($"#{item.Id}")">@item.Label</a></li>
+            }
+        </ul>
+    </nav>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public DocumentationPageState State { get; set; } = null!;
+
+    protected override void OnInitialized() => State.Changed += OnChanged;
+
+    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.Changed -= OnChanged;
+}
