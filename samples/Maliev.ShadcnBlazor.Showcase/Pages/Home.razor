@@ -1,4 +1,6 @@
 @page "/"
-<PageTitle>Shadcn Blazor Showcase</PageTitle>
-<h1>Shadcn Blazor Showcase</h1>
-<p>Deterministic component and state fixtures.</p>
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized() => Navigation.NavigateTo("docs/components", replace: true);
+}

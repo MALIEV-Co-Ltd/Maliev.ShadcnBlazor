@@ -8,6 +8,23 @@ public sealed class DocumentationWorkbenchBrowserTests(
     ShowcaseServerFixture server,
     PlaywrightFixture playwright)
 {
+    [Fact]
+    public async Task RepositoryRootOpensTheDocumentationCatalog()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(server.BaseUri.ToString());
+
+        await page.GetByTestId("documentation-workbench").WaitForAsync();
+        Assert.EndsWith("/docs/components", new Uri(page.Url).AbsolutePath, StringComparison.Ordinal);
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Component catalog" })).ToBeVisibleAsync();
+    }
+
     public static TheoryData<int, int> Viewports => new()
     {
         { 1440, 900 },
