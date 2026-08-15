@@ -47,7 +47,14 @@ jobs:
         run: dotnet pack src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj -c Release --no-build --no-restore -o artifacts/package
       - name: Verify public surface and package
         shell: pwsh
-        run: ./eng/Verify-PublicSurface.ps1 -Root . -Package artifacts/package/Maliev.ShadcnBlazor.1.0.0.nupkg
+        run: |
+          $packages = @(Get-ChildItem -LiteralPath artifacts/package -File | Where-Object {
+            $_.Name -like 'Maliev.ShadcnBlazor.*.nupkg' -and $_.Name -notlike '*.snupkg'
+          })
+          if ($packages.Count -ne 1) {
+            throw "Expected exactly one non-symbol Maliev.ShadcnBlazor package, found $($packages.Count)."
+          }
+          ./eng/Verify-PublicSurface.ps1 -Root . -Package $packages[0].FullName
       - name: Upload packages
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
