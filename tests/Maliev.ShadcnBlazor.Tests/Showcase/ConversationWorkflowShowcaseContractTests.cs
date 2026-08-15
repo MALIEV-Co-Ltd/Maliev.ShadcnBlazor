@@ -83,6 +83,35 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void MarkerDossierShowsStatusSeparatorAndStreamingCompositions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("marker").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Equal(3, cut.FindAll("[data-slot='marker']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='marker-icon']").Count);
+        Assert.Contains("ตรวจสอบ 4 ไฟล์แล้ว", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("กำลังประมวลผล", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MessageDossierShowsGroupedRowsWithAvatarsHeadersAndActions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("[data-slot='message-group']"));
+        Assert.Equal(3, cut.FindAll("[data-slot='message']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-avatar']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
+        Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryExactPlanNinePinnedSource()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));
