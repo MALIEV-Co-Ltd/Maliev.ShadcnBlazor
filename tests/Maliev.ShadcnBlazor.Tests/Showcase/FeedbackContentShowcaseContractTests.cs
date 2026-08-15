@@ -89,12 +89,26 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void AlertDossierUsesTheComposedShadcnCalloutPattern()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("alert"));
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("[data-slot='alert']"));
+        Assert.Single(cut.FindAll("[data-slot='alert-icon']"));
+        Assert.Single(cut.FindAll("[data-slot='alert-title']"));
+        Assert.Single(cut.FindAll("[data-slot='alert-description']"));
+        Assert.Single(cut.FindAll("[data-slot='alert-action'] button"));
+        Assert.Contains("Payment processed", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EveryFeedbackDossierExposesControlsForItsDocumentedCustomizationStates()
     {
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
         var expected = new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
-            ["alert"] = ["alert-variant", "alert-role"],
+            ["alert"] = ["alert-variant", "alert-role", "alert-action"],
             ["avatar"] = ["avatar-size", "avatar-failed", "avatar-badge", "avatar-group"],
             ["badge"] = ["badge-variant", "badge-link", "badge-invalid"],
             ["card"] = ["card-size", "card-spacing", "card-action"],
@@ -136,6 +150,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         {
             ["alert-variant"] = "Destructive",
             ["alert-role"] = "Status",
+            ["alert-action"] = "false",
             ["avatar-size"] = "Large",
             ["avatar-failed"] = "true",
             ["avatar-badge"] = "true",
@@ -198,6 +213,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         {
             case "alert-variant": Assert.Equal("destructive", cut.Find("[data-slot='alert']").GetAttribute("data-variant")); break;
             case "alert-role": Assert.Equal("status", cut.Find("[data-slot='alert']").GetAttribute("role")); break;
+            case "alert-action": Assert.Empty(cut.FindAll("[data-slot='alert-action']")); break;
             case "avatar-size": Assert.Equal("lg", cut.Find("[data-slot='avatar']").GetAttribute("data-size")); break;
             case "avatar-failed": Assert.Equal("/missing-avatar.webp", cut.Find("[data-slot='avatar-image']").GetAttribute("src")); break;
             case "avatar-badge": Assert.Single(cut.FindAll("[data-slot='avatar-badge']")); break;

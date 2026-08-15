@@ -955,6 +955,53 @@ a {
     padding-block-start: 1rem;
 }
 
+.showcase-alert-card {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+    border-radius: var(--shadcn-radius-lg);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-alert-card [data-slot="alert-icon"] {
+    display: grid;
+    width: 1.25rem;
+    height: 1.25rem;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 750;
+}
+
+.showcase-alert-card [data-slot="alert-title"] {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.showcase-alert-card [data-slot="alert-description"] {
+    max-width: 48ch;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.showcase-alert-card [data-slot="alert-action"] {
+    inset-inline-end: 1rem;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+}
+
+.showcase-alert-action {
+    min-height: 2rem;
+    border: 1px solid currentColor;
+    border-radius: var(--shadcn-radius-md);
+    padding-inline: 0.7rem;
+    background: transparent;
+    color: inherit;
+    font-size: 0.75rem;
+    font-weight: 650;
+}
+
 .component-code__header button {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-border);
