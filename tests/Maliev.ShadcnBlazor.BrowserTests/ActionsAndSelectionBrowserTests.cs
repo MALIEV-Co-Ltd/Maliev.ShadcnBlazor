@@ -940,8 +940,8 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='false']")).ToHaveCountAsync(0);
 
-        await page.GetByTestId("copy-source").ClickAsync();
-        await Assertions.Expect(page.Locator(".component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
+        await page.Locator("#preview").GetByTestId("copy-source").ClickAsync();
+        await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         Assert.Contains("<Shadcn", await page.EvaluateAsync<string>("navigator.clipboard.readText()"), StringComparison.Ordinal);
     }
 
