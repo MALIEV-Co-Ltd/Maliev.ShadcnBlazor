@@ -70,6 +70,67 @@ public sealed class DocumentationNavigationTests : BunitContext
     }
 
     [Fact]
+    public void CatalogRail_GroupsEveryComponentAndOffersRecoveryForEmptySearch()
+    {
+        var state = new DocumentationNavigationState();
+        var cut = Render<DocumentationCatalogRail>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal(64, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(
+            new[] { "Composition", "Data", "Feedback", "Forms", "Foundation", "Layout", "Overlays" },
+            cut.FindAll(".documentation-category h3").Select(heading => heading.TextContent.Trim()));
+
+        state.Query = "no-such-component";
+
+        Assert.Equal("No components found", cut.Find("[role='status']").TextContent.Trim());
+        Assert.Equal("Clear search", cut.Find("[data-testid='clear-component-search']").TextContent.Trim());
+        cut.Find("[data-testid='clear-component-search']").Click();
+        Assert.Equal(64, cut.FindAll(".documentation-component-list a").Count);
+    }
+
+    [Fact]
+    public void PageState_NormalizesUniqueSectionsAndClearsWithoutDuplicateNotifications()
+    {
+        var state = new DocumentationPageState();
+        var changes = 0;
+        state.Changed += (_, _) => changes++;
+
+        state.SetSections([
+            new DocumentationSection(" usage ", " Usage "),
+            new DocumentationSection("usage", "Duplicate"),
+            new DocumentationSection("api-reference", "API Reference")
+        ]);
+        state.SetSections(state.Sections);
+
+        Assert.Equal(
+            [new DocumentationSection("usage", "Usage"), new DocumentationSection("api-reference", "API Reference")],
+            state.Sections);
+        Assert.Equal(1, changes);
+
+        state.Clear();
+        state.Clear();
+        Assert.Empty(state.Sections);
+        Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public void OnThisPage_RendersOnlyPublishedSections()
+    {
+        var state = new DocumentationPageState();
+        state.SetSections([
+            new DocumentationSection("overview", "Overview"),
+            new DocumentationSection("usage", "Usage")
+        ]);
+
+        var cut = Render<DocumentationOnThisPage>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal("On This Page", cut.Find("h2").TextContent.Trim());
+        Assert.Equal(new[] { "#overview", "#usage" }, cut.FindAll("a").Select(link => link.GetAttribute("href")));
+        state.Clear();
+        Assert.Empty(cut.FindAll("nav"));
+    }
+
+    [Fact]
     public void Layout_HasLandmarkSkipTargetsAndEscapeClosesDrawersWithoutMutatingTheme()
     {
         var theme = Services.GetRequiredService<ShowcaseState>();

@@ -13,6 +13,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMalievShadcn();
 builder.Services.AddScoped<ShowcaseState>();
+builder.Services.AddScoped<DocumentationPageState>();
 builder.Services.AddSingleton<IComponentDocumentationCatalog, ComponentDocumentationCatalog>();
 builder.Services.AddSingleton<ComponentApiCatalog>();
 builder.Services.AddTransient<IComponentExampleRegistry, ComponentExampleRegistry>();

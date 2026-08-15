@@ -7,6 +7,7 @@ public sealed class DocumentationNavigationState
     private ComponentDocumentationStatus? _status;
     private bool _catalogOpen;
     private bool _themeDockOpen;
+    private bool _outlineOpen;
 
     public event EventHandler? Changed;
 
@@ -43,7 +44,10 @@ public sealed class DocumentationNavigationState
 
             _catalogOpen = value;
             if (value)
+            {
                 _themeDockOpen = false;
+                _outlineOpen = false;
+            }
             OnChanged();
         }
     }
@@ -58,18 +62,40 @@ public sealed class DocumentationNavigationState
 
             _themeDockOpen = value;
             if (value)
+            {
                 _catalogOpen = false;
+                _outlineOpen = false;
+            }
+            OnChanged();
+        }
+    }
+
+    public bool OutlineOpen
+    {
+        get => _outlineOpen;
+        set
+        {
+            if (_outlineOpen == value && (!value || (!_catalogOpen && !_themeDockOpen)))
+                return;
+
+            _outlineOpen = value;
+            if (value)
+            {
+                _catalogOpen = false;
+                _themeDockOpen = false;
+            }
             OnChanged();
         }
     }
 
     public bool CloseDrawers()
     {
-        if (!_catalogOpen && !_themeDockOpen)
+        if (!_catalogOpen && !_themeDockOpen && !_outlineOpen)
             return false;
 
         _catalogOpen = false;
         _themeDockOpen = false;
+        _outlineOpen = false;
         OnChanged();
         return true;
     }
