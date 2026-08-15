@@ -2,6 +2,9 @@
 
 Thank you for helping improve Maliev.ShadcnBlazor.
 
+Coding agents and automation must also follow the repository-wide
+[AGENTS.md](AGENTS.md) working agreement.
+
 ## Prerequisites
 
 - The .NET SDK version selected by `global.json`.

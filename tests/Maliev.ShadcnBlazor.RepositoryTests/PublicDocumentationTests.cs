@@ -5,6 +5,7 @@ public sealed class PublicDocumentationTests
     private static readonly string[] RequiredFiles =
     [
         "README.md",
+        "AGENTS.md",
         "CONTRIBUTING.md",
         "SECURITY.md",
         "CODE_OF_CONDUCT.md",
@@ -59,6 +60,25 @@ public sealed class PublicDocumentationTests
         Assert.Contains("private vulnerability reporting", security, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("open a public issue", security, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("supported", security, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void AgentGuideDefinesSafePublicContributionBoundaries()
+    {
+        var root = RepositoryRoot.Find();
+        var guide = File.ReadAllText(Path.Combine(root, "AGENTS.md"));
+
+        foreach (var required in new[]
+        {
+            "Repository map", "Build before tests", "Test-driven changes", "Accessibility",
+            "Evidence and visual baselines", "Public safety", "Release boundaries"
+        })
+        {
+            Assert.Contains(required, guide, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Do not push", guide, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Do not publish", guide, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
