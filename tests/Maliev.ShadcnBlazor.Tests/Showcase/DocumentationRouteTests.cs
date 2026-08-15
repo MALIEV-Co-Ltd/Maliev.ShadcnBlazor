@@ -76,4 +76,16 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains(cut.FindAll(".component-dossier__pagination a"), link => link.TextContent.Contains("Previous", StringComparison.Ordinal));
         Assert.Contains(cut.FindAll(".component-dossier__pagination a"), link => link.TextContent.Contains("Next", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void CatalogLandingIntroducesTheLibraryAndKeepsEveryComponentDiscoverable()
+    {
+        var cut = Render<ComponentCatalog>();
+
+        Assert.Contains("Build accessible Blazor interfaces with shadcn primitives", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Interactive, typed, and themeable", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal(64, cut.FindAll(".documentation-catalog-card").Count);
+        Assert.Contains(cut.FindAll(".documentation-landing__actions a"), link => link.GetAttribute("href") == "theme");
+    }
 }

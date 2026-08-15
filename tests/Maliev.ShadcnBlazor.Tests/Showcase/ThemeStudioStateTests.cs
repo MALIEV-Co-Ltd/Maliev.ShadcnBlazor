@@ -327,6 +327,24 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void PreviewToolbarOffersWhitelistedGoogleFontPresetsAndAppliesTheSelectedMetric()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<PreviewToolbar>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal(5, ThemeStudioFontPreset.All.Count);
+        Assert.NotEmpty(cut.FindAll("[data-testid='font-family-select']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='monospace-font-family-select']"));
+
+        state.SetFontFamily(ThemeStudioFontPreset.NotoSansThai.Id);
+
+        Assert.Equal(ThemeStudioFontPreset.NotoSansThai.CssStack, state.GetMetricEditorValue("fontFamily"));
+
+        state.SetMonospaceFontFamily(ThemeStudioFontPreset.IbmPlexMono.Id);
+        Assert.Equal(ThemeStudioFontPreset.IbmPlexMono.CssStack, state.GetMetricEditorValue("monospaceFontFamily"));
+    }
+
+    [Fact]
     public void ThemeStudioSwitchingMockupsResetsTheDestinationFixtureBeforeRender()
     {
         var theme = Services.GetRequiredService<ThemeStudioState>();

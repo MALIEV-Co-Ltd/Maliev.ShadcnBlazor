@@ -31,6 +31,32 @@
         <MudButton Variant="@(State.Locale == ThemeStudioLocale.English ? Variant.Filled : Variant.Outlined)" aria-label="Use English locale" data-testid="locale-english" OnClick="() => State.SetLocale(ThemeStudioLocale.English)">English</MudButton>
         <MudButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? Variant.Filled : Variant.Outlined)" aria-label="Use Thai locale" data-testid="locale-thai" OnClick="() => State.SetLocale(ThemeStudioLocale.Thai)">ไทย</MudButton>
     </div>
+    <MudSelect T="string"
+               Value='@State.GetMetricEditorValue("fontFamily")'
+               ValueChanged="State.SetFontFamily"
+               Label="Font family"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               aria-label="Font family"
+               data-testid="font-family-select">
+        @foreach (var font in ThemeStudioFontPreset.All)
+        {
+            <MudSelectItem Value="@font.CssStack"><span data-testid='@($"font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
+        }
+    </MudSelect>
+    <MudSelect T="string"
+               Value='@State.GetMetricEditorValue("monospaceFontFamily")'
+               ValueChanged="State.SetMonospaceFontFamily"
+               Label="Code font"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               aria-label="Code font"
+               data-testid="monospace-font-family-select">
+        @foreach (var font in ThemeStudioFontPreset.MonospaceAll)
+        {
+            <MudSelectItem Value="@font.CssStack"><span data-testid='@($"monospace-font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
+        }
+    </MudSelect>
     <MudSelect T="ThemeStudioMockup"
                Value="@State.SelectedMockup"
                ValueChanged="State.SetSelectedMockup"

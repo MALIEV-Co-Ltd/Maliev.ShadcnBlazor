@@ -11,8 +11,8 @@
 }
 
 :root {
-    --shadcn-font-sans: ui-sans-serif, system-ui, sans-serif;
-    --shadcn-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --shadcn-font-sans: 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif;
+    --shadcn-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --shadcn-background: oklch(1 0 0);
     --shadcn-foreground: oklch(0.145 0 0);
     --shadcn-card: oklch(1 0 0);

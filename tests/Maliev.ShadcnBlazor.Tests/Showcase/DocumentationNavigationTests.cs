@@ -220,6 +220,16 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("Documentation actions", actions.GetAttribute("aria-label"));
     }
 
+    [Fact]
+    public void HeaderThemeAndDirectionActionsUseAccessibleIconGlyphs()
+    {
+        var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
+
+        Assert.Equal(2, cut.FindAll(".documentation-icon-action svg[aria-hidden='true']").Count);
+        Assert.Equal("Use dark theme", cut.Find("[data-testid='documentation-theme-toggle']").GetAttribute("aria-label"));
+        Assert.Equal("Use right-to-left direction", cut.Find("[data-testid='documentation-direction-toggle']").GetAttribute("aria-label"));
+    }
+
     private IRenderedComponent<DocumentationLayout> RenderDocumentationLayout() => Render<DocumentationLayout>(parameters => parameters
         .Add(x => x.Body, (RenderFragment)(builder => builder.AddContent(0, "Documentation body"))));
 

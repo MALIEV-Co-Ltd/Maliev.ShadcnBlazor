@@ -4,6 +4,11 @@
 motion tokens to its rendered subtree. It also coordinates the compatible
 MudBlazor theme and overlay providers.
 
+The default typography stack uses IBM Plex Sans first, IBM Plex Sans Thai as
+the Thai glyph fallback, and IBM Plex Mono for code, keyboard, and other
+monospace content. Applications can replace either stack with a validated
+theme metric or `ShadcnOptions.FontFamily` value.
+
 ## Configure defaults
 
 ```csharp
@@ -11,7 +16,7 @@ builder.Services.AddMalievShadcn(options =>
 {
     options.DefaultDarkMode = true;
     options.DefaultDirection = ShadcnDirection.RightToLeft;
-    options.FontFamily = "system-ui, sans-serif";
+    options.FontFamily = "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif";
 });
 ```
 

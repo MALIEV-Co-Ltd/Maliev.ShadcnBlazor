@@ -3,16 +3,71 @@
 
 <PageTitle>Component catalog</PageTitle>
 
-<section aria-labelledby="component-catalog-title">
-    <h1 id="component-catalog-title">Component catalog</h1>
-    <p>@Catalog.All.Count components are listed from the certification ledger.</p>
-    <ul>
-        @foreach (var component in Catalog.All)
+<section class="documentation-landing" aria-labelledby="component-catalog-title">
+    <div class="documentation-landing__hero">
+        <p class="documentation-landing__eyebrow">Maliev Shadcn Blazor</p>
+        <h1 id="component-catalog-title">Component catalog</h1>
+        <p class="documentation-landing__lead">Build accessible Blazor interfaces with shadcn primitives: native semantics, typed APIs, and a theme system you can own.</p>
+        <div class="documentation-landing__actions">
+            <a class="documentation-button documentation-button--primary" href="docs/components/button">Browse components</a>
+            <a class="documentation-button" href="theme">Open Theme Studio</a>
+        </div>
+    </div>
+
+    <div class="documentation-landing__principles" aria-label="Library principles">
+        <article>
+            <span class="documentation-landing__principle-icon" aria-hidden="true">✦</span>
+            <h2>Interactive, typed, and themeable</h2>
+            <p>Compose Razor primitives with strongly typed parameters, callbacks, and semantic design tokens.</p>
+        </article>
+        <article>
+            <span class="documentation-landing__principle-icon" aria-hidden="true">↗</span>
+            <h2>Accessible by default</h2>
+            <p>Keyboard behavior, focus states, RTL, reduced motion, and forced colors are part of each component contract.</p>
+        </article>
+        <article>
+            <span class="documentation-landing__principle-icon" aria-hidden="true">◌</span>
+            <h2>Designed for real products</h2>
+            <p>Use the live examples, copy the package command, and keep ownership of your markup and application state.</p>
+        </article>
+    </div>
+
+    <section class="documentation-landing__installation" aria-labelledby="installation-title">
+        <div>
+            <p class="documentation-landing__eyebrow">Start here</p>
+            <h2 id="installation-title">Install once, compose anywhere</h2>
+            <p>Add the package to a Blazor app, register the theme services, and then use only the primitives your product needs.</p>
+        </div>
+        <pre><code>dotnet add package Maliev.ShadcnBlazor</code></pre>
+    </section>
+
+    <section aria-labelledby="component-catalog-browse-title">
+        <div class="documentation-landing__section-heading">
+            <div>
+                <p class="documentation-landing__eyebrow">Explore the library</p>
+                <h2 id="component-catalog-browse-title">Browse @Catalog.All.Count components</h2>
+            </div>
+            <span class="documentation-landing__status">Live examples and API references</span>
+        </div>
+        @foreach (var group in Catalog.All.GroupBy(component => component.Category).OrderBy(group => group.Key))
         {
-            <li>
-                <a href="@component.DocumentationUrl">@component.Name</a>
-                <span aria-label="Status: @component.Status">@component.Status</span>
-            </li>
+            <section class="documentation-catalog-group" aria-labelledby="catalog-group-@Slugify(group.Key)">
+                <h3 id="catalog-group-@Slugify(group.Key)">@group.Key</h3>
+                <div class="documentation-catalog-grid">
+                    @foreach (var component in group)
+                    {
+                        <a class="documentation-catalog-card" href="@component.DocumentationUrl">
+                            <span class="documentation-catalog-card__name">@component.Name</span>
+                            <span class="documentation-catalog-card__summary">@component.PrimaryType</span>
+                            <span class="documentation-catalog-card__status">@component.Status</span>
+                        </a>
+                    }
+                </div>
+            </section>
         }
-    </ul>
+    </section>
 </section>
+
+@code {
+    private static string Slugify(string value) => value.ToLowerInvariant().Replace(' ', '-');
+}

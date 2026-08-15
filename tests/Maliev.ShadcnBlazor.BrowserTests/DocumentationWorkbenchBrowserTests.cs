@@ -23,6 +23,37 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await page.GetByTestId("documentation-workbench").WaitForAsync();
         Assert.EndsWith("/docs/components", new Uri(page.Url).AbsolutePath, StringComparison.Ordinal);
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Component catalog" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".documentation-icon-action svg[aria-hidden='true']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.GetByText("Build accessible Blazor interfaces with shadcn primitives")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task CalendarPreviewKeepsAnIntrinsicSquareSurface()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+            Locale = "th-TH",
+            TimezoneId = "Asia/Bangkok"
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/calendar").ToString());
+        await page.GetByTestId("component-preview-canvas").WaitForAsync();
+
+        var canvas = page.GetByTestId("component-preview-canvas");
+        var calendar = canvas.Locator("[data-slot='calendar']");
+        var canvasBox = await canvas.BoundingBoxAsync();
+        var calendarBox = await calendar.BoundingBoxAsync();
+        Assert.NotNull(canvasBox);
+        Assert.NotNull(calendarBox);
+        Assert.True(calendarBox.Width < canvasBox.Width * 0.5, $"Calendar should remain intrinsic, got {calendarBox.Width}px inside {canvasBox.Width}px.");
+        Assert.True(calendarBox.Height >= calendarBox.Width, $"Calendar surface should remain square-oriented, got {calendarBox.Width}x{calendarBox.Height}px.");
+        var today = calendar.Locator("[data-day='2026-08-13']");
+        Assert.Equal("true", await today.GetAttributeAsync("data-selected-single"));
+        Assert.NotEqual("true", await today.GetAttributeAsync("aria-disabled"));
+        var todayPaint = await today.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return `${style.backgroundColor}|${style.color}|${style.opacity}|${style.getPropertyValue('--shadcn-primary')}|${style.getPropertyValue('--shadcn-muted')}`; }");
+        Assert.Equal("oklch(0.205 0 0)|oklch(0.985 0 0)|1|oklch(0.205 0 0)|oklch(0.97 0 0)", todayPaint);
     }
 
     public static TheoryData<int, int> Viewports => new()
@@ -75,6 +106,7 @@ public sealed class DocumentationWorkbenchBrowserTests(
             Assert.NotNull(outlineBox);
             Assert.True(catalogBox.X < contentBox.X);
             Assert.True(contentBox.X < outlineBox.X);
+            Assert.True(contentBox.Width > 800, $"Expected a full-width content column, got {contentBox.Width}px.");
         }
 
         if (width <= 768)
