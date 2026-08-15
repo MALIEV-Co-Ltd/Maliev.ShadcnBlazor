@@ -23,6 +23,8 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await page.GetByTestId("documentation-workbench").WaitForAsync();
         Assert.EndsWith("/docs/components", new Uri(page.Url).AbsolutePath, StringComparison.Ordinal);
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Component catalog" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".documentation-icon-action svg[aria-hidden='true']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.GetByText("Build accessible Blazor interfaces with shadcn primitives")).ToBeVisibleAsync();
     }
 
     public static TheoryData<int, int> Viewports => new()
@@ -75,6 +77,7 @@ public sealed class DocumentationWorkbenchBrowserTests(
             Assert.NotNull(outlineBox);
             Assert.True(catalogBox.X < contentBox.X);
             Assert.True(contentBox.X < outlineBox.X);
+            Assert.True(contentBox.Width > 800, $"Expected a full-width content column, got {contentBox.Width}px.");
         }
 
         if (width <= 768)

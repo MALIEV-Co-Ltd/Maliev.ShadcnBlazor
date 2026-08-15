@@ -7,6 +7,13 @@
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="preload" as="style" href="@GoogleFontsStylesheet" />
+    <link rel="stylesheet" href="@GoogleFontsStylesheet" />
+</HeadContent>
+
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
@@ -44,6 +51,7 @@
     private bool _disposed;
     private Task _persistenceTask = Task.CompletedTask;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
+    private static string GoogleFontsStylesheet => $"https://fonts.googleapis.com/css2?family={string.Join("&family=", ThemeStudioFontPreset.All.Select(font => font.GoogleFontsFamily))}&display=swap";
 
     protected override async Task OnInitializedAsync()
     {

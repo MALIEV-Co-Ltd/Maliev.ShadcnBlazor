@@ -271,6 +271,18 @@ a {
     font-weight: 550;
 }
 
+.documentation-icon-action {
+    display: inline-grid;
+    inline-size: 2.5rem;
+    place-items: center;
+    padding-inline: 0;
+}
+
+.documentation-icon-action__icon {
+    inline-size: 1.05rem;
+    block-size: 1.05rem;
+}
+
 .documentation-trigger:focus-visible,
 .documentation-panel-close:focus-visible,
 .documentation-icon-action:focus-visible,
@@ -291,8 +303,8 @@ a {
 .documentation-workbench {
     display: grid;
     grid-template-areas: "catalog content outline";
-    grid-template-columns: minmax(15rem, 17rem) minmax(0, 48rem) minmax(12rem, 14rem);
-    justify-content: center;
+    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr) minmax(14rem, 18rem);
+    justify-content: stretch;
     align-items: start;
     min-inline-size: 0;
     inline-size: 100%;
@@ -323,6 +335,217 @@ a {
     min-inline-size: 0;
     padding-block: clamp(2.5rem, 5vw, 4rem);
     padding-inline: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.documentation-landing {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    inline-size: 100%;
+}
+
+.documentation-landing__hero {
+    display: grid;
+    gap: 1rem;
+    max-inline-size: 62rem;
+    padding-block: clamp(1rem, 4vw, 3rem);
+}
+
+.documentation-landing__eyebrow {
+    margin: 0;
+    color: var(--shadcn-primary);
+    font-size: 0.6875rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.documentation-landing__hero h1,
+.documentation-landing__hero p,
+.documentation-landing__principles h2,
+.documentation-landing__principles p,
+.documentation-landing__installation h2,
+.documentation-landing__installation p,
+.documentation-landing__section-heading h2,
+.documentation-catalog-group h3 {
+    margin: 0;
+}
+
+.documentation-landing__hero h1 {
+    max-inline-size: 46rem;
+    font-size: clamp(2.25rem, 6vw, 4.75rem);
+    letter-spacing: -0.065em;
+    line-height: 0.98;
+}
+
+.documentation-landing__lead {
+    max-inline-size: 42rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.6;
+}
+
+.documentation-landing__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    margin-block-start: 0.5rem;
+}
+
+.documentation-button {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    color: var(--shadcn-foreground);
+    padding-inline: 1rem;
+    text-decoration: none;
+}
+
+.documentation-button--primary {
+    border-color: var(--shadcn-primary);
+    background: var(--shadcn-primary);
+    color: var(--shadcn-primary-foreground);
+}
+
+.documentation-landing__principles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-border);
+}
+
+.documentation-landing__principles article {
+    display: grid;
+    gap: 0.65rem;
+    min-block-size: 10rem;
+    align-content: start;
+    background: var(--shadcn-card);
+    padding: 1.25rem;
+}
+
+.documentation-landing__principle-icon {
+    display: inline-grid;
+    inline-size: 2rem;
+    block-size: 2rem;
+    place-items: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    color: var(--shadcn-primary);
+    font-size: 1.1rem;
+}
+
+.documentation-landing__principles h2 {
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.documentation-landing__principles p,
+.documentation-landing__installation p {
+    color: var(--shadcn-muted-foreground);
+    line-height: 1.55;
+}
+
+.documentation-landing__installation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+    gap: 1.5rem;
+    align-items: center;
+    border-block: 1px solid var(--shadcn-border);
+    padding-block: 1.5rem;
+}
+
+.documentation-landing__installation h2 {
+    margin-block-start: 0.35rem;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+.documentation-landing__installation pre {
+    overflow-x: auto;
+    margin: 0;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    padding: 1rem;
+}
+
+.documentation-landing__installation code {
+    color: var(--shadcn-foreground);
+    font-family: var(--shadcn-font-mono);
+    font-size: 0.8rem;
+}
+
+.documentation-landing__section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 1rem;
+}
+
+.documentation-landing__section-heading h2 {
+    margin-block-start: 0.35rem;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    letter-spacing: -0.04em;
+}
+
+.documentation-landing__status,
+.documentation-catalog-card__status {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+}
+
+.documentation-catalog-group + .documentation-catalog-group {
+    margin-block-start: 2rem;
+}
+
+.documentation-catalog-group h3 {
+    margin-block-end: 0.75rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.documentation-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 0.625rem;
+}
+
+.documentation-catalog-card {
+    display: grid;
+    gap: 0.35rem;
+    min-block-size: 5.5rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    color: var(--shadcn-foreground);
+    padding: 0.9rem;
+    text-decoration: none;
+    transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.documentation-catalog-card:hover {
+    border-color: var(--shadcn-primary);
+    background: var(--shadcn-accent);
+    transform: translateY(-1px);
+}
+
+.documentation-catalog-card__name {
+    font-weight: 650;
+}
+
+.documentation-catalog-card__summary {
+    overflow: hidden;
+    color: var(--shadcn-muted-foreground);
+    font-family: var(--shadcn-font-mono);
+    font-size: 0.6875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .documentation-content > :first-child,
@@ -1173,7 +1396,7 @@ a {
 
     .documentation-workbench {
         grid-template-areas: "catalog content";
-        grid-template-columns: minmax(15rem, 17rem) minmax(0, 48rem);
+        grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
     }
 
     .documentation-outline {
@@ -1278,8 +1501,19 @@ a {
 
     .documentation-trigger,
     .documentation-icon-action {
-        padding-inline: 0.5rem;
+        inline-size: 2.5rem;
+        padding-inline: 0;
         font-size: 0.8125rem;
+    }
+
+    .documentation-landing__principles,
+    .documentation-landing__installation {
+        grid-template-columns: 1fr;
+    }
+
+    .documentation-landing__section-heading {
+        align-items: start;
+        flex-direction: column;
     }
 }
 
@@ -1381,6 +1615,12 @@ a {
     width: min(100% - 2rem, 70rem);
     margin-inline: auto;
     padding-block: 3.5rem 4.5rem;
+}
+
+.theme-studio-main {
+    inline-size: 100%;
+    max-inline-size: none;
+    padding-inline: clamp(1rem, 3vw, 3rem);
 }
 
 .foundation-page {
@@ -1821,8 +2061,11 @@ a {
 /* Theme Studio */
 .theme-studio {
     display: grid;
+    inline-size: 100%;
+    max-inline-size: none;
     min-width: 0;
     gap: 1rem;
+    padding-inline: clamp(1rem, 3vw, 3rem);
 }
 
 .theme-studio-hero {

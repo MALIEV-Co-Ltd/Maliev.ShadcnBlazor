@@ -19,6 +19,29 @@ public sealed record ThemeStudioViewport(string Id, string DisplayName, int Widt
     public static IReadOnlyList<ThemeStudioViewport> All { get; } = [Desktop, Tablet, Mobile];
 }
 
+public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string CssStack, string GoogleFontsFamily)
+{
+    public static ThemeStudioFontPreset DmSans { get; } = new(
+        "dm-sans",
+        "DM Sans",
+        "'DM Sans', ui-sans-serif, system-ui, sans-serif",
+        "DM+Sans:wght@400;500;600;700");
+
+    public static ThemeStudioFontPreset PlusJakartaSans { get; } = new(
+        "plus-jakarta-sans",
+        "Plus Jakarta Sans",
+        "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
+        "Plus+Jakarta+Sans:wght@400;500;600;700");
+
+    public static ThemeStudioFontPreset NotoSansThai { get; } = new(
+        "noto-sans-thai",
+        "Noto Sans Thai",
+        "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        "Noto+Sans+Thai:wght@400;500;600;700");
+
+    public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [DmSans, PlusJakartaSans, NotoSansThai];
+}
+
 public sealed record ThemeStudioTokenDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
 public sealed record ThemeStudioMetricDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
 
@@ -366,6 +389,16 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
             return;
         Viewport = viewport;
         RaiseChanged();
+    }
+
+    public void SetFontFamily(string presetOrCssStack)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetOrCssStack);
+        var preset = ThemeStudioFontPreset.All.FirstOrDefault(item =>
+                string.Equals(item.Id, presetOrCssStack, StringComparison.Ordinal) ||
+                string.Equals(item.CssStack, presetOrCssStack, StringComparison.Ordinal))
+            ?? throw new ArgumentOutOfRangeException(nameof(presetOrCssStack), presetOrCssStack, "Unknown Theme Studio font preset.");
+        SetMetric("fontFamily", preset.CssStack);
     }
 
     private static void ValidateWorkspaceValue<T>(T value, string parameterName) where T : struct, Enum

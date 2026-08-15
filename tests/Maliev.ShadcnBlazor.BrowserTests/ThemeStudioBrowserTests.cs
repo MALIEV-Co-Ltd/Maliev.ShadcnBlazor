@@ -72,6 +72,30 @@ public sealed class ThemeStudioBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-undo")).ToBeDisabledAsync();
     }
 
+    [Fact]
+    public async Task ThemeStudioPreloadsAndAppliesASelectableGoogleFontPreset()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        var studioBox = await page.GetByTestId("theme-studio").BoundingBoxAsync();
+        Assert.NotNull(studioBox);
+        Assert.True(studioBox.Width > 1200, $"Expected full-width Theme Studio, got {studioBox.Width}px.");
+        await Assertions.Expect(page.Locator("link[rel='preload'][as='style'][href*='Noto+Sans+Thai']")).ToHaveCountAsync(1);
+        await page.GetByTestId("font-family-select").ClickAsync();
+        await page.GetByText("Noto Sans Thai", new() { Exact = true }).ClickAsync();
+
+        var fontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
+        Assert.Contains("Noto Sans Thai", fontVariable, StringComparison.Ordinal);
+    }
+
     [Theory]
     [MemberData(nameof(ReleaseViewports))]
     public async Task ThemeStudioHasNoHorizontalDocumentOverflowAndKeepsCoarseTargets(int width, int height)
