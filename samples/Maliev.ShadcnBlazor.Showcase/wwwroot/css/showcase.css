@@ -792,6 +792,18 @@ a {
     box-shadow: var(--shadcn-shadow-xs);
 }
 
+.showcase-bubble-reaction-icon {
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.showcase-bubble-reaction-count {
+    margin-inline-start: 0.1rem;
+    font-size: 0.6875rem;
+    font-weight: 650;
+}
+
 .component-code__header button {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-border);
