@@ -4,7 +4,7 @@
 .shadcn-attachment[data-size="xs"] { padding: calc(.375rem * var(--shadcn-spacing-multiplier)); font-size: .75rem; }
 .shadcn-attachment[data-state="idle"] { border-style: dashed; }
 .shadcn-attachment[data-state="error"] { border-color: color-mix(in srgb, var(--destructive) 30%, transparent); }
-.shadcn-attachment-media { position: relative; display: flex; aspect-ratio: 1; flex: none; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--radius-sm); }
+.shadcn-attachment-media { position: relative; display: flex; width: 2.5rem; height: 2.5rem; aspect-ratio: 1; flex: none; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--radius-sm); background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); }
 .shadcn-attachment-media[data-variant="image"] :is(img,svg) { width: 100%; height: 100%; object-fit: cover; }
 .shadcn-attachment-content { min-width: 0; max-width: 100%; flex: 1; }
 .shadcn-attachment-title,.shadcn-attachment-description { display: block; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

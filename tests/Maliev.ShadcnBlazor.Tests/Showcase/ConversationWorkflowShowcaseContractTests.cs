@@ -51,6 +51,38 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void AttachmentDossierUsesAComposedGalleryAndFileRows()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("attachment").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("[data-slot='attachment-group']"));
+        Assert.Equal(5, cut.FindAll("[data-slot='attachment']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='attachment-media'][data-variant='image']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='attachment-media'][data-variant='icon']").Count);
+        Assert.Single(cut.FindAll("[data-slot='attachment-progress']"));
+        Assert.Contains("sales-dashboard.pdf", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("message-renderer.tsx", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BubbleDossierUsesAnInteractiveConversationThread()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("bubble").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Single(cut.FindAll("[data-slot='bubble-group']"));
+        Assert.Equal(4, cut.FindAll("[data-slot='bubble']").Count);
+        Assert.Equal(4, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='bubble-reactions']").Count);
+        Assert.Contains("Hey there! what's up?", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Very meta. Very on-brand.", cut.Markup, StringComparison.Ordinal);
+        Assert.NotEmpty(cut.FindAll("button[data-slot='bubble-content']"));
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryExactPlanNinePinnedSource()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));

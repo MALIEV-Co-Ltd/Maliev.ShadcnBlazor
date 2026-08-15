@@ -19,17 +19,174 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Attachment()
     {
-        var state = ShadcnAttachmentState.Uploading; var vertical = false; var image = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnAttachment>(0); b.AddAttribute(1, "State", state); b.AddAttribute(2, "Progress", state == ShadcnAttachmentState.Uploading ? (double?)64d : null); b.AddAttribute(3, "ErrorReason", state == ShadcnAttachmentState.Error ? "อัปโหลดไม่สำเร็จ" : null); b.AddAttribute(4, "Orientation", vertical ? ShadcnAttachmentOrientation.Vertical : ShadcnAttachmentOrientation.Horizontal); b.AddAttribute(5, "Title", "แบบชิ้นงาน.step"); b.AddAttribute(6, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnAttachmentMedia>(0); x.AddAttribute(1, "Variant", image ? ShadcnAttachmentMediaVariant.Image : ShadcnAttachmentMediaVariant.Icon); x.AddAttribute(2, "ImageAlt", image ? "Drawing preview" : null); x.AddAttribute(3, "ChildContent", Text(image ? "🖼️" : "📄")); x.CloseComponent(); x.OpenComponent<ShadcnAttachmentContent>(4); x.AddAttribute(5, "ChildContent", (RenderFragment)(c => { AddText<ShadcnAttachmentTitle>(c, 0, "แบบชิ้นงาน.step"); AddText<ShadcnAttachmentDescription>(c, 3, state == ShadcnAttachmentState.Error ? "อัปโหลดไม่สำเร็จ" : $"STEP · {state}"); })); x.CloseComponent(); x.OpenComponent<ShadcnAttachmentActions>(6); x.AddAttribute(7, "ChildContent", (RenderFragment)(a => { a.OpenComponent<ShadcnAttachmentAction>(0); a.AddAttribute(1, "Action", ShadcnAttachmentActionKind.Remove); a.AddAttribute(2, "AccessibleName", "Remove drawing"); a.AddAttribute(3, "ChildContent", Text("×")); a.CloseComponent(); })); x.CloseComponent(); })); b.CloseComponent(); };
-        return Example("attachment", "Attachment lifecycle", preview, [Select("attachment-state", "State", "Uploading", ["Idle", "Uploading", "Processing", "Error", "Done"], v => state = Enum.Parse<ShadcnAttachmentState>(v)), Toggle("attachment-vertical", "Vertical", v => vertical = v), Toggle("attachment-image", "Image", v => image = v)], ["idle", "uploading", "processing", "error", "done", "progress", "remove", "retry", "image", "group", "rtl"]);
+        var state = ShadcnAttachmentState.Uploading;
+        var vertical = false;
+        var image = true;
+
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-attachment-demo");
+            b.OpenComponent<ShadcnAttachmentGroup>(2);
+            b.AddAttribute(3, nameof(ShadcnAttachmentGroup.AccessibleName), "Uploaded files");
+            b.AddAttribute(4, nameof(ShadcnAttachmentGroup.Class), $"showcase-attachment-gallery{(vertical ? " showcase-attachment-gallery--vertical" : string.Empty)}");
+            b.AddAttribute(5, nameof(ShadcnAttachmentGroup.ChildContent), (RenderFragment)(gallery =>
+            {
+                AddImageAttachment(gallery, 0, "workspace-plan.svg", "SVG · 820 KB", "workspace", image);
+                AddImageAttachment(gallery, 10, "desk-reference.jpg", "JPG · 1.1 MB", "desk", image);
+                AddImageAttachment(gallery, 20, "office-reference.jpg", "JPG · 940 KB", "office", image);
+            }));
+            b.CloseComponent();
+
+            b.OpenElement(6, "div");
+            b.AddAttribute(7, "class", "showcase-attachment-files");
+            AddFileAttachment(b, 10, "sales-dashboard.pdf", "PDF · 2.4 MB", state, state == ShadcnAttachmentState.Uploading ? 64 : null, vertical);
+            AddFileAttachment(b, 20, "message-renderer.tsx", "TypeScript · 12 KB", ShadcnAttachmentState.Done, null, vertical);
+            b.CloseElement();
+            b.CloseElement();
+        };
+
+        return Example(
+            "attachment",
+            "Attachment lifecycle",
+            preview,
+            [
+                Select("attachment-state", "State", "Uploading", ["Idle", "Uploading", "Processing", "Error", "Done"], v => state = Enum.Parse<ShadcnAttachmentState>(v)),
+                Toggle("attachment-vertical", "Vertical", v => vertical = v),
+                Toggle("attachment-image", "Image media", v => image = v, true)
+            ],
+            ["gallery", "image", "file", "uploading", "processing", "error", "done", "progress", "actions", "group", "rtl"]);
     }
 
     private static ComponentExampleDefinition Bubble()
     {
-        var variant = ShadcnBubbleVariant.Secondary; var end = false; var top = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnBubble>(0); b.AddAttribute(1, "Variant", variant); b.AddAttribute(2, "Align", end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start); b.AddAttribute(3, "ChildContent", (RenderFragment)(x => { AddText<ShadcnBubbleContent>(x, 0, "ตรวจสอบแบบแล้ว"); x.OpenComponent<ShadcnBubbleReactions>(3); x.AddAttribute(4, "Side", top ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom); x.AddAttribute(5, "AccessibleName", "Reactions: thumbs up"); x.AddAttribute(6, "ChildContent", Text("👍")); x.CloseComponent(); })); b.CloseComponent(); };
-        return Example("bubble", "Conversation bubble", preview, [Select("bubble-variant", "Variant", "Secondary", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)), Toggle("bubble-end", "Align end", v => end = v), Toggle("bubble-reactions-top", "Reactions top", v => top = v)], ["variants", "alignment", "reactions", "button", "link", "collapsible", "rtl"]);
+        var variant = ShadcnBubbleVariant.Secondary;
+        var end = false;
+        var top = false;
+
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnBubbleGroup>(0);
+            b.AddAttribute(1, nameof(ShadcnBubbleGroup.Class), "showcase-bubble-thread");
+            b.AddAttribute(2, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
+            {
+                AddBubble(thread, 0, ShadcnBubbleVariant.Default, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top);
+                AddBubble(thread, 10, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top);
+                AddBubble(thread, 20, ShadcnBubbleVariant.Muted, ShadcnLogicalAlign.Start, "Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.", false, null, top);
+                AddBubble(thread, 30, ShadcnBubbleVariant.Default, ShadcnLogicalAlign.End, "Sure. Hit me with your best demo.", true, "👍 🔥 👀 +2", top);
+            }));
+            b.CloseComponent();
+        };
+
+        return Example(
+            "bubble",
+            "Conversation bubble",
+            preview,
+            [
+                Select("bubble-variant", "Incoming variant", "Secondary", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Toggle("bubble-end", "Align incoming end", v => end = v),
+                Toggle("bubble-reactions-top", "Reactions top", v => top = v)
+            ],
+            ["thread", "variants", "alignment", "reactions", "button", "link", "collapsible", "rtl"]);
     }
+
+    private static void AddImageAttachment(RenderTreeBuilder b, int sequence, string title, string description, string artwork, bool image)
+    {
+        b.OpenComponent<ShadcnAttachment>(sequence);
+        b.AddAttribute(sequence + 1, nameof(ShadcnAttachment.State), ShadcnAttachmentState.Done);
+        b.AddAttribute(sequence + 2, nameof(ShadcnAttachment.Orientation), ShadcnAttachmentOrientation.Vertical);
+        b.AddAttribute(sequence + 3, nameof(ShadcnAttachment.Class), "showcase-attachment-card");
+        b.AddAttribute(sequence + 4, nameof(ShadcnAttachment.Title), title);
+        b.AddAttribute(sequence + 5, nameof(ShadcnAttachment.ChildContent), (RenderFragment)(content =>
+        {
+            content.OpenComponent<ShadcnAttachmentMedia>(0);
+            content.AddAttribute(1, nameof(ShadcnAttachmentMedia.Variant), image ? ShadcnAttachmentMediaVariant.Image : ShadcnAttachmentMediaVariant.Icon);
+            content.AddAttribute(2, nameof(ShadcnAttachmentMedia.ImageAlt), image ? $"Preview of {title}" : null);
+            content.AddAttribute(3, nameof(ShadcnAttachmentMedia.Class), "showcase-attachment-thumbnail");
+            content.AddAttribute(4, nameof(ShadcnAttachmentMedia.ChildContent), image ? Thumbnail(artwork) : FileIcon());
+            content.CloseComponent();
+            content.OpenComponent<ShadcnAttachmentContent>(5);
+            content.AddAttribute(6, nameof(ShadcnAttachmentContent.ChildContent), (RenderFragment)(meta =>
+            {
+                AddText<ShadcnAttachmentTitle>(meta, 0, title);
+                AddText<ShadcnAttachmentDescription>(meta, 3, description);
+            }));
+            content.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddFileAttachment(RenderTreeBuilder b, int sequence, string title, string description, ShadcnAttachmentState state, double? progress, bool vertical)
+    {
+        b.OpenComponent<ShadcnAttachment>(sequence);
+        b.AddAttribute(sequence + 1, nameof(ShadcnAttachment.State), state);
+        b.AddAttribute(sequence + 2, nameof(ShadcnAttachment.Progress), progress);
+        b.AddAttribute(sequence + 3, nameof(ShadcnAttachment.Title), title);
+        b.AddAttribute(sequence + 4, nameof(ShadcnAttachment.ErrorReason), state == ShadcnAttachmentState.Error ? "Upload failed" : null);
+        b.AddAttribute(sequence + 5, nameof(ShadcnAttachment.Class), $"showcase-attachment-file{(vertical ? " showcase-attachment-file--vertical" : string.Empty)}");
+        b.AddAttribute(sequence + 6, nameof(ShadcnAttachment.ChildContent), (RenderFragment)(content =>
+        {
+            content.OpenComponent<ShadcnAttachmentMedia>(0);
+            content.AddAttribute(1, nameof(ShadcnAttachmentMedia.Class), "showcase-attachment-file-icon");
+            content.AddAttribute(2, nameof(ShadcnAttachmentMedia.ChildContent), FileIcon());
+            content.CloseComponent();
+            content.OpenComponent<ShadcnAttachmentContent>(3);
+            content.AddAttribute(4, nameof(ShadcnAttachmentContent.ChildContent), (RenderFragment)(meta =>
+            {
+                AddText<ShadcnAttachmentTitle>(meta, 0, title);
+                AddText<ShadcnAttachmentDescription>(meta, 3, state == ShadcnAttachmentState.Error ? "Upload failed" : description);
+            }));
+            content.CloseComponent();
+            content.OpenComponent<ShadcnAttachmentActions>(6);
+            content.AddAttribute(7, nameof(ShadcnAttachmentActions.ChildContent), (RenderFragment)(actions =>
+            {
+                actions.OpenComponent<ShadcnAttachmentAction>(0);
+                actions.AddAttribute(1, nameof(ShadcnAttachmentAction.Action), state == ShadcnAttachmentState.Error ? ShadcnAttachmentActionKind.Retry : ShadcnAttachmentActionKind.Remove);
+                actions.AddAttribute(2, nameof(ShadcnAttachmentAction.AccessibleName), state == ShadcnAttachmentState.Error ? $"Retry {title}" : $"Remove {title}");
+                actions.AddAttribute(3, nameof(ShadcnAttachmentAction.ChildContent), CloseIcon());
+                actions.CloseComponent();
+            }));
+            content.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddBubble(RenderTreeBuilder b, int sequence, ShadcnBubbleVariant variant, ShadcnLogicalAlign align, string text, bool interactive, string? reaction, bool reactionTop)
+    {
+        b.OpenComponent<ShadcnBubble>(sequence);
+        b.AddAttribute(sequence + 1, nameof(ShadcnBubble.Variant), variant);
+        b.AddAttribute(sequence + 2, nameof(ShadcnBubble.Align), align);
+        b.AddAttribute(sequence + 3, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
+        {
+            content.OpenComponent<ShadcnBubbleContent>(0);
+            if (interactive)
+                content.AddAttribute(1, nameof(ShadcnBubbleContent.OnActivate), EventCallback.Factory.Create(new object(), () => { }));
+            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
+            content.CloseComponent();
+            if (reaction is not null)
+            {
+                content.OpenComponent<ShadcnBubbleReactions>(3);
+                content.AddAttribute(4, nameof(ShadcnBubbleReactions.Side), reactionTop ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom);
+                content.AddAttribute(5, nameof(ShadcnBubbleReactions.Align), align == ShadcnLogicalAlign.End ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start);
+                content.AddAttribute(6, nameof(ShadcnBubbleReactions.AccessibleName), $"Reactions for {text}");
+                content.AddAttribute(7, nameof(ShadcnBubbleReactions.ChildContent), ReactionMarkup(reaction));
+                content.CloseComponent();
+            }
+        }));
+        b.CloseComponent();
+    }
+
+    private static RenderFragment Thumbnail(string artwork) => b =>
+        b.AddMarkupContent(0, artwork switch
+        {
+            "workspace" => "<svg class=\"showcase-attachment-artwork\" viewBox=\"0 0 160 120\" aria-hidden=\"true\"><rect width=\"160\" height=\"120\" fill=\"#d9dde2\"/><path d=\"M0 80 55 25l30 30 24-24 51 54H0Z\" fill=\"#8f9da7\"/><path d=\"M12 0v120M38 0v120M64 0v120M90 0v120M116 0v120M142 0v120\" stroke=\"#65737c\" stroke-width=\"3\" opacity=\".6\"/></svg>",
+            "desk" => "<svg class=\"showcase-attachment-artwork\" viewBox=\"0 0 160 120\" aria-hidden=\"true\"><rect width=\"160\" height=\"120\" fill=\"#dbe8e4\"/><rect x=\"14\" y=\"12\" width=\"8\" height=\"108\" fill=\"#6f8d84\"/><rect x=\"118\" y=\"0\" width=\"5\" height=\"120\" fill=\"#90aaa4\"/><path d=\"M32 92h98L92 60 58 74 32 92Z\" fill=\"#a78d67\"/><rect x=\"74\" y=\"38\" width=\"34\" height=\"21\" rx=\"2\" fill=\"#34464d\"/></svg>",
+            _ => "<svg class=\"showcase-attachment-artwork\" viewBox=\"0 0 160 120\" aria-hidden=\"true\"><rect width=\"160\" height=\"120\" fill=\"#d8d2c7\"/><path d=\"M0 96 52 40l36 29 28-42 44 69H0Z\" fill=\"#8a7967\"/><path d=\"M0 24h160M0 48h160M0 72h160\" stroke=\"#665947\" stroke-width=\"5\" opacity=\".45\"/><circle cx=\"118\" cy=\"30\" r=\"12\" fill=\"#c3a35f\"/></svg>"
+        });
+
+    private static RenderFragment FileIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 2.75h8l4 4v14.5H6z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M14 2.75v4h4M9 12h6M9 16h4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>");
+    private static RenderFragment CloseIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m7 7 10 10M17 7 7 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>");
+    private static RenderFragment ReactionMarkup(string value) => b => b.AddMarkupContent(0, $"<span class=\"showcase-bubble-reaction-set\">{value}</span>");
 
     private static ComponentExampleDefinition Marker()
     {
