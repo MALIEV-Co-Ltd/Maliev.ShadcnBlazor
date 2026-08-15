@@ -48,6 +48,8 @@ public sealed class ComponentCatalogVisualProofTests(
         {
             ViewportSize = mode.Viewport,
             DeviceScaleFactor = 1,
+            Locale = "th-TH",
+            TimezoneId = "Asia/Bangkok",
             ReducedMotion = ReducedMotion.Reduce,
             ColorScheme = mode.Dark ? ColorScheme.Dark : ColorScheme.Light,
         });
