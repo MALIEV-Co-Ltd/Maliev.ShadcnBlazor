@@ -1,0 +1,61 @@
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<div class="showcase-calendar-demo" data-testid="forms-calendar-demo">
+    <ShadcnCalendar Mode="Mode"
+                    Value="Selected"
+                    ValueChanged="OnValueChanged"
+                    Range="SelectedRange"
+                    RangeChanged="OnRangeChanged"
+                    VisibleMonth="VisibleMonth"
+                    VisibleMonthChanged="OnVisibleMonthChanged"
+                    Today="Today"
+                    Culture="ThaiCulture"
+                    Invalid="Invalid"
+                    AdditionalAttributes="Attributes" />
+    <output class="showcase-calendar-selection" data-testid="calendar-selection" aria-live="polite">
+        @if (Mode == ShadcnCalendarSelectionMode.Range)
+        {
+            <span>@(SelectedRange is null ? "เลือกช่วงวันที่" : $"{SelectedRange.Start:dd MMM} — {SelectedRange.End:dd MMM}")</span>
+        }
+        else
+        {
+            <span>@(Selected is null ? "ยังไม่ได้เลือกวันที่" : $"เลือกแล้ว · {Selected:dd MMM yyyy}")</span>
+        }
+    </output>
+</div>
+
+@code {
+    [Parameter] public ShadcnCalendarSelectionMode Mode { get; set; } = ShadcnCalendarSelectionMode.Single;
+    [Parameter] public bool Invalid { get; set; }
+
+    private DateOnly? Selected { get; set; } = new(2026, 8, 13);
+    private ShadcnDateRange? SelectedRange { get; set; } = new(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13));
+    private DateOnly VisibleMonth { get; set; } = new(2026, 8, 1);
+    private DateOnly Today { get; } = new(2026, 8, 13);
+    private CultureInfo ThaiCulture { get; } = CultureInfo.GetCultureInfo("th-TH");
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
+    {
+        ["data-testid"] = "forms-dossier-calendar",
+        ["aria-label"] = "Delivery calendar",
+        ["data-selected-date"] = Selected?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty
+    };
+
+    private Task OnValueChanged(DateOnly? value)
+    {
+        Selected = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnRangeChanged(ShadcnDateRange? range)
+    {
+        SelectedRange = range;
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisibleMonthChanged(DateOnly month)
+    {
+        VisibleMonth = month;
+        return Task.CompletedTask;
+    }
+}

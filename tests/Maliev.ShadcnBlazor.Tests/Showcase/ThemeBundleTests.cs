@@ -16,6 +16,33 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
 public sealed class ThemeBundleTests
 {
+    [Fact]
+    public void GeneratedCSharpContainsThePortableMetadataAndTypedThemeFactory()
+    {
+        var theme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var config = new ThemeStudioGeneratorConfig
+        {
+            Preset = "base-vega-neutral",
+            Style = "vega",
+            BaseColor = "neutral",
+            IconLibrary = ThemeStudioIconLibrary.Lucide,
+            MenuAccent = ThemeStudioMenuAccent.Default,
+            MenuColor = ThemeStudioMenuColor.Default,
+            RadiusPreset = ThemeStudioRadiusPreset.Default,
+            FontFamily = theme.Metrics.FontFamily,
+            MonospaceFontFamily = theme.Metrics.MonospaceFontFamily,
+            Theme = theme
+        };
+
+        var code = ThemeStudioCodeGenerator.WriteCSharp(config);
+
+        Assert.Contains("public static ShadcnTheme Create()", code, StringComparison.Ordinal);
+        Assert.Contains("public const string IconLibrary = \"lucide\"", code, StringComparison.Ordinal);
+        Assert.Contains("options.FontFamily", code, StringComparison.Ordinal);
+        Assert.Contains("FontFamily = \"'Geist'", code, StringComparison.Ordinal);
+        Assert.Contains("new ShadcnTheme", code, StringComparison.Ordinal);
+    }
+
     private static readonly string[] ExpectedPaths =
     [
         "theme.css",

@@ -1,6 +1,4 @@
-@using Microsoft.JSInterop
-@inject IJSRuntime JavaScript
-@implements IAsyncDisposable
+@using Maliev.ShadcnBlazor.Components.Typography
 
 <section class="component-code" aria-labelledby="@HeadingId">
     <div class="component-code__header">
@@ -12,22 +10,14 @@
         {
             <h2 id="@HeadingId">@Heading</h2>
         }
-        <button type="button" data-testid="copy-source" @onclick="CopyAsync">Copy source</button>
     </div>
-    <pre tabindex="0" aria-label="Razor usage example"><code>@Source</code></pre>
-    <p class="component-code__announcement" aria-live="polite">@_announcement</p>
-    @if (_showFallback)
-    {
-        <label for="@FallbackId">Selectable source fallback</label>
-        <textarea id="@FallbackId" readonly rows="8">@Source</textarea>
-    }
+    <ShadcnCodeBlock Class="component-code__surface"
+                     Source="@Source"
+                     Language="@Language"
+                     Sources="@Sources" />
 </section>
 
 @code {
-    private IJSObjectReference? _module;
-    private string _announcement = string.Empty;
-    private bool _showFallback;
-
     [Parameter] public string Title { get; set; } = "Component";
 
     [Parameter] public string Heading { get; set; } = "Code";
@@ -36,40 +26,11 @@
 
     [Parameter, EditorRequired] public string Source { get; set; } = string.Empty;
 
+    [Parameter] public string Language { get; set; } = "razor";
+
+    [Parameter] public IReadOnlyDictionary<string, string>? Sources { get; set; }
+
     private string HeadingId => $"{Sanitize(Title)}-code-title";
-
-    private string FallbackId => $"{Sanitize(Title)}-source-fallback";
-
-    private async Task CopyAsync()
-    {
-        try
-        {
-            _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/component-code-example.js");
-            await _module.InvokeVoidAsync("copyText", Source);
-            _showFallback = false;
-            _announcement = "Source copied to clipboard.";
-        }
-        catch (JSException)
-        {
-            _showFallback = true;
-            _announcement = "Copy failed. Select the source below and copy it manually.";
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_module is null)
-            return;
-
-        try
-        {
-            await _module.DisposeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-            // The browser can disconnect before a documentation route is disposed.
-        }
-    }
 
     private static string Sanitize(string value) => string.Concat(value.ToLowerInvariant().Select(character =>
         char.IsLetterOrDigit(character) ? character : '-')).Trim('-');

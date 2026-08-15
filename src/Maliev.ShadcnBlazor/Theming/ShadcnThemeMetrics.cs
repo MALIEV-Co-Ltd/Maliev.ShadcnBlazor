@@ -3,7 +3,7 @@ namespace Maliev.ShadcnBlazor.Theming;
 public sealed record ShadcnThemeMetrics
 {
     public required string FontFamily { get; init; }
-    public string MonospaceFontFamily { get; init; } = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+    public string MonospaceFontFamily { get; init; } = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
     public double RadiusRem { get; init; }
     public double RadiusSmallScale { get; init; }
     public double RadiusMediumScale { get; init; }

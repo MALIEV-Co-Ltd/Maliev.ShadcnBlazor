@@ -115,7 +115,7 @@ public sealed class ShadcnThemeDomainTests
     public void SchemaOneJsonWithoutNewSharedControlsMigratesDeterministically()
     {
         var legacy = ShadcnThemeSerializer.Serialize(CreateTheme())
-            .Replace("    \"monospaceFontFamily\": \"'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace\",\n", string.Empty, StringComparison.Ordinal)
+            .Replace("    \"monospaceFontFamily\": \"'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace\",\n", string.Empty, StringComparison.Ordinal)
             .Replace("    \"spacingScaleMultiplier\": 1,\n", string.Empty, StringComparison.Ordinal)
             .Replace("    \"focusRingWidthPx\": 3,\n", string.Empty, StringComparison.Ordinal)
             .Replace("    \"focusRingOffsetPx\": 0,\n", string.Empty, StringComparison.Ordinal)
@@ -126,7 +126,7 @@ public sealed class ShadcnThemeDomainTests
 
         var migrated = ShadcnThemeSerializer.Deserialize(legacy);
 
-        Assert.Equal("'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", migrated.Metrics.MonospaceFontFamily);
+        Assert.Equal("'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", migrated.Metrics.MonospaceFontFamily);
         Assert.Equal(1, migrated.Metrics.SpacingScaleMultiplier);
         Assert.Equal(3, migrated.Metrics.FocusRingWidthPx);
         Assert.Equal(0, migrated.Metrics.FocusRingOffsetPx);
@@ -577,13 +577,13 @@ public sealed class ShadcnThemeDomainTests
         var root = cut.Find("[data-shadcn-scope]");
         var mud = Assert.IsType<MudTheme>(cut.FindComponent<MudThemeProvider>().Instance.Theme);
 
-        Assert.Equal("--shadcn-font-sans: 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetAttribute("style"));
+        Assert.Equal("--shadcn-font-sans: 'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetAttribute("style"));
         Assert.Equal(new MudColor("#171717"), mud.PaletteLight.Primary);
         Assert.Equal(new MudColor("#ffffff"), mud.PaletteLight.Background);
         Assert.Equal(new MudColor("#e4e4e7"), mud.PaletteDark.Primary);
         Assert.Equal(new MudColor("#252525"), mud.PaletteDark.Background);
         Assert.Equal(
-            ["'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif"],
+            ["'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif"],
             Assert.IsType<string[]>(mud.Typography.Default.FontFamily));
     }
 
@@ -626,8 +626,8 @@ public sealed class ShadcnThemeDomainTests
         Assert.Equal(
             ["Noto Sans Thai, sans-serif"],
             Assert.IsType<string[]>(mud.Typography.Button.FontFamily));
-        Assert.Contains("--shadcn-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
-        Assert.Contains("--shadcn-typeset-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typeset-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-spacing-multiplier: 1", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-focus-ring-width: 3px", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-motion-duration: 150ms", style, StringComparison.Ordinal);
@@ -761,8 +761,8 @@ public sealed class ShadcnThemeDomainTests
 
     private static ShadcnThemeMetrics CreateMetrics() => new()
     {
-        FontFamily = "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif",
-        MonospaceFontFamily = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        FontFamily = "'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        MonospaceFontFamily = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
         RadiusRem = 0.625,
         RadiusSmallScale = 0.6,
         RadiusMediumScale = 0.8,

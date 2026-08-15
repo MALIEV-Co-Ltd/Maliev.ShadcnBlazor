@@ -31,3 +31,33 @@ infrastructure used by this library.
 
 The library targets .NET and uses ASP.NET Core Blazor APIs through published
 Microsoft packages. Those packages retain their own notices and licenses.
+
+## Geist
+
+- Project: <https://github.com/vercel/geist-font>
+- License: SIL Open Font License 1.1
+- License copy: `licenses/Geist-OFL.txt` in the NuGet package
+
+The package bundles Geist for the default Latin UI typography. The font license
+applies to that font file and does not change the MIT license of the library
+source.
+
+## Noto Sans Thai
+
+- Project: <https://github.com/notofonts/noto-fonts>
+- License: SIL Open Font License 1.1
+- License copy: `licenses/Noto-Sans-Thai-OFL.txt` in the NuGet package
+
+The package bundles Noto Sans Thai for Thai-script UI typography. The font
+license applies to that font file and does not change the MIT license of the
+library source.
+
+## JetBrains Mono
+
+- Project: <https://github.com/JetBrains/JetBrainsMono>
+- License: SIL Open Font License 1.1
+- License copy: `licenses/JetBrains-Mono-OFL.txt` in the NuGet package
+
+The package bundles JetBrains Mono for code, keyboard, and other monospace
+content. The font license applies to that font file and does not change the MIT
+license of the library source.

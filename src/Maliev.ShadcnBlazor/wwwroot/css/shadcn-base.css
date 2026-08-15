@@ -10,9 +10,53 @@
     border: 0;
 }
 
+/* Public copyable source primitive. The toolbar stays quiet until interaction,
+   keeping documentation code readable while retaining a keyboard target. */
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: color-mix(in oklch, var(--shadcn-muted) 72%, var(--shadcn-background));
+    color: var(--shadcn-foreground);
+}
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-toolbar {
+    display: flex;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: flex-end;
+    gap: calc(.5rem * var(--shadcn-spacing-multiplier));
+    border-block-end: 1px solid var(--shadcn-border);
+    padding-inline: calc(.625rem * var(--shadcn-spacing-multiplier));
+}
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language { margin-inline-end: auto; color: var(--shadcn-muted-foreground); font-family: var(--shadcn-font-mono); font-size: .6875rem; text-transform: lowercase; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select { height: 1.75rem; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-sm); background: var(--shadcn-background); color: var(--shadcn-foreground); font: inherit; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy { display: inline-flex; width: auto; min-width: 1.75rem; height: 1.75rem; align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); border: 1px solid transparent; border-radius: var(--shadcn-radius-sm); background: transparent; color: var(--shadcn-muted-foreground); opacity: 0; transition: opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block:hover .shadcn-code-block-copy,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block:focus-within .shadcn-code-block-copy { opacity: 1; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy:hover { border-color: var(--shadcn-border); background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy svg { width: 1rem; height: 1rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-status { animation: shadcn-code-block-copy-fade 2s var(--shadcn-motion-easing-standard) forwards; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block pre { max-height: 32rem; overflow: auto; margin: 0; padding: calc(1rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-background); color: var(--shadcn-foreground); font-family: var(--shadcn-font-mono); font-size: .8rem; line-height: 1.7; tab-size: 2; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block code { color: inherit; font: inherit; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-tag { color: var(--shadcn-chart-1); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-string { color: var(--shadcn-chart-2); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-keyword { color: var(--shadcn-chart-4); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-type { color: var(--shadcn-chart-3); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-number { color: var(--shadcn-chart-5); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-comment { color: var(--shadcn-muted-foreground); font-style: italic; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@keyframes shadcn-code-block-copy-fade { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Geist, Noto Sans Thai, and JetBrains Mono are shipped with the package so
+   the default typography is stable in offline and self-hosted deployments. */
+@font-face { font-family: "Geist"; src: url("../fonts/geist-sans-variable.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Noto Sans Thai"; src: url("../fonts/noto-sans-thai.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; unicode-range: U+0E01-0E5B, U+25CC, U+200C-200D; }
+@font-face { font-family: "JetBrains Mono"; src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2"); font-style: normal; font-weight: 100 800; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 :root {
-    --shadcn-font-sans: 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif;
-    --shadcn-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --shadcn-font-sans: 'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif;
+    --shadcn-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --shadcn-background: oklch(1 0 0);
     --shadcn-foreground: oklch(0.145 0 0);
     --shadcn-card: oklch(1 0 0);
@@ -71,6 +115,12 @@
     --shadcn-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
+/* Blazor applications commonly set lang on the document or an application
+   shell. Keep the language choice inherited by every nested primitive. */
+:where(:lang(th), [lang|="th"]) {
+    --shadcn-font-sans: 'Noto Sans Thai', 'Geist', ui-sans-serif, system-ui, sans-serif;
+}
+
 [data-shadcn-theme="dark"],
 .shadcn-overlay-scope[data-shadcn-theme="dark"] {
     --shadcn-background: oklch(0.145 0 0);
@@ -115,6 +165,10 @@
     box-sizing: border-box;
     font-family: var(--shadcn-font-sans);
     color: var(--shadcn-foreground);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(code, kbd, pre, samp) {
+    font-family: var(--shadcn-font-mono);
 }
 
 .shadcn-scope *,

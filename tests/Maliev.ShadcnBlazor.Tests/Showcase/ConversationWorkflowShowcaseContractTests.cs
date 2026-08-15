@@ -60,6 +60,8 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Single(cut.FindAll("[data-slot='attachment-group']"));
         Assert.Equal(5, cut.FindAll("[data-slot='attachment']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='attachment-media'][data-variant='image']").Count);
+        Assert.Equal(3, cut.FindAll("img.showcase-attachment-artwork[src^='images/attachments/']").Count);
+        Assert.Empty(cut.FindAll("svg.showcase-attachment-artwork"));
         Assert.Equal(2, cut.FindAll("[data-slot='attachment-media'][data-variant='icon']").Count);
         Assert.Single(cut.FindAll("[data-slot='attachment-progress']"));
         Assert.Contains("sales-dashboard.pdf", cut.Markup, StringComparison.Ordinal);
@@ -74,10 +76,18 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var cut = Render(example.Preview);
 
         Assert.Single(cut.FindAll("[data-slot='bubble-group']"));
-        Assert.Equal(4, cut.FindAll("[data-slot='bubble']").Count);
-        Assert.Equal(4, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(5, cut.FindAll("[data-slot='bubble']").Count);
+        Assert.Equal(5, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='bubble-reactions']").Count);
+        var incoming = cut.FindAll("[data-bubble-role='incoming']");
+        Assert.Equal(3, incoming.Count);
+        Assert.All(incoming, bubble =>
+        {
+            Assert.Equal("secondary", bubble.GetAttribute("data-variant"));
+            Assert.Equal("start", bubble.GetAttribute("data-align"));
+        });
         Assert.Contains("Hey there! what's up?", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("I can group messages, switch sides, and keep the whole thread easy to scan.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Very meta. Very on-brand.", cut.Markup, StringComparison.Ordinal);
         Assert.NotEmpty(cut.FindAll("button[data-slot='bubble-content']"));
     }
@@ -93,6 +103,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, cut.FindAll("[data-slot='marker-icon']").Count);
         Assert.Contains("ตรวจสอบ 4 ไฟล์แล้ว", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("กำลังประมวลผล", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("showcase-marker-loader", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find("[data-slot='marker'][role='status']").GetAttribute("data-live"));
+        Assert.Equal("true", cut.Find("[data-slot='marker'][role='status'] [data-slot='marker-icon']").GetAttribute("data-streaming"));
+        Assert.Equal("true", cut.Find("[data-slot='marker'][role='status'] [data-slot='marker-content']").GetAttribute("data-streaming"));
     }
 
     [Fact]
@@ -105,6 +119,8 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Single(cut.FindAll("[data-slot='message-group']"));
         Assert.Equal(3, cut.FindAll("[data-slot='message']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar']").Count);
+        Assert.Equal(2, cut.FindAll("img[data-avatar]").Count);
+        Assert.Single(cut.FindAll("[data-slot='message-avatar'] [data-avatar='placeholder']"));
         Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);

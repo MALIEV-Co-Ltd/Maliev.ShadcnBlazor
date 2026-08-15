@@ -968,12 +968,15 @@ public sealed class ActionsAndSelectionBrowserTests(
         switch (slug)
         {
             case "button":
-                await page.GetByTestId("control-button-variant").SelectOptionAsync("Destructive");
-                await Assertions.Expect(page.GetByTestId("action-button")).ToHaveAttributeAsync("data-variant", "destructive");
-                await page.GetByTestId("control-button-size").SelectOptionAsync("Large");
-                await Assertions.Expect(page.GetByTestId("action-button")).ToHaveCSSAsync("height", "40px");
+                var variants = page.GetByTestId("button-dossier-preview").Locator("[data-testid^='button-variant-']");
+                await Assertions.Expect(variants).ToHaveCountAsync(6);
+                await Assertions.Expect(page.GetByTestId("button-variant-destructive")).ToHaveAttributeAsync("data-variant", "destructive");
+                var sizes = page.GetByTestId("button-dossier-preview").Locator(".showcase-button-dossier__sizes [data-slot='button']");
+                await Assertions.Expect(sizes).ToHaveCountAsync(4);
+                await Assertions.Expect(sizes.Last).ToHaveCSSAsync("height", "40px");
                 await page.GetByTestId("control-button-disabled").CheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-button")).ToBeDisabledAsync();
+                await Assertions.Expect(variants).ToHaveCountAsync(6);
+                await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator("[data-testid^='button-variant-']:disabled")).ToHaveCountAsync(6);
                 break;
             case "button-group":
                 await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button-group-text]")).ToHaveCountAsync(1);

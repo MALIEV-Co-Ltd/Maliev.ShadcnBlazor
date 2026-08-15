@@ -344,6 +344,7 @@ public sealed class ThemeMockSiteBrowserTests(
     {
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Preview composition" }).ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = label, Exact = true }).ClickAsync();
+        await Assertions.Expect(page.Locator("[role='option']:visible")).ToHaveCountAsync(0);
     }
 
     private static async Task SelectOperationsStateAsync(IPage page, string testId)

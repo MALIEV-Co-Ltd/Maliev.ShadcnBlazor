@@ -70,7 +70,15 @@ public abstract class ShadcnFormComponentBase<TValue> : ComponentBase, IDisposab
             }
             return;
         }
-        await ValueChanged.InvokeAsync(parsed);
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(parsed);
+        }
+        else
+        {
+            Value = parsed;
+            await InvokeAsync(StateHasChanged);
+        }
         if (EditContext is not null && ValueExpression is not null)
         {
             EditContext.NotifyFieldChanged(field);
@@ -83,7 +91,15 @@ public abstract class ShadcnFormComponentBase<TValue> : ComponentBase, IDisposab
         if (EffectiveDisabled || ReadOnly) return;
         EnsureValidationSubscription();
         if (ValueExpression is not null) ParsingMessages?.Clear(FieldIdentifier.Create(ValueExpression));
-        await ValueChanged.InvokeAsync(value);
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(value);
+        }
+        else
+        {
+            Value = value;
+            await InvokeAsync(StateHasChanged);
+        }
         if (EditContext is not null && ValueExpression is not null)
         {
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));

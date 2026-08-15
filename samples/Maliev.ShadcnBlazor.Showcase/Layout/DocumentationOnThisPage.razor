@@ -1,5 +1,8 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
+@using Microsoft.JSInterop
+@inject IJSRuntime JavaScript
 @implements IDisposable
+@implements IAsyncDisposable
 
 @if (State.Sections.Count > 0)
 {
@@ -8,7 +11,7 @@
         <ul>
             @foreach (var item in State.Sections)
             {
-                <li><a href="@($"#{item.Id}")">@item.Label</a></li>
+                <li><a href="@($"#{item.Id}")" data-section-link="@item.Id">@item.Label</a></li>
             }
         </ul>
     </nav>
@@ -18,9 +21,47 @@
     [Parameter, EditorRequired]
     public DocumentationPageState State { get; set; } = null!;
 
+    private IJSObjectReference? _module;
+
     protected override void OnInitialized() => State.Changed += OnChanged;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (State.Sections.Count == 0)
+            return;
+
+        try
+        {
+            _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/documentation-outline.js");
+            await _module.InvokeVoidAsync("observe", "#documentation-content", ".documentation-on-this-page a[data-section-link]");
+        }
+        catch (JSException)
+        {
+            // Static rendering and bUnit do not provide a browser scroll surface.
+        }
+        catch (InvalidOperationException)
+        {
+            // The component can be disposed while a route transition is in flight.
+        }
+    }
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
 
     public void Dispose() => State.Changed -= OnChanged;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null)
+            return;
+
+        try
+        {
+            await _module.InvokeVoidAsync("dispose");
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The browser can disconnect before a documentation route is disposed.
+        }
+    }
 }

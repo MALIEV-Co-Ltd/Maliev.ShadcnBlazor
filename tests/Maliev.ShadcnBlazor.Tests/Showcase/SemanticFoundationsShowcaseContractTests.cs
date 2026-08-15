@@ -3,6 +3,24 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 public sealed class SemanticFoundationsShowcaseContractTests
 {
     [Fact]
+    public void SemanticExamplesShowTheFullHierarchyAndHumanReadableRatios()
+    {
+        var registry = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(new Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationCatalog());
+        var aspectRatio = Assert.Single(registry.GetBySlug("aspect-ratio"));
+        Assert.Contains("16:9", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("1.7777777777777777", aspectRatio.RazorSource, StringComparison.Ordinal);
+
+        var typography = Assert.Single(registry.GetBySlug("typography"));
+        Assert.Contains("Variant=\"ShadcnTypographyVariant.H1\"", typography.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnTypographyVariant.H3\"", typography.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnTypographyVariant.Paragraph\"", typography.RazorSource, StringComparison.Ordinal);
+
+        var keyboard = Assert.Single(registry.GetBySlug("kbd"));
+        Assert.Contains("Ctrl", keyboard.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Shift", keyboard.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseLoadsSemanticStylesAndExposesComponentRoute()
     {
         var root = FindRoot();

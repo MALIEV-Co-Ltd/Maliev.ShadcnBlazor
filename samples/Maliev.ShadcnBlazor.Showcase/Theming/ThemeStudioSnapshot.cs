@@ -8,4 +8,14 @@ public sealed record ThemeStudioSnapshot(
     ShadcnTheme Baseline,
     IReadOnlyDictionary<string, string> TokenEditorValues,
     IReadOnlyDictionary<string, string> MetricEditorValues,
-    string SelectedPresetId);
+    string SelectedPresetId,
+    string StyleId,
+    string BaseColorId,
+    ThemeStudioIconLibrary IconLibrary,
+    ThemeStudioMenuAccent MenuAccent,
+    ThemeStudioMenuColor MenuColor,
+    string BaselineStyleId,
+    string BaselineBaseColorId,
+    ThemeStudioIconLibrary BaselineIconLibrary,
+    ThemeStudioMenuAccent BaselineMenuAccent,
+    ThemeStudioMenuColor BaselineMenuColor);

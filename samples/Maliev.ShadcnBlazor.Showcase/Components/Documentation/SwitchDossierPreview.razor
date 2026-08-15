@@ -1,0 +1,19 @@
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<label class="action-control-label" data-testid="switch-dossier-preview">
+    <ShadcnSwitch Value="CurrentValue" ValueChanged="HandleChanged" Size="Size" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="notifications" AdditionalAttributes="Attributes" />
+    <span>Enable notifications</span>
+</label>
+
+@code {
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public ShadcnSwitchSize Size { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    private bool CurrentValue;
+    private bool LastValue;
+    protected override void OnParametersSet() { if (Value != LastValue) CurrentValue = Value; LastValue = Value; }
+    private Task HandleChanged(bool value) { CurrentValue = value; return Task.CompletedTask; }
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "action-switch", ["aria-label"] = "Enable notifications" };
+}

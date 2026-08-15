@@ -41,6 +41,7 @@
     protected override void OnInitialized() => Context = new(this);
     protected override void OnParametersSet()
     {
+        var previousSelectedIndex = _effectiveSelectedIndex;
         if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown carousel orientation.");
         Options.Validate();
         ArgumentNullException.ThrowIfNull(SlideLabelFormatter);
@@ -52,6 +53,7 @@
             _selectionInitialized = true;
         }
         _lastParameterSelectedIndex = SelectedIndex;
+        if (previousSelectedIndex != _effectiveSelectedIndex) Context.NotifyChanged();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -63,7 +65,7 @@
         if (Context.Count > 0)
         {
             var normalized = Options.Loop ? ((_effectiveSelectedIndex % Context.Count) + Context.Count) % Context.Count : Math.Clamp(_effectiveSelectedIndex, 0, Context.Count - 1);
-            if (normalized != _effectiveSelectedIndex) { _effectiveSelectedIndex = normalized; await InvokeAsync(StateHasChanged); }
+            if (normalized != _effectiveSelectedIndex) { _effectiveSelectedIndex = normalized; Context.NotifyChanged(); await InvokeAsync(StateHasChanged); }
         }
         if (!_pluginsInitialized && Context.Count > 0)
         {
@@ -96,6 +98,7 @@
         else
         {
             _effectiveSelectedIndex = target;
+            Context.NotifyChanged();
             await InvokeAsync(StateHasChanged);
         }
         foreach (var plugin in Plugins) plugin.Selected(target);

@@ -170,6 +170,53 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void AttachmentPreviewKeepsLifecycleStateInTheDemoAndExposesOnlyMeaningfulControls()
+    {
+        var cut = RenderPreview("attachment");
+
+        Assert.Empty(cut.FindAll("[data-testid='control-attachment-state']"));
+        Assert.Equal(["Vertical", "Image media"], cut.FindAll(".component-preview__control").Select(control => control.TextContent.Trim()));
+        Assert.Equal("uploading", cut.Find(".showcase-attachment-file").GetAttribute("data-state"));
+    }
+
+    [Fact]
+    public void CodeExampleUsesAnAccessibleIconCopyAction()
+    {
+        var cut = Render<ComponentCodeExample>(parameters => parameters
+            .Add(component => component.Title, "Keyboard shortcut")
+            .Add(component => component.Source, "<ShadcnKbd>Ctrl</ShadcnKbd>"));
+
+        var copy = cut.Find("[data-testid='copy-source']");
+        Assert.Equal("Copy source", copy.GetAttribute("aria-label"));
+        Assert.NotNull(copy.QuerySelector("svg"));
+        Assert.Contains("Copy source", copy.TextContent, StringComparison.Ordinal);
+        Assert.NotNull(cut.Find(".component-code__surface [data-testid='copy-source']"));
+        Assert.NotEmpty(cut.FindAll(".component-code__surface .code-token-tag"));
+    }
+
+    [Fact]
+    public void CodeExampleShowsCopiedStateAfterTheClipboardWriteSucceeds()
+    {
+        const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";
+        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
+        module.SetupVoid("copyText", source).SetVoidResult();
+        var cut = Render<ComponentCodeExample>(parameters => parameters
+            .Add(component => component.Title, "Keyboard shortcut")
+            .Add(component => component.Source, source));
+
+        cut.Find("[data-testid='copy-source']").Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            var copy = cut.Find("[data-testid='copy-source']");
+            Assert.Equal("true", copy.GetAttribute("data-copied"));
+            Assert.Equal("Copied", copy.GetAttribute("aria-label"));
+            Assert.Contains("Copied", copy.TextContent, StringComparison.Ordinal);
+            Assert.NotNull(copy.QuerySelector("svg"));
+        });
+    }
+
+    [Fact]
     public void DirectionControlRendersInheritedAndExplicitDirections()
     {
         var cut = RenderPreview("direction");
@@ -259,7 +306,7 @@ public sealed class ComponentDossierTests : BunitContext
         var cut = RenderPreview("empty");
 
         Assert.Equal(["Default", "Icon"], OptionValues(cut, "control-empty-media-variant"));
-        Assert.Single(cut.FindAll("[data-slot='empty-content'] button[type='button']"));
+        Assert.Equal(2, cut.FindAll("[data-slot='empty-content'] button[type='button']").Count);
         Assert.Equal("icon", cut.Find("[data-slot='empty-icon']").GetAttribute("data-variant"));
 
         cut.Find("[data-testid='control-empty-media-variant']").Change("Default");
@@ -288,7 +335,7 @@ public sealed class ComponentDossierTests : BunitContext
         cut.Find("[data-testid='control-typeset-flow']").Change("1.5rem");
         cut.Find("[data-testid='control-typeset-max-width']").Change("48rem");
 
-        Assert.Single(cut.FindAll("article[data-slot='typeset'] h1[data-slot='typography']"));
+        Assert.Equal(2, cut.FindAll("article[data-slot='typeset'] h1[data-slot='typography']").Count);
         var style = cut.Find("article[data-slot='typeset']").GetAttribute("style");
         Assert.Contains("--shadcn-typeset-size: 1.125rem", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typeset-leading: 1.8", style, StringComparison.Ordinal);
@@ -300,7 +347,7 @@ public sealed class ComponentDossierTests : BunitContext
     public void CopyFailureAnnouncesTheFallbackAndPreservesTheExactSource()
     {
         const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";
-        var module = JSInterop.SetupModule("./js/component-code-example.js");
+        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
         module.SetupVoid("copyText", source).SetException(new JSException("Clipboard denied."));
         var cut = Render<ComponentCodeExample>(parameters => parameters
             .Add(component => component.Title, "Keyboard shortcut")

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Maliev.ShadcnBlazor.Components.Content;
 using Maliev.ShadcnBlazor.Components.Direction;
 using Maliev.ShadcnBlazor.Components.Forms;
@@ -6,6 +5,7 @@ using Maliev.ShadcnBlazor.Components.Layout;
 using Maliev.ShadcnBlazor.Components.Typography;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 
 namespace Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 
@@ -38,7 +38,7 @@ internal static class SemanticFoundationExamples
                 content.AddAttribute(1, nameof(ShadcnDirectionProvider.Direction), direction);
                 content.AddAttribute(2, nameof(ShadcnDirectionProvider.AdditionalAttributes),
                     new Dictionary<string, object> { ["data-testid"] = "direction-example" });
-                content.AddAttribute(3, nameof(ShadcnDirectionProvider.ChildContent), Text("مرحبا — direction preview"));
+                content.AddAttribute(3, nameof(ShadcnDirectionProvider.ChildContent), DirectionContent());
                 content.CloseComponent();
             }));
             builder.CloseComponent();
@@ -53,7 +53,7 @@ internal static class SemanticFoundationExamples
         return Example(
             "direction",
             "Nested reading direction",
-            "Override direction for one component subtree.",
+            "Preview a localized account form while overriding the direction for one component subtree.",
             "<ShadcnDirectionProvider Direction=\"ShadcnDirection.RightToLeft\">\n    <ShadcnDirectionProvider Direction=\"null\">\n        مرحبا — inherited RTL preview\n    </ShadcnDirectionProvider>\n</ShadcnDirectionProvider>",
             preview,
             [control],
@@ -67,16 +67,16 @@ internal static class SemanticFoundationExamples
         {
             builder.OpenComponent<ShadcnAspectRatio>(0);
             builder.AddAttribute(1, nameof(ShadcnAspectRatio.Ratio), ratio);
-            builder.AddAttribute(2, nameof(ShadcnAspectRatio.ChildContent), Text("16:9 media frame"));
+            builder.AddAttribute(2, nameof(ShadcnAspectRatio.ChildContent), AspectRatioContent());
             builder.CloseComponent();
         };
         var control = new ComponentParameterControl(
             "aspect-ratio",
             "Aspect ratio",
             ComponentParameterControlKind.Select,
-            "1.7777777777777777",
-            ["1.7777777777777777", "1", "0.5625"],
-            value => ratio = double.Parse(value, CultureInfo.InvariantCulture));
+            "16:9",
+            ["16:9", "1:1", "9:16"],
+            value => ratio = value switch { "16:9" => 16d / 9d, "1:1" => 1d, "9:16" => 9d / 16d, _ => ratio });
         return Example(
             "aspect-ratio",
             "Responsive media frame",
@@ -103,13 +103,7 @@ internal static class SemanticFoundationExamples
             builder.AddAttribute(3, nameof(ShadcnTypeset.Leading), leading);
             builder.AddAttribute(4, nameof(ShadcnTypeset.Flow), flow);
             builder.AddAttribute(5, nameof(ShadcnTypeset.MaxWidth), maxWidth);
-            builder.AddAttribute(6, nameof(ShadcnTypeset.ChildContent), (RenderFragment)(content =>
-            {
-                content.OpenComponent<ShadcnTypography>(0);
-                content.AddAttribute(1, nameof(ShadcnTypography.Variant), variant);
-                content.AddAttribute(2, nameof(ShadcnTypography.ChildContent), Text("Build calm, capable interfaces"));
-                content.CloseComponent();
-            }));
+            builder.AddAttribute(6, nameof(ShadcnTypeset.ChildContent), TypographyContent(variant));
             builder.CloseComponent();
         };
         var options = Enum.GetNames<ShadcnTypographyVariant>();
@@ -161,8 +155,8 @@ internal static class SemanticFoundationExamples
         return Example(
             "typography",
             "Semantic type scale",
-            "Select a semantic text treatment while preserving the matching HTML element.",
-            "<ShadcnTypeset Tag=\"article\" Size=\"1rem\" Leading=\"1.6\" Flow=\"1rem\" MaxWidth=\"48rem\">\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H2\">\n        Build calm, capable interfaces\n    </ShadcnTypography>\n</ShadcnTypeset>",
+            "Select a semantic text treatment while preserving the matching HTML element. The preview shows the complete hierarchy in a realistic product brief.",
+            "<ShadcnTypeset Tag=\"article\" Size=\"1rem\" Leading=\"1.6\" Flow=\"1rem\" MaxWidth=\"48rem\">\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H1\">Production brief</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Lead\">A compact hierarchy for a quotation workspace.</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H2\">Build calm, capable interfaces</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H3\">Make the next action obvious</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H4\">Use type to organize the work</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Paragraph\">Use semantic components to make dense manufacturing workflows easier to scan.</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Blockquote\">Good interfaces reduce the number of decisions people must hold in their heads.</ShadcnTypography>\n</ShadcnTypeset>",
             preview,
             controls,
             options.Select(name => name.ToLowerInvariant())
@@ -307,7 +301,7 @@ internal static class SemanticFoundationExamples
             "item",
             "Structured content item",
             "Compose item title and description inside a selectable visual treatment.",
-            "<ShadcnItem Variant=\"ShadcnItemVariant.Outline\">\n    <ShadcnItemMedia Variant=\"ShadcnItemMediaVariant.Icon\">PDF</ShadcnItemMedia>\n    <ShadcnItemContent>\n        <ShadcnItemTitle>Production drawing</ShadcnItemTitle>\n        <ShadcnItemDescription>Revision C</ShadcnItemDescription>\n    </ShadcnItemContent>\n</ShadcnItem>",
+            "<ShadcnItem Variant=\"ShadcnItemVariant.Outline\">\n    <ShadcnItemMedia Variant=\"ShadcnItemMediaVariant.Icon\">\n        <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M6 3h8l4 4v14H6z\" /><path d=\"M14 3v5h5M9 13h6M9 17h4\" /></svg>\n    </ShadcnItemMedia>\n    <ShadcnItemContent>\n        <ShadcnItemTitle>Production drawing</ShadcnItemTitle>\n        <ShadcnItemDescription>Revision C · Updated 2 minutes ago</ShadcnItemDescription>\n    </ShadcnItemContent>\n</ShadcnItem>",
             preview,
             controls,
             ["default", "outline", "muted", "small", "link", "media-default", "media-icon", "media-image"]);
@@ -324,8 +318,8 @@ internal static class SemanticFoundationExamples
         return Example(
             "kbd",
             "Keyboard shortcut",
-            "Present a compact shortcut using a keyboard-key group.",
-            "<ShadcnKbdGroup>\n    <ShadcnKbd>Ctrl</ShadcnKbd>\n    <span>+</span>\n    <ShadcnKbd>K</ShadcnKbd>\n</ShadcnKbdGroup>",
+            "Present single-key and multi-key shortcuts in a compact, readable command reference.",
+            "<ShadcnKbdGroup>\n    <ShadcnKbd>Esc</ShadcnKbd>\n</ShadcnKbdGroup>\n<ShadcnKbdGroup>\n    <ShadcnKbd>Ctrl</ShadcnKbd><span>+</span><ShadcnKbd>K</ShadcnKbd>\n</ShadcnKbdGroup>\n<ShadcnKbdGroup>\n    <ShadcnKbd>Ctrl</ShadcnKbd><span>+</span><ShadcnKbd>Shift</ShadcnKbd><span>+</span><ShadcnKbd>P</ShadcnKbd>\n</ShadcnKbdGroup>",
             preview,
             [],
             ["single-key", "grouped"]);
@@ -337,10 +331,11 @@ internal static class SemanticFoundationExamples
         var decorative = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnSeparator>(0);
-            builder.AddAttribute(1, nameof(ShadcnSeparator.Orientation), orientation);
-            builder.AddAttribute(2, nameof(ShadcnSeparator.Decorative), decorative);
-            builder.CloseComponent();
+            builder.OpenElement(0, "section"); builder.AddAttribute(1, "class", orientation == ShadcnSeparatorOrientation.Vertical ? "showcase-separator-demo showcase-separator-demo--vertical" : "showcase-separator-demo");
+            builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-separator-demo__section"); builder.OpenElement(4, "strong"); builder.AddContent(5, "Production details"); builder.CloseElement(); builder.OpenElement(6, "span"); builder.AddContent(7, "Material and finish requirements."); builder.CloseElement(); builder.CloseElement();
+            builder.OpenComponent<ShadcnSeparator>(10); builder.AddAttribute(11, nameof(ShadcnSeparator.Orientation), orientation); builder.AddAttribute(12, nameof(ShadcnSeparator.Decorative), decorative); builder.CloseComponent();
+            builder.OpenElement(20, "div"); builder.AddAttribute(21, "class", "showcase-separator-demo__section"); builder.OpenElement(22, "strong"); builder.AddContent(23, "Delivery"); builder.CloseElement(); builder.OpenElement(24, "span"); builder.AddContent(25, "Dispatch estimate and shipping method."); builder.CloseElement(); builder.CloseElement();
+            builder.CloseElement();
         };
         ComponentParameterControl[] controls =
         [
@@ -362,8 +357,8 @@ internal static class SemanticFoundationExamples
         return Example(
             "separator",
             "Semantic section separator",
-            "Switch between a meaningful separator and a decorative visual rule.",
-            "<ShadcnSeparator Decorative=\"false\" Orientation=\"ShadcnSeparatorOrientation.Horizontal\" />",
+            "Show a meaningful boundary between quotation sections, or switch to a decorative rule when the relationship is only visual.",
+            "<section>\n    <h3>Production details</h3>\n    <p>Material and finish requirements.</p>\n    <ShadcnSeparator Decorative=\"false\" />\n    <h3>Delivery</h3>\n    <p>Dispatch estimate and shipping method.</p>\n</section>",
             preview,
             controls,
             ["horizontal", "vertical", "decorative", "semantic"]);
@@ -381,8 +376,8 @@ internal static class SemanticFoundationExamples
         return Example(
             "empty",
             "Empty collection",
-            "Explain why content is absent and offer a clear recovery action.",
-            "<ShadcnEmpty>\n    <ShadcnEmptyHeader>\n        <ShadcnEmptyMedia Variant=\"ShadcnEmptyMediaVariant.Icon\">+</ShadcnEmptyMedia>\n        <ShadcnEmptyTitle>No projects yet</ShadcnEmptyTitle>\n        <ShadcnEmptyDescription>Create a project to begin.</ShadcnEmptyDescription>\n    </ShadcnEmptyHeader>\n    <ShadcnEmptyContent><button type=\"button\">Create project</button></ShadcnEmptyContent>\n</ShadcnEmpty>",
+            "Explain why a collection is empty and offer clear create or import actions.",
+            "<ShadcnEmpty>\n    <ShadcnEmptyHeader>\n        <ShadcnEmptyMedia Variant=\"ShadcnEmptyMediaVariant.Icon\">\n            <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z\" /><path d=\"M12 11v5M9.5 13.5h5\" /></svg>\n        </ShadcnEmptyMedia>\n        <ShadcnEmptyTitle>No projects yet</ShadcnEmptyTitle>\n        <ShadcnEmptyDescription>You have not created any projects yet.</ShadcnEmptyDescription>\n    </ShadcnEmptyHeader>\n    <ShadcnEmptyContent Class=\"showcase-empty-actions\"><button type=\"button\">Create project</button><button type=\"button\">Import project</button></ShadcnEmptyContent>\n</ShadcnEmpty>",
             preview,
             [new ComponentParameterControl(
                 "empty-media-variant",
@@ -405,6 +400,49 @@ internal static class SemanticFoundationExamples
         new($"{slug}-primary", title, description, source, preview, controls, stateTags);
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private static RenderFragment DirectionContent() => builder =>
+    {
+        builder.OpenElement(0, "section"); builder.AddAttribute(1, "class", "showcase-direction-form");
+        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-direction-form__header"); builder.OpenElement(4, "div"); builder.OpenElement(5, "strong"); builder.AddContent(6, "إنشاء حساب"); builder.CloseElement(); builder.OpenElement(7, "span"); builder.AddContent(8, "Create a workspace account"); builder.CloseElement(); builder.CloseElement(); builder.OpenElement(9, "span"); builder.AddContent(10, "الخطوة 1 من 3"); builder.CloseElement(); builder.CloseElement();
+        AddNativeField(builder, 20, "البريد الإلكتروني", "you@example.com", "سيُستخدم هذا البريد لإشعارات الإنتاج.");
+        AddNativeField(builder, 30, "اسم المشروع", "Quotation workspace", "اختر اسماً يسهل على فريقك تذكره.");
+        builder.OpenElement(40, "div"); builder.AddAttribute(41, "class", "showcase-direction-form__actions"); builder.OpenElement(42, "button"); builder.AddAttribute(43, "type", "button"); builder.AddContent(44, "التالي"); builder.CloseElement(); builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private static void AddNativeField(RenderTreeBuilder builder, int sequence, string label, string value, string description)
+    {
+        builder.OpenElement(sequence, "label"); builder.AddAttribute(sequence + 1, "class", "showcase-direction-field"); builder.OpenElement(sequence + 2, "span"); builder.AddContent(sequence + 3, label); builder.CloseElement(); builder.OpenElement(sequence + 4, "input"); builder.AddAttribute(sequence + 5, "value", value); builder.CloseElement(); builder.OpenElement(sequence + 6, "small"); builder.AddContent(sequence + 7, description); builder.CloseElement(); builder.CloseElement();
+    }
+
+    private static RenderFragment AspectRatioContent() => builder =>
+    {
+        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-aspect-ratio-media");
+        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-aspect-ratio-media__toolbar"); builder.OpenElement(4, "span"); builder.AddContent(5, "Production preview"); builder.CloseElement(); builder.OpenElement(6, "span"); builder.AddContent(7, "16:9"); builder.CloseElement(); builder.CloseElement();
+        builder.OpenElement(8, "div"); builder.AddAttribute(9, "class", "showcase-aspect-ratio-media__body"); builder.OpenElement(10, "strong"); builder.AddContent(11, "CNC enclosure · Revision C"); builder.CloseElement(); builder.OpenElement(12, "span"); builder.AddContent(13, "A visible frame makes the ratio easy to verify."); builder.CloseElement(); builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private static RenderFragment TypographyContent(ShadcnTypographyVariant selected) => builder =>
+    {
+        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-typography-preview");
+        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-typography-preview__selected"); builder.OpenElement(4, "span"); builder.AddContent(5, "Selected treatment"); builder.CloseElement(); builder.OpenComponent<ShadcnTypography>(6); builder.AddAttribute(7, nameof(ShadcnTypography.Variant), selected); builder.AddAttribute(8, nameof(ShadcnTypography.ChildContent), Text("Build calm, capable interfaces")); builder.CloseComponent(); builder.CloseElement();
+        AddTypography(builder, 20, ShadcnTypographyVariant.H1, "Production brief");
+        AddTypography(builder, 30, ShadcnTypographyVariant.Lead, "A compact hierarchy for a quotation workspace.");
+        AddTypography(builder, 40, ShadcnTypographyVariant.H2, "Build calm, capable interfaces");
+        AddTypography(builder, 50, ShadcnTypographyVariant.H3, "Make the next action obvious");
+        AddTypography(builder, 60, ShadcnTypographyVariant.H4, "Use type to organize the work");
+        AddTypography(builder, 70, ShadcnTypographyVariant.Paragraph, "Semantic typography lets a production brief stay readable when it moves from a desktop review to a compact mobile handoff.");
+        AddTypography(builder, 80, ShadcnTypographyVariant.Blockquote, "Good interfaces reduce the number of decisions people must hold in their heads.");
+        builder.OpenComponent<ShadcnTypography>(90); builder.AddAttribute(91, nameof(ShadcnTypography.Variant), ShadcnTypographyVariant.UnorderedList); builder.AddAttribute(92, nameof(ShadcnTypography.ChildContent), (RenderFragment)(list => { list.OpenElement(0, "li"); list.AddContent(1, "Clear status at a glance"); list.CloseElement(); list.OpenElement(2, "li"); list.AddContent(3, "Helpful context near each control"); list.CloseElement(); })); builder.CloseComponent();
+        builder.CloseElement();
+    };
+
+    private static void AddTypography(RenderTreeBuilder builder, int sequence, ShadcnTypographyVariant variant, string text)
+    {
+        builder.OpenComponent<ShadcnTypography>(sequence); builder.AddAttribute(sequence + 1, nameof(ShadcnTypography.Variant), variant); builder.AddAttribute(sequence + 2, nameof(ShadcnTypography.ChildContent), Text(text)); builder.CloseComponent();
+    }
 
     private static RenderFragment FieldSetContent(
         ShadcnFieldOrientation orientation,
@@ -453,7 +491,7 @@ internal static class SemanticFoundationExamples
     {
         builder.OpenComponent<ShadcnItemMedia>(0);
         builder.AddAttribute(1, nameof(ShadcnItemMedia.Variant), mediaVariant);
-        builder.AddAttribute(2, nameof(ShadcnItemMedia.ChildContent), Text("PDF"));
+        builder.AddAttribute(2, nameof(ShadcnItemMedia.ChildContent), FileIcon());
         builder.CloseComponent();
         builder.OpenComponent<ShadcnItemContent>(3);
         builder.AddAttribute(4, nameof(ShadcnItemContent.ChildContent), (RenderFragment)(builder2 =>
@@ -470,13 +508,11 @@ internal static class SemanticFoundationExamples
 
     private static RenderFragment KeyboardKeys() => builder =>
     {
-        builder.OpenComponent<ShadcnKbd>(0);
-        builder.AddAttribute(1, nameof(ShadcnKbd.ChildContent), Text("Ctrl"));
-        builder.CloseComponent();
-        builder.AddContent(2, "+");
-        builder.OpenComponent<ShadcnKbd>(3);
-        builder.AddAttribute(4, nameof(ShadcnKbd.ChildContent), Text("K"));
-        builder.CloseComponent();
+        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-kbd-list");
+        AddShortcut(builder, 10, "Open command palette", ["Ctrl", "K"]);
+        AddShortcut(builder, 20, "Search files", ["Ctrl", "Shift", "P"]);
+        AddShortcut(builder, 30, "Close dialog", ["Esc"]);
+        builder.CloseElement();
     };
 
     private static RenderFragment EmptyContent(ShadcnEmptyMediaVariant mediaVariant) => builder =>
@@ -486,7 +522,7 @@ internal static class SemanticFoundationExamples
         {
             builder2.OpenComponent<ShadcnEmptyMedia>(0);
             builder2.AddAttribute(1, nameof(ShadcnEmptyMedia.Variant), mediaVariant);
-            builder2.AddAttribute(2, nameof(ShadcnEmptyMedia.ChildContent), Text("+"));
+            builder2.AddAttribute(2, nameof(ShadcnEmptyMedia.ChildContent), FolderPlusIcon());
             builder2.CloseComponent();
             builder2.OpenComponent<ShadcnEmptyTitle>(3);
             builder2.AddAttribute(4, nameof(ShadcnEmptyTitle.ChildContent), Text("No projects yet"));
@@ -497,13 +533,42 @@ internal static class SemanticFoundationExamples
         }));
         builder.CloseComponent();
         builder.OpenComponent<ShadcnEmptyContent>(2);
-        builder.AddAttribute(3, nameof(ShadcnEmptyContent.ChildContent), (RenderFragment)(content =>
+        builder.AddAttribute(3, nameof(ShadcnEmptyContent.Class), "showcase-empty-actions");
+        builder.AddAttribute(4, nameof(ShadcnEmptyContent.ChildContent), (RenderFragment)(content =>
         {
             content.OpenElement(0, "button");
             content.AddAttribute(1, "type", "button");
             content.AddContent(2, "Create project");
             content.CloseElement();
+            content.OpenElement(3, "button");
+            content.AddAttribute(4, "type", "button");
+            content.AddAttribute(5, "class", "shadcn-button shadcn-button--outline");
+            content.AddContent(6, "Import project");
+            content.CloseElement();
         }));
         builder.CloseComponent();
     };
+
+    private static RenderFragment FileIcon() => builder =>
+    {
+        builder.OpenElement(0, "svg"); builder.AddAttribute(1, "viewBox", "0 0 24 24"); builder.AddAttribute(2, "aria-hidden", "true"); builder.OpenElement(3, "path"); builder.AddAttribute(4, "d", "M6 3h8l4 4v14H6z"); builder.CloseElement(); builder.OpenElement(5, "path"); builder.AddAttribute(6, "d", "M14 3v5h5M9 13h6M9 17h4"); builder.CloseElement(); builder.CloseElement();
+    };
+
+    private static RenderFragment FolderPlusIcon() => builder =>
+    {
+        builder.OpenElement(0, "svg"); builder.AddAttribute(1, "viewBox", "0 0 24 24"); builder.AddAttribute(2, "aria-hidden", "true"); builder.OpenElement(3, "path"); builder.AddAttribute(4, "d", "M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"); builder.CloseElement(); builder.OpenElement(5, "path"); builder.AddAttribute(6, "d", "M12 11v5M9.5 13.5h5"); builder.CloseElement(); builder.CloseElement();
+    };
+
+    private static void AddShortcut(RenderTreeBuilder builder, int sequence, string label, IReadOnlyList<string> keys)
+    {
+        builder.OpenElement(sequence, "div"); builder.AddAttribute(sequence + 1, "class", "showcase-kbd-row"); builder.OpenElement(sequence + 2, "span"); builder.AddContent(sequence + 3, label); builder.CloseElement(); builder.OpenComponent<ShadcnKbdGroup>(sequence + 4); builder.AddAttribute(sequence + 5, nameof(ShadcnKbdGroup.ChildContent), (RenderFragment)(group =>
+        {
+            var keySequence = 0;
+            foreach (var key in keys)
+            {
+                if (keySequence > 0) group.AddContent(keySequence * 10, "+");
+                group.OpenComponent<ShadcnKbd>(keySequence * 10 + 1); group.AddAttribute(keySequence * 10 + 2, nameof(ShadcnKbd.ChildContent), Text(key)); group.CloseComponent(); keySequence++;
+            }
+        })); builder.CloseComponent(); builder.CloseElement();
+    }
 }

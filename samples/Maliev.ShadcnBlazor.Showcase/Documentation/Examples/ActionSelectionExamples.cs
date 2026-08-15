@@ -1,5 +1,6 @@
 using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Selection;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -22,22 +23,16 @@ internal static class ActionSelectionExamples
 
     private static ComponentExampleDefinition Button()
     {
-        var variant = ShadcnButtonVariant.Default;
-        var size = ShadcnButtonSize.Default;
         var disabled = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnButton>(0);
-            builder.AddAttribute(1, nameof(ShadcnButton.Variant), variant);
-            builder.AddAttribute(2, nameof(ShadcnButton.Size), size);
-            builder.AddAttribute(3, nameof(ShadcnButton.Disabled), disabled);
-            builder.AddAttribute(4, nameof(ShadcnButton.AdditionalAttributes), Attributes("action-button", "Save changes"));
-            builder.AddAttribute(5, nameof(ShadcnButton.ChildContent), Text("Save changes"));
+            builder.OpenComponent<ButtonDossierPreview>(0);
+            builder.AddAttribute(1, nameof(ButtonDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
-        return Example("button", "Button variants and sizes", "Choose every pinned Vega variant and size, including disabled semantics.",
-            "<ShadcnButton Variant=\"ShadcnButtonVariant.Default\" Size=\"ShadcnButtonSize.Default\">Save changes</ShadcnButton>", preview,
-            [Select("button-variant", "Variant", variant, value => variant = value), Select("button-size", "Size", size, value => size = value), Toggle("button-disabled", "Disabled", value => disabled = value)],
+        return Example("button", "Button variants and sizes", "Compare every supported treatment at once, then scan the size scale without clicking through a selector.",
+            "<ShadcnButton Variant=\"ShadcnButtonVariant.Default\">Save changes</ShadcnButton>", preview,
+            [Toggle("button-disabled", "Disabled", value => disabled = value)],
             ["variants", "sizes", "disabled"]);
     }
 
@@ -81,18 +76,12 @@ internal static class ActionSelectionExamples
         var invalid = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenElement(0, "label");
-            builder.AddAttribute(1, "class", "action-control-label");
-            builder.OpenComponent<ShadcnCheckbox>(2);
-            builder.AddAttribute(3, nameof(ShadcnCheckbox.Value), value);
-            builder.AddAttribute(4, nameof(ShadcnCheckbox.Disabled), disabled);
-            builder.AddAttribute(5, nameof(ShadcnCheckbox.ReadOnly), readOnly);
-            builder.AddAttribute(6, nameof(ShadcnCheckbox.Invalid), invalid);
-            builder.AddAttribute(7, nameof(ShadcnCheckbox.Name), "terms");
-            builder.AddAttribute(8, nameof(ShadcnCheckbox.AdditionalAttributes), Attributes("action-checkbox", "Accept terms"));
+            builder.OpenComponent<CheckboxDossierPreview>(0);
+            builder.AddAttribute(1, nameof(CheckboxDossierPreview.Value), value);
+            builder.AddAttribute(2, nameof(CheckboxDossierPreview.Disabled), disabled);
+            builder.AddAttribute(3, nameof(CheckboxDossierPreview.ReadOnly), readOnly);
+            builder.AddAttribute(4, nameof(CheckboxDossierPreview.Invalid), invalid);
             builder.CloseComponent();
-            builder.AddContent(9, "Accept terms");
-            builder.CloseElement();
         };
         return Example("checkbox", "Three-state checkbox", "Preview checked, unchecked, indeterminate, disabled, read-only, and invalid states.",
             "<ShadcnCheckbox Value=\"null\" Name=\"terms\" aria-label=\"Accept terms\" />", preview,
@@ -140,23 +129,13 @@ internal static class ActionSelectionExamples
         var invalid = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnSlider>(0);
-            builder.AddAttribute(1, nameof(ShadcnSlider.Values), values);
-            builder.AddAttribute(2, nameof(ShadcnSlider.Minimum), 0d);
-            builder.AddAttribute(3, nameof(ShadcnSlider.Maximum), 100d);
-            builder.AddAttribute(4, nameof(ShadcnSlider.Step), 5d);
-            builder.AddAttribute(5, nameof(ShadcnSlider.Orientation), orientation);
-            builder.AddAttribute(6, nameof(ShadcnSlider.Disabled), disabled);
-            builder.AddAttribute(7, nameof(ShadcnSlider.ReadOnly), readOnly);
-            builder.AddAttribute(8, nameof(ShadcnSlider.Invalid), invalid);
-            builder.AddAttribute(9, nameof(ShadcnSlider.Name), "budget");
-            builder.AddAttribute(10, nameof(ShadcnSlider.Form), "dossier-slider-form");
-            builder.AddAttribute(11, nameof(ShadcnSlider.Required), true);
-            builder.AddAttribute(12, nameof(ShadcnSlider.AdditionalAttributes), Attributes("action-slider", "Budget range"));
+            builder.OpenComponent<SliderDossierPreview>(0);
+            builder.AddAttribute(1, nameof(SliderDossierPreview.Values), values);
+            builder.AddAttribute(2, nameof(SliderDossierPreview.Orientation), orientation);
+            builder.AddAttribute(3, nameof(SliderDossierPreview.Disabled), disabled);
+            builder.AddAttribute(4, nameof(SliderDossierPreview.ReadOnly), readOnly);
+            builder.AddAttribute(5, nameof(SliderDossierPreview.Invalid), invalid);
             builder.CloseComponent();
-            builder.OpenElement(20, "form");
-            builder.AddAttribute(21, "id", "dossier-slider-form");
-            builder.CloseElement();
         };
         return Example("slider", "Single and range values", "A snapped range with native keyboard input, nearest-thumb pointer targeting, RTL, and vertical support.",
             "<ShadcnSlider Values=\"new[] { 20d, 80d }\" Minimum=\"0\" Maximum=\"100\" Step=\"5\" />", preview,
@@ -173,19 +152,13 @@ internal static class ActionSelectionExamples
         var invalid = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenElement(0, "label");
-            builder.AddAttribute(1, "class", "action-control-label");
-            builder.OpenComponent<ShadcnSwitch>(2);
-            builder.AddAttribute(3, nameof(ShadcnSwitch.Value), value);
-            builder.AddAttribute(4, nameof(ShadcnSwitch.Size), size);
-            builder.AddAttribute(5, nameof(ShadcnSwitch.Disabled), disabled);
-            builder.AddAttribute(6, nameof(ShadcnSwitch.ReadOnly), readOnly);
-            builder.AddAttribute(7, nameof(ShadcnSwitch.AdditionalAttributes), Attributes("action-switch", "Enable notifications"));
-            builder.AddAttribute(8, nameof(ShadcnSwitch.Invalid), invalid);
-            builder.AddAttribute(9, nameof(ShadcnSwitch.Name), "notifications");
+            builder.OpenComponent<SwitchDossierPreview>(0);
+            builder.AddAttribute(1, nameof(SwitchDossierPreview.Value), value);
+            builder.AddAttribute(2, nameof(SwitchDossierPreview.Size), size);
+            builder.AddAttribute(3, nameof(SwitchDossierPreview.Disabled), disabled);
+            builder.AddAttribute(4, nameof(SwitchDossierPreview.ReadOnly), readOnly);
+            builder.AddAttribute(5, nameof(SwitchDossierPreview.Invalid), invalid);
             builder.CloseComponent();
-            builder.AddContent(10, "Enable notifications");
-            builder.CloseElement();
         };
         return Example("switch", "Boolean switch", "Preview checked state, both sizes, disabled, read-only, invalid, and RTL thumb motion.",
             "<ShadcnSwitch Value=\"true\" aria-label=\"Enable notifications\" />", preview,

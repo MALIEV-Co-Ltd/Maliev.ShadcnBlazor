@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
@@ -21,17 +22,11 @@ public sealed record ThemeStudioViewport(string Id, string DisplayName, int Widt
 
 public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string CssStack, string GoogleFontsFamily)
 {
-    public static ThemeStudioFontPreset IbmPlexSans { get; } = new(
-        "ibm-plex-sans",
-        "IBM Plex Sans + Thai",
-        "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif",
-        "IBM+Plex+Sans:wght@400;500;600;700");
-
-    public static ThemeStudioFontPreset IbmPlexSansThai { get; } = new(
-        "ibm-plex-sans-thai",
-        "IBM Plex Sans Thai",
-        "'IBM Plex Sans Thai', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
-        "IBM+Plex+Sans+Thai:wght@400;500;600;700");
+    public static ThemeStudioFontPreset GeistSans { get; } = new(
+        "geist-sans",
+        "Geist + Noto Sans Thai",
+        "'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        "Geist:wght@400;500;600;700");
 
     public static ThemeStudioFontPreset DmSans { get; } = new(
         "dm-sans",
@@ -51,14 +46,14 @@ public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string
         "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
         "Noto+Sans+Thai:wght@400;500;600;700");
 
-    public static ThemeStudioFontPreset IbmPlexMono { get; } = new(
-        "ibm-plex-mono",
-        "IBM Plex Mono",
-        "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        "IBM+Plex+Mono:wght@400;500;600;700");
+    public static ThemeStudioFontPreset JetBrainsMono { get; } = new(
+        "jetbrains-mono",
+        "JetBrains Mono",
+        "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        "JetBrains+Mono:wght@400;500;600;700");
 
-    public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [IbmPlexSans, IbmPlexSansThai, DmSans, PlusJakartaSans, NotoSansThai];
-    public static IReadOnlyList<ThemeStudioFontPreset> MonospaceAll { get; } = [IbmPlexMono];
+    public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [GeistSans, DmSans, PlusJakartaSans, NotoSansThai];
+    public static IReadOnlyList<ThemeStudioFontPreset> MonospaceAll { get; } = [JetBrainsMono];
 }
 
 public sealed record ThemeStudioTokenDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
@@ -109,6 +104,11 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     private readonly Dictionary<string, string> _tokenEditorValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _metricEditorValues = new(StringComparer.Ordinal);
     private ShadcnTheme _baseline = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    private string _baselineStyleId = "vega";
+    private string _baselineBaseColorId = "neutral";
+    private ThemeStudioIconLibrary _baselineIconLibrary = ThemeStudioIconLibrary.Lucide;
+    private ThemeStudioMenuAccent _baselineMenuAccent = ThemeStudioMenuAccent.Default;
+    private ThemeStudioMenuColor _baselineMenuColor = ThemeStudioMenuColor.Default;
     private string? _pointerMutationKey;
     private bool _pointerSnapshotCaptured;
 
@@ -120,9 +120,17 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     public ThemeStudioViewport Viewport { get; private set; } = ThemeStudioViewport.Desktop;
     public ThemeStudioMockup SelectedMockup { get; private set; } = ThemeStudioMockup.OperationsDashboard;
     public string SelectedPresetId { get; private set; } = ShadcnThemePresets.BaseVegaNeutral.Id;
+    public string StyleId { get; private set; } = "vega";
+    public string BaseColorId { get; private set; } = "neutral";
+    public ThemeStudioIconLibrary IconLibrary { get; private set; } = ThemeStudioIconLibrary.Lucide;
+    public ThemeStudioMenuAccent MenuAccent { get; private set; } = ThemeStudioMenuAccent.Default;
+    public ThemeStudioMenuColor MenuColor { get; private set; } = ThemeStudioMenuColor.Default;
+    public ThemeStudioRadiusPreset RadiusPreset => ThemeStudioGeneratorCatalog.RadiusPreset(Draft.Metrics.RadiusRem);
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
-    public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline;
+    public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline ||
+        StyleId != _baselineStyleId || BaseColorId != _baselineBaseColorId || IconLibrary != _baselineIconLibrary ||
+        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor;
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public string? StorageDiagnostic { get; private set; }
     public string? ImportDiagnostic { get; private set; }
@@ -305,6 +313,11 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
         Draft = Clone(_baseline);
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
+        StyleId = _baselineStyleId;
+        BaseColorId = _baselineBaseColorId;
+        IconLibrary = _baselineIconLibrary;
+        MenuAccent = _baselineMenuAccent;
+        MenuColor = _baselineMenuColor;
         RevalidateAndApply();
     }
 
@@ -399,6 +412,131 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
         RaiseChanged();
     }
 
+    public void SetStyle(string styleId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(styleId);
+        if (!ThemeStudioGeneratorCatalog.IsKnownStyle(styleId))
+            throw new ArgumentOutOfRangeException(nameof(styleId), styleId, "Unknown Theme Studio style.");
+        if (string.Equals(StyleId, styleId, StringComparison.Ordinal)) return;
+        CaptureHistory("generator.style");
+        StyleId = styleId;
+        RaiseChanged();
+    }
+
+    public void SetBaseColor(string baseColorId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(baseColorId);
+        if (!ThemeStudioGeneratorCatalog.IsKnownBaseColor(baseColorId))
+            throw new ArgumentOutOfRangeException(nameof(baseColorId), baseColorId, "Unknown Theme Studio base color.");
+        if (string.Equals(BaseColorId, baseColorId, StringComparison.Ordinal)) return;
+        CaptureHistory("generator.base-color");
+        BaseColorId = baseColorId;
+        RaiseChanged();
+    }
+
+    public void SetIconLibrary(ThemeStudioIconLibrary iconLibrary)
+    {
+        ValidateWorkspaceValue(iconLibrary, nameof(iconLibrary));
+        if (IconLibrary == iconLibrary) return;
+        CaptureHistory("generator.icon-library");
+        IconLibrary = iconLibrary;
+        RaiseChanged();
+    }
+
+    public void SetMenuAccent(ThemeStudioMenuAccent menuAccent)
+    {
+        ValidateWorkspaceValue(menuAccent, nameof(menuAccent));
+        if (MenuAccent == menuAccent) return;
+        CaptureHistory("generator.menu-accent");
+        MenuAccent = menuAccent;
+        RaiseChanged();
+    }
+
+    public void SetMenuColor(ThemeStudioMenuColor menuColor)
+    {
+        ValidateWorkspaceValue(menuColor, nameof(menuColor));
+        if (MenuColor == menuColor) return;
+        CaptureHistory("generator.menu-color");
+        MenuColor = menuColor;
+        RaiseChanged();
+    }
+
+    public void SetRadiusPreset(ThemeStudioRadiusPreset radiusPreset)
+    {
+        ValidateWorkspaceValue(radiusPreset, nameof(radiusPreset));
+        SetMetric("radiusRem", ThemeStudioGeneratorCatalog.RadiusRem(radiusPreset).ToString("G17", CultureInfo.InvariantCulture));
+    }
+
+    public ThemeStudioGeneratorConfig CreateGeneratorConfig()
+    {
+        var theme = Clone(Applied);
+        return new ThemeStudioGeneratorConfig
+        {
+            Preset = SelectedPresetId,
+            Style = StyleId,
+            BaseColor = BaseColorId,
+            IconLibrary = IconLibrary,
+            MenuAccent = MenuAccent,
+            MenuColor = MenuColor,
+            RadiusPreset = ThemeStudioGeneratorCatalog.RadiusPreset(theme.Metrics.RadiusRem),
+            FontFamily = theme.Metrics.FontFamily,
+            MonospaceFontFamily = theme.Metrics.MonospaceFontFamily,
+            Theme = theme
+        };
+    }
+
+    public string SerializeGeneratorConfig() => ThemeStudioGeneratorConfigSerializer.Serialize(CreateGeneratorConfig());
+
+    public bool ImportGeneratorConfig(ThemeStudioGeneratorConfig config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        try
+        {
+            ThemeStudioGeneratorConfigSerializer.Validate(config);
+        }
+        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
+        {
+            ImportDiagnostic = $"Generator configuration was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+
+        CaptureHistory("generator.import");
+        Draft = Clone(config.Theme);
+        Applied = Clone(config.Theme);
+        _baseline = Clone(config.Theme);
+        SelectedPresetId = config.Preset;
+        StyleId = config.Style;
+        BaseColorId = config.BaseColor;
+        IconLibrary = config.IconLibrary;
+        MenuAccent = config.MenuAccent;
+        MenuColor = config.MenuColor;
+        _baselineStyleId = StyleId;
+        _baselineBaseColorId = BaseColorId;
+        _baselineIconLibrary = IconLibrary;
+        _baselineMenuAccent = MenuAccent;
+        _baselineMenuColor = MenuColor;
+        _tokenEditorValues.Clear();
+        _metricEditorValues.Clear();
+        ImportDiagnostic = null;
+        RevalidateAndApply();
+        return true;
+    }
+
+    public bool ImportGeneratorConfig(string json)
+    {
+        try
+        {
+            return ImportGeneratorConfig(ThemeStudioGeneratorConfigSerializer.Deserialize(json));
+        }
+        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
+        {
+            ImportDiagnostic = $"Generator configuration was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+    }
+
     public void SetViewport(ThemeStudioViewport viewport)
     {
         ArgumentNullException.ThrowIfNull(viewport);
@@ -454,7 +592,17 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
         Clone(_baseline),
         new Dictionary<string, string>(_tokenEditorValues, StringComparer.Ordinal),
         new Dictionary<string, string>(_metricEditorValues, StringComparer.Ordinal),
-        SelectedPresetId);
+        SelectedPresetId,
+        StyleId,
+        BaseColorId,
+        IconLibrary,
+        MenuAccent,
+        MenuColor,
+        _baselineStyleId,
+        _baselineBaseColorId,
+        _baselineIconLibrary,
+        _baselineMenuAccent,
+        _baselineMenuColor);
 
     private void Restore(ThemeStudioSnapshot snapshot)
     {
@@ -462,6 +610,16 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
         Applied = Clone(snapshot.Applied);
         _baseline = Clone(snapshot.Baseline);
         SelectedPresetId = snapshot.SelectedPresetId;
+        StyleId = snapshot.StyleId;
+        BaseColorId = snapshot.BaseColorId;
+        IconLibrary = snapshot.IconLibrary;
+        MenuAccent = snapshot.MenuAccent;
+        MenuColor = snapshot.MenuColor;
+        _baselineStyleId = snapshot.BaselineStyleId;
+        _baselineBaseColorId = snapshot.BaselineBaseColorId;
+        _baselineIconLibrary = snapshot.BaselineIconLibrary;
+        _baselineMenuAccent = snapshot.BaselineMenuAccent;
+        _baselineMenuColor = snapshot.BaselineMenuColor;
         _tokenEditorValues.Clear();
         foreach (var pair in snapshot.TokenEditorValues)
             _tokenEditorValues[pair.Key] = pair.Value;

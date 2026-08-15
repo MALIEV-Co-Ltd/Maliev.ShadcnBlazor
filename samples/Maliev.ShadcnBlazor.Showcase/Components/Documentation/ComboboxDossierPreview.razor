@@ -1,0 +1,22 @@
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<div class="showcase-combobox-dossier" data-testid="combobox-dossier-preview">
+    <ShadcnCombobox TValue="string" Value="@Selected" ValueChanged="@HandleValueChanged" Values="@SelectedValues" ValuesChanged="@HandleValuesChanged" Options="@GetMaterialOptions()" Multiple="@Multiple" Open="@Open" OpenChanged="@HandleOpenChanged" Query="@Query" QueryChanged="@HandleQueryChanged" ShowClear="true" ShowTrigger="true" Invalid="@Invalid" AdditionalAttributes="@Attributes" />
+</div>
+
+@code {
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public bool Multiple { get; set; }
+    private string Selected = "al6061";
+    private IReadOnlyList<string> SelectedValues = ["al6061", "ss316"];
+    private bool Open = true;
+    private string Query = string.Empty;
+    private static readonly IReadOnlyList<ShadcnComboboxOption<string>> MaterialOptions =
+        [new("al6061", "Aluminum 6061", "Metals"), new("ss316", "Stainless 316L", "Metals"), new("peek", "PEEK", "Polymers")];
+    private static IReadOnlyList<ShadcnComboboxOption<string>> GetMaterialOptions() => MaterialOptions;
+    private Task HandleValueChanged(string value) { Selected = value; return Task.CompletedTask; }
+    private Task HandleValuesChanged(IReadOnlyList<string> values) { SelectedValues = values; return Task.CompletedTask; }
+    private Task HandleOpenChanged(bool value) { Open = value; return Task.CompletedTask; }
+    private Task HandleQueryChanged(string value) { Query = value; return Task.CompletedTask; }
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "forms-dossier-combobox", ["aria-label"] = "Material" };
+}

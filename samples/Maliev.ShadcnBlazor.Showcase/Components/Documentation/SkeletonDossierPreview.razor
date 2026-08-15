@@ -1,0 +1,24 @@
+@using Maliev.ShadcnBlazor.Components.Feedback
+
+<div class="showcase-skeleton-layout" data-testid="skeleton-dossier-preview">
+    <div class="showcase-skeleton-layout__header">
+        <ShadcnSkeleton Shape="@(Circle ? ShadcnSkeletonShape.Circle : ShadcnSkeletonShape.Default)" Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 2.75rem; height: 2.75rem;" />
+        <div><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 12rem; height: 1rem;" /><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 8rem; height: .75rem; margin-top: .5rem;" /></div>
+    </div>
+    <div class="showcase-skeleton-layout__body">
+        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 68%; height: 1rem;" />
+        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 92%; height: 1rem;" />
+        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 48%; height: 1rem;" />
+    </div>
+    <div class="showcase-skeleton-layout__cards">
+        @for (var i = 0; i < 3; i++)
+        {
+            <article><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 100%; height: 4.5rem;" /><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 70%; height: .75rem; margin-top: .65rem;" /></article>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool Circle { get; set; }
+    [Parameter] public bool Motion { get; set; } = true;
+}

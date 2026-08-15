@@ -1,0 +1,20 @@
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<div data-testid="slider-dossier-preview">
+    <ShadcnSlider Values="CurrentValues" ValuesChanged="HandleChanged" Minimum="0" Maximum="100" Step="5" Orientation="Orientation" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="budget" Form="dossier-slider-form" Required="true" AdditionalAttributes="Attributes" />
+    <form id="dossier-slider-form"></form>
+    <output class="showcase-slider-values" aria-live="polite">@string.Join(" – ", CurrentValues.Select(value => value.ToString("0")))</output>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<double> Values { get; set; } = [20d, 80d];
+    [Parameter] public ShadcnSliderOrientation Orientation { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+    private IReadOnlyList<double> CurrentValues = [20d, 80d];
+    private IReadOnlyList<double>? LastValues;
+    protected override void OnParametersSet() { if (!ReferenceEquals(Values, LastValues)) CurrentValues = Values; LastValues = Values; }
+    private Task HandleChanged(IReadOnlyList<double> values) { CurrentValues = values; return Task.CompletedTask; }
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "action-slider", ["aria-label"] = "Budget range" };
+}

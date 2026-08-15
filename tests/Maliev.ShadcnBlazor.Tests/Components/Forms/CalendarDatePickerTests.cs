@@ -291,6 +291,24 @@ public sealed class CalendarDatePickerTests : BunitContext
     }
 
     [Fact]
+    public void DatePickerWithoutOpenBindingOpensAndSelectsADate()
+    {
+        DateOnly? selected = null;
+        var cut = Render<ShadcnDatePicker>(parameters => parameters
+            .Add(component => component.Value, selected)
+            .Add(component => component.ValueChanged, value => selected = value)
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1)));
+
+        cut.Find("[data-slot='date-picker-trigger']").Click();
+
+        Assert.Equal("true", cut.Find("[data-slot='date-picker-trigger']").GetAttribute("aria-expanded"));
+        cut.Find("[data-day='2026-08-13']").Click();
+
+        Assert.Equal(new DateOnly(2026, 8, 13), selected);
+        Assert.Equal("false", cut.Find("[data-slot='date-picker-trigger']").GetAttribute("aria-expanded"));
+    }
+
+    [Fact]
     public void DatePickerOpensSelectsAndClearsWithoutTimezoneConversion()
     {
         DateOnly? selected = null;
