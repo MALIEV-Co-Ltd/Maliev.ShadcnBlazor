@@ -1,6 +1,7 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
 @inherits LayoutComponentBase
 @inject ShowcaseState ThemeState
+@inject DocumentationPageState PageState
 @implements IDisposable
 
 <ShadcnThemeProvider IsDarkMode="@ThemeState.IsDarkMode" Direction="@ThemeState.Direction" Class="documentation-root">
@@ -33,12 +34,13 @@
                 @Body
             </main>
 
-            <aside id="documentation-theme"
-                   class="documentation-theme"
-                   aria-label="Documentation theme studio"
-                   data-open="@NavigationState.ThemeDockOpen.ToString().ToLowerInvariant()"
+            <aside id="documentation-outline"
+                   class="documentation-outline"
+                   aria-label="Page outline"
+                   data-open="@NavigationState.OutlineOpen.ToString().ToLowerInvariant()"
                    tabindex="-1">
-                <DocumentationThemeDock State="@NavigationState" CloseRequested="CloseThemeDrawerAsync" />
+                <button type="button" class="documentation-panel-close" aria-label="Close page outline" @onclick="CloseOutlineDrawerAsync">Close</button>
+                <DocumentationOnThisPage State="@PageState" />
             </aside>
         </div>
     </div>
@@ -48,7 +50,7 @@
     private DocumentationHeader? _header;
     private ElementReference _catalogNavigation;
     private bool _focusCatalogAfterRender;
-    private bool AnyDrawerOpen => NavigationState.CatalogOpen || NavigationState.ThemeDockOpen;
+    private bool AnyDrawerOpen => NavigationState.CatalogOpen || NavigationState.OutlineOpen;
 
     public DocumentationNavigationState NavigationState { get; } = new();
 
@@ -70,8 +72,8 @@
     {
         if (NavigationState.CatalogOpen)
             await CloseCatalogDrawerAsync();
-        else if (NavigationState.ThemeDockOpen)
-            await CloseThemeDrawerAsync();
+        else if (NavigationState.OutlineOpen)
+            await CloseOutlineDrawerAsync();
     }
 
     private void OpenCatalogFromSkipLink()
@@ -99,14 +101,14 @@
         await _header.FocusCatalogTriggerAsync();
     }
 
-    private async Task CloseThemeDrawerAsync()
+    private async Task CloseOutlineDrawerAsync()
     {
-        if (!NavigationState.ThemeDockOpen || _header is null)
+        if (!NavigationState.OutlineOpen || _header is null)
             return;
 
-        NavigationState.ThemeDockOpen = false;
+        NavigationState.OutlineOpen = false;
         await InvokeAsync(StateHasChanged);
-        await _header.FocusThemeDockTriggerAsync();
+        await _header.FocusOutlineTriggerAsync();
     }
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
