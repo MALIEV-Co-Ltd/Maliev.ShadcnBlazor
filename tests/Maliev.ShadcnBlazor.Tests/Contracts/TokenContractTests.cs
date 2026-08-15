@@ -55,7 +55,7 @@ public sealed class TokenContractTests
         Assert.Contains("font-family: \"Geist\"", css, StringComparison.Ordinal);
         Assert.Contains("font-family: \"Noto Sans Thai\"", css, StringComparison.Ordinal);
         Assert.Contains("font-family: \"JetBrains Mono\"", css, StringComparison.Ordinal);
-        Assert.Contains(":where(:lang(th), [lang|=\"th\"])" , css, StringComparison.Ordinal);
+        Assert.Contains(":where(:lang(th), [lang|=\"th\"])", css, StringComparison.Ordinal);
     }
 
     [Fact]
