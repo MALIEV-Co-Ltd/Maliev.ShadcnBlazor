@@ -867,6 +867,94 @@ a {
     font-size: 0.6875rem;
 }
 
+.showcase-scroller-frame {
+    min-height: 20rem;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-card);
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-scroller-frame .shadcn-message-scroller-viewport {
+    scrollbar-color: var(--shadcn-muted-foreground) transparent;
+}
+
+.showcase-scroller-frame .shadcn-message-scroller-content {
+    gap: 0.25rem;
+    padding: 1rem 1.25rem 4rem;
+}
+
+.showcase-scroller-frame .shadcn-message-scroller-item {
+    border-bottom: 1px solid color-mix(in srgb, var(--shadcn-border) 55%, transparent);
+    padding-block: 0.55rem;
+}
+
+.showcase-scroller-frame .shadcn-message {
+    min-height: 3.2rem;
+}
+
+.showcase-scroller-frame .shadcn-message-avatar {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.6875rem;
+}
+
+.showcase-scroller-frame [data-slot="message-scroller-button"] {
+    min-height: 2.25rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    padding-inline: 0.875rem;
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    box-shadow: var(--shadcn-shadow-md);
+    font-size: 0.75rem;
+    font-weight: 650;
+}
+
+.showcase-questionnaire-card {
+    width: min(100%, 34rem);
+    margin-inline: auto;
+    gap: 1.25rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    padding: 1.5rem;
+    background: var(--shadcn-card);
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-questionnaire-card > [data-slot="questionnaire-progress"] {
+    width: 100%;
+    min-width: 0;
+    border-bottom: 1px solid var(--shadcn-border);
+    padding-block-end: 0.75rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+}
+
+.showcase-questionnaire-card [data-slot="questionnaire-item"] {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.showcase-questionnaire-card [data-slot="questionnaire-title"] {
+    font-size: 1.4rem;
+    letter-spacing: -0.015em;
+}
+
+.showcase-questionnaire-card [data-slot="questionnaire-choice-description"] {
+    display: grid;
+    gap: 0.18rem;
+    color: var(--shadcn-foreground);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.showcase-questionnaire-card [data-slot="questionnaire-actions"] {
+    border-top: 1px solid var(--shadcn-border);
+    padding-block-start: 1rem;
+}
+
 .component-code__header button {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-border);

@@ -270,19 +270,140 @@ internal static class ConversationWorkflowExamples
     private static ComponentExampleDefinition Scroller()
     {
         var auto = false; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnMessageScrollerProvider>(0); b.SetKey($"{auto}-{extra}-{position}"); b.AddAttribute(1, "AutoScroll", auto); b.AddAttribute(2, "DefaultScrollPosition", position); b.AddAttribute(3, "ChildContent", (RenderFragment)(p => { p.OpenComponent<ShadcnMessageScroller>(0); p.AddAttribute(1, "Style", "height:16rem"); p.AddAttribute(2, "data-preview-auto", auto ? "true" : "false"); p.AddAttribute(3, "data-preview-position", position.ToString().ToLowerInvariant()); p.AddAttribute(4, "ChildContent", (RenderFragment)(r => { r.OpenComponent<ShadcnMessageScrollerViewport>(0); r.AddAttribute(1, "AccessibleName", "บทสนทนา"); r.AddAttribute(2, "ChildContent", (RenderFragment)(v => { v.OpenComponent<ShadcnMessageScrollerContent>(0); v.AddAttribute(1, "ChildContent", (RenderFragment)(c => { AddScrollerItem(c, 0, "turn-1", "ข้อความแรก", true); if (extra) AddScrollerItem(c, 5, "turn-2", "ข้อความใหม่", true); })); v.CloseComponent(); })); r.CloseComponent(); r.OpenComponent<ShadcnMessageScrollerButton>(5); r.AddAttribute(6, "AccessibleName", "ไปข้อความล่าสุด"); r.CloseComponent(); })); p.CloseComponent(); })); b.CloseComponent(); };
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnMessageScrollerProvider>(0);
+            b.SetKey($"{auto}-{extra}-{position}");
+            b.AddAttribute(1, nameof(ShadcnMessageScrollerProvider.AutoScroll), auto);
+            b.AddAttribute(2, nameof(ShadcnMessageScrollerProvider.DefaultScrollPosition), position);
+            b.AddAttribute(3, nameof(ShadcnMessageScrollerProvider.ChildContent), (RenderFragment)(provider =>
+            {
+                provider.OpenComponent<ShadcnMessageScroller>(0);
+                provider.AddAttribute(1, "class", "showcase-scroller-frame");
+                provider.AddAttribute(2, "style", "height:24rem");
+                provider.AddAttribute(3, "data-preview-auto", auto ? "true" : "false");
+                provider.AddAttribute(4, "data-preview-position", position.ToString().ToLowerInvariant());
+                provider.AddAttribute(5, nameof(ShadcnMessageScroller.ChildContent), (RenderFragment)(scroller =>
+                {
+                    scroller.OpenComponent<ShadcnMessageScrollerViewport>(0);
+                    scroller.AddAttribute(1, nameof(ShadcnMessageScrollerViewport.AccessibleName), "บทสนทนาโครงการ");
+                    scroller.AddAttribute(2, nameof(ShadcnMessageScrollerViewport.ChildContent), (RenderFragment)(viewport =>
+                    {
+                        viewport.OpenComponent<ShadcnMessageScrollerContent>(0);
+                        viewport.AddAttribute(1, nameof(ShadcnMessageScrollerContent.ChildContent), (RenderFragment)(content =>
+                        {
+                            AddScrollerMessage(content, 0, "turn-1", ShadcnLogicalAlign.Start, "นที", "วิศวกร MALIEV", "เริ่มตรวจสอบชิ้นงานแล้ว", true);
+                            AddScrollerMessage(content, 5, "turn-2", ShadcnLogicalAlign.Start, "มาลี", "ผู้ประสานงาน", "พบไฟล์ CAD ครบ 3 รายการ", true);
+                            AddScrollerMessage(content, 10, "turn-3", ShadcnLogicalAlign.End, "M", "MALIEV Assistant", "กำลังเตรียมใบเสนอราคา", true);
+                            AddScrollerMessage(content, 15, "turn-4", ShadcnLogicalAlign.Start, "นที", "วิศวกร MALIEV", "จะส่งให้ตรวจในอีกสักครู่", true);
+                            AddScrollerMessage(content, 20, "turn-5", ShadcnLogicalAlign.End, "M", "MALIEV Assistant", "รับทราบครับ", true);
+                            if (extra)
+                                AddScrollerMessage(content, 25, "turn-6", ShadcnLogicalAlign.Start, "มาลี", "ผู้ประสานงาน", "มีข้อความใหม่เข้ามา", true);
+                        }));
+                        viewport.CloseComponent();
+                    }));
+                    scroller.CloseComponent();
+                    scroller.OpenComponent<ShadcnMessageScrollerButton>(5);
+                    scroller.AddAttribute(6, nameof(ShadcnMessageScrollerButton.AccessibleName), "ไปข้อความล่าสุด");
+                    scroller.AddAttribute(7, "ChildContent", Text("ข้อความล่าสุด"));
+                    scroller.CloseComponent();
+                }));
+                provider.CloseComponent();
+            }));
+            b.CloseComponent();
+        };
         return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"]);
     }
 
     private static ComponentExampleDefinition Questionnaire()
     {
         var branch = true; var start = "scope";
-        RenderFragment preview = b => { var items = branch ? new[] { new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")]), new("notes", AllowsFreeform: true) } : [new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")])]; b.OpenComponent<ShadcnQuestionnaire>(0); b.SetKey($"{branch}-{start}"); b.AddAttribute(1, "Items", items); b.AddAttribute(2, "DefaultItem", start == "notes" && branch ? "notes" : "scope"); b.AddAttribute(3, "AccessibleName", "ขอบเขตงาน"); b.AddAttribute(4, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnQuestionnaireProgress>(0); x.AddAttribute(1, "AccessibleName", "Progress"); x.CloseComponent(); AddQuestion(x, 3, "scope", "เลือกขอบเขต", false); if (branch) AddQuestion(x, 10, "notes", "รายละเอียด", true); x.OpenComponent<ShadcnQuestionnaireActions>(20); x.AddAttribute(21, "ChildContent", (RenderFragment)(a => { AddText<ShadcnQuestionnairePrevious>(a, 0, "ก่อนหน้า"); AddText<ShadcnQuestionnaireSkip>(a, 3, "ข้าม"); AddText<ShadcnQuestionnaireNext>(a, 6, "ถัดไป"); AddText<ShadcnQuestionnaireSubmit>(a, 9, "ส่ง"); })); x.CloseComponent(); })); b.CloseComponent(); };
+        RenderFragment preview = b =>
+        {
+            var items = branch
+                ? new[] { new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")]), new ShadcnQuestionnaireItemDefinition("notes", AllowsFreeform: true) }
+                : [new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")])];
+            b.OpenComponent<ShadcnQuestionnaire>(0);
+            b.SetKey($"{branch}-{start}");
+            b.AddAttribute(1, nameof(ShadcnQuestionnaire.Items), items);
+            b.AddAttribute(2, nameof(ShadcnQuestionnaire.DefaultItem), start == "notes" && branch ? "notes" : "scope");
+            b.AddAttribute(3, nameof(ShadcnQuestionnaire.AccessibleName), "ขอบเขตงาน");
+            b.AddAttribute(4, nameof(ShadcnQuestionnaire.Shortcuts), ShadcnQuestionnaireShortcutMode.Numbers);
+            b.AddAttribute(5, "class", "showcase-questionnaire-card");
+            b.AddAttribute(6, nameof(ShadcnQuestionnaire.ChildContent), (RenderFragment)(questionnaire =>
+            {
+                questionnaire.OpenComponent<ShadcnQuestionnaireProgress>(0);
+                questionnaire.AddAttribute(1, nameof(ShadcnQuestionnaireProgress.AccessibleName), "ความคืบหน้า");
+                questionnaire.CloseComponent();
+                AddQuestion(questionnaire, 3, "scope", "เลือกประเภทการตรวจ", "เลือก workflow ที่ต้องการสาธิต", false);
+                if (branch)
+                    AddQuestion(questionnaire, 10, "notes", "รายละเอียดเพิ่มเติม", "อธิบายสิ่งที่ต้องการให้ทีมตรวจสอบ", true);
+                questionnaire.OpenComponent<ShadcnQuestionnaireActions>(20);
+                questionnaire.AddAttribute(21, nameof(ShadcnQuestionnaireActions.ChildContent), (RenderFragment)(actions =>
+                {
+                    AddText<ShadcnQuestionnairePrevious>(actions, 0, "ก่อนหน้า");
+                    AddText<ShadcnQuestionnaireSkip>(actions, 3, "ข้าม");
+                    AddText<ShadcnQuestionnaireNext>(actions, 6, "ถัดไป");
+                    AddText<ShadcnQuestionnaireSubmit>(actions, 9, "ส่งคำตอบ");
+                }));
+                questionnaire.CloseComponent();
+            }));
+            b.CloseComponent();
+        };
         return Example("questionnaire", "Guided questionnaire", preview, [Toggle("questionnaire-branch", "Conditional notes", v => branch = v, true), Select("questionnaire-start", "Resume item", "scope", ["scope", "notes"], v => start = v)], ["single", "multiple", "freeform", "skipped", "required", "invalid", "controlled", "resume", "branching", "submit", "thai", "rtl"]);
     }
 
-    private static void AddQuestion(RenderTreeBuilder b, int s, string name, string title, bool input) { b.OpenComponent<ShadcnQuestionnaireItem>(s); b.AddAttribute(s + 1, "Name", name); b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(x => { AddText<ShadcnQuestionnaireTitle>(x, 0, title); if (input) { x.OpenComponent<ShadcnQuestionnaireInput>(3); x.AddAttribute(4, "AccessibleName", title); x.CloseComponent(); } else { x.OpenComponent<ShadcnQuestionnaireChoices>(3); x.AddAttribute(4, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnQuestionnaireChoice>(0); c.AddAttribute(1, "Value", "component"); c.AddAttribute(2, "ChildContent", Text("Component")); c.CloseComponent(); c.OpenComponent<ShadcnQuestionnaireChoice>(3); c.AddAttribute(4, "Value", "feature"); c.AddAttribute(5, "ChildContent", Text("Feature")); c.CloseComponent(); })); x.CloseComponent(); } x.OpenComponent<ShadcnQuestionnaireError>(8); x.CloseComponent(); })); b.CloseComponent(); }
-    private static void AddScrollerItem(RenderTreeBuilder b, int s, string id, string text, bool anchor) { b.OpenComponent<ShadcnMessageScrollerItem>(s); b.AddAttribute(s + 1, "MessageId", id); b.AddAttribute(s + 2, "ScrollAnchor", anchor); b.AddAttribute(s + 3, "ChildContent", Text(text)); b.CloseComponent(); }
+    private static void AddQuestion(RenderTreeBuilder b, int s, string name, string title, string description, bool input)
+    {
+        b.OpenComponent<ShadcnQuestionnaireItem>(s);
+        b.AddAttribute(s + 1, nameof(ShadcnQuestionnaireItem.Name), name);
+        b.AddAttribute(s + 2, nameof(ShadcnQuestionnaireItem.ChildContent), (RenderFragment)(x =>
+        {
+            AddText<ShadcnQuestionnaireTitle>(x, 0, title);
+            AddText<ShadcnQuestionnaireDescription>(x, 3, description);
+            if (input)
+            {
+                x.OpenComponent<ShadcnQuestionnaireInput>(6);
+                x.AddAttribute(7, nameof(ShadcnQuestionnaireInput.AccessibleName), title);
+                x.AddAttribute(8, "placeholder", "พิมพ์คำตอบของคุณ");
+                x.CloseComponent();
+            }
+            else
+            {
+                x.OpenComponent<ShadcnQuestionnaireChoices>(6);
+                x.AddAttribute(7, nameof(ShadcnQuestionnaireChoices.ChildContent), (RenderFragment)(choices =>
+                {
+                    AddChoice(choices, 0, "component", "Component", "ตัวอย่างองค์ประกอบ UI");
+                    AddChoice(choices, 3, "feature", "Feature", "workflow หรือฟีเจอร์ใหม่");
+                }));
+                x.CloseComponent();
+            }
+            x.OpenComponent<ShadcnQuestionnaireError>(12);
+            x.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddChoice(RenderTreeBuilder b, int s, string value, string label, string description)
+    {
+        b.OpenComponent<ShadcnQuestionnaireChoice>(s);
+        b.AddAttribute(s + 1, nameof(ShadcnQuestionnaireChoice.Value), value);
+        b.AddAttribute(s + 2, nameof(ShadcnQuestionnaireChoice.ChildContent), (RenderFragment)(choice =>
+        {
+            AddText<ShadcnQuestionnaireChoiceDescription>(choice, 0, $"{label} · {description}");
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddScrollerMessage(RenderTreeBuilder b, int s, string id, ShadcnLogicalAlign align, string avatar, string author, string text, bool anchor)
+    {
+        b.OpenComponent<ShadcnMessageScrollerItem>(s);
+        b.AddAttribute(s + 1, nameof(ShadcnMessageScrollerItem.MessageId), id);
+        b.AddAttribute(s + 2, nameof(ShadcnMessageScrollerItem.ScrollAnchor), anchor);
+        b.AddAttribute(s + 3, nameof(ShadcnMessageScrollerItem.ChildContent), (RenderFragment)(item =>
+            AddMessage(item, 0, align, true, false, avatar, author, text)));
+        b.CloseComponent();
+    }
     private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", $"<Shadcn{string.Concat(slug.Split('-').Select(w => char.ToUpperInvariant(w[0]) + w[1..]))} />", preview, controls, tags);
     private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], v => apply(bool.Parse(v)));
     private static ComponentParameterControl Select(string id, string label, string initial, IReadOnlyList<string> options, Action<string> apply) => new(id, label, ComponentParameterControlKind.Select, initial, options, apply);
