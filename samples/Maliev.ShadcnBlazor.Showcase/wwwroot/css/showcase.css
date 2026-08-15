@@ -804,6 +804,69 @@ a {
     font-weight: 650;
 }
 
+.showcase-marker-thread {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    gap: 0.25rem;
+    padding-block: 1rem;
+}
+
+.showcase-marker-thread > [data-slot="marker"] {
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+}
+
+.showcase-marker-thread > [data-slot="marker"][data-variant="default"] {
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-foreground);
+}
+
+.showcase-marker-thread > [data-slot="marker"][data-variant="separator"] {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.8125rem;
+}
+
+.showcase-marker-thread > [data-slot="marker"][data-variant="border"] {
+    padding-block: 0.7rem;
+    color: var(--shadcn-foreground);
+}
+
+.showcase-message-thread {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    gap: 1.15rem;
+    padding-block: 1rem;
+}
+
+.showcase-message-thread > [data-slot="message"] {
+    align-items: flex-end;
+}
+
+.showcase-message-thread .shadcn-message-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--shadcn-border);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-foreground);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.showcase-message-thread .shadcn-message-header {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 650;
+}
+
+.showcase-message-thread .shadcn-message-footer {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.6875rem;
+}
+
 .component-code__header button {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-border);

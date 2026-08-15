@@ -192,16 +192,79 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Marker()
     {
-        var variant = ShadcnMarkerVariant.Default; var streaming = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnMarker>(0); b.AddAttribute(1, "Variant", variant); b.AddAttribute(2, "Live", streaming); b.AddAttribute(3, "ChildContent", (RenderFragment)(x => { AddText<ShadcnMarkerIcon>(x, 0, "✓"); x.OpenComponent<ShadcnMarkerContent>(3); x.AddAttribute(4, "Streaming", streaming); x.AddAttribute(5, "ChildContent", Text(streaming ? "กำลังประมวลผล" : "ตรวจสอบ 4 ไฟล์แล้ว")); x.CloseComponent(); })); b.CloseComponent(); };
-        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v)], ["default", "separator", "border", "status", "shimmer", "reduced-motion"]);
+        var variant = ShadcnMarkerVariant.Default;
+        var streaming = true;
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-marker-thread");
+            AddMarker(b, 2, variant, false, "✓", "ตรวจสอบ 4 ไฟล์แล้ว");
+            AddMarker(b, 12, ShadcnMarkerVariant.Separator, false, "•", "วันนี้");
+            AddMarker(b, 22, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "กำลังประมวลผล" : "พร้อมส่งให้ผู้ตรวจ");
+            b.CloseElement();
+        };
+        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"]);
     }
 
     private static ComponentExampleDefinition Message()
     {
-        var end = false; var avatar = true; var footer = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnMessage>(0); b.AddAttribute(1, "Align", end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start); b.AddAttribute(2, "ChildContent", (RenderFragment)(x => { if (avatar) AddText<ShadcnMessageAvatar>(x, 0, "ม"); x.OpenComponent<ShadcnMessageContent>(3); x.AddAttribute(4, "ChildContent", (RenderFragment)(c => { AddText<ShadcnMessageHeader>(c, 0, "วิศวกร MALIEV"); c.OpenComponent<ShadcnBubble>(3); c.AddAttribute(4, "ChildContent", (RenderFragment)(q => AddText<ShadcnBubbleContent>(q, 0, "พร้อมตรวจสอบใบเสนอราคา"))); c.CloseComponent(); if (footer) AddText<ShadcnMessageFooter>(c, 6, "ส่งแล้ว"); })); x.CloseComponent(); })); b.CloseComponent(); };
-        return Example("message", "Message row", preview, [Toggle("message-end", "Align end", v => end = v), Toggle("message-avatar", "Avatar", v => avatar = v, true), Toggle("message-footer", "Footer", v => footer = v, true)], ["start", "end", "avatar", "header", "footer", "grouped", "streaming", "rtl"]);
+        var end = false;
+        var avatar = true;
+        var footer = true;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnMessageGroup>(0);
+            b.AddAttribute(1, nameof(ShadcnMessageGroup.Class), "showcase-message-thread");
+            b.AddAttribute(2, nameof(ShadcnMessageGroup.ChildContent), (RenderFragment)(thread =>
+            {
+                AddMessage(thread, 0, ShadcnLogicalAlign.Start, avatar, footer, "นที", "วิศวกร MALIEV", "ตรวจสอบไฟล์แล้ว 3 รายการ");
+                AddMessage(thread, 20, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, avatar, false, "มาลี", "ผู้ประสานงาน", "พร้อมส่งแบบให้ตรวจ");
+                AddMessage(thread, 40, ShadcnLogicalAlign.End, avatar, footer, "M", "MALIEV Assistant", "Sure. I’ll keep the thread easy to scan.");
+            }));
+            b.CloseComponent();
+        };
+        return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true)], ["group", "start", "end", "avatar", "header", "footer", "bubbles", "rtl"]);
+    }
+
+    private static void AddMarker(RenderTreeBuilder b, int sequence, ShadcnMarkerVariant variant, bool live, string icon, string text)
+    {
+        b.OpenComponent<ShadcnMarker>(sequence);
+        b.AddAttribute(sequence + 1, nameof(ShadcnMarker.Variant), variant);
+        b.AddAttribute(sequence + 2, nameof(ShadcnMarker.Live), live);
+        b.AddAttribute(sequence + 3, nameof(ShadcnMarker.ChildContent), (RenderFragment)(content =>
+        {
+            AddText<ShadcnMarkerIcon>(content, 0, icon);
+            content.OpenComponent<ShadcnMarkerContent>(3);
+            content.AddAttribute(4, nameof(ShadcnMarkerContent.Streaming), live);
+            content.AddAttribute(5, nameof(ShadcnMarkerContent.ChildContent), Text(text));
+            content.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, bool avatar, bool footer, string avatarText, string author, string message)
+    {
+        b.OpenComponent<ShadcnMessage>(sequence);
+        b.AddAttribute(sequence + 1, nameof(ShadcnMessage.Align), align);
+        b.AddAttribute(sequence + 2, nameof(ShadcnMessage.ChildContent), (RenderFragment)(row =>
+        {
+            if (avatar)
+                AddText<ShadcnMessageAvatar>(row, 0, avatarText);
+            row.OpenComponent<ShadcnMessageContent>(3);
+            row.AddAttribute(4, nameof(ShadcnMessageContent.ChildContent), (RenderFragment)(content =>
+            {
+                AddText<ShadcnMessageHeader>(content, 0, author);
+                content.OpenComponent<ShadcnBubble>(3);
+                content.AddAttribute(4, nameof(ShadcnBubble.Variant), align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted);
+                content.AddAttribute(5, nameof(ShadcnBubble.Align), align);
+                content.AddAttribute(6, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble => AddText<ShadcnBubbleContent>(bubble, 0, message)));
+                content.CloseComponent();
+                if (footer)
+                    AddText<ShadcnMessageFooter>(content, 8, align == ShadcnLogicalAlign.End ? "ส่งแล้ว · 10:42" : "อ่านแล้ว · 10:42");
+            }));
+            row.CloseComponent();
+        }));
+        b.CloseComponent();
     }
 
     private static ComponentExampleDefinition Scroller()

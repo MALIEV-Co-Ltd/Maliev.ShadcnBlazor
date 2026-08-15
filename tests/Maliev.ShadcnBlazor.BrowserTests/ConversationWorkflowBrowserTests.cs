@@ -31,12 +31,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         await page.GetByTestId("control-marker-streaming").CheckAsync();
-        await Assertions.Expect(page.Locator("[data-slot='marker']")).ToHaveAttributeAsync("role", "status");
+        await Assertions.Expect(page.Locator("[data-slot='marker'][role='status']")).ToHaveCountAsync(1);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
         await page.GetByTestId("control-message-end").CheckAsync();
         await page.Locator("[data-testid='component-preview-canvas']").EvaluateAsync("el => el.dir='rtl'");
-        await Assertions.Expect(page.Locator("[data-slot='message']")).ToHaveAttributeAsync("data-align", "end");
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(2);
     }
 
     [Fact]
