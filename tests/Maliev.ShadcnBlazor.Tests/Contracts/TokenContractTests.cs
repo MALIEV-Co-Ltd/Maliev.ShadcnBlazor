@@ -17,7 +17,8 @@ public sealed class TokenContractTests
         Assert.Equal("oklch(0.922 0 0)", root.GetRequiredDeclaration("--shadcn-border"));
         Assert.Equal("oklch(0.922 0 0)", root.GetRequiredDeclaration("--shadcn-input"));
         Assert.Equal("oklch(0.708 0 0)", root.GetRequiredDeclaration("--shadcn-ring"));
-        Assert.Equal("ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", root.GetRequiredDeclaration("--shadcn-font-mono"));
+        Assert.Equal("'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetRequiredDeclaration("--shadcn-font-sans"));
+        Assert.Equal("'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", root.GetRequiredDeclaration("--shadcn-font-mono"));
         Assert.Equal("0.625rem", root.GetRequiredDeclaration("--shadcn-radius"));
         Assert.Equal("2.25rem", root.GetRequiredDeclaration("--shadcn-control-height"));
         Assert.Equal("1", root.GetRequiredDeclaration("--shadcn-spacing-multiplier"));

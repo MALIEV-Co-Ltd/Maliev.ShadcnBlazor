@@ -886,6 +886,14 @@ a {
     inline-size: min(100%, 32rem);
 }
 
+/* Calendar grids are intrinsically sized; do not let the generic preview
+   child rule stretch the seven-column surface across the canvas. */
+.component-preview__canvas > .shadcn-calendar {
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    justify-self: center;
+}
+
 /* Conversation dossiers use the same composed surfaces as the public reference
    examples: a media gallery, file rows, and a readable multi-turn thread. */
 .showcase-attachment-demo {

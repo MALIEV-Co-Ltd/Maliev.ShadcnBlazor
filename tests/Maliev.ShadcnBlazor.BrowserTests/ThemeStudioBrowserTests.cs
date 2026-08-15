@@ -87,13 +87,24 @@ public sealed class ThemeStudioBrowserTests(
         var studioBox = await page.GetByTestId("theme-studio").BoundingBoxAsync();
         Assert.NotNull(studioBox);
         Assert.True(studioBox.Width > 1200, $"Expected full-width Theme Studio, got {studioBox.Width}px.");
+        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='IBM+Plex+Sans']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='IBM+Plex+Mono']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("link[rel='preload'][as='style'][href*='Noto+Sans+Thai']")).ToHaveCountAsync(1);
-        await page.GetByTestId("font-family-select").ClickAsync();
+        var defaultFontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
+        Assert.Contains("IBM Plex Sans", defaultFontVariable, StringComparison.Ordinal);
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Font family" }).ClickAsync();
         await page.GetByText("Noto Sans Thai", new() { Exact = true }).ClickAsync();
 
         var fontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("Noto Sans Thai", fontVariable, StringComparison.Ordinal);
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Code font" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "IBM Plex Mono", Exact = true }).ClickAsync();
+        var monoVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-mono')");
+        Assert.Contains("IBM Plex Mono", monoVariable, StringComparison.Ordinal);
     }
 
     [Theory]

@@ -177,7 +177,7 @@ public sealed class ShadcnThemeProviderTests : BunitContext
         Assert.Equal("ltr", root.GetAttribute("dir"));
         Assert.Equal("consumer label", root.GetAttribute("aria-label"));
         Assert.Equal(
-            "background: black; color: rebeccapurple; --shadcn-font-sans: defeated; --shadcn-font-sans: ui-sans-serif, system-ui, sans-serif",
+            "background: black; color: rebeccapurple; --shadcn-font-sans: defeated; --shadcn-font-sans: 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif",
             root.GetAttribute("style"));
     }
 

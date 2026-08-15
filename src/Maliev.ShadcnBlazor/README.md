@@ -10,7 +10,7 @@ using Maliev.ShadcnBlazor.Theming;
 
 builder.Services.AddMalievShadcn(options =>
 {
-    options.FontFamily = "IBM Plex Sans Thai, sans-serif";
+    options.FontFamily = "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif";
     options.DefaultDarkMode = false;
     options.DefaultDirection = ShadcnDirection.LeftToRight;
 });
@@ -23,7 +23,9 @@ The configured font family is applied to both MudBlazor typography and the scope
 
 ```html
 <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-<link href="css/ibm-plex-sans-thai.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />

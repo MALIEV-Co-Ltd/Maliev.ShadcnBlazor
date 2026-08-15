@@ -21,6 +21,18 @@ public sealed record ThemeStudioViewport(string Id, string DisplayName, int Widt
 
 public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string CssStack, string GoogleFontsFamily)
 {
+    public static ThemeStudioFontPreset IbmPlexSans { get; } = new(
+        "ibm-plex-sans",
+        "IBM Plex Sans + Thai",
+        "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        "IBM+Plex+Sans:wght@400;500;600;700");
+
+    public static ThemeStudioFontPreset IbmPlexSansThai { get; } = new(
+        "ibm-plex-sans-thai",
+        "IBM Plex Sans Thai",
+        "'IBM Plex Sans Thai', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+        "IBM+Plex+Sans+Thai:wght@400;500;600;700");
+
     public static ThemeStudioFontPreset DmSans { get; } = new(
         "dm-sans",
         "DM Sans",
@@ -39,7 +51,14 @@ public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string
         "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
         "Noto+Sans+Thai:wght@400;500;600;700");
 
-    public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [DmSans, PlusJakartaSans, NotoSansThai];
+    public static ThemeStudioFontPreset IbmPlexMono { get; } = new(
+        "ibm-plex-mono",
+        "IBM Plex Mono",
+        "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        "IBM+Plex+Mono:wght@400;500;600;700");
+
+    public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [IbmPlexSans, IbmPlexSansThai, DmSans, PlusJakartaSans, NotoSansThai];
+    public static IReadOnlyList<ThemeStudioFontPreset> MonospaceAll { get; } = [IbmPlexMono];
 }
 
 public sealed record ThemeStudioTokenDescriptor(string Name, string Label, ThemeStudioGroup Group, PropertyInfo Property);
@@ -399,6 +418,16 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
                 string.Equals(item.CssStack, presetOrCssStack, StringComparison.Ordinal))
             ?? throw new ArgumentOutOfRangeException(nameof(presetOrCssStack), presetOrCssStack, "Unknown Theme Studio font preset.");
         SetMetric("fontFamily", preset.CssStack);
+    }
+
+    public void SetMonospaceFontFamily(string presetOrCssStack)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetOrCssStack);
+        var preset = ThemeStudioFontPreset.MonospaceAll.FirstOrDefault(item =>
+                string.Equals(item.Id, presetOrCssStack, StringComparison.Ordinal) ||
+                string.Equals(item.CssStack, presetOrCssStack, StringComparison.Ordinal))
+            ?? throw new ArgumentOutOfRangeException(nameof(presetOrCssStack), presetOrCssStack, "Unknown Theme Studio monospace font preset.");
+        SetMetric("monospaceFontFamily", preset.CssStack);
     }
 
     private static void ValidateWorkspaceValue<T>(T value, string parameterName) where T : struct, Enum

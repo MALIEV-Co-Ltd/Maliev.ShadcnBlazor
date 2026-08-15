@@ -44,6 +44,19 @@
             <MudSelectItem Value="@font.CssStack"><span data-testid='@($"font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
         }
     </MudSelect>
+    <MudSelect T="string"
+               Value='@State.GetMetricEditorValue("monospaceFontFamily")'
+               ValueChanged="State.SetMonospaceFontFamily"
+               Label="Code font"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               aria-label="Code font"
+               data-testid="monospace-font-family-select">
+        @foreach (var font in ThemeStudioFontPreset.MonospaceAll)
+        {
+            <MudSelectItem Value="@font.CssStack"><span data-testid='@($"monospace-font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
+        }
+    </MudSelect>
     <MudSelect T="ThemeStudioMockup"
                Value="@State.SelectedMockup"
                ValueChanged="State.SetSelectedMockup"

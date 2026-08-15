@@ -90,6 +90,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[aria-disabled="true"] { opacity: .5; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-today="true"]:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { background: var(--shadcn-muted); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] .shadcn-calendar-day-button { border-radius: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [dir="rtl"] .shadcn-calendar-nav > button svg { rotate: 180deg; }

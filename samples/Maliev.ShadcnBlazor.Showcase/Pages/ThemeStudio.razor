@@ -51,7 +51,7 @@
     private bool _disposed;
     private Task _persistenceTask = Task.CompletedTask;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
-    private static string GoogleFontsStylesheet => $"https://fonts.googleapis.com/css2?family={string.Join("&family=", ThemeStudioFontPreset.All.Select(font => font.GoogleFontsFamily))}&display=swap";
+    private static string GoogleFontsStylesheet => $"https://fonts.googleapis.com/css2?family={string.Join("&family=", ThemeStudioFontPreset.All.Concat(ThemeStudioFontPreset.MonospaceAll).Select(font => font.GoogleFontsFamily))}&display=swap";
 
     protected override async Task OnInitializedAsync()
     {
