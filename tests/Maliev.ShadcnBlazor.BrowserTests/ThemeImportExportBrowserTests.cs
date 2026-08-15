@@ -36,8 +36,7 @@ public sealed class ThemeImportExportBrowserTests(
         });
         var page = await context.NewPageAsync();
         var errors = new List<string>();
-        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
-        page.PageError += (_, error) => errors.Add(error);
+        CapturePageErrors(page, errors);
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
@@ -139,8 +138,7 @@ public sealed class ThemeImportExportBrowserTests(
         });
         var page = await context.NewPageAsync();
         var errors = new List<string>();
-        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
-        page.PageError += (_, error) => errors.Add(error);
+        CapturePageErrors(page, errors);
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
         var opener = page.GetByTestId(openerTestId);
@@ -169,8 +167,7 @@ public sealed class ThemeImportExportBrowserTests(
         });
         var page = await context.NewPageAsync();
         var errors = new List<string>();
-        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
-        page.PageError += (_, error) => errors.Add(error);
+        CapturePageErrors(page, errors);
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
@@ -181,6 +178,28 @@ public sealed class ThemeImportExportBrowserTests(
         await page.Keyboard.PressAsync("Escape");
 
         Assert.Empty(errors);
+    }
+
+    private static void CapturePageErrors(IPage page, ICollection<string> errors)
+    {
+        page.Console += (_, message) =>
+        {
+            if (message.Type != "error" || IsOptionalGoogleFontFailure(message))
+                return;
+
+            var location = string.IsNullOrWhiteSpace(message.Location) ? string.Empty : $" ({message.Location})";
+            errors.Add($"{message.Text}{location}");
+        };
+        page.PageError += (_, error) => errors.Add(error);
+    }
+
+    private static bool IsOptionalGoogleFontFailure(IConsoleMessage message)
+    {
+        if (!message.Text.Contains("Failed to load resource", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return message.Location.Contains("fonts.googleapis.com", StringComparison.OrdinalIgnoreCase)
+            || message.Location.Contains("fonts.gstatic.com", StringComparison.OrdinalIgnoreCase);
     }
 
     private static async Task<byte[]> ReadBytesAsync(ZipArchiveEntry entry)
