@@ -663,6 +663,147 @@ a {
     inline-size: min(100%, 32rem);
 }
 
+/* Conversation dossiers use the same composed surfaces as the public reference
+   examples: a media gallery, file rows, and a readable multi-turn thread. */
+.showcase-attachment-demo {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    gap: 1rem;
+}
+
+.showcase-attachment-gallery {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    overflow: visible;
+}
+
+.showcase-attachment-gallery--vertical {
+    grid-template-columns: 1fr;
+}
+
+.showcase-attachment-gallery > [data-slot="attachment"] {
+    width: 100%;
+    min-width: 0;
+}
+
+.showcase-attachment-card {
+    align-items: stretch;
+    gap: 0.6rem;
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-background);
+    padding: 0.5rem;
+    box-shadow: var(--shadcn-shadow-xs);
+}
+
+.showcase-attachment-card .showcase-attachment-thumbnail {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.35;
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+}
+
+.showcase-attachment-artwork {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.showcase-attachment-card .shadcn-attachment-content {
+    flex: none;
+}
+
+.showcase-attachment-files {
+    display: grid;
+    min-width: 0;
+    gap: 0.65rem;
+}
+
+.showcase-attachment-file {
+    width: 100%;
+    min-width: 0;
+    min-height: 3.5rem;
+    padding: 0.55rem 0.65rem;
+    background: var(--shadcn-background);
+    box-shadow: var(--shadcn-shadow-xs);
+}
+
+.showcase-attachment-file--vertical {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.showcase-attachment-file-icon {
+    border: 1px solid var(--shadcn-border);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-foreground);
+}
+
+.showcase-attachment-file-icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.showcase-bubble-thread {
+    display: flex;
+    width: 100%;
+    min-height: 22rem;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 1.25rem;
+    padding-block: 1.25rem;
+}
+
+.showcase-bubble-thread > [data-slot="bubble"] {
+    max-width: min(82%, 28rem);
+}
+
+.showcase-bubble-thread > [data-slot="bubble"][data-align="end"] {
+    margin-inline-start: auto;
+}
+
+.showcase-bubble-thread > [data-slot="bubble"][data-align="start"] {
+    margin-inline-end: auto;
+}
+
+.showcase-bubble-thread .shadcn-bubble-content {
+    padding-block: 0.7rem;
+    padding-inline: 1rem;
+    line-height: 1.45;
+}
+
+.showcase-bubble-reaction-set {
+    display: inline-flex;
+    min-height: 1.5rem;
+    align-items: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    background: var(--shadcn-background);
+    padding-inline: 0.45rem;
+    color: var(--shadcn-foreground);
+    font-size: 0.75rem;
+    line-height: 1;
+    box-shadow: var(--shadcn-shadow-xs);
+}
+
+.showcase-bubble-reaction-icon {
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.showcase-bubble-reaction-count {
+    margin-inline-start: 0.1rem;
+    font-size: 0.6875rem;
+    font-weight: 650;
+}
+
 .component-code__header button {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-border);

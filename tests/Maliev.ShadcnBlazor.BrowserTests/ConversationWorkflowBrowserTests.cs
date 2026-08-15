@@ -13,14 +13,21 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var page = await context.NewPageAsync();
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/attachment").ToString());
+        await Assertions.Expect(page.Locator("[data-slot='attachment-group']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-slot='attachment']")).ToHaveCountAsync(5);
+        await Assertions.Expect(page.Locator("[data-slot='attachment-media'][data-variant='image']")).ToHaveCountAsync(3);
         await page.GetByTestId("control-attachment-state").SelectOptionAsync("Error");
-        await Assertions.Expect(page.Locator("[data-slot='attachment']")).ToHaveAttributeAsync("data-state", "error");
-        await page.Locator("[data-slot='attachment-action']").FocusAsync();
-        await Assertions.Expect(page.Locator("[data-slot='attachment-action']")).ToBeFocusedAsync();
+        var primaryAttachment = page.Locator(".showcase-attachment-file").First;
+        await Assertions.Expect(primaryAttachment).ToHaveAttributeAsync("data-state", "error");
+        await primaryAttachment.Locator("[data-slot='attachment-action']").FocusAsync();
+        await Assertions.Expect(primaryAttachment.Locator("[data-slot='attachment-action']")).ToBeFocusedAsync();
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
+        await Assertions.Expect(page.Locator("[data-slot='bubble-group']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-slot='bubble']")).ToHaveCountAsync(4);
+        await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(2);
         await page.GetByTestId("control-bubble-end").CheckAsync();
-        await Assertions.Expect(page.Locator("[data-slot='bubble']")).ToHaveAttributeAsync("data-align", "end");
+        await Assertions.Expect(page.Locator("[data-slot='bubble'][data-variant='secondary']")).ToHaveAttributeAsync("data-align", "end");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         await page.GetByTestId("control-marker-streaming").CheckAsync();
