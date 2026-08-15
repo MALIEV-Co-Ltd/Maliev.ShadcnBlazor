@@ -25,9 +25,35 @@ internal static class FeedbackContentExamples
 
     private static ComponentExampleDefinition Alert()
     {
-        var variant = ShadcnAlertVariant.Default; var role = ShadcnAlertRole.Alert;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnAlert>(0); b.AddAttribute(1, "Variant", variant); b.AddAttribute(2, "AlertRole", role); b.AddAttribute(3, "ChildContent", Text("ชำระเงินสำเร็จ — Payment processed")); b.CloseComponent(); };
-        return Example("alert", "Alert callout", "Switch urgency and semantic presentation.", "<ShadcnAlert Variant=\"ShadcnAlertVariant.Default\">...</ShadcnAlert>", preview, [EnumSelect("alert-variant", "Variant", variant, v => variant = v), EnumSelect("alert-role", "Role", role, v => role = v)], ["default", "destructive", "alert", "status"]);
+        var variant = ShadcnAlertVariant.Default; var role = ShadcnAlertRole.Alert; var action = true;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnAlert>(0);
+            b.AddAttribute(1, nameof(ShadcnAlert.Variant), variant);
+            b.AddAttribute(2, nameof(ShadcnAlert.AlertRole), role);
+            b.AddAttribute(3, "class", "showcase-alert-card");
+            b.AddAttribute(4, nameof(ShadcnAlert.ChildContent), (RenderFragment)(content =>
+            {
+                Add<ShadcnAlertIcon>(content, 0, variant == ShadcnAlertVariant.Destructive ? "!" : "✓");
+                Add<ShadcnAlertTitle>(content, 3, variant == ShadcnAlertVariant.Destructive ? "ตรวจสอบข้อมูลก่อนส่ง" : "ชำระเงินสำเร็จ");
+                Add<ShadcnAlertDescription>(content, 6, variant == ShadcnAlertVariant.Destructive ? "ยังมีรายการที่ต้องแก้ไขในใบเสนอราคา" : "Payment processed — ใบเสนอราคาพร้อมดำเนินการต่อ");
+                if (action)
+                {
+                    content.OpenComponent<ShadcnAlertAction>(9);
+                    content.AddAttribute(10, nameof(ShadcnAlertAction.ChildContent), (RenderFragment)(actionContent =>
+                    {
+                        actionContent.OpenElement(0, "button");
+                        actionContent.AddAttribute(1, "type", "button");
+                        actionContent.AddAttribute(2, "class", "showcase-alert-action");
+                        actionContent.AddContent(3, variant == ShadcnAlertVariant.Destructive ? "ตรวจสอบ" : "ดูรายละเอียด");
+                        actionContent.CloseElement();
+                    }));
+                    content.CloseComponent();
+                }
+            }));
+            b.CloseComponent();
+        };
+        return Example("alert", "Alert callout", "Compose an accessible shadcn alert with semantic icon, title, description, and an optional action.", "<ShadcnAlert><ShadcnAlertIcon>...</ShadcnAlertIcon><ShadcnAlertTitle>...</ShadcnAlertTitle><ShadcnAlertDescription>...</ShadcnAlertDescription></ShadcnAlert>", preview, [EnumSelect("alert-variant", "Variant", variant, v => variant = v), EnumSelect("alert-role", "Role", role, v => role = v), Toggle("alert-action", "Action", v => action = v, true)], ["default", "destructive", "icon", "title", "description", "action", "alert", "status"]);
     }
     private static ComponentExampleDefinition Avatar()
     {
