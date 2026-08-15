@@ -17,8 +17,8 @@ public sealed class TokenContractTests
         Assert.Equal("oklch(0.922 0 0)", root.GetRequiredDeclaration("--shadcn-border"));
         Assert.Equal("oklch(0.922 0 0)", root.GetRequiredDeclaration("--shadcn-input"));
         Assert.Equal("oklch(0.708 0 0)", root.GetRequiredDeclaration("--shadcn-ring"));
-        Assert.Equal("'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetRequiredDeclaration("--shadcn-font-sans"));
-        Assert.Equal("'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", root.GetRequiredDeclaration("--shadcn-font-mono"));
+        Assert.Equal("'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetRequiredDeclaration("--shadcn-font-sans"));
+        Assert.Equal("'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", root.GetRequiredDeclaration("--shadcn-font-mono"));
         Assert.Equal("0.625rem", root.GetRequiredDeclaration("--shadcn-radius"));
         Assert.Equal("2.25rem", root.GetRequiredDeclaration("--shadcn-control-height"));
         Assert.Equal("1", root.GetRequiredDeclaration("--shadcn-spacing-multiplier"));
@@ -34,6 +34,28 @@ public sealed class TokenContractTests
         Assert.Equal("oklch(0.145 0 0)", dark.GetRequiredDeclaration("--shadcn-background"));
         Assert.Equal("oklch(0.985 0 0)", dark.GetRequiredDeclaration("--shadcn-foreground"));
         Assert.DoesNotContain(stylesheet.GetAllDeclarationNames(), name => name.StartsWith("--mud-", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void PackageBundlesTheFontsUsedByTheDefaultTokens()
+    {
+        var root = FindRoot();
+        var fonts = Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "fonts");
+        foreach (var file in new[]
+        {
+            "geist-sans-variable.woff2", "noto-sans-thai.woff2", "jetbrains-mono-latin.woff2"
+        })
+        {
+            var path = Path.Combine(fonts, file);
+            Assert.True(File.Exists(path), $"Missing bundled font {file}.");
+            Assert.True(new FileInfo(path).Length > 10_000, $"Bundled font {file} is unexpectedly small.");
+        }
+
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-base.css"));
+        Assert.Contains("font-family: \"Geist\"", css, StringComparison.Ordinal);
+        Assert.Contains("font-family: \"Noto Sans Thai\"", css, StringComparison.Ordinal);
+        Assert.Contains("font-family: \"JetBrains Mono\"", css, StringComparison.Ordinal);
+        Assert.Contains(":where(:lang(th), [lang|=\"th\"])" , css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -103,11 +125,13 @@ public sealed class TokenContractTests
         var cssFiles = Directory.GetFiles(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css"), "*.css");
         var spacing = new Regex(@"(?:^|[;{])\s*(?:gap|row-gap|column-gap|padding(?:-(?:inline|block|top|right|bottom|left)(?:-(?:start|end))?)?|(?:scroll-)?margin(?:-(?:inline|block|top|right|bottom|left)(?:-(?:start|end))?)?)\s*:\s*(?!0(?:\s|;|$)|\s*-)[^;]*(?:\d*\.\d+|\d+)(?:r?em)\b(?![^;]*--shadcn-spacing-multiplier)", RegexOptions.Multiline | RegexOptions.CultureInvariant);
         var fixedMotion = new Regex(@"(?:^|[;{])\s*(?:transition|animation)(?:-(?:duration|timing-function))?\s*:\s*(?!none\s*;)[^;]*\b\d+(?:\.\d+)?m?s\b", RegexOptions.Multiline | RegexOptions.CultureInvariant);
+        var unscopedShadcnToken = new Regex(@"var\(--(?:border|card|card-foreground|radius-(?:sm|md|lg)|destructive|muted-foreground|ring)\)", RegexOptions.CultureInvariant);
 
         foreach (var path in cssFiles)
         {
             var css = File.ReadAllText(path);
             Assert.DoesNotMatch(spacing, css);
+            Assert.DoesNotMatch(unscopedShadcnToken, css);
             if (!path.EndsWith("shadcn-base.css", StringComparison.Ordinal))
                 Assert.DoesNotMatch(fixedMotion, css);
         }

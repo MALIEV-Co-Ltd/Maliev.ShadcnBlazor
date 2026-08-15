@@ -1482,6 +1482,10 @@ type Maliev.ShadcnBlazor.Components.ShadcnThemeProvider
   String Style
   EventCallback<Boolean> SystemDarkModeChanged
   ShadcnTheme Theme
+type Maliev.ShadcnBlazor.Components.Typography.ShadcnCodeBlock
+  String Language
+  String Source
+  IReadOnlyDictionary<String, String> Sources
 type Maliev.ShadcnBlazor.Components.Typography.ShadcnTypeset
   RenderFragment ChildContent
   String Flow

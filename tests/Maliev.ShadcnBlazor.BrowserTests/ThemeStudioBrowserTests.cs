@@ -87,12 +87,12 @@ public sealed class ThemeStudioBrowserTests(
         var studioBox = await page.GetByTestId("theme-studio").BoundingBoxAsync();
         Assert.NotNull(studioBox);
         Assert.True(studioBox.Width > 1200, $"Expected full-width Theme Studio, got {studioBox.Width}px.");
-        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='IBM+Plex+Sans']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='IBM+Plex+Mono']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='Geist']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='JetBrains+Mono']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("link[rel='preload'][as='style'][href*='Noto+Sans+Thai']")).ToHaveCountAsync(1);
         var defaultFontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
-        Assert.Contains("IBM Plex Sans", defaultFontVariable, StringComparison.Ordinal);
+        Assert.Contains("Geist", defaultFontVariable, StringComparison.Ordinal);
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Font family" }).ClickAsync();
         await page.GetByText("Noto Sans Thai", new() { Exact = true }).ClickAsync();
 
@@ -101,10 +101,69 @@ public sealed class ThemeStudioBrowserTests(
         Assert.Contains("Noto Sans Thai", fontVariable, StringComparison.Ordinal);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Code font" }).ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "IBM Plex Mono", Exact = true }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "JetBrains Mono", Exact = true }).ClickAsync();
         var monoVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-mono')");
-        Assert.Contains("IBM Plex Mono", monoVariable, StringComparison.Ordinal);
+        Assert.Contains("JetBrains Mono", monoVariable, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ThemeStudioCanCollapseControlsForFullWidthPreview()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        var toggle = page.GetByTestId("theme-controls-toggle");
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "true");
+        await toggle.ClickAsync();
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.GetByTestId("theme-inspector")).ToBeHiddenAsync();
+
+        var previewBox = await page.Locator(".theme-preview-region").BoundingBoxAsync();
+        Assert.NotNull(previewBox);
+        Assert.InRange(previewBox.X, 0, 20);
+        Assert.True(previewBox.Width > 1200, $"Expected a full-width preview, got {previewBox.Width}px.");
+
+        await toggle.ClickAsync();
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(page.GetByTestId("theme-inspector")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task ThemeGeneratorExportsPortableJsonAndReadyToPasteCSharp()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Generated icon library" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Tabler", Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-theme-icon-library", "tabler");
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Generated menu accent" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Bold", Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-theme-menu-accent", "bold");
+        await Assertions.Expect(page.GetByTestId("theme-generator-summary")).ToContainTextAsync("Icons Tabler");
+        await Assertions.Expect(page.GetByTestId("theme-generator-summary")).ToContainTextAsync("Menu Bold / Default");
+
+        await page.GetByTestId("theme-code-open").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-dialog")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-content")).ToContainTextAsync("Generated by Maliev.ShadcnBlazor Theme Studio");
+
+        await page.GetByTestId("theme-code-tab-json").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-content")).ToContainTextAsync("\"iconLibrary\": \"tabler\"");
+        await Assertions.Expect(page.GetByTestId("theme-json-download")).ToBeVisibleAsync();
     }
 
     [Theory]

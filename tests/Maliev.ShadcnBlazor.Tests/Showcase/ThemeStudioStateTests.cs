@@ -183,6 +183,54 @@ public sealed class ThemeStudioStateTests
     }
 
     [Fact]
+    public void GeneratorConfigRoundTripsThemeAndApplicationMetadata()
+    {
+        var state = CreateState();
+        state.SetStyle("base");
+        state.SetBaseColor("stone");
+        state.SetIconLibrary(ThemeStudioIconLibrary.Tabler);
+        state.SetMenuAccent(ThemeStudioMenuAccent.Bold);
+        state.SetMenuColor(ThemeStudioMenuColor.Translucent);
+        state.SetRadiusPreset(ThemeStudioRadiusPreset.Relaxed);
+        state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
+
+        var json = state.SerializeGeneratorConfig();
+        var config = ThemeStudioGeneratorConfigSerializer.Deserialize(json);
+
+        Assert.Equal("base", config.Style);
+        Assert.Equal("stone", config.BaseColor);
+        Assert.Equal(ThemeStudioIconLibrary.Tabler, config.IconLibrary);
+        Assert.Equal(ThemeStudioMenuAccent.Bold, config.MenuAccent);
+        Assert.Equal(ThemeStudioMenuColor.Translucent, config.MenuColor);
+        Assert.Equal(ThemeStudioRadiusPreset.Relaxed, config.RadiusPreset);
+        Assert.Equal("#123456", config.Theme.Light.Primary);
+
+        var restored = CreateState();
+        Assert.True(restored.ImportGeneratorConfig(json));
+        Assert.Equal(config.Theme, restored.Applied);
+        Assert.Equal(config.Style, restored.StyleId);
+        Assert.Equal(config.BaseColor, restored.BaseColorId);
+        Assert.Equal(config.IconLibrary, restored.IconLibrary);
+        Assert.Equal(config.MenuAccent, restored.MenuAccent);
+        Assert.Equal(config.MenuColor, restored.MenuColor);
+        Assert.Equal(config.RadiusPreset, restored.RadiusPreset);
+        Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public void GeneratorConfigRejectsUnknownMetadataWithoutChangingTheCurrentTheme()
+    {
+        var state = CreateState();
+        var before = state.Applied;
+
+        Assert.False(state.ImportGeneratorConfig(
+            "{\"schemaVersion\":1,\"preset\":\"base-vega-neutral\",\"style\":\"not-a-style\",\"baseColor\":\"neutral\",\"iconLibrary\":\"lucide\",\"menuAccent\":\"default\",\"menuColor\":\"default\",\"radiusPreset\":\"default\",\"fontFamily\":\"Geist\",\"monospaceFontFamily\":\"JetBrains Mono\",\"theme\":{}}"));
+
+        Assert.Equal(before, state.Applied);
+        Assert.False(string.IsNullOrWhiteSpace(state.ImportDiagnostic));
+    }
+
+    [Fact]
     public void ImportIsTransactionalAndSuccessfulImportCreatesOneUndoEntry()
     {
         var state = CreateState();
@@ -332,7 +380,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<PreviewToolbar>(parameters => parameters.Add(component => component.State, state));
 
-        Assert.Equal(5, ThemeStudioFontPreset.All.Count);
+        Assert.Equal(4, ThemeStudioFontPreset.All.Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='font-family-select']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='monospace-font-family-select']"));
 
@@ -340,8 +388,39 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
 
         Assert.Equal(ThemeStudioFontPreset.NotoSansThai.CssStack, state.GetMetricEditorValue("fontFamily"));
 
-        state.SetMonospaceFontFamily(ThemeStudioFontPreset.IbmPlexMono.Id);
-        Assert.Equal(ThemeStudioFontPreset.IbmPlexMono.CssStack, state.GetMetricEditorValue("monospaceFontFamily"));
+        state.SetMonospaceFontFamily(ThemeStudioFontPreset.JetBrainsMono.Id);
+        Assert.Equal(ThemeStudioFontPreset.JetBrainsMono.CssStack, state.GetMetricEditorValue("monospaceFontFamily"));
+    }
+
+    [Fact]
+    public void GeneratorControlsAndCodeActionAreExposedWithStableAccessibleHooks()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var inspector = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-generator-options']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-style-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-base-color-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-icon-library-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-accent-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-color-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
+    }
+
+    [Fact]
+    public void CodeDialogShowsBothPortableJsonAndReadyToPasteCSharp()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeCodeDialog>(parameters => parameters
+            .Add(component => component.State, state)
+            .Add(component => component.Open, true));
+
+        Assert.Contains("Generated by Maliev.ShadcnBlazor Theme Studio", cut.Find("[data-testid='theme-code-content']").TextContent, StringComparison.Ordinal);
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-code-tab-csharp']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-code-tab-json']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-json-download']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-generator-import-file']"));
     }
 
     [Fact]

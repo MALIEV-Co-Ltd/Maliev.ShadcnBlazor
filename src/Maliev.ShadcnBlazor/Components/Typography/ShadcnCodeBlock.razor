@@ -1,0 +1,147 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-code-block")" style="@MergeStyle(null)" data-slot="code-block" data-language="@SelectedLanguage">
+    <div class="shadcn-code-block-toolbar" data-slot="code-block-toolbar">
+        <span class="shadcn-code-block-language" aria-hidden="true">@SelectedLanguage</span>
+        @if (SourceByLanguage.Count > 1)
+        {
+            <label class="shadcn-sr-only" for="@LanguageId">Code language</label>
+            <select id="@LanguageId" class="shadcn-code-block-language-select" value="@SelectedLanguage" @onchange="ChangeLanguageAsync">
+                @foreach (var language in SourceByLanguage.Keys)
+                {
+                    <option value="@language">@language</option>
+                }
+            </select>
+        }
+        <button type="button" class="shadcn-code-block-copy" data-testid="copy-source" data-copied="@_copied.ToString().ToLowerInvariant()" aria-label="@(_copied ? "Copied" : "Copy source")" title="@(_copied ? "Copied" : "Copy source")" @onclick="CopyAsync">
+            @if (_copied)
+            {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            }
+            else
+            {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+            }
+            @if (_copied)
+            {
+                <span class="shadcn-code-block-copy-status" aria-hidden="true">Copied</span>
+            }
+            <span class="shadcn-sr-only">@(_copied ? "Copied" : "Copy source")</span>
+        </button>
+    </div>
+    <pre tabindex="0" aria-label="@($"{SelectedLanguage} code example")"><code>@((MarkupString)HighlightedSource)</code></pre>
+    <p class="shadcn-code-block-announcement component-code__announcement" aria-live="polite">@_announcement</p>
+    @if (_showFallback)
+    {
+        <label class="shadcn-sr-only" for="@FallbackId">Selectable source fallback</label>
+        <textarea id="@FallbackId" readonly rows="8">@SelectedSource</textarea>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Source { get; set; } = string.Empty;
+    [Parameter] public string Language { get; set; } = "razor";
+    [Parameter] public IReadOnlyDictionary<string, string>? Sources { get; set; }
+
+    private IJSObjectReference? _module;
+    private string _selectedLanguage = string.Empty;
+    private string _announcement = string.Empty;
+    private bool _copied;
+    private bool _showFallback;
+    private string LanguageId = $"shadcn-code-language-{Guid.NewGuid():N}";
+    private string FallbackId = $"shadcn-code-fallback-{Guid.NewGuid():N}";
+
+    private IReadOnlyDictionary<string, string> SourceByLanguage => Sources is { Count: > 0 } ? Sources : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [Language] = Source };
+    private string SelectedLanguage => SourceByLanguage.ContainsKey(_selectedLanguage) ? _selectedLanguage : SourceByLanguage.Keys.First();
+    private string SelectedSource => SourceByLanguage.TryGetValue(SelectedLanguage, out var source) ? source : Source;
+    private string HighlightedSource => Highlight(SelectedSource, SelectedLanguage);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "data-language");
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (string.IsNullOrWhiteSpace(Language)) throw new ArgumentException("Language is required.", nameof(Language));
+        if (SourceByLanguage.Count == 0) throw new ArgumentException("At least one source is required.", nameof(Source));
+        if (!SourceByLanguage.ContainsKey(_selectedLanguage)) _selectedLanguage = SourceByLanguage.ContainsKey(Language) ? Language : SourceByLanguage.Keys.First();
+    }
+
+    private Task ChangeLanguageAsync(ChangeEventArgs args)
+    {
+        var next = args.Value?.ToString();
+        if (!string.IsNullOrWhiteSpace(next) && SourceByLanguage.ContainsKey(next)) { _selectedLanguage = next; _copied = false; _announcement = string.Empty; }
+        return Task.CompletedTask;
+    }
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
+            await _module.InvokeVoidAsync("copyText", SelectedSource);
+            _copied = true;
+            _showFallback = false;
+            _announcement = "Source copied to clipboard.";
+        }
+        catch (JSException)
+        {
+            _copied = false;
+            _showFallback = true;
+            _announcement = "Copy failed. Select the source below and copy it manually.";
+        }
+    }
+
+    private static string Highlight(string source, string language)
+    {
+        if (string.IsNullOrEmpty(source)) return string.Empty;
+        var output = new System.Text.StringBuilder(source.Length + 128);
+        var index = 0;
+        while (index < source.Length)
+        {
+            if (source[index] == '/' && index + 1 < source.Length && source[index + 1] == '/')
+            {
+                var end = source.IndexOf('\n', index); if (end < 0) end = source.Length;
+                AppendToken(output, "comment", source[index..end]); index = end; continue;
+            }
+            if (source[index] is '"' or '\'')
+            {
+                var quote = source[index]; var end = index + 1;
+                while (end < source.Length) { if (source[end] == '\\') { end += Math.Min(2, source.Length - end); continue; } if (source[end] == quote) { end++; break; } end++; }
+                AppendToken(output, "string", source[index..end]); index = end; continue;
+            }
+            if (source[index] == '<' && index + 1 < source.Length && (char.IsLetter(source[index + 1]) || source[index + 1] == '/'))
+            {
+                var end = source.IndexOf('>', index + 1); end = end < 0 ? source.Length : end + 1;
+                AppendToken(output, "tag", source[index..end]); index = end; continue;
+            }
+            if (char.IsDigit(source[index]))
+            {
+                var end = index + 1; while (end < source.Length && (char.IsDigit(source[end]) || source[end] == '.')) end++;
+                AppendToken(output, "number", source[index..end]); index = end; continue;
+            }
+            if (char.IsLetter(source[index]) || source[index] is '_' or '@')
+            {
+                var end = index + 1; while (end < source.Length && (char.IsLetterOrDigit(source[end]) || source[end] is '_' or '-')) end++;
+                var token = source[index..end]; var normalized = token.TrimStart('@');
+                var kind = normalized switch { "using" or "inject" or "if" or "else" or "for" or "foreach" or "var" or "new" or "return" or "true" or "false" or "null" => "keyword", "string" or "int" or "double" or "bool" or "Task" or "RenderFragment" => "type", _ => string.Empty };
+                if (kind.Length > 0) AppendToken(output, kind, token); else output.Append(System.Net.WebUtility.HtmlEncode(token));
+                index = end; continue;
+            }
+            output.Append(System.Net.WebUtility.HtmlEncode(source[index].ToString())); index++;
+        }
+        return output.ToString();
+    }
+
+    private static void AppendToken(System.Text.StringBuilder output, string kind, string value)
+    {
+        output.Append("<span class=\"shadcn-code-token shadcn-code-token-"); output.Append(kind); output.Append(" code-token code-token-"); output.Append(kind); output.Append("\">"); output.Append(System.Net.WebUtility.HtmlEncode(value)); output.Append("</span>");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { }
+    }
+}

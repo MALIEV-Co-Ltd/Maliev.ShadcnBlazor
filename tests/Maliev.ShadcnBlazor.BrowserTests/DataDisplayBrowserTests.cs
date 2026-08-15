@@ -46,7 +46,7 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(chart).ToHaveAttributeAsync("data-chart-measured", "true");
         var surface = chart.Locator("svg[data-slot='chart-surface']");
         await surface.FocusAsync(); await page.Keyboard.PressAsync("End");
-        await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("Mar");
+        await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("Jun");
         await page.GetByTestId("control-chart-line").CheckAsync();
         await Assertions.Expect(surface.Locator("polyline[data-series='desktop']")).ToHaveCountAsync(1);
         await chart.EvaluateAsync("el => { const scope = el.closest('[dir]') ?? document.documentElement; scope.classList.add('dark'); scope.dir='rtl'; }");
@@ -70,12 +70,12 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/table").ToString());
         await page.GetByTestId("control-table-selected").CheckAsync();
         await page.GetByTestId("control-table-expanded").CheckAsync();
-        var row = page.Locator("tbody [data-slot='table-row']");
+        var row = page.Locator("#preview tbody [data-slot='table-row']").First;
         await Assertions.Expect(row).ToHaveAttributeAsync("data-state", "selected");
         await Assertions.Expect(row).ToHaveAttributeAsync("data-expanded", "true");
         await page.GetByTestId("control-table-disabled").CheckAsync();
         await Assertions.Expect(row).ToHaveAttributeAsync("aria-disabled", "true");
         await Assertions.Expect(row).Not.ToHaveAttributeAsync("data-state", "selected");
-        await Assertions.Expect(page.Locator("[data-slot='table-container']")).ToHaveCSSAsync("overflow-x", "auto");
+        await Assertions.Expect(page.Locator("#preview [data-slot='table-container']")).ToHaveCSSAsync("overflow-x", "auto");
     }
 }

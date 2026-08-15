@@ -10,6 +10,8 @@ internal sealed class ShadcnCarouselContext(ShadcnCarousel owner)
     public bool Disabled => owner.Disabled;
     public string PreviousLabel => owner.PreviousLabel;
     public string NextLabel => owner.NextLabel;
+    internal event Action? Changed;
+    internal void NotifyChanged() => Changed?.Invoke();
     public void Register(Guid registrationId, int index, double basisPercent)
     {
         if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));

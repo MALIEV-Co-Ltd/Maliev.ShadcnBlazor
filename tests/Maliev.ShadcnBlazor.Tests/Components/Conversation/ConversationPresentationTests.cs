@@ -76,9 +76,11 @@ public sealed class ConversationPresentationTests : BunitContext
 
         var marker = cut.Find("[data-slot='marker']");
         Assert.Equal(value, marker.GetAttribute("data-variant"));
+        Assert.Equal("true", marker.GetAttribute("data-live"));
         Assert.Equal("status", marker.GetAttribute("role"));
         Assert.Equal("polite", marker.GetAttribute("aria-live"));
         Assert.Equal("true", cut.Find("[data-slot='marker-icon']").GetAttribute("aria-hidden"));
+        Assert.Equal("true", cut.Find("[data-slot='marker-icon']").GetAttribute("data-streaming"));
         Assert.Equal("true", cut.Find("[data-slot='marker-content']").GetAttribute("data-streaming"));
     }
 

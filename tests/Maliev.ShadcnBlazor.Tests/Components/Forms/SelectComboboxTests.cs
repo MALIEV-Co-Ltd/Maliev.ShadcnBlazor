@@ -164,6 +164,22 @@ public sealed class SelectComboboxTests : BunitContext
         Assert.Equal("true", trigger.GetAttribute("aria-readonly"));
     }
 
+    [Fact]
+    public void SelectWithoutOpenBindingTogglesAndSelectsAnOption()
+    {
+        var cut = Render<ShadcnSelect<int>>(parameters => parameters
+            .Add(component => component.Options, Priorities)
+            .Add(component => component.Placeholder, "Choose priority"));
+
+        cut.Find("[data-slot='select-trigger']").Click();
+
+        Assert.Equal("true", cut.Find("[data-slot='select-trigger']").GetAttribute("aria-expanded"));
+        cut.Find("[role='option'][data-value='2']").Click();
+
+        Assert.Equal("High", cut.Find("[data-slot='select-value']").TextContent);
+        Assert.Equal("false", cut.Find("[data-slot='select-trigger']").GetAttribute("aria-expanded"));
+    }
+
     private static readonly IReadOnlyList<ShadcnComboboxOption<string>> Frameworks =
     [
         new("next", "Next.js", "Web"),

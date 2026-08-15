@@ -24,7 +24,7 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Dialog(bool alert)
     {
-        var open = true; var compact = false;
+        var open = false; var compact = false;
         RenderFragment preview = b =>
         {
             if (alert)
@@ -32,71 +32,84 @@ internal static class OverlayMenuExamples
                 b.OpenComponent<ShadcnAlertDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c =>
                 {
                     AddText<ShadcnAlertDialogTrigger>(c, 0, "Delete quotation");
-                    c.OpenComponent<ShadcnAlertDialogContent>(10); c.AddAttribute(11, "Size", compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default); c.AddAttribute(12, "ChildContent", (RenderFragment)(x => { AddText<ShadcnAlertDialogTitle>(x, 0, "Delete quotation?"); AddText<ShadcnAlertDialogDescription>(x, 10, "This action cannot be undone."); AddText<ShadcnAlertDialogCancel>(x, 20, "Cancel"); AddText<ShadcnAlertDialogAction>(x, 30, "Delete"); })); c.CloseComponent();
+                    c.OpenComponent<ShadcnAlertDialogContent>(10); c.AddAttribute(11, "Size", compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
+                    {
+                        x.OpenComponent<ShadcnAlertDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnAlertDialogTitle>(header, 0, "Delete quotation?"); AddText<ShadcnAlertDialogDescription>(header, 10, "This action cannot be undone. The saved quotation will be permanently removed."); })); x.CloseComponent();
+                        x.OpenComponent<ShadcnAlertDialogFooter>(20); x.AddAttribute(21, "ChildContent", (RenderFragment)(footer => { AddText<ShadcnAlertDialogCancel>(footer, 0, "Cancel"); AddText<ShadcnAlertDialogAction>(footer, 10, "Delete quotation"); })); x.CloseComponent();
+                    })); c.CloseComponent();
                 })); b.CloseComponent();
             }
             else
             {
-                b.OpenComponent<ShadcnDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Modal", !compact); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDialogTrigger>(c, 0, "Edit profile"); c.OpenComponent<ShadcnDialogContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnDialogTitle>(x, 0, "Edit profile"); AddText<ShadcnDialogDescription>(x, 10, "Update customer details."); AddText<ShadcnDialogClose>(x, 20, "Done"); })); c.CloseComponent(); })); b.CloseComponent();
+                b.OpenComponent<ShadcnDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Modal", !compact); b.AddAttribute(3, "ChildContent", (RenderFragment)(c =>
+                {
+                    AddText<ShadcnDialogTrigger>(c, 0, "Edit profile");
+                    c.OpenComponent<ShadcnDialogContent>(10); c.AddAttribute(11, "ShowCloseButton", false); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
+                    {
+                        x.OpenComponent<ShadcnDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDialogTitle>(header, 0, "Edit profile"); AddText<ShadcnDialogDescription>(header, 10, "Update the customer details, then save when you are done."); })); x.CloseComponent();
+                        x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Name · Pedro Duarte"); x.AddContent(23, "Username · @peduarte"); x.CloseElement();
+                        x.OpenComponent<ShadcnDialogFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDialogClose>(footer, 0, "Save changes"))); x.CloseComponent();
+                    })); c.CloseComponent();
+                })); b.CloseComponent();
             }
         };
         var slug = alert ? "alert-dialog" : "dialog";
         return Example(slug, alert ? "Confirmation dialog" : "Modal and non-modal dialog", preview,
-            [Toggle($"{slug}-open", "Open", v => open = v, true), Toggle($"{slug}-variant", alert ? "Small layout" : "Non-modal", v => compact = v)],
+            [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-variant", alert ? "Small layout" : "Non-modal", v => compact = v)],
             alert ? ["open", "cancel-focus", "destructive", "small", "localized"] : ["open", "modal", "non-modal", "focus-trap", "restore-focus"]);
     }
 
     private static ComponentExampleDefinition Sheet()
     {
-        var open = true; var left = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnSheet>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnSheetTrigger>(c, 0, "Open settings"); c.OpenComponent<ShadcnSheetContent>(10); c.AddAttribute(11, "Side", left ? ShadcnSheetSide.Left : ShadcnSheetSide.Right); c.AddAttribute(12, "CloseLabel", "Close settings"); c.AddAttribute(13, "ChildContent", (RenderFragment)(x => { AddText<ShadcnSheetTitle>(x, 0, "Settings"); AddText<ShadcnSheetDescription>(x, 10, "Configure the workspace."); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("sheet", "Edge sheet", preview, [Toggle("sheet-open", "Open", v => open = v, true), Toggle("sheet-left", "Left side", v => left = v)], ["top", "right", "bottom", "left", "modal", "localized-close"]);
+        var open = false; var left = false;
+        RenderFragment preview = b => { b.OpenComponent<ShadcnSheet>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnSheetTrigger>(c, 0, "Open settings"); c.OpenComponent<ShadcnSheetContent>(10); c.AddAttribute(11, "Side", left ? ShadcnSheetSide.Left : ShadcnSheetSide.Right); c.AddAttribute(12, "ShowCloseButton", false); c.AddAttribute(13, "CloseLabel", "Close settings"); c.AddAttribute(14, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnSheetHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnSheetTitle>(header, 0, "Workspace settings"); AddText<ShadcnSheetDescription>(header, 10, "Manage notifications and quotation defaults."); })); x.CloseComponent(); x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Email notifications · Enabled"); x.AddContent(23, "Default currency · THB"); x.CloseElement(); x.OpenComponent<ShadcnSheetFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnSheetClose>(footer, 0, "Done"))); x.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
+        return Example("sheet", "Edge sheet", preview, [Toggle("sheet-open", "Open", v => open = v), Toggle("sheet-left", "Left side", v => left = v)], ["top", "right", "bottom", "left", "modal", "localized-close"]);
     }
 
     private static ComponentExampleDefinition Drawer()
     {
-        var open = true; var nonmodal = false; var up = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnDrawer>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ModalMode", nonmodal ? ShadcnDrawerModalMode.NonModal : ShadcnDrawerModalMode.Modal); b.AddAttribute(3, "SwipeDirection", up ? ShadcnDrawerSwipeDirection.Up : ShadcnDrawerSwipeDirection.Down); b.AddAttribute(4, "ShowSwipeHandle", true); b.AddAttribute(5, "SnapPoints", new[] { ShadcnDrawerSnapPoint.Fraction(.4), ShadcnDrawerSnapPoint.Fraction(1) }); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDrawerTrigger>(c, 0, "Open drawer"); c.OpenComponent<ShadcnDrawerContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnDrawerTitle>(x, 0, "Order details"); AddText<ShadcnDrawerDescription>(x, 10, "Swipe to dismiss."); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("drawer", "Gesture drawer", preview, [Toggle("drawer-open", "Open", v => open = v, true), Toggle("drawer-up", "Open from top", v => up = v), Toggle("drawer-nonmodal", "Non-modal", v => nonmodal = v)], ["swipe", "snap-points", "modal", "non-modal", "trap-focus", "safe-area"]);
+        var open = false; var nonmodal = false; var up = false;
+        RenderFragment preview = b => { b.OpenComponent<ShadcnDrawer>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ModalMode", nonmodal ? ShadcnDrawerModalMode.NonModal : ShadcnDrawerModalMode.Modal); b.AddAttribute(3, "SwipeDirection", up ? ShadcnDrawerSwipeDirection.Up : ShadcnDrawerSwipeDirection.Down); b.AddAttribute(4, "ShowSwipeHandle", true); b.AddAttribute(5, "SnapPoints", new[] { ShadcnDrawerSnapPoint.Fraction(.4), ShadcnDrawerSnapPoint.Fraction(1) }); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDrawerTrigger>(c, 0, "Open drawer"); c.OpenComponent<ShadcnDrawerContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnDrawerHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDrawerTitle>(header, 0, "Order #4189"); AddText<ShadcnDrawerDescription>(header, 10, "Review delivery details before confirming."); })); x.CloseComponent(); x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Status · Ready to ship"); x.AddContent(23, "Delivery · Friday, 4:30 PM"); x.CloseElement(); x.OpenComponent<ShadcnDrawerFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDrawerClose>(footer, 0, "Confirm order"))); x.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
+        return Example("drawer", "Gesture drawer", preview, [Toggle("drawer-open", "Open", v => open = v), Toggle("drawer-up", "Open from top", v => up = v), Toggle("drawer-nonmodal", "Non-modal", v => nonmodal = v)], ["swipe", "snap-points", "modal", "non-modal", "trap-focus", "safe-area"]);
     }
 
     private static ComponentExampleDefinition Popover()
     {
-        var open = true; var top = false;
+        var open = false; var top = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnPopover>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnPopoverTrigger>(c, 0, "Open popover"); c.OpenComponent<ShadcnPopoverContent>(10); c.AddAttribute(11, "Side", top ? ShadcnOverlaySide.Top : ShadcnOverlaySide.Bottom); c.AddAttribute(12, "ChildContent", (RenderFragment)(x => { AddText<ShadcnPopoverTitle>(x, 0, "Dimensions"); AddText<ShadcnPopoverDescription>(x, 10, "Set part dimensions."); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("popover", "Collision-aware popover", preview, [Toggle("popover-open", "Open", v => open = v, true), Toggle("popover-top", "Top placement", v => top = v)], ["controlled", "placement", "collision", "outside-press", "restore-focus"]);
+        return Example("popover", "Collision-aware popover", preview, [Toggle("popover-open", "Open", v => open = v), Toggle("popover-top", "Top placement", v => top = v)], ["controlled", "placement", "collision", "outside-press", "restore-focus"]);
     }
 
     private static ComponentExampleDefinition HoverCard()
     {
-        var open = true; var fast = false;
+        var open = false; var fast = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnHoverCard>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "OpenDelay", TimeSpan.FromMilliseconds(fast ? 0 : 700)); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { AddText<ShadcnHoverCardTrigger>(c, 0, "@maliev"); AddText<ShadcnHoverCardContent>(c, 10, "Thai digital manufacturing platform."); })); b.CloseComponent(); };
-        return Example("hover-card", "Delayed hover card", preview, [Toggle("hover-card-open", "Open", v => open = v, true), Toggle("hover-card-fast", "No open delay", v => fast = v)], ["hover", "focus", "delays", "pointer-bridge", "collision"]);
+        return Example("hover-card", "Delayed hover card", preview, [Toggle("hover-card-open", "Open", v => open = v), Toggle("hover-card-fast", "No open delay", v => fast = v)], ["hover", "focus", "delays", "pointer-bridge", "collision"]);
     }
 
     private static ComponentExampleDefinition Tooltip()
     {
-        var open = true; var bottom = false;
+        var open = false; var bottom = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnTooltipProvider>(0); b.AddAttribute(1, "ChildContent", (RenderFragment)(p => { p.OpenComponent<ShadcnTooltip>(0); p.AddAttribute(1, "Open", open); p.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnTooltipTrigger>(c, 0, "Save"); c.OpenComponent<ShadcnTooltipContent>(10); c.AddAttribute(11, "Side", bottom ? ShadcnOverlaySide.Bottom : ShadcnOverlaySide.Top); c.AddAttribute(12, "ChildContent", Text("Save quotation")); c.CloseComponent(); })); p.CloseComponent(); })); b.CloseComponent(); };
-        return Example("tooltip", "Hover and focus tooltip", preview, [Toggle("tooltip-open", "Open", v => open = v, true), Toggle("tooltip-bottom", "Bottom placement", v => bottom = v)], ["hover", "focus", "provider-delay", "arrow", "noninteractive"]);
+        return Example("tooltip", "Hover and focus tooltip", preview, [Toggle("tooltip-open", "Open", v => open = v), Toggle("tooltip-bottom", "Bottom placement", v => bottom = v)], ["hover", "focus", "provider-delay", "arrow", "noninteractive"]);
     }
 
     private static ComponentExampleDefinition Menu(bool context)
     {
-        var open = true; var checkedValue = true;
+        var open = false; var checkedValue = true;
         RenderFragment preview = b =>
         {
             if (context) { b.OpenComponent<ShadcnContextMenu>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnContextMenuTrigger>(c, 0, "Right-click this surface"); c.OpenComponent<ShadcnContextMenuContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnContextMenuItem>(x, 0, "New quotation"); AddChecked<ShadcnContextMenuCheckboxItem>(x, 10, checkedValue, "Show archived"); })); c.CloseComponent(); })); b.CloseComponent(); }
             else { b.OpenComponent<ShadcnDropdownMenu>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDropdownMenuTrigger>(c, 0, "Actions"); c.OpenComponent<ShadcnDropdownMenuContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnDropdownMenuItem>(x, 0, "Duplicate"); AddChecked<ShadcnDropdownMenuCheckboxItem>(x, 10, checkedValue, "Show details"); })); c.CloseComponent(); })); b.CloseComponent(); }
         };
         var slug = context ? "context-menu" : "dropdown-menu";
-        return Example(slug, context ? "Pointer and keyboard context menu" : "Dropdown menu states", preview, [Toggle($"{slug}-open", "Open", v => open = v, true), Toggle($"{slug}-checked", "Checked item", v => checkedValue = v, true)], ["keyboard", "typeahead", "checkbox", "radio", "submenu", "rtl", context ? "Shift+F10" : "trigger"]);
+        return Example(slug, context ? "Pointer and keyboard context menu" : "Dropdown menu states", preview, [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-checked", "Checked item", v => checkedValue = v, true)], ["keyboard", "typeahead", "checkbox", "radio", "submenu", "rtl", context ? "Shift+F10" : "trigger"]);
     }
 
     private static ComponentExampleDefinition Menubar()
     {
         var second = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnMenubar>(0); b.AddAttribute(1, "Label", "Application menu"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddMenubarMenu(c, 0, "File", "New quotation", !second); AddMenubarMenu(c, 10, "Edit", "Undo", second); })); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenComponent<ShadcnMenubar>(0); b.AddAttribute(1, "Label", "Application menu"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddMenubarMenu(c, 0, "File", "New quotation", false); AddMenubarMenu(c, 10, "Edit", "Undo", second); })); b.CloseComponent(); };
         return Example("menubar", "Application menubar", preview, [Toggle("menubar-second", "Open Edit menu", v => second = v)], ["roving-focus", "open-switching", "submenu", "checkbox", "radio", "rtl"]);
     }
 

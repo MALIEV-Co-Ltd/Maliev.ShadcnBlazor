@@ -102,8 +102,8 @@ public static class ShadcnThemePresets
 
     private static ShadcnThemeMetrics CreateMetrics() => new()
     {
-        FontFamily = "'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif",
-        MonospaceFontFamily = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        FontFamily = "'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        MonospaceFontFamily = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
         RadiusRem = 0.625,
         RadiusSmallScale = 0.6,
         RadiusMediumScale = 0.8,

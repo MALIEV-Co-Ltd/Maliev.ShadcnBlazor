@@ -1,0 +1,20 @@
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<div data-testid="date-picker-dossier-preview">
+    <ShadcnDatePicker Value="Selected" ValueChanged="HandleValueChanged" Open="Open" OpenChanged="HandleOpenChanged" VisibleMonth="VisibleMonth" VisibleMonthChanged="HandleMonthChanged" Culture="ThaiCulture" Today="Today" AllowTextInput="true" Clearable="Clearable" Invalid="Invalid" AdditionalAttributes="Attributes" />
+</div>
+
+@code {
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public bool Clearable { get; set; } = true;
+    private DateOnly? Selected = new(2026, 8, 13);
+    private DateOnly VisibleMonth = new(2026, 8, 1);
+    private bool Open = true;
+    private static readonly DateOnly Today = new(2026, 8, 13);
+    private static readonly CultureInfo ThaiCulture = CultureInfo.GetCultureInfo("th-TH");
+    private Task HandleValueChanged(DateOnly? value) { Selected = value; return Task.CompletedTask; }
+    private Task HandleOpenChanged(bool value) { Open = value; return Task.CompletedTask; }
+    private Task HandleMonthChanged(DateOnly value) { VisibleMonth = value; return Task.CompletedTask; }
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "forms-dossier-date-picker", ["aria-label"] = "Delivery date" };
+}

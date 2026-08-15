@@ -1,0 +1,175 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using Maliev.ShadcnBlazor.Showcase.Export
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<dialog class="theme-code-dialog"
+        id="theme-code-dialog"
+        data-testid="theme-code-dialog"
+        aria-labelledby="theme-code-title">
+    <form method="dialog">
+        <div class="theme-transfer-dialog__heading">
+            <div>
+                <span class="theme-inspector__eyebrow">Portable generator output</span>
+                <h2 id="theme-code-title">Get code</h2>
+            </div>
+            <button type="button" class="theme-transfer-dialog__close" aria-label="Close generated code" @onclick="CloseAsync">×</button>
+        </div>
+        <p class="theme-code-dialog__intro">Save the JSON as a source-of-truth file, or copy the C# class directly into a Blazor app.</p>
+        <div class="theme-code-dialog__tabs" role="tablist" aria-label="Generated output format">
+            <button type="button" role="tab" aria-selected="@(_activeTab == ThemeCodeTab.CSharp)" data-testid="theme-code-tab-csharp" @onclick="() => _activeTab = ThemeCodeTab.CSharp">C# configuration</button>
+            <button type="button" role="tab" aria-selected="@(_activeTab == ThemeCodeTab.Json)" data-testid="theme-code-tab-json" @onclick="() => _activeTab = ThemeCodeTab.Json">Portable JSON</button>
+        </div>
+        <pre class="theme-code-dialog__code" data-testid="theme-code-content" tabindex="0"><code>@CurrentContent</code></pre>
+        <div class="theme-code-dialog__actions">
+            <button type="button" data-testid="theme-code-copy" @onclick="CopyAsync">Copy @_activeTabLabel</button>
+            <button type="button" data-testid="theme-code-download" @onclick="DownloadCodeAsync">Download C#</button>
+            <button type="button" data-testid="theme-json-download" @onclick="DownloadJsonAsync">Download JSON</button>
+        </div>
+        <div class="theme-code-dialog__import">
+            <label for="theme-generator-import-file">Import a generator JSON</label>
+            <InputFile id="theme-generator-import-file"
+                       data-testid="theme-generator-import-file"
+                       accept="application/json,.json"
+                       OnChange="ImportAsync" />
+        </div>
+        <p class="theme-transfer-dialog__status" data-testid="theme-code-status" aria-live="polite" role="status">@_status</p>
+    </form>
+</dialog>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private enum ThemeCodeTab { CSharp, Json }
+    private ThemeCodeTab _activeTab = ThemeCodeTab.CSharp;
+    private string _status = string.Empty;
+    private IJSObjectReference? _dialogModule;
+    private IJSObjectReference? _downloadModule;
+    private DotNetObjectReference<ThemeCodeDialog>? _selfReference;
+    private bool _shown;
+    private bool _disposed;
+    private const long MaxImportBytes = 512 * 1024;
+
+    private string _activeTabLabel => _activeTab == ThemeCodeTab.CSharp ? "C#" : "JSON";
+    private string CurrentContent => _activeTab == ThemeCodeTab.CSharp
+        ? ThemeStudioCodeGenerator.WriteCSharp(State.CreateGeneratorConfig())
+        : ThemeStudioCodeGenerator.WriteJson(State.CreateGeneratorConfig());
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_disposed || Open == _shown)
+            return;
+        try
+        {
+            _dialogModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-transfer-dialog.js");
+            if (_selfReference is null)
+            {
+                _selfReference = DotNetObjectReference.Create(this);
+                await _dialogModule.InvokeVoidAsync("connect", "theme-code-dialog", _selfReference);
+            }
+            await _dialogModule.InvokeVoidAsync(Open ? "showModal" : "close", "theme-code-dialog");
+            _shown = Open;
+        }
+        catch (Exception exception) when (exception is JSException or JSDisconnectedException or TaskCanceledException or OperationCanceledException)
+        {
+            _status = $"Code dialog could not be {(Open ? "opened" : "closed")}: {exception.Message}";
+        }
+    }
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            _downloadModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/shadcn-download.js");
+            await _downloadModule.InvokeVoidAsync("copyText", CurrentContent);
+            _status = $"Copied {_activeTabLabel} output.";
+        }
+        catch (Exception exception) when (exception is JSException or JSDisconnectedException or TaskCanceledException or OperationCanceledException)
+        {
+            _status = $"Copy failed: {exception.Message}";
+        }
+    }
+
+    private async Task DownloadCodeAsync() => await DownloadAsync("MalievShadcnTheme.cs", "text/plain", ThemeStudioCodeGenerator.WriteCSharp(State.CreateGeneratorConfig()));
+
+    private async Task DownloadJsonAsync() => await DownloadAsync("maliev-shadcn-theme.json", "application/json", ThemeStudioCodeGenerator.WriteJson(State.CreateGeneratorConfig()));
+
+    private async Task DownloadAsync(string fileName, string mimeType, string content)
+    {
+        try
+        {
+            _downloadModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/shadcn-download.js");
+            await _downloadModule.InvokeVoidAsync("downloadBytes", fileName, mimeType, System.Text.Encoding.UTF8.GetBytes(content));
+            _status = $"Prepared {fileName} for download.";
+        }
+        catch (Exception exception) when (exception is JSException or JSDisconnectedException or TaskCanceledException or OperationCanceledException)
+        {
+            _status = $"Download failed: {exception.Message}";
+        }
+    }
+
+    private async Task ImportAsync(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        if (file.Size > MaxImportBytes)
+        {
+            _status = $"Generator JSON exceeds the {MaxImportBytes} byte limit.";
+            return;
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxImportBytes);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            if (State.ImportGeneratorConfig(System.Text.Encoding.UTF8.GetString(memory.ToArray())))
+                _status = $"Imported {file.Name} successfully.";
+            else
+                _status = State.ImportDiagnostic ?? "Generator JSON was not applied.";
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or System.Text.Json.JsonException or NotSupportedException)
+        {
+            _status = $"Generator JSON was not applied: {exception.Message}";
+        }
+    }
+
+    private async Task CloseAsync()
+    {
+        if (_dialogModule is not null && _shown)
+            await _dialogModule.InvokeVoidAsync("close", "theme-code-dialog");
+        _shown = false;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    [JSInvokable]
+    public async Task OnNativeClosed()
+    {
+        if (_disposed || !_shown)
+            return;
+        _shown = false;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        try
+        {
+            if (_dialogModule is not null)
+                await _dialogModule.InvokeVoidAsync("disconnect", "theme-code-dialog");
+            if (_dialogModule is not null)
+                await _dialogModule.DisposeAsync();
+            if (_downloadModule is not null)
+                await _downloadModule.DisposeAsync();
+        }
+        catch (Exception exception) when (exception is JSDisconnectedException or TaskCanceledException or OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _selfReference?.Dispose();
+        }
+    }
+}

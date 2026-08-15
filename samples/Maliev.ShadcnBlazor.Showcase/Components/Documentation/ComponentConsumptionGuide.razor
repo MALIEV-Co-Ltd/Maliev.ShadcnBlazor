@@ -8,6 +8,8 @@
     <ComponentCodeExample Title="@($"{Entry.Name} installation")"
                           Heading="Package installation"
                           Nested="true"
+                          Language="bash"
+                          Sources="@InstallationSources"
                           Source="dotnet add package Maliev.ShadcnBlazor" />
 </section>
 
@@ -17,6 +19,8 @@
     <ComponentCodeExample Title="@($"{Entry.Name} usage")"
                           Heading="Razor example"
                           Nested="true"
+                          Language="razor"
+                          Sources="@UsageSources"
                           Source="@UsageSource" />
 </section>
 
@@ -39,4 +43,16 @@
     [Parameter] public ComponentExampleDefinition? Example { get; set; }
 
     private string UsageSource => $"@using {Entry.Namespace}{Environment.NewLine}{Environment.NewLine}{Example?.RazorSource ?? $"<{Entry.PrimaryType} />"}";
+
+    private IReadOnlyDictionary<string, string> InstallationSources => new Dictionary<string, string>
+    {
+        ["bash"] = "dotnet add package Maliev.ShadcnBlazor",
+        ["powershell"] = "dotnet add package Maliev.ShadcnBlazor"
+    };
+
+    private IReadOnlyDictionary<string, string> UsageSources => new Dictionary<string, string>
+    {
+        ["razor"] = UsageSource,
+        ["csharp"] = "builder.Services.AddMalievShadcn();"
+    };
 }

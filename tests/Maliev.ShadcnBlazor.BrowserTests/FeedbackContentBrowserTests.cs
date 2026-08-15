@@ -159,6 +159,35 @@ public sealed class FeedbackContentBrowserTests(ShowcaseServerFixture server, Pl
     }
 
     [Fact]
+    public async Task DocumentationCarouselPreviousButtonReturnsToPriorSlide()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 1280, Height = 900 } });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/carousel").ToString());
+
+        var carousel = page.Locator("#preview [data-slot='carousel']");
+        var items = carousel.Locator("[data-slot='carousel-item']");
+        var status = page.GetByTestId("showcase-carousel-status");
+        await Assertions.Expect(items.Nth(0)).ToHaveAttributeAsync("data-selected", "true");
+        await Assertions.Expect(items.Nth(1)).Not.ToHaveAttributeAsync("data-selected", "true");
+        await Assertions.Expect(status).ToContainTextAsync("Slide 1 of 3");
+        await Assertions.Expect(page.GetByTestId("showcase-carousel-dot-0")).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-previous']")).ToBeDisabledAsync();
+
+        await carousel.Locator("[data-slot='carousel-next']").ClickAsync();
+        await Assertions.Expect(items.Nth(1)).ToHaveAttributeAsync("data-selected", "true");
+        await Assertions.Expect(status).ToContainTextAsync("Slide 2 of 3");
+        await Assertions.Expect(page.GetByTestId("showcase-carousel-dot-1")).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-previous']")).ToBeEnabledAsync();
+
+        await carousel.Locator("[data-slot='carousel-previous']").ClickAsync();
+        await Assertions.Expect(items.Nth(0)).ToHaveAttributeAsync("data-selected", "true");
+        await Assertions.Expect(items.Nth(1)).Not.ToHaveAttributeAsync("data-selected", "true");
+        await Assertions.Expect(status).ToContainTextAsync("Slide 1 of 3");
+        await Assertions.Expect(page.GetByTestId("showcase-carousel-dot-0")).ToHaveAttributeAsync("aria-pressed", "true");
+    }
+
+    [Fact]
     public async Task ToastSupportsGlobalF6HoverExpansionAndPhysicalSwipe()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 390, Height = 844 }, HasTouch = true });

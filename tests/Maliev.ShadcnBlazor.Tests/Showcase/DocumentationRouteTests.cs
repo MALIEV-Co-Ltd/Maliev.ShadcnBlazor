@@ -68,7 +68,9 @@ public sealed class DocumentationRouteTests : BunitContext
 
         Assert.All(expectedSections, id => Assert.Single(cut.FindAll($"#{id}")));
         Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
-        Assert.Contains("@using Maliev.ShadcnBlazor.Components.Actions", cut.Markup, StringComparison.Ordinal);
+        var usageCode = cut.Find("#usage .component-code code");
+        Assert.Contains("@using Maliev.ShadcnBlazor.Components.Actions", usageCode.TextContent, StringComparison.Ordinal);
+        Assert.Contains("code-token-keyword", usageCode.InnerHtml, StringComparison.Ordinal);
         Assert.Contains("ShadcnButton", cut.Markup, StringComparison.Ordinal);
 
         var outline = Services.GetRequiredService<DocumentationPageState>().Sections;
@@ -87,5 +89,28 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("Interactive, typed, and themeable", cut.Markup, StringComparison.Ordinal);
         Assert.Equal(64, cut.FindAll(".documentation-catalog-card").Count);
         Assert.Contains(cut.FindAll(".documentation-landing__actions a"), link => link.GetAttribute("href") == "theme");
+    }
+
+    [Fact]
+    public void ShowcaseBootShellIsCenteredAccessibleAndMotionAware()
+    {
+        var root = FindRoot();
+        var index = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "index.html"));
+        var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+
+        Assert.Contains("class=\"showcase-boot\"", index, StringComparison.Ordinal);
+        Assert.Contains("role=\"status\"", index, StringComparison.Ordinal);
+        Assert.Contains("showcase-boot__spinner", index, StringComparison.Ordinal);
+        Assert.Contains("place-content: center", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes showcase-boot-spin", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

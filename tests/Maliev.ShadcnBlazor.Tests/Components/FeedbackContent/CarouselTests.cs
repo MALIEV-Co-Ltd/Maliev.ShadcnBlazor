@@ -125,6 +125,26 @@ public sealed class CarouselTests : BunitContext
     }
 
     [Fact]
+    public void UnboundSelectionUpdatesPreviousAndNextButtonState()
+    {
+        var cut = RenderCarousel(new ShadcnCarouselOptions(), 0);
+        var previous = cut.Find("[data-slot='carousel-previous']");
+        var next = cut.Find("[data-slot='carousel-next']");
+
+        Assert.True(previous.HasAttribute("disabled"));
+        Assert.False(next.HasAttribute("disabled"));
+
+        next.Click();
+
+        Assert.False(previous.HasAttribute("disabled"));
+        Assert.False(next.HasAttribute("disabled"));
+
+        previous.Click();
+
+        Assert.True(previous.HasAttribute("disabled"));
+    }
+
+    [Fact]
     public void SparsePublicItemIndicesUseOrderedRegistrationIdentity()
     {
         var cut = Render<ShadcnCarousel>(parameters => parameters

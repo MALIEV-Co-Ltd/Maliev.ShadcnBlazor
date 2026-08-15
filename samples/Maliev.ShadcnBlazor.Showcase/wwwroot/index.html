@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shadcn Blazor Showcase</title>
     <base href="/" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin="anonymous" href="_content/Maliev.ShadcnBlazor/fonts/geist-sans-variable.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin="anonymous" href="_content/Maliev.ShadcnBlazor/fonts/noto-sans-thai.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin="anonymous" href="_content/Maliev.ShadcnBlazor/fonts/jetbrains-mono-latin.woff2" />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
     <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
@@ -20,7 +23,20 @@
     <link href="Maliev.ShadcnBlazor.Showcase.styles.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="app">Loading showcase…</div>
+    <div id="app">
+        <div class="showcase-boot" role="status" aria-live="polite">
+            <div class="showcase-boot__mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <path d="M5 24V8h4.2l6.8 9.2L22.8 8H27v16h-4V14.8l-6.3 8.1h-1.4L9 14.8V24H5Z" fill="currentColor" />
+                </svg>
+            </div>
+            <div class="showcase-boot__copy">
+                <strong>Shadcn Blazor</strong>
+                <span>Loading showcase</span>
+            </div>
+            <span class="showcase-boot__spinner" aria-hidden="true"></span>
+        </div>
+    </div>
     <div id="blazor-error-ui" hidden role="alert">The showcase encountered an unexpected error.</div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="js/mock-site-overlay.js"></script>

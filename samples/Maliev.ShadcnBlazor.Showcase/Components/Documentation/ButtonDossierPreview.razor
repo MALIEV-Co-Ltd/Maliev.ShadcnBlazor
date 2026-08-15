@@ -1,0 +1,46 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<div class="showcase-button-dossier" data-testid="button-dossier-preview">
+    <section class="showcase-button-dossier__section" aria-labelledby="button-variants-title">
+        <h3 id="button-variants-title">Variants</h3>
+        <div class="showcase-button-dossier__grid">
+            @foreach (var variant in Enum.GetValues<ShadcnButtonVariant>())
+            {
+                <div class="showcase-button-dossier__sample">
+                    <ShadcnButton Variant="variant" Disabled="Disabled" AdditionalAttributes="Attributes(variant.ToString())">@ButtonLabel(variant)</ShadcnButton>
+                    <span>@variant</span>
+                </div>
+            }
+        </div>
+    </section>
+    <section class="showcase-button-dossier__section" aria-labelledby="button-sizes-title">
+        <h3 id="button-sizes-title">Sizes</h3>
+        <div class="showcase-button-dossier__sizes">
+            @foreach (var size in new[] { ShadcnButtonSize.ExtraSmall, ShadcnButtonSize.Small, ShadcnButtonSize.Default, ShadcnButtonSize.Large })
+            {
+                <div class="showcase-button-dossier__sample">
+                    <ShadcnButton Size="size" Variant="ShadcnButtonVariant.Outline" Disabled="Disabled">Save changes</ShadcnButton>
+                    <span>@size</span>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    [Parameter] public bool Disabled { get; set; }
+
+    private static string ButtonLabel(ShadcnButtonVariant variant) => variant switch
+    {
+        ShadcnButtonVariant.Destructive => "Delete",
+        ShadcnButtonVariant.Link => "View details",
+        ShadcnButtonVariant.Ghost => "More actions",
+        _ => "Save changes"
+    };
+
+    private static IReadOnlyDictionary<string, object> Attributes(string variant) => new Dictionary<string, object>
+    {
+        ["data-testid"] = $"button-variant-{variant.ToLowerInvariant()}",
+        ["aria-label"] = ButtonLabel(Enum.Parse<ShadcnButtonVariant>(variant))
+    };
+}

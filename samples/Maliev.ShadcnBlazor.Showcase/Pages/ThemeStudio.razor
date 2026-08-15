@@ -18,24 +18,48 @@
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
 <div class="theme-studio" data-testid="theme-studio" lang="@LocaleCode">
-    <header class="theme-studio-hero">
-        <div>
-            <span class="theme-studio-eyebrow">Theme Studio</span>
-            <h1>@Text("Build a production-ready semantic theme", "สร้างธีมเชิงความหมายที่พร้อมใช้งานจริง")</h1>
-            <p>@Text("Edit every supported token and metric. Valid changes flow through the real ShadcnThemeProvider and persist locally.", "แก้ไขโทเค็นและเมตริกที่รองรับทั้งหมด การเปลี่ยนแปลงที่ถูกต้องจะแสดงผ่าน ShadcnThemeProvider จริงและบันทึกในเครื่อง")</p>
+    <header class="theme-studio-appbar">
+        <div class="theme-studio-appbar__brand">
+            <span class="theme-studio-appbar__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 14.2 9.8 21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3Z" /></svg>
+            </span>
+            <div>
+                <strong>Theme Studio</strong>
+                <span>@Text("Maliev.ShadcnBlazor theme builder", "ตัวสร้างธีม Maliev.ShadcnBlazor")</span>
+            </div>
         </div>
-        <a class="theme-studio-docs-link" href="docs">Component docs</a>
+        <div class="theme-studio-appbar__actions">
+            <a class="theme-studio-docs-link" href="docs">Component docs</a>
+            <button type="button"
+                    class="theme-studio-controls-toggle"
+                    data-testid="theme-controls-toggle"
+                    aria-controls="theme-controls"
+                    aria-expanded="@ControlsExpanded"
+                    @onclick="ToggleControls">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                <span>@(_controlsOpen ? "Hide controls" : "Show controls")</span>
+            </button>
+        </div>
     </header>
 
     <PreviewToolbar State="State" />
 
-    <div class="theme-studio-workbench">
-        <ThemeInspector State="State" />
+    <div class="theme-studio-workbench" data-controls-open="@ControlsExpanded">
+        <div class="theme-inspector-drawer" aria-hidden="@ControlsHidden">
+            <ThemeInspector State="State" />
+        </div>
         <main class="theme-preview-region" id="theme-preview" tabindex="-1">
             <div class="theme-preview-stage"
                  data-testid="theme-preview-stage"
                  data-preview-width="@State.Viewport.Width"
                  style="@($"--theme-preview-width: {State.Viewport.Width}px")">
+                <div class="theme-preview-settings" data-testid="theme-generator-summary" aria-label="Active generator settings">
+                    <span><strong>Style</strong> @State.StyleId</span>
+                    <span><strong>Base</strong> @State.BaseColorId</span>
+                    <span><strong>Icons</strong> @State.IconLibrary</span>
+                    <span><strong>Menu</strong> @State.MenuAccent / @State.MenuColor</span>
+                    <span><strong>Radius</strong> @State.RadiusPreset</span>
+                </div>
                 <div class="theme-preview-scope">
                     <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
                 </div>
@@ -46,6 +70,7 @@
 
 @code {
     private bool _initialized;
+    private bool _controlsOpen = true;
     private bool _persisting;
     private bool _persistRequested;
     private bool _disposed;
@@ -135,7 +160,11 @@
     }
 
     private string Text(string english, string thai) => State.Locale == ThemeStudioLocale.Thai ? thai : english;
+    private string ControlsExpanded => _controlsOpen ? "true" : "false";
+    private string ControlsHidden => _controlsOpen ? "false" : "true";
     private ThemeStudioMockup _selectedMockup;
+
+    private void ToggleControls() => _controlsOpen = !_controlsOpen;
 
     public void Dispose()
     {

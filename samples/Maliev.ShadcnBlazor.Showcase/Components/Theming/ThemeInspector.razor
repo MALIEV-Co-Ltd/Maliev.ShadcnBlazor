@@ -30,11 +30,13 @@
         </div>
         <div class="theme-transfer-actions">
             <button type="button" data-testid="theme-import-open" aria-haspopup="dialog" @onclick="() => _importOpen = true">Import JSON</button>
+            <button type="button" data-testid="theme-code-open" aria-haspopup="dialog" @onclick="() => _codeOpen = true">Get code</button>
             <button type="button" data-testid="theme-export-open" aria-haspopup="dialog" @onclick="() => _exportOpen = true">Export bundle</button>
         </div>
     </div>
 
     <ThemeValidationSummary State="State" />
+    <ThemeGeneratorOptions State="State" />
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Light" Group="ThemeStudioGroup.Colors" />
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Dark" Group="ThemeStudioGroup.Colors" />
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Typography" />
@@ -44,11 +46,13 @@
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Focus" />
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Motion" />
     <ThemeImportDialog State="State" @bind-Open="_importOpen" />
+    <ThemeCodeDialog State="State" @bind-Open="_codeOpen" />
     <ThemeExportDialog State="State" @bind-Open="_exportOpen" />
 </aside>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen;
+    private bool _codeOpen;
     private bool _exportOpen;
 }

@@ -11,7 +11,7 @@ Library.
 ## Install
 
 ```bash
-dotnet add package Maliev.ShadcnBlazor --version 1.0.0
+dotnet add package Maliev.ShadcnBlazor --version 1.0.1
 ```
 
 Register the services in `Program.cs`:
@@ -62,6 +62,10 @@ every component family.
   motion behavior.
 - Keyboard and screen-reader behavior covered by unit and real-browser tests.
 - Theme tokens and MudBlazor adapters for applications that need both systems.
+- Bundled Geist, Noto Sans Thai, and JetBrains Mono fonts for a
+  deterministic offline default; see [theming](docs/theming.md).
+- A Blazor-first Theme Studio with live generator options plus portable JSON
+  and ready-to-paste C# output.
 - A standalone Showcase project with all component dossiers.
 
 ## Compatibility

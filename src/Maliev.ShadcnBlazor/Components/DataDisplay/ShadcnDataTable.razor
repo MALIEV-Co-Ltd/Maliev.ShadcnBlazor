@@ -2,19 +2,27 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-data-table")" style="@MergeStyle(null)" data-slot="data-table" aria-busy="@(Loading ? "true" : null)">
     <div class="shadcn-data-table-toolbar" data-slot="data-table-toolbar">
-        <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
+        <div class="shadcn-data-table-toolbar__filters">
+            <label class="shadcn-data-table-filter-control">
+                <span class="shadcn-sr-only">@FilterPlaceholder</span>
+                <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
+            </label>
+            @foreach (var column in OrderedColumns.Where(column => column.Filterable))
+            {
+                var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
+                <label class="shadcn-data-table-column-filter">
+                    <span class="shadcn-sr-only">@filterLabel</span>
+                    <input class="shadcn-data-table-filter shadcn-data-table-column-filter__input" type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
+                </label>
+            }
+        </div>
         <fieldset class="shadcn-data-table-visibility" data-slot="data-table-visibility">
             <legend class="shadcn-sr-only">@ColumnsLabel</legend>
             @foreach (var column in OrderedColumns.Where(column => column.Hideable))
             {
-                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@(!CurrentState.HiddenColumnKeys.Contains(column.Key))" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /> @column.Label</label>
+                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@(!CurrentState.HiddenColumnKeys.Contains(column.Key))" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
             }
         </fieldset>
-        @foreach (var column in OrderedColumns.Where(column => column.Filterable))
-        {
-            var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
-            <input type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
-        }
     </div>
     @if (Loading)
     {
@@ -81,13 +89,17 @@
         </div>
     }
     <div class="shadcn-data-table-footer" data-slot="data-table-footer">
-        <span data-slot="data-table-selection-summary" aria-live="polite">@SelectionSummary(Result.FilteredSelectedCount, Result.TotalCount)</span>
-        <span data-slot="data-table-page-summary">@PageSummary(Result.PageIndex + 1, Result.PageCount)</span>
-        <label><span class="shadcn-sr-only">@PageSizeLabel</span><select data-slot="data-table-page-size" aria-label="@PageSizeLabel" value="@CurrentState.PageSize" @onchange="OnPageSizeChanged">@foreach (var size in PageSizeOptions) { <option value="@size">@size</option> }</select></label>
-        <button type="button" data-slot="data-table-first" disabled="@(Result.PageIndex == 0)" @onclick="FirstPageAsync">@FirstLabel</button>
-        <button type="button" data-slot="data-table-previous" disabled="@(Result.PageIndex == 0)" @onclick="PreviousPageAsync">@PreviousLabel</button>
-        <button type="button" data-slot="data-table-next" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="NextPageAsync">@NextLabel</button>
-        <button type="button" data-slot="data-table-last" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="LastPageAsync">@LastLabel</button>
+        <div class="shadcn-data-table-footer__summary">
+            <span data-slot="data-table-selection-summary" aria-live="polite">@SelectionSummary(Result.FilteredSelectedCount, Result.TotalCount)</span>
+            <span data-slot="data-table-page-summary">@PageSummary(Result.PageIndex + 1, Result.PageCount)</span>
+        </div>
+        <div class="shadcn-data-table-footer__controls">
+            <label><span class="shadcn-sr-only">@PageSizeLabel</span><select data-slot="data-table-page-size" aria-label="@PageSizeLabel" value="@CurrentState.PageSize" @onchange="OnPageSizeChanged">@foreach (var size in PageSizeOptions) { <option value="@size">@size</option> }</select></label>
+            <button type="button" data-slot="data-table-first" disabled="@(Result.PageIndex == 0)" @onclick="FirstPageAsync">@FirstLabel</button>
+            <button type="button" data-slot="data-table-previous" disabled="@(Result.PageIndex == 0)" @onclick="PreviousPageAsync">@PreviousLabel</button>
+            <button type="button" data-slot="data-table-next" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="NextPageAsync">@NextLabel</button>
+            <button type="button" data-slot="data-table-last" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="LastPageAsync">@LastLabel</button>
+        </div>
     </div>
 </div>
 

@@ -4,22 +4,17 @@
 @implements IDisposable
 
 <div class="documentation-catalog-rail">
-    <div class="documentation-rail__heading">
-        <div>
-            <p class="documentation-eyebrow">Reference</p>
-            <h2>Components</h2>
-        </div>
+    <div class="documentation-rail__heading documentation-rail__toolbar">
+        <label class="documentation-field">
+            <span>Search components</span>
+            <input type="search"
+                   value="@State.Query"
+                   placeholder="Search components"
+                   autocomplete="off"
+                   @oninput="OnQueryChanged" />
+        </label>
         <button type="button" class="documentation-panel-close" aria-label="Close component catalog" @onclick="RequestCloseAsync">Close</button>
     </div>
-
-    <label class="documentation-field">
-        <span>Search components</span>
-        <input type="search"
-               value="@State.Query"
-               placeholder="Search components"
-               autocomplete="off"
-               @oninput="OnQueryChanged" />
-    </label>
 
     <p class="documentation-result-count" data-testid="documentation-result-count" role="status" aria-live="polite">
         @ResultAnnouncement

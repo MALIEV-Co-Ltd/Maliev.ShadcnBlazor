@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <PackageId>Maliev.ShadcnBlazor</PackageId>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <Authors>MALIEV Co., Ltd.</Authors>
     <Company>MALIEV Co., Ltd.</Company>
     <Description>Accessible, themeable Shadcn-inspired components for .NET 10 Blazor applications.</Description>
@@ -35,6 +35,9 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" Link="LICENSE" />
     <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" Link="THIRD-PARTY-NOTICES.md" />
+    <Content Update="wwwroot\fonts\Geist-OFL.txt" Pack="true" PackagePath="licenses\Geist-OFL.txt" />
+    <Content Update="wwwroot\fonts\Noto-Sans-Thai-OFL.txt" Pack="true" PackagePath="licenses\Noto-Sans-Thai-OFL.txt" />
+    <Content Update="wwwroot\fonts\JetBrains-Mono-OFL.txt" Pack="true" PackagePath="licenses\JetBrains-Mono-OFL.txt" />
     <None Update="licenses\shadcn-ui-LICENSE.md" Pack="true" PackagePath="licenses\shadcn-ui-LICENSE.md" />
     <None Update="licenses\MudBlazor-LICENSE.txt" Pack="true" PackagePath="licenses\MudBlazor-LICENSE.txt" />
     <None Include="Reference\shadcn-reference.json" Pack="true" PackagePath="reference\shadcn-reference.json" />

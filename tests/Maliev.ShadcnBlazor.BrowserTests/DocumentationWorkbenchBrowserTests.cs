@@ -95,6 +95,13 @@ public sealed class DocumentationWorkbenchBrowserTests(
         var content = page.Locator("#documentation-content");
         await Assertions.Expect(outline.Locator("a[href='#installation']")).ToHaveTextAsync("Installation");
         await Assertions.Expect(outline.Locator("a[href='#api-reference']")).ToHaveTextAsync("API Reference");
+        var activeOutlineItem = outline.Locator("a[href='#overview']");
+        await Assertions.Expect(activeOutlineItem).ToHaveAttributeAsync("data-active", "true");
+        var activeOutlineStyle = await activeOutlineItem.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return `${style.fontWeight}|${style.backgroundColor}|${style.borderInlineStartColor}`; }");
+        var activeStyleParts = activeOutlineStyle.Split('|');
+        Assert.True(int.Parse(activeStyleParts[0], System.Globalization.CultureInfo.InvariantCulture) >= 700);
+        Assert.Contains("0, 0, 0, 0", activeStyleParts[1], StringComparison.Ordinal);
+        Assert.Contains("0, 0, 0, 0", activeStyleParts[2], StringComparison.Ordinal);
         await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("@using Maliev.ShadcnBlazor");
         if (width > 1280)
         {

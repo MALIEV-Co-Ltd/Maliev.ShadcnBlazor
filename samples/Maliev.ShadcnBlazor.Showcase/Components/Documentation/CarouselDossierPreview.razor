@@ -1,0 +1,78 @@
+@using Maliev.ShadcnBlazor.Components.Content
+
+<div class="showcase-carousel-demo" data-testid="showcase-carousel-demo">
+    <ShadcnCarousel @bind-SelectedIndex="_selectedIndex"
+                    Orientation="@(Vertical ? ShadcnCarouselOrientation.Vertical : ShadcnCarouselOrientation.Horizontal)"
+                    Options="Options"
+                    Label="Production queue"
+                    PreviousLabel="Previous production queue slide"
+                    NextLabel="Next production queue slide">
+        <ShadcnCarouselContent>
+            @foreach (var slide in Slides)
+            {
+                <ShadcnCarouselItem @key="slide.Index" Index="slide.Index" Label="slide.AccessibleLabel">
+                    <article class="showcase-carousel-slide showcase-carousel-slide--@slide.Tone">
+                        <span class="showcase-carousel-slide__index" aria-hidden="true">@slide.Index.ToString("00")</span>
+                        <span class="showcase-carousel-slide__eyebrow">@slide.Eyebrow</span>
+                        <strong class="showcase-carousel-slide__title">@slide.Title</strong>
+                        <span class="showcase-carousel-slide__metric">@slide.Metric</span>
+                        <span class="showcase-carousel-slide__detail">@slide.Detail</span>
+                    </article>
+                </ShadcnCarouselItem>
+            }
+        </ShadcnCarouselContent>
+        <ShadcnCarouselPrevious data-testid="showcase-carousel-previous" />
+        <ShadcnCarouselNext data-testid="showcase-carousel-next" />
+    </ShadcnCarousel>
+
+    <div class="showcase-carousel-meta" data-testid="showcase-carousel-status" aria-live="polite">
+        <span>Slide @(_selectedIndex + 1) of @Slides.Count</span>
+        <span aria-hidden="true">·</span>
+        <strong>@CurrentSlide.Title</strong>
+    </div>
+
+    <div class="showcase-carousel-dots" role="group" aria-label="Choose production queue slide">
+        @foreach (var slide in Slides)
+        {
+            <button type="button"
+                    class="showcase-carousel-dot@(slide.Index == _selectedIndex ? " is-selected" : null)"
+                    aria-label="Show @slide.AccessibleLabel"
+                    aria-pressed="@(slide.Index == _selectedIndex ? "true" : "false")"
+                    data-testid="showcase-carousel-dot-@slide.Index"
+                    @onclick="() => SelectAsync(slide.Index)"></button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool Vertical { get; set; }
+    [Parameter] public bool Loop { get; set; }
+    [Parameter] public bool Rtl { get; set; }
+    [Parameter] public bool ReducedMotion { get; set; }
+
+    private int _selectedIndex;
+
+    private IReadOnlyList<CarouselSlide> Slides { get; } =
+    [
+        new(0, "Operations", "Laser cell", "98%", "On schedule", "Operations · Laser cell · 98%", "operations"),
+        new(1, "Quality", "First-pass yield", "96.2%", "Target met", "Quality · First-pass yield · 96.2%", "quality"),
+        new(2, "Delivery", "Orders shipped", "1,284", "This month", "Delivery · Orders shipped · 1,284", "delivery")
+    ];
+
+    private ShadcnCarouselOptions Options => new()
+    {
+        Loop = Loop,
+        RightToLeft = Rtl,
+        ReducedMotion = ReducedMotion
+    };
+
+    private CarouselSlide CurrentSlide => Slides[Math.Clamp(_selectedIndex, 0, Slides.Count - 1)];
+
+    private Task SelectAsync(int index)
+    {
+        _selectedIndex = Math.Clamp(index, 0, Slides.Count - 1);
+        return Task.CompletedTask;
+    }
+
+    private sealed record CarouselSlide(int Index, string Eyebrow, string Title, string Metric, string Detail, string AccessibleLabel, string Tone);
+}

@@ -1,0 +1,95 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<section class="theme-generator-options" aria-labelledby="theme-generator-options-title" data-testid="theme-generator-options">
+    <div class="theme-inspector-group__heading">
+        <div>
+            <span class="theme-inspector__eyebrow">Generated app settings</span>
+            <h3 id="theme-generator-options-title">Generator options</h3>
+            <p>These choices are included in the portable JSON and C# output.</p>
+        </div>
+    </div>
+    <div class="theme-generator-options__grid">
+        <MudSelect T="string"
+                   Value="@State.StyleId"
+                   ValueChanged="State.SetStyle"
+                   Label="Style"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated component style"
+                   data-testid="theme-style-select">
+            @foreach (var option in ThemeStudioGeneratorCatalog.Styles)
+            {
+                <MudSelectItem T="string" Value="@option.Id">@option.DisplayName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="string"
+                   Value="@State.BaseColorId"
+                   ValueChanged="State.SetBaseColor"
+                   Label="Base color"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated base color"
+                   data-testid="theme-base-color-select">
+            @foreach (var option in ThemeStudioGeneratorCatalog.BaseColors)
+            {
+                <MudSelectItem T="string" Value="@option.Id">@option.DisplayName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="ThemeStudioIconLibrary"
+                   Value="@State.IconLibrary"
+                   ValueChanged="State.SetIconLibrary"
+                   Label="Icon library"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated icon library"
+                   data-testid="theme-icon-library-select">
+            @foreach (var library in Enum.GetValues<ThemeStudioIconLibrary>())
+            {
+                <MudSelectItem T="ThemeStudioIconLibrary" Value="@library">@library</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="ThemeStudioRadiusPreset"
+                   Value="@State.RadiusPreset"
+                   ValueChanged="State.SetRadiusPreset"
+                   Label="Radius"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated radius"
+                   data-testid="theme-radius-select">
+            @foreach (var radius in ThemeStudioGeneratorCatalog.Radii)
+            {
+                <MudSelectItem T="ThemeStudioRadiusPreset" Value="@radius.Preset">@radius.DisplayName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="ThemeStudioMenuAccent"
+                   Value="@State.MenuAccent"
+                   ValueChanged="State.SetMenuAccent"
+                   Label="Menu accent"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated menu accent"
+                   data-testid="theme-menu-accent-select">
+            @foreach (var accent in Enum.GetValues<ThemeStudioMenuAccent>())
+            {
+                <MudSelectItem T="ThemeStudioMenuAccent" Value="@accent">@accent</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="ThemeStudioMenuColor"
+                   Value="@State.MenuColor"
+                   ValueChanged="State.SetMenuColor"
+                   Label="Menu color"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   aria-label="Generated menu color"
+                   data-testid="theme-menu-color-select">
+            @foreach (var color in Enum.GetValues<ThemeStudioMenuColor>())
+            {
+                <MudSelectItem T="ThemeStudioMenuColor" Value="@color">@color</MudSelectItem>
+            }
+        </MudSelect>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+}

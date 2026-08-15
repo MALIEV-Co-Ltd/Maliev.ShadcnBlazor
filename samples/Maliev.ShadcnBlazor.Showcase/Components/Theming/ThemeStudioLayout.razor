@@ -10,7 +10,12 @@
                      Direction="State.Direction"
                      Class="showcase-root theme-studio-provider"
                      data-testid="theme-preview-scope"
-                     data-preview-mode="@State.Mode.ToString().ToLowerInvariant()">
+                     data-preview-mode="@State.Mode.ToString().ToLowerInvariant()"
+                     data-theme-style="@State.StyleId"
+                     data-theme-base-color="@State.BaseColorId"
+                     data-theme-icon-library="@State.IconLibrary.ToString().ToLowerInvariant()"
+                     data-theme-menu-accent="@State.MenuAccent.ToString().ToLowerInvariant()"
+                     data-theme-menu-color="@State.MenuColor.ToString().ToLowerInvariant()">
     <div class="showcase-shell">
         <main class="showcase-main theme-studio-main">@Body</main>
         <footer class="showcase-footer">Maliev.ShadcnBlazor Theme Studio · local and deterministic</footer>

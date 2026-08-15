@@ -70,6 +70,22 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DisclosureExamplesExposeRealisticContentAndPaginationEllipsis()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+        var accordion = Assert.Single(registry.GetBySlug("accordion"));
+        Assert.Contains("What are the delivery options?", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("How can I contact support?", accordion.RazorSource, StringComparison.Ordinal);
+
+        var pagination = Assert.Single(registry.GetBySlug("pagination"));
+        Assert.Contains("ShadcnPaginationEllipsis", pagination.RazorSource, StringComparison.Ordinal);
+
+        var tabs = Assert.Single(registry.GetBySlug("tabs"));
+        Assert.Contains("Files", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Activity", tabs.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EvidencePairSurfaceOwnsOneDeterministicNamedStatePerComponent()
     {
         var cut = Render<DisclosureNavigationEvidence>();

@@ -4,8 +4,8 @@
 @inject IJSRuntime JS
 @inherits ShadcnFormComponentBase<TValue>
 
-<div @ref="Root" class="@MergeClass("shadcn-select")" style="@MergeStyle()" data-slot="select" data-open="@(Open ? "true" : null)">
-    <button @ref="Trigger" @attributes="ForwardedAttributes" class="shadcn-select-trigger" type="button" data-slot="select-trigger" data-size="@SizeValue" disabled="@EffectiveDisabled" aria-haspopup="listbox" aria-expanded="@Open.ToString().ToLowerInvariant()" aria-controls="@ListboxId" aria-activedescendant="@ActiveDescendant" aria-readonly="@(ReadOnly ? "true" : null)" aria-required="@(Required ? "true" : null)" aria-invalid="@(EffectiveInvalid ? "true" : null)" aria-describedby="@DescribedBy" @onclick="ToggleOpenAsync" @onkeydown="HandleKeyDownAsync">
+<div @ref="Root" class="@MergeClass("shadcn-select")" style="@MergeStyle()" data-slot="select" data-open="@(EffectiveOpen ? "true" : null)">
+    <button @ref="Trigger" @attributes="ForwardedAttributes" class="shadcn-select-trigger" type="button" data-slot="select-trigger" data-size="@SizeValue" disabled="@EffectiveDisabled" aria-haspopup="listbox" aria-expanded="@EffectiveOpen.ToString().ToLowerInvariant()" aria-controls="@ListboxId" aria-activedescendant="@ActiveDescendant" aria-readonly="@(ReadOnly ? "true" : null)" aria-required="@(Required ? "true" : null)" aria-invalid="@(EffectiveInvalid ? "true" : null)" aria-describedby="@DescribedBy" @onclick="ToggleOpenAsync" @onkeydown="HandleKeyDownAsync">
         <span data-slot="select-value" data-placeholder="@(SelectedOption is null ? "true" : null)">@(SelectedOption?.Text ?? Placeholder)</span>
         <svg class="shadcn-select-trigger-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg>
     </button>
@@ -13,7 +13,7 @@
     {
         <button class="shadcn-select-clear" data-slot="select-clear" type="button" aria-label="@ClearLabel" @onclick="ClearAsync">×</button>
     }
-    @if (Open)
+    @if (EffectiveOpen)
     {
         <div class="shadcn-select-content" data-slot="select-content">
             <div id="@ListboxId" role="listbox" tabindex="-1">
@@ -52,23 +52,49 @@
     private IJSObjectReference? Module;
     private DotNetObjectReference<ShadcnSelect<TValue>>? SelfReference;
     private bool IsObserving;
+    private bool _uncontrolledOpen;
+    private bool _openInitialized;
     private int ActiveIndex;
     private ShadcnSelectOption<TValue>? SelectedOption => Options.FirstOrDefault(IsSelected);
     private IEnumerable<IGrouping<string, ShadcnSelectOption<TValue>>> GroupedOptions => Options.GroupBy(option => option.Group ?? string.Empty);
     private string SizeValue => Size switch { ShadcnControlSize.Default => "default", ShadcnControlSize.Small => "sm", _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown control size.") };
-    private string? ActiveDescendant => Open && ActiveIndex >= 0 ? OptionId(ActiveIndex) : null;
+    private bool EffectiveOpen => OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
+    private string? ActiveDescendant => EffectiveOpen && ActiveIndex >= 0 ? OptionId(ActiveIndex) : null;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "type", "data-slot", "data-size", "disabled", "aria-haspopup", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-readonly", "aria-required", "aria-invalid", "aria-describedby");
-    protected override void OnParametersSet() { base.OnParametersSet(); _ = SizeValue; var selected = SelectedOption is null ? -1 : OptionIndex(SelectedOption); ActiveIndex = selected >= 0 ? selected : FirstEnabled(); }
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _ = SizeValue;
+        if (!_openInitialized)
+        {
+            _uncontrolledOpen = Open;
+            _openInitialized = true;
+        }
+        var selected = SelectedOption is null ? -1 : OptionIndex(SelectedOption);
+        ActiveIndex = selected >= 0 ? selected : FirstEnabled();
+    }
     private bool IsSelected(ShadcnSelectOption<TValue> option) => EqualityComparer<TValue>.Default.Equals(Value, option.Value);
     private int FirstEnabled() { for (var i = 0; i < Options.Count; i++) if (!Options[i].Disabled) return i; return -1; }
     private int OptionIndex(ShadcnSelectOption<TValue> option) { for (var i = 0; i < Options.Count; i++) if (ReferenceEquals(Options[i], option) || EqualityComparer<ShadcnSelectOption<TValue>>.Default.Equals(Options[i], option)) return i; return -1; }
-    private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await OpenChanged.InvokeAsync(!Open); }
-    private async Task ClearAsync() { if (!EffectiveDisabled && !ReadOnly) { await SetCurrentValueAsync(default!); if (Open) await CloseAndFocusAsync(); } }
+    private async Task SetOpenAsync(bool value)
+    {
+        if (OpenChanged.HasDelegate)
+        {
+            await OpenChanged.InvokeAsync(value);
+            return;
+        }
+
+        if (_uncontrolledOpen == value) return;
+        _uncontrolledOpen = value;
+        await InvokeAsync(StateHasChanged);
+    }
+    private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
+    private async Task ClearAsync() { if (!EffectiveDisabled && !ReadOnly) await SetCurrentValueAsync(default!); }
     private async Task SelectAsync(ShadcnSelectOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; await SetCurrentValueAsync(option.Value); await CloseAndFocusAsync(); }
     private async Task HandleKeyDownAsync(KeyboardEventArgs args)
     {
         if (EffectiveDisabled || ReadOnly) return;
-        if (args.Key is "ArrowDown" or "ArrowUp" or "Home" or "End" && !Open) await OpenChanged.InvokeAsync(true);
+        if (args.Key is "ArrowDown" or "ArrowUp" or "Home" or "End" && !EffectiveOpen) await SetOpenAsync(true);
         ActiveIndex = args.Key switch { "Home" => FirstEnabled(), "End" => LastEnabled(), "ArrowDown" => Move(1), "ArrowUp" => Move(-1), _ => ActiveIndex };
         if (args.Key.Length == 1 && args.Key != " ")
         {
@@ -78,30 +104,30 @@
         }
         if (args.Key is "Enter" or " " && ActiveIndex >= 0) await SelectAsync(Options[ActiveIndex]);
         if (args.Key == "Escape") await CloseAndFocusAsync();
-        if (args.Key == "Tab" && Open) await OpenChanged.InvokeAsync(false);
+        if (args.Key == "Tab" && EffectiveOpen) await SetOpenAsync(false);
     }
     private string OptionId(int index) => $"{ListboxId}-option-{index}";
-    private async Task CloseAndFocusAsync() { await OpenChanged.InvokeAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
+    private async Task CloseAndFocusAsync() { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private int LastEnabled() { for (var i = Options.Count - 1; i >= 0; i--) if (!Options[i].Disabled) return i; return -1; }
     private int Move(int delta) { if (Options.Count == 0) return -1; var current = ActiveIndex; for (var count = 0; count < Options.Count; count++) { current = (current + delta + Options.Count) % Options.Count; if (!Options[current].Disabled) return current; } return ActiveIndex; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Open && !IsObserving)
+        if (EffectiveOpen && !IsObserving)
         {
             Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
             SelfReference ??= DotNetObjectReference.Create(this);
             await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "select");
             IsObserving = true;
         }
-        else if (!Open && IsObserving && Module is not null)
+        else if (!EffectiveOpen && IsObserving && Module is not null)
         {
             await Module.InvokeVoidAsync("disconnectPopupDismissal", Root);
             IsObserving = false;
         }
     }
 
-    [JSInvokable] public async Task DismissPopup() { if (Open) await CloseAndFocusAsync(); }
+    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await CloseAndFocusAsync(); }
 
     public async ValueTask DisposeAsync()
     {

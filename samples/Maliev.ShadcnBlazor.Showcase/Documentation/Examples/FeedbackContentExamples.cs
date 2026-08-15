@@ -53,18 +53,56 @@ internal static class FeedbackContentExamples
             }));
             b.CloseComponent();
         };
-        return Example("alert", "Alert callout", "Compose an accessible shadcn alert with semantic icon, title, description, and an optional action.", "<ShadcnAlert><ShadcnAlertIcon>...</ShadcnAlertIcon><ShadcnAlertTitle>...</ShadcnAlertTitle><ShadcnAlertDescription>...</ShadcnAlertDescription></ShadcnAlert>", preview, [EnumSelect("alert-variant", "Variant", variant, v => variant = v), EnumSelect("alert-role", "Role", role, v => role = v), Toggle("alert-action", "Action", v => action = v, true)], ["default", "destructive", "icon", "title", "description", "action", "alert", "status"]);
+        const string source = """
+<ShadcnAlert Variant="ShadcnAlertVariant.Default" AlertRole="ShadcnAlertRole.Status">
+    <ShadcnAlertIcon>✓</ShadcnAlertIcon>
+    <ShadcnAlertTitle>ชำระเงินสำเร็จ</ShadcnAlertTitle>
+    <ShadcnAlertDescription>
+        Payment processed — ใบเสนอราคาพร้อมดำเนินการต่อ
+    </ShadcnAlertDescription>
+    <ShadcnAlertAction>
+        <button type="button">ดูรายละเอียด</button>
+    </ShadcnAlertAction>
+</ShadcnAlert>
+""";
+        return Example("alert", "Alert callout", "Compose an accessible shadcn alert with semantic icon, title, description, and an optional action.", source, preview, [EnumSelect("alert-variant", "Variant", variant, v => variant = v), EnumSelect("alert-role", "Role", role, v => role = v), Toggle("alert-action", "Action", v => action = v, true)], ["default", "destructive", "icon", "title", "description", "action", "alert", "status"]);
     }
     private static ComponentExampleDefinition Avatar()
     {
         var size = ShadcnAvatarSize.Default; var failed = false; var badge = false; var group = false;
         RenderFragment preview = b => { b.OpenComponent<AvatarDossierPreview>(0); b.AddAttribute(1, "Size", size); b.AddAttribute(2, "Failed", failed); b.AddAttribute(3, "Badge", badge); b.AddAttribute(4, "Group", group); b.CloseComponent(); };
-        return Example("avatar", "Avatar fallback", "Review sizes and image failure fallback; badge and group states are available as live controls.", "<ShadcnAvatar><ShadcnAvatarImage Source=\"...\" Alt=\"Operator\" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback></ShadcnAvatar>", preview, [EnumSelect("avatar-size", "Size", size, v => size = v), Toggle("avatar-failed", "Failed image", v => failed = v), Toggle("avatar-badge", "Badge", v => badge = v), Toggle("avatar-group", "Group", v => group = v)], ["sm", "default", "lg", "fallback", "badge", "group"]);
+        const string source = """
+<ShadcnAvatarGroup>
+    <ShadcnAvatar>
+        <ShadcnAvatarImage Source="/images/avatars/operator-thai.png" Alt="Thai operator" />
+        <ShadcnAvatarFallback>OP</ShadcnAvatarFallback>
+    </ShadcnAvatar>
+    <ShadcnAvatar>
+        <ShadcnAvatarImage Source="/images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
+        <ShadcnAvatarFallback>QR</ShadcnAvatarFallback>
+    </ShadcnAvatar>
+    <ShadcnAvatar>
+        <ShadcnAvatarImage Source="/images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
+        <ShadcnAvatarFallback>PC</ShadcnAvatarFallback>
+    </ShadcnAvatar>
+    <ShadcnAvatarGroupCount>+2</ShadcnAvatarGroupCount>
+</ShadcnAvatarGroup>
+<ShadcnAvatar Size="ShadcnAvatarSize.Default">
+    <ShadcnAvatarImage Source="/images/avatars/operator-thai.png" Alt="Thai operator" />
+    <ShadcnAvatarFallback>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.25" fill="currentColor" />
+            <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" />
+        </svg>
+    </ShadcnAvatarFallback>
+</ShadcnAvatar>
+""";
+        return Example("avatar", "Avatar fallback", "Review distinct Thai portraits, intentional avatar-less states, visual fallback, and optional status/group composition.", source, preview, [EnumSelect("avatar-size", "Size", size, v => size = v), Toggle("avatar-failed", "Failed image", v => failed = v), Toggle("avatar-badge", "Badge", v => badge = v), Toggle("avatar-group", "Group", v => group = v)], ["sm", "default", "lg", "fallback", "badge", "group", "distinct-images"]);
     }
     private static ComponentExampleDefinition Badge()
     {
         var variant = ShadcnBadgeVariant.Default; var link = false; var invalid = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnBadge>(0); b.AddAttribute(1, "Variant", variant); b.AddAttribute(2, "Href", link ? "/docs/components/badge" : null); b.AddAttribute(3, "ChildContent", Text("Ready")); if (invalid) b.AddAttribute(4, "AdditionalAttributes", new Dictionary<string, object> { ["aria-invalid"] = "true" }); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenElement(0, "div"); b.AddAttribute(1, "class", "showcase-badge-demo"); b.OpenComponent<ShadcnBadge>(2); b.AddAttribute(3, "Variant", variant); b.AddAttribute(4, "Href", link ? "/docs/components/badge" : null); b.AddAttribute(5, "ChildContent", Text("Ready")); if (invalid) b.AddAttribute(6, "AdditionalAttributes", new Dictionary<string, object> { ["aria-invalid"] = "true" }); b.CloseComponent(); b.CloseElement(); };
         return Example("badge", "Status badge", "Exercise all semantic variants, validation, and optional link rendering.", "<ShadcnBadge Variant=\"ShadcnBadgeVariant.Secondary\">Ready</ShadcnBadge>", preview, [EnumSelect("badge-variant", "Variant", variant, v => variant = v), Toggle("badge-link", "Link", v => link = v), Toggle("badge-invalid", "Invalid", v => invalid = v)], ["variants", "inline", "link", "focus"]);
     }
     private static ComponentExampleDefinition Card()
@@ -75,9 +113,41 @@ internal static class FeedbackContentExamples
     }
     private static ComponentExampleDefinition Carousel()
     {
-        var vertical = false; var loop = false; var rtl = false; var reduced = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnCarousel>(0); b.AddAttribute(1, "Orientation", vertical ? ShadcnCarouselOrientation.Vertical : ShadcnCarouselOrientation.Horizontal); b.AddAttribute(2, "Options", new ShadcnCarouselOptions { Loop = loop, RightToLeft = rtl, ReducedMotion = reduced }); b.AddAttribute(3, "Label", "Production queue"); b.AddAttribute(4, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnCarouselContent>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(items => { for (var i = 0; i < 3; i++) { items.OpenComponent<ShadcnCarouselItem>(i * 3); items.AddAttribute(i * 3 + 1, "Index", i); items.AddAttribute(i * 3 + 2, "ChildContent", Text($"Job {i + 1}")); items.CloseComponent(); } })); c.CloseComponent(); c.OpenComponent<ShadcnCarouselPrevious>(2); c.CloseComponent(); c.OpenComponent<ShadcnCarouselNext>(3); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("carousel", "Carousel engine", "Review the Blazor-native typed engine across axis and loop modes.", "<ShadcnCarousel Options=\"Options\"><ShadcnCarouselContent>...</ShadcnCarouselContent></ShadcnCarousel>", preview, [Toggle("carousel-vertical", "Vertical", v => vertical = v), Toggle("carousel-loop", "Loop", v => loop = v), Toggle("carousel-rtl", "RTL", v => rtl = v), Toggle("carousel-reduced", "Reduced motion", v => reduced = v, true)], ["horizontal", "vertical", "loop", "keyboard", "pointer", "rtl", "reduced-motion"]);
+        var vertical = false; var loop = false; var rtl = false; var reduced = false;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<CarouselDossierPreview>(0);
+            b.AddAttribute(1, "Vertical", vertical);
+            b.AddAttribute(2, "Loop", loop);
+            b.AddAttribute(3, "Rtl", rtl);
+            b.AddAttribute(4, "ReducedMotion", reduced);
+            b.CloseComponent();
+        };
+        const string source = """
+<ShadcnCarousel Label="Production queue"
+                @bind-SelectedIndex="selectedIndex"
+                Options="@Options">
+    <ShadcnCarouselContent>
+        <ShadcnCarouselItem Index="0" Label="Operations · Laser cell · 98%">
+            <article class="queue-slide">Operations · Laser cell · 98% · On schedule</article>
+        </ShadcnCarouselItem>
+        <ShadcnCarouselItem Index="1" Label="Quality · First-pass yield · 96.2%">
+            <article class="queue-slide">Quality · First-pass yield · 96.2% · Target met</article>
+        </ShadcnCarouselItem>
+        <ShadcnCarouselItem Index="2" Label="Delivery · Orders shipped · 1,284">
+            <article class="queue-slide">Delivery · Orders shipped · 1,284 · This month</article>
+        </ShadcnCarouselItem>
+    </ShadcnCarouselContent>
+    <ShadcnCarouselPrevious />
+    <ShadcnCarouselNext />
+</ShadcnCarousel>
+
+@code {
+    private int selectedIndex;
+    private readonly ShadcnCarouselOptions Options = new() { Loop = true };
+}
+""";
+        return Example("carousel", "Carousel engine", "Move through a production queue with arrows, keyboard shortcuts, pointer gestures, slide status, and motion preferences.", source, preview, [Toggle("carousel-vertical", "Vertical", v => vertical = v), Toggle("carousel-loop", "Loop", v => loop = v), Toggle("carousel-rtl", "RTL", v => rtl = v), Toggle("carousel-reduced", "Reduced motion", v => reduced = v)], ["horizontal", "vertical", "loop", "keyboard", "pointer", "status", "dots", "rtl", "reduced-motion"]);
     }
     private static ComponentExampleDefinition Progress()
     {
@@ -88,8 +158,8 @@ internal static class FeedbackContentExamples
     private static ComponentExampleDefinition Skeleton()
     {
         var circle = false; var motion = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnSkeleton>(0); b.AddAttribute(1, "Shape", circle ? ShadcnSkeletonShape.Circle : ShadcnSkeletonShape.Default); b.AddAttribute(2, "Animation", motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None); b.AddAttribute(3, "Style", "width: 8rem; height: 2rem"); b.CloseComponent(); };
-        return Example("skeleton", "Skeleton", "Adjust shape and animation while reduced motion remains respected.", "<ShadcnSkeleton Style=\"width:8rem;height:2rem\" />", preview, [Toggle("skeleton-circle", "Circle", v => circle = v), Toggle("skeleton-motion", "Pulse", v => motion = v, true)], ["rectangle", "circle", "pulse", "reduced-motion"]);
+        RenderFragment preview = b => { b.OpenComponent<SkeletonDossierPreview>(0); b.AddAttribute(1, "Circle", circle); b.AddAttribute(2, "Motion", motion); b.CloseComponent(); };
+        return Example("skeleton", "Skeleton", "Preview a realistic page-loading layout with shared geometry and respectful motion.", "<ShadcnSkeleton Style=\"width:100%;height:1rem\" />", preview, [Toggle("skeleton-circle", "Avatar circle", v => circle = v), Toggle("skeleton-motion", "Pulse", v => motion = v, true)], ["layout", "circle", "pulse", "reduced-motion"]);
     }
     private static ComponentExampleDefinition Spinner()
     {
@@ -101,7 +171,7 @@ internal static class FeedbackContentExamples
     {
         var limit = 3d; var start = false; var reduced = false; var type = ShadcnToastType.Success; var priority = ShadcnToastPriority.Normal;
         RenderFragment preview = b => { b.OpenComponent<ToastDossierPreview>(0); b.AddAttribute(1, "MaximumVisible", (int)limit); b.AddAttribute(2, "Placement", start ? ShadcnToastPlacement.BottomStart : ShadcnToastPlacement.BottomEnd); b.AddAttribute(3, "ReducedMotion", reduced); b.AddAttribute(4, "Type", type); b.AddAttribute(5, "Priority", priority); b.CloseComponent(); };
-        return Example("toast", "Toast viewport", "Trigger and configure the deterministic queue viewport.", "@inject IShadcnToastService Toasts\n<ShadcnButton OnClick=\"Show\">Show</ShadcnButton>\n<ShadcnToaster />", preview, [Number("toast-limit", "Visible limit", limit, v => limit = Math.Max(1, v)), Toggle("toast-start", "Logical start", v => start = v), Toggle("toast-reduced", "Reduced motion", v => reduced = v), EnumSelect("toast-type", "Type", type, v => type = v), EnumSelect("toast-priority", "Priority", priority, v => priority = v)], ["queue", "limit", "promise", "pause", "swipe", "F6", "rtl", "reduced-motion", "priority"]);
+        return Example("toast", "Toast viewport", "Trigger the real page-level toast queue; notifications stack outside this preview and remain keyboard reachable.", "@inject IShadcnToastService Toasts\n<ShadcnButton OnClick=\"Show\">Show localized toast</ShadcnButton>\n<ShadcnToaster />", preview, [Number("toast-limit", "Visible limit", limit, v => limit = Math.Max(1, v)), Toggle("toast-start", "Logical start", v => start = v), Toggle("toast-reduced", "Reduced motion", v => reduced = v), EnumSelect("toast-type", "Type", type, v => type = v), EnumSelect("toast-priority", "Priority", priority, v => priority = v)], ["queue", "limit", "promise", "pause", "swipe", "F6", "rtl", "reduced-motion", "priority"]);
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, description, source, preview, controls, tags);

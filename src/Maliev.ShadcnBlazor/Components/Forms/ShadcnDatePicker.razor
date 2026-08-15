@@ -7,11 +7,11 @@
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
-<div @ref="Root" class="@MergeClass("shadcn-date-picker")" style="@MergeStyle(null)" data-slot="date-picker" data-open="@(Open ? "true" : null)" @onkeydown="HandleKeyDownAsync">
-    <button @ref="Trigger" @attributes="ForwardedAttributes" class="shadcn-date-picker-trigger" type="button" data-slot="date-picker-trigger" disabled="@EffectiveDisabled" aria-haspopup="dialog" aria-expanded="@Open.ToString().ToLowerInvariant()" aria-controls="@DialogId" aria-readonly="@(ReadOnly ? "true" : null)" aria-required="@(Required ? "true" : null)" aria-invalid="@(EffectiveInvalid || ParseInvalid ? "true" : null)" aria-describedby="@DescribedBy" @onclick="ToggleAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z" /></svg><span data-placeholder="@(!HasSelection ? "true" : null)">@TriggerText</span></button>
+<div @ref="Root" class="@MergeClass("shadcn-date-picker")" style="@MergeStyle(null)" data-slot="date-picker" data-open="@(EffectiveOpen ? "true" : null)" @onkeydown="HandleKeyDownAsync">
+    <button @ref="Trigger" @attributes="ForwardedAttributes" class="shadcn-date-picker-trigger" type="button" data-slot="date-picker-trigger" disabled="@EffectiveDisabled" aria-haspopup="dialog" aria-expanded="@EffectiveOpen.ToString().ToLowerInvariant()" aria-controls="@DialogId" aria-readonly="@(ReadOnly ? "true" : null)" aria-required="@(Required ? "true" : null)" aria-invalid="@(EffectiveInvalid || ParseInvalid ? "true" : null)" aria-describedby="@DescribedBy" @onclick="ToggleAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z" /></svg><span data-placeholder="@(!HasSelection ? "true" : null)">@TriggerText</span></button>
     @if (AllowTextInput) { <input class="shadcn-date-picker-input" data-slot="date-picker-input" value="@TextInputValue" placeholder="@Placeholder" disabled="@EffectiveDisabled" readonly="@ReadOnly" required="@Required" aria-label="@TextInputLabel" aria-describedby="@DescribedBy" aria-invalid="@(EffectiveInvalid || ParseInvalid ? "true" : null)" @onchange="ParseInputAsync" /> }
     @if (Clearable && HasSelection && !EffectiveDisabled && !ReadOnly) { <button type="button" data-slot="date-picker-clear" aria-label="@ClearLabel" @onclick="ClearAsync">×</button> }
-    @if (Open)
+    @if (EffectiveOpen)
     {
         <div id="@DialogId" class="shadcn-date-picker-content" data-slot="date-picker-content" role="dialog" aria-label="@CalendarLabel">
             <ShadcnCalendar Mode="@Mode" Value="@Value" ValueChanged="SelectAsync" Range="@Range" RangeChanged="SelectRangeAsync" VisibleMonth="@EffectiveVisibleMonth" VisibleMonthChanged="VisibleMonthChanged" Today="@Today" Culture="@Culture" FirstDayOfWeek="@FirstDayOfWeek" ShowOutsideDays="@ShowOutsideDays" ShowWeekNumbers="@ShowWeekNumbers" Min="@Min" Max="@Max" IsDateDisabled="@IsDateDisabled" Disabled="@EffectiveDisabled" ReadOnly="@ReadOnly" Invalid="@EffectiveInvalid" Direction="@EffectiveDirection" CaptionLayout="@CaptionLayout" FromYear="@FromYear" ToYear="@ToYear" />
@@ -67,11 +67,14 @@
     private IJSObjectReference? Module;
     private DotNetObjectReference<ShadcnDatePicker>? SelfReference;
     private bool IsObserving;
+    private bool _uncontrolledOpen;
+    private bool _openInitialized;
     private string? InputBuffer;
     private ValidationMessageStore? ParseMessages;
     private EditContext? ParseMessageContext;
     private EditContext? ValidationEditContext;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
+    private bool EffectiveOpen => OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
     private ShadcnDirection EffectiveDirection => Direction ?? ThemeContext.Direction;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true || EditContext is not null && (ValueExpression is not null && EditContext.GetValidationMessages(FieldIdentifier.Create(ValueExpression)).Any() || RangeExpression is not null && EditContext.GetValidationMessages(FieldIdentifier.Create(RangeExpression)).Any());
     private DateOnly EffectiveVisibleMonth { get { var anchor = Value ?? Range?.Start ?? Today; return VisibleMonth == default ? new(anchor.Year, anchor.Month, 1) : new(VisibleMonth.Year, VisibleMonth.Month, 1); } }
@@ -80,7 +83,19 @@
     private string TextInputValue => ParseInvalid && InputBuffer is not null ? InputBuffer : HasSelection ? TriggerText : string.Empty;
     private string? DescribedBy => MergeIds(FieldContext?.AriaDescribedBy, AttributeText("aria-describedby"));
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "type", "data-slot", "disabled", "aria-haspopup", "aria-expanded", "aria-controls", "aria-readonly", "aria-required", "aria-invalid", "aria-describedby");
-    private async Task ToggleAsync() { if (!EffectiveDisabled && !ReadOnly) await OpenChanged.InvokeAsync(!Open); }
+    private async Task SetOpenAsync(bool value)
+    {
+        if (OpenChanged.HasDelegate)
+        {
+            await OpenChanged.InvokeAsync(value);
+            return;
+        }
+
+        if (_uncontrolledOpen == value) return;
+        _uncontrolledOpen = value;
+        await InvokeAsync(StateHasChanged);
+    }
+    private async Task ToggleAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
     private async Task SelectAsync(DateOnly? date) { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); await ValueChanged.InvokeAsync(date); Notify(); await CloseAndFocusAsync(); }
     private async Task SelectRangeAsync(ShadcnDateRange? range) { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); await RangeChanged.InvokeAsync(range); NotifyRange(); if (range?.End is not null) await CloseAndFocusAsync(); }
     private async Task ClearAsync() { if (EffectiveDisabled || ReadOnly) return; ParseInvalid = false; InputBuffer = null; ClearParseMessage(); if (Mode == ShadcnCalendarSelectionMode.Range) { await RangeChanged.InvokeAsync(null); NotifyRange(); } else { await ValueChanged.InvokeAsync(null); Notify(); } }
@@ -127,13 +142,18 @@
     private FieldIdentifier? ParseField() => Mode == ShadcnCalendarSelectionMode.Range ? RangeExpression is null ? null : FieldIdentifier.Create(RangeExpression) : ValueExpression is null ? null : FieldIdentifier.Create(ValueExpression);
     private void ClearParseMessage() { EnsureParseMessages(); var field = ParseField(); if (field is not null) ParseMessages?.Clear(field.Value); EditContext?.NotifyValidationStateChanged(); }
     private void AddParseMessage() { EnsureParseMessages(); var field = ParseField(); if (field is not null) { ParseMessages?.Clear(field.Value); ParseMessages?.Add(field.Value, $"The {field.Value.FieldName} field is not a valid date."); EditContext?.NotifyValidationStateChanged(); } }
-    private async Task HandleKeyDownAsync(KeyboardEventArgs args) { if (args.Key == "Escape" && Open) await CloseAndFocusAsync(); }
-    private async Task CloseAndFocusAsync() { await OpenChanged.InvokeAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
+    private async Task HandleKeyDownAsync(KeyboardEventArgs args) { if (args.Key == "Escape" && EffectiveOpen) await CloseAndFocusAsync(); }
+    private async Task CloseAndFocusAsync() { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private string? AttributeText(string name) => AdditionalAttributes?.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase)).Value?.ToString();
     private static string? MergeIds(params string?[] values) { var ids = values.Where(value => !string.IsNullOrWhiteSpace(value)).SelectMany(value => value!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Distinct(StringComparer.Ordinal).ToArray(); return ids.Length == 0 ? null : string.Join(' ', ids); }
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        if (!_openInitialized)
+        {
+            _uncontrolledOpen = Open;
+            _openInitialized = true;
+        }
         if (Range?.End is not null && Range.End.Value < Range.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
         if (!ReferenceEquals(ValidationEditContext, EditContext))
         {
@@ -146,9 +166,9 @@
     private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Open && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "date-picker"); await Module.InvokeVoidAsync("focusCalendarInPopup", Root); IsObserving = true; }
-        else if (!Open && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
+        if (EffectiveOpen && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "date-picker"); await Module.InvokeVoidAsync("focusCalendarInPopup", Root); IsObserving = true; }
+        else if (!EffectiveOpen && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
     }
-    [JSInvokable] public async Task DismissPopup() { if (Open) await CloseAndFocusAsync(); }
+    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await CloseAndFocusAsync(); }
     public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; ReplaceParseMessageContext(null); if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
 }

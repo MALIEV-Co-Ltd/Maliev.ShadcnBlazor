@@ -1,3 +1,19 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IDisposable
 <button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-previous")" style="@MergeStyle(null)" data-slot="carousel-previous" type="button" aria-label="@Context?.PreviousLabel" disabled="@Disabled" @onclick="HandleClickAsync"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
-@code { [CascadingParameter] private ShadcnCarouselContext? Context { get; set; } private bool Disabled => Context is null || Context.Disabled || (!Context.Options.Loop && Context.SelectedIndex <= 0); private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "aria-label", "disabled"); private Task HandleClickAsync() => Context?.PreviousAsync().AsTask() ?? Task.CompletedTask; }
+@code {
+    [CascadingParameter] private ShadcnCarouselContext? Context { get; set; }
+    private ShadcnCarouselContext? _observedContext;
+    private bool Disabled => Context is null || Context.Disabled || (!Context.Options.Loop && Context.SelectedIndex <= 0);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "aria-label", "disabled");
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(_observedContext, Context)) return;
+        if (_observedContext is not null) _observedContext.Changed -= HandleContextChanged;
+        _observedContext = Context;
+        if (_observedContext is not null) _observedContext.Changed += HandleContextChanged;
+    }
+    private Task HandleClickAsync() => Context?.PreviousAsync().AsTask() ?? Task.CompletedTask;
+    private void HandleContextChanged() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() { if (_observedContext is not null) _observedContext.Changed -= HandleContextChanged; }
+}

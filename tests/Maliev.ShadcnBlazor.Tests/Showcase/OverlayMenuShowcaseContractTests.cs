@@ -54,6 +54,20 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void InteractiveOverlaysStartClosedAndWaitForAUserTrigger()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+        foreach (var slug in new[] { "alert-dialog", "dialog", "drawer", "dropdown-menu", "hover-card", "popover", "sheet", "tooltip" })
+        {
+            var markup = Render(registry.GetBySlug(slug).Single().Preview).Markup;
+            Assert.DoesNotContain("data-state=\"open\"", markup, StringComparison.Ordinal);
+        }
+
+        var menubar = Render(registry.GetBySlug("menubar").Single().Preview).Markup;
+        Assert.DoesNotContain("data-state=\"open\"", menubar, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();

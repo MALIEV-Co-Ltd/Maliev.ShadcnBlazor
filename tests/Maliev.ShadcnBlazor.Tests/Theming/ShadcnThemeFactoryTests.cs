@@ -10,14 +10,14 @@ public sealed class ShadcnThemeFactoryTests
     {
         var theme = ShadcnThemeFactory.Create(new ShadcnOptions
         {
-            FontFamily = "IBM Plex Sans Thai, sans-serif"
+            FontFamily = "Noto Sans Thai, sans-serif"
         });
 
         Assert.Equal(new MudColor("#171717"), theme.PaletteLight.Primary);
         Assert.Equal(new MudColor("#ffffff"), theme.PaletteLight.Background);
         Assert.Equal(new MudColor("#e4e4e7"), theme.PaletteDark.Primary);
         Assert.Equal(new MudColor("#252525"), theme.PaletteDark.Background);
-        Assert.Equal("IBM Plex Sans Thai, sans-serif", theme.Typography.Default.FontFamily!.Single());
-        Assert.Equal("IBM Plex Sans Thai, sans-serif", theme.Typography.Button.FontFamily!.Single());
+        Assert.Equal("Noto Sans Thai, sans-serif", theme.Typography.Default.FontFamily!.Single());
+        Assert.Equal("Noto Sans Thai, sans-serif", theme.Typography.Button.FontFamily!.Single());
     }
 }

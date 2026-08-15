@@ -1,3 +1,4 @@
+@using Maliev.ShadcnBlazor.Components.DataDisplay
 @using Maliev.ShadcnBlazor.Showcase.Documentation.Api
 
 <section class="component-api" aria-labelledby="component-api-title" data-testid="component-api">
@@ -13,29 +14,54 @@
             else
             {
                 <div class="component-api__scroller" tabindex="0" role="region" aria-label="@descriptor.Name parameters">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th scope="col">Parameter</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Default</th>
-                                <th scope="col">Binding</th>
-                                <th scope="col">Description and constraints</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <ShadcnTable Class="component-api__table">
+                        <ShadcnTableHeader>
+                            <ShadcnTableRow>
+                                <ShadcnTableHead>Parameter</ShadcnTableHead>
+                                <ShadcnTableHead>Type</ShadcnTableHead>
+                                <ShadcnTableHead>Default</ShadcnTableHead>
+                                <ShadcnTableHead>Binding</ShadcnTableHead>
+                                <ShadcnTableHead>Description and constraints</ShadcnTableHead>
+                            </ShadcnTableRow>
+                        </ShadcnTableHeader>
+                        <ShadcnTableBody>
                             @foreach (var parameter in descriptor.Parameters)
                             {
-                                <tr data-testid="api-row" data-parameter="@parameter.Name">
-                                    <th scope="row"><code>@parameter.Name</code>@if (parameter.Required) { <span> required</span> }</th>
-                                    <td><code>@parameter.FriendlyType</code></td>
-                                    <td><code>@parameter.DefaultValue</code></td>
-                                    <td>@(parameter.BindingPair ?? "—")</td>
-                                    <td>@parameter.Description <span class="component-api__constraint">@parameter.Constraints</span></td>
-                                </tr>
+                                <ShadcnTableRow AdditionalAttributes="@(new Dictionary<string, object>
+                                {
+                                    ["data-testid"] = "api-row",
+                                    ["data-parameter"] = parameter.Name
+                                })">
+                                    <ShadcnTableHead Scope="ShadcnTableHeadScope.Row">
+                                        <code>@parameter.Name</code>
+                                        @if (parameter.Required)
+                                        {
+                                            <span class="component-api__required">required</span>
+                                        }
+                                    </ShadcnTableHead>
+                                    <ShadcnTableCell><code>@parameter.FriendlyType</code></ShadcnTableCell>
+                                    <ShadcnTableCell><code>@parameter.DefaultValue</code></ShadcnTableCell>
+                                    <ShadcnTableCell>
+                                        @if (parameter.BindingPair is null)
+                                        {
+                                            <span class="component-api__empty">—</span>
+                                        }
+                                        else
+                                        {
+                                            <code>@parameter.BindingPair</code>
+                                        }
+                                    </ShadcnTableCell>
+                                    <ShadcnTableCell>
+                                        <span class="component-api__description">@parameter.Description</span>
+                                        @if (!string.IsNullOrWhiteSpace(parameter.Constraints))
+                                        {
+                                            <span class="component-api__constraint">@parameter.Constraints</span>
+                                        }
+                                    </ShadcnTableCell>
+                                </ShadcnTableRow>
                             }
-                        </tbody>
-                    </table>
+                        </ShadcnTableBody>
+                    </ShadcnTable>
                 </div>
             }
         </section>
