@@ -31,8 +31,9 @@ public sealed class ComponentDossierBrowserTests(
         await ratio.SelectOptionAsync("1");
         await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1(?:;|$)"));
 
-        await page.GetByTestId("copy-source").ClickAsync();
-        await Assertions.Expect(page.Locator(".component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
+        var previewSource = page.Locator("#preview").GetByTestId("copy-source");
+        await previewSource.ClickAsync();
+        await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         var copied = await page.EvaluateAsync<string>("navigator.clipboard.readText()");
         Assert.Contains("<ShadcnAspectRatio", copied, StringComparison.Ordinal);
 
@@ -106,7 +107,7 @@ public sealed class ComponentDossierBrowserTests(
 
         await Assertions.Expect(page.GetByTestId("planned-component-notice")).ToHaveCountAsync(0);
         await Assertions.Expect(page.GetByTestId("component-preview")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(3);
         await Assertions.Expect(page.GetByTestId("component-api")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByTestId("evidence-row")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);

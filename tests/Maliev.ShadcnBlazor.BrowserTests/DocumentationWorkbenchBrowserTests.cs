@@ -45,6 +45,9 @@ public sealed class DocumentationWorkbenchBrowserTests(
         var catalog = page.Locator("#documentation-catalog");
         var outline = page.Locator("#documentation-outline");
         var content = page.Locator("#documentation-content");
+        await Assertions.Expect(outline.Locator("a[href='#installation']")).ToHaveTextAsync("Installation");
+        await Assertions.Expect(outline.Locator("a[href='#api-reference']")).ToHaveTextAsync("API Reference");
+        await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("@using Maliev.ShadcnBlazor");
         if (width > 1280)
         {
             var catalogBox = await catalog.BoundingBoxAsync();
