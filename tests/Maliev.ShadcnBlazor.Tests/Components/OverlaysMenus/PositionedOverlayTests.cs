@@ -13,6 +13,9 @@ public sealed class PositionedOverlayTests : BunitContext
         module.SetupVoid("detachPositioned", _ => true);
         module.SetupVoid("attachDelayedTrigger", _ => true);
         module.SetupVoid("detachDelayedTrigger", _ => true);
+        var tooltipModule = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-tooltip.js");
+        tooltipModule.SetupVoid("attachDelayedTrigger", _ => true);
+        tooltipModule.SetupVoid("detachDelayedTrigger", _ => true);
     }
 
     [Fact]
@@ -136,6 +139,30 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Equal("บันทึก", wrapper.GetAttribute("aria-label"));
         Assert.Equal(tooltipContent.Id, wrapper.GetAttribute("aria-describedby"));
         Assert.Equal("true", cut.Find("[data-slot='tooltip-trigger']").GetAttribute("aria-hidden"));
+    }
+
+    [Fact]
+    public async Task UncontrolledTooltipRespondsToOpenAndCloseRequests()
+    {
+        var cut = Render<ShadcnTooltip>(p => p.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnTooltipTrigger>(0);
+            builder.AddAttribute(1, nameof(ShadcnTooltipTrigger.ChildContent), (RenderFragment)(text => text.AddContent(0, "Save")));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnTooltipContent>(2);
+            builder.AddAttribute(3, nameof(ShadcnTooltipContent.ChildContent), (RenderFragment)(text => text.AddContent(0, "Save quotation")));
+            builder.CloseComponent();
+        }));
+
+        Assert.Equal("closed", cut.Find("[data-slot='tooltip']").GetAttribute("data-state"));
+
+        await cut.Instance.RequestOpenAsync(true);
+        Assert.Equal("open", cut.Find("[data-slot='tooltip']").GetAttribute("data-state"));
+        Assert.Equal("Save quotation", cut.Find("[data-slot='tooltip-content']").TextContent.Trim());
+
+        await cut.Instance.RequestCloseAsync();
+        Assert.Equal("closed", cut.Find("[data-slot='tooltip']").GetAttribute("data-state"));
+        Assert.Empty(cut.FindAll("[data-slot='tooltip-content']"));
     }
 
     [Fact]

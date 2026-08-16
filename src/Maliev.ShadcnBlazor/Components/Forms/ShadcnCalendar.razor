@@ -84,8 +84,12 @@
     private DateOnly? LastValue;
     private ShadcnDateRange? LastRange;
     private DateOnly LastVisibleMonth;
+    private DateOnly _uncontrolledVisibleMonth;
+    private DateOnly _lastVisibleMonthParameter;
+    private bool _visibleMonthInitialized;
     private DateOnly? PendingFocus;
-    private DateOnly EffectiveMonth => new(VisibleMonth.Year, VisibleMonth.Month, 1);
+    private DateOnly EffectiveVisibleMonth => VisibleMonthChanged.HasDelegate ? NormalizeMonth(VisibleMonth) : _uncontrolledVisibleMonth;
+    private DateOnly EffectiveMonth => NormalizeMonth(EffectiveVisibleMonth);
     private DayOfWeek EffectiveFirstDay => FirstDayOfWeek ?? Culture.DateTimeFormat.FirstDayOfWeek;
     private ShadcnDirection EffectiveDirection => Direction ?? ThemeContext.Direction;
     private string DirectionValue => EffectiveDirection switch { ShadcnDirection.LeftToRight => "ltr", ShadcnDirection.RightToLeft => "rtl", _ => throw new ArgumentOutOfRangeException(nameof(Direction), EffectiveDirection, "Unknown direction.") };
@@ -100,10 +104,15 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet(); _ = DirectionValue;
+        var incomingVisibleMonth = NormalizeMonth(VisibleMonth);
+        if (!_visibleMonthInitialized || VisibleMonthChanged.HasDelegate || incomingVisibleMonth != _lastVisibleMonthParameter)
+            _uncontrolledVisibleMonth = incomingVisibleMonth;
+        _lastVisibleMonthParameter = incomingVisibleMonth;
+        _visibleMonthInitialized = true;
         if (Min > Max) throw new ArgumentException("Min cannot be later than Max.");
         if (Range?.End is not null && Range.End.Value < Range.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
         if (EffectiveFromYear > EffectiveToYear) throw new ArgumentException("FromYear cannot be later than ToYear.");
-        if (FocusedDate == default || Value != LastValue || !Equals(Range, LastRange) || VisibleMonth != LastVisibleMonth || !IsVisibleEnabled(FocusedDate))
+        if (FocusedDate == default || Value != LastValue || !Equals(Range, LastRange) || EffectiveMonth != LastVisibleMonth || !IsVisibleEnabled(FocusedDate))
         {
             var candidate = PendingFocus is not null && PendingFocus.Value.Year == EffectiveMonth.Year && PendingFocus.Value.Month == EffectiveMonth.Month ? PendingFocus.Value
                 : Value is not null && Value.Value.Year == EffectiveMonth.Year && Value.Value.Month == EffectiveMonth.Month ? Value.Value
@@ -111,7 +120,7 @@
                 : Today.Year == EffectiveMonth.Year && Today.Month == EffectiveMonth.Month ? Today : EffectiveMonth;
             FocusedDate = FindEnabledInMonth(candidate);
         }
-        LastValue = Value; LastRange = Range; LastVisibleMonth = VisibleMonth;
+        LastValue = Value; LastRange = Range; LastVisibleMonth = EffectiveMonth;
     }
     private bool IsVisibleEnabled(DateOnly date)
     {
@@ -143,10 +152,23 @@
     private bool IsRangeEnd(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End == date;
     private bool IsRangeMiddle(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End is not null && date > Range.Start && date < Range.End;
     private int WeekNumber(DateOnly date) => Culture.Calendar.GetWeekOfYear(date.ToDateTime(TimeOnly.MinValue), Culture.DateTimeFormat.CalendarWeekRule, EffectiveFirstDay);
-    private async Task PreviousAsync() { if (CanNavigatePrevious && !Disabled) await VisibleMonthChanged.InvokeAsync(EffectiveMonth.AddMonths(-1)); }
-    private async Task NextAsync() { if (CanNavigateNext && !Disabled) await VisibleMonthChanged.InvokeAsync(EffectiveMonth.AddMonths(1)); }
-    private async Task ChangeMonthAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var month) && month is >= 1 and <= 12) await VisibleMonthChanged.InvokeAsync(new(EffectiveMonth.Year, month, 1)); }
-    private async Task ChangeYearAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var year) && year >= EffectiveFromYear && year <= EffectiveToYear) await VisibleMonthChanged.InvokeAsync(new(year, EffectiveMonth.Month, 1)); }
+    private async Task PreviousAsync() { if (CanNavigatePrevious && !Disabled) await SetVisibleMonthAsync(EffectiveMonth.AddMonths(-1)); }
+    private async Task NextAsync() { if (CanNavigateNext && !Disabled) await SetVisibleMonthAsync(EffectiveMonth.AddMonths(1)); }
+    private async Task ChangeMonthAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var month) && month is >= 1 and <= 12) await SetVisibleMonthAsync(new(EffectiveMonth.Year, month, 1)); }
+    private async Task ChangeYearAsync(ChangeEventArgs args) { if (!Disabled && int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out var year) && year >= EffectiveFromYear && year <= EffectiveToYear) await SetVisibleMonthAsync(new(year, EffectiveMonth.Month, 1)); }
+    private async Task SetVisibleMonthAsync(DateOnly month)
+    {
+        var normalized = NormalizeMonth(month);
+        if (VisibleMonthChanged.HasDelegate)
+        {
+            await VisibleMonthChanged.InvokeAsync(normalized);
+            return;
+        }
+
+        if (_uncontrolledVisibleMonth == normalized) return;
+        _uncontrolledVisibleMonth = normalized;
+        await InvokeAsync(StateHasChanged);
+    }
     private async Task SelectAsync(DateOnly date)
     {
         if (Disabled || ReadOnly || IsDisabled(date)) return;
@@ -174,12 +196,12 @@
         if (focusTarget < gridStart || focusTarget > gridEnd)
         {
             PendingFocus = focusTarget;
-            await VisibleMonthChanged.InvokeAsync(new(focusTarget.Year, focusTarget.Month, 1));
+            await SetVisibleMonthAsync(new(focusTarget.Year, focusTarget.Month, 1));
         }
         else
         {
             FocusedDate = focusTarget;
-            if (FocusedDate.Year != EffectiveMonth.Year || FocusedDate.Month != EffectiveMonth.Month) await VisibleMonthChanged.InvokeAsync(new(FocusedDate.Year, FocusedDate.Month, 1));
+            if (FocusedDate.Year != EffectiveMonth.Year || FocusedDate.Month != EffectiveMonth.Month) await SetVisibleMonthAsync(new(FocusedDate.Year, FocusedDate.Month, 1));
         }
         if (args.Key is "Enter" or " ") await SelectAsync(FocusedDate);
         if (args.Key is "ArrowRight" or "ArrowLeft" or "ArrowDown" or "ArrowUp" or "Home" or "End" or "PageUp" or "PageDown")
@@ -228,6 +250,7 @@
         return origin;
     }
     private string FormatYear(int year) => UseCultureCalendarYears ? Culture.Calendar.GetYear(new DateTime(year, 1, 1)).ToString(CultureInfo.InvariantCulture) : year.ToString(CultureInfo.InvariantCulture);
+    private static DateOnly NormalizeMonth(DateOnly value) => value == default ? new(DateTime.Today.Year, DateTime.Today.Month, 1) : new(value.Year, value.Month, 1);
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (PendingFocus is null) return;

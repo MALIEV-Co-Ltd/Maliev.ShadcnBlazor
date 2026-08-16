@@ -11,7 +11,7 @@ Library.
 ## Install
 
 ```bash
-dotnet add package Maliev.ShadcnBlazor --version 1.0.1
+dotnet add package Maliev.ShadcnBlazor --version 1.0.2
 ```
 
 Register the services in `Program.cs`:

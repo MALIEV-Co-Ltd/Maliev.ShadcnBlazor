@@ -12,7 +12,7 @@ internal static class DisclosureNavigationExamples
 {
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "accordion" => [Accordion()],
+        "accordion" => [AccordionPolished()],
         "breadcrumb" => [Breadcrumb()],
         "collapsible" => [Collapsible()],
         "navigation-menu" => [NavigationMenu()],
@@ -24,11 +24,58 @@ internal static class DisclosureNavigationExamples
         _ => []
     };
 
-    private static ComponentExampleDefinition Accordion()
+    private static ComponentExampleDefinition AccordionPolished()
     {
         var multiple = false; var horizontal = false; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnAccordion>(0); b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" }); b.AddAttribute(2, "Multiple", multiple); b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical); b.AddAttribute(4, "Disabled", disabled); b.AddAttribute(5, "Label", "Quotation questions"); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddAccordionItem(c, 0, "shipping", "What are the delivery options?", "Standard delivery is prepared from our Thailand workshop. The quote includes a dispatch estimate before checkout."); AddAccordionItem(c, 10, "returns", "What is the return policy?", "Returns are accepted within 30 days when the item is unused and in its original packaging."); AddAccordionItem(c, 20, "support", "How can I contact support?", "Send a message from the quotation workspace and the production team will reply with the next available step."); })); b.CloseComponent(); };
-        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", "<ShadcnAccordion Values=\"new[] { \"shipping\" }\" Multiple=\"false\">\n    <ShadcnAccordionItem Value=\"shipping\">\n        <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Standard delivery is prepared from our Thailand workshop.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n    <ShadcnAccordionItem Value=\"returns\">\n        <ShadcnAccordionTrigger>What is the return policy?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Returns are accepted within 30 days when the item is unused and in its original packaging.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n    <ShadcnAccordionItem Value=\"support\">\n        <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Send a message from the quotation workspace and the production team will reply with the next available step.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n</ShadcnAccordion>", preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnAccordion>(0);
+            b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" });
+            b.AddAttribute(2, "Multiple", multiple);
+            b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
+            b.AddAttribute(4, "Disabled", disabled);
+            b.AddAttribute(5, "Label", "Quotation questions");
+            b.AddAttribute(6, "ChildContent", (RenderFragment)(c =>
+            {
+                AddAccordionItem(c, 0, "shipping", "What are the delivery options?", ShippingAccordionContent());
+                AddAccordionItem(c, 10, "returns", "What is the return policy?", ReturnsAccordionContent());
+                AddAccordionItem(c, 20, "support", "How can I contact support?", SupportAccordionContent());
+            }));
+            b.CloseComponent();
+        };
+        const string source = """
+<ShadcnAccordion Values='new[] { "shipping" }' Multiple="false" Label="Quotation questions">
+    <ShadcnAccordionItem Value="shipping">
+        <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Choose the handoff that fits your production deadline.</p>
+            <ul>
+                <li>Standard delivery — dispatch estimate included before checkout.</li>
+                <li>Express delivery — priority workshop queue when available.</li>
+            </ul>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="returns">
+        <ShadcnAccordionTrigger>What is the return policy?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Returns are accepted within 30 days when the item is unused and in its original packaging.</p>
+            <p>Include the quotation number so the team can route the request quickly.</p>
+            <p>Revision notes help production review the requested change.</p>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="support">
+        <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Send a message from the quotation workspace and the production team will reply with the next available step.</p>
+            <ul>
+                <li>Ask about materials, finishing, or delivery timing.</li>
+                <li>Attach a drawing when the requested revision needs review.</li>
+            </ul>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+</ShadcnAccordion>
+""";
+        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", source, preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
     }
 
     private static ComponentExampleDefinition Breadcrumb()
@@ -49,7 +96,30 @@ internal static class DisclosureNavigationExamples
     {
         string? value = null; var vertical = false; var disabled = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnNavigationMenu>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "Orientation", vertical ? ShadcnNavigationMenuOrientation.Vertical : ShadcnNavigationMenuOrientation.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "Label", "Workspace navigation"); b.AddAttribute(5, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnNavigationMenuList>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(l => { AddNavigationItem(l, 0, "services", "Services", [("CNC machining", "#cnc"), ("Finishing", "#finishing"), ("Quality inspection", "#quality")]); AddNavigationItem(l, 10, "resources", "Resources", [("Material library", "#materials"), ("Guides", "#guides")]); AddNavigationItem(l, 20, "account", "Account", [("Team settings", "#team"), ("Billing", "#billing")]); })); c.CloseComponent(); Add<ShadcnNavigationMenuIndicator>(c, 10); Add<ShadcnNavigationMenuViewport>(c, 20); })); b.CloseComponent(); };
-        return Example("navigation-menu", "Navigation menu portal", "Explore a realistic workspace navigation with delayed hover, click, keyboard focus, collision-aware viewport, RTL, and disabled behavior.", "<ShadcnNavigationMenu Label=\"Workspace navigation\">\n    <ShadcnNavigationMenuList>\n        <ShadcnNavigationMenuItem Value=\"services\">\n            <ShadcnNavigationMenuTrigger>Services</ShadcnNavigationMenuTrigger>\n            <ShadcnNavigationMenuContent>...</ShadcnNavigationMenuContent>\n        </ShadcnNavigationMenuItem>\n    </ShadcnNavigationMenuList>\n    <ShadcnNavigationMenuViewport />\n</ShadcnNavigationMenu>", preview, [Toggle("navigation-open", "Open Services", v => value = v ? "services" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["open", "closed", "hover", "keyboard", "portal", "collision", "rtl"]);
+        var source = """
+<ShadcnNavigationMenu Label="Workspace navigation">
+    <ShadcnNavigationMenuList>
+        <ShadcnNavigationMenuItem Value="services">
+            <ShadcnNavigationMenuTrigger>Services</ShadcnNavigationMenuTrigger>
+            <ShadcnNavigationMenuContent>
+                <ShadcnNavigationMenuLink Href="#cnc">CNC machining</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#finishing">Finishing</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#quality">Quality inspection</ShadcnNavigationMenuLink>
+            </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+        <ShadcnNavigationMenuItem Value="resources">
+            <ShadcnNavigationMenuTrigger>Resources</ShadcnNavigationMenuTrigger>
+            <ShadcnNavigationMenuContent>
+                <ShadcnNavigationMenuLink Href="#materials">Material library</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#guides">Guides</ShadcnNavigationMenuLink>
+            </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+    </ShadcnNavigationMenuList>
+    <ShadcnNavigationMenuIndicator />
+    <ShadcnNavigationMenuViewport />
+</ShadcnNavigationMenu>
+""";
+        return Example("navigation-menu", "Navigation menu portal", "Explore a realistic workspace navigation with delayed hover, click, keyboard focus, collision-aware viewport, RTL, and disabled behavior.", source, preview, [Toggle("navigation-open", "Open Services", v => value = v ? "services" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["open", "closed", "hover", "keyboard", "portal", "collision", "rtl"]);
     }
 
     private static ComponentExampleDefinition Pagination()
@@ -63,21 +133,64 @@ internal static class DisclosureNavigationExamples
     {
         var vertical = false; var disabled = false; var collapsible = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnResizableGroup>(0); b.AddAttribute(1, "Sizes", new[] { 40d, 60d }); b.AddAttribute(2, "Direction", vertical ? ShadcnResizableDirection.Vertical : ShadcnResizableDirection.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "ChildContent", (RenderFragment)(c => { AddPanel(c, 0, "queue", "Incoming queue", collapsible, "3 quotations waiting"); c.OpenComponent<ShadcnResizableHandle>(10); c.AddAttribute(11, "WithHandle", true); c.AddAttribute(12, "Label", "Resize queue and detail panels"); c.CloseComponent(); AddPanel(c, 20, "detail", "Quotation detail", false, "Select an item to review its production timeline."); })); b.CloseComponent(); };
-        return Example("resizable", "Resizable panels", "Pointer and keyboard resizing, live panel IDs, constraints, collapsible panels, persistence, vertical layout, and RTL deltas.", "<ShadcnResizableGroup Sizes=\"Sizes\"><ShadcnResizablePanel Id=\"queue\">...</ShadcnResizablePanel><ShadcnResizableHandle /></ShadcnResizableGroup>", preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible first panel", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]);
+        var source = """
+<ShadcnResizableGroup Sizes="new[] { 40d, 60d }">
+    <ShadcnResizablePanel Id="queue">
+        <h3>Incoming queue</h3>
+        <p>3 quotations waiting</p>
+    </ShadcnResizablePanel>
+    <ShadcnResizableHandle WithHandle="true" Label="Resize queue and detail panels" />
+    <ShadcnResizablePanel Id="detail">
+        <h3>Quotation detail</h3>
+        <p>Select an item to review its production timeline.</p>
+    </ShadcnResizablePanel>
+</ShadcnResizableGroup>
+""";
+        return Example("resizable", "Resizable panels", "Pointer and keyboard resizing, live panel IDs, constraints, collapsible panels, persistence, vertical layout, and RTL deltas.", source, preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible first panel", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]);
     }
 
     private static ComponentExampleDefinition ScrollArea()
     {
         var always = true; var horizontal = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnScrollArea>(0); b.AddAttribute(1, "Type", always ? ShadcnScrollAreaType.Always : ShadcnScrollAreaType.Auto); b.AddAttribute(2, "Style", "height:12rem;width:min(100%,24rem)"); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnScrollAreaViewport>(0); c.AddAttribute(1, "Label", "Material catalog"); c.AddAttribute(2, "ChildContent", MaterialCatalog(horizontal)); c.CloseComponent(); c.OpenComponent<ShadcnScrollAreaScrollbar>(10); c.AddAttribute(11, "Orientation", horizontal ? ShadcnScrollAreaOrientation.Horizontal : ShadcnScrollAreaOrientation.Vertical); c.AddAttribute(12, "ChildContent", (RenderFragment)(s => Add<ShadcnScrollAreaThumb>(s, 0))); c.CloseComponent(); Add<ShadcnScrollAreaCorner>(c, 20); })); b.CloseComponent(); };
-        return Example("scroll-area", "Native scroll area", "Native focusable scrolling with auto/always visibility, vertical/horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", "<ShadcnScrollArea><ShadcnScrollAreaViewport>...</ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar>...</ShadcnScrollAreaScrollbar></ShadcnScrollArea>", preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
+        var source = """
+<ShadcnScrollArea Type="ShadcnScrollAreaType.Always" Style="height:12rem;width:min(100%,24rem)">
+    <ShadcnScrollAreaViewport Label="Material catalog">
+        <p>Aluminum 6061 · CNC-ready stock</p>
+        <p>Stainless 316L · Corrosion resistant</p>
+        <p>PEEK · High-temperature polymer</p>
+    </ShadcnScrollAreaViewport>
+    <ShadcnScrollAreaScrollbar Orientation="ShadcnScrollAreaOrientation.Vertical">
+        <ShadcnScrollAreaThumb />
+    </ShadcnScrollAreaScrollbar>
+    <ShadcnScrollAreaCorner />
+</ShadcnScrollArea>
+""";
+        return Example("scroll-area", "Native scroll area", "Native focusable scrolling with auto/always visibility, vertical/horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", source, preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
     }
 
     private static ComponentExampleDefinition Sidebar()
     {
         var open = true; var right = false; var none = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnSidebarProvider>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnSidebar>(0); c.AddAttribute(1, "Id", "dossier"); c.AddAttribute(2, "Side", right ? ShadcnSidebarSide.Right : ShadcnSidebarSide.Left); c.AddAttribute(3, "Collapsible", none ? ShadcnSidebarCollapsible.None : ShadcnSidebarCollapsible.Icon); c.AddAttribute(4, "Label", "Workspace"); c.AddAttribute(5, "ChildContent", SidebarContent()); c.CloseComponent(); c.OpenComponent<ShadcnSidebarInset>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(inset => { inset.OpenComponent<ShadcnSidebarTrigger>(0); inset.AddAttribute(1, "TargetId", "dossier"); inset.CloseComponent(); inset.OpenElement(10, "div"); inset.AddAttribute(11, "class", "showcase-sidebar-main"); inset.OpenElement(12, "h3"); inset.AddContent(13, "Quotation workspace"); inset.CloseElement(); inset.OpenElement(14, "p"); inset.AddContent(15, "Review active quotations and production handoffs."); inset.CloseElement(); inset.CloseElement(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("sidebar", "Responsive sidebar shell", "A realistic quotation workspace with navigation groups, active state, responsive collapse, physical sides, and mobile modal behavior.", "<ShadcnSidebarProvider Open=\"true\">\n    <ShadcnSidebar Id=\"workspace\" Collapsible=\"ShadcnSidebarCollapsible.Icon\">...</ShadcnSidebar>\n    <ShadcnSidebarInset><ShadcnSidebarTrigger TargetId=\"workspace\" />...</ShadcnSidebarInset>\n</ShadcnSidebarProvider>", preview, [Toggle("sidebar-open", "Expanded", v => open = v, true), Toggle("sidebar-right", "Right side", v => right = v), Toggle("sidebar-none", "Non-collapsible", v => none = v)], ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "rtl"]);
+        var source = """
+<ShadcnSidebarProvider Open="true">
+    <ShadcnSidebar Id="dossier" Collapsible="ShadcnSidebarCollapsible.Icon" Label="Workspace">
+        <ShadcnSidebarHeader>MALIEV</ShadcnSidebarHeader>
+        <ShadcnSidebarContent>
+            <ShadcnSidebarMenuItem>Quotations</ShadcnSidebarMenuItem>
+            <ShadcnSidebarMenuItem>Materials</ShadcnSidebarMenuItem>
+            <ShadcnSidebarMenuItem>Team settings</ShadcnSidebarMenuItem>
+        </ShadcnSidebarContent>
+    </ShadcnSidebar>
+    <ShadcnSidebarInset>
+        <ShadcnSidebarTrigger TargetId="dossier" />
+        <h3>Quotation workspace</h3>
+        <p>Review active quotations and production handoffs.</p>
+    </ShadcnSidebarInset>
+</ShadcnSidebarProvider>
+""";
+        return Example("sidebar", "Responsive sidebar shell", "A realistic quotation workspace with navigation groups, active state, responsive collapse, physical sides, and mobile modal behavior.", source, preview, [Toggle("sidebar-open", "Expanded", v => open = v, true), Toggle("sidebar-right", "Right side", v => right = v), Toggle("sidebar-none", "Non-collapsible", v => none = v)], ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "rtl"]);
     }
 
     private static ComponentExampleDefinition Tabs()
@@ -93,7 +206,49 @@ internal static class DisclosureNavigationExamples
     private static RenderFragment Text(string text) => b => b.AddContent(0, text);
     private static void Add<T>(RenderTreeBuilder b, int sequence) where T : IComponent { b.OpenComponent<T>(sequence); b.CloseComponent(); }
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
-    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, string content) { b.OpenComponent<ShadcnAccordionItem>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnAccordionTrigger>(c, 0, title); AddText<ShadcnAccordionContent>(c, 10, content); })); b.CloseComponent(); }
+    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, string content) => AddAccordionItem(b, s, value, title, Text(content));
+    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, RenderFragment content)
+    {
+        b.OpenComponent<ShadcnAccordionItem>(s);
+        b.AddAttribute(s + 1, "Value", value);
+        b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(c =>
+        {
+            AddText<ShadcnAccordionTrigger>(c, 0, title);
+            c.OpenComponent<ShadcnAccordionContent>(10);
+            c.AddAttribute(11, "ChildContent", content);
+            c.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+    private static RenderFragment ShippingAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Choose the handoff that fits your production deadline."); builder.CloseElement();
+        builder.OpenElement(10, "ul");
+        AddAccordionDetail(builder, 20, "Standard delivery", "dispatch estimate included before checkout");
+        AddAccordionDetail(builder, 30, "Express delivery", "priority workshop queue when available");
+        builder.CloseElement();
+    };
+    private static RenderFragment ReturnsAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Returns are accepted within 30 days when the item is unused and in its original packaging."); builder.CloseElement();
+        builder.OpenElement(10, "p"); builder.AddContent(11, "Include the quotation number so the team can route the request quickly."); builder.CloseElement();
+        builder.OpenElement(20, "p"); builder.AddContent(21, "Revision notes help production review the requested change."); builder.CloseElement();
+    };
+    private static RenderFragment SupportAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Send a message from the quotation workspace and the production team will reply with the next available step."); builder.CloseElement();
+        builder.OpenElement(10, "ul");
+        AddAccordionDetail(builder, 20, "Materials and finishing", "ask for a recommendation");
+        AddAccordionDetail(builder, 30, "Drawing review", "attach the requested revision");
+        builder.CloseElement();
+    };
+    private static void AddAccordionDetail(RenderTreeBuilder builder, int sequence, string title, string detail)
+    {
+        builder.OpenElement(sequence, "li");
+        builder.OpenElement(sequence + 1, "strong"); builder.AddContent(sequence + 2, title); builder.CloseElement();
+        builder.AddContent(sequence + 3, $" — {detail}.");
+        builder.CloseElement();
+    }
     private static void AddBreadcrumbLink(RenderTreeBuilder b, int s, string text, string href) { b.OpenComponent<ShadcnBreadcrumbItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbLink>(0); c.AddAttribute(1, "Href", href); c.AddAttribute(2, "ChildContent", Text(text)); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationItem<T>(RenderTreeBuilder b, int s, bool disabled) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationDirection<T>(RenderTreeBuilder b, int s, bool disabled, Action apply) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.AddAttribute(2, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.CloseComponent(); })); b.CloseComponent(); }

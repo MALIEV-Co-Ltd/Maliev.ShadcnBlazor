@@ -162,18 +162,18 @@ public sealed class ComponentDossierBrowserTests(
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/avatar").ToString());
         var avatarDemo = page.GetByTestId("avatar-dossier-preview");
-        await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar']")).ToHaveCountAsync(1);
-        await Assertions.Expect(avatarDemo.Locator("img")).ToHaveAttributeAsync("src", new System.Text.RegularExpressions.Regex("operator-thai\\.png"));
+        await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar']")).ToHaveCountAsync(4);
+        await Assertions.Expect(avatarDemo.Locator("img[src*='operator-thai.png']")).ToHaveCountAsync(1);
         await page.GetByTestId("control-avatar-group").CheckAsync();
-        await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar']")).ToHaveCountAsync(3);
+        await Assertions.Expect(avatarDemo.Locator("[data-testid='avatar-group-preview'] [data-slot='avatar']")).ToHaveCountAsync(3);
         var groupedAvatarSources = await avatarDemo.Locator("img").EvaluateAllAsync<string[]>("elements => elements.map(element => element.getAttribute('src'))");
-        Assert.Equal(3, groupedAvatarSources.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(4, groupedAvatarSources.Distinct(StringComparer.Ordinal).Count());
         Assert.Contains(groupedAvatarSources, source => source?.Contains("reviewer-thai.png", StringComparison.Ordinal) == true);
-        Assert.Contains(groupedAvatarSources, source => source?.Contains("coordinator-thai.png", StringComparison.Ordinal) == true);
+        Assert.Contains(groupedAvatarSources, source => source?.Contains("assistant-thai.png", StringComparison.Ordinal) == true);
         await page.GetByTestId("control-avatar-group").UncheckAsync();
         await page.GetByTestId("control-avatar-failed").CheckAsync();
-        await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar-fallback']")).ToHaveAttributeAsync("data-state", "visible");
-        Assert.Equal("32px", await avatarDemo.Locator("[data-slot='avatar']").EvaluateAsync<string>("element => getComputedStyle(element).width"));
+        Assert.True(await avatarDemo.Locator("[data-slot='avatar-fallback'][data-state='visible']").CountAsync() >= 1);
+        Assert.Equal("32px", await avatarDemo.Locator("[data-slot='avatar']").First.EvaluateAsync<string>("element => getComputedStyle(element).width"));
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/carousel").ToString());
         await Assertions.Expect(page.GetByTestId("control-carousel-reduced")).Not.ToBeCheckedAsync();
@@ -205,15 +205,23 @@ public sealed class ComponentDossierBrowserTests(
         await message.HoverAsync();
         await Assertions.Expect(footer).ToHaveCSSAsync("opacity", "1");
         await Assertions.Expect(footer.Locator("button")).ToBeVisibleAsync();
+        await page.GetByTestId("control-message-footer-always").CheckAsync();
+        await page.Mouse.MoveAsync(1, 1);
+        await Assertions.Expect(footer).ToHaveAttributeAsync("data-visibility", "always");
+        await Assertions.Expect(footer).ToHaveCSSAsync("opacity", "1");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
         var scrollerAvatars = page.Locator("#preview .showcase-scroller-frame img.showcase-message-avatar-image");
-        await Assertions.Expect(scrollerAvatars).ToHaveCountAsync(3);
+        await Assertions.Expect(scrollerAvatars).ToHaveCountAsync(2);
         var scrollerAvatarSources = await scrollerAvatars.EvaluateAllAsync<string[]>("elements => elements.map(element => element.getAttribute('src'))");
-        Assert.Equal(3, scrollerAvatarSources.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(2, scrollerAvatarSources.Distinct(StringComparer.Ordinal).Count());
         Assert.Contains(scrollerAvatarSources, source => source?.Contains("operator-thai.png", StringComparison.Ordinal) == true);
         Assert.Contains(scrollerAvatarSources, source => source?.Contains("assistant-thai.png", StringComparison.Ordinal) == true);
-        Assert.Contains(scrollerAvatarSources, source => source?.Contains("coordinator-thai.png", StringComparison.Ordinal) == true);
+        await Assertions.Expect(page.GetByTestId("scroller-send")).ToBeEnabledAsync();
+        await Assertions.Expect(page.Locator(".showcase-scroller-composer input")).ToHaveValueAsync("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย");
+        await page.GetByTestId("scroller-send").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("scroller-streaming")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".showcase-scroller-frame [data-slot='message-scroller-item']")).ToHaveCountAsync(4);
 
         await page.SetViewportSizeAsync(390, 844);
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/data-table").ToString());

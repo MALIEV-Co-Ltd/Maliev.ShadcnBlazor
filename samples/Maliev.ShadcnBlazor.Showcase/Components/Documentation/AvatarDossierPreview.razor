@@ -1,43 +1,35 @@
-<div class="showcase-avatar-demo" data-testid="avatar-dossier-preview">
+<section class="showcase-avatar-demo" data-testid="avatar-dossier-preview" aria-label="Project team avatar examples">
+    <header class="showcase-avatar-demo__header">
+        <div>
+            <strong>Project team</strong>
+            <span>Distinct portraits, fallback states, and presence composition.</span>
+        </div>
+        <span class="showcase-avatar-demo__state">@(Group ? "Stacked group" : "Individual states")</span>
+    </header>
+
+    <div class="showcase-avatar-gallery" data-testid="avatar-gallery" aria-label="Individual team avatars">
+        @Profile("images/avatars/operator-thai.png", "นที", "Thai CNC operator", Failed, Badge)
+        @Profile("images/avatars/reviewer-thai.png", "พิม", "Thai quality reviewer", false, false)
+        @Profile("images/avatars/coordinator-thai.png", "มาลี", "Thai project coordinator", false, false)
+        @Profile(null, "ทีม", "Fallback placeholder", false, false, true)
+    </div>
+
     @if (Group)
     {
-        <ShadcnAvatarGroup>
-            <ShadcnAvatar Size="Size">
-                <ShadcnAvatarImage Source="@(Failed ? "/missing-avatar.webp" : "/images/avatars/operator-thai.png")" Alt="Thai operator" />
-                <ShadcnAvatarFallback>
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />
-                        <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" />
-                    </svg>
-                </ShadcnAvatarFallback>
-                @if (Badge) { <ShadcnAvatarBadge /> }
-            </ShadcnAvatar>
-            <ShadcnAvatar Size="Size">
-                <ShadcnAvatarImage Source="/images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
-                <ShadcnAvatarFallback>
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />
-                        <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" />
-                    </svg>
-                </ShadcnAvatarFallback>
-            </ShadcnAvatar>
-            <ShadcnAvatar Size="Size">
-                <ShadcnAvatarImage Source="/images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
-                <ShadcnAvatarFallback>
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />
-                        <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" />
-                    </svg>
-                </ShadcnAvatarFallback>
-            </ShadcnAvatar>
-            <ShadcnAvatarGroupCount Size="Size">+2</ShadcnAvatarGroupCount>
-        </ShadcnAvatarGroup>
+        <section class="showcase-avatar-group-preview" data-testid="avatar-group-preview" aria-label="Recently active team members">
+            <div class="showcase-avatar-group-preview__header">
+                <strong>Recently active</strong>
+                <span>4 teammates</span>
+            </div>
+            <ShadcnAvatarGroup Size="Size" Overlap="0.625rem">
+                @Avatar("images/avatars/operator-thai.png", "Thai CNC operator", Failed, Badge)
+                @Avatar("images/avatars/reviewer-thai.png", "Thai quality reviewer", false, false)
+                @Avatar("images/avatars/assistant-thai.png", "Thai support assistant", false, false)
+                <ShadcnAvatarGroupCount Size="Size">+1</ShadcnAvatarGroupCount>
+            </ShadcnAvatarGroup>
+        </section>
     }
-    else
-    {
-        @Avatar("/images/avatars/operator-thai.png", "Thai operator", Failed, Badge)
-    }
-</div>
+</section>
 
 @code {
     [Parameter] public ShadcnAvatarSize Size { get; set; }
@@ -45,8 +37,32 @@
     [Parameter] public bool Badge { get; set; }
     [Parameter] public bool Group { get; set; }
 
+    private const string BrokenAvatarSource = "data:image/png;base64,invalid-avatar";
+
+    private RenderFragment Profile(string? source, string name, string role, bool failed, bool badge, bool fallbackOnly = false) => @<div class="showcase-avatar-profile" data-testid="avatar-profile">
+        <ShadcnAvatar Size="Size">
+            @if (!fallbackOnly)
+            {
+                @* Exercise the image error path without requesting a missing URL. This keeps
+                   the fallback proof deterministic on the static documentation host. *@
+                <ShadcnAvatarImage Source="@(failed ? BrokenAvatarSource : source ?? string.Empty)" Alt="@role" />
+            }
+            <ShadcnAvatarFallback>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />
+                    <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" />
+                </svg>
+            </ShadcnAvatarFallback>
+            @if (badge) { <ShadcnAvatarBadge /> }
+        </ShadcnAvatar>
+        <span class="showcase-avatar-profile__copy">
+            <strong>@name</strong>
+            <span>@role</span>
+        </span>
+    </div>;
+
     private RenderFragment Avatar(string source, string alt, bool failed, bool badge) => @<ShadcnAvatar Size="Size">
-        <ShadcnAvatarImage Source="@(failed ? "/missing-avatar.webp" : source)" Alt="@alt" />
+        <ShadcnAvatarImage Source="@(failed ? BrokenAvatarSource : source)" Alt="@alt" />
         <ShadcnAvatarFallback>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />

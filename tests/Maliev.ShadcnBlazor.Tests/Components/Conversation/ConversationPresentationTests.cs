@@ -140,5 +140,32 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void MessageFooterSupportsHoverFocusAndAlwaysVisibleModes()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
+
+        Assert.Contains(".shadcn-message:hover .shadcn-message-footer", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message:focus-within .shadcn-message-footer", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message-footer[data-visibility=\"always\"]", css, StringComparison.Ordinal);
+        Assert.Contains("pointer-events: none;", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BubbleCssScopesVariantsAndPreservesChatTailShape()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
+
+        Assert.Contains(".shadcn-bubble[data-variant=\"secondary\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-variant=\"tinted\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-variant=\"destructive\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-align=\"start\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-align=\"end\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
+        Assert.Contains("border-end-start-radius", css, StringComparison.Ordinal);
+        Assert.Contains("border-end-end-radius", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble-reactions :is(svg,img)", css, StringComparison.Ordinal);
+        Assert.Contains("color:var(--shadcn-foreground)", css, StringComparison.Ordinal);
+    }
+
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
 }

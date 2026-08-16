@@ -1,4 +1,5 @@
 @using Microsoft.JSInterop
+@using Maliev.ShadcnBlazor.Components.Forms
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
@@ -9,12 +10,14 @@
         @if (SourceByLanguage.Count > 1)
         {
             <label class="shadcn-sr-only" for="@LanguageId">Code language</label>
-            <select id="@LanguageId" class="shadcn-code-block-language-select" value="@SelectedLanguage" @onchange="ChangeLanguageAsync">
-                @foreach (var language in SourceByLanguage.Keys)
-                {
-                    <option value="@language">@language</option>
-                }
-            </select>
+            <ShadcnSelect TValue="string"
+                          id="@LanguageId"
+                          Class="shadcn-code-block-language-select"
+                          Value="@SelectedLanguage"
+                          ValueChanged="@ChangeLanguageAsync"
+                          Options="@LanguageOptions"
+                          Placeholder="Code language"
+                          Size="ShadcnControlSize.Small" />
         }
         <button type="button" class="shadcn-code-block-copy" data-testid="copy-source" data-copied="@_copied.ToString().ToLowerInvariant()" aria-label="@(_copied ? "Copied" : "Copy source")" title="@(_copied ? "Copied" : "Copy source")" @onclick="CopyAsync">
             @if (_copied)
@@ -55,6 +58,7 @@
     private string FallbackId = $"shadcn-code-fallback-{Guid.NewGuid():N}";
 
     private IReadOnlyDictionary<string, string> SourceByLanguage => Sources is { Count: > 0 } ? Sources : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [Language] = Source };
+    private IReadOnlyList<ShadcnSelectOption<string>> LanguageOptions => SourceByLanguage.Keys.Select(language => new ShadcnSelectOption<string>(language, language)).ToArray();
     private string SelectedLanguage => SourceByLanguage.ContainsKey(_selectedLanguage) ? _selectedLanguage : SourceByLanguage.Keys.First();
     private string SelectedSource => SourceByLanguage.TryGetValue(SelectedLanguage, out var source) ? source : Source;
     private string HighlightedSource => Highlight(SelectedSource, SelectedLanguage);
@@ -68,9 +72,8 @@
         if (!SourceByLanguage.ContainsKey(_selectedLanguage)) _selectedLanguage = SourceByLanguage.ContainsKey(Language) ? Language : SourceByLanguage.Keys.First();
     }
 
-    private Task ChangeLanguageAsync(ChangeEventArgs args)
+    private Task ChangeLanguageAsync(string? next)
     {
-        var next = args.Value?.ToString();
         if (!string.IsNullOrWhiteSpace(next) && SourceByLanguage.ContainsKey(next)) { _selectedLanguage = next; _copied = false; _announcement = string.Empty; }
         return Task.CompletedTask;
     }

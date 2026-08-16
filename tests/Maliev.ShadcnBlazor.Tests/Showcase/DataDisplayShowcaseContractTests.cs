@@ -50,6 +50,37 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DataTableExampleUsesRealRowsAndAccessibleRowActions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] tbody tr[data-row-key]").Count);
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action").Count);
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action svg").Count);
+        Assert.DoesNotContain("•••", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-label=\\\"เปิด @row.Email\\\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TableExampleKeepsHeaderBodyAndTotalFooterColumnsAligned()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("table").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(4, rendered.FindAll("[data-slot='table-header'] [data-slot='table-head']").Count);
+        Assert.All(rendered.FindAll("[data-slot='table-body'] [data-slot='table-row']"), row =>
+            Assert.Equal(4, row.Children.Count(child => child.GetAttribute("data-slot") == "table-cell")));
+
+        var footerCells = rendered.FindAll("[data-slot='table-footer'] [data-slot='table-cell']");
+        Assert.Equal(2, footerCells.Count);
+        Assert.Equal("3", footerCells[0].GetAttribute("colspan"));
+        Assert.Equal("฿37,800", footerCells[1].TextContent.Trim());
+        Assert.Contains("<ShadcnTableHead>Method</ShadcnTableHead>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTableCell ColSpan=\"3\">Total</ShadcnTableCell>", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksPinnedAndCurrentReferences()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));

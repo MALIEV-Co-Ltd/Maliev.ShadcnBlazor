@@ -182,6 +182,10 @@ public sealed class FormsDossierTests : BunitContext
         Assert.Null(otp.Find("[data-testid='forms-dossier-input-otp']").GetAttribute("data-pattern"));
 
         var select = RenderExample(registry, "select");
+        select.Find("[data-testid='forms-dossier-select']").Click();
+        Assert.NotEmpty(select.FindAll("[role='listbox']"));
+        select.Find("[role='option'][data-value='slm']").Click();
+        Assert.Equal("Metal 3D printing", select.Find("[data-slot='select-value']").TextContent);
         Change(select, "select-invalid", true);
         Assert.Equal("true", select.Find("[data-testid='forms-dossier-select']").GetAttribute("aria-invalid"));
         Change(select, "select-open", true);

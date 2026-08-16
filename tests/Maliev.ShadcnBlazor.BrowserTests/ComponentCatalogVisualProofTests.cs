@@ -39,6 +39,31 @@ public sealed class ComponentCatalogVisualProofTests(
         Assert.Empty(errors);
     }
 
+    [Fact]
+    public async Task EveryCompletedCatalogDossierRendersItsPrimaryRclComponent()
+    {
+        var root = VisualProof.FindRoot();
+        var slugs = ComponentCatalogProof.LoadCompleted(root);
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        foreach (var slug in slugs)
+        {
+            await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/{slug}").ToString());
+            await page.GetByTestId("component-dossier").WaitForAsync();
+            await Assertions.Expect(page.GetByTestId("planned-component-notice")).ToHaveCountAsync(0);
+            var expectedSlot = PrimaryPreviewSlot(slug);
+            Assert.True(
+                await page.GetByTestId("component-preview-canvas").Locator($"[data-slot='{expectedSlot}']").CountAsync() > 0,
+                $"The {slug} documentation preview did not render a '{expectedSlot}' RCL component slot.");
+        }
+    }
+
     private async Task CaptureModeAsync(
         IReadOnlyList<string> slugs,
         VisualProofMode mode,
@@ -77,10 +102,28 @@ public sealed class ComponentCatalogVisualProofTests(
             }
 
             await page.EvaluateAsync("document.fonts.ready");
+            await page.EvaluateAsync("""
+                async () => {
+                    const images = Array.from(document.images);
+                    await Promise.all(images.map(image => image.complete
+                        ? Promise.resolve()
+                        : new Promise(resolve => {
+                            image.addEventListener('load', resolve, { once: true });
+                            image.addEventListener('error', resolve, { once: true });
+                        })));
+                }
+                """);
             var canvas = page.GetByTestId("component-preview-canvas");
             await canvas.ScrollIntoViewIfNeededAsync();
             var actual = await canvas.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });
             await VisualProof.CompareOrUpdateAsync(page, slug, mode.Name, actual);
         }
     }
+
+    private static string PrimaryPreviewSlot(string slug) => slug switch
+    {
+        "resizable" => "resizable-group",
+        "toast" => "toast-viewport",
+        _ => slug
+    };
 }

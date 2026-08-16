@@ -8,7 +8,9 @@
     </div>
     <div class="feedback-pair-crop" data-pair-id="avatar">
         <ShadcnAvatar>
-            <ShadcnAvatarFallback>NO</ShadcnAvatarFallback>
+            <ShadcnAvatarFallback>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.25" fill="currentColor" /><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" /></svg>
+            </ShadcnAvatarFallback>
             <ShadcnAvatarBadge />
         </ShadcnAvatar>
     </div>
@@ -60,6 +62,6 @@
     <div class="feedback-pair-crop" data-pair-id="card-small"><ShadcnCard Size="ShadcnCardSize.Small"><ShadcnCardHeader><ShadcnCardTitle>Compact card</ShadcnCardTitle></ShadcnCardHeader><ShadcnCardContent>Ready</ShadcnCardContent></ShadcnCard></div>
     <div class="feedback-pair-crop" data-pair-id="progress-indeterminate"><ShadcnProgress><ShadcnProgressLabel>Loading</ShadcnProgressLabel></ShadcnProgress></div>
     <div class="feedback-pair-crop feedback-pair-crop--vertical" data-pair-id="carousel-vertical"><ShadcnCarousel Orientation="ShadcnCarouselOrientation.Vertical" Label="Carousel"><ShadcnCarouselContent>@for (var index = 0; index < 3; index++) { var job = index + 1; <ShadcnCarouselItem Index="index">Job @job</ShadcnCarouselItem> }</ShadcnCarouselContent><ShadcnCarouselPrevious /><ShadcnCarouselNext /></ShadcnCarousel></div>
-    <div class="feedback-pair-crop" data-pair-id="avatar-loaded"><ShadcnAvatar><ShadcnAvatarImage Source="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%236b7280'/%3E%3C/svg%3E" Alt="Operator" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback></ShadcnAvatar></div>
-    <div class="feedback-pair-crop" data-pair-id="avatar-error"><ShadcnAvatar><ShadcnAvatarImage Source="/missing-avatar.webp" Alt="Unavailable operator" /><ShadcnAvatarFallback>NO</ShadcnAvatarFallback></ShadcnAvatar></div>
+    <div class="feedback-pair-crop" data-pair-id="avatar-loaded"><ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Thai CNC operator" /><ShadcnAvatarFallback>NT</ShadcnAvatarFallback></ShadcnAvatar></div>
+    <div class="feedback-pair-crop" data-pair-id="avatar-error"><ShadcnAvatar><ShadcnAvatarImage Source="data:image/png;base64,invalid-avatar" Alt="Unavailable operator" /><ShadcnAvatarFallback><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.25" fill="currentColor" /><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" opacity=".65" /></svg></ShadcnAvatarFallback></ShadcnAvatar></div>
 </div>

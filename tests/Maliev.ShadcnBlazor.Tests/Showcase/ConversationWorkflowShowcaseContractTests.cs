@@ -69,6 +69,23 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void AttachmentDossierSourceIsTheComposedCopyableExample()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("attachment").Single();
+
+        Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@using Maliev.ShadcnBlazor.Components.Feedback", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentGroup", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentMedia", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentContent", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentActions", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("workspace-plan.png", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSpinner", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Progress=\"64\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BubbleDossierUsesAnInteractiveConversationThread()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
@@ -110,6 +127,32 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void MarkerDossierSourceDocumentsTheStreamingLoaderAndReducedMotionPath()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("marker").Single();
+
+        Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarker Live=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarkerIcon>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<span class=\"showcase-marker-loader shadcn-marker-loader\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("style=\"display:none\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarkerContent Streaming=\"true\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("กำลังประมวลผล", example.RazorSource, StringComparison.Ordinal);
+
+        var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");
+        var css = File.ReadAllText(cssPath);
+        Assert.Contains("@keyframes shadcn-marker-dots", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave", css, StringComparison.Ordinal);
+        Assert.Contains("background-size:200% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
+        Assert.Contains("forced-colors", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-marker-content[data-streaming=\"true\"]", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("shadcn-marker-spin", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("shadcn-marker-pulse", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MessageDossierShowsGroupedRowsWithAvatarsHeadersAndActions()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
@@ -124,7 +167,29 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
+        Assert.Single(cut.FindAll(".shadcn-message-action"));
+        Assert.Single(cut.FindAll(".shadcn-message-reply-icon"));
+        Assert.Single(cut.FindAll(".showcase-message-status"));
         Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MessageDossierSourceIsCompleteAndDocumentsFooterVisibility()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message").Single();
+
+        Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@using Maliev.ShadcnBlazor.Components.Conversation", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageGroup", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageAvatar", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageFooter", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("data-visibility=\"always\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("shadcn-message-reply-icon", example.RazorSource, StringComparison.Ordinal);
+
+        var cssPath = Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+        var css = File.ReadAllText(cssPath);
+        Assert.DoesNotContain("message-action:not(.showcase-message-action--sent)::before", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -135,11 +200,28 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var cut = Render(example.Preview);
 
         Assert.Single(cut.FindAll("[data-slot='message-scroller']"));
-        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item']").Count);
-        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
-        Assert.Equal(5, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Single(cut.FindAll("form.showcase-scroller-composer"));
+        Assert.Equal("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย", cut.Find(".showcase-scroller-composer input").GetAttribute("value"));
+        Assert.NotEmpty(cut.FindAll("button[data-testid='scroller-send']"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller-button']"));
         Assert.Contains("ตรวจสอบชิ้นงาน", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ScrollerDossierSourceDocumentsTheInteractiveComposerAndStableAnchors()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message-scroller").Single();
+
+        Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerProvider", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"user-1\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"assistant-1\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

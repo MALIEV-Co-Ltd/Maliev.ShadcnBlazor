@@ -20,7 +20,7 @@
             }
             else if (Case.StartsWith("marker", StringComparison.Ordinal))
             {
-                <ShadcnMarker Variant="@ShadcnMarkerVariant.Separator" Live="@Case.EndsWith("streaming")">@if (Case.EndsWith("streaming")){<ShadcnMarkerIcon><svg class="showcase-marker-loader" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-dasharray="38 16"></circle></svg></ShadcnMarkerIcon>}<ShadcnMarkerContent Streaming="@Case.EndsWith("streaming")">@(Case.EndsWith("streaming") ? "MALIEV is replying •••" : "Today")</ShadcnMarkerContent></ShadcnMarker>
+                <ShadcnMarker Variant="@ShadcnMarkerVariant.Separator" Live="@Case.EndsWith("streaming")">@if (Case.EndsWith("streaming")){<ShadcnMarkerIcon><span class="showcase-marker-loader shadcn-marker-loader" aria-hidden="true"></span></ShadcnMarkerIcon>}<ShadcnMarkerContent Streaming="@Case.EndsWith("streaming")">@(Case.EndsWith("streaming") ? "MALIEV is replying" : "Today")</ShadcnMarkerContent></ShadcnMarker>
             }
             else if (Case.StartsWith("message-scroller", StringComparison.Ordinal))
             {

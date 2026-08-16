@@ -1,0 +1,121 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+@implements IAsyncDisposable
+
+<div class="showcase-scroller-demo" data-testid="scroller-demo" data-preview-unread="@(AppendUnread ? "true" : "false")">
+    <ShadcnMessageScrollerProvider AutoScroll="@AutoFollow" DefaultScrollPosition="@OpeningPosition">
+        <ShadcnMessageScroller Class="showcase-scroller-frame" Style="height:24rem" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-position="@OpeningPosition.ToString().ToLowerInvariant()">
+            <ShadcnMessageScrollerViewport AccessibleName="บทสนทนาโครงการ">
+                <ShadcnMessageScrollerContent>
+                    @foreach (var message in _messages)
+                    {
+                        <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
+                            <ShadcnMessage Align="@message.Align">
+                                <ShadcnMessageAvatar>
+                                    <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
+                                </ShadcnMessageAvatar>
+                                <ShadcnMessageContent>
+                                    <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
+                                    <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
+                                        <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
+                                            {
+                                                <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
+                                            }</ShadcnBubbleContent>
+                                    </ShadcnBubble>
+                                </ShadcnMessageContent>
+                            </ShadcnMessage>
+                        </ShadcnMessageScrollerItem>
+                    }
+                </ShadcnMessageScrollerContent>
+            </ShadcnMessageScrollerViewport>
+            <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="ไปข้อความล่าสุด">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+        </ShadcnMessageScroller>
+
+        <form class="showcase-scroller-composer" aria-label="ส่งข้อความ" @onsubmit="SendAsync" @onsubmit:preventDefault="true">
+            <input type="text" @bind="Composer" @bind:event="oninput" aria-label="ข้อความใหม่" />
+            <button type="submit" aria-label="ส่งข้อความ" data-testid="scroller-send" disabled="@IsStreaming">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12 14-7-4 14-3.5-5.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M11.5 13.5 19 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            </button>
+        </form>
+        <p class="showcase-scroller-helper">Send a message to watch the assistant response stream into the transcript.</p>
+    </ShadcnMessageScrollerProvider>
+</div>
+
+@code {
+    [Parameter] public bool AutoFollow { get; set; }
+    [Parameter] public bool AppendUnread { get; set; }
+    [Parameter] public ShadcnMessageDefaultScrollPosition OpeningPosition { get; set; } = ShadcnMessageDefaultScrollPosition.End;
+
+    private readonly CancellationTokenSource _lifetime = new();
+    private readonly List<TranscriptMessage> _messages =
+    [
+        new("user-1", ShadcnLogicalAlign.Start, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", "images/avatars/operator-thai.png", "นที · วิศวกร"),
+        new("assistant-1", ShadcnLogicalAlign.End, "MALIEV Assistant", "รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว", "images/avatars/assistant-thai.png", "MALIEV Assistant")
+    ];
+
+    private string Composer { get; set; } = "อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย";
+    private bool IsStreaming { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var unreadId = "reviewer-unread";
+        var unread = _messages.FirstOrDefault(message => message.Id == unreadId);
+        if (AppendUnread && unread is null)
+        {
+            _messages.Add(new TranscriptMessage(unreadId, ShadcnLogicalAlign.Start, "ผู้ตรวจสอบคุณภาพ", "พบข้อความใหม่จากทีมตรวจสอบ", "images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ"));
+        }
+        else if (!AppendUnread && unread is not null)
+        {
+            _messages.Remove(unread);
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        if (IsStreaming || string.IsNullOrWhiteSpace(Composer))
+            return;
+
+        var prompt = Composer.Trim();
+        Composer = string.Empty;
+        IsStreaming = true;
+        _messages.Add(new TranscriptMessage($"user-{_messages.Count + 1}", ShadcnLogicalAlign.Start, "นที · วิศวกร", prompt, "images/avatars/operator-thai.png", "นที · วิศวกร"));
+        var response = new TranscriptMessage($"assistant-{_messages.Count + 1}", ShadcnLogicalAlign.End, "MALIEV Assistant", string.Empty, "images/avatars/assistant-thai.png", "MALIEV Assistant") { IsStreaming = true };
+        _messages.Add(response);
+        await InvokeAsync(StateHasChanged);
+
+        const string answer = "MessageScroller keeps a long transcript readable by preserving stable message anchors, respecting the reader's position, and following the newest response only when auto-follow is enabled. As this response arrives, the viewport stays connected to the assistant without jumping the reader away from older messages.";
+        foreach (var chunk in Chunk(answer, 8))
+        {
+            await Task.Delay(45, _lifetime.Token);
+            response.Text += chunk;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        response.IsStreaming = false;
+        IsStreaming = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static IEnumerable<string> Chunk(string value, int size)
+    {
+        for (var index = 0; index < value.Length; index += size)
+            yield return value.Substring(index, Math.Min(size, value.Length - index));
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _lifetime.Cancel();
+        _lifetime.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    private sealed class TranscriptMessage(string id, ShadcnLogicalAlign align, string author, string text, string avatarSource, string avatarAlt)
+    {
+        public string Id { get; } = id;
+        public ShadcnLogicalAlign Align { get; } = align;
+        public string Author { get; } = author;
+        public string Text { get; set; } = text;
+        public string AvatarSource { get; } = avatarSource;
+        public string AvatarAlt { get; } = avatarAlt;
+        public bool IsStreaming { get; set; }
+    }
+}

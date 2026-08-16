@@ -131,6 +131,9 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         avatar.Controls.Single(control => control.Id == "avatar-badge").Apply("true");
         avatar.Controls.Single(control => control.Id == "avatar-group").Apply("true");
         var avatarCut = Render(avatar.Preview);
+        Assert.Equal(4, avatarCut.FindAll("[data-testid='avatar-gallery'] > [data-testid='avatar-profile']").Count);
+        Assert.NotNull(avatarCut.Find("[data-testid='avatar-gallery'] [data-slot='avatar-fallback'] svg"));
+        Assert.Equal(3, avatarCut.FindAll("[data-testid='avatar-group-preview'] [data-slot='avatar']").Count);
         Assert.NotNull(avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar'] > [data-slot='avatar-badge']"));
         Assert.NotNull(avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar-group-count']"));
 
@@ -215,7 +218,10 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             case "alert-role": Assert.Equal("status", cut.Find("[data-slot='alert']").GetAttribute("role")); break;
             case "alert-action": Assert.Empty(cut.FindAll("[data-slot='alert-action']")); break;
             case "avatar-size": Assert.Equal("lg", cut.Find("[data-slot='avatar']").GetAttribute("data-size")); break;
-            case "avatar-failed": Assert.Equal("/missing-avatar.webp", cut.Find("[data-slot='avatar-image']").GetAttribute("src")); break;
+            case "avatar-failed":
+                Assert.Equal("data:image/png;base64,invalid-avatar", cut.Find("[data-slot='avatar-image']").GetAttribute("src"));
+                Assert.DoesNotContain("missing-avatar.webp", cut.Markup, StringComparison.Ordinal);
+                break;
             case "avatar-badge": Assert.Single(cut.FindAll("[data-slot='avatar-badge']")); break;
             case "avatar-group": Assert.Single(cut.FindAll("[data-slot='avatar-group']")); break;
             case "badge-variant": Assert.Equal("outline", cut.Find("[data-slot='badge']").GetAttribute("data-variant")); break;

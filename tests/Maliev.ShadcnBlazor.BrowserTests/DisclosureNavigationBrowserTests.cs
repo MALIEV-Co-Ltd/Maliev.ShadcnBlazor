@@ -180,6 +180,36 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task AccordionDossierShowsRichContentAndDirectDisclosureInteraction()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/accordion").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var accordion = page.Locator("#preview [data-slot='accordion']");
+        var triggers = accordion.Locator("[data-slot='accordion-trigger']");
+        var contents = accordion.Locator("[data-slot='accordion-content']");
+        await Assertions.Expect(triggers).ToHaveCountAsync(3);
+        await Assertions.Expect(contents.First).ToContainTextAsync("Express delivery");
+        await Assertions.Expect(contents.First).ToBeVisibleAsync();
+
+        await triggers.First.ClickAsync();
+        await Assertions.Expect(contents.First).ToBeHiddenAsync();
+        await triggers.Nth(1).ClickAsync();
+        await Assertions.Expect(contents.Nth(1)).ToBeVisibleAsync();
+        await Assertions.Expect(contents.Nth(1)).ToContainTextAsync("Revision notes");
+
+        await page.GetByTestId("control-accordion-multiple").CheckAsync();
+        await Assertions.Expect(contents.First).ToBeVisibleAsync();
+        await Assertions.Expect(contents.Nth(1)).ToBeVisibleAsync();
+    }
+
+    [Fact]
     public async Task DisclosureTabsAndNavigationMenuHaveRealKeyboardFocusAndState()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 900, Height = 800 } });

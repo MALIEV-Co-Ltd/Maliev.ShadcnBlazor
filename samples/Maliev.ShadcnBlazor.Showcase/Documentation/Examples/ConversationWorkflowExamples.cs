@@ -1,4 +1,6 @@
 using Maliev.ShadcnBlazor.Components.Conversation;
+using Maliev.ShadcnBlazor.Components.Feedback;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -8,10 +10,10 @@ internal static class ConversationWorkflowExamples
 {
     private sealed record AvatarProfile(string Id, string Source, string Alt);
 
-    private static readonly AvatarProfile OperatorAvatar = new("operator", "/images/avatars/operator-thai.png", "นที · วิศวกร");
-    private static readonly AvatarProfile ReviewerAvatar = new("reviewer", "/images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ");
-    private static readonly AvatarProfile AssistantAvatar = new("assistant", "/images/avatars/assistant-thai.png", "MALIEV Assistant");
-    private static readonly AvatarProfile CoordinatorAvatar = new("coordinator", "/images/avatars/coordinator-thai.png", "มาลี · ผู้ประสานงาน");
+    private static readonly AvatarProfile OperatorAvatar = new("operator", "images/avatars/operator-thai.png", "นที · วิศวกร");
+    private static readonly AvatarProfile ReviewerAvatar = new("reviewer", "images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ");
+    private static readonly AvatarProfile AssistantAvatar = new("assistant", "images/avatars/assistant-thai.png", "MALIEV Assistant");
+    private static readonly AvatarProfile CoordinatorAvatar = new("coordinator", "images/avatars/coordinator-thai.png", "มาลี · ผู้ประสานงาน");
     private static readonly AvatarProfile PlaceholderAvatar = new("placeholder", string.Empty, "ผู้ประสานงาน");
 
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
@@ -62,7 +64,8 @@ internal static class ConversationWorkflowExamples
                 Toggle("attachment-vertical", "Vertical", v => vertical = v),
                 Toggle("attachment-image", "Image media", v => image = v, true)
             ],
-            ["gallery", "image", "file", "uploading", "processing", "error", "done", "progress", "actions", "group", "rtl"]);
+            ["gallery", "image", "file", "uploading", "processing", "error", "done", "progress", "actions", "group", "rtl"],
+            AttachmentRazorSource);
     }
 
     private static ComponentExampleDefinition Bubble()
@@ -95,7 +98,8 @@ internal static class ConversationWorkflowExamples
                 Toggle("bubble-end", "Align incoming end", v => end = v),
                 Toggle("bubble-reactions-top", "Reactions top", v => top = v)
             ],
-            ["thread", "variants", "alignment", "reactions", "button", "link", "collapsible", "rtl"]);
+            ["thread", "variants", "alignment", "reactions", "button", "link", "collapsible", "rtl"],
+            BubbleRazorSource);
     }
 
     private static void AddImageAttachment(RenderTreeBuilder b, int sequence, string title, string description, string artwork, bool image)
@@ -130,9 +134,10 @@ internal static class ConversationWorkflowExamples
         b.AddAttribute(sequence + 1, nameof(ShadcnAttachment.State), state);
         b.AddAttribute(sequence + 2, nameof(ShadcnAttachment.Progress), progress);
         b.AddAttribute(sequence + 3, nameof(ShadcnAttachment.Title), title);
-        b.AddAttribute(sequence + 4, nameof(ShadcnAttachment.ErrorReason), state == ShadcnAttachmentState.Error ? "Upload failed" : null);
-        b.AddAttribute(sequence + 5, nameof(ShadcnAttachment.Class), $"showcase-attachment-file{(vertical ? " showcase-attachment-file--vertical" : string.Empty)}");
-        b.AddAttribute(sequence + 6, nameof(ShadcnAttachment.ChildContent), (RenderFragment)(content =>
+        b.AddAttribute(sequence + 4, nameof(ShadcnAttachment.File), AttachmentFile(title, description));
+        b.AddAttribute(sequence + 5, nameof(ShadcnAttachment.ErrorReason), state == ShadcnAttachmentState.Error ? "Upload failed" : null);
+        b.AddAttribute(sequence + 6, nameof(ShadcnAttachment.Class), $"showcase-attachment-file{(vertical ? " showcase-attachment-file--vertical" : string.Empty)}");
+        b.AddAttribute(sequence + 7, nameof(ShadcnAttachment.ChildContent), (RenderFragment)(content =>
         {
             content.OpenComponent<ShadcnAttachmentMedia>(0);
             content.AddAttribute(1, nameof(ShadcnAttachmentMedia.Class), "showcase-attachment-file-icon");
@@ -159,14 +164,24 @@ internal static class ConversationWorkflowExamples
         b.CloseComponent();
     }
 
+    private static ShadcnAttachmentFile AttachmentFile(string title, string description)
+    {
+        var contentType = title.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
+            ? "application/pdf"
+            : "text/typescript";
+        var size = description.Contains("2.4 MB", StringComparison.Ordinal) ? 2_400_000L : 12_000L;
+        return new ShadcnAttachmentFile(title, size, contentType);
+    }
+
     private static void AddBubble(RenderTreeBuilder b, int sequence, ShadcnBubbleVariant variant, ShadcnLogicalAlign align, string text, bool interactive, string? reaction, bool reactionTop, string? role = null)
     {
         b.OpenComponent<ShadcnBubble>(sequence);
         b.AddAttribute(sequence + 1, nameof(ShadcnBubble.Variant), variant);
         b.AddAttribute(sequence + 2, nameof(ShadcnBubble.Align), align);
+        b.AddAttribute(sequence + 3, "data-bubble-index", Math.Max(0, sequence / 10).ToString(System.Globalization.CultureInfo.InvariantCulture));
         if (role is not null)
-            b.AddAttribute(sequence + 3, "data-bubble-role", role);
-        b.AddAttribute(sequence + 4, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
+            b.AddAttribute(sequence + 4, "data-bubble-role", role);
+        b.AddAttribute(sequence + 5, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
         {
             content.OpenComponent<ShadcnBubbleContent>(0);
             if (interactive)
@@ -200,8 +215,8 @@ internal static class ConversationWorkflowExamples
     private static RenderFragment FileIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 2.75h8l4 4v14.5H6z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M14 2.75v4h4M9 12h6M9 16h4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>");
     private static RenderFragment CloseIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m7 7 10 10M17 7 7 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>");
     private static RenderFragment ReactionMarkup(string value) => b => b.AddMarkupContent(0, value == "👍"
-        ? "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8.5 10.5v9h-3v-9zM10 10.5l3.8-7.1a1.5 1.5 0 0 1 2.8 1l-.8 4.1h4.1a2 2 0 0 1 2 2.4l-1.3 6.3a3 3 0 0 1-2.9 2.4H8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/></svg></span>"
-        : "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13.4 2.8c.5 3.2-1.4 4.1-2.4 5.7-.8 1.3-.7 2.8.2 3.7.1-1.8 1.3-2.6 2.3-3.4.9 1.5 3.4 2.7 3.4 6a5 5 0 1 1-9.8-1.4c.6-2.4 2.6-3.9 3.6-5.8.8-1.5 1.2-3.2.6-4.8 1.1.5 1.7 1.1 2.1 2.2Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18.1 5.3v3.4M16.4 7h3.4\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\"/></svg><svg class=\"showcase-bubble-reaction-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg><span class=\"showcase-bubble-reaction-count\">+2</span></span>");
+        ? "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--like\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8.5 10.5v9h-3v-9zM10 10.5l3.8-7.1a1.5 1.5 0 0 1 2.8 1l-.8 4.1h4.1a2 2 0 0 1 2 2.4l-1.3 6.3a3 3 0 0 1-2.9 2.4H8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/></svg></span>"
+        : "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--fire\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13.4 2.8c.5 3.2-1.4 4.1-2.4 5.7-.8 1.3-.7 2.8.2 3.7.1-1.8 1.3-2.6 2.3-3.4.9 1.5 3.4 2.7 3.4 6a5 5 0 1 1-9.8-1.4c.6-2.4 2.6-3.9 3.6-5.8.8-1.5 1.2-3.2.6-4.8 1.1.5 1.7 1.1 2.1 2.2Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18.1 5.3v3.4M16.4 7h3.4\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\"/></svg><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--eyes\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg><span class=\"showcase-bubble-reaction-count\">+2</span></span>");
 
     private static ComponentExampleDefinition Marker()
     {
@@ -216,7 +231,7 @@ internal static class ConversationWorkflowExamples
             AddMarker(b, 22, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "กำลังประมวลผล" : "พร้อมส่งให้ผู้ตรวจ");
             b.CloseElement();
         };
-        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"]);
+        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
     }
 
     private static ComponentExampleDefinition Message()
@@ -231,13 +246,13 @@ internal static class ConversationWorkflowExamples
             b.AddAttribute(1, nameof(ShadcnMessageGroup.Class), $"showcase-message-thread{(footerAlways ? " showcase-message-thread--footer-always" : string.Empty)}");
             b.AddAttribute(2, nameof(ShadcnMessageGroup.ChildContent), (RenderFragment)(thread =>
             {
-                AddMessage(thread, 0, ShadcnLogicalAlign.Start, avatar ? OperatorAvatar : null, footer, "วิศวกร MALIEV", "ตรวจสอบไฟล์แล้ว 3 รายการ");
+                AddMessage(thread, 0, ShadcnLogicalAlign.Start, avatar ? OperatorAvatar : null, footer, "วิศวกร MALIEV", "ตรวจสอบไฟล์แล้ว 3 รายการ", footerAlways);
                 AddMessage(thread, 20, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, null, false, "ผู้ประสานงาน", "พร้อมส่งแบบให้ตรวจ");
-                AddMessage(thread, 40, ShadcnLogicalAlign.End, avatar ? AssistantAvatar : null, footer, "MALIEV Assistant", "Sure. I’ll keep the thread easy to scan.");
+                AddMessage(thread, 40, ShadcnLogicalAlign.End, avatar ? AssistantAvatar : null, footer, "MALIEV Assistant", "Sure. I’ll keep the thread easy to scan.", footerAlways);
             }));
             b.CloseComponent();
         };
-        return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "hover-actions", "bubbles", "rtl"]);
+        return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "hover-actions", "bubbles", "rtl"], MessageRazorSource);
     }
 
     private static void AddMarker(RenderTreeBuilder b, int sequence, ShadcnMarkerVariant variant, bool live, string icon, string text)
@@ -258,7 +273,7 @@ internal static class ConversationWorkflowExamples
         b.CloseComponent();
     }
 
-    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message)
+    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false)
     {
         b.OpenComponent<ShadcnMessage>(sequence);
         b.AddAttribute(sequence + 1, nameof(ShadcnMessage.Align), align);
@@ -279,16 +294,26 @@ internal static class ConversationWorkflowExamples
                     content.OpenComponent<ShadcnMessageFooter>(8);
                     content.AddAttribute(9, nameof(ShadcnMessageFooter.ChildContent), (RenderFragment)(actions =>
                     {
-                        actions.OpenElement(0, "button");
-                        actions.AddAttribute(1, "type", "button");
-                        actions.AddAttribute(2, "class", $"showcase-message-action{(align == ShadcnLogicalAlign.End ? " showcase-message-action--sent" : string.Empty)}");
-                        actions.AddAttribute(3, "aria-label", align == ShadcnLogicalAlign.End ? "ส่งแล้ว · 10:42" : "ตอบกลับข้อความ");
                         if (align == ShadcnLogicalAlign.End)
-                            actions.AddContent(4, "ส่งแล้ว · 10:42");
+                        {
+                            actions.OpenElement(0, "span");
+                            actions.AddAttribute(1, "class", "showcase-message-status");
+                            actions.AddAttribute(2, "aria-label", "ส่งแล้ว · 10:42");
+                            actions.AddContent(3, "ส่งแล้ว · 10:42");
+                            actions.CloseElement();
+                        }
                         else
+                        {
+                            actions.OpenElement(0, "button");
+                            actions.AddAttribute(1, "type", "button");
+                            actions.AddAttribute(2, "class", "shadcn-message-action");
+                            actions.AddAttribute(3, "aria-label", "ตอบกลับข้อความ");
                             actions.AddMarkupContent(4, ReplyIconMarkup());
-                        actions.CloseElement();
+                            actions.CloseElement();
+                        }
                     }));
+                    if (footerAlways)
+                        content.AddAttribute(10, "data-visibility", "always");
                     content.CloseComponent();
                 }
             }));
@@ -302,62 +327,13 @@ internal static class ConversationWorkflowExamples
         var auto = false; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnMessageScrollerProvider>(0);
-            b.SetKey($"{auto}-{extra}-{position}");
-            b.AddAttribute(1, nameof(ShadcnMessageScrollerProvider.AutoScroll), auto);
-            b.AddAttribute(2, nameof(ShadcnMessageScrollerProvider.DefaultScrollPosition), position);
-            b.AddAttribute(3, nameof(ShadcnMessageScrollerProvider.ChildContent), (RenderFragment)(provider =>
-            {
-                provider.OpenComponent<ShadcnMessageScroller>(0);
-                provider.AddAttribute(1, "class", "showcase-scroller-frame");
-                provider.AddAttribute(2, "style", "height:24rem");
-                provider.AddAttribute(3, "data-preview-auto", auto ? "true" : "false");
-                provider.AddAttribute(4, "data-preview-position", position.ToString().ToLowerInvariant());
-                provider.AddAttribute(5, nameof(ShadcnMessageScroller.ChildContent), (RenderFragment)(scroller =>
-                {
-                    scroller.OpenComponent<ShadcnMessageScrollerViewport>(0);
-                    scroller.AddAttribute(1, nameof(ShadcnMessageScrollerViewport.AccessibleName), "บทสนทนาโครงการ");
-                    scroller.AddAttribute(2, nameof(ShadcnMessageScrollerViewport.ChildContent), (RenderFragment)(viewport =>
-                    {
-                        viewport.OpenComponent<ShadcnMessageScrollerContent>(0);
-                        viewport.AddAttribute(1, nameof(ShadcnMessageScrollerContent.ChildContent), (RenderFragment)(content =>
-                        {
-                            AddScrollerMessage(content, 0, "turn-1", ShadcnLogicalAlign.Start, OperatorAvatar, "วิศวกร MALIEV", "เริ่มตรวจสอบชิ้นงานแล้ว", true);
-                            AddScrollerMessage(content, 5, "turn-2", ShadcnLogicalAlign.Start, null, "ผู้ประสานงาน", "พบไฟล์ CAD ครบ 3 รายการ", true);
-                            AddScrollerMessage(content, 10, "turn-3", ShadcnLogicalAlign.End, AssistantAvatar, "MALIEV Assistant", "กำลังเตรียมใบเสนอราคา", true);
-                            AddScrollerMessage(content, 15, "turn-4", ShadcnLogicalAlign.Start, CoordinatorAvatar, "ผู้ประสานงาน", "จะส่งให้ตรวจในอีกสักครู่", true);
-                            AddScrollerMessage(content, 20, "turn-5", ShadcnLogicalAlign.End, null, "MALIEV Assistant", "รับทราบครับ", true);
-                            if (extra)
-                                AddScrollerMessage(content, 25, "turn-6", ShadcnLogicalAlign.Start, ReviewerAvatar, "ผู้ตรวจสอบคุณภาพ", "มีข้อความใหม่เข้ามา", true);
-                        }));
-                        viewport.CloseComponent();
-                    }));
-                    scroller.CloseComponent();
-                    scroller.OpenComponent<ShadcnMessageScrollerButton>(5);
-                    scroller.AddAttribute(6, nameof(ShadcnMessageScrollerButton.AccessibleName), "ไปข้อความล่าสุด");
-                    scroller.AddAttribute(7, "ChildContent", Text("ข้อความล่าสุด"));
-                    scroller.CloseComponent();
-                    scroller.OpenElement(8, "form");
-                    scroller.AddAttribute(9, "class", "showcase-scroller-composer");
-                    scroller.AddAttribute(10, "aria-label", "ส่งข้อความ");
-                    scroller.OpenElement(11, "input");
-                    scroller.AddAttribute(12, "type", "text");
-                    scroller.AddAttribute(13, "value", "เมื่อมีข้อความใหม่ ระบบจะจัดตำแหน่งรายการให้อ่านต่อได้โดยไม่รบกวนผู้ใช้");
-                    scroller.AddAttribute(14, "aria-label", "ข้อความใหม่");
-                    scroller.CloseElement();
-                    scroller.OpenElement(15, "button");
-                    scroller.AddAttribute(16, "type", "button");
-                    scroller.AddAttribute(17, "aria-label", "ส่งข้อความ");
-                    scroller.AddAttribute(18, "data-testid", "scroller-send");
-                    scroller.AddMarkupContent(19, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m5 12 14-7-4 14-3.5-5.5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><path d=\"M11.5 13.5 19 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>");
-                    scroller.CloseElement();
-                    scroller.CloseElement();
-                }));
-                provider.CloseComponent();
-            }));
+            b.OpenComponent<StreamingScrollerDemo>(0);
+            b.AddAttribute(1, nameof(StreamingScrollerDemo.AutoFollow), auto);
+            b.AddAttribute(2, nameof(StreamingScrollerDemo.AppendUnread), extra);
+            b.AddAttribute(3, nameof(StreamingScrollerDemo.OpeningPosition), position);
             b.CloseComponent();
         };
-        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"]);
+        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"], MessageScrollerRazorSource);
     }
 
     private static ComponentExampleDefinition Questionnaire()
@@ -474,13 +450,68 @@ internal static class ConversationWorkflowExamples
     {
         if (streaming)
         {
-            builder.AddMarkupContent(0, "<svg class=\"showcase-marker-loader shadcn-marker-loader\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"12\" r=\"8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-dasharray=\"38 16\" style=\"display:none\"></circle></svg>");
+            builder.AddMarkupContent(0, "<span class=\"showcase-marker-loader shadcn-marker-loader\" aria-hidden=\"true\"></span>");
         }
         else
         {
             builder.AddContent(1, fallback);
         }
     };
+
+    private const string MarkerRazorSource = """
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<div>
+    <ShadcnMarker Variant="ShadcnMarkerVariant.Default">
+        <ShadcnMarkerIcon>✓</ShadcnMarkerIcon>
+        <ShadcnMarkerContent>ตรวจสอบ 4 ไฟล์แล้ว</ShadcnMarkerContent>
+    </ShadcnMarker>
+
+    <ShadcnMarker Variant="ShadcnMarkerVariant.Separator">
+        <ShadcnMarkerIcon>•</ShadcnMarkerIcon>
+        <ShadcnMarkerContent>วันนี้</ShadcnMarkerContent>
+    </ShadcnMarker>
+
+    <ShadcnMarker Live="true" Variant="ShadcnMarkerVariant.Border">
+        <ShadcnMarkerIcon>
+            <span class="showcase-marker-loader shadcn-marker-loader" aria-hidden="true"></span>
+        </ShadcnMarkerIcon>
+        <ShadcnMarkerContent Streaming="true">กำลังประมวลผล</ShadcnMarkerContent>
+    </ShadcnMarker>
+</div>
+""";
+
+    private const string BubbleRazorSource = """
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<ShadcnBubbleGroup>
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+        <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Tinted">
+        <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
+        <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
+            <span aria-hidden="true">👍</span>
+        </ShadcnBubbleReactions>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+        <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+        <ShadcnBubbleContent Href="/docs/components/bubble">Sure. Hit me with your best demo.</ShadcnBubbleContent>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+        <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
+        <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
+            <span aria-hidden="true">👍 🔥 👀 <span aria-label="Two more reactions">+2</span></span>
+        </ShadcnBubbleReactions>
+    </ShadcnBubble>
+</ShadcnBubbleGroup>
+""";
 
     private static void AddAvatar(RenderTreeBuilder b, int sequence, AvatarProfile profile)
     {
@@ -509,9 +540,163 @@ internal static class ConversationWorkflowExamples
         }));
         b.CloseComponent();
     }
-    private static RenderFragment UploadSpinner() => b => b.AddMarkupContent(0, "<svg class=\"showcase-attachment-spinner\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"12\" r=\"8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-dasharray=\"36 18\"></circle></svg>");
-    private static string ReplyIconMarkup() => "<svg class=\"showcase-message-reply-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m9 7-5 5 5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M4 12h10a5 5 0 0 1 5 5v1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>";
-    private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", $"<Shadcn{string.Concat(slug.Split('-').Select(w => char.ToUpperInvariant(w[0]) + w[1..]))} />", preview, controls, tags);
+    private static RenderFragment UploadSpinner() => b =>
+    {
+        b.OpenComponent<ShadcnSpinner>(0);
+        b.AddAttribute(1, nameof(ShadcnSpinner.Label), (string?)null);
+        b.AddAttribute(2, nameof(ShadcnSpinner.SpinnerRole), ShadcnSpinnerRole.None);
+        b.AddAttribute(3, nameof(ShadcnSpinner.Size), "1.25rem");
+        b.AddAttribute(4, nameof(ShadcnSpinner.Class), "showcase-attachment-spinner");
+        b.CloseComponent();
+    };
+    private static string ReplyIconMarkup() => "<svg class=\"shadcn-message-reply-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m9 7-5 5 5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M4 12h10a5 5 0 0 1 5 5v1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>";
+    private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags, string? razorSource = null) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", razorSource ?? $"<Shadcn{string.Concat(slug.Split('-').Select(w => char.ToUpperInvariant(w[0]) + w[1..]))} />", preview, controls, tags);
+
+    private const string MessageScrollerRazorSource = """
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<ShadcnMessageScrollerProvider AutoScroll="true" DefaultScrollPosition="ShadcnMessageDefaultScrollPosition.End">
+    <ShadcnMessageScroller Class="showcase-scroller-frame" Style="height:24rem">
+        <ShadcnMessageScrollerViewport AccessibleName="Project conversation">
+            <ShadcnMessageScrollerContent>
+                <ShadcnMessageScrollerItem MessageId="user-1" ScrollAnchor="true">
+                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+                        <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
+                        <ShadcnMessageContent>
+                            <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
+                            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                                <ShadcnBubbleContent>เริ่มตรวจสอบชิ้นงานแล้ว</ShadcnBubbleContent>
+                            </ShadcnBubble>
+                        </ShadcnMessageContent>
+                    </ShadcnMessage>
+                </ShadcnMessageScrollerItem>
+                <ShadcnMessageScrollerItem MessageId="assistant-1" ScrollAnchor="true">
+                    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+                        <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
+                        <ShadcnMessageContent>
+                            <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
+                            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                                <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
+                            </ShadcnBubble>
+                        </ShadcnMessageContent>
+                    </ShadcnMessage>
+                </ShadcnMessageScrollerItem>
+            </ShadcnMessageScrollerContent>
+        </ShadcnMessageScrollerViewport>
+        <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="Jump to latest">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+    </ShadcnMessageScroller>
+    <form class="showcase-scroller-composer" @onsubmit:preventDefault="true">
+        <input @bind="message" aria-label="New message" />
+        <button type="submit" aria-label="Send message">Send</button>
+    </form>
+</ShadcnMessageScrollerProvider>
+""";
+
+    private const string MessageRazorSource = """
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<ShadcnMessageGroup Class="message-thread">
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar>
+            <img src="images/avatars/operator-thai.png" alt="Operator" />
+        </ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                <ShadcnBubbleContent>ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
+            </ShadcnBubble>
+            <ShadcnMessageFooter>
+                <button type="button" aria-label="Reply" class="shadcn-message-action">
+                    <svg class="shadcn-message-reply-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </ShadcnMessageFooter>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
+
+    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+        <ShadcnMessageAvatar>
+            <img src="images/avatars/assistant-thai.png" alt="Assistant" />
+        </ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                <ShadcnBubbleContent>I’ll keep the thread easy to scan.</ShadcnBubbleContent>
+            </ShadcnBubble>
+            <ShadcnMessageFooter data-visibility="always">
+                <span>Sent · 10:42</span>
+            </ShadcnMessageFooter>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
+</ShadcnMessageGroup>
+""";
+
+    private const string AttachmentRazorSource = """
+@using Maliev.ShadcnBlazor.Components.Feedback
+
+<ShadcnAttachmentGroup AccessibleName="Uploaded files">
+    <div class="attachment-gallery">
+        <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="workspace-plan.png">
+            <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of workspace-plan.png">
+                <img src="images/attachments/workspace-plan.png" alt="" />
+            </ShadcnAttachmentMedia>
+            <ShadcnAttachmentContent>
+                <ShadcnAttachmentTitle>workspace-plan.png</ShadcnAttachmentTitle>
+                <ShadcnAttachmentDescription>PNG · 2.0 MB</ShadcnAttachmentDescription>
+            </ShadcnAttachmentContent>
+        </ShadcnAttachment>
+        <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="desk-reference.png">
+            <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of desk-reference.png">
+                <img src="images/attachments/desk-reference.png" alt="" />
+            </ShadcnAttachmentMedia>
+            <ShadcnAttachmentContent>
+                <ShadcnAttachmentTitle>desk-reference.png</ShadcnAttachmentTitle>
+                <ShadcnAttachmentDescription>PNG · 2.0 MB</ShadcnAttachmentDescription>
+            </ShadcnAttachmentContent>
+        </ShadcnAttachment>
+        <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="office-reference.png">
+            <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of office-reference.png">
+                <img src="images/attachments/office-reference.png" alt="" />
+            </ShadcnAttachmentMedia>
+            <ShadcnAttachmentContent>
+                <ShadcnAttachmentTitle>office-reference.png</ShadcnAttachmentTitle>
+                <ShadcnAttachmentDescription>PNG · 1.8 MB</ShadcnAttachmentDescription>
+            </ShadcnAttachmentContent>
+        </ShadcnAttachment>
+    </div>
+
+    <ShadcnAttachment State="ShadcnAttachmentState.Uploading" Progress="64" Title="sales-dashboard.pdf">
+        <ShadcnAttachmentMedia>
+            <ShadcnSpinner Label="Uploading" SpinnerRole="ShadcnSpinnerRole.None" Size="1.25rem" />
+        </ShadcnAttachmentMedia>
+        <ShadcnAttachmentContent>
+            <ShadcnAttachmentTitle>sales-dashboard.pdf</ShadcnAttachmentTitle>
+            <ShadcnAttachmentDescription>Uploading · 64% · PDF · 2.4 MB</ShadcnAttachmentDescription>
+        </ShadcnAttachmentContent>
+        <ShadcnAttachmentActions>
+            <ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="Remove sales-dashboard.pdf">
+                <span aria-hidden="true">×</span>
+            </ShadcnAttachmentAction>
+        </ShadcnAttachmentActions>
+    </ShadcnAttachment>
+
+    <ShadcnAttachment State="ShadcnAttachmentState.Done" Title="message-renderer.tsx">
+        <ShadcnAttachmentMedia>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 2.75h8l4 4v14.5H6z" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M14 2.75v4h4M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+        </ShadcnAttachmentMedia>
+        <ShadcnAttachmentContent>
+            <ShadcnAttachmentTitle>message-renderer.tsx</ShadcnAttachmentTitle>
+            <ShadcnAttachmentDescription>TypeScript · 12 KB</ShadcnAttachmentDescription>
+        </ShadcnAttachmentContent>
+        <ShadcnAttachmentActions>
+            <ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="Remove message-renderer.tsx">
+                <span aria-hidden="true">×</span>
+            </ShadcnAttachmentAction>
+        </ShadcnAttachmentActions>
+    </ShadcnAttachment>
+</ShadcnAttachmentGroup>
+""";
     private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], v => apply(bool.Parse(v)));
     private static ComponentParameterControl Select(string id, string label, string initial, IReadOnlyList<string> options, Action<string> apply) => new(id, label, ComponentParameterControlKind.Select, initial, options, apply);
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);

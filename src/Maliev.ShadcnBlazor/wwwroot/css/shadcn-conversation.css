@@ -3,7 +3,10 @@
 .shadcn-attachment[data-size="sm"] { padding: calc(.5rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; }
 .shadcn-attachment[data-size="xs"] { padding: calc(.375rem * var(--shadcn-spacing-multiplier)); font-size: .75rem; }
 .shadcn-attachment[data-state="idle"] { border-style: dashed; }
-.shadcn-attachment[data-state="error"] { border-color: color-mix(in srgb, var(--shadcn-destructive) 30%, transparent); }
+.shadcn-attachment[data-state="error"] {
+    border-color: color-mix(in srgb, var(--shadcn-destructive) 42%, var(--shadcn-border));
+    background: color-mix(in srgb, var(--shadcn-destructive) 7%, var(--shadcn-card));
+}
 .shadcn-attachment-media { position: relative; display: flex; width: 2.5rem; height: 2.5rem; aspect-ratio: 1; flex: none; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--shadcn-radius-sm); background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); }
 .shadcn-attachment-media[data-variant="image"] :is(img,svg) { width: 100%; height: 100%; object-fit: cover; }
 .shadcn-attachment-content { min-width: 0; max-width: 100%; flex: 1; }
@@ -12,6 +15,7 @@
 [data-state="error"] > .shadcn-attachment-description { color: var(--shadcn-destructive); }
 .shadcn-attachment-actions { position: relative; z-index: 20; display: flex; flex: none; align-items: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-attachment-action { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; min-height: 2rem; border: 0; border-radius: var(--shadcn-radius-sm); background: transparent; color: inherit; }
+.shadcn-attachment-action:disabled { cursor: not-allowed; opacity: .5; }
 .shadcn-attachment-progress { position: relative; order: 10; width: 100%; height: .375rem; overflow: hidden; border-radius: 999px; background: var(--shadcn-muted); }
 .shadcn-attachment-progress > span { position: relative; display: block; height: 100%; overflow: hidden; border-radius: inherit; background: var(--shadcn-primary); }
 .shadcn-attachment-progress > span::after { position: absolute; inset: 0; content: ""; background: linear-gradient(110deg, transparent 15%, color-mix(in srgb, var(--shadcn-primary-foreground) 45%, transparent) 50%, transparent 85%); background-size: 220% 100%; animation: shadcn-attachment-progress-shimmer var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
@@ -28,15 +32,18 @@
 .shadcn-bubble { position:relative; display:flex; width:fit-content; min-width:0; max-width:80%; flex-direction:column; }
 .shadcn-bubble[data-align="end"] { align-self:flex-end; }
 .shadcn-bubble[data-variant="ghost"] { width:100%; max-width:none; }
-.shadcn-bubble-content { display:block; width:fit-content; max-width:100%; min-width:0; overflow-wrap:anywhere; border:0; border-radius:var(--shadcn-radius-lg); padding:calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.875rem * var(--shadcn-spacing-multiplier)); background:var(--shadcn-primary); color:var(--shadcn-primary-foreground); text-align:start; }
-[data-variant="secondary"]>.shadcn-bubble-content { background:var(--shadcn-secondary); color:var(--shadcn-secondary-foreground); }
-[data-variant="muted"]>.shadcn-bubble-content { background:var(--shadcn-muted); color:var(--shadcn-muted-foreground); }
-[data-variant="tinted"]>.shadcn-bubble-content { background:color-mix(in srgb,var(--shadcn-primary) 10%,transparent); color:var(--shadcn-foreground); }
-[data-variant="outline"]>.shadcn-bubble-content { border:1px solid var(--shadcn-border); background:var(--shadcn-background); color:var(--shadcn-foreground); }
-[data-variant="ghost"]>.shadcn-bubble-content { width:100%; padding:0; background:transparent; color:var(--shadcn-foreground); }
-[data-variant="destructive"]>.shadcn-bubble-content { background:var(--shadcn-destructive); color:var(--shadcn-destructive-foreground); }
+.shadcn-bubble-content { display:block; width:fit-content; max-width:100%; min-width:0; overflow-wrap:anywhere; border:1px solid transparent; border-radius:var(--shadcn-radius-lg); padding:calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.875rem * var(--shadcn-spacing-multiplier)); background:var(--shadcn-primary); color:var(--shadcn-primary-foreground); text-align:start; }
+.shadcn-bubble[data-variant="secondary"] > .shadcn-bubble-content { background:var(--shadcn-secondary); color:var(--shadcn-secondary-foreground); }
+.shadcn-bubble[data-variant="muted"] > .shadcn-bubble-content { background:var(--shadcn-muted); color:var(--shadcn-muted-foreground); }
+.shadcn-bubble[data-variant="tinted"] > .shadcn-bubble-content { background:color-mix(in srgb,var(--shadcn-primary) 10%,transparent); color:var(--shadcn-foreground); }
+.shadcn-bubble[data-variant="outline"] > .shadcn-bubble-content { border-color:var(--shadcn-border); background:var(--shadcn-background); color:var(--shadcn-foreground); }
+.shadcn-bubble[data-variant="ghost"] > .shadcn-bubble-content { width:100%; border-color:transparent; padding:0; background:transparent; color:var(--shadcn-foreground); }
+.shadcn-bubble[data-variant="destructive"] > .shadcn-bubble-content { border-color:color-mix(in srgb,var(--shadcn-destructive) 65%,transparent); background:var(--shadcn-destructive); color:var(--shadcn-destructive-foreground); }
+.shadcn-bubble[data-align="start"] > .shadcn-bubble-content { border-end-start-radius:var(--shadcn-radius-sm); }
+.shadcn-bubble[data-align="end"] > .shadcn-bubble-content { border-end-end-radius:var(--shadcn-radius-sm); }
 .shadcn-bubble-content:is(button,a):focus-visible { outline:var(--shadcn-focus-ring-width) solid var(--shadcn-ring); outline-offset:var(--shadcn-focus-ring-offset); }
-.shadcn-bubble-reactions { position:absolute; z-index:10; display:flex; align-items:center; gap:calc(.125rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-bubble-reactions { position:absolute; z-index:10; display:flex; align-items:center; gap:calc(.125rem * var(--shadcn-spacing-multiplier)); color:var(--shadcn-foreground); }
+.shadcn-bubble-reactions :is(svg,img) { display:block; width:1.1rem; height:1.1rem; flex:none; }
 .shadcn-bubble-reactions[data-side="top"] { inset-block-start:0; transform:translateY(-50%); }
 .shadcn-bubble-reactions[data-side="bottom"] { inset-block-end:0; transform:translateY(50%); }
 .shadcn-bubble-reactions[data-align="start"] { inset-inline-start:calc(.5rem * var(--shadcn-spacing-multiplier)); }
@@ -45,12 +52,12 @@
 .shadcn-marker[data-variant="border"] { border-block-end:1px solid var(--shadcn-border); padding-block:calc(.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { content:""; height:1px; flex:1; background:var(--shadcn-border); }
 .shadcn-marker-icon { flex:none; }
-.shadcn-marker-icon[data-streaming="true"] { display:inline-flex; width:1rem; height:1rem; align-items:center; justify-content:center; color:var(--shadcn-primary); transform-origin:center; animation:shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite; }
+.shadcn-marker-icon[data-streaming="true"] { display:inline-flex; width:1rem; height:1rem; align-items:center; justify-content:center; color:var(--shadcn-primary); }
 .shadcn-marker-icon[data-streaming="true"] svg { display:block; width:100%; height:100%; }
 .shadcn-marker-content { min-width:0; overflow-wrap:anywhere; }
-.shadcn-marker-content[data-streaming="true"] { display:inline-block; animation:shadcn-marker-pulse var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite alternate; }
-@keyframes shadcn-marker-spin { to { transform:rotate(360deg); } }
-@keyframes shadcn-marker-pulse { from { opacity:.45; } to { opacity:1; } }
+.shadcn-marker-content[data-streaming="true"] { position:relative; display:inline-block; isolation:isolate; color:var(--shadcn-foreground); }
+.shadcn-marker-content[data-streaming="true"]::after { position:absolute; z-index:-1; inset:0; pointer-events:none; border-radius:var(--shadcn-radius-sm); background:linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--shadcn-primary) 14%, transparent) 40%, color-mix(in oklch, var(--shadcn-primary) 28%, transparent) 50%, transparent 60%); background-size:200% 100%; content:""; opacity:.65; animation:shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
+@keyframes shadcn-marker-wave { from { background-position:-200% 0; } to { background-position:200% 0; } }
 .shadcn-message { position:relative; display:flex; width:100%; min-width:0; gap:calc(.625rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-message[data-align="end"] { flex-direction:row-reverse; }
 .shadcn-message-avatar { display:flex; width:fit-content; flex:none; align-items:center; justify-content:center; align-self:flex-start; overflow:hidden; border-radius:9999px; background:var(--shadcn-muted); }
@@ -60,8 +67,8 @@
 .shadcn-message-footer button { min-width:55px !important; min-height:32px; border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-sm); background:inherit; }
 [data-align="end"] .shadcn-message-footer { justify-content:flex-end; }
 .shadcn-message-footer :is(button,a):focus-visible { outline:2px solid currentColor !important; outline-offset:2px !important; }
-@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-content[data-streaming="true"] { animation:none; } }
-@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-content[data-streaming="true"] { animation:none; color:CanvasText; } }
+@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; } .shadcn-marker-content[data-streaming="true"]::after { animation:none; } }
+@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } .shadcn-marker-content[data-streaming="true"] { color:CanvasText; } .shadcn-marker-content[data-streaming="true"]::after { background:Highlight; animation:none; } }
 .shadcn-message-scroller { position:relative; display:flex; width:100%; height:100%; min-height:0; flex-direction:column; overflow:hidden; }
 .shadcn-message-scroller-viewport { width:100%; height:100%; min-width:0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
 .shadcn-message-scroller-content { display:flex; min-height:100%; height:max-content; flex-direction:column; }
@@ -149,37 +156,75 @@
     line-height: 1.45;
     box-shadow: var(--shadcn-shadow-xs);
 }
-[data-slot="bubble"][data-variant="secondary"] > .shadcn-bubble-content {
+.shadcn-bubble[data-variant="secondary"] > .shadcn-bubble-content {
     background: color-mix(in oklch, var(--shadcn-muted) 88%, var(--shadcn-background));
     color: var(--shadcn-foreground);
 }
-[data-slot="bubble"][data-variant="muted"] > .shadcn-bubble-content {
+.shadcn-bubble[data-variant="muted"] > .shadcn-bubble-content {
     background: var(--shadcn-muted);
     color: var(--shadcn-foreground);
 }
-[data-slot="bubble"][data-variant="tinted"] > .shadcn-bubble-content {
+.shadcn-bubble[data-variant="tinted"] > .shadcn-bubble-content {
     background: color-mix(in oklch, var(--shadcn-primary) 12%, var(--shadcn-background));
     color: var(--shadcn-foreground);
 }
-[data-slot="bubble"][data-variant="outline"] > .shadcn-bubble-content {
+.shadcn-bubble[data-variant="outline"] > .shadcn-bubble-content {
     border: 1px solid var(--shadcn-border);
     background: var(--shadcn-background);
     color: var(--shadcn-foreground);
     box-shadow: none;
 }
-[data-slot="bubble"][data-variant="destructive"] > .shadcn-bubble-content {
-    background: color-mix(in oklch, var(--shadcn-destructive) 18%, var(--shadcn-background));
-    color: var(--shadcn-destructive);
+.shadcn-bubble[data-variant="destructive"] > .shadcn-bubble-content {
+    border-color: color-mix(in oklch, var(--shadcn-destructive) 65%, transparent);
+    background: var(--shadcn-destructive);
+    color: var(--shadcn-destructive-foreground);
 }
 .showcase-bubble-thread .shadcn-bubble-content {
     border-radius: 1.15rem !important;
     box-shadow: none !important;
 }
+.shadcn-bubble[data-align="end"] > .shadcn-bubble-content,
 .showcase-bubble-thread > [data-slot="bubble"][data-align="end"] .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-left-radius: 1.15rem !important;
     border-end-end-radius: .35rem !important;
+    border-bottom-right-radius: .35rem !important;
 }
+.shadcn-bubble[data-align="start"] > .shadcn-bubble-content,
 .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-right-radius: 1.15rem !important;
     border-end-start-radius: .35rem !important;
+    border-bottom-left-radius: .35rem !important;
+}
+:dir(rtl) .shadcn-bubble[data-align="end"] > .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-left-radius: 1.15rem !important;
+    border-end-end-radius: .35rem !important;
+    border-bottom-left-radius: .35rem !important;
+}
+:dir(rtl) .shadcn-bubble[data-align="start"] > .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-right-radius: 1.15rem !important;
+    border-end-start-radius: .35rem !important;
+    border-bottom-right-radius: .35rem !important;
+}
+/* Keep the showcase tail deterministic across engines that resolve logical and physical corner declarations differently. */
+html body .showcase-bubble-thread > [data-slot="bubble"][data-align="end"] > .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-left-radius: 1.15rem !important;
+    border-bottom-right-radius: .35rem !important;
+}
+html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .shadcn-bubble-content {
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-left-radius: .35rem !important;
+    border-bottom-right-radius: 1.15rem !important;
 }
 .showcase-bubble-thread .showcase-bubble-reaction-set {
     min-height: 1.75rem !important;
@@ -195,12 +240,14 @@
     padding: calc(.14rem * var(--shadcn-spacing-multiplier)) !important;
     border-radius: 999px;
 }
+.showcase-bubble-thread .showcase-bubble-reaction-icon--like { color: #f59e0b; }
+.showcase-bubble-thread .showcase-bubble-reaction-icon--fire { color: #f97316; }
+.showcase-bubble-thread .showcase-bubble-reaction-icon--eyes { color: #a855f7; }
 
 .shadcn-marker-icon[data-streaming="true"] {
     width: 1.5rem;
     height: .75rem;
     color: var(--shadcn-primary);
-    animation: shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite;
 }
 .shadcn-marker-loader {
     display: block;
@@ -220,11 +267,21 @@
     80% { background-position: 0% 50%, 50% 50%, 100% 100%; }
 }
 .shadcn-marker-content[data-streaming="true"] {
-    color: color-mix(in oklch, var(--shadcn-foreground) 72%, var(--shadcn-muted-foreground));
-    animation: shadcn-marker-pulse var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite alternate;
+    color: var(--shadcn-foreground);
 }
-.showcase-marker-thread [data-streaming="true"] .shadcn-marker-icon {
-    animation: shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite !important;
+/* The showcase has its own streaming decoration. Keep the package contract authoritative:
+   the icon is static, the loader owns the dots, and the content owns one accessible wave. */
+html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] {
+    animation: none;
+}
+html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after {
+    inline-size: auto;
+    block-size: auto;
+    flex: none;
+    border-radius: var(--shadcn-radius-sm);
+    background: linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--shadcn-primary) 14%, transparent) 40%, color-mix(in oklch, var(--shadcn-primary) 28%, transparent) 50%, transparent 60%);
+    background-size: 200% 100%;
+    animation: shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite;
 }
 
 .shadcn-message { align-items: flex-start; }
@@ -245,7 +302,28 @@
 .shadcn-message-content { flex: 0 1 auto; }
 .shadcn-message-header { align-self: flex-start; color: var(--shadcn-muted-foreground); font-size: .75rem; font-weight: 600; line-height: 1.25; }
 .shadcn-message[data-align="end"] .shadcn-message-header { align-self: flex-end; }
-.shadcn-message-footer { color: var(--shadcn-muted-foreground); font-size: .6875rem; }
+.shadcn-message-footer {
+    color: var(--shadcn-muted-foreground);
+    font-size: .6875rem;
+    max-block-size: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-.25rem);
+    transition: max-block-size var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+        opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+        transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
+}
+.shadcn-message:hover .shadcn-message-footer,
+.shadcn-message:focus-within .shadcn-message-footer,
+.shadcn-message-footer[data-visibility="always"] {
+    max-block-size: 3rem;
+    overflow: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transform: none;
+}
+.shadcn-message-action,
 .showcase-message-action {
     min-width: 0 !important;
     min-height: 1.75rem !important;
@@ -256,8 +334,15 @@
     color: var(--shadcn-muted-foreground) !important;
     font: inherit;
 }
-.showcase-message-action:not(.showcase-message-action--sent)::before { content: "↩"; margin-inline-end: calc(.25rem * var(--shadcn-spacing-multiplier)); font-size: .9rem; }
+.shadcn-message-action--sent,
 .showcase-message-action--sent { pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .shadcn-message-footer {
+        transition: none;
+        transform: none;
+    }
+}
 
 .showcase-scroller-frame .shadcn-message-scroller-item { border: 0 !important; padding-block: calc(.4rem * var(--shadcn-spacing-multiplier)) !important; }
 .showcase-scroller-frame .shadcn-message-scroller-content { gap: calc(.2rem * var(--shadcn-spacing-multiplier)); }
@@ -274,6 +359,7 @@
     font-size: .8rem;
     font-weight: 700;
 }
+.shadcn-message-reply-icon,
 .showcase-message-reply-icon { width: 1rem; height: 1rem; display: block; }
 
 .showcase-scroller-composer {
@@ -354,11 +440,18 @@
 @media (prefers-reduced-motion: reduce) {
     .shadcn-attachment[data-state="uploading"] .showcase-attachment-spinner,
     .shadcn-marker-icon[data-streaming="true"],
-    .shadcn-marker-content[data-streaming="true"] { animation: none !important; }
+    .shadcn-marker-loader { animation: none !important; }
+    .shadcn-marker-content[data-streaming="true"]::after { animation: none !important; }
     .showcase-scroller-composer button,
     .shadcn-questionnaire-choice, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"]::before { transition: none; }
 }
 @media (forced-colors: active) {
     .shadcn-attachment-media, .shadcn-message-avatar, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"] { border-color: CanvasText; }
     .shadcn-questionnaire-choice[data-checked="true"] { outline: 2px solid Highlight; }
+    .shadcn-marker-icon[data-streaming="true"], .shadcn-marker-loader { color: CanvasText; animation: none !important; }
+    .shadcn-marker-content[data-streaming="true"] { color: CanvasText; }
+    .shadcn-marker-content[data-streaming="true"]::after { background: Highlight; animation: none !important; }
+    html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] { animation: none; }
+    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; }
+    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after { background: Highlight; animation: none; }
 }

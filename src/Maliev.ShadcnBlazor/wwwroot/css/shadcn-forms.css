@@ -65,8 +65,16 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input { width: 100%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-control { flex: 1; height: 100%; border: 0; background: transparent; padding-inline: calc(.625rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-foreground); font: inherit; font-size: .875rem; outline: none; box-shadow: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input:has(.shadcn-combobox-control[aria-invalid="true"]) { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 24%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input:has(.shadcn-combobox-control[aria-invalid="true"]:focus-visible) { box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 38%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="combobox-trigger"] { width: 2rem; height: 100%; border: 0; background: transparent; color: var(--shadcn-muted-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="combobox-trigger"] svg { width: 1rem; height: 1rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"] { position: static; inset: auto; flex: 0 0 auto; order: 2; width: 1.75rem; height: 100%; border: 0; border-radius: var(--shadcn-radius-sm); background: transparent; color: var(--shadcn-muted-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"] { position: static; order: 3; flex: 0 0 auto; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:hover,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:focus-visible { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"]:hover,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"]:focus-visible { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-chips { display: flex; min-height: var(--shadcn-control-height); flex-wrap: wrap; align-items: center; gap: calc(.375rem * var(--shadcn-spacing-multiplier)); border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); padding: calc(.375rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-chip { display: inline-flex; align-items: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); border-radius: var(--shadcn-radius-sm); background: var(--shadcn-muted); padding: calc(.125rem * var(--shadcn-spacing-multiplier)) calc(.375rem * var(--shadcn-spacing-multiplier)); font-size: .75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-chip button { border: 0; background: transparent; color: inherit; }

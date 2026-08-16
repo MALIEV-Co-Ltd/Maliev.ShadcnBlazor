@@ -1,14 +1,21 @@
 @using Maliev.ShadcnBlazor.Components.Actions
 
 <div class="showcase-button-dossier" data-testid="button-dossier-preview">
+    <header class="showcase-button-dossier__intro">
+        <div>
+            <span class="showcase-button-dossier__eyebrow">Production order #4189</span>
+            <p>Use the same action vocabulary across a review workflow: save, remove, inspect, and reveal more.</p>
+        </div>
+        <span class="showcase-button-dossier__context">Revision C · 3 files ready</span>
+    </header>
     <section class="showcase-button-dossier__section" aria-labelledby="button-variants-title">
         <h3 id="button-variants-title">Variants</h3>
         <div class="showcase-button-dossier__grid">
             @foreach (var variant in Enum.GetValues<ShadcnButtonVariant>())
             {
                 <div class="showcase-button-dossier__sample">
-                    <ShadcnButton Variant="variant" Disabled="Disabled" AdditionalAttributes="Attributes(variant.ToString())">@ButtonLabel(variant)</ShadcnButton>
-                    <span>@variant</span>
+                    <ShadcnButton Variant="variant" Disabled="Disabled" PointerCursor="true" OnClick="@(args => Announce(ButtonLabel(variant)))" AdditionalAttributes="Attributes(variant.ToString())">@ButtonLabel(variant)</ShadcnButton>
+                    <span>@VariantLabel(variant)</span>
                 </div>
             }
         </div>
@@ -19,16 +26,24 @@
             @foreach (var size in new[] { ShadcnButtonSize.ExtraSmall, ShadcnButtonSize.Small, ShadcnButtonSize.Default, ShadcnButtonSize.Large })
             {
                 <div class="showcase-button-dossier__sample">
-                    <ShadcnButton Size="size" Variant="ShadcnButtonVariant.Outline" Disabled="Disabled">Save changes</ShadcnButton>
-                    <span>@size</span>
+                    <ShadcnButton Size="size" Variant="ShadcnButtonVariant.Outline" Disabled="Disabled" PointerCursor="true" OnClick="@(args => Announce($"Save changes ({SizeLabel(size)})"))">Save changes</ShadcnButton>
+                    <span>@SizeLabel(size)</span>
                 </div>
             }
         </div>
     </section>
+    <p class="showcase-button-dossier__status" data-testid="button-last-action" role="status" aria-live="polite">
+        <span>Last action</span>
+        <strong>@(LastAction ?? "Choose an enabled action to try it")</strong>
+    </p>
 </div>
 
 @code {
     [Parameter] public bool Disabled { get; set; }
+
+    private string? LastAction { get; set; }
+
+    private void Announce(string action) => LastAction = $"{action} pressed";
 
     private static string ButtonLabel(ShadcnButtonVariant variant) => variant switch
     {
@@ -36,6 +51,26 @@
         ShadcnButtonVariant.Link => "View details",
         ShadcnButtonVariant.Ghost => "More actions",
         _ => "Save changes"
+    };
+
+    private static string VariantLabel(ShadcnButtonVariant variant) => variant switch
+    {
+        ShadcnButtonVariant.Default => "Default",
+        ShadcnButtonVariant.Destructive => "Destructive",
+        ShadcnButtonVariant.Outline => "Outline",
+        ShadcnButtonVariant.Secondary => "Secondary",
+        ShadcnButtonVariant.Ghost => "Ghost",
+        ShadcnButtonVariant.Link => "Link",
+        _ => variant.ToString()
+    };
+
+    private static string SizeLabel(ShadcnButtonSize size) => size switch
+    {
+        ShadcnButtonSize.ExtraSmall => "Extra small",
+        ShadcnButtonSize.Small => "Small",
+        ShadcnButtonSize.Default => "Default",
+        ShadcnButtonSize.Large => "Large",
+        _ => size.ToString()
     };
 
     private static IReadOnlyDictionary<string, object> Attributes(string variant) => new Dictionary<string, object>

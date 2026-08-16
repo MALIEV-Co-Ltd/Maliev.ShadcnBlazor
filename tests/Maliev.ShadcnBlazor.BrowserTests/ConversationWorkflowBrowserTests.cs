@@ -1,3 +1,4 @@
+using System.Globalization;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
 
@@ -78,7 +79,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var streamingMarker = page.Locator("[data-slot='marker'][role='status']");
         await Assertions.Expect(streamingMarker).ToHaveCountAsync(1);
         await Assertions.Expect(streamingMarker).ToHaveAttributeAsync("data-live", "true");
-        await Assertions.Expect(streamingMarker.Locator("[data-slot='marker-icon'][data-streaming='true'] svg.showcase-marker-loader")).ToHaveCountAsync(1);
+        await Assertions.Expect(streamingMarker.Locator("[data-slot='marker-icon'][data-streaming='true'] .showcase-marker-loader")).ToHaveCountAsync(1);
         await Assertions.Expect(streamingMarker.Locator("[data-slot='marker-content'][data-streaming='true']")).ToHaveCountAsync(1);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
@@ -88,22 +89,81 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task BubblePreviewAppliesVariantTailRadiusAndReactionIconTreatment()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
+
+        var defaultBubble = page.Locator("[data-slot='bubble']").First.Locator("[data-slot='bubble-content']");
+        var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+
+        await page.GetByTestId("control-bubble-variant").SelectOptionAsync("Tinted");
+        var incoming = page.Locator("[data-bubble-role='incoming']").First;
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "tinted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "start");
+        var incomingContent = incoming.Locator("[data-slot='bubble-content']");
+        var incomingBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual(defaultBackground, incomingBackground);
+
+        var incomingTail = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderEndStartRadius");
+        var incomingTop = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderStartStartRadius");
+        Assert.True(ParseCssPixels(incomingTail) < ParseCssPixels(incomingTop));
+
+        await page.GetByTestId("control-bubble-end").CheckAsync();
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "end");
+        var endRadii = await incomingContent.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return `${style.borderBottomLeftRadius}|${style.borderBottomRightRadius}|${style.borderTopLeftRadius}|${style.borderTopRightRadius}`; }");
+        var endRadiusValues = endRadii.Split('|', StringSplitOptions.TrimEntries);
+        Assert.Equal(4, endRadiusValues.Length);
+        var endTail = Math.Min(ParseCssPixels(endRadiusValues[0]), ParseCssPixels(endRadiusValues[1]));
+        var endTop = Math.Max(ParseCssPixels(endRadiusValues[2]), ParseCssPixels(endRadiusValues[3]));
+        Assert.True(endTail < endTop, $"end tail={endTail}px, top={endTop}px");
+
+        var reactionIcon = page.Locator("[data-slot='bubble-reactions'] .showcase-bubble-reaction-icon").First;
+        Assert.True(await reactionIcon.EvaluateAsync<double>("element => element.getBoundingClientRect().width") >= 16);
+        var reactionColor = await reactionIcon.EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.DoesNotContain("rgba(0, 0, 0, 0)", reactionColor, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task StreamingMarkerUsesLoaderAndShimmerButHonorsReducedMotion()
     {
         await using var animatedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.NoPreference });
         var animatedPage = await animatedContext.NewPageAsync();
         await animatedPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         var animatedMarker = animatedPage.Locator("[data-slot='marker'][role='status']");
-        await Assertions.Expect(animatedMarker.Locator("svg.showcase-marker-loader")).ToHaveCountAsync(1);
-        Assert.Equal("shadcn-marker-spin", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("shadcn-marker-pulse", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var animatedLoader = animatedMarker.Locator(".showcase-marker-loader");
+        await Assertions.Expect(animatedLoader).ToHaveCountAsync(1);
+        var loaderBackground = await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage");
+        Assert.Contains("radial-gradient", loaderBackground, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("shadcn-marker-dots", await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("none", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("shadcn-marker-wave", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
 
         await using var reducedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.Reduce });
         var reducedPage = await reducedContext.NewPageAsync();
         await reducedPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         var reducedMarker = reducedPage.Locator("[data-slot='marker'][role='status']");
         Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
+        Assert.Equal("none", await reducedMarker.Locator(".showcase-marker-loader").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+
+        await using var forcedColorsContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ForcedColors = ForcedColors.Active });
+        var forcedColorsPage = await forcedColorsContext.NewPageAsync();
+        await forcedColorsPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
+        var forcedColorsMarker = forcedColorsPage.Locator("[data-slot='marker'][role='status']");
+        var forcedColorsContent = forcedColorsMarker.Locator("[data-slot='marker-content']");
+        var forcedColorsContentColor = await forcedColorsContent.EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", forcedColorsContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", forcedColorsContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal("none", await forcedColorsContent.EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
+        var forcedColorsLoaderColor = await forcedColorsMarker.Locator(".showcase-marker-loader").EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", forcedColorsLoaderColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", forcedColorsLoaderColor, StringComparer.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -183,4 +243,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await page.GetByTestId("reset-questionnaire").ClickAsync();
         await Assertions.Expect(page.Locator("fieldset[name='scope']")).ToBeVisibleAsync();
     }
+
+    private static double ParseCssPixels(string value) =>
+        double.Parse(value.Replace("px", string.Empty, StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture);
 }
