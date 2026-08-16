@@ -424,18 +424,18 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void ThemeStudioSwitchingMockupsResetsTheDestinationFixtureBeforeRender()
+    public async Task ThemeStudioSwitchingMockupsResetsTheDestinationFixtureBeforeRender()
     {
         var theme = Services.GetRequiredService<ThemeStudioState>();
         var mockSites = Services.GetRequiredService<MockSiteState>();
         var cut = Render<ThemeStudio>();
         mockSites.SetCustomerQuery("วริศรา");
-        cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
+        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
 
         cut.WaitForAssertion(() => Assert.Equal(string.Empty, mockSites.Customers.Query));
         mockSites.SetCustomerQuery("กานต์ชนก");
-        cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.OperationsDashboard));
-        cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
+        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.OperationsDashboard));
+        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
 
         cut.WaitForAssertion(() => Assert.Equal(string.Empty, mockSites.Customers.Query));
     }
