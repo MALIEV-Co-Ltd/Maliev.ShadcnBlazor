@@ -20,37 +20,47 @@ public sealed record ThemeStudioViewport(string Id, string DisplayName, int Widt
     public static IReadOnlyList<ThemeStudioViewport> All { get; } = [Desktop, Tablet, Mobile];
 }
 
-public sealed record ThemeStudioFontPreset(string Id, string DisplayName, string CssStack, string GoogleFontsFamily)
+public sealed record ThemeStudioFontPreset(
+    string Id,
+    string DisplayName,
+    string CssStack,
+    string GoogleFontsFamily,
+    bool IsBundled)
 {
     public static ThemeStudioFontPreset GeistSans { get; } = new(
         "geist-sans",
         "Geist + Noto Sans Thai",
         "'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
-        "Geist:wght@400;500;600;700");
+        "Geist:wght@400;500;600;700",
+        IsBundled: true);
 
     public static ThemeStudioFontPreset DmSans { get; } = new(
         "dm-sans",
         "DM Sans",
         "'DM Sans', ui-sans-serif, system-ui, sans-serif",
-        "DM+Sans:wght@400;500;600;700");
+        "DM+Sans:wght@400;500;600;700",
+        IsBundled: false);
 
     public static ThemeStudioFontPreset PlusJakartaSans { get; } = new(
         "plus-jakarta-sans",
         "Plus Jakarta Sans",
         "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
-        "Plus+Jakarta+Sans:wght@400;500;600;700");
+        "Plus+Jakarta+Sans:wght@400;500;600;700",
+        IsBundled: false);
 
     public static ThemeStudioFontPreset NotoSansThai { get; } = new(
         "noto-sans-thai",
         "Noto Sans Thai",
         "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
-        "Noto+Sans+Thai:wght@400;500;600;700");
+        "Noto+Sans+Thai:wght@400;500;600;700",
+        IsBundled: true);
 
     public static ThemeStudioFontPreset JetBrainsMono { get; } = new(
         "jetbrains-mono",
         "JetBrains Mono",
         "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        "JetBrains+Mono:wght@400;500;600;700");
+        "JetBrains+Mono:wght@400;500;600;700",
+        IsBundled: true);
 
     public static IReadOnlyList<ThemeStudioFontPreset> All { get; } = [GeistSans, DmSans, PlusJakartaSans, NotoSansThai];
     public static IReadOnlyList<ThemeStudioFontPreset> MonospaceAll { get; } = [JetBrainsMono];

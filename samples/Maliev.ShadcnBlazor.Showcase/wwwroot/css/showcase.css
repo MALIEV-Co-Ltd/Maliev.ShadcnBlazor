@@ -2789,7 +2789,7 @@ a {
 .mock-chart-card { margin: 0; }
 .mock-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); height: 10rem; align-items: end; gap: 0.45rem; padding-block-start: 1rem; }
 .mock-chart-column { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) auto; align-items: end; gap: 0.3rem; text-align: center; }
-.mock-chart-column span { display: block; min-height: 0.25rem; border-radius: var(--shadcn-radius-sm) var(--shadcn-radius-sm) 0 0; background: var(--shadcn-chart-1); }
+.mock-chart-column span { display: block; min-height: 0.25rem; border-radius: 0; background: var(--shadcn-chart-1); }
 .mock-chart-column:nth-child(2n) span { background: var(--shadcn-chart-2); }
 .mock-chart-column small { color: var(--shadcn-muted-foreground); font-size: 0.625rem; }
 .mock-queue-card dl { display: grid; gap: 0.6rem; margin: 1rem 0; }
@@ -3209,10 +3209,10 @@ a {
 
 .documentation-brand__mark {
     display: inline-grid;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
+    inline-size: 2rem;
+    block-size: 2rem;
     place-items: center;
-    border-radius: 0.5rem;
+    border-radius: 50%;
     background: var(--shadcn-primary);
     color: var(--shadcn-primary-foreground);
     font-size: 0.8rem;
@@ -3261,9 +3261,9 @@ a {
 }
 
 .documentation-workbench {
-    grid-template-columns: minmax(15rem, 18rem) minmax(0, 60rem) minmax(13rem, 16rem);
-    max-inline-size: 96rem;
-    margin-inline: auto;
+    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr) minmax(13rem, 16rem);
+    max-inline-size: none;
+    margin-inline: 0;
 }
 
 .documentation-catalog,
@@ -3347,13 +3347,13 @@ a {
 }
 
 .documentation-component-list a[aria-current="page"] {
-    border-color: color-mix(in oklch, var(--shadcn-border) 75%, var(--shadcn-primary));
+    border-color: transparent;
     font-weight: 650;
 }
 
 .documentation-content {
-    padding-block: clamp(3.5rem, 7vw, 5.5rem) 7rem;
-    padding-inline: clamp(1.5rem, 5vw, 4.5rem);
+    padding-block: 3rem;
+    padding-inline: 3rem;
 }
 
 .component-dossier,
@@ -3373,9 +3373,9 @@ a {
 }
 
 .component-dossier__hero h1 {
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-size: clamp(2rem, 3.2vw, 3rem);
     letter-spacing: -0.055em;
-    line-height: 1;
+    line-height: 1.05;
 }
 
 .component-dossier__hero > p:not(.documentation-eyebrow) {
@@ -3428,8 +3428,8 @@ a {
 
 .documentation-on-this-page ul {
     gap: 0.2rem;
-    border-inline-start: 1px solid var(--shadcn-border);
-    padding-inline-start: 0.875rem;
+    border-inline-start: 0;
+    padding-inline-start: 0;
 }
 
 .documentation-on-this-page a {
@@ -4334,9 +4334,8 @@ a {
 }
 
 .documentation-on-this-page a {
-    border-inline-start: 2px solid transparent;
     color: var(--shadcn-muted-foreground);
-    padding-inline: 0.65rem;
+    padding-inline: 0;
     transition: color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
         background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
         border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
@@ -4431,6 +4430,9 @@ a {
     box-shadow: 0 1px 2px color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
 }
 
+/* Keep the keyboard focus ring on the actionable attachment itself. The
+   resting preview stays quiet; the ring appears only after focus enters a
+   remove/retry action. */
 .showcase-attachment-file:focus-within,
 .showcase-attachment-card:focus-within {
     border-color: var(--shadcn-ring);
