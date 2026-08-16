@@ -64,16 +64,16 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition Select()
     {
-        var invalid = false; var open = false; var value = "cnc";
-        RenderFragment preview = b => { b.OpenComponent<ShadcnSelect<string>>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string?>(new object(), next => value = next ?? string.Empty)); b.AddAttribute(3, "Options", Processes); b.AddAttribute(4, "Open", open); b.AddAttribute(5, "OpenChanged", EventCallback.Factory.Create<bool>(new object(), next => open = next)); b.AddAttribute(6, "Invalid", invalid); b.AddAttribute(7, "Clearable", true); b.AddAttribute(8, "AdditionalAttributes", Attr("forms-dossier-select", "Process")); b.CloseComponent(); };
-        return Example("select", "Typed select", "Open a grouped listbox with keyboard navigation and clearable typed value.", "<ShadcnSelect TValue=\"string\" @bind-Value=\"Process\" @bind-Open=\"IsOpen\" Options=\"ProcessOptions\" Clearable=\"true\" />", preview,
+        var invalid = false; var open = false;
+        RenderFragment preview = b => { b.OpenComponent<SelectDossierPreview>(0); b.AddAttribute(1, nameof(SelectDossierPreview.Invalid), invalid); b.AddAttribute(2, nameof(SelectDossierPreview.Open), open); b.CloseComponent(); };
+        return Example("select", "Grouped select", "Choose a manufacturing process from a keyboard-friendly grouped listbox, then clear or change the selection directly in the preview.", "<ShadcnSelect TValue=\"string\" @bind-Value=\"Process\" @bind-Open=\"IsOpen\" Options=\"ProcessOptions\" Clearable=\"true\" Invalid=\"HasError\" />", preview,
             [Toggle("select-invalid", "Invalid", v => invalid = v), Toggle("select-open", "Open", v => open = v)], ["selected", "groups", "clearable", "open", "invalid"]);
     }
     private static ComponentExampleDefinition Combobox()
     {
         var invalid = false; var multiple = false;
         RenderFragment preview = b => { b.OpenComponent<ComboboxDossierPreview>(0); b.AddAttribute(1, "Multiple", multiple); b.AddAttribute(2, "Invalid", invalid); b.CloseComponent(); };
-        return Example("combobox", "Searchable typed combobox", "Filter grouped options or switch to multiple chips and clear behavior.", "<ShadcnCombobox TValue=\"string\" @bind-Value=\"Material\" Options=\"MaterialOptions\" />", preview,
+        return Example("combobox", "Searchable typed combobox", "Search grouped materials, select with the pointer or keyboard, and try the clear and multi-select states in the field itself.", "<ShadcnCombobox TValue=\"string\" @bind-Value=\"SelectedMaterial\" @bind-Values=\"SelectedMaterials\" @bind-Open=\"IsOpen\" @bind-Query=\"Query\" Options=\"MaterialOptions\" Multiple=\"@AllowMultiple\" ShowClear=\"true\" ShowTrigger=\"true\" Invalid=\"@HasError\" Placeholder=\"Select a material\" />", preview,
             [Toggle("combobox-invalid", "Invalid", v => invalid = v), Toggle("combobox-multiple", "Multiple", v => multiple = v)], ["selected", "multiple", "chips", "open", "invalid"]);
     }
     private static ComponentExampleDefinition Calendar()
@@ -98,4 +98,54 @@ internal static class FormDateExamples
     private static IReadOnlyDictionary<string, object> Attr(string testId, string label) => new Dictionary<string, object> { ["data-testid"] = testId, ["aria-label"] = label };
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);
     private static void AddNativeOption(RenderTreeBuilder b, int sequence, string value, string text) { b.OpenComponent<ShadcnNativeSelectOption<string>>(sequence); b.AddAttribute(sequence + 1, "Value", value); b.AddAttribute(sequence + 2, "ChildContent", Text(text)); b.CloseComponent(); }
+
+    private sealed class SelectDossierPreview : ComponentBase
+    {
+        [Parameter] public bool Invalid { get; set; }
+        [Parameter] public bool Open { get; set; }
+
+        private string Value { get; set; } = "cnc";
+        private bool EffectiveOpen { get; set; }
+        private bool OpenInitialized { get; set; }
+        private bool LastOpenParameter { get; set; }
+
+        protected override void OnParametersSet()
+        {
+            if (!OpenInitialized || Open != LastOpenParameter)
+            {
+                EffectiveOpen = Open;
+                LastOpenParameter = Open;
+                OpenInitialized = true;
+            }
+        }
+
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-select-dossier");
+            builder.OpenComponent<ShadcnSelect<string>>(2);
+            builder.AddAttribute(3, "Value", Value);
+            builder.AddAttribute(4, "ValueChanged", EventCallback.Factory.Create<string>(this, HandleValueChanged));
+            builder.AddAttribute(5, "Options", Processes);
+            builder.AddAttribute(6, "Open", EffectiveOpen);
+            builder.AddAttribute(7, "OpenChanged", EventCallback.Factory.Create<bool>(this, HandleOpenChanged));
+            builder.AddAttribute(8, "Invalid", Invalid);
+            builder.AddAttribute(9, "Clearable", true);
+            builder.AddAttribute(10, "AdditionalAttributes", Attr("forms-dossier-select", "Process"));
+            builder.CloseComponent();
+            builder.CloseElement();
+        }
+
+        private Task HandleValueChanged(string value)
+        {
+            Value = value;
+            return Task.CompletedTask;
+        }
+
+        private Task HandleOpenChanged(bool open)
+        {
+            EffectiveOpen = open;
+            return Task.CompletedTask;
+        }
+    }
 }

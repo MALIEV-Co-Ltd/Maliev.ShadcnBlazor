@@ -76,6 +76,9 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         var accordion = Assert.Single(registry.GetBySlug("accordion"));
         Assert.Contains("What are the delivery options?", accordion.RazorSource, StringComparison.Ordinal);
         Assert.Contains("How can I contact support?", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Express delivery", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Revision notes", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("...", accordion.RazorSource, StringComparison.Ordinal);
 
         var pagination = Assert.Single(registry.GetBySlug("pagination"));
         Assert.Contains("ShadcnPaginationEllipsis", pagination.RazorSource, StringComparison.Ordinal);

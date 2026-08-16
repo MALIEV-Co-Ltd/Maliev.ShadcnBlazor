@@ -77,6 +77,17 @@ public sealed class ComponentCatalogVisualProofTests(
             }
 
             await page.EvaluateAsync("document.fonts.ready");
+            await page.EvaluateAsync("""
+                async () => {
+                    const images = Array.from(document.images);
+                    await Promise.all(images.map(image => image.complete
+                        ? Promise.resolve()
+                        : new Promise(resolve => {
+                            image.addEventListener('load', resolve, { once: true });
+                            image.addEventListener('error', resolve, { once: true });
+                        })));
+                }
+                """);
             var canvas = page.GetByTestId("component-preview-canvas");
             await canvas.ScrollIntoViewIfNeededAsync();
             var actual = await canvas.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });

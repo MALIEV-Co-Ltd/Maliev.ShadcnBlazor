@@ -107,6 +107,7 @@ public sealed class AttachmentTests : BunitContext
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
         Assert.Contains("scroll-snap-type: inline mandatory", css, StringComparison.Ordinal);
         Assert.Contains("[data-state=\"error\"]", css, StringComparison.Ordinal);
+        Assert.Contains("background: color-mix(in srgb, var(--shadcn-destructive)", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
     }

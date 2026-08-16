@@ -15,6 +15,11 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/data-table").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
         var table = page.Locator("[data-slot='data-table']");
+        await Assertions.Expect(table.Locator("tbody tr[data-row-key]")).ToHaveCountAsync(5);
+        await Assertions.Expect(table.Locator(".showcase-data-table-row-action svg")).ToHaveCountAsync(5);
+        await Assertions.Expect(table.Locator("input[data-row-key='3']")).ToHaveCSSAsync("appearance", "none");
+        var headerBackground = await table.Locator("thead th").Nth(1).EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual("rgba(0, 0, 0, 0)", headerBackground);
         await table.Locator("button[data-column='email']").ClickAsync();
         await Assertions.Expect(table.Locator("th[data-column='email']")).ToHaveAttributeAsync("aria-sort", "ascending");
         await table.Locator("input[data-slot='data-table-filter']").FillAsync("niran");
@@ -23,6 +28,10 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await table.Locator("input[data-column-filter='status']").FillAsync("success");
         await Assertions.Expect(table.Locator("tbody tr[data-row-key='2']")).ToHaveCountAsync(1);
         await table.Locator("input[data-column-filter='status']").FillAsync("");
+        await page.GetByTestId("control-data-table-manual").CheckAsync();
+        await Assertions.Expect(table.Locator("button[data-slot='data-table-next']")).ToBeEnabledAsync();
+        await table.Locator("button[data-slot='data-table-next']").ClickAsync();
+        await Assertions.Expect(table.Locator("[data-slot='data-table-page-summary']")).ToContainTextAsync("2");
         await table.Locator("select[data-slot='data-table-page-size']").SelectOptionAsync("25");
         await Assertions.Expect(table.Locator("select[data-slot='data-table-page-size']")).ToHaveValueAsync("25");
         await Assertions.Expect(table.Locator("button[data-slot='data-table-first']")).ToBeDisabledAsync();

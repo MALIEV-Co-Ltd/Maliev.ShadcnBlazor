@@ -12,7 +12,7 @@ internal static class DisclosureNavigationExamples
 {
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
     {
-        "accordion" => [Accordion()],
+        "accordion" => [AccordionPolished()],
         "breadcrumb" => [Breadcrumb()],
         "collapsible" => [Collapsible()],
         "navigation-menu" => [NavigationMenu()],
@@ -24,11 +24,58 @@ internal static class DisclosureNavigationExamples
         _ => []
     };
 
-    private static ComponentExampleDefinition Accordion()
+    private static ComponentExampleDefinition AccordionPolished()
     {
         var multiple = false; var horizontal = false; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnAccordion>(0); b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" }); b.AddAttribute(2, "Multiple", multiple); b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical); b.AddAttribute(4, "Disabled", disabled); b.AddAttribute(5, "Label", "Quotation questions"); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddAccordionItem(c, 0, "shipping", "What are the delivery options?", "Standard delivery is prepared from our Thailand workshop. The quote includes a dispatch estimate before checkout."); AddAccordionItem(c, 10, "returns", "What is the return policy?", "Returns are accepted within 30 days when the item is unused and in its original packaging."); AddAccordionItem(c, 20, "support", "How can I contact support?", "Send a message from the quotation workspace and the production team will reply with the next available step."); })); b.CloseComponent(); };
-        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", "<ShadcnAccordion Values=\"new[] { \"shipping\" }\" Multiple=\"false\">\n    <ShadcnAccordionItem Value=\"shipping\">\n        <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Standard delivery is prepared from our Thailand workshop.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n    <ShadcnAccordionItem Value=\"returns\">\n        <ShadcnAccordionTrigger>What is the return policy?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Returns are accepted within 30 days when the item is unused and in its original packaging.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n    <ShadcnAccordionItem Value=\"support\">\n        <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>\n        <ShadcnAccordionContent>Send a message from the quotation workspace and the production team will reply with the next available step.</ShadcnAccordionContent>\n    </ShadcnAccordionItem>\n</ShadcnAccordion>", preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnAccordion>(0);
+            b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" });
+            b.AddAttribute(2, "Multiple", multiple);
+            b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
+            b.AddAttribute(4, "Disabled", disabled);
+            b.AddAttribute(5, "Label", "Quotation questions");
+            b.AddAttribute(6, "ChildContent", (RenderFragment)(c =>
+            {
+                AddAccordionItem(c, 0, "shipping", "What are the delivery options?", ShippingAccordionContent());
+                AddAccordionItem(c, 10, "returns", "What is the return policy?", ReturnsAccordionContent());
+                AddAccordionItem(c, 20, "support", "How can I contact support?", SupportAccordionContent());
+            }));
+            b.CloseComponent();
+        };
+        const string source = """
+<ShadcnAccordion Values='new[] { "shipping" }' Multiple="false" Label="Quotation questions">
+    <ShadcnAccordionItem Value="shipping">
+        <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Choose the handoff that fits your production deadline.</p>
+            <ul>
+                <li>Standard delivery — dispatch estimate included before checkout.</li>
+                <li>Express delivery — priority workshop queue when available.</li>
+            </ul>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="returns">
+        <ShadcnAccordionTrigger>What is the return policy?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Returns are accepted within 30 days when the item is unused and in its original packaging.</p>
+            <p>Include the quotation number so the team can route the request quickly.</p>
+            <p>Revision notes help production review the requested change.</p>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="support">
+        <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Send a message from the quotation workspace and the production team will reply with the next available step.</p>
+            <ul>
+                <li>Ask about materials, finishing, or delivery timing.</li>
+                <li>Attach a drawing when the requested revision needs review.</li>
+            </ul>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+</ShadcnAccordion>
+""";
+        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", source, preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
     }
 
     private static ComponentExampleDefinition Breadcrumb()
@@ -93,7 +140,49 @@ internal static class DisclosureNavigationExamples
     private static RenderFragment Text(string text) => b => b.AddContent(0, text);
     private static void Add<T>(RenderTreeBuilder b, int sequence) where T : IComponent { b.OpenComponent<T>(sequence); b.CloseComponent(); }
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
-    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, string content) { b.OpenComponent<ShadcnAccordionItem>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnAccordionTrigger>(c, 0, title); AddText<ShadcnAccordionContent>(c, 10, content); })); b.CloseComponent(); }
+    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, string content) => AddAccordionItem(b, s, value, title, Text(content));
+    private static void AddAccordionItem(RenderTreeBuilder b, int s, string value, string title, RenderFragment content)
+    {
+        b.OpenComponent<ShadcnAccordionItem>(s);
+        b.AddAttribute(s + 1, "Value", value);
+        b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(c =>
+        {
+            AddText<ShadcnAccordionTrigger>(c, 0, title);
+            c.OpenComponent<ShadcnAccordionContent>(10);
+            c.AddAttribute(11, "ChildContent", content);
+            c.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+    private static RenderFragment ShippingAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Choose the handoff that fits your production deadline."); builder.CloseElement();
+        builder.OpenElement(10, "ul");
+        AddAccordionDetail(builder, 20, "Standard delivery", "dispatch estimate included before checkout");
+        AddAccordionDetail(builder, 30, "Express delivery", "priority workshop queue when available");
+        builder.CloseElement();
+    };
+    private static RenderFragment ReturnsAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Returns are accepted within 30 days when the item is unused and in its original packaging."); builder.CloseElement();
+        builder.OpenElement(10, "p"); builder.AddContent(11, "Include the quotation number so the team can route the request quickly."); builder.CloseElement();
+        builder.OpenElement(20, "p"); builder.AddContent(21, "Revision notes help production review the requested change."); builder.CloseElement();
+    };
+    private static RenderFragment SupportAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Send a message from the quotation workspace and the production team will reply with the next available step."); builder.CloseElement();
+        builder.OpenElement(10, "ul");
+        AddAccordionDetail(builder, 20, "Materials and finishing", "ask for a recommendation");
+        AddAccordionDetail(builder, 30, "Drawing review", "attach the requested revision");
+        builder.CloseElement();
+    };
+    private static void AddAccordionDetail(RenderTreeBuilder builder, int sequence, string title, string detail)
+    {
+        builder.OpenElement(sequence, "li");
+        builder.OpenElement(sequence + 1, "strong"); builder.AddContent(sequence + 2, title); builder.CloseElement();
+        builder.AddContent(sequence + 3, $" — {detail}.");
+        builder.CloseElement();
+    }
     private static void AddBreadcrumbLink(RenderTreeBuilder b, int s, string text, string href) { b.OpenComponent<ShadcnBreadcrumbItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbLink>(0); c.AddAttribute(1, "Href", href); c.AddAttribute(2, "ChildContent", Text(text)); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationItem<T>(RenderTreeBuilder b, int s, bool disabled) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationDirection<T>(RenderTreeBuilder b, int s, bool disabled, Action apply) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.AddAttribute(2, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.CloseComponent(); })); b.CloseComponent(); }

@@ -103,6 +103,19 @@ public sealed class CalendarDatePickerTests : BunitContext
     }
 
     [Fact]
+    public void UnboundCalendarNavigationUpdatesItsOwnVisibleMonth()
+    {
+        var cut = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1))
+            .Add(component => component.Culture, CultureInfo.InvariantCulture));
+
+        cut.Find("[data-slot='calendar-next']").Click();
+
+        Assert.Contains("September 2026", cut.Find("[data-slot='calendar-caption']").TextContent, StringComparison.Ordinal);
+        Assert.NotEmpty(cut.FindAll("[data-day='2026-09-01']"));
+    }
+
+    [Fact]
     public void RangeCalendarRequestsStartThenCompletedRange()
     {
         ShadcnDateRange? requested = null;

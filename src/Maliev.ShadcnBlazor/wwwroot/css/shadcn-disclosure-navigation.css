@@ -1,6 +1,8 @@
 .shadcn-accordion { width: 100%; }
 .shadcn-accordion[data-orientation="horizontal"] { display: flex; align-items: stretch; }
-.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item { flex: 1 1 0; border-block-end: 0; border-inline-end: 1px solid var(--shadcn-border); }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item { flex: 1 1 0; border-block-end: 0; }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item:not(:last-child) { border-inline-end: 1px solid var(--shadcn-border); }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item:last-child { border-inline-end: 0; }
 .shadcn-accordion-item:not(:last-child) { border-block-end: 1px solid var(--shadcn-border); }
 .shadcn-accordion-heading { margin: 0; font: inherit; }
 .shadcn-accordion-trigger { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: calc(.75rem * var(--shadcn-spacing-multiplier)); min-block-size: var(--shadcn-control-height); padding-block: calc(1rem * var(--shadcn-spacing-multiplier)); border: 1px solid transparent; border-radius: var(--shadcn-radius-md); background: transparent; color: inherit; font: inherit; font-weight: 500; text-align: start; cursor: pointer; transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing); }

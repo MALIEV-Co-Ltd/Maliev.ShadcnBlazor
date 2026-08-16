@@ -89,9 +89,37 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Tooltip()
     {
-        var open = false; var bottom = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnTooltipProvider>(0); b.AddAttribute(1, "ChildContent", (RenderFragment)(p => { p.OpenComponent<ShadcnTooltip>(0); p.AddAttribute(1, "Open", open); p.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnTooltipTrigger>(c, 0, "Save"); c.OpenComponent<ShadcnTooltipContent>(10); c.AddAttribute(11, "Side", bottom ? ShadcnOverlaySide.Bottom : ShadcnOverlaySide.Top); c.AddAttribute(12, "ChildContent", Text("Save quotation")); c.CloseComponent(); })); p.CloseComponent(); })); b.CloseComponent(); };
-        return Example("tooltip", "Hover and focus tooltip", preview, [Toggle("tooltip-open", "Open", v => open = v), Toggle("tooltip-bottom", "Bottom placement", v => bottom = v)], ["hover", "focus", "provider-delay", "arrow", "noninteractive"]);
+        var bottom = false;
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-tooltip-preview");
+            b.AddAttribute(2, "style", "display:grid; place-items:center; min-block-size:8rem; padding:2rem;");
+            b.OpenComponent<ShadcnTooltipProvider>(3);
+            b.AddAttribute(4, "OpenDelay", TimeSpan.FromMilliseconds(200));
+            b.AddAttribute(5, "ChildContent", (RenderFragment)(p =>
+            {
+                p.OpenComponent<ShadcnTooltip>(0);
+                p.AddAttribute(1, "ChildContent", (RenderFragment)(c =>
+                {
+                    AddText<ShadcnTooltipTrigger>(c, 0, "Save");
+                    c.OpenComponent<ShadcnTooltipContent>(10);
+                    c.AddAttribute(11, "Side", bottom ? ShadcnOverlaySide.Bottom : ShadcnOverlaySide.Top);
+                    c.AddAttribute(12, "ChildContent", Text("Save quotation"));
+                    c.CloseComponent();
+                }));
+                p.CloseComponent();
+            }));
+            b.CloseComponent();
+            b.CloseElement();
+        };
+        var side = bottom ? "Bottom" : "Top";
+        var source = $"<ShadcnTooltipProvider OpenDelay=\"@(TimeSpan.FromMilliseconds(200))\">{Environment.NewLine}" +
+            $"    <ShadcnTooltip>{Environment.NewLine}" +
+            $"        <ShadcnTooltipTrigger>Save</ShadcnTooltipTrigger>{Environment.NewLine}" +
+            $"        <ShadcnTooltipContent Side=\"{side}\">Save quotation</ShadcnTooltipContent>{Environment.NewLine}" +
+            $"    </ShadcnTooltip>{Environment.NewLine}</ShadcnTooltipProvider>";
+        return Example("tooltip", "Hover and focus tooltip", preview, [Toggle("tooltip-bottom", "Bottom placement", v => bottom = v)], ["hover", "focus", "provider-delay", "arrow", "noninteractive"], source);
     }
 
     private static ComponentExampleDefinition Menu(bool context)
@@ -120,8 +148,8 @@ internal static class OverlayMenuExamples
         return Example("command", "Searchable command palette", preview, [Toggle("command-empty", "Alternate values", v => empty = v), Toggle("command-disabled", "Disable first item", v => disabled = v)], ["filtering", "Thai-keywords", "groups", "empty", "disabled", "keyboard", "dialog"]);
     }
 
-    private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) =>
-        new($"{slug}-primary", title, "Live package component with controlled state and the complete composition surface.", $"<{Primary(slug)}>...</{Primary(slug)}>", preview, controls, tags);
+    private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags, string? razorSource = null) =>
+        new($"{slug}-primary", title, "Live package component with controlled state and the complete composition surface.", razorSource ?? $"<{Primary(slug)}>...</{Primary(slug)}>", preview, controls, tags);
     private static string Primary(string slug) => "Shadcn" + string.Concat(slug.Split('-').Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
     private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], value => apply(bool.Parse(value)));
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);

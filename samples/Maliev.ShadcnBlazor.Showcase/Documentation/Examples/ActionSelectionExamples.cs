@@ -30,8 +30,41 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(1, nameof(ButtonDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
-        return Example("button", "Button variants and sizes", "Compare every supported treatment at once, then scan the size scale without clicking through a selector.",
-            "<ShadcnButton Variant=\"ShadcnButtonVariant.Default\">Save changes</ShadcnButton>", preview,
+        const string source = """
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<section aria-label="Button variants and sizes">
+    <p>Production order #4189 · Revision C · 3 files ready</p>
+
+    <div>
+        <ShadcnButton Variant="ShadcnButtonVariant.Default" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Destructive" Disabled="@disabled" OnClick="@(() => Announce(\"Delete\"))">Delete</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Secondary" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Disabled="@disabled" OnClick="@(() => Announce(\"More actions\"))">More actions</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Link" Disabled="@disabled" OnClick="@(() => Announce(\"View details\"))">View details</ShadcnButton>
+    </div>
+
+    <div aria-label="Button sizes">
+        <ShadcnButton Size="ShadcnButtonSize.ExtraSmall" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
+        <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
+        <ShadcnButton Size="ShadcnButtonSize.Default" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
+        <ShadcnButton Size="ShadcnButtonSize.Large" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
+    </div>
+
+    <label><input type="checkbox" @bind="disabled" /> Disable actions</label>
+    <p role="status" aria-live="polite">@(_lastAction ?? "Choose an enabled action to try it")</p>
+</section>
+
+@code {
+    private bool disabled;
+    private string? _lastAction;
+
+    private void Announce(string action) => _lastAction = $"{action} pressed";
+}
+""";
+        return Example("button", "Button variants and sizes", "Compare every supported treatment at once, scan the size scale, and try each action in a production-order context.",
+            source, preview,
             [Toggle("button-disabled", "Disabled", value => disabled = value)],
             ["variants", "sizes", "disabled"]);
     }

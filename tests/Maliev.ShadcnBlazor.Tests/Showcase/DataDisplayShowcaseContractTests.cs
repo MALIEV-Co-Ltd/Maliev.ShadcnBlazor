@@ -50,6 +50,19 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DataTableExampleUsesRealRowsAndAccessibleRowActions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] tbody tr[data-row-key]").Count);
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action").Count);
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action svg").Count);
+        Assert.DoesNotContain("•••", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-label=\\\"เปิด @row.Email\\\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksPinnedAndCurrentReferences()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));

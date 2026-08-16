@@ -96,6 +96,8 @@ public sealed class DisclosureTests : BunitContext
 
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
         Assert.Contains(".shadcn-accordion[data-orientation=\"horizontal\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-accordion[data-orientation=\"horizontal\"] .shadcn-accordion-item:not(:last-child)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-accordion[data-orientation=\"horizontal\"] .shadcn-accordion-item:last-child", css, StringComparison.Ordinal);
     }
 
     [Fact]
