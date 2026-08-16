@@ -47,6 +47,30 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void EveryCatalogPreviewRendersItsPrimaryRclComponent()
+    {
+        var registry = new ComponentExampleRegistry(_documentation);
+        var expectedSlots = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            // These components expose a semantic host slot rather than repeating the catalog slug.
+            ["resizable"] = "resizable-group",
+            ["toast"] = "toast-viewport"
+        };
+
+        foreach (var entry in _documentation.All.Where(entry => entry.Status == ComponentDocumentationStatus.Complete))
+        {
+            var example = Assert.Single(registry.GetBySlug(entry.Slug));
+            var markup = Render(example.Preview).Markup;
+            var expectedSlot = expectedSlots.GetValueOrDefault(entry.Slug, entry.Slug);
+
+            Assert.Contains(
+                $"data-slot=\"{expectedSlot}\"",
+                markup,
+                StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void ExampleIdsAreUniqueAcrossTheAuthoritativeCatalog()
     {
         var registry = new ComponentExampleRegistry(_documentation);
