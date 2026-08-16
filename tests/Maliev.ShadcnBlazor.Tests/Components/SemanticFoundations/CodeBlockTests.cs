@@ -26,9 +26,12 @@ public sealed class CodeBlockTests : BunitContext
 
         Assert.Equal("razor", cut.Find("[data-slot='code-block']").GetAttribute("data-language"));
         Assert.NotEmpty(cut.FindAll(".shadcn-code-token-tag"));
-        Assert.Equal(2, cut.Find("select").QuerySelectorAll("option").Length);
+        var trigger = cut.Find("button[data-slot='select-trigger']");
+        Assert.Equal("razor", cut.Find("[data-slot='select-value']").TextContent);
+        trigger.Click();
+        Assert.Equal(2, cut.FindAll("[role='option']").Count);
 
-        cut.Find("select").Change("csharp");
+        cut.Find("[role='option'][data-value='csharp']").Click();
 
         cut.WaitForAssertion(() =>
         {

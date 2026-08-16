@@ -218,7 +218,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             case "alert-role": Assert.Equal("status", cut.Find("[data-slot='alert']").GetAttribute("role")); break;
             case "alert-action": Assert.Empty(cut.FindAll("[data-slot='alert-action']")); break;
             case "avatar-size": Assert.Equal("lg", cut.Find("[data-slot='avatar']").GetAttribute("data-size")); break;
-            case "avatar-failed": Assert.Equal("/missing-avatar.webp", cut.Find("[data-slot='avatar-image']").GetAttribute("src")); break;
+            case "avatar-failed": Assert.Equal("images/avatars/missing-avatar.webp", cut.Find("[data-slot='avatar-image']").GetAttribute("src")); break;
             case "avatar-badge": Assert.Single(cut.FindAll("[data-slot='avatar-badge']")); break;
             case "avatar-group": Assert.Single(cut.FindAll("[data-slot='avatar-group']")); break;
             case "badge-variant": Assert.Equal("outline", cut.Find("[data-slot='badge']").GetAttribute("data-variant")); break;

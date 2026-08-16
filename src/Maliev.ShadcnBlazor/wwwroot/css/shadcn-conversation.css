@@ -52,12 +52,12 @@
 .shadcn-marker[data-variant="border"] { border-block-end:1px solid var(--shadcn-border); padding-block:calc(.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { content:""; height:1px; flex:1; background:var(--shadcn-border); }
 .shadcn-marker-icon { flex:none; }
-.shadcn-marker-icon[data-streaming="true"] { display:inline-flex; width:1rem; height:1rem; align-items:center; justify-content:center; color:var(--shadcn-primary); transform-origin:center; animation:shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite; }
+.shadcn-marker-icon[data-streaming="true"] { display:inline-flex; width:1rem; height:1rem; align-items:center; justify-content:center; color:var(--shadcn-primary); }
 .shadcn-marker-icon[data-streaming="true"] svg { display:block; width:100%; height:100%; }
 .shadcn-marker-content { min-width:0; overflow-wrap:anywhere; }
-.shadcn-marker-content[data-streaming="true"] { display:inline-block; animation:shadcn-marker-pulse var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite alternate; }
-@keyframes shadcn-marker-spin { to { transform:rotate(360deg); } }
-@keyframes shadcn-marker-pulse { from { opacity:.45; } to { opacity:1; } }
+.shadcn-marker-content[data-streaming="true"] { position:relative; display:inline-block; isolation:isolate; color:var(--shadcn-foreground); }
+.shadcn-marker-content[data-streaming="true"]::after { position:absolute; z-index:-1; inset:0; pointer-events:none; border-radius:var(--shadcn-radius-sm); background:linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--shadcn-primary) 14%, transparent) 40%, color-mix(in oklch, var(--shadcn-primary) 28%, transparent) 50%, transparent 60%); background-size:200% 100%; content:""; opacity:.65; animation:shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
+@keyframes shadcn-marker-wave { from { background-position:-200% 0; } to { background-position:200% 0; } }
 .shadcn-message { position:relative; display:flex; width:100%; min-width:0; gap:calc(.625rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-message[data-align="end"] { flex-direction:row-reverse; }
 .shadcn-message-avatar { display:flex; width:fit-content; flex:none; align-items:center; justify-content:center; align-self:flex-start; overflow:hidden; border-radius:9999px; background:var(--shadcn-muted); }
@@ -67,8 +67,8 @@
 .shadcn-message-footer button { min-width:55px !important; min-height:32px; border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-sm); background:inherit; }
 [data-align="end"] .shadcn-message-footer { justify-content:flex-end; }
 .shadcn-message-footer :is(button,a):focus-visible { outline:2px solid currentColor !important; outline-offset:2px !important; }
-@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-content[data-streaming="true"],.shadcn-marker-loader { animation:none; } }
-@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-content[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } }
+@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; } .shadcn-marker-content[data-streaming="true"]::after { animation:none; } }
+@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } .shadcn-marker-content[data-streaming="true"] { color:CanvasText; } .shadcn-marker-content[data-streaming="true"]::after { background:Highlight; animation:none; } }
 .shadcn-message-scroller { position:relative; display:flex; width:100%; height:100%; min-height:0; flex-direction:column; overflow:hidden; }
 .shadcn-message-scroller-viewport { width:100%; height:100%; min-width:0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
 .shadcn-message-scroller-content { display:flex; min-height:100%; height:max-content; flex-direction:column; }
@@ -248,7 +248,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
     width: 1.5rem;
     height: .75rem;
     color: var(--shadcn-primary);
-    animation: shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite;
 }
 .shadcn-marker-loader {
     display: block;
@@ -268,11 +267,21 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
     80% { background-position: 0% 50%, 50% 50%, 100% 100%; }
 }
 .shadcn-marker-content[data-streaming="true"] {
-    color: color-mix(in oklch, var(--shadcn-foreground) 72%, var(--shadcn-muted-foreground));
-    animation: shadcn-marker-pulse var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite alternate;
+    color: var(--shadcn-foreground);
 }
-.showcase-marker-thread [data-streaming="true"] .shadcn-marker-icon {
-    animation: shadcn-marker-spin var(--shadcn-motion-duration-slow) linear infinite !important;
+/* The showcase has its own streaming decoration. Keep the package contract authoritative:
+   the icon is static, the loader owns the dots, and the content owns one accessible wave. */
+html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] {
+    animation: none;
+}
+html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after {
+    inline-size: auto;
+    block-size: auto;
+    flex: none;
+    border-radius: var(--shadcn-radius-sm);
+    background: linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--shadcn-primary) 14%, transparent) 40%, color-mix(in oklch, var(--shadcn-primary) 28%, transparent) 50%, transparent 60%);
+    background-size: 200% 100%;
+    animation: shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite;
 }
 
 .shadcn-message { align-items: flex-start; }
@@ -431,12 +440,18 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
 @media (prefers-reduced-motion: reduce) {
     .shadcn-attachment[data-state="uploading"] .showcase-attachment-spinner,
     .shadcn-marker-icon[data-streaming="true"],
-    .shadcn-marker-content[data-streaming="true"],
     .shadcn-marker-loader { animation: none !important; }
+    .shadcn-marker-content[data-streaming="true"]::after { animation: none !important; }
     .showcase-scroller-composer button,
     .shadcn-questionnaire-choice, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"]::before { transition: none; }
 }
 @media (forced-colors: active) {
     .shadcn-attachment-media, .shadcn-message-avatar, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"] { border-color: CanvasText; }
     .shadcn-questionnaire-choice[data-checked="true"] { outline: 2px solid Highlight; }
+    .shadcn-marker-icon[data-streaming="true"], .shadcn-marker-loader { color: CanvasText; animation: none !important; }
+    .shadcn-marker-content[data-streaming="true"] { color: CanvasText; }
+    .shadcn-marker-content[data-streaming="true"]::after { background: Highlight; animation: none !important; }
+    html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] { animation: none; }
+    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; }
+    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after { background: Highlight; animation: none; }
 }

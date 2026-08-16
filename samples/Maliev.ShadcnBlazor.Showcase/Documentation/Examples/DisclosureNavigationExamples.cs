@@ -96,7 +96,30 @@ internal static class DisclosureNavigationExamples
     {
         string? value = null; var vertical = false; var disabled = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnNavigationMenu>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "Orientation", vertical ? ShadcnNavigationMenuOrientation.Vertical : ShadcnNavigationMenuOrientation.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "Label", "Workspace navigation"); b.AddAttribute(5, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnNavigationMenuList>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(l => { AddNavigationItem(l, 0, "services", "Services", [("CNC machining", "#cnc"), ("Finishing", "#finishing"), ("Quality inspection", "#quality")]); AddNavigationItem(l, 10, "resources", "Resources", [("Material library", "#materials"), ("Guides", "#guides")]); AddNavigationItem(l, 20, "account", "Account", [("Team settings", "#team"), ("Billing", "#billing")]); })); c.CloseComponent(); Add<ShadcnNavigationMenuIndicator>(c, 10); Add<ShadcnNavigationMenuViewport>(c, 20); })); b.CloseComponent(); };
-        return Example("navigation-menu", "Navigation menu portal", "Explore a realistic workspace navigation with delayed hover, click, keyboard focus, collision-aware viewport, RTL, and disabled behavior.", "<ShadcnNavigationMenu Label=\"Workspace navigation\">\n    <ShadcnNavigationMenuList>\n        <ShadcnNavigationMenuItem Value=\"services\">\n            <ShadcnNavigationMenuTrigger>Services</ShadcnNavigationMenuTrigger>\n            <ShadcnNavigationMenuContent>...</ShadcnNavigationMenuContent>\n        </ShadcnNavigationMenuItem>\n    </ShadcnNavigationMenuList>\n    <ShadcnNavigationMenuViewport />\n</ShadcnNavigationMenu>", preview, [Toggle("navigation-open", "Open Services", v => value = v ? "services" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["open", "closed", "hover", "keyboard", "portal", "collision", "rtl"]);
+        var source = """
+<ShadcnNavigationMenu Label="Workspace navigation">
+    <ShadcnNavigationMenuList>
+        <ShadcnNavigationMenuItem Value="services">
+            <ShadcnNavigationMenuTrigger>Services</ShadcnNavigationMenuTrigger>
+            <ShadcnNavigationMenuContent>
+                <ShadcnNavigationMenuLink Href="#cnc">CNC machining</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#finishing">Finishing</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#quality">Quality inspection</ShadcnNavigationMenuLink>
+            </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+        <ShadcnNavigationMenuItem Value="resources">
+            <ShadcnNavigationMenuTrigger>Resources</ShadcnNavigationMenuTrigger>
+            <ShadcnNavigationMenuContent>
+                <ShadcnNavigationMenuLink Href="#materials">Material library</ShadcnNavigationMenuLink>
+                <ShadcnNavigationMenuLink Href="#guides">Guides</ShadcnNavigationMenuLink>
+            </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+    </ShadcnNavigationMenuList>
+    <ShadcnNavigationMenuIndicator />
+    <ShadcnNavigationMenuViewport />
+</ShadcnNavigationMenu>
+""";
+        return Example("navigation-menu", "Navigation menu portal", "Explore a realistic workspace navigation with delayed hover, click, keyboard focus, collision-aware viewport, RTL, and disabled behavior.", source, preview, [Toggle("navigation-open", "Open Services", v => value = v ? "services" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["open", "closed", "hover", "keyboard", "portal", "collision", "rtl"]);
     }
 
     private static ComponentExampleDefinition Pagination()
@@ -110,21 +133,64 @@ internal static class DisclosureNavigationExamples
     {
         var vertical = false; var disabled = false; var collapsible = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnResizableGroup>(0); b.AddAttribute(1, "Sizes", new[] { 40d, 60d }); b.AddAttribute(2, "Direction", vertical ? ShadcnResizableDirection.Vertical : ShadcnResizableDirection.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "ChildContent", (RenderFragment)(c => { AddPanel(c, 0, "queue", "Incoming queue", collapsible, "3 quotations waiting"); c.OpenComponent<ShadcnResizableHandle>(10); c.AddAttribute(11, "WithHandle", true); c.AddAttribute(12, "Label", "Resize queue and detail panels"); c.CloseComponent(); AddPanel(c, 20, "detail", "Quotation detail", false, "Select an item to review its production timeline."); })); b.CloseComponent(); };
-        return Example("resizable", "Resizable panels", "Pointer and keyboard resizing, live panel IDs, constraints, collapsible panels, persistence, vertical layout, and RTL deltas.", "<ShadcnResizableGroup Sizes=\"Sizes\"><ShadcnResizablePanel Id=\"queue\">...</ShadcnResizablePanel><ShadcnResizableHandle /></ShadcnResizableGroup>", preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible first panel", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]);
+        var source = """
+<ShadcnResizableGroup Sizes="new[] { 40d, 60d }">
+    <ShadcnResizablePanel Id="queue">
+        <h3>Incoming queue</h3>
+        <p>3 quotations waiting</p>
+    </ShadcnResizablePanel>
+    <ShadcnResizableHandle WithHandle="true" Label="Resize queue and detail panels" />
+    <ShadcnResizablePanel Id="detail">
+        <h3>Quotation detail</h3>
+        <p>Select an item to review its production timeline.</p>
+    </ShadcnResizablePanel>
+</ShadcnResizableGroup>
+""";
+        return Example("resizable", "Resizable panels", "Pointer and keyboard resizing, live panel IDs, constraints, collapsible panels, persistence, vertical layout, and RTL deltas.", source, preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible first panel", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]);
     }
 
     private static ComponentExampleDefinition ScrollArea()
     {
         var always = true; var horizontal = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnScrollArea>(0); b.AddAttribute(1, "Type", always ? ShadcnScrollAreaType.Always : ShadcnScrollAreaType.Auto); b.AddAttribute(2, "Style", "height:12rem;width:min(100%,24rem)"); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnScrollAreaViewport>(0); c.AddAttribute(1, "Label", "Material catalog"); c.AddAttribute(2, "ChildContent", MaterialCatalog(horizontal)); c.CloseComponent(); c.OpenComponent<ShadcnScrollAreaScrollbar>(10); c.AddAttribute(11, "Orientation", horizontal ? ShadcnScrollAreaOrientation.Horizontal : ShadcnScrollAreaOrientation.Vertical); c.AddAttribute(12, "ChildContent", (RenderFragment)(s => Add<ShadcnScrollAreaThumb>(s, 0))); c.CloseComponent(); Add<ShadcnScrollAreaCorner>(c, 20); })); b.CloseComponent(); };
-        return Example("scroll-area", "Native scroll area", "Native focusable scrolling with auto/always visibility, vertical/horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", "<ShadcnScrollArea><ShadcnScrollAreaViewport>...</ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar>...</ShadcnScrollAreaScrollbar></ShadcnScrollArea>", preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
+        var source = """
+<ShadcnScrollArea Type="ShadcnScrollAreaType.Always" Style="height:12rem;width:min(100%,24rem)">
+    <ShadcnScrollAreaViewport Label="Material catalog">
+        <p>Aluminum 6061 · CNC-ready stock</p>
+        <p>Stainless 316L · Corrosion resistant</p>
+        <p>PEEK · High-temperature polymer</p>
+    </ShadcnScrollAreaViewport>
+    <ShadcnScrollAreaScrollbar Orientation="ShadcnScrollAreaOrientation.Vertical">
+        <ShadcnScrollAreaThumb />
+    </ShadcnScrollAreaScrollbar>
+    <ShadcnScrollAreaCorner />
+</ShadcnScrollArea>
+""";
+        return Example("scroll-area", "Native scroll area", "Native focusable scrolling with auto/always visibility, vertical/horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", source, preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
     }
 
     private static ComponentExampleDefinition Sidebar()
     {
         var open = true; var right = false; var none = false;
         RenderFragment preview = b => { b.OpenComponent<ShadcnSidebarProvider>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnSidebar>(0); c.AddAttribute(1, "Id", "dossier"); c.AddAttribute(2, "Side", right ? ShadcnSidebarSide.Right : ShadcnSidebarSide.Left); c.AddAttribute(3, "Collapsible", none ? ShadcnSidebarCollapsible.None : ShadcnSidebarCollapsible.Icon); c.AddAttribute(4, "Label", "Workspace"); c.AddAttribute(5, "ChildContent", SidebarContent()); c.CloseComponent(); c.OpenComponent<ShadcnSidebarInset>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(inset => { inset.OpenComponent<ShadcnSidebarTrigger>(0); inset.AddAttribute(1, "TargetId", "dossier"); inset.CloseComponent(); inset.OpenElement(10, "div"); inset.AddAttribute(11, "class", "showcase-sidebar-main"); inset.OpenElement(12, "h3"); inset.AddContent(13, "Quotation workspace"); inset.CloseElement(); inset.OpenElement(14, "p"); inset.AddContent(15, "Review active quotations and production handoffs."); inset.CloseElement(); inset.CloseElement(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("sidebar", "Responsive sidebar shell", "A realistic quotation workspace with navigation groups, active state, responsive collapse, physical sides, and mobile modal behavior.", "<ShadcnSidebarProvider Open=\"true\">\n    <ShadcnSidebar Id=\"workspace\" Collapsible=\"ShadcnSidebarCollapsible.Icon\">...</ShadcnSidebar>\n    <ShadcnSidebarInset><ShadcnSidebarTrigger TargetId=\"workspace\" />...</ShadcnSidebarInset>\n</ShadcnSidebarProvider>", preview, [Toggle("sidebar-open", "Expanded", v => open = v, true), Toggle("sidebar-right", "Right side", v => right = v), Toggle("sidebar-none", "Non-collapsible", v => none = v)], ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "rtl"]);
+        var source = """
+<ShadcnSidebarProvider Open="true">
+    <ShadcnSidebar Id="dossier" Collapsible="ShadcnSidebarCollapsible.Icon" Label="Workspace">
+        <ShadcnSidebarHeader>MALIEV</ShadcnSidebarHeader>
+        <ShadcnSidebarContent>
+            <ShadcnSidebarMenuItem>Quotations</ShadcnSidebarMenuItem>
+            <ShadcnSidebarMenuItem>Materials</ShadcnSidebarMenuItem>
+            <ShadcnSidebarMenuItem>Team settings</ShadcnSidebarMenuItem>
+        </ShadcnSidebarContent>
+    </ShadcnSidebar>
+    <ShadcnSidebarInset>
+        <ShadcnSidebarTrigger TargetId="dossier" />
+        <h3>Quotation workspace</h3>
+        <p>Review active quotations and production handoffs.</p>
+    </ShadcnSidebarInset>
+</ShadcnSidebarProvider>
+""";
+        return Example("sidebar", "Responsive sidebar shell", "A realistic quotation workspace with navigation groups, active state, responsive collapse, physical sides, and mobile modal behavior.", source, preview, [Toggle("sidebar-open", "Expanded", v => open = v, true), Toggle("sidebar-right", "Right side", v => right = v), Toggle("sidebar-none", "Non-collapsible", v => none = v)], ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "rtl"]);
     }
 
     private static ComponentExampleDefinition Tabs()

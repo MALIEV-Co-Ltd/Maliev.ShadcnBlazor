@@ -3993,6 +3993,23 @@ a {
     margin-inline-start: auto;
 }
 
+/* Keep the semantic table usable on narrow preview canvases. The table keeps
+   its readable column minimum, while the component-owned container provides
+   the only horizontal scroll instead of widening the documentation page. */
+.showcase-table {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-gutter: stable;
+}
+
+.showcase-table .shadcn-table {
+    inline-size: 100%;
+    min-inline-size: 34rem;
+}
+
 .showcase-toast-demo .shadcn-toast-viewport {
     position: fixed;
     inset: auto 1rem 1rem auto;
@@ -4019,8 +4036,19 @@ a {
 .showcase-carousel-demo {
     display: grid;
     inline-size: min(100%, 46rem);
+    max-inline-size: 100%;
+    min-inline-size: 0;
     gap: .75rem;
     margin-inline: auto;
+}
+
+.showcase-carousel-demo .shadcn-carousel,
+.showcase-carousel-demo .shadcn-carousel-content,
+.showcase-carousel-demo .shadcn-carousel-item,
+.showcase-carousel-demo .showcase-carousel-slide {
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    min-inline-size: 0;
 }
 
 .showcase-carousel-demo .shadcn-carousel {
@@ -5027,9 +5055,9 @@ a {
 }
 
 .component-api__table code {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 .component-api__required {
@@ -5056,8 +5084,13 @@ a {
     margin-inline-start: 1rem;
 }
 
+.showcase-scroller-frame .shadcn-message-scroller-item {
+    border-block-end: 0;
+}
+
 .component-code__surface {
     overflow: hidden;
+    overflow-wrap: anywhere;
     border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-lg);
     background: color-mix(in oklch, var(--shadcn-muted) 38%, var(--shadcn-background));
@@ -5066,6 +5099,23 @@ a {
 .component-code__surface .shadcn-code-block-toolbar {
     border-block-end: 1px solid var(--shadcn-border);
     background: color-mix(in oklch, var(--shadcn-muted) 52%, var(--shadcn-background));
+}
+
+.component-code__surface .shadcn-code-block-toolbar .shadcn-select {
+    min-inline-size: 5.5rem;
+    width: auto;
+}
+
+.component-code__surface .shadcn-code-block-toolbar .shadcn-select-trigger {
+    min-block-size: 1.75rem;
+    border-radius: 999px;
+    padding-block: .2rem;
+    padding-inline: .65rem .55rem;
+    font-size: .75rem;
+}
+
+.component-code__surface .shadcn-code-block-toolbar .shadcn-select-trigger-icon {
+    margin-inline-start: .15rem;
 }
 
 .component-code__surface pre {

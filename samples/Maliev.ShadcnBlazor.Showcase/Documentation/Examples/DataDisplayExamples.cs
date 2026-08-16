@@ -25,10 +25,10 @@ internal static class DataDisplayExamples
         var selected = false; var expanded = false; var disabled = false; var footer = true;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "ChildContent", (RenderFragment)(t =>
+            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", "showcase-table"); b.AddAttribute(2, "ChildContent", (RenderFragment)(t =>
             {
                 AddText<ShadcnTableCaption>(t, 0, "รายการใบแจ้งหนี้ล่าสุด");
-                t.OpenComponent<ShadcnTableHeader>(10); t.AddAttribute(11, "ChildContent", (RenderFragment)(h => { h.OpenComponent<ShadcnTableRow>(0); h.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableHead>(r, 0, "Invoice"); AddText<ShadcnTableHead>(r, 10, "Status"); AddText<ShadcnTableHead>(r, 20, "Amount"); })); h.CloseComponent(); })); t.CloseComponent();
+                t.OpenComponent<ShadcnTableHeader>(10); t.AddAttribute(11, "ChildContent", (RenderFragment)(h => { h.OpenComponent<ShadcnTableRow>(0); h.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableHead>(r, 0, "Invoice"); AddText<ShadcnTableHead>(r, 10, "Status"); AddText<ShadcnTableHead>(r, 20, "Method"); AddText<ShadcnTableHead>(r, 30, "Amount"); })); h.CloseComponent(); })); t.CloseComponent();
                 t.OpenComponent<ShadcnTableBody>(20); t.AddAttribute(21, "ChildContent", (RenderFragment)(body =>
                 {
                     for (var index = 0; index < Invoices.Length; index++)
@@ -38,7 +38,7 @@ internal static class DataDisplayExamples
                         body.OpenComponent<ShadcnTableRow>(rowSequence); body.AddAttribute(rowSequence + 1, "Selected", selected && index == 0); body.AddAttribute(rowSequence + 2, "Expanded", expanded && index == 0); body.AddAttribute(rowSequence + 3, "Disabled", disabled && index == 0); body.AddAttribute(rowSequence + 4, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableCell>(r, 0, invoice.Id); AddText<ShadcnTableCell>(r, 10, invoice.Status); AddText<ShadcnTableCell>(r, 20, invoice.Method); AddText<ShadcnTableCell>(r, 30, invoice.Amount); })); body.CloseComponent();
                     }
                 })); t.CloseComponent();
-                if (footer) { t.OpenComponent<ShadcnTableFooter>(30); t.AddAttribute(31, "ChildContent", (RenderFragment)(f => { f.OpenComponent<ShadcnTableRow>(0); f.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableCell>(r, 0, "Total"); AddText<ShadcnTableCell>(r, 10, "฿37,800"); })); f.CloseComponent(); })); t.CloseComponent(); }
+                if (footer) { t.OpenComponent<ShadcnTableFooter>(30); t.AddAttribute(31, "ChildContent", (RenderFragment)(f => { f.OpenComponent<ShadcnTableRow>(0); f.AddAttribute(1, "ChildContent", (RenderFragment)(r => { r.OpenComponent<ShadcnTableCell>(0); r.AddAttribute(1, "ColSpan", 3); r.AddAttribute(2, "ChildContent", (RenderFragment)(c => c.AddContent(0, "Total"))); r.CloseComponent(); AddText<ShadcnTableCell>(r, 10, "฿37,800"); })); f.CloseComponent(); })); t.CloseComponent(); }
             })); b.CloseComponent();
         };
         const string source = """
@@ -56,8 +56,10 @@ internal static class DataDisplayExamples
         <ShadcnTableRow><ShadcnTableCell>INV001</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>Credit Card</ShadcnTableCell><ShadcnTableCell>฿8,500</ShadcnTableCell></ShadcnTableRow>
         <ShadcnTableRow><ShadcnTableCell>INV002</ShadcnTableCell><ShadcnTableCell>Pending</ShadcnTableCell><ShadcnTableCell>PayPal</ShadcnTableCell><ShadcnTableCell>฿3,250</ShadcnTableCell></ShadcnTableRow>
         <ShadcnTableRow><ShadcnTableCell>INV003</ShadcnTableCell><ShadcnTableCell>Unpaid</ShadcnTableCell><ShadcnTableCell>Bank Transfer</ShadcnTableCell><ShadcnTableCell>฿12,400</ShadcnTableCell></ShadcnTableRow>
+        <ShadcnTableRow><ShadcnTableCell>INV004</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>Credit Card</ShadcnTableCell><ShadcnTableCell>฿5,900</ShadcnTableCell></ShadcnTableRow>
+        <ShadcnTableRow><ShadcnTableCell>INV005</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>PayPal</ShadcnTableCell><ShadcnTableCell>฿7,750</ShadcnTableCell></ShadcnTableRow>
     </ShadcnTableBody>
-    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell>Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>
+    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan="3">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>
 </ShadcnTable>
 """;
         return Example("table", "Responsive semantic table", "Show a realistic invoice list with caption, status, payment method, selection, and a total footer.", source, preview, [Toggle("table-selected", "Selected row", v => selected = v), Toggle("table-expanded", "Expanded row", v => expanded = v), Toggle("table-disabled", "Disabled row", v => disabled = v), Toggle("table-footer", "Footer", v => footer = v, true)], ["caption", "footer", "selected", "expanded", "disabled", "actions", "responsive-overflow", "rtl"]);

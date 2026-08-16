@@ -41,7 +41,7 @@
         <ShadcnAvatar Size="Size">
             @if (!fallbackOnly)
             {
-                <ShadcnAvatarImage Source="@(failed ? "/missing-avatar.webp" : source ?? string.Empty)" Alt="@role" />
+                <ShadcnAvatarImage Source="@(failed ? "images/avatars/missing-avatar.webp" : source ?? string.Empty)" Alt="@role" />
             }
             <ShadcnAvatarFallback>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -58,7 +58,7 @@
     </div>;
 
     private RenderFragment Avatar(string source, string alt, bool failed, bool badge) => @<ShadcnAvatar Size="Size">
-        <ShadcnAvatarImage Source="@(failed ? "/missing-avatar.webp" : source)" Alt="@alt" />
+        <ShadcnAvatarImage Source="@(failed ? "images/avatars/missing-avatar.webp" : source)" Alt="@alt" />
         <ShadcnAvatarFallback>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />

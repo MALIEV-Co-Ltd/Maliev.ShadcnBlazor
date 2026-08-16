@@ -141,16 +141,29 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var loaderBackground = await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage");
         Assert.Contains("radial-gradient", loaderBackground, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("shadcn-marker-dots", await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("shadcn-marker-spin", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("shadcn-marker-pulse", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("none", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("shadcn-marker-wave", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
 
         await using var reducedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.Reduce });
         var reducedPage = await reducedContext.NewPageAsync();
         await reducedPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         var reducedMarker = reducedPage.Locator("[data-slot='marker'][role='status']");
         Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
         Assert.Equal("none", await reducedMarker.Locator(".showcase-marker-loader").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+
+        await using var forcedColorsContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ForcedColors = ForcedColors.Active });
+        var forcedColorsPage = await forcedColorsContext.NewPageAsync();
+        await forcedColorsPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
+        var forcedColorsMarker = forcedColorsPage.Locator("[data-slot='marker'][role='status']");
+        var forcedColorsContent = forcedColorsMarker.Locator("[data-slot='marker-content']");
+        var forcedColorsContentColor = await forcedColorsContent.EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", forcedColorsContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", forcedColorsContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal("none", await forcedColorsContent.EvaluateAsync<string>("element => getComputedStyle(element, '::after').animationName"));
+        var forcedColorsLoaderColor = await forcedColorsMarker.Locator(".showcase-marker-loader").EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", forcedColorsLoaderColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", forcedColorsLoaderColor, StringComparer.OrdinalIgnoreCase);
     }
 
     [Fact]
