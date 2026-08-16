@@ -4712,6 +4712,11 @@ a {
     overflow-x: clip;
 }
 
+html:has(.theme-studio-provider),
+body:has(.theme-studio-provider) {
+    overflow-x: hidden;
+}
+
 .theme-preview-toolbar .theme-toolbar-group {
     flex: 0 0 auto;
     flex-wrap: nowrap;
