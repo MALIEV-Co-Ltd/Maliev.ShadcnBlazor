@@ -75,7 +75,7 @@ internal static class FeedbackContentExamples
 <div class="team-avatars" aria-label="Project team avatars">
     <div class="team-avatar-profile">
         <ShadcnAvatar>
-            <ShadcnAvatarImage Source="/images/avatars/operator-thai.png" Alt="Thai CNC operator" />
+            <ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Thai CNC operator" />
             <ShadcnAvatarFallback>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" fill="currentColor" /><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" /></svg>
             </ShadcnAvatarFallback>
@@ -85,14 +85,14 @@ internal static class FeedbackContentExamples
     </div>
     <div class="team-avatar-profile">
         <ShadcnAvatar>
-            <ShadcnAvatarImage Source="/images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
+            <ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
             <ShadcnAvatarFallback>QR</ShadcnAvatarFallback>
         </ShadcnAvatar>
         <span><strong>Pim</strong><span>Thai quality reviewer</span></span>
     </div>
     <div class="team-avatar-profile">
         <ShadcnAvatar>
-            <ShadcnAvatarImage Source="/images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
+            <ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
             <ShadcnAvatarFallback>PC</ShadcnAvatarFallback>
         </ShadcnAvatar>
         <span><strong>Malee</strong><span>Thai project coordinator</span></span>
@@ -107,9 +107,9 @@ internal static class FeedbackContentExamples
     </div>
 </div>
 <ShadcnAvatarGroup>
-    <ShadcnAvatar><ShadcnAvatarImage Source="/images/avatars/operator-thai.png" Alt="Thai CNC operator" /><ShadcnAvatarFallback>NT</ShadcnAvatarFallback></ShadcnAvatar>
-    <ShadcnAvatar><ShadcnAvatarImage Source="/images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" /><ShadcnAvatarFallback>QR</ShadcnAvatarFallback></ShadcnAvatar>
-    <ShadcnAvatar><ShadcnAvatarImage Source="/images/avatars/assistant-thai.png" Alt="Thai support assistant" /><ShadcnAvatarFallback>SA</ShadcnAvatarFallback></ShadcnAvatar>
+    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Thai CNC operator" /><ShadcnAvatarFallback>NT</ShadcnAvatarFallback></ShadcnAvatar>
+    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" /><ShadcnAvatarFallback>QR</ShadcnAvatarFallback></ShadcnAvatar>
+    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="Thai support assistant" /><ShadcnAvatarFallback>SA</ShadcnAvatarFallback></ShadcnAvatar>
     <ShadcnAvatarGroupCount>+1</ShadcnAvatarGroupCount>
 </ShadcnAvatarGroup>
 """;

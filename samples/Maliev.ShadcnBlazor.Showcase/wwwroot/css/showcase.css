@@ -4954,3 +4954,150 @@ a {
         transform: none;
     }
 }
+
+/* Final documentation shell polish. Keep the rail flush to the viewport while
+   the reading column stays comfortably measured for long-form reference text. */
+.documentation-workbench {
+    max-inline-size: none;
+    margin-inline: 0;
+}
+
+.documentation-catalog,
+.documentation-outline {
+    border-inline: 0;
+    scrollbar-width: none;
+}
+
+.documentation-catalog::-webkit-scrollbar,
+.documentation-outline::-webkit-scrollbar {
+    display: none;
+}
+
+.documentation-catalog-rail,
+.documentation-on-this-page {
+    padding-inline: 1.25rem;
+}
+
+.documentation-content {
+    border-inline: 0;
+    padding: 3rem;
+}
+
+.documentation-content > :where(.component-dossier, .documentation-landing) {
+    inline-size: min(100%, 58rem);
+    margin-inline: auto;
+}
+
+.documentation-landing__hero h1,
+.component-dossier__hero h1 {
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    line-height: 1.08;
+}
+
+.documentation-component-list a[aria-current="page"] {
+    border-color: transparent;
+}
+
+.documentation-on-this-page {
+    gap: .75rem;
+    padding-inline: 1.25rem;
+}
+
+.documentation-on-this-page ul {
+    margin: 0;
+    padding-inline: 0;
+    border-inline: 0;
+    list-style: none;
+}
+
+.documentation-on-this-page a {
+    padding-inline: 0;
+    border-inline: 0;
+}
+
+.documentation-on-this-page a[data-active="true"],
+.documentation-on-this-page a[aria-current="true"] {
+    background: transparent;
+    color: var(--shadcn-foreground);
+    font-weight: 700;
+}
+
+.component-api__type + .component-api__type {
+    margin-block-start: 2rem;
+}
+
+.component-api__table code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.component-api__required {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.25rem;
+    margin-inline-start: .5rem;
+    padding-inline: .45rem;
+    border: 1px solid color-mix(in oklch, var(--shadcn-primary) 35%, var(--shadcn-border));
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--shadcn-primary) 12%, var(--shadcn-background));
+    color: var(--shadcn-primary);
+    font-family: var(--shadcn-font-sans);
+    font-size: .625rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    line-height: 1;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.component-reference li {
+    margin-block-start: .5rem;
+    margin-inline-start: 1rem;
+}
+
+.component-code__surface {
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: color-mix(in oklch, var(--shadcn-muted) 38%, var(--shadcn-background));
+}
+
+.component-code__surface .shadcn-code-block-toolbar {
+    border-block-end: 1px solid var(--shadcn-border);
+    background: color-mix(in oklch, var(--shadcn-muted) 52%, var(--shadcn-background));
+}
+
+.component-code__surface pre {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.documentation-brand__mark {
+    overflow: hidden;
+    background: var(--shadcn-background);
+    border: 1px solid var(--shadcn-border);
+}
+
+.documentation-brand__mark img {
+    display: block;
+    inline-size: 1.35rem;
+    block-size: auto;
+}
+
+[data-shadcn-theme="dark"] .documentation-brand__mark img,
+.dark .documentation-brand__mark img {
+    filter: invert(1);
+}
+
+@media (max-width: 48rem) {
+    .documentation-content {
+        padding: 1rem;
+    }
+
+    .documentation-catalog-rail,
+    .documentation-on-this-page {
+        padding-inline: 1rem;
+    }
+}

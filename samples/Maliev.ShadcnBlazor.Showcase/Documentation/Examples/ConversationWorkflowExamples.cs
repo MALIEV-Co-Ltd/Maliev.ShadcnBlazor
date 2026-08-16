@@ -9,10 +9,10 @@ internal static class ConversationWorkflowExamples
 {
     private sealed record AvatarProfile(string Id, string Source, string Alt);
 
-    private static readonly AvatarProfile OperatorAvatar = new("operator", "/images/avatars/operator-thai.png", "นที · วิศวกร");
-    private static readonly AvatarProfile ReviewerAvatar = new("reviewer", "/images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ");
-    private static readonly AvatarProfile AssistantAvatar = new("assistant", "/images/avatars/assistant-thai.png", "MALIEV Assistant");
-    private static readonly AvatarProfile CoordinatorAvatar = new("coordinator", "/images/avatars/coordinator-thai.png", "มาลี · ผู้ประสานงาน");
+    private static readonly AvatarProfile OperatorAvatar = new("operator", "images/avatars/operator-thai.png", "นที · วิศวกร");
+    private static readonly AvatarProfile ReviewerAvatar = new("reviewer", "images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ");
+    private static readonly AvatarProfile AssistantAvatar = new("assistant", "images/avatars/assistant-thai.png", "MALIEV Assistant");
+    private static readonly AvatarProfile CoordinatorAvatar = new("coordinator", "images/avatars/coordinator-thai.png", "มาลี · ผู้ประสานงาน");
     private static readonly AvatarProfile PlaceholderAvatar = new("placeholder", string.Empty, "ผู้ประสานงาน");
 
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch
@@ -605,7 +605,7 @@ internal static class ConversationWorkflowExamples
 <ShadcnMessageGroup Class="message-thread">
     <ShadcnMessage Align="ShadcnLogicalAlign.Start">
         <ShadcnMessageAvatar>
-            <img src="/images/avatars/operator-thai.png" alt="Operator" />
+            <img src="images/avatars/operator-thai.png" alt="Operator" />
         </ShadcnMessageAvatar>
         <ShadcnMessageContent>
             <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
@@ -624,7 +624,7 @@ internal static class ConversationWorkflowExamples
 
     <ShadcnMessage Align="ShadcnLogicalAlign.End">
         <ShadcnMessageAvatar>
-            <img src="/images/avatars/assistant-thai.png" alt="Assistant" />
+            <img src="images/avatars/assistant-thai.png" alt="Assistant" />
         </ShadcnMessageAvatar>
         <ShadcnMessageContent>
             <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
@@ -646,7 +646,7 @@ internal static class ConversationWorkflowExamples
     <div class="attachment-gallery">
         <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="workspace-plan.png">
             <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of workspace-plan.png">
-                <img src="/images/attachments/workspace-plan.png" alt="" />
+                <img src="images/attachments/workspace-plan.png" alt="" />
             </ShadcnAttachmentMedia>
             <ShadcnAttachmentContent>
                 <ShadcnAttachmentTitle>workspace-plan.png</ShadcnAttachmentTitle>
@@ -655,7 +655,7 @@ internal static class ConversationWorkflowExamples
         </ShadcnAttachment>
         <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="desk-reference.png">
             <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of desk-reference.png">
-                <img src="/images/attachments/desk-reference.png" alt="" />
+                <img src="images/attachments/desk-reference.png" alt="" />
             </ShadcnAttachmentMedia>
             <ShadcnAttachmentContent>
                 <ShadcnAttachmentTitle>desk-reference.png</ShadcnAttachmentTitle>
@@ -664,7 +664,7 @@ internal static class ConversationWorkflowExamples
         </ShadcnAttachment>
         <ShadcnAttachment State="ShadcnAttachmentState.Done" Orientation="ShadcnAttachmentOrientation.Vertical" Title="office-reference.png">
             <ShadcnAttachmentMedia Variant="ShadcnAttachmentMediaVariant.Image" ImageAlt="Preview of office-reference.png">
-                <img src="/images/attachments/office-reference.png" alt="" />
+                <img src="images/attachments/office-reference.png" alt="" />
             </ShadcnAttachmentMedia>
             <ShadcnAttachmentContent>
                 <ShadcnAttachmentTitle>office-reference.png</ShadcnAttachmentTitle>
