@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-08-16
+
+### Fixed
+
+- Kept bundled Geist, Noto Sans Thai, and JetBrains Mono typography offline by
+  loading Google Fonts only when a remote preset is explicitly selected.
+- Refined the documentation workbench so the rails stay at the viewport edges,
+  the reading column remains centered, and active navigation uses quiet emphasis.
+- Made the documentation brand mark round and enlarged it, kept resting
+  attachment previews quiet while preserving their keyboard focus ring, and
+  kept chart bars square in the theme mock.
+
 ## [1.0.5] - 2026-08-16
 
 ### Fixed
@@ -52,7 +64,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.6
 [1.0.5]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.5
 [1.0.4]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.4
 [1.0.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.2
