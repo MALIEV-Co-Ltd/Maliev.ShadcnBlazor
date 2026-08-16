@@ -1147,7 +1147,6 @@ a {
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-item {
-    border-bottom: 1px solid color-mix(in srgb, var(--shadcn-border) 55%, transparent);
     padding-block: 0.55rem;
 }
 
@@ -1171,6 +1170,37 @@ a {
     box-shadow: var(--shadcn-shadow-md);
     font-size: 0.75rem;
     font-weight: 650;
+}
+
+.showcase-scroller-demo {
+    width: min(100%, 34rem);
+    margin-inline: auto;
+}
+
+.showcase-scroller-helper {
+    margin: .7rem 1rem 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.showcase-scroller-streaming {
+    display: inline-flex;
+    margin-inline-start: .45rem;
+    color: var(--shadcn-primary);
+    font-size: .7rem;
+    font-weight: 650;
+    animation: showcase-scroller-streaming 1.2s ease-in-out infinite;
+}
+
+@keyframes showcase-scroller-streaming {
+    0%, 100% { opacity: .48; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .showcase-scroller-streaming { animation: none; }
 }
 
 .showcase-questionnaire-card {
@@ -3577,13 +3607,6 @@ a {
     .showcase-toast-demo .shadcn-toast-viewport { inset-inline: 1rem; inline-size: auto; max-inline-size: none; }
 }
 
-.showcase-message-thread .shadcn-message-footer {
-    max-block-size: 2rem;
-    opacity: 1;
-    transform: none;
-    transition: max-block-size var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
-}
-
 .showcase-message-thread.showcase-message-thread--footer-always [data-slot="message"] .shadcn-message-footer {
     pointer-events: auto;
 }
@@ -3780,6 +3803,8 @@ a {
 .showcase-calendar-demo {
     display: grid;
     inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
     place-items: center;
     gap: .75rem;
 }
@@ -3799,6 +3824,32 @@ a {
 .showcase-avatar-demo .shadcn-avatar-fallback svg {
     width: 62%;
     height: 62%;
+}
+
+/* Keep composed previews inside the padded canvas at phone widths. Intrinsic
+   min-content sizing otherwise makes tabs/direction surfaces widen the canvas
+   even though their visible content can safely wrap or scroll. */
+.component-preview__canvas > :is(.shadcn-tabs, .shadcn-direction) {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+}
+
+@media (max-width: 40rem) {
+    .component-preview__canvas > [data-testid="action-button-group"] {
+        inline-size: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .component-preview__canvas > [data-testid="action-button-group"] > [data-slot="button-group-separator"] {
+        display: none;
+    }
+
+    .showcase-calendar-demo .shadcn-calendar {
+        --shadcn-calendar-cell: clamp(1.875rem, 9.5vw, 2.25rem);
+    }
 }
 
 .showcase-data-table {
@@ -4431,41 +4482,13 @@ a {
 }
 
 .showcase-bubble-thread > [data-slot="bubble"]:hover {
-    translate: 0 -2px;
-    filter: drop-shadow(0 4px 10px color-mix(in oklch, var(--shadcn-foreground) 10%, transparent));
+    translate: 0 -1px;
+    filter: drop-shadow(0 2px 6px color-mix(in oklch, var(--shadcn-foreground) 8%, transparent));
 }
 
 .showcase-bubble-thread .shadcn-bubble-content {
     border: 1px solid color-mix(in oklch, currentColor 14%, transparent);
     box-shadow: 0 1px 2px color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
-}
-
-.showcase-marker-thread [data-streaming="true"] {
-    position: relative;
-}
-
-.showcase-marker-thread [data-streaming="true"]::after {
-    inline-size: 0.35rem;
-    block-size: 0.35rem;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    background: currentColor;
-    content: "";
-    animation: showcase-marker-dot-pulse 1.25s var(--shadcn-motion-easing-standard) infinite;
-}
-
-.showcase-marker-thread [data-streaming="true"] .shadcn-marker-icon {
-    animation: showcase-marker-icon-pulse 1.25s var(--shadcn-motion-easing-standard) infinite;
-}
-
-@keyframes showcase-marker-dot-pulse {
-    0%, 100% { opacity: 0.35; scale: 0.8; }
-    50% { opacity: 1; scale: 1.1; }
-}
-
-@keyframes showcase-marker-icon-pulse {
-    0%, 100% { opacity: 0.55; }
-    50% { opacity: 1; }
 }
 
 .sr-only {
@@ -4487,10 +4510,6 @@ a {
         transition: none;
     }
 
-    .showcase-marker-thread [data-streaming="true"]::after,
-    .showcase-marker-thread [data-streaming="true"] .shadcn-marker-icon {
-        animation: none;
-    }
 }
 
 /* The WebAssembly boot state should feel like part of the documentation shell,
@@ -5149,5 +5168,52 @@ a {
     .documentation-catalog-rail,
     .documentation-on-this-page {
         padding-inline: 1rem;
+    }
+}
+
+/* Conversation showcase motion and variant proof. The reveal is deliberately
+   short and low-amplitude: it communicates message order without making the
+   thread feel like a notification stack. Reduced motion restores every row
+   immediately for keyboard and assistive-technology users. */
+html body .showcase-bubble-thread > [data-slot="bubble"] {
+    animation: showcase-bubble-reveal 420ms var(--shadcn-motion-easing-enter) both;
+}
+
+html body .showcase-bubble-thread > [data-slot="bubble"]:nth-child(1) { animation-delay: 0ms; }
+html body .showcase-bubble-thread > [data-slot="bubble"]:nth-child(2) { animation-delay: 70ms; }
+html body .showcase-bubble-thread > [data-slot="bubble"]:nth-child(3) { animation-delay: 140ms; }
+html body .showcase-bubble-thread > [data-slot="bubble"]:nth-child(4) { animation-delay: 210ms; }
+html body .showcase-bubble-thread > [data-slot="bubble"]:nth-child(5) { animation-delay: 280ms; }
+
+@keyframes showcase-bubble-reveal {
+    from { opacity: 0; translate: 0 .35rem; }
+    to { opacity: 1; translate: 0 0; }
+}
+
+/* Ghost is intentionally borderless and quiet; outline retains a crisp
+   container so the two often-confused variants are visually distinguishable. */
+html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="ghost"] {
+    width: fit-content !important;
+    max-inline-size: min(78%, 28rem);
+}
+
+html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="ghost"] > .shadcn-bubble-content {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding-inline: 0 !important;
+}
+
+html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"] > .shadcn-bubble-content {
+    border: 1px solid var(--shadcn-border) !important;
+    background: var(--shadcn-background) !important;
+    box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body .showcase-bubble-thread > [data-slot="bubble"] {
+        animation: none;
+        opacity: 1;
+        translate: none;
     }
 }

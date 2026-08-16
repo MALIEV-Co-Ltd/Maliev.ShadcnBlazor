@@ -37,11 +37,15 @@
     [Parameter] public bool Badge { get; set; }
     [Parameter] public bool Group { get; set; }
 
+    private const string BrokenAvatarSource = "data:image/png;base64,invalid-avatar";
+
     private RenderFragment Profile(string? source, string name, string role, bool failed, bool badge, bool fallbackOnly = false) => @<div class="showcase-avatar-profile" data-testid="avatar-profile">
         <ShadcnAvatar Size="Size">
             @if (!fallbackOnly)
             {
-                <ShadcnAvatarImage Source="@(failed ? "images/avatars/missing-avatar.webp" : source ?? string.Empty)" Alt="@role" />
+                @* Exercise the image error path without requesting a missing URL. This keeps
+                   the fallback proof deterministic on the static documentation host. *@
+                <ShadcnAvatarImage Source="@(failed ? BrokenAvatarSource : source ?? string.Empty)" Alt="@role" />
             }
             <ShadcnAvatarFallback>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -58,7 +62,7 @@
     </div>;
 
     private RenderFragment Avatar(string source, string alt, bool failed, bool badge) => @<ShadcnAvatar Size="Size">
-        <ShadcnAvatarImage Source="@(failed ? "images/avatars/missing-avatar.webp" : source)" Alt="@alt" />
+        <ShadcnAvatarImage Source="@(failed ? BrokenAvatarSource : source)" Alt="@alt" />
         <ShadcnAvatarFallback>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="8" r="3.25" fill="currentColor" opacity=".9" />

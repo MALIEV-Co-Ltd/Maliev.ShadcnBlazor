@@ -200,11 +200,28 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var cut = Render(example.Preview);
 
         Assert.Single(cut.FindAll("[data-slot='message-scroller']"));
-        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item']").Count);
-        Assert.Equal(5, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
-        Assert.Equal(5, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Single(cut.FindAll("form.showcase-scroller-composer"));
+        Assert.Equal("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย", cut.Find(".showcase-scroller-composer input").GetAttribute("value"));
+        Assert.NotEmpty(cut.FindAll("button[data-testid='scroller-send']"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller-button']"));
         Assert.Contains("ตรวจสอบชิ้นงาน", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ScrollerDossierSourceDocumentsTheInteractiveComposerAndStableAnchors()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message-scroller").Single();
+
+        Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerProvider", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"user-1\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"assistant-1\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

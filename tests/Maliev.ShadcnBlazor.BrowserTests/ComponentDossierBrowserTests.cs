@@ -212,12 +212,16 @@ public sealed class ComponentDossierBrowserTests(
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
         var scrollerAvatars = page.Locator("#preview .showcase-scroller-frame img.showcase-message-avatar-image");
-        await Assertions.Expect(scrollerAvatars).ToHaveCountAsync(3);
+        await Assertions.Expect(scrollerAvatars).ToHaveCountAsync(2);
         var scrollerAvatarSources = await scrollerAvatars.EvaluateAllAsync<string[]>("elements => elements.map(element => element.getAttribute('src'))");
-        Assert.Equal(3, scrollerAvatarSources.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(2, scrollerAvatarSources.Distinct(StringComparer.Ordinal).Count());
         Assert.Contains(scrollerAvatarSources, source => source?.Contains("operator-thai.png", StringComparison.Ordinal) == true);
         Assert.Contains(scrollerAvatarSources, source => source?.Contains("assistant-thai.png", StringComparison.Ordinal) == true);
-        Assert.Contains(scrollerAvatarSources, source => source?.Contains("coordinator-thai.png", StringComparison.Ordinal) == true);
+        await Assertions.Expect(page.GetByTestId("scroller-send")).ToBeEnabledAsync();
+        await Assertions.Expect(page.Locator(".showcase-scroller-composer input")).ToHaveValueAsync("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย");
+        await page.GetByTestId("scroller-send").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("scroller-streaming")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".showcase-scroller-frame [data-slot='message-scroller-item']")).ToHaveCountAsync(4);
 
         await page.SetViewportSizeAsync(390, 844);
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/data-table").ToString());
