@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <PackageId>Maliev.ShadcnBlazor</PackageId>
-    <VersionPrefix>1.0.2</VersionPrefix>
+    <VersionPrefix>1.0.3</VersionPrefix>
     <Authors>MALIEV Co., Ltd.</Authors>
     <Company>MALIEV Co., Ltd.</Company>
     <Description>Accessible, themeable Shadcn-inspired components for .NET 10 Blazor applications.</Description>
