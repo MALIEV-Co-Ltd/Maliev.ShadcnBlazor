@@ -11,7 +11,9 @@
     </button>
     @if (Clearable && SelectedOption is not null && !EffectiveDisabled && !ReadOnly)
     {
-        <button class="shadcn-select-clear" data-slot="select-clear" type="button" aria-label="@ClearLabel" @onclick="ClearAsync">×</button>
+        <button class="shadcn-select-clear" data-slot="select-clear" type="button" aria-label="@ClearLabel" @onclick="ClearAsync">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
     }
     @if (EffectiveOpen)
     {

@@ -89,6 +89,57 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void FeedbackSourcesDescribeTheRenderedCompositionsInsteadOfPlaceholders()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+
+        var card = registry.GetBySlug("card").Single().RazorSource;
+        Assert.Contains("Laser cell 04", card, StringComparison.Ordinal);
+        Assert.Contains("ShadcnCardDescription", card, StringComparison.Ordinal);
+        Assert.Contains("ShadcnCardFooter", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("...</", card, StringComparison.Ordinal);
+
+        var progress = registry.GetBySlug("progress").Single().RazorSource;
+        Assert.Contains("Indeterminate ? null : Value", progress, StringComparison.Ordinal);
+        Assert.Contains("Label=\"Upload\"", progress, StringComparison.Ordinal);
+
+        var toast = registry.GetBySlug("toast").Single().RazorSource;
+        Assert.Contains("private void Show()", toast, StringComparison.Ordinal);
+        Assert.Contains("MaximumVisible=\"3\"", toast, StringComparison.Ordinal);
+        Assert.Contains("ActionLabel: \"เลิกทำ\"", toast, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FeedbackSourcesFollowTheCurrentPreviewControls()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+
+        var card = registry.GetBySlug("card").Single();
+        card.Controls.Single(control => control.Id == "card-size").Apply("Small");
+        card.Controls.Single(control => control.Id == "card-spacing").Apply("true");
+        card.Controls.Single(control => control.Id == "card-action").Apply("false");
+        Assert.Contains("Size=\"ShadcnCardSize.Small\"", card.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Spacing=\"0.75rem\"", card.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShadcnCardAction", card.RazorSource, StringComparison.Ordinal);
+
+        var progress = registry.GetBySlug("progress").Single();
+        progress.Controls.Single(control => control.Id == "progress-indeterminate").Apply("true");
+        progress.Controls.Single(control => control.Id == "progress-value").Apply("32");
+        progress.Controls.Single(control => control.Id == "progress-show-value").Apply("false");
+        Assert.Contains("private bool Indeterminate = true", progress.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private double Value = 32", progress.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool ShowValue = false", progress.RazorSource, StringComparison.Ordinal);
+
+        var toast = registry.GetBySlug("toast").Single();
+        toast.Controls.Single(control => control.Id == "toast-limit").Apply("1");
+        toast.Controls.Single(control => control.Id == "toast-start").Apply("true");
+        toast.Controls.Single(control => control.Id == "toast-type").Apply("Error");
+        Assert.Contains("MaximumVisible=\"1\"", toast.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Placement=\"ShadcnToastPlacement.BottomStart\"", toast.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Type: ShadcnToastType.Error", toast.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AlertDossierUsesTheComposedShadcnCalloutPattern()
     {
         var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("alert"));

@@ -195,6 +195,7 @@ public sealed class FormsDossierTests : BunitContext
         Change(combobox, "combobox-invalid", true);
         Assert.Equal("true", combobox.Find("[data-testid='forms-dossier-combobox']").GetAttribute("aria-invalid"));
         Change(combobox, "combobox-multiple", true);
+        combobox.Find("[data-slot='combobox-input']").TriggerEvent("onfocus", new Microsoft.AspNetCore.Components.Web.FocusEventArgs());
         Assert.Equal("true", combobox.Find("[data-slot='combobox-list']").GetAttribute("aria-multiselectable"));
         Assert.Equal(2, combobox.FindAll("[data-slot='combobox-chip']").Count);
 
@@ -227,7 +228,7 @@ public sealed class FormsDossierTests : BunitContext
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],
             ["combobox"] = ["selected", "multiple", "chips", "open", "invalid"],
             ["calendar"] = ["single", "range", "culture", "invalid"],
-            ["date-picker"] = ["single", "text-input", "culture", "clearable", "invalid"]
+            ["date-picker"] = ["single", "calendar", "culture", "clearable", "invalid"]
         };
 
         foreach (var (slug, tags) in expected)

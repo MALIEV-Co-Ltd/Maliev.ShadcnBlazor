@@ -1,10 +1,40 @@
-<ShadcnCard Size="Size" Spacing="@(CompactSpacing ? "0.75rem" : null)">
+<ShadcnCard Size="Size" Spacing="@(CompactSpacing ? "0.75rem" : null)" Class="showcase-card-dossier">
     <ShadcnCardHeader>
-        <ShadcnCardTitle>Machine status</ShadcnCardTitle>
-        @if (Action) { <ShadcnCardAction>Open</ShadcnCardAction> }
+        <div class="showcase-card-dossier__heading">
+            <ShadcnCardTitle>Laser cell 04</ShadcnCardTitle>
+            <ShadcnCardDescription>CNC milling · Production line A</ShadcnCardDescription>
+        </div>
+        @if (Action)
+        {
+            <ShadcnCardAction>
+                <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Running</ShadcnBadge>
+            </ShadcnCardAction>
+        }
     </ShadcnCardHeader>
-    <ShadcnCardContent>Running</ShadcnCardContent>
-    <ShadcnCardFooter>Updated now</ShadcnCardFooter>
+    <ShadcnCardContent>
+        <div class="showcase-card-dossier__metrics">
+            <div>
+                <span>Utilization</span>
+                <strong>98%</strong>
+            </div>
+            <div>
+                <span>Next service</span>
+                <strong>22 Aug 2026</strong>
+            </div>
+        </div>
+        <div class="showcase-card-dossier__health">
+            <span class="showcase-card-dossier__health-dot" aria-hidden="true"></span>
+            <span>Within target</span>
+            <span>Updated 2 minutes ago</span>
+        </div>
+    </ShadcnCardContent>
+    <ShadcnCardFooter>
+        <span>Production cell A</span>
+        @if (Action)
+        {
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small">View details</ShadcnButton>
+        }
+    </ShadcnCardFooter>
 </ShadcnCard>
 
 @code {

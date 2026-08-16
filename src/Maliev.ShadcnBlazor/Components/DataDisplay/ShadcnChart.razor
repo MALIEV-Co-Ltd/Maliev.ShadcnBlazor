@@ -81,7 +81,9 @@
     [Parameter] public bool HideTooltipIndicator { get; set; }
     [Parameter] public string? NameKey { get; set; }
     [Parameter] public string? LabelKey { get; set; }
-    [Parameter] public double BarRadius { get; set; } = 4;
+    // Shadcn chart bars use a crisp, square edge by default. Consumers can opt
+    // into rounded bars explicitly when their visual language calls for it.
+    [Parameter] public double BarRadius { get; set; }
     [Parameter] public double StrokeWidth { get; set; } = 2;
     [Parameter] public ShadcnDirection Direction { get; set; } = ShadcnDirection.LeftToRight;
     [Parameter] public bool Animated { get; set; } = true;

@@ -39,7 +39,7 @@ else
             <h2 id="preview-title">Preview</h2>
             @foreach (var example in _examples)
             {
-                <ComponentPreview Example="@example" />
+                <ComponentPreview Example="@example" SourceChanged="HandleExampleSourceChanged" />
                 <ComponentCodeExample Title="@example.Title" Heading="Example source" Source="@example.RazorSource" />
             }
         </section>
@@ -175,6 +175,11 @@ else
         _examples = entry is null ? [] : Examples.GetBySlug(entry.Slug);
         _apiDescriptors = entry is null ? [] : ApiCatalog.GetByEntry(entry);
         PageState.SetSections(entry is null ? [] : Sections(entry));
+    }
+
+    private Task HandleExampleSourceChanged()
+    {
+        return InvokeAsync(StateHasChanged);
     }
 
     public void Dispose() => PageState.Clear();

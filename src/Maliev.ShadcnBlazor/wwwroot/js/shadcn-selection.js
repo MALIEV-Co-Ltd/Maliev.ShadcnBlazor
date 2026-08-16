@@ -58,6 +58,12 @@ export function attachRovingGroup(root, kind, orientation, readOnly) {
 export function attachSlider(root, readOnly) {
     if (!root) return
 
+    const existing = listeners.get(root)
+    if (existing && typeof existing === "object" && existing.kind === "slider") {
+        existing.readOnly = readOnly
+        return
+    }
+
     detach(root)
     const inputs = () => Array.from(root.querySelectorAll("input[type='range']"))
     const readOnlyValues = new Map(inputs().map((input) => [input, input.value]))
@@ -65,6 +71,11 @@ export function attachSlider(root, readOnly) {
         for (const [input, value] of readOnlyValues) input.value = value
     }
 
+    const state = {
+        kind: "slider",
+        get readOnly() { return readOnly },
+        set readOnly(value) { readOnly = Boolean(value) }
+    }
     let activeTarget = null
     let activePointerId = null
 
@@ -149,7 +160,8 @@ export function attachSlider(root, readOnly) {
     root.addEventListener("pointercancel", pointerUp, true)
     root.addEventListener("keydown", keyDown)
     root.addEventListener("input", input, true)
-    listeners.set(root, { pointerDown, pointerMove, pointerUp, keyDown, input })
+    Object.assign(state, { pointerDown, pointerMove, pointerUp, keyDown, input })
+    listeners.set(root, state)
 }
 
 export function detach(root) {

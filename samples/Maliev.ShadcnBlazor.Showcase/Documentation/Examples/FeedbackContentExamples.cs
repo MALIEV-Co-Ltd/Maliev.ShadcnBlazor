@@ -142,18 +142,52 @@ internal static class FeedbackContentExamples
     {
         var size = ShadcnCardSize.Default; var compactSpacing = false; var action = true;
         RenderFragment preview = b => { b.OpenComponent<CardDossierPreview>(0); b.AddAttribute(1, "Size", size); b.AddAttribute(2, "CompactSpacing", compactSpacing); b.AddAttribute(3, "Action", action); b.CloseComponent(); };
-        const string source = """
-<ShadcnCard Size="ShadcnCardSize.Default">
+        string Source()
+        {
+            var sizeMarkup = $"Size=\"ShadcnCardSize.{size}\"";
+            var spacingMarkup = compactSpacing ? " Spacing=\"0.75rem\"" : string.Empty;
+            var actionMarkup = action
+                ? """
+        <ShadcnCardAction>
+            <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Running</ShadcnBadge>
+        </ShadcnCardAction>
+"""
+                : string.Empty;
+            var footerActionMarkup = action
+                ? """
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small">View details</ShadcnButton>
+"""
+                : string.Empty;
+
+            return $"""
+<ShadcnCard {sizeMarkup}{spacingMarkup}>
     <ShadcnCardHeader>
-        <ShadcnCardTitle>Production order #4189</ShadcnCardTitle>
-        <ShadcnCardDescription>Revision C · CNC enclosure</ShadcnCardDescription>
-        <ShadcnCardAction><button type="button">Open</button></ShadcnCardAction>
-    </ShadcnCardHeader>
-    <ShadcnCardContent>Running · 3 files ready for inspection.</ShadcnCardContent>
-    <ShadcnCardFooter>Updated 2 minutes ago</ShadcnCardFooter>
+        <div>
+            <ShadcnCardTitle>Laser cell 04</ShadcnCardTitle>
+            <ShadcnCardDescription>CNC milling · Production line A</ShadcnCardDescription>
+        </div>
+{actionMarkup}    </ShadcnCardHeader>
+    <ShadcnCardContent>
+        <div>
+            <span>Utilization</span>
+            <strong>98%</strong>
+            <span>Next service</span>
+            <strong>22 Aug 2026</strong>
+        </div>
+        <div>Within target · Updated 2 minutes ago</div>
+    </ShadcnCardContent>
+    <ShadcnCardFooter>
+        <span>Production cell A</span>
+{footerActionMarkup}    </ShadcnCardFooter>
 </ShadcnCard>
 """;
-        return Example("card", "Composed card", "Show a production-order card with title, description, action, content, and footer hierarchy.", source, preview, [EnumSelect("card-size", "Size", size, v => size = v), Toggle("card-spacing", "Compact spacing", v => compactSpacing = v), Toggle("card-action", "Action", v => action = v, true)], ["default", "sm", "header", "action", "content", "footer"]);
+        }
+
+        var source = Source();
+        return new ComponentExampleDefinition("card-primary", "Composed card", "Show a production-order card with title, description, action, content, and footer hierarchy.", source, preview, [EnumSelect("card-size", "Size", size, v => size = v), Toggle("card-spacing", "Compact spacing", v => compactSpacing = v), Toggle("card-action", "Action", v => action = v, true)], ["default", "sm", "header", "action", "content", "footer"])
+        {
+            RazorSourceProvider = Source
+        };
     }
     private static ComponentExampleDefinition Carousel()
     {
@@ -223,7 +257,22 @@ internal static class FeedbackContentExamples
     {
         var indeterminate = false; var value = 64d; var showValue = true;
         RenderFragment preview = b => { b.OpenComponent<ShadcnProgress>(0); b.AddAttribute(1, "Value", indeterminate ? null : value); b.AddAttribute(2, "Label", "Upload"); b.AddAttribute(3, "ShowValue", showValue); b.CloseComponent(); };
-        return Example("progress", "Progress", "Compare determinate and indeterminate accessible progress.", "<ShadcnProgress Value=\"64\" Label=\"Upload\" ShowValue=\"true\" />", preview, [Toggle("progress-indeterminate", "Indeterminate", v => indeterminate = v), Number("progress-value", "Value", value, v => value = v), Toggle("progress-show-value", "Show value", v => showValue = v, true)], ["determinate", "indeterminate", "label", "value"]);
+        string Source() => string.Join(Environment.NewLine,
+        [
+            "@code {",
+            $"    private bool Indeterminate = {indeterminate.ToString().ToLowerInvariant()};",
+            $"    private double Value = {value:0.##};",
+            $"    private bool ShowValue = {showValue.ToString().ToLowerInvariant()};",
+            "}",
+            string.Empty,
+            "<ShadcnProgress Value=\"@(Indeterminate ? null : Value)\" Label=\"Upload\" ShowValue=\"@ShowValue\" />",
+            string.Empty
+        ]);
+        var source = Source();
+        return new ComponentExampleDefinition("progress-primary", "Progress", "Compare determinate and indeterminate accessible progress.", source, preview, [Toggle("progress-indeterminate", "Indeterminate", v => indeterminate = v), Number("progress-value", "Value", value, v => value = v), Toggle("progress-show-value", "Show value", v => showValue = v, true)], ["determinate", "indeterminate", "label", "value"])
+        {
+            RazorSourceProvider = Source
+        };
     }
     private static ComponentExampleDefinition Skeleton()
     {
@@ -263,7 +312,26 @@ internal static class FeedbackContentExamples
     {
         var limit = 3d; var start = false; var reduced = false; var type = ShadcnToastType.Success; var priority = ShadcnToastPriority.Normal;
         RenderFragment preview = b => { b.OpenComponent<ToastDossierPreview>(0); b.AddAttribute(1, "MaximumVisible", (int)limit); b.AddAttribute(2, "Placement", start ? ShadcnToastPlacement.BottomStart : ShadcnToastPlacement.BottomEnd); b.AddAttribute(3, "ReducedMotion", reduced); b.AddAttribute(4, "Type", type); b.AddAttribute(5, "Priority", priority); b.CloseComponent(); };
-        return Example("toast", "Toast viewport", "Trigger the real page-level toast queue; notifications stack outside this preview and remain keyboard reachable.", "@inject IShadcnToastService Toasts\n<ShadcnButton OnClick=\"Show\">Show localized toast</ShadcnButton>\n<ShadcnToaster />", preview, [Number("toast-limit", "Visible limit", limit, v => limit = Math.Max(1, v)), Toggle("toast-start", "Logical start", v => start = v), Toggle("toast-reduced", "Reduced motion", v => reduced = v), EnumSelect("toast-type", "Type", type, v => type = v), EnumSelect("toast-priority", "Priority", priority, v => priority = v)], ["queue", "limit", "promise", "pause", "swipe", "F6", "rtl", "reduced-motion", "priority"]);
+        string Source() => string.Join(Environment.NewLine,
+        [
+            "@inject IShadcnToastService Toasts",
+            string.Empty,
+            "<ShadcnButton OnClick=\"Show\">Show localized toast</ShadcnButton>",
+            $"<ShadcnToaster MaximumVisible=\"{Math.Max(1, (int)limit)}\" Placement=\"ShadcnToastPlacement.{(start ? ShadcnToastPlacement.BottomStart : ShadcnToastPlacement.BottomEnd)}\" ReducedMotion=\"{reduced.ToString().ToLowerInvariant()}\" />",
+            string.Empty,
+            "@code {",
+            "    private void Show()",
+            "    {",
+            $"        Toasts.Show(new(\"บันทึกแล้ว — Saved\", Type: ShadcnToastType.{type}, ActionLabel: \"เลิกทำ\", Action: () => Task.CompletedTask, Priority: ShadcnToastPriority.{priority}));",
+            "    }",
+            "}",
+            string.Empty
+        ]);
+        var source = Source();
+        return new ComponentExampleDefinition("toast-primary", "Toast viewport", "Trigger the real page-level toast queue; notifications stack outside this preview and remain keyboard reachable.", source, preview, [Number("toast-limit", "Visible limit", limit, v => limit = Math.Max(1, v)), Toggle("toast-start", "Logical start", v => start = v), Toggle("toast-reduced", "Reduced motion", v => reduced = v), EnumSelect("toast-type", "Type", type, v => type = v), EnumSelect("toast-priority", "Priority", priority, v => priority = v)], ["queue", "limit", "promise", "pause", "swipe", "F6", "rtl", "reduced-motion", "priority"])
+        {
+            RazorSourceProvider = Source
+        };
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, description, source, preview, controls, tags);

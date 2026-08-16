@@ -116,7 +116,7 @@ internal static class DataDisplayExamples
     {
         var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false;
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Id", "dossier"); b.AddAttribute(2, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(3, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(4, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(5, "Config", config); b.AddAttribute(6, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(7, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "ShowLegend", !hideLegend); b.AddAttribute(10, "ShowGrid", true); b.AddAttribute(11, "BarRadius", 6d); b.AddAttribute(12, "InitialHeight", 260d); b.AddAttribute(13, "Stacked", stacked); b.AddAttribute(14, "LegendInteractive", true); b.AddAttribute(15, "Animated", true); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Id", "dossier"); b.AddAttribute(2, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(3, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(4, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(5, "Config", config); b.AddAttribute(6, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(7, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "ShowLegend", !hideLegend); b.AddAttribute(10, "ShowGrid", true); b.AddAttribute(11, "BarRadius", 0d); b.AddAttribute(12, "InitialHeight", 260d); b.AddAttribute(13, "Stacked", stacked); b.AddAttribute(14, "LegendInteractive", true); b.AddAttribute(15, "Animated", true); b.CloseComponent(); };
         const string source = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
@@ -129,6 +129,7 @@ internal static class DataDisplayExamples
              Config="@Config"
              ShowLegend="true"
              ShowGrid="true"
+             BarRadius="0"
              LegendInteractive="true"
              Animated="true" />
 

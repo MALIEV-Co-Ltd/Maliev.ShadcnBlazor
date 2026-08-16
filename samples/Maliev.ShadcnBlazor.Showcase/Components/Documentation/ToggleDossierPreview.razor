@@ -1,0 +1,42 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<ShadcnToggle Pressed="CurrentPressed"
+              PressedChanged="HandlePressedChanged"
+              Variant="Variant"
+              Size="Size"
+              Disabled="Disabled"
+              AdditionalAttributes="Attributes">
+    Bold
+</ShadcnToggle>
+
+@code {
+    [Parameter] public bool Pressed { get; set; }
+    [Parameter] public ShadcnToggleVariant Variant { get; set; } = ShadcnToggleVariant.Default;
+    [Parameter] public ShadcnToggleSize Size { get; set; } = ShadcnToggleSize.Default;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+
+    private bool CurrentPressed;
+    private bool LastPressed;
+
+    protected override void OnParametersSet()
+    {
+        if (Pressed != LastPressed)
+            CurrentPressed = Pressed;
+
+        LastPressed = Pressed;
+    }
+
+    private Task HandlePressedChanged(bool value)
+    {
+        CurrentPressed = value;
+        return Task.CompletedTask;
+    }
+
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
+    {
+        ["data-testid"] = "action-toggle",
+        ["aria-label"] = "Bold",
+        ["aria-invalid"] = Invalid ? "true" : "false"
+    };
+}

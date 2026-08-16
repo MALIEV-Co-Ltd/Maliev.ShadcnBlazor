@@ -1,0 +1,130 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+@implements IDisposable
+
+<div class="showcase-message-dossier" data-testid="showcase-message-dossier">
+    <ShadcnMessageGroup class="@($"showcase-message-thread{(AlwaysShowActions ? " showcase-message-thread--footer-always" : string.Empty)}")">
+        <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+            @if (Avatars)
+            {
+                <ConversationAvatar AvatarId="operator" Source="/images/avatars/operator-thai.png" Alt="นที · วิศวกร" Fallback="นท" />
+            }
+            <ShadcnMessageContent>
+                <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
+                <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start">
+                    <ShadcnBubbleContent>ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
+                </ShadcnBubble>
+                @if (FooterActions)
+                {
+                    <ShadcnMessageFooter>
+                        <button type="button" class="showcase-message-action showcase-message-action--copy" data-testid="message-copy" aria-label="Copy message" data-copied="@OperatorCopied" @onclick="CopyOperatorAsync">
+                            @if (IsCopied("operator")) { <span>Copied</span> } else { <span aria-hidden="true">⧉</span><span class="sr-only">Copy</span> }
+                        </button>
+                        <button type="button" class="showcase-message-action showcase-message-action--reply" data-testid="message-reply" aria-label="Reply to message" @onclick="ReplyToOperator">
+                            <span aria-hidden="true">↩</span><span class="sr-only">Reply</span>
+                        </button>
+                    </ShadcnMessageFooter>
+                }
+            </ShadcnMessageContent>
+        </ShadcnMessage>
+
+        <ShadcnMessage Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
+            @if (Avatars)
+            {
+                <ConversationAvatar AvatarId="placeholder" Alt="มาลี · ผู้ประสานงาน" Fallback="ม" />
+            }
+            <ShadcnMessageContent>
+                <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
+                <ShadcnBubble Variant="@(AlignMiddleRowEnd ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)" Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
+                    <ShadcnBubbleContent>พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnMessageContent>
+        </ShadcnMessage>
+
+        <ShadcnMessage Align="ShadcnLogicalAlign.End">
+            @if (Avatars)
+            {
+                <ConversationAvatar AvatarId="assistant" Source="/images/avatars/assistant-thai.png" Alt="MALIEV Assistant" Fallback="MA" />
+            }
+            <ShadcnMessageContent>
+                <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
+                <ShadcnBubble Variant="ShadcnBubbleVariant.Default" Align="ShadcnLogicalAlign.End">
+                    <ShadcnBubbleContent>Sure. I’ll keep the thread easy to scan.</ShadcnBubbleContent>
+                </ShadcnBubble>
+                @if (FooterActions)
+                {
+                    <ShadcnMessageFooter>
+                        <button type="button" class="showcase-message-action showcase-message-action--copy" data-testid="message-copy" aria-label="Copy message" data-copied="@AssistantCopied" @onclick="CopyAssistantAsync">
+                            @if (IsCopied("assistant")) { <span>Copied</span> } else { <span aria-hidden="true">⧉</span><span class="sr-only">Copy</span> }
+                        </button>
+                        <button type="button" class="showcase-message-action showcase-message-action--reply" data-testid="message-reply" aria-label="Reply to message" @onclick="ReplyToCoordinator">
+                            <span aria-hidden="true">↩</span><span class="sr-only">Reply</span>
+                        </button>
+                    </ShadcnMessageFooter>
+                }
+            </ShadcnMessageContent>
+        </ShadcnMessage>
+
+        @if (!string.IsNullOrWhiteSpace(_replyText))
+        {
+            <div class="showcase-message-reply-quote" role="note" data-testid="message-reply-quote">
+                <span class="showcase-message-reply-quote__label">Replying to</span>
+                <q>@_replyText</q>
+                <button type="button" class="showcase-message-reply-quote__dismiss" aria-label="Cancel reply" @onclick="ClearReply">×</button>
+            </div>
+        }
+    </ShadcnMessageGroup>
+</div>
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Parameter] public bool AlignMiddleRowEnd { get; set; }
+    [Parameter] public bool Avatars { get; set; } = true;
+    [Parameter] public bool FooterActions { get; set; } = true;
+    [Parameter] public bool AlwaysShowActions { get; set; }
+
+    private string? _copiedId;
+    private string? _replyText;
+    private CancellationTokenSource? _copyReset;
+
+    private bool IsCopied(string id) => string.Equals(_copiedId, id, StringComparison.Ordinal);
+    private string OperatorCopied => IsCopied("operator") ? "true" : "false";
+    private string AssistantCopied => IsCopied("assistant") ? "true" : "false";
+
+    private Task CopyOperatorAsync() => CopyAsync("operator", "ตรวจสอบไฟล์แล้ว 3 รายการ");
+    private Task CopyAssistantAsync() => CopyAsync("assistant", "Sure. I’ll keep the thread easy to scan.");
+    private void ReplyToOperator() => ReplyTo("ตรวจสอบไฟล์แล้ว 3 รายการ");
+    private void ReplyToCoordinator() => ReplyTo("พร้อมส่งแบบให้ตรวจ");
+
+    private async Task CopyAsync(string id, string text)
+    {
+        _copiedId = id;
+        await InvokeAsync(StateHasChanged);
+        try { await JS.InvokeVoidAsync("navigator.clipboard.writeText", text); } catch (JSException) { }
+
+        _copyReset?.Cancel();
+        _copyReset?.Dispose();
+        _copyReset = new CancellationTokenSource();
+        var token = _copyReset.Token;
+        _ = ResetCopiedAsync(id, token);
+    }
+
+    private async Task ResetCopiedAsync(string id, CancellationToken token)
+    {
+        try { await Task.Delay(TimeSpan.FromMilliseconds(1600), token); }
+        catch (OperationCanceledException) { return; }
+        if (IsCopied(id))
+        {
+            _copiedId = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void ReplyTo(string text) => _replyText = text;
+    private void ClearReply() => _replyText = null;
+
+    public void Dispose()
+    {
+        _copyReset?.Cancel();
+        _copyReset?.Dispose();
+    }
+}

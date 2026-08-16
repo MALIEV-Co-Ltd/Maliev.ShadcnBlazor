@@ -208,15 +208,12 @@ internal static class ActionSelectionExamples
         var invalid = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnToggle>(0);
-            builder.AddAttribute(1, nameof(ShadcnToggle.Pressed), pressed);
-            builder.AddAttribute(2, nameof(ShadcnToggle.Variant), variant);
-            builder.AddAttribute(3, nameof(ShadcnToggle.Size), size);
-            builder.AddAttribute(4, nameof(ShadcnToggle.AdditionalAttributes), invalid
-                ? new Dictionary<string, object> { ["data-testid"] = "action-toggle", ["aria-label"] = "Bold", ["aria-invalid"] = "true" }
-                : Attributes("action-toggle", "Bold"));
-            builder.AddAttribute(5, nameof(ShadcnToggle.ChildContent), Text("Bold"));
-            builder.AddAttribute(6, nameof(ShadcnToggle.Disabled), disabled);
+            builder.OpenComponent<ToggleDossierPreview>(0);
+            builder.AddAttribute(1, nameof(ToggleDossierPreview.Pressed), pressed);
+            builder.AddAttribute(2, nameof(ToggleDossierPreview.Variant), variant);
+            builder.AddAttribute(3, nameof(ToggleDossierPreview.Size), size);
+            builder.AddAttribute(4, nameof(ToggleDossierPreview.Invalid), invalid);
+            builder.AddAttribute(5, nameof(ToggleDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
         return Example("toggle", "Two-state action", "Control pressed state, outline treatment, and every supported size.",
