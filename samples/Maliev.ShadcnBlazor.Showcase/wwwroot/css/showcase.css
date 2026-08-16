@@ -4575,6 +4575,7 @@ a {
 .theme-studio-main {
     inline-size: 100%;
     max-inline-size: none;
+    overflow-x: clip;
     padding: 0;
 }
 
@@ -4586,6 +4587,8 @@ a {
     display: grid;
     gap: 0;
     min-block-size: 100dvh;
+    max-inline-size: 100%;
+    overflow-x: clip;
     padding: 0;
 }
 
