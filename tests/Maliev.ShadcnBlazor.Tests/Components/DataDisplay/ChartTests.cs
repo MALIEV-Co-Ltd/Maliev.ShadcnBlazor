@@ -38,6 +38,14 @@ public sealed class ChartTests : BunitContext
         Assert.Contains("[data-shadcn-theme=\"dark\"] [data-chart=\"chart-sales\"]", cut.Find("style[data-slot='chart-style']").TextContent, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void BarGeometryUsesSquareCornersByDefault()
+    {
+        var cut = RenderChart();
+
+        Assert.All(cut.FindAll("rect[data-series]"), bar => Assert.Equal("0", bar.GetAttribute("rx")));
+    }
+
     [Theory]
     [InlineData(ShadcnChartIndicator.Dot, "dot")]
     [InlineData(ShadcnChartIndicator.Line, "line")]

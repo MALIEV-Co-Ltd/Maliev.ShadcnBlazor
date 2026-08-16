@@ -160,7 +160,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item { border-radius: 50%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item:checked { border-color: var(--shadcn-primary); background: var(--shadcn-primary); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-indicator { position: absolute; inset-inline-start: 0.25rem; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--shadcn-primary-foreground); opacity: 0; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-indicator { position: absolute; inset-inline-start: 0.25rem; top: 50%; width: 0.5rem; height: 0.5rem; transform: translateY(-50%); border-radius: 50%; background: var(--shadcn-primary-foreground); opacity: 0; pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-state="checked"] .shadcn-radio-indicator { opacity: 1; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }

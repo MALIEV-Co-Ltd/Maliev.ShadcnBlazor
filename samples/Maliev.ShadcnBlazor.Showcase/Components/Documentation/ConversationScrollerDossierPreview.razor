@@ -1,0 +1,134 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+@implements IDisposable
+
+<div class="showcase-scroller-dossier" data-testid="showcase-scroller-dossier" data-preview-auto="@(AutoFollow ? "true" : "false")">
+    <ShadcnMessageScrollerProvider AutoScroll="@AutoFollow" DefaultScrollPosition="@Position">
+        <ShadcnMessageScroller class="showcase-scroller-frame" style="height:24rem" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-position="@Position.ToString().ToLowerInvariant()">
+            <ShadcnMessageScrollerViewport AccessibleName="บทสนทนาโครงการ">
+                <ShadcnMessageScrollerContent>
+                    @foreach (var message in _messages)
+                    {
+                        <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
+                            <ShadcnMessage Align="@message.Align" class="@(message.Streaming ? "showcase-scroller-message--streaming" : null)" aria-busy="@(message.Streaming ? "true" : null)">
+                                @if (message.Avatar is not null)
+                                {
+                                    <ConversationAvatar AvatarId="@message.Avatar.Id" Source="@message.Avatar.Source" Alt="@message.Avatar.Alt" Fallback="@message.Avatar.Fallback" />
+                                }
+                                <ShadcnMessageContent>
+                                    <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
+                                    <ShadcnBubble Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)" Align="@message.Align">
+                                        <ShadcnBubbleContent>@message.Text</ShadcnBubbleContent>
+                                    </ShadcnBubble>
+                                </ShadcnMessageContent>
+                            </ShadcnMessage>
+                        </ShadcnMessageScrollerItem>
+                    }
+                </ShadcnMessageScrollerContent>
+            </ShadcnMessageScrollerViewport>
+
+            <ShadcnMessageScrollerButton AccessibleName="ไปข้อความล่าสุด">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+            <form class="showcase-scroller-composer" aria-label="ส่งข้อความ" @onsubmit="HandleSubmitAsync" @onsubmit:preventDefault="true">
+                <input type="text" @bind="_composerText" aria-label="ข้อความใหม่" />
+                <button type="submit" aria-label="ส่งข้อความ" data-testid="scroller-send" disabled="@_sending">
+                    <span aria-hidden="true">↑</span>
+                </button>
+            </form>
+        </ShadcnMessageScroller>
+    </ShadcnMessageScrollerProvider>
+</div>
+
+@code {
+    [Parameter] public bool AutoFollow { get; set; } = true;
+    [Parameter] public bool AppendUnread { get; set; }
+    [Parameter] public ShadcnMessageDefaultScrollPosition Position { get; set; } = ShadcnMessageDefaultScrollPosition.End;
+
+    private readonly List<TranscriptMessage> _messages = [];
+    private string _composerText = "เมื่อมีข้อความใหม่ ระบบจะจัดตำแหน่งรายการให้อ่านต่อได้โดยไม่รบกวนผู้ใช้";
+    private bool _sending;
+    private CancellationTokenSource _streamCancellation = new();
+    private bool _extraWasAdded;
+
+    protected override void OnInitialized()
+    {
+        _messages.AddRange([
+            new("turn-1", ShadcnLogicalAlign.End, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", new("operator", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
+            new("turn-2", ShadcnLogicalAlign.Start, "MALIEV Assistant", "พบไฟล์ CAD ครบ 3 รายการ จัดลำดับการตรวจสอบให้แล้ว", new("assistant", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
+            new("turn-3", ShadcnLogicalAlign.End, "นที · วิศวกร", "กำลังเตรียมใบเสนอราคา", new("operator-2", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
+            new("turn-4", ShadcnLogicalAlign.Start, "MALIEV Assistant", "จะส่งให้ตรวจในอีกสักครู่", new("assistant-2", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
+            new("turn-5", ShadcnLogicalAlign.Start, "MALIEV Assistant", "รับทราบครับ", new("assistant-3", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA"))
+        ]);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (AppendUnread && !_extraWasAdded)
+        {
+            _messages.Add(new("turn-unread", ShadcnLogicalAlign.Start, "ผู้ตรวจสอบคุณภาพ", "มีข้อความใหม่เข้ามา พร้อมข้อสังเกตสำหรับรอยพิมพ์และผิวงาน", new("reviewer", "/images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ", "ผต")));
+            _extraWasAdded = true;
+        }
+        else if (!AppendUnread && _extraWasAdded)
+        {
+            _messages.RemoveAll(message => message.Id == "turn-unread");
+            _extraWasAdded = false;
+        }
+    }
+
+    private async Task HandleSubmitAsync(EventArgs _)
+    {
+        if (_sending || string.IsNullOrWhiteSpace(_composerText)) return;
+        _sending = true;
+        var userText = _composerText.Trim();
+        _composerText = string.Empty;
+        var userId = $"turn-user-{_messages.Count}";
+        _messages.Add(new(userId, ShadcnLogicalAlign.End, "นที · วิศวกร", userText, new("operator-send", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")));
+        var assistant = new TranscriptMessage($"turn-assistant-{_messages.Count}", ShadcnLogicalAlign.Start, "MALIEV Assistant", string.Empty, new("assistant-send", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")) { Streaming = true };
+        _messages.Add(assistant);
+        await InvokeAsync(StateHasChanged);
+
+        const string response = "ระบบได้รับข้อความแล้วครับ ผมจะจัดกลุ่มรายการสนทนา รักษาตำแหน่งการอ่านของคุณ และค่อย ๆ แสดงผลการตรวจสอบไฟล์กับขั้นตอนถัดไปให้เห็นอย่างต่อเนื่อง หากมีข้อความใหม่เข้ามาระหว่างการอ่าน ระบบจะทำเครื่องหมายไว้และเลื่อนตามเฉพาะเมื่อคุณกำลังติดตามข้อความล่าสุดอยู่เท่านั้น";
+        _streamCancellation.Cancel();
+        _streamCancellation.Dispose();
+        _streamCancellation = new CancellationTokenSource();
+        try
+        {
+            foreach (var chunk in Chunk(response, 9))
+            {
+                _streamCancellation.Token.ThrowIfCancellationRequested();
+                assistant.Text += chunk;
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(42, _streamCancellation.Token);
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            assistant.Streaming = false;
+            _sending = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private static IEnumerable<string> Chunk(string text, int size)
+    {
+        for (var index = 0; index < text.Length; index += size)
+            yield return text[index..Math.Min(index + size, text.Length)];
+    }
+
+    public void Dispose()
+    {
+        _streamCancellation.Cancel();
+        _streamCancellation.Dispose();
+    }
+
+    private sealed class TranscriptMessage(string id, ShadcnLogicalAlign align, string author, string text, AvatarInfo? avatar)
+    {
+        public string Id { get; } = id;
+        public ShadcnLogicalAlign Align { get; } = align;
+        public string Author { get; } = author;
+        public string Text { get; set; } = text;
+        public AvatarInfo? Avatar { get; } = avatar;
+        public bool Streaming { get; set; }
+    }
+
+    private sealed record AvatarInfo(string Id, string Source, string Alt, string Fallback);
+}

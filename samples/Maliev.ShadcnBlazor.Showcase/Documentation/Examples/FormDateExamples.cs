@@ -88,7 +88,7 @@ internal static class FormDateExamples
         var invalid = false; var clearable = true;
         RenderFragment preview = b => { b.OpenComponent<DatePickerDossierPreview>(0); b.AddAttribute(1, "Clearable", clearable); b.AddAttribute(2, "Invalid", invalid); b.CloseComponent(); };
         return Example("date-picker", "Date picker composition", "Use culture-exact text entry, clearable trigger, DateOnly payload, and calendar popup.", "<ShadcnDatePicker @bind-Value=\"DeliveryDate\" AllowTextInput=\"true\" Culture=\"ThaiCulture\" />", preview,
-            [Toggle("date-picker-invalid", "Invalid", v => invalid = v), Toggle("date-picker-clearable", "Clearable", v => clearable = v, true)], ["single", "text-input", "culture", "clearable", "invalid"]);
+            [Toggle("date-picker-invalid", "Invalid", v => invalid = v), Toggle("date-picker-clearable", "Clearable", v => clearable = v, true)], ["single", "calendar", "culture", "clearable", "invalid"]);
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, description, source, preview, controls, tags);

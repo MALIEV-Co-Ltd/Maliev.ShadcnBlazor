@@ -40,7 +40,7 @@ foreach ($relative in $files) {
 
     $text = [System.Text.Encoding]::UTF8.GetString($bytes)
     foreach ($term in $forbidden) {
-        if ($text.Contains($term, [StringComparison]::OrdinalIgnoreCase)) {
+        if ($text.IndexOf($term, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
             $violations.Add("private identifier in ${normalized}: $term")
         }
     }
@@ -78,7 +78,7 @@ if ($Package) {
 
                 $text = [System.Text.Encoding]::UTF8.GetString($bytes)
                 foreach ($term in $forbidden) {
-                    if ($text.Contains($term, [StringComparison]::OrdinalIgnoreCase)) {
+                    if ($text.IndexOf($term, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
                         $violations.Add("private identifier in package entry $($entry.FullName): $term")
                     }
                 }

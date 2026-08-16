@@ -20,7 +20,12 @@
     }
     <div class="shadcn-input-group shadcn-combobox-input" data-slot="input-group">
         <input @ref="InputElement" @attributes="ForwardedAttributes" class="shadcn-input shadcn-combobox-control" data-slot="combobox-input" role="combobox" value="@DisplayQuery" placeholder="@Placeholder" disabled="@EffectiveDisabled" readonly="@ReadOnly" aria-required="@(Required ? "true" : null)" aria-autocomplete="listbox" aria-expanded="@Open.ToString().ToLowerInvariant()" aria-controls="@ListboxId" aria-activedescendant="@ActiveDescendant" aria-invalid="@(EffectiveInvalid ? "true" : null)" aria-describedby="@DescribedBy" @oninput="HandleInputAsync" @onfocus="OpenAsync" @onkeydown="HandleKeyDownAsync" />
-        @if (ShowClear && (!string.IsNullOrEmpty(DisplayQuery) || SelectedOption is not null || Multiple && Values.Count > 0) && !EffectiveDisabled && !ReadOnly) { <button type="button" data-slot="combobox-clear" aria-label="@ClearLabel" @onclick="ClearAsync">×</button> }
+        @if (ShowClear && (!string.IsNullOrEmpty(DisplayQuery) || SelectedOption is not null || Multiple && Values.Count > 0) && !EffectiveDisabled && !ReadOnly)
+        {
+            <button type="button" data-slot="combobox-clear" aria-label="@ClearLabel" @onclick="ClearAsync">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+        }
         @if (ShowTrigger) { <button type="button" data-slot="combobox-trigger" aria-label="@TriggerLabel" disabled="@EffectiveDisabled" @onclick="ToggleOpenAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg></button> }
     </div>
     @if (Open)

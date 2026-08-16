@@ -66,11 +66,16 @@
 @code {
     [Parameter, EditorRequired] public ComponentExampleDefinition Example { get; set; } = null!;
 
+    [Parameter] public EventCallback SourceChanged { get; set; }
+
     private string HeadingId => $"{Example.Id}-title";
 
-    private void Update(ComponentParameterControl control, string value)
+    private async Task Update(ComponentParameterControl control, string value)
     {
         control.Apply(value);
         StateHasChanged();
+
+        if (SourceChanged.HasDelegate)
+            await SourceChanged.InvokeAsync();
     }
 }

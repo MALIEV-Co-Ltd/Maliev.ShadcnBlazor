@@ -85,7 +85,7 @@ public sealed class MessageScrollerTests : BunitContext
     public async Task ProviderRejectsStaleSnapshotsAndRefreshesDynamicOptions()
     {
         JSInterop.Mode = JSRuntimeMode.Loose;
-        var cut = Render<ShadcnMessageScrollerProvider>(p => p.Add(c => c.ChildContent, Text("content")));
+        var cut = Render<ShadcnMessageScrollerProvider>(p => p.Add(c => c.AutoScroll, false).Add(c => c.ChildContent, Text("content")));
         await cut.InvokeAsync(() => cut.Instance.OnScrollerMeasurementAsync(new(200, 200, 400, [new("row", 0, 400, false)], Sequence: 2)));
         var state = cut.Instance.CurrentState;
         await cut.InvokeAsync(() => cut.Instance.OnScrollerMeasurementAsync(new(0, 200, 400, [new("row", 0, 400, false)], Sequence: 1)));

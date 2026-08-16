@@ -56,7 +56,18 @@ public sealed record ComponentExampleDefinition(
     string Id,
     string Title,
     string Description,
-    string RazorSource,
+    string InitialRazorSource,
     RenderFragment Preview,
     IReadOnlyList<ComponentParameterControl> Controls,
-    IReadOnlyList<string> StateTags);
+    IReadOnlyList<string> StateTags)
+{
+    /// <summary>
+    /// Optional state-aware source renderer used by interactive documentation examples.
+    /// </summary>
+    public Func<string>? RazorSourceProvider { get; init; }
+
+    /// <summary>
+    /// Returns the source for the current preview state, falling back to the initial source.
+    /// </summary>
+    public string RazorSource => RazorSourceProvider?.Invoke() ?? InitialRazorSource;
+}

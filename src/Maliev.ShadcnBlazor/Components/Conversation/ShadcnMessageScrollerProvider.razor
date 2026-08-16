@@ -2,7 +2,7 @@
 @inject IJSRuntime JS
 <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
 @code {
-    [Parameter] public bool AutoScroll { get; set; }
+    [Parameter] public bool AutoScroll { get; set; } = true;
     [Parameter] public ShadcnMessageDefaultScrollPosition DefaultScrollPosition { get; set; } = ShadcnMessageDefaultScrollPosition.End;
     [Parameter] public double ScrollEdgeThreshold { get; set; } = 8;
     [Parameter] public double ScrollPreviousItemPeek { get; set; } = 64;

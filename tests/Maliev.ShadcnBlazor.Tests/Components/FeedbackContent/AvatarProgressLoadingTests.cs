@@ -16,6 +16,7 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         Assert.Contains("border: 1px solid var(--shadcn-border)", css, StringComparison.Ordinal);
         Assert.Contains("mix-blend-mode: darken", css, StringComparison.Ordinal);
         Assert.Contains("mix-blend-mode: lighten", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-success", css, StringComparison.Ordinal);
     }
     [Theory]
     [InlineData(ShadcnAvatarSize.Small, "sm")]
@@ -170,7 +171,9 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         Assert.Equal(maximum.ToString(System.Globalization.CultureInfo.InvariantCulture), root.GetAttribute("aria-valuemax"));
         Assert.Equal(expectedValue, root.GetAttribute("aria-valuenow"));
         Assert.Equal("Upload", root.GetAttribute("aria-label"));
-        Assert.Contains($"--shadcn-progress-percent: {expectedPercent}", cut.Find("[data-slot='progress-indicator']").GetAttribute("style"));
+        var indicatorStyle = cut.Find("[data-slot='progress-indicator']").GetAttribute("style");
+        Assert.Contains($"--shadcn-progress-percent: {expectedPercent}", indicatorStyle);
+        Assert.Contains("--shadcn-progress-ratio:", indicatorStyle);
         Assert.NotEmpty(cut.Find("[data-slot='progress-value']").TextContent);
     }
 
@@ -216,7 +219,17 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         Assert.Equal(label.Id, root.GetAttribute("aria-labelledby"));
         Assert.Null(root.GetAttribute("aria-label"));
         Assert.Equal("20 งาน", cut.Find("[data-slot='progress-value']").TextContent);
-        Assert.Equal("--shadcn-progress-percent: 100%", cut.Find("[data-slot='progress-indicator']").GetAttribute("style"));
+        var indicatorStyle = cut.Find("[data-slot='progress-indicator']").GetAttribute("style");
+        Assert.Contains("--shadcn-progress-percent: 100%", indicatorStyle);
+        Assert.Contains("--shadcn-progress-ratio: 1", indicatorStyle);
+    }
+
+    [Fact]
+    public void ProgressIndicatorUsesTransformRatioForLiveValueUpdates()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+        Assert.Contains("transform: scaleX(var(--shadcn-progress-ratio, 0))", css, StringComparison.Ordinal);
+        Assert.Contains("transition: transform", css, StringComparison.Ordinal);
     }
 
     [Theory]
