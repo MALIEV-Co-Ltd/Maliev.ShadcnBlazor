@@ -67,7 +67,8 @@ public sealed class DocumentationRouteTests : BunitContext
         };
 
         Assert.All(expectedSections, id => Assert.Single(cut.FindAll($"#{id}")));
-        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
+        var installationCode = cut.Find("#installation .component-code code");
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", installationCode.TextContent, StringComparison.Ordinal);
         var usageCode = cut.Find("#usage .component-code code");
         Assert.Contains("@using Maliev.ShadcnBlazor.Components.Actions", usageCode.TextContent, StringComparison.Ordinal);
         Assert.Contains("code-token-keyword", usageCode.InnerHtml, StringComparison.Ordinal);

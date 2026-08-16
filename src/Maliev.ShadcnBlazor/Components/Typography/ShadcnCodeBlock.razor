@@ -30,7 +30,7 @@
             }
             @if (_copied)
             {
-                <span class="shadcn-code-block-copy-status" aria-hidden="true">Copied</span>
+                <span @key="_copyFeedbackId" class="shadcn-code-block-copy-status" aria-hidden="true">Copied</span>
             }
             <span class="shadcn-sr-only">@(_copied ? "Copied" : "Copy source")</span>
         </button>
@@ -54,6 +54,9 @@
     private string _announcement = string.Empty;
     private bool _copied;
     private bool _showFallback;
+    private int _copyFeedbackId;
+    private CancellationTokenSource? _copyResetCancellation;
+    private static readonly TimeSpan CopyFeedbackDuration = TimeSpan.FromMilliseconds(1800);
     private string LanguageId = $"shadcn-code-language-{Guid.NewGuid():N}";
     private string FallbackId = $"shadcn-code-fallback-{Guid.NewGuid():N}";
 
@@ -74,7 +77,13 @@
 
     private Task ChangeLanguageAsync(string? next)
     {
-        if (!string.IsNullOrWhiteSpace(next) && SourceByLanguage.ContainsKey(next)) { _selectedLanguage = next; _copied = false; _announcement = string.Empty; }
+        if (!string.IsNullOrWhiteSpace(next) && SourceByLanguage.ContainsKey(next))
+        {
+            CancelCopyReset();
+            _selectedLanguage = next;
+            _copied = false;
+            _announcement = string.Empty;
+        }
         return Task.CompletedTask;
     }
 
@@ -85,27 +94,99 @@
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
             await _module.InvokeVoidAsync("copyText", SelectedSource);
             _copied = true;
+            _copyFeedbackId++;
             _showFallback = false;
             _announcement = "Source copied to clipboard.";
+            BeginCopyReset();
         }
         catch (JSException)
         {
+            CancelCopyReset();
             _copied = false;
             _showFallback = true;
             _announcement = "Copy failed. Select the source below and copy it manually.";
         }
     }
 
+    private void BeginCopyReset()
+    {
+        CancelCopyReset();
+        var cancellation = new CancellationTokenSource();
+        _copyResetCancellation = cancellation;
+        _ = ResetCopyStateAsync(cancellation);
+    }
+
+    private async Task ResetCopyStateAsync(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(CopyFeedbackDuration, cancellation.Token);
+            if (cancellation.IsCancellationRequested) return;
+
+            await InvokeAsync(() =>
+            {
+                if (cancellation.IsCancellationRequested) return;
+                _copied = false;
+                _announcement = string.Empty;
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // A second copy or language change intentionally cancels this feedback cycle.
+        }
+        catch (ObjectDisposedException)
+        {
+            // The component can be disposed while the transient feedback is pending.
+        }
+        finally
+        {
+            if (ReferenceEquals(_copyResetCancellation, cancellation))
+            {
+                _copyResetCancellation = null;
+                cancellation.Dispose();
+            }
+        }
+    }
+
+    private void CancelCopyReset()
+    {
+        _copyResetCancellation?.Cancel();
+        _copyResetCancellation?.Dispose();
+        _copyResetCancellation = null;
+    }
+
     private static string Highlight(string source, string language)
     {
         if (string.IsNullOrEmpty(source)) return string.Empty;
+        var markupLanguage = language.Equals("razor", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("html", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("markup", StringComparison.OrdinalIgnoreCase);
         var output = new System.Text.StringBuilder(source.Length + 128);
         var index = 0;
         while (index < source.Length)
         {
+            if (markupLanguage && source[index] == '<' && source.AsSpan(index).StartsWith("<!--", StringComparison.Ordinal))
+            {
+                var end = source.IndexOf("-->", index + 4, StringComparison.Ordinal);
+                end = end < 0 ? source.Length : end + 3;
+                AppendToken(output, "comment", source[index..end]); index = end; continue;
+            }
+            if (source[index] == '@' && index + 1 < source.Length && source[index + 1] == '*')
+            {
+                var end = source.IndexOf("*@", index + 2, StringComparison.Ordinal);
+                end = end < 0 ? source.Length : end + 2;
+                AppendToken(output, "comment", source[index..end]); index = end; continue;
+            }
             if (source[index] == '/' && index + 1 < source.Length && source[index + 1] == '/')
             {
                 var end = source.IndexOf('\n', index); if (end < 0) end = source.Length;
+                AppendToken(output, "comment", source[index..end]); index = end; continue;
+            }
+            if (source[index] == '/' && index + 1 < source.Length && source[index + 1] == '*')
+            {
+                var end = source.IndexOf("*/", index + 2, StringComparison.Ordinal);
+                end = end < 0 ? source.Length : end + 2;
                 AppendToken(output, "comment", source[index..end]); index = end; continue;
             }
             if (source[index] is '"' or '\'')
@@ -114,28 +195,169 @@
                 while (end < source.Length) { if (source[end] == '\\') { end += Math.Min(2, source.Length - end); continue; } if (source[end] == quote) { end++; break; } end++; }
                 AppendToken(output, "string", source[index..end]); index = end; continue;
             }
-            if (source[index] == '<' && index + 1 < source.Length && (char.IsLetter(source[index + 1]) || source[index + 1] == '/'))
+            if (markupLanguage && source[index] == '<' && index + 1 < source.Length && (char.IsLetter(source[index + 1]) || source[index + 1] == '/'))
             {
-                var end = source.IndexOf('>', index + 1); end = end < 0 ? source.Length : end + 1;
-                AppendToken(output, "tag", source[index..end]); index = end; continue;
+                var end = FindMarkupTagEnd(source, index + 1);
+                AppendMarkupTag(output, source[index..end]); index = end; continue;
             }
             if (char.IsDigit(source[index]))
             {
                 var end = index + 1; while (end < source.Length && (char.IsDigit(source[end]) || source[end] == '.')) end++;
                 AppendToken(output, "number", source[index..end]); index = end; continue;
             }
+            if (source[index] == '@' && index + 1 < source.Length && IsIdentifierStart(source[index + 1]))
+            {
+                var end = index + 2;
+                while (end < source.Length && IsIdentifierPart(source[end])) end++;
+                var token = source[index..end];
+                var normalized = token[1..];
+                AppendToken(output, IsDirective(normalized) ? "directive" : ResolveIdentifierKind(normalized, source, index, end), token);
+                index = end; continue;
+            }
             if (char.IsLetter(source[index]) || source[index] is '_' or '@')
             {
                 var end = index + 1; while (end < source.Length && (char.IsLetterOrDigit(source[end]) || source[end] is '_' or '-')) end++;
-                var token = source[index..end]; var normalized = token.TrimStart('@');
-                var kind = normalized switch { "using" or "inject" or "if" or "else" or "for" or "foreach" or "var" or "new" or "return" or "true" or "false" or "null" => "keyword", "string" or "int" or "double" or "bool" or "Task" or "RenderFragment" => "type", _ => string.Empty };
+                var token = source[index..end];
+                var kind = ResolveIdentifierKind(token, source, index, end);
                 if (kind.Length > 0) AppendToken(output, kind, token); else output.Append(System.Net.WebUtility.HtmlEncode(token));
                 index = end; continue;
+            }
+            if (IsOperator(source[index]))
+            {
+                var end = index + 1;
+                while (end < source.Length && IsOperator(source[end])) end++;
+                AppendToken(output, "operator", source[index..end]); index = end; continue;
+            }
+            if (IsPunctuation(source[index]))
+            {
+                AppendToken(output, "punctuation", source[index].ToString()); index++; continue;
             }
             output.Append(System.Net.WebUtility.HtmlEncode(source[index].ToString())); index++;
         }
         return output.ToString();
     }
+
+    private static int FindMarkupTagEnd(string source, int start)
+    {
+        var quote = '\0';
+        for (var index = start; index < source.Length; index++)
+        {
+            var character = source[index];
+            if (quote != '\0')
+            {
+                if (character == '\\') { index++; continue; }
+                if (character == quote) quote = '\0';
+                continue;
+            }
+            if (character is '"' or '\'') { quote = character; continue; }
+            if (character == '>') return index + 1;
+        }
+        return source.Length;
+    }
+
+    private static void AppendMarkupTag(System.Text.StringBuilder output, string value)
+    {
+        var index = 0;
+        AppendToken(output, "punctuation", value[index].ToString()); index++;
+        if (index < value.Length && value[index] == '/')
+        {
+            AppendToken(output, "punctuation", "/"); index++;
+        }
+
+        var tagStart = index;
+        while (index < value.Length && IsMarkupNamePart(value[index])) index++;
+        if (index > tagStart) AppendToken(output, "tag", value[tagStart..index]);
+
+        while (index < value.Length)
+        {
+            if (char.IsWhiteSpace(value[index]))
+            {
+                var whitespaceStart = index;
+                while (index < value.Length && char.IsWhiteSpace(value[index])) index++;
+                output.Append(System.Net.WebUtility.HtmlEncode(value[whitespaceStart..index]));
+                continue;
+            }
+            if (value[index] == '>' || (value[index] == '/' && index + 1 < value.Length && value[index + 1] == '>'))
+            {
+                if (value[index] == '/') { AppendToken(output, "punctuation", "/"); index++; }
+                if (index < value.Length && value[index] == '>') { AppendToken(output, "punctuation", ">"); index++; }
+                continue;
+            }
+
+            var attributeStart = index;
+            while (index < value.Length && !char.IsWhiteSpace(value[index]) && value[index] is not '=' and not '>' and not '/') index++;
+            if (index == attributeStart)
+            {
+                AppendToken(output, "punctuation", value[index].ToString()); index++; continue;
+            }
+            AppendToken(output, "attribute", value[attributeStart..index]);
+            while (index < value.Length && char.IsWhiteSpace(value[index]))
+            {
+                var whitespaceStart = index;
+                while (index < value.Length && char.IsWhiteSpace(value[index])) index++;
+                output.Append(System.Net.WebUtility.HtmlEncode(value[whitespaceStart..index]));
+            }
+            if (index < value.Length && value[index] == '=')
+            {
+                AppendToken(output, "operator", "="); index++;
+                while (index < value.Length && char.IsWhiteSpace(value[index]))
+                {
+                    var whitespaceStart = index;
+                    while (index < value.Length && char.IsWhiteSpace(value[index])) index++;
+                    output.Append(System.Net.WebUtility.HtmlEncode(value[whitespaceStart..index]));
+                }
+                if (index < value.Length && value[index] is '"' or '\'')
+                {
+                    var quote = value[index]; var stringStart = index++;
+                    while (index < value.Length)
+                    {
+                        if (value[index] == '\\') { index += Math.Min(2, value.Length - index); continue; }
+                        if (value[index] == quote) { index++; break; }
+                        index++;
+                    }
+                    AppendToken(output, "string", value[stringStart..index]);
+                }
+            }
+        }
+    }
+
+    private static string ResolveIdentifierKind(string token, string source, int start, int end)
+    {
+        if (Keywords.Contains(token)) return "keyword";
+        if (Literals.Contains(token)) return "literal";
+        var next = end;
+        while (next < source.Length && char.IsWhiteSpace(source[next])) next++;
+        if (next < source.Length && source[next] == '(') return "method";
+        if (Types.Contains(token) || (token.Length > 0 && char.IsUpper(token[0]))) return "type";
+        if (start > 0 && source[start - 1] == '.') return "property";
+        return string.Empty;
+    }
+
+    private static bool IsDirective(string token) => token is "page" or "using" or "inject" or "inherits" or "implements" or "attribute" or "typeparam" or "code" or "functions";
+
+    private static bool IsIdentifierStart(char value) => char.IsLetter(value) || value is '_' or '@';
+    private static bool IsIdentifierPart(char value) => char.IsLetterOrDigit(value) || value is '_' or '-';
+    private static bool IsMarkupNamePart(char value) => char.IsLetterOrDigit(value) || value is '_' or '-' or ':' or '.';
+    private static bool IsOperator(char value) => value is '=' or '+' or '-' or '*' or '/' or '!' or '&' or '|' or '?' or '%' or '<' or '>';
+    private static bool IsPunctuation(char value) => value is '{' or '}' or '(' or ')' or '[' or ']' or ';' or ':' or ',' or '.';
+
+    private static readonly HashSet<string> Keywords = new(StringComparer.Ordinal)
+    {
+        "abstract", "as", "async", "await", "base", "break", "case", "catch", "class", "const", "continue", "default", "delegate",
+        "do", "else", "enum", "event", "explicit", "extern", "finally", "fixed", "for", "foreach", "goto", "if", "implicit", "in",
+        "interface", "internal", "is", "lock", "namespace", "new", "operator", "out", "override", "params", "private", "protected",
+        "public", "readonly", "ref", "return", "sealed", "sizeof", "stackalloc", "static", "struct", "switch", "this", "throw",
+        "try", "typeof", "unchecked", "unsafe", "using", "var", "virtual", "void", "volatile", "while", "with", "yield", "inject", "inherits"
+    };
+
+    private static readonly HashSet<string> Literals = new(StringComparer.Ordinal) { "true", "false", "null", "default" };
+
+    private static readonly HashSet<string> Types = new(StringComparer.Ordinal)
+    {
+        "bool", "byte", "char", "decimal", "double", "float", "int", "long", "object", "sbyte", "short", "string", "uint", "ulong", "ushort",
+        "DateTime", "DateOnly", "TimeOnly", "Task", "ValueTask", "EventCallback", "RenderFragment", "IEnumerable", "IReadOnlyList", "IReadOnlyDictionary",
+        "CancellationToken", "Guid", "StringBuilder", "MarkupString"
+    };
 
     private static void AppendToken(System.Text.StringBuilder output, string kind, string value)
     {
@@ -144,6 +366,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        CancelCopyReset();
         if (_module is null) return;
         try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { }
     }

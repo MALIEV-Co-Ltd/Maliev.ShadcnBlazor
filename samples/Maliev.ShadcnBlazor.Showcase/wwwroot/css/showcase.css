@@ -4437,11 +4437,6 @@ a {
     box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-ring) 18%, transparent);
 }
 
-.showcase-attachment-file[data-state="uploading"] {
-    border-color: color-mix(in oklch, var(--shadcn-primary) 52%, var(--shadcn-border));
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-primary) 10%, transparent);
-}
-
 .showcase-attachment-file-icon {
     display: inline-grid;
     inline-size: 2.75rem;
@@ -4950,6 +4945,29 @@ body:has(.theme-studio-provider) {
     color: #953800;
 }
 
+.component-code pre code .code-token-literal {
+    color: #0550ae;
+}
+
+.component-code pre code .code-token-attribute,
+.component-code pre code .code-token-method {
+    color: #8250df;
+}
+
+.component-code pre code .code-token-property {
+    color: #0550ae;
+}
+
+.component-code pre code .code-token-directive,
+.component-code pre code .code-token-operator {
+    color: #cf222e;
+    font-weight: 600;
+}
+
+.component-code pre code .code-token-punctuation {
+    color: #57606a;
+}
+
 [data-shadcn-theme="dark"] .component-code pre code .code-token-tag,
 .dark .component-code pre code .code-token-tag {
     color: #d2a8ff;
@@ -4973,6 +4991,37 @@ body:has(.theme-studio-provider) {
 [data-shadcn-theme="dark"] .component-code pre code .code-token-number,
 .dark .component-code pre code .code-token-number {
     color: #ffa657;
+}
+
+[data-shadcn-theme="dark"] .component-code pre code .code-token-literal,
+.dark .component-code pre code .code-token-literal {
+    color: #79c0ff;
+}
+
+[data-shadcn-theme="dark"] .component-code pre code .code-token-attribute,
+[data-shadcn-theme="dark"] .component-code pre code .code-token-method,
+.dark .component-code pre code .code-token-attribute,
+.dark .component-code pre code .code-token-method {
+    color: #d2a8ff;
+}
+
+[data-shadcn-theme="dark"] .component-code pre code .code-token-property,
+[data-shadcn-theme="dark"] .component-code pre code .code-token-type,
+.dark .component-code pre code .code-token-property,
+.dark .component-code pre code .code-token-type {
+    color: #79c0ff;
+}
+
+[data-shadcn-theme="dark"] .component-code pre code .code-token-directive,
+[data-shadcn-theme="dark"] .component-code pre code .code-token-operator,
+.dark .component-code pre code .code-token-directive,
+.dark .component-code pre code .code-token-operator {
+    color: #ff7b72;
+}
+
+[data-shadcn-theme="dark"] .component-code pre code .code-token-punctuation,
+.dark .component-code pre code .code-token-punctuation {
+    color: #c9d1d9;
 }
 
 .showcase-bubble-thread [data-bubble-role="incoming"] {

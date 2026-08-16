@@ -51,8 +51,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator("[data-slot='attachment-media'][data-variant='image']")).ToHaveCountAsync(3);
         var primaryAttachment = page.Locator(".showcase-attachment-file").First;
         await Assertions.Expect(primaryAttachment).ToHaveAttributeAsync("data-state", "uploading");
+        var idleAttachmentShadow = await primaryAttachment.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow");
+        Assert.DoesNotContain("3px", idleAttachmentShadow, StringComparison.OrdinalIgnoreCase);
         await primaryAttachment.Locator("[data-slot='attachment-action']").FocusAsync();
         await Assertions.Expect(primaryAttachment.Locator("[data-slot='attachment-action']")).ToBeFocusedAsync();
+        var focusedAttachmentShadow = await primaryAttachment.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow");
+        Assert.Contains("3px", focusedAttachmentShadow, StringComparison.OrdinalIgnoreCase);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
         await Assertions.Expect(page.Locator("[data-slot='bubble-group']")).ToHaveCountAsync(1);
@@ -73,6 +77,9 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await copy.ClickAsync();
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "true");
         await Assertions.Expect(page.Locator("#preview .component-code .code-token-tag")).Not.ToHaveCountAsync(0);
+        await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "false", new() { Timeout = 3000 });
+        await copy.ClickAsync();
+        await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "true");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         await page.GetByTestId("control-marker-streaming").CheckAsync();

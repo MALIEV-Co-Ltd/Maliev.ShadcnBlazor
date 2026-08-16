@@ -59,4 +59,57 @@ public sealed class CodeBlockTests : BunitContext
             Assert.Equal("Source copied to clipboard.", cut.Find("[aria-live='polite']").TextContent.Trim());
         });
     }
+
+    [Fact]
+    public void HighlightsCSharpAndRazorSyntaxWithEditorTokens()
+    {
+        const string source = "@using Maliev.ShadcnBlazor.Components.Feedback\n<ShadcnAttachment State=\"ShadcnAttachmentState.Done\" />\nvar progress = 64;\nvar ready = true;";
+
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, source)
+            .Add(component => component.Language, "razor"));
+
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-directive"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-tag"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-attribute"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-string"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-type"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-literal"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-number"));
+
+        var csharp = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, "public async Task<string> ResolveAsync() { var result = true; return result; }")
+            .Add(component => component.Language, "csharp"));
+
+        Assert.Empty(csharp.FindAll(".shadcn-code-token-tag"));
+        Assert.NotEmpty(csharp.FindAll(".shadcn-code-token-keyword"));
+        Assert.NotEmpty(csharp.FindAll(".shadcn-code-token-type"));
+        Assert.NotEmpty(csharp.FindAll(".shadcn-code-token-method"));
+        Assert.NotEmpty(csharp.FindAll(".shadcn-code-token-literal"));
+    }
+
+    [Fact]
+    public async Task CopyFeedbackReturnsToTheCopyIconForSubsequentCopies()
+    {
+        const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";
+        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
+        module.SetupVoid("copyText", source).SetVoidResult();
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters.Add(component => component.Source, source));
+        var copy = cut.Find("[data-testid='copy-source']");
+
+        copy.Click();
+        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find("[data-testid='copy-source']").GetAttribute("data-copied")));
+
+        await Task.Delay(2100);
+        cut.WaitForAssertion(() =>
+        {
+            var reset = cut.Find("[data-testid='copy-source']");
+            Assert.Equal("false", reset.GetAttribute("data-copied"));
+            Assert.Null(reset.QuerySelector(".shadcn-code-block-copy-status"));
+            Assert.NotNull(reset.QuerySelector("svg rect"));
+        });
+
+        cut.Find("[data-testid='copy-source']").Click();
+        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find("[data-testid='copy-source']").GetAttribute("data-copied")));
+    }
 }
