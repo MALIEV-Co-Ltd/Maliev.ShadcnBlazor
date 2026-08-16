@@ -17,7 +17,7 @@ public sealed class PackageMetadataTests
         string Property(string name) => project.Descendants(name).Single().Value;
 
         Assert.Equal("Maliev.ShadcnBlazor", Property("PackageId"));
-        Assert.Equal("1.0.5", Property("VersionPrefix"));
+        Assert.Equal("1.0.6", Property("VersionPrefix"));
         Assert.Equal("MALIEV Co., Ltd.", Property("Authors"));
         Assert.Equal("MIT", Property("PackageLicenseExpression"));
         Assert.Equal("README.md", Property("PackageReadmeFile"));

@@ -87,18 +87,20 @@ public sealed class ThemeStudioBrowserTests(
         var studioBox = await page.GetByTestId("theme-studio").BoundingBoxAsync();
         Assert.NotNull(studioBox);
         Assert.True(studioBox.Width > 1200, $"Expected full-width Theme Studio, got {studioBox.Width}px.");
-        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='Geist']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='JetBrains+Mono']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("link[rel='preload'][as='style'][href*='Noto+Sans+Thai']")).ToHaveCountAsync(1);
+        // Bundled defaults must work offline; remote Google CSS is only added when
+        // a user chooses a font that is not shipped with the package.
+        await Assertions.Expect(page.Locator("link[href*='fonts.googleapis.com']")).ToHaveCountAsync(0);
         var defaultFontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("Geist", defaultFontVariable, StringComparison.Ordinal);
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Font family" }).ClickAsync();
-        await page.GetByText("Noto Sans Thai", new() { Exact = true }).ClickAsync();
+        await page.GetByText("DM Sans", new() { Exact = true }).ClickAsync();
+
+        await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='DM+Sans']")).ToHaveCountAsync(1);
 
         var fontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
-        Assert.Contains("Noto Sans Thai", fontVariable, StringComparison.Ordinal);
+        Assert.Contains("DM Sans", fontVariable, StringComparison.Ordinal);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Code font" }).ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "JetBrains Mono", Exact = true }).ClickAsync();
