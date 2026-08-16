@@ -4704,6 +4704,14 @@ a {
     scrollbar-width: thin;
 }
 
+/* MudBlazor keeps closed select popovers in the overlay tree while it measures
+   their anchor. On narrow viewports a fractional anchor position can otherwise
+   extend the document's scrollable width by a few pixels. Keep that transient
+   measurement inside the Theme Studio viewport without clipping open menus. */
+.theme-studio-provider {
+    overflow-x: clip;
+}
+
 .theme-preview-toolbar .theme-toolbar-group {
     flex: 0 0 auto;
     flex-wrap: nowrap;
