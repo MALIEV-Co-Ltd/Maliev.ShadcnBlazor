@@ -180,7 +180,7 @@ internal static class FeedbackContentExamples
         <li><ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">Blocked</ShadcnBadge><span>Requires attention</span></li>
         <li><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">In review</ShadcnBadge><span>Quality check in progress</span></li>
         <li><ShadcnBadge Variant="ShadcnBadgeVariant.Ghost">Draft</ShadcnBadge><span>Not yet scheduled</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Link" Href="/docs/components/badge">View order</ShadcnBadge><span>Linked badge treatment</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Link" Href="docs/components/badge">View order</ShadcnBadge><span>Linked badge treatment</span></li>
     </ul>
 </section>
 """;
