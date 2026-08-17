@@ -36,7 +36,10 @@ public sealed class NavigationCompositionTests : BunitContext
         Assert.Equal("เส้นทางนำทาง", nav.GetAttribute("aria-label"));
         Assert.Equal("integration", nav.GetAttribute("data-consumer"));
         Assert.NotNull(cut.Find("ol[data-slot='breadcrumb-list']"));
-        Assert.Equal("page", cut.Find("[data-slot='breadcrumb-page']").GetAttribute("aria-current"));
+        var currentPage = cut.Find("[data-slot='breadcrumb-page']");
+        Assert.Equal("link", currentPage.GetAttribute("role"));
+        Assert.Equal("true", currentPage.GetAttribute("aria-disabled"));
+        Assert.Equal("page", currentPage.GetAttribute("aria-current"));
         Assert.Equal("true", cut.Find("[data-slot='breadcrumb-separator']").GetAttribute("aria-hidden"));
     }
 

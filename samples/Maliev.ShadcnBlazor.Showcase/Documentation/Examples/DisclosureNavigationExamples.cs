@@ -121,9 +121,88 @@ internal static class DisclosureNavigationExamples
 
     private static ComponentExampleDefinition Breadcrumb()
     {
-        var ellipsis = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnBreadcrumb>(0); b.AddAttribute(1, "Label", "Quotation breadcrumb"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbList>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(l => { AddBreadcrumbLink(l, 0, "Home", "/"); Add<ShadcnBreadcrumbSeparator>(l, 10); AddBreadcrumbLink(l, 20, "Projects", "/projects"); Add<ShadcnBreadcrumbSeparator>(l, 30); if (ellipsis) { Add<ShadcnBreadcrumbEllipsis>(l, 40); Add<ShadcnBreadcrumbSeparator>(l, 50); } AddBreadcrumbLink(l, 60, "Quotations", "/projects/quotations"); Add<ShadcnBreadcrumbSeparator>(l, 70); l.OpenComponent<ShadcnBreadcrumbItem>(80); l.AddAttribute(81, "ChildContent", (RenderFragment)(i => AddText<ShadcnBreadcrumbPage>(i, 0, "Quotation #4189"))); l.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("breadcrumb", "Breadcrumb composition", "Navigate a deep quotation workspace with multiple levels, links, separators, optional ellipsis, and current-page semantics.", "<ShadcnBreadcrumb Label=\"Quotation breadcrumb\">\n    <ShadcnBreadcrumbList>\n        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href=\"/\">Home</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>\n        <ShadcnBreadcrumbSeparator />\n        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href=\"/projects\">Projects</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>\n        <ShadcnBreadcrumbSeparator />\n        <ShadcnBreadcrumbEllipsis />\n        <ShadcnBreadcrumbSeparator />\n        <ShadcnBreadcrumbItem><ShadcnBreadcrumbPage>Quotation #4189</ShadcnBreadcrumbPage></ShadcnBreadcrumbItem>\n    </ShadcnBreadcrumbList>\n</ShadcnBreadcrumb>", preview, [Toggle("breadcrumb-ellipsis", "Ellipsis", v => ellipsis = v, true)], ["links", "separator", "ellipsis", "current-page", "rtl"]);
+        var collapsed = true;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<ShadcnBreadcrumb>(0);
+            builder.AddAttribute(1, "Label", "Quotation workspace breadcrumb");
+            builder.AddAttribute(2, "ChildContent", (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnBreadcrumbList>(0);
+                content.AddAttribute(1, "ChildContent", (RenderFragment)(list =>
+                {
+                    AddBreadcrumbLink(list, 0, "Home", "/");
+                    Add<ShadcnBreadcrumbSeparator>(list, 10);
+                    AddBreadcrumbLink(list, 20, "Projects", "/projects");
+                    Add<ShadcnBreadcrumbSeparator>(list, 30);
+                    if (collapsed)
+                    {
+                        list.OpenComponent<ShadcnBreadcrumbItem>(40);
+                        list.AddAttribute(41, "ChildContent", (RenderFragment)(item =>
+                        {
+                            item.OpenComponent<ShadcnBreadcrumbEllipsis>(0);
+                            item.AddAttribute(1, "Label", "Aster Precision and Quotations");
+                            item.CloseComponent();
+                        }));
+                        list.CloseComponent();
+                        Add<ShadcnBreadcrumbSeparator>(list, 50);
+                    }
+                    else
+                    {
+                        AddBreadcrumbLink(list, 40, "Aster Precision", "/projects/aster-precision");
+                        Add<ShadcnBreadcrumbSeparator>(list, 50);
+                        AddBreadcrumbLink(list, 60, "Quotations", "/projects/aster-precision/quotations");
+                        Add<ShadcnBreadcrumbSeparator>(list, 70);
+                    }
+
+                    list.OpenComponent<ShadcnBreadcrumbItem>(80);
+                    list.AddAttribute(81, "ChildContent", (RenderFragment)(item => AddText<ShadcnBreadcrumbPage>(item, 0, "Quotation #4189")));
+                    list.CloseComponent();
+                }));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        };
+
+        string Source() => collapsed
+            ? """
+<ShadcnBreadcrumb Label="Quotation workspace breadcrumb">
+    <ShadcnBreadcrumbList>
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/">Home</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/projects">Projects</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbEllipsis Label="Aster Precision and Quotations" /></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbPage>Quotation #4189</ShadcnBreadcrumbPage></ShadcnBreadcrumbItem>
+    </ShadcnBreadcrumbList>
+</ShadcnBreadcrumb>
+"""
+            : """
+<ShadcnBreadcrumb Label="Quotation workspace breadcrumb">
+    <ShadcnBreadcrumbList>
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/">Home</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/projects">Projects</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/projects/aster-precision">Aster Precision</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbLink Href="/projects/aster-precision/quotations">Quotations</ShadcnBreadcrumbLink></ShadcnBreadcrumbItem>
+        <ShadcnBreadcrumbSeparator />
+        <ShadcnBreadcrumbItem><ShadcnBreadcrumbPage>Quotation #4189</ShadcnBreadcrumbPage></ShadcnBreadcrumbItem>
+    </ShadcnBreadcrumbList>
+</ShadcnBreadcrumb>
+""";
+
+        var example = Example(
+            "breadcrumb",
+            "Quotation workspace breadcrumb",
+            "Show a clear project path with linked levels, a responsive collapsed middle, logical separators, and an announced current page.",
+            Source(),
+            preview,
+            [Toggle("breadcrumb-ellipsis", "Collapse middle levels", value => collapsed = value, true)],
+            ["links", "separator", "ellipsis", "current-page", "responsive-collapse", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Collapsible()
