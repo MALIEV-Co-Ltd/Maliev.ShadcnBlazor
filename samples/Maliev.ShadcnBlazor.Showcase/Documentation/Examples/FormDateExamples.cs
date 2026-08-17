@@ -146,36 +146,20 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition InputGroup()
     {
-        var invalid = false; var alignment = ShadcnInputGroupAlignment.InlineStart; var amount = 1250m;
+        var invalid = false; var alignment = ShadcnInputGroupAlignment.InlineEnd;
         RenderFragment preview = b =>
         {
-            b.OpenElement(0, "div");
-            b.AddAttribute(1, "class", "showcase-input-group-dossier");
-            b.OpenComponent<ShadcnInputGroup>(2);
-            b.AddAttribute(3, "AdditionalAttributes", invalid ? new Dictionary<string, object> { ["data-testid"] = "forms-dossier-input-group", ["aria-label"] = "Budget", ["aria-invalid"] = "true" } : Attr("forms-dossier-input-group", "Budget"));
-            b.AddAttribute(4, "ChildContent", (RenderFragment)(c =>
-            {
-                c.OpenComponent<ShadcnInputGroupAddon>(0);
-                c.AddAttribute(1, "Alignment", alignment);
-                c.AddAttribute(2, "ChildContent", Text("THB"));
-                c.CloseComponent();
-                c.OpenComponent<ShadcnInput<decimal>>(10);
-                c.AddAttribute(11, "Value", amount);
-                c.AddAttribute(12, "ValueChanged", EventCallback.Factory.Create<decimal>(new object(), next => amount = next));
-                c.AddAttribute(13, "Type", "number");
-                c.AddAttribute(14, "Invalid", invalid);
-                c.AddAttribute(15, "AdditionalAttributes", new Dictionary<string, object> { ["aria-label"] = "Budget" });
-                c.CloseComponent();
-            }));
+            b.OpenComponent<InputGroupDossierPreview>(0);
+            b.AddAttribute(1, nameof(InputGroupDossierPreview.Invalid), invalid);
+            b.AddAttribute(2, nameof(InputGroupDossierPreview.Alignment), alignment);
             b.CloseComponent();
-            b.CloseElement();
         };
-        string Source() => $"<ShadcnInputGroup>\n    <ShadcnInputGroupAddon Alignment=\"{alignment}\">THB</ShadcnInputGroupAddon>\n    <ShadcnInput TValue=\"decimal\" @bind-Value=\"Budget\" Type=\"number\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Budget\" />\n</ShadcnInputGroup>";
-        return Example("input-group", "Input group composition", "Move semantic text and actions across logical addon positions.", Source(), preview,
+        string Source() => $"@using System.Globalization\n@using Maliev.ShadcnBlazor.Components.Actions\n@using Maliev.ShadcnBlazor.Components.Content\n@using Maliev.ShadcnBlazor.Components.Forms\n\n<ShadcnCard Size=\"ShadcnCardSize.Small\">\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>Part estimate</ShadcnCardTitle>\n        <ShadcnCardDescription>Update the unit price for 12 machined parts.</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnLabel For=\"quote-unit-price\">Unit price</ShadcnLabel>\n        <ShadcnInputGroup aria-invalid=\"{invalid.ToString().ToLowerInvariant()}\">\n            <ShadcnInput TValue=\"decimal\" id=\"quote-unit-price\" @bind-Value=\"UnitPrice\" Type=\"number\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" inputmode=\"decimal\" min=\"0\" />\n            <ShadcnInputGroupAddon Alignment=\"ShadcnInputGroupAlignment.{alignment}\">\n                <ShadcnInputGroupText>THB / part</ShadcnInputGroupText>\n                <ShadcnInputGroupButton Variant=\"ShadcnButtonVariant.Ghost\" Size=\"ShadcnInputGroupButtonSize.IconExtraSmall\" OnClick=\"ResetUnitPrice\" aria-label=\"Reset unit price\">\n                    <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 3-6.7M3 4v5h5\" /></svg>\n                </ShadcnInputGroupButton>\n            </ShadcnInputGroupAddon>\n        </ShadcnInputGroup>\n    </ShadcnCardContent>\n    <ShadcnCardFooter>\n        <span>Estimated subtotal</span>\n        <output for=\"quote-unit-price\">@((UnitPrice * Quantity).ToString(\"C0\", ThaiCulture))</output>\n    </ShadcnCardFooter>\n</ShadcnCard>\n\n@code {{\n    private const int Quantity = 12;\n    private static readonly CultureInfo ThaiCulture = CultureInfo.GetCultureInfo(\"th-TH\");\n    private decimal UnitPrice {{ get; set; }} = 1250m;\n    private void ResetUnitPrice() => UnitPrice = 1250m;\n}}";
+        return Example("input-group", "Production price input", "Compose semantic text and an inline action around a live unit price without widening the form.", Source(), preview,
             [
                 Toggle("input-group-invalid", "Invalid", v => invalid = v),
                 EnumSelect("input-group-alignment", "Alignment", alignment, v => alignment = v)
-            ], ["addons", "inline", "block", "invalid"]) with
+            ], ["addons", "inline", "block", "button", "invalid", "rtl"]) with
         { RazorSourceProvider = Source };
     }
     private static ComponentExampleDefinition InputOtp()
@@ -528,6 +512,134 @@ internal static class FormDateExamples
         }
 
         private void Save() => Status = "Credentials saved for this demo.";
+    }
+
+    private sealed class InputGroupDossierPreview : ComponentBase
+    {
+        [Parameter] public bool Invalid { get; set; }
+        [Parameter] public ShadcnInputGroupAlignment Alignment { get; set; } = ShadcnInputGroupAlignment.InlineEnd;
+
+        private const int Quantity = 12;
+        private decimal UnitPrice { get; set; } = 1250m;
+        private static readonly CultureInfo ThaiCulture = CultureInfo.GetCultureInfo("th-TH");
+
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-input-group-dossier");
+            builder.AddAttribute(2, "data-testid", "forms-dossier-input-group-demo");
+            builder.OpenComponent<ShadcnCard>(3);
+            builder.AddAttribute(4, nameof(ShadcnCard.Size), ShadcnCardSize.Small);
+            builder.AddAttribute(5, nameof(ShadcnCard.Class), "showcase-input-group-card");
+            builder.AddAttribute(6, nameof(ShadcnCard.ChildContent), (RenderFragment)(card =>
+            {
+                card.OpenComponent<ShadcnCardHeader>(0);
+                card.AddAttribute(1, nameof(ShadcnCardHeader.ChildContent), (RenderFragment)(header =>
+                {
+                    header.OpenComponent<ShadcnCardTitle>(0);
+                    header.AddAttribute(1, nameof(ShadcnCardTitle.ChildContent), Text("Part estimate"));
+                    header.CloseComponent();
+                    header.OpenComponent<ShadcnCardDescription>(2);
+                    header.AddAttribute(3, nameof(ShadcnCardDescription.ChildContent), Text("Update the unit price for 12 machined parts."));
+                    header.CloseComponent();
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardContent>(10);
+                card.AddAttribute(11, nameof(ShadcnCardContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenElement(0, "div");
+                    content.AddAttribute(1, "class", "showcase-input-group-field");
+                    content.OpenComponent<ShadcnLabel>(2);
+                    content.AddAttribute(3, nameof(ShadcnLabel.For), "quote-unit-price");
+                    content.AddAttribute(4, nameof(ShadcnLabel.ChildContent), Text("Unit price"));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnInputGroup>(5);
+                    content.AddAttribute(6, nameof(ShadcnInputGroup.AdditionalAttributes), new Dictionary<string, object>
+                    {
+                        ["data-testid"] = "forms-dossier-input-group",
+                        ["aria-label"] = "Unit price",
+                        ["aria-invalid"] = Invalid ? "true" : "false"
+                    });
+                    content.AddAttribute(7, nameof(ShadcnInputGroup.ChildContent), (RenderFragment)(group =>
+                    {
+                        group.OpenComponent<ShadcnInput<decimal>>(0);
+                        group.AddAttribute(1, nameof(ShadcnInput<decimal>.Value), UnitPrice);
+                        group.AddAttribute(2, nameof(ShadcnInput<decimal>.ValueChanged), EventCallback.Factory.Create<decimal>(this, HandleUnitPriceChanged));
+                        group.AddAttribute(3, nameof(ShadcnInput<decimal>.Type), "number");
+                        group.AddAttribute(4, nameof(ShadcnInput<decimal>.Invalid), Invalid);
+                        group.AddAttribute(5, nameof(ShadcnInput<decimal>.AdditionalAttributes), new Dictionary<string, object>
+                        {
+                            ["id"] = "quote-unit-price",
+                            ["aria-label"] = "Unit price",
+                            ["inputmode"] = "decimal",
+                            ["min"] = "0",
+                            ["step"] = "0.01"
+                        });
+                        group.CloseComponent();
+                        group.OpenComponent<ShadcnInputGroupAddon>(10);
+                        group.AddAttribute(11, nameof(ShadcnInputGroupAddon.Alignment), Alignment);
+                        group.AddAttribute(12, nameof(ShadcnInputGroupAddon.ChildContent), (RenderFragment)(addon =>
+                        {
+                            addon.OpenComponent<ShadcnInputGroupText>(0);
+                            addon.AddAttribute(1, nameof(ShadcnInputGroupText.ChildContent), Text("THB / part"));
+                            addon.CloseComponent();
+                            addon.OpenComponent<ShadcnInputGroupButton>(2);
+                            addon.AddAttribute(3, nameof(ShadcnInputGroupButton.Variant), ShadcnButtonVariant.Ghost);
+                            addon.AddAttribute(4, nameof(ShadcnInputGroupButton.Size), ShadcnInputGroupButtonSize.IconExtraSmall);
+                            addon.AddAttribute(5, nameof(ShadcnInputGroupButton.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, ResetUnitPrice));
+                            addon.AddAttribute(6, nameof(ShadcnInputGroupButton.AdditionalAttributes), new Dictionary<string, object>
+                            {
+                                ["aria-label"] = "Reset unit price",
+                                ["data-testid"] = "input-group-reset"
+                            });
+                            addon.AddAttribute(7, nameof(ShadcnInputGroupButton.ChildContent), ResetIcon());
+                            addon.CloseComponent();
+                        }));
+                        group.CloseComponent();
+                    }));
+                    content.CloseComponent();
+                    content.CloseElement();
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardFooter>(20);
+                card.AddAttribute(21, nameof(ShadcnCardFooter.Class), "showcase-input-group-summary");
+                card.AddAttribute(22, nameof(ShadcnCardFooter.ChildContent), (RenderFragment)(footer =>
+                {
+                    footer.OpenElement(0, "span");
+                    footer.AddContent(1, "Estimated subtotal");
+                    footer.CloseElement();
+                    footer.OpenElement(2, "output");
+                    footer.AddAttribute(3, "data-testid", "input-group-subtotal");
+                    footer.AddAttribute(4, "for", "quote-unit-price");
+                    footer.AddContent(5, (UnitPrice * Quantity).ToString("C0", ThaiCulture));
+                    footer.CloseElement();
+                }));
+                card.CloseComponent();
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        }
+
+        private void HandleUnitPriceChanged(decimal value) => UnitPrice = Math.Max(0, value);
+        private void ResetUnitPrice() => UnitPrice = 1250m;
+
+        private static RenderFragment ResetIcon() => icon =>
+        {
+            icon.OpenElement(0, "svg");
+            icon.AddAttribute(1, "viewBox", "0 0 24 24");
+            icon.AddAttribute(2, "fill", "none");
+            icon.AddAttribute(3, "stroke", "currentColor");
+            icon.AddAttribute(4, "stroke-width", "2");
+            icon.AddAttribute(5, "stroke-linecap", "round");
+            icon.AddAttribute(6, "stroke-linejoin", "round");
+            icon.AddAttribute(7, "aria-hidden", "true");
+            icon.OpenElement(8, "path");
+            icon.AddAttribute(9, "d", "M3 12a9 9 0 1 0 3-6.7M3 4v5h5");
+            icon.CloseElement();
+            icon.CloseElement();
+        };
     }
 
     private sealed class CompactDatePickerDossierPreview : ComponentBase

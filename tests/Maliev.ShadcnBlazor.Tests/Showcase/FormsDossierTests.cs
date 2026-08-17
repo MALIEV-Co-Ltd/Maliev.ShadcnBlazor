@@ -185,11 +185,23 @@ public sealed class FormsDossierTests : BunitContext
         Change(nativeSelect, "native-select-readonly", true);
         Assert.Equal("true", nativeSelect.Find("[data-testid='forms-dossier-native-select']").GetAttribute("aria-readonly"));
 
-        var inputGroup = RenderExample(registry, "input-group");
+        var inputGroupExample = registry.GetBySlug("input-group").Single();
+        var inputGroup = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, inputGroupExample));
+        Assert.Contains("Part estimate", inputGroup.Markup, StringComparison.Ordinal);
+        Assert.Contains("12 machined parts", inputGroup.Markup, StringComparison.Ordinal);
+        Assert.Equal("ghost", inputGroup.Find("[data-testid='input-group-reset']").GetAttribute("data-variant"));
+        inputGroup.Find("[data-slot='input-group-control']").Input("1000");
+        Assert.Contains("12,000", inputGroup.Find("[data-testid='input-group-subtotal']").TextContent, StringComparison.Ordinal);
+        inputGroup.Find("[data-testid='input-group-reset']").Click();
+        Assert.Contains("15,000", inputGroup.Find("[data-testid='input-group-subtotal']").TextContent, StringComparison.Ordinal);
         Change(inputGroup, "input-group-invalid", true);
         Assert.Equal("true", inputGroup.Find("[data-testid='forms-dossier-input-group']").GetAttribute("aria-invalid"));
         Change(inputGroup, "input-group-alignment", "BlockEnd");
         Assert.Equal("block-end", inputGroup.Find("[data-slot='input-group-addon']").GetAttribute("data-align"));
+        Assert.Contains("ShadcnInputGroupAlignment.BlockEnd", inputGroupExample.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"true\"", inputGroupExample.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private void ResetUnitPrice()", inputGroupExample.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@using System.Globalization", inputGroupExample.RazorSource, StringComparison.Ordinal);
 
         var otp = RenderExample(registry, "input-otp");
         Change(otp, "input-otp-invalid", true);
@@ -251,7 +263,7 @@ public sealed class FormsDossierTests : BunitContext
             ["input"] = ["typed-binding", "required", "file", "invalid", "disabled", "read-only"],
             ["textarea"] = ["typed-binding", "rows", "invalid"],
             ["native-select"] = ["selected", "read-only", "invalid"],
-            ["input-group"] = ["addons", "inline", "block", "invalid"],
+            ["input-group"] = ["addons", "inline", "block", "button", "invalid", "rtl"],
             ["input-otp"] = ["one-input", "graphemes", "numeric", "invalid"],
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],
             ["combobox"] = ["selected", "multiple", "chips", "open", "invalid"],

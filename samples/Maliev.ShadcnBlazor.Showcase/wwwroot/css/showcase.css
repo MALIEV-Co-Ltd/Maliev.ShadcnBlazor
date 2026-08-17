@@ -4218,7 +4218,7 @@ a {
 
 .showcase-input-group-dossier {
     display: grid;
-    inline-size: min(100%, 20rem);
+    inline-size: min(100%, 23rem);
     max-inline-size: 100%;
     margin-inline: auto;
 }
@@ -4300,6 +4300,35 @@ a {
 .showcase-input-dossier .shadcn-card-content { display: grid; gap: 1.25rem; }
 .showcase-input-dossier .shadcn-card-footer { justify-content: space-between; gap: 1rem; }
 .showcase-input-dossier .shadcn-card-footer [role="status"] { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; text-align: end; }
+
+.showcase-input-group-card {
+    inline-size: 100%;
+    border: 1px solid var(--shadcn-border);
+}
+
+.showcase-input-group-card .shadcn-card-content,
+.showcase-input-group-field {
+    display: grid;
+    gap: .5rem;
+}
+
+.showcase-input-group-card .shadcn-input-group {
+    inline-size: 100%;
+}
+
+.showcase-input-group-summary {
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--shadcn-border);
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-input-group-summary output {
+    color: var(--shadcn-foreground);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
 
 .showcase-otp-card {
     inline-size: min(100%, 26rem);

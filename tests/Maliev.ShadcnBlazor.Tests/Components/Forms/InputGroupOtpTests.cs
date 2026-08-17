@@ -1,4 +1,5 @@
 using Bunit;
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Microsoft.AspNetCore.Components;
 
@@ -72,6 +73,48 @@ public sealed class InputGroupOtpTests : BunitContext
         var button = cut.Find("button");
         Assert.Equal("button", button.GetAttribute("type"));
         Assert.Equal(expected, button.GetAttribute("data-size"));
+        Assert.Equal("ghost", button.GetAttribute("data-variant"));
+    }
+
+    [Theory]
+    [InlineData(ShadcnButtonVariant.Default, "default")]
+    [InlineData(ShadcnButtonVariant.Destructive, "destructive")]
+    [InlineData(ShadcnButtonVariant.Outline, "outline")]
+    [InlineData(ShadcnButtonVariant.Secondary, "secondary")]
+    [InlineData(ShadcnButtonVariant.Ghost, "ghost")]
+    [InlineData(ShadcnButtonVariant.Link, "link")]
+    public void InputGroupButtonExposesPinnedButtonVariants(ShadcnButtonVariant variant, string expected)
+    {
+        var cut = Render<ShadcnInputGroupButton>(parameters => parameters
+            .Add(component => component.Variant, variant)
+            .AddChildContent("Action"));
+
+        var button = cut.Find("button");
+        Assert.Contains("shadcn-button", button.ClassList);
+        Assert.Contains("shadcn-input-group-button", button.ClassList);
+        Assert.Equal(expected, button.GetAttribute("data-variant"));
+    }
+
+    [Fact]
+    public void InputGroupTextAndInvalidControlExposePinnedStylingHooks()
+    {
+        var cut = Render<ShadcnInputGroup>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnInput<string>>(0);
+            builder.AddAttribute(1, nameof(ShadcnInput<string>.Invalid), true);
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnInputGroupAddon>(2);
+            builder.AddAttribute(3, nameof(ShadcnInputGroupAddon.ChildContent), (RenderFragment)(addon =>
+            {
+                addon.OpenComponent<ShadcnInputGroupText>(0);
+                addon.AddAttribute(1, nameof(ShadcnInputGroupText.ChildContent), (RenderFragment)(text => text.AddContent(0, "THB / part")));
+                addon.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        Assert.Equal("true", cut.Find("[data-slot='input-group-control']").GetAttribute("aria-invalid"));
+        Assert.Equal("THB / part", cut.Find("[data-slot='input-group-text']").TextContent);
     }
 
     [Fact]
@@ -95,6 +138,17 @@ public sealed class InputGroupOtpTests : BunitContext
         Assert.Equal("input-group-control", cut.Find("input").GetAttribute("data-slot"));
         var script = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-forms.js"));
         Assert.Contains("eventTarget?.closest", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InputGroupStylesPinCompactButtonDarkInvalidAndLogicalAddonContracts()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+
+        Assert.Contains("[data-shadcn-theme=\"dark\"] .shadcn-input-group", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group-button[data-size=\"icon-xs\"] { width: 1.5rem; height: 1.5rem;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group-addon[data-align=\"inline-end\"]:has(> button) { margin-inline-end: -.4rem;", css, StringComparison.Ordinal);
+        Assert.Contains(":has(> [data-slot=\"input-group-control\"][aria-invalid=\"true\"])", css, StringComparison.Ordinal);
     }
 
     [Fact]
