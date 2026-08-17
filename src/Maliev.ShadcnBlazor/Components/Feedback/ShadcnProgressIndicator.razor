@@ -3,6 +3,7 @@
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-progress-indicator")" style="@IndicatorStyle" data-slot="progress-indicator" data-state="@(Context?.Percent is null ? "indeterminate" : "determinate")"></div>
 @code {
     [CascadingParameter] private ShadcnProgressContext? Context { get; set; }
+    [CascadingParameter(Name = "ShadcnProgressVersion")] private long ProgressVersion { get; set; }
     private string? IndicatorStyle => MergeStyle(Context?.Percent is null
         ? null
         : $"--shadcn-progress-percent: {Context.Percent.Value.ToString("0.###", CultureInfo.InvariantCulture)}%; --shadcn-progress-ratio: {(Context.Percent.Value / 100d).ToString("0.####", CultureInfo.InvariantCulture)}");

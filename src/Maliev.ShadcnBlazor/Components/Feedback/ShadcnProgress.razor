@@ -2,12 +2,14 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <CascadingValue Value="ProgressContext" IsFixed="true">
-    <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-progress")" style="@MergeStyle(null)" data-slot="progress" data-state="@ProgressContext.State" role="progressbar" aria-label="@Label" aria-labelledby="@(Label is null && ProgressContext.HasLabel ? ProgressContext.LabelId : null)" aria-valuemin="@Invariant(Minimum)" aria-valuemax="@Invariant(Maximum)" aria-valuenow="@(ClampedValue is null ? null : Invariant(ClampedValue.Value))" aria-valuetext="@(ClampedValue is null ? null : FormattedValue)">
-        @if (ChildContent is not null) { @ChildContent }
-        else if (Label is not null) { <ShadcnProgressLabel>@Label</ShadcnProgressLabel> }
-        @if (ShowValue && ClampedValue is not null) { <ShadcnProgressValue>@FormattedValue</ShadcnProgressValue> }
-        <ShadcnProgressTrack><ShadcnProgressIndicator /></ShadcnProgressTrack>
-    </div>
+    <CascadingValue Value="ProgressVersion" Name="ShadcnProgressVersion">
+        <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-progress")" style="@MergeStyle(null)" data-slot="progress" data-state="@ProgressContext.State" role="progressbar" aria-label="@Label" aria-labelledby="@(Label is null && ProgressContext.HasLabel ? ProgressContext.LabelId : null)" aria-valuemin="@Invariant(Minimum)" aria-valuemax="@Invariant(Maximum)" aria-valuenow="@(ClampedValue is null ? null : Invariant(ClampedValue.Value))" aria-valuetext="@(ClampedValue is null ? null : FormattedValue)">
+            @if (ChildContent is not null) { @ChildContent }
+            else if (Label is not null) { <ShadcnProgressLabel>@Label</ShadcnProgressLabel> }
+            @if (ShowValue && ClampedValue is not null) { <ShadcnProgressValue>@FormattedValue</ShadcnProgressValue> }
+            <ShadcnProgressTrack><ShadcnProgressIndicator /></ShadcnProgressTrack>
+        </div>
+    </CascadingValue>
 </CascadingValue>
 
 @code {
@@ -19,6 +21,7 @@
     [Parameter] public Func<double, string>? ValueFormatter { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private readonly ShadcnProgressContext ProgressContext;
+    private long ProgressVersion { get; set; }
     public ShadcnProgress() => ProgressContext = new($"shadcn-progress-label-{Guid.NewGuid():N}", () => _ = InvokeAsync(StateHasChanged));
     private double? ClampedValue => Value is null ? null : Math.Clamp(Value.Value, Minimum, Maximum);
     private double? Percent => ClampedValue is null ? null : (ClampedValue.Value - Minimum) / (Maximum - Minimum) * 100;
@@ -30,6 +33,7 @@
         if (!double.IsFinite(Maximum) || Maximum <= Minimum) throw new ArgumentOutOfRangeException(nameof(Maximum));
         if (Value is not null && !double.IsFinite(Value.Value)) throw new ArgumentOutOfRangeException(nameof(Value));
         ProgressContext.Update(ClampedValue, Percent, ClampedValue is null ? string.Empty : FormattedValue);
+        ProgressVersion++;
     }
     private static string Invariant(double value) => value.ToString("0.################", CultureInfo.InvariantCulture);
 }

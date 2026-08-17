@@ -256,17 +256,65 @@ internal static class FeedbackContentExamples
     private static ComponentExampleDefinition Progress()
     {
         var indeterminate = false; var value = 64d; var showValue = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnProgress>(0); b.AddAttribute(1, "Value", indeterminate ? null : value); b.AddAttribute(2, "Label", "Upload"); b.AddAttribute(3, "ShowValue", showValue); b.CloseComponent(); };
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "section");
+            b.AddAttribute(1, "class", "showcase-progress-demo");
+            b.AddAttribute(2, "aria-label", "Design asset upload");
+            b.OpenElement(3, "div");
+            b.AddAttribute(4, "class", "showcase-progress-demo__summary");
+            b.OpenElement(5, "span");
+            b.AddAttribute(6, "aria-hidden", "true");
+            b.OpenElement(7, "svg");
+            b.AddAttribute(8, "viewBox", "0 0 24 24");
+            b.OpenElement(9, "path");
+            b.AddAttribute(10, "d", "M12 16V4m0 0-4 4m4-4 4 4M5 20h14");
+            b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenElement(11, "div");
+            b.OpenElement(12, "strong");
+            b.AddContent(13, "design-assets.zip");
+            b.CloseElement();
+            b.OpenElement(14, "small");
+            b.AddContent(15, indeterminate
+                ? "Preparing secure upload…"
+                : $"{Math.Clamp(value, 0d, 100d) * 28.8d / 100d:0.0} MB of 28.8 MB");
+            b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnProgress>(16);
+            b.AddAttribute(17, "Value", indeterminate ? null : value);
+            b.AddAttribute(18, "Label", indeterminate ? "Preparing upload" : "Upload progress");
+            b.AddAttribute(19, "ShowValue", showValue);
+            b.CloseComponent();
+            b.CloseElement();
+        };
         string Source() => string.Join(Environment.NewLine,
         [
+            "<section class=\"showcase-progress-demo\" aria-label=\"Design asset upload\">",
+            "    <div class=\"showcase-progress-demo__summary\">",
+            "        <span aria-hidden=\"true\">",
+            "            <svg viewBox=\"0 0 24 24\"><path d=\"M12 16V4m0 0-4 4m4-4 4 4M5 20h14\" /></svg>",
+            "        </span>",
+            "        <div>",
+            "            <strong>design-assets.zip</strong>",
+            "            <small>@UploadDetail</small>",
+            "        </div>",
+            "    </div>",
+            "    <ShadcnProgress Value=\"@(Indeterminate ? null : Value)\"",
+            "                    Label=\"@(Indeterminate ? \"Preparing upload\" : \"Upload progress\")\"",
+            "                    ShowValue=\"@ShowValue\" />",
+            "</section>",
+            string.Empty,
             "@code {",
             $"    private bool Indeterminate = {indeterminate.ToString().ToLowerInvariant()};",
             $"    private double Value = {value:0.##};",
             $"    private bool ShowValue = {showValue.ToString().ToLowerInvariant()};",
-            "}",
-            string.Empty,
-            "<ShadcnProgress Value=\"@(Indeterminate ? null : Value)\" Label=\"Upload\" ShowValue=\"@ShowValue\" />",
-            string.Empty
+            "    private string UploadDetail => Indeterminate",
+            "        ? \"Preparing secure upload…\"",
+            "        : $\"{Math.Clamp(Value, 0d, 100d) * 28.8d / 100d:0.0} MB of 28.8 MB\";",
+            "}"
         ]);
         var source = Source();
         return new ComponentExampleDefinition("progress-primary", "Progress", "Compare determinate and indeterminate accessible progress.", source, preview, [Toggle("progress-indeterminate", "Indeterminate", v => indeterminate = v), Number("progress-value", "Value", value, v => value = v), Toggle("progress-show-value", "Show value", v => showValue = v, true)], ["determinate", "indeterminate", "label", "value"])
