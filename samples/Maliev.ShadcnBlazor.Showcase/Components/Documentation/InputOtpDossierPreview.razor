@@ -1,0 +1,137 @@
+@using System.Globalization
+
+<ShadcnCard Class="showcase-otp-card" data-testid="input-otp-dossier-preview">
+    <ShadcnCardHeader>
+        <div class="showcase-otp-card__heading">
+            <ShadcnCardTitle>Verify your email</ShadcnCardTitle>
+            <ShadcnCardDescription>
+                Enter the 6-digit code sent to <strong>n•••@@maliev.example</strong>.
+            </ShadcnCardDescription>
+        </div>
+        <ShadcnCardAction>
+            <span class="showcase-otp-card__secure" aria-label="Secure verification">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
+            </span>
+        </ShadcnCardAction>
+    </ShadcnCardHeader>
+    <ShadcnCardContent>
+        <div class="showcase-otp-card__field">
+            <label class="showcase-otp-card__label" for="verification-code">Verification code</label>
+            <ShadcnInputOtp Value="@Code"
+                            ValueChanged="HandleCodeChanged"
+                            MaxLength="6"
+                            Pattern="@(Numeric ? "[0-9]" : null)"
+                            InputMode="@(Numeric ? "numeric" : "text")"
+                            Required="true"
+                            Invalid="Invalid"
+                            AdditionalAttributes="InputAttributes">
+                <ShadcnInputOtpGroup>
+                    <ShadcnInputOtpSlot Index="0" />
+                    <ShadcnInputOtpSlot Index="1" />
+                    <ShadcnInputOtpSlot Index="2" />
+                </ShadcnInputOtpGroup>
+                <ShadcnInputOtpSeparator />
+                <ShadcnInputOtpGroup>
+                    <ShadcnInputOtpSlot Index="3" />
+                    <ShadcnInputOtpSlot Index="4" />
+                    <ShadcnInputOtpSlot Index="5" />
+                </ShadcnInputOtpGroup>
+            </ShadcnInputOtp>
+            <p id="input-otp-status"
+               class="showcase-otp-card__status"
+               data-state="@StatusState"
+               data-testid="input-otp-status"
+               role="status"
+               aria-live="polite">@StatusText</p>
+        </div>
+        <ShadcnButton Disabled="@(!CanVerify)"
+                      OnClick="VerifyCode"
+                      Class="showcase-otp-card__verify"
+                      data-testid="input-otp-verify">
+            Verify code
+        </ShadcnButton>
+    </ShadcnCardContent>
+    <ShadcnCardFooter>
+        <span>Didn't receive a code?</span>
+        <ShadcnButton Variant="ShadcnButtonVariant.Link"
+                      Size="ShadcnButtonSize.Small"
+                      OnClick="SendNewCode"
+                      data-testid="input-otp-resend">
+            Send a new code
+        </ShadcnButton>
+    </ShadcnCardFooter>
+</ShadcnCard>
+
+@code {
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public bool Numeric { get; set; } = true;
+
+    private string Code = string.Empty;
+    private bool Verified;
+    private bool Resent;
+    private bool LastNumeric = true;
+    private bool Initialized;
+
+    private int CodeLength => StringInfo.ParseCombiningCharacters(Code).Length;
+    private bool CanVerify => CodeLength == 6 && !Invalid && !Verified;
+    private string StatusState => Invalid ? "error" : Verified ? "success" : Resent ? "notice" : "hint";
+    private string StatusText => Invalid
+        ? "That code is invalid. Check the email and try again."
+        : Verified
+            ? "Email verified. You can continue."
+            : Resent
+                ? "A new code was sent. Enter it below."
+                : CodeLength == 0
+                    ? "Enter all 6 characters."
+                    : CodeLength == 6
+                        ? "Code ready to verify."
+                        : $"Enter {6 - CodeLength} more {(6 - CodeLength == 1 ? "character" : "characters")}.";
+
+    private IReadOnlyDictionary<string, object> InputAttributes => new Dictionary<string, object>
+    {
+        ["id"] = "verification-code",
+        ["data-testid"] = "forms-dossier-input-otp",
+        ["aria-label"] = "Verification code",
+        ["aria-describedby"] = "input-otp-status"
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (Initialized && Numeric != LastNumeric)
+        {
+            Code = string.Empty;
+            Verified = false;
+            Resent = false;
+        }
+
+        LastNumeric = Numeric;
+        Initialized = true;
+    }
+
+    private Task HandleCodeChanged(string value)
+    {
+        Code = value;
+        Verified = false;
+        Resent = false;
+        return Task.CompletedTask;
+    }
+
+    private Task VerifyCode(MouseEventArgs _)
+    {
+        if (CanVerify)
+            Verified = true;
+
+        return Task.CompletedTask;
+    }
+
+    private Task SendNewCode(MouseEventArgs _)
+    {
+        Code = string.Empty;
+        Verified = false;
+        Resent = true;
+        return Task.CompletedTask;
+    }
+}

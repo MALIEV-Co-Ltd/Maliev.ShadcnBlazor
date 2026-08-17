@@ -4331,20 +4331,82 @@ a {
 }
 
 .showcase-otp-card {
-    inline-size: min(100%, 26rem);
+    inline-size: min(100%, 28rem);
     max-inline-size: 100%;
     margin-inline: auto;
 }
 
-.showcase-otp-card .shadcn-card-content {
-    display: grid;
-    justify-items: center;
-    gap: .75rem;
+.showcase-otp-card .shadcn-card-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
 }
 
-.showcase-otp-card .shadcn-card-footer {
+.showcase-otp-card__heading {
+    display: grid;
+    gap: .375rem;
+    min-inline-size: 0;
+}
+
+.showcase-otp-card__heading strong { color: var(--shadcn-foreground); font-weight: 500; }
+
+.showcase-otp-card__secure {
+    display: grid;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    place-items: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 50%;
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-otp-card__secure svg { inline-size: 1rem; block-size: 1rem; }
+
+.showcase-otp-card .shadcn-card-content {
+    display: grid;
+    gap: 1rem;
+}
+
+.showcase-otp-card__field { display: grid; gap: .625rem; }
+.showcase-otp-card__label { color: var(--shadcn-foreground); font-size: .875rem; font-weight: 500; }
+.showcase-otp-card__field > .shadcn-input-otp { justify-self: center; }
+
+.showcase-otp-card__status {
+    min-block-size: 1.25rem;
+    margin: 0;
     color: var(--shadcn-muted-foreground);
     font-size: .75rem;
+    line-height: 1.25rem;
+}
+
+.showcase-otp-card__status[data-state="error"] { color: var(--shadcn-destructive); }
+.showcase-otp-card__status[data-state="success"] { color: var(--shadcn-foreground); font-weight: 500; }
+.showcase-otp-card__verify { inline-size: 100%; }
+
+.showcase-otp-card .shadcn-card-footer {
+    justify-content: space-between;
+    gap: .5rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+.showcase-otp-card .shadcn-card-footer .shadcn-button { block-size: auto; padding: 0; }
+
+[dir="rtl"] .showcase-otp-card__heading,
+[dir="rtl"] .showcase-otp-card__label,
+[dir="rtl"] .showcase-otp-card__status,
+[dir="rtl"] .showcase-otp-card .shadcn-card-footer > span {
+    direction: ltr;
+    text-align: right;
+}
+
+@media (max-width: 30rem) {
+    .showcase-otp-card .shadcn-card-header { grid-template-columns: minmax(0, 1fr); }
+    .showcase-otp-card .shadcn-card-action { display: none; }
+    .showcase-otp-card .shadcn-card-footer { align-items: flex-start; flex-direction: column; }
+}
+
+@media (forced-colors: active) {
+    .showcase-otp-card__secure { border-color: ButtonText; }
 }
 
 .showcase-select-dossier,

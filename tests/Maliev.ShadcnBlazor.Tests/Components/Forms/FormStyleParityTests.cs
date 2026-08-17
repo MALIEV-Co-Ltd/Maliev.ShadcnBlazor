@@ -53,6 +53,17 @@ public sealed class FormStyleParityTests
     }
 
     [Fact]
+    public void OtpStylesMakeValidationFocusAndLockedStateVisible()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+
+        Assert.Contains(".shadcn-input-otp[data-invalid=\"true\"] .shadcn-input-otp-slot", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-otp[data-disabled=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-otp-slot[data-active=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains("outline: 2px solid Highlight", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseReferencePairsPinSelectAndDatePickerTriggerGeometry()
     {
         var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));

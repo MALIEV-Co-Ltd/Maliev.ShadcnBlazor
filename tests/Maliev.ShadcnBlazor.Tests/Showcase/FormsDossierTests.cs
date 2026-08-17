@@ -255,6 +255,38 @@ public sealed class FormsDossierTests : BunitContext
     }
 
     [Fact]
+    public void InputOtpDossierDemonstratesACompleteInteractiveVerificationFlow()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+        var example = registry.GetBySlug("input-otp").Single();
+        var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
+
+        Assert.Single(cut.FindAll(".showcase-otp-card[data-testid='input-otp-dossier-preview']"));
+        Assert.Equal(2, cut.FindAll("[data-slot='input-otp-group']").Count);
+        Assert.Equal(6, cut.FindAll("[data-slot='input-otp-slot']").Count);
+        Assert.Single(cut.FindAll("[data-slot='input-otp-separator']"));
+        Assert.Equal("polite", cut.Find("[data-testid='input-otp-status']").GetAttribute("aria-live"));
+        Assert.Equal(string.Empty, cut.Find("[data-testid='forms-dossier-input-otp']").GetAttribute("value"));
+
+        var verify = cut.Find("[data-testid='input-otp-verify']");
+        Assert.True(verify.HasAttribute("disabled"));
+        cut.Find("[data-testid='forms-dossier-input-otp']").Input("246810");
+        verify = cut.Find("[data-testid='input-otp-verify']");
+        Assert.False(verify.HasAttribute("disabled"));
+        verify.Click();
+        Assert.Contains("verified", cut.Find("[data-testid='input-otp-status']").TextContent, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("<ShadcnInputOtpSeparator />", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private Task VerifyCode", example.RazorSource, StringComparison.Ordinal);
+        Change(cut, "input-otp-invalid", true);
+        Assert.Contains("Invalid=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find("[data-testid='forms-dossier-input-otp']").GetAttribute("aria-invalid"));
+        Change(cut, "input-otp-numeric", false);
+        Assert.DoesNotContain("Pattern=", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("InputMode=\"text\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PlanFourCoveredStateTagsOnlyNameRenderedOrOperableDossierStates()
     {
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
@@ -264,7 +296,7 @@ public sealed class FormsDossierTests : BunitContext
             ["textarea"] = ["typed-binding", "rows", "invalid"],
             ["native-select"] = ["selected", "read-only", "invalid"],
             ["input-group"] = ["addons", "inline", "block", "button", "invalid", "rtl"],
-            ["input-otp"] = ["one-input", "graphemes", "numeric", "invalid"],
+            ["input-otp"] = ["one-input", "paste", "keyboard", "status", "graphemes", "numeric", "invalid"],
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],
             ["combobox"] = ["selected", "multiple", "chips", "open", "invalid"],
             ["calendar"] = ["single", "range", "culture", "keyboard", "week-numbers", "invalid"],
