@@ -54,6 +54,9 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await chart.WaitForAsync();
         await Assertions.Expect(chart).ToHaveAttributeAsync("data-chart-measured", "true");
         var surface = chart.Locator("svg[data-slot='chart-surface']");
+        var bars = surface.Locator("rect[data-series]");
+        Assert.True(await bars.CountAsync() > 0);
+        await Assertions.Expect(bars.First).ToHaveAttributeAsync("rx", "0");
         await surface.FocusAsync(); await page.Keyboard.PressAsync("End");
         await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("Jun");
         await page.GetByTestId("control-chart-line").CheckAsync();

@@ -108,6 +108,7 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("Type=\"ShadcnChartType.Line\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Loading=\"true\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowLegend=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("BarRadius=\"0\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
     }
 
