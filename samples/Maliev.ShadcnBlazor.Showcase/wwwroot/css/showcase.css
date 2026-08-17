@@ -5554,6 +5554,27 @@ body:has(.theme-studio-provider) {
     background: transparent;
 }
 
+/* Authoritative editor palette for the documentation surface. Keep this
+   block after the surface reset so a generic code rule cannot flatten the
+   C#/Razor token colors or reintroduce the retired GitHub palette. */
+.component-code__surface pre code .shadcn-code-token {
+    color: var(--shadcn-code-token-foreground);
+}
+
+.component-code__surface pre code .shadcn-code-token-comment { color: var(--shadcn-code-token-comment); font-style: italic; }
+.component-code__surface pre code .shadcn-code-token-tag { color: var(--shadcn-code-token-tag); }
+.component-code__surface pre code .shadcn-code-token-keyword { color: var(--shadcn-code-token-keyword); font-weight: 650; }
+.component-code__surface pre code .shadcn-code-token-type { color: var(--shadcn-code-token-type); }
+.component-code__surface pre code .shadcn-code-token-string { color: var(--shadcn-code-token-string); }
+.component-code__surface pre code .shadcn-code-token-number { color: var(--shadcn-code-token-number); }
+.component-code__surface pre code .shadcn-code-token-literal { color: var(--shadcn-code-token-literal); }
+.component-code__surface pre code .shadcn-code-token-attribute { color: var(--shadcn-code-token-attribute); }
+.component-code__surface pre code .shadcn-code-token-method { color: var(--shadcn-code-token-method); }
+.component-code__surface pre code .shadcn-code-token-property { color: var(--shadcn-code-token-property); }
+.component-code__surface pre code .shadcn-code-token-directive { color: var(--shadcn-code-token-directive); font-weight: 600; }
+.component-code__surface pre code .shadcn-code-token-operator { color: var(--shadcn-code-token-operator); font-weight: 600; }
+.component-code__surface pre code .shadcn-code-token-punctuation { color: var(--shadcn-code-token-punctuation); }
+
 .documentation-brand__mark {
     overflow: hidden;
     inline-size: 2.25rem;

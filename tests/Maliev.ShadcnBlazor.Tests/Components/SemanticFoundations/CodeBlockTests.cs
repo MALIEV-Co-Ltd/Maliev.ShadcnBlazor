@@ -124,6 +124,49 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
+    public void KeepsTheEditorPaletteAcrossACompleteRazorExample()
+    {
+        const string source = """
+            @using Maliev.ShadcnBlazor.Components.Conversation
+
+            <ShadcnBubbleGroup data-reveal="true">
+                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                    <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
+                </ShadcnBubble>
+
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Tinted">
+                    <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
+                    <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions">
+                        <span aria-hidden="true">👍</span>
+                    </ShadcnBubbleReactions>
+                </ShadcnBubble>
+
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                    <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
+                </ShadcnBubble>
+
+                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                    <ShadcnBubbleContent Href="/docs/components/bubble">Sure. Hit me with your best demo.</ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnBubbleGroup>
+            """;
+
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, source)
+            .Add(component => component.Language, "razor"));
+
+        var tags = cut.FindAll(".shadcn-code-token-tag").Select(element => element.TextContent).ToArray();
+        Assert.Contains("ShadcnBubbleGroup", tags);
+        Assert.Contains("ShadcnBubbleReactions", tags);
+        Assert.Contains("ShadcnBubbleContent", tags);
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-directive"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-attribute"));
+        Assert.NotEmpty(cut.FindAll(".shadcn-code-token-string"));
+        Assert.DoesNotContain("Hey", cut.FindAll(".shadcn-code-token-type").Select(element => element.TextContent));
+        Assert.DoesNotContain("I", cut.FindAll(".shadcn-code-token-type").Select(element => element.TextContent));
+    }
+
+    [Fact]
     public void UsesOneEditorPaletteAcrossPackageAndShowcaseStyles()
     {
         var root = FindRoot();
@@ -170,6 +213,16 @@ public sealed class CodeBlockTests : BunitContext
         Assert.Contains(".component-code__surface .shadcn-code-block-copy-feedback", showcaseCss, StringComparison.Ordinal);
         Assert.Contains("@keyframes component-code-copied-feedback", showcaseCss, StringComparison.Ordinal);
         Assert.DoesNotContain("component-code-copied-fade", showcaseCss, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ShowcaseStylesheetsCarryARevisionQueryForPaletteRefreshes()
+    {
+        var root = FindRoot();
+        var index = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "index.html"));
+
+        Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-base.css?v=1.0.11", index, StringComparison.Ordinal);
+        Assert.Contains("css/showcase.css?v=1.0.11", index, StringComparison.Ordinal);
     }
 
     [Fact]
