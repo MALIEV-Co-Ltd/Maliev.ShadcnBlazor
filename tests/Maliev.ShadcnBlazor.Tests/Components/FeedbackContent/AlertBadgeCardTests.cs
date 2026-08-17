@@ -93,6 +93,17 @@ public sealed class AlertBadgeCardTests : BunitContext
     }
 
     [Fact]
+    public void DestructiveBadgeUsesAContrastSafeForegroundMix()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(
+            ".shadcn-badge[data-variant=\"destructive\"] { background: color-mix(in oklch, var(--shadcn-destructive) 10%, transparent); color: color-mix(in oklch, var(--shadcn-destructive) 78%, var(--shadcn-foreground)); }",
+            css,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BadgeUsesAnchorOnlyWhenHrefIsProvidedAndProtectsOwnedAttributes()
     {
         var inline = Render<ShadcnBadge>(parameters => parameters.AddChildContent("New"));

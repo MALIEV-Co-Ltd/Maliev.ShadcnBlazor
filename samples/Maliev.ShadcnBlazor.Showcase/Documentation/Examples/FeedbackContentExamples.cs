@@ -142,23 +142,51 @@ internal static class FeedbackContentExamples
         var variant = ShadcnBadgeVariant.Default; var link = false; var invalid = false;
         RenderFragment preview = b =>
         {
-            b.OpenElement(0, "div"); b.AddAttribute(1, "class", "showcase-badge-demo");
-            b.OpenElement(2, "div"); b.AddAttribute(3, "class", "showcase-badge-demo__selected");
-            b.OpenComponent<ShadcnBadge>(4); b.AddAttribute(5, "Variant", variant); b.AddAttribute(6, "Href", link ? "/docs/components/badge" : null); b.AddAttribute(7, "ChildContent", Text("Ready")); if (invalid) b.AddAttribute(8, "AdditionalAttributes", new Dictionary<string, object> { ["aria-invalid"] = "true" }); b.CloseComponent();
-            b.CloseElement();
-            b.OpenElement(10, "div"); b.AddAttribute(11, "class", "showcase-badge-demo__gallery");
-            AddBadge(b, 20, ShadcnBadgeVariant.Default, "Default"); AddBadge(b, 30, ShadcnBadgeVariant.Secondary, "Secondary"); AddBadge(b, 40, ShadcnBadgeVariant.Destructive, "Destructive"); AddBadge(b, 50, ShadcnBadgeVariant.Outline, "Outline");
-            b.CloseElement(); b.CloseElement();
+            b.OpenComponent<BadgeDossierPreview>(0);
+            b.AddAttribute(1, nameof(BadgeDossierPreview.Variant), variant);
+            b.AddAttribute(2, nameof(BadgeDossierPreview.Link), link);
+            b.AddAttribute(3, nameof(BadgeDossierPreview.Invalid), invalid);
+            b.CloseComponent();
         };
-        const string source = """
-<div class="showcase-badge-demo">
-    <ShadcnBadge Variant="ShadcnBadgeVariant.Default">Default</ShadcnBadge>
-    <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Secondary</ShadcnBadge>
-    <ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">Destructive</ShadcnBadge>
-    <ShadcnBadge Variant="ShadcnBadgeVariant.Outline" Href="/docs/components/badge">Outline link</ShadcnBadge>
-</div>
+        string Source()
+        {
+            var href = link ? " Href=\"/docs/components/badge\"" : string.Empty;
+            var invalidState = invalid ? " aria-invalid=\"true\"" : string.Empty;
+            return $$"""
+@using Maliev.ShadcnBlazor.Components.Content
+
+<section class="production-queue" aria-labelledby="production-queue-title">
+    <header>
+        <div>
+            <strong id="production-queue-title">Production queue</strong>
+            <span>Scan work states without opening each order.</span>
+        </div>
+        <span>Line 04 · Today</span>
+    </header>
+
+    <div class="current-order">
+        <span><strong>CNC enclosure</strong><span>Order MO-1842</span></span>
+        <ShadcnBadge Variant="ShadcnBadgeVariant.{{variant}}"{{href}}{{invalidState}}>
+            <svg data-icon="inline-start" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="m3.25 8.2 2.7 2.65 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Ready for inspection
+        </ShadcnBadge>
+    </div>
+
+    <ul aria-label="Badge variants">
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Default">Approved</ShadcnBadge><span>Released to production</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Queued</ShadcnBadge><span>Waiting for a machine</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">Blocked</ShadcnBadge><span>Requires attention</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">In review</ShadcnBadge><span>Quality check in progress</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Ghost">Draft</ShadcnBadge><span>Not yet scheduled</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Link" Href="/docs/components/badge">View order</ShadcnBadge><span>Linked badge treatment</span></li>
+    </ul>
+</section>
 """;
-        return Example("badge", "Status badge", "Compare every semantic badge treatment at once, including a link and destructive state.", source, preview, [EnumSelect("badge-variant", "Variant", variant, v => variant = v), Toggle("badge-link", "Link", v => link = v), Toggle("badge-invalid", "Invalid", v => invalid = v)], ["variants", "inline", "link", "focus"]);
+        }
+        var example = Example("badge", "Production status badges", "Compare all six pinned badge treatments in a realistic production queue, then exercise link, focus, and invalid states on the current order.", Source(), preview, [EnumSelect("badge-variant", "Current variant", variant, v => variant = v), Toggle("badge-link", "Current badge is a link", v => link = v), Toggle("badge-invalid", "Invalid state", v => invalid = v)], ["variants", "inline", "icons", "link", "focus", "invalid", "responsive", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
     private static ComponentExampleDefinition Card()
     {
@@ -411,5 +439,4 @@ internal static class FeedbackContentExamples
     private static ComponentParameterControl EnumSelect<T>(string id, string label, T value, Action<T> apply) where T : struct, Enum => new(id, label, ComponentParameterControlKind.Select, value.ToString(), Enum.GetNames<T>(), text => apply(Enum.Parse<T>(text)));
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);
     private static void Add<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
-    private static void AddBadge(RenderTreeBuilder b, int sequence, ShadcnBadgeVariant variant, string label) { b.OpenComponent<ShadcnBadge>(sequence); b.AddAttribute(sequence + 1, "Variant", variant); b.AddAttribute(sequence + 2, "ChildContent", Text(label)); b.CloseComponent(); }
 }

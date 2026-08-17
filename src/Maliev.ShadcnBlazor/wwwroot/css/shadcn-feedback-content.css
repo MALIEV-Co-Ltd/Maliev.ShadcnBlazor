@@ -39,7 +39,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge:has(> [data-icon="inline-end"]) { padding-inline-end: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="default"] { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="secondary"] { background: var(--shadcn-secondary); color: var(--shadcn-secondary-foreground); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="destructive"] { background: color-mix(in oklch, var(--shadcn-destructive) 10%, transparent); color: var(--shadcn-destructive); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="destructive"] { background: color-mix(in oklch, var(--shadcn-destructive) 10%, transparent); color: color-mix(in oklch, var(--shadcn-destructive) 78%, var(--shadcn-foreground)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="outline"] { border-color: var(--shadcn-border); color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="ghost"] { color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge[data-variant="ghost"]:hover { background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); }
