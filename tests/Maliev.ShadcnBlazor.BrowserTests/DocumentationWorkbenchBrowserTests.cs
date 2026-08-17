@@ -8,6 +8,54 @@ public sealed class DocumentationWorkbenchBrowserTests(
     ShowcaseServerFixture server,
     PlaywrightFixture playwright)
 {
+    [Theory]
+    [InlineData(1440, 900, false)]
+    [InlineData(390, 844, true)]
+    public async Task SelectDossierOpensFromTriggerAndKeepsClearActionInsideCompactField(int width, int height, bool darkRtl)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = width, Height = height },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = darkRtl ? ColorScheme.Dark : ColorScheme.Light
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/select").ToString());
+        await page.GetByTestId("component-preview-canvas").WaitForAsync();
+
+        if (darkRtl)
+        {
+            await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+            await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        }
+
+        await Assertions.Expect(page.GetByTestId("control-select-open")).ToHaveCountAsync(0);
+        var trigger = page.GetByTestId("forms-dossier-select");
+        var root = trigger.Locator("xpath=ancestor-or-self::*[@data-slot='select'][1]");
+        var clear = root.GetByRole(AriaRole.Button, new() { Name = "Clear selection" });
+        var chevron = root.Locator("[data-slot='select-trigger-icon']");
+        var rootBox = await root.BoundingBoxAsync();
+        var clearBox = await clear.BoundingBoxAsync();
+        var chevronBox = await chevron.BoundingBoxAsync();
+        Assert.NotNull(rootBox);
+        Assert.NotNull(clearBox);
+        Assert.NotNull(chevronBox);
+        Assert.InRange(clearBox.X, rootBox.X, rootBox.X + rootBox.Width - clearBox.Width);
+        Assert.True(Math.Abs(clearBox.X - chevronBox.X) >= 12, "Clear action and chevron must not overlap.");
+
+        await clear.ClickAsync();
+        await Assertions.Expect(trigger).ToContainTextAsync("Select a process");
+        await trigger.ClickAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(root.Locator("[role='group']")).ToHaveCountAsync(3);
+        await root.Locator("[role='option'][data-value='slm']").ClickAsync();
+        await Assertions.Expect(trigger).ToContainTextAsync("Metal 3D printing");
+
+        await page.GetByTestId("control-select-invalid").CheckAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-invalid", "true");
+        Assert.InRange(await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
+    }
+
     [Fact]
     public async Task RepositoryRootOpensTheDocumentationCatalog()
     {

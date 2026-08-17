@@ -49,10 +49,14 @@
 @keyframes shadcn-caret { 50% { opacity: 0; } }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { position: relative; width: fit-content; min-width: 12rem; max-inline-size: 100%; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select { display: grid; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger, .shadcn-date-picker-trigger) { display: flex; align-items: center; justify-content: space-between; gap: calc(.375rem * var(--shadcn-spacing-multiplier)); width: 100%; color: var(--shadcn-foreground); text-align: start; white-space: nowrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger, .shadcn-date-picker-trigger) { position: relative; z-index: 1; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-trigger { padding-block: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-inline-start: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-inline-end: calc(.625rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:has(> [data-slot="select-clear"]) .shadcn-select-trigger { padding-inline-end: calc(2.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-trigger { border-radius: 9999px; padding-block: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-inline-start: calc(.75rem * var(--shadcn-spacing-multiplier)); padding-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] .shadcn-select-trigger { padding-inline-end: calc(3.25rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] .shadcn-select-trigger-icon { position: absolute; inset-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > :where(.shadcn-select-trigger, .shadcn-select-clear) { grid-area: 1 / 1; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > .shadcn-select-clear { position: relative; inset: auto; align-self: center; justify-self: end; margin-inline-end: calc(2rem * var(--shadcn-spacing-multiplier)); translate: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger { padding: 0 calc(.625rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger[aria-expanded="true"] { background: var(--shadcn-accent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger-icon, .shadcn-date-picker-trigger svg) { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--shadcn-muted-foreground); }

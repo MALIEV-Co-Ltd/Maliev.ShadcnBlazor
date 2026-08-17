@@ -138,12 +138,29 @@ public sealed class SelectComboboxTests : BunitContext
             .Add(component => component.Clearable, true)
             .Add(component => component.Open, true));
 
+        Assert.Equal("true", cut.Find("[data-slot='select']").GetAttribute("data-clearable"));
         cut.Find("[data-slot='select-clear']").Click();
         Assert.Null(selected);
 
         selected = 2;
         cut.Find("[role='option'][data-value='3']").Click();
         Assert.Equal(2, selected);
+    }
+
+    [Fact]
+    public void SelectClearActionAndChevronReserveDistinctInTriggerSpace()
+    {
+        var cut = Render<ShadcnSelect<int>>(parameters => parameters
+            .Add(component => component.Value, 2)
+            .Add(component => component.Options, Priorities)
+            .Add(component => component.Clearable, true));
+
+        var root = cut.Find("[data-slot='select']");
+        Assert.NotNull(root.QuerySelector(":scope > [data-slot='select-trigger']"));
+        Assert.NotNull(root.QuerySelector(":scope > [data-slot='select-clear']"));
+        Assert.NotNull(root.QuerySelector("[data-slot='select-trigger'] > [data-slot='select-trigger-icon']"));
+        cut.Find("[data-slot='select-clear']").Click();
+        Assert.Equal("false", cut.Find("[data-slot='select-trigger']").GetAttribute("aria-expanded"));
     }
 
     [Fact]
