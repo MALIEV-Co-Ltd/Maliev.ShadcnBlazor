@@ -9,4 +9,9 @@
         @ChildContent
     }
 </span>
-@code { [CascadingParameter] private ShadcnProgressContext? Context { get; set; } [Parameter] public RenderFragment? ChildContent { get; set; } private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot"); }
+@code {
+    [CascadingParameter] private ShadcnProgressContext? Context { get; set; }
+    [CascadingParameter(Name = "ShadcnProgressVersion")] private long ProgressVersion { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+}

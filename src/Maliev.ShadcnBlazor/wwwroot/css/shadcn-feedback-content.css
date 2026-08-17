@@ -115,6 +115,10 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-value { margin-inline-start: auto; color: var(--shadcn-muted-foreground); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 @keyframes shadcn-progress-indeterminate { 0% { translate: -150% 0; } 100% { translate: 300% 0; } }
 :where(.shadcn-scope, .shadcn-overlay-scope)[dir="rtl"] .shadcn-progress-indicator[data-state="indeterminate"] { animation-direction: reverse; }
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator { transition: none; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator[data-state="indeterminate"] { animation: none; translate: 75% 0; }
+}
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-skeleton { border-radius: var(--shadcn-radius-md); background: var(--shadcn-muted); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-skeleton[data-shape="circle"] { border-radius: 9999px; }

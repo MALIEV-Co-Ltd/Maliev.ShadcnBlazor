@@ -101,7 +101,9 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
 
         var progress = registry.GetBySlug("progress").Single().RazorSource;
         Assert.Contains("Indeterminate ? null : Value", progress, StringComparison.Ordinal);
-        Assert.Contains("Label=\"Upload\"", progress, StringComparison.Ordinal);
+        Assert.Contains("Label=\"@(Indeterminate ? \"Preparing upload\" : \"Upload progress\")\"", progress, StringComparison.Ordinal);
+        Assert.Contains("class=\"showcase-progress-demo\"", progress, StringComparison.Ordinal);
+        Assert.Contains("private string UploadDetail", progress, StringComparison.Ordinal);
 
         var toast = registry.GetBySlug("toast").Single().RazorSource;
         Assert.Contains("private void Show()", toast, StringComparison.Ordinal);
@@ -129,6 +131,9 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("private bool Indeterminate = true", progress.RazorSource, StringComparison.Ordinal);
         Assert.Contains("private double Value = 32", progress.RazorSource, StringComparison.Ordinal);
         Assert.Contains("private bool ShowValue = false", progress.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Value=\"@(Indeterminate ? null : Value)\"", progress.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Label=\"@(Indeterminate ? \"Preparing upload\" : \"Upload progress\")\"", progress.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowValue=\"@ShowValue\"", progress.RazorSource, StringComparison.Ordinal);
 
         var toast = registry.GetBySlug("toast").Single();
         toast.Controls.Single(control => control.Id == "toast-limit").Apply("1");

@@ -108,6 +108,17 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("control-progress-value").PressAsync("Tab");
         await Assertions.Expect(progress).ToHaveAttributeAsync("aria-valuenow", "31");
         await Assertions.Expect(progress.Locator("[data-slot='progress-value']")).ToHaveTextAsync("31%");
+        await Assertions.Expect(progress.Locator("[data-slot='progress-indicator']")).ToHaveAttributeAsync("style", new Regex("--shadcn-progress-ratio:\\s*0\\.31"));
+        await Assertions.Expect(page.Locator("#preview .showcase-progress-demo")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("#preview .showcase-progress-demo__summary small")).ToHaveTextAsync("8.9 MB of 28.8 MB");
+
+        await page.GetByTestId("control-progress-indeterminate").CheckAsync();
+        await Assertions.Expect(progress).ToHaveAttributeAsync("data-state", "indeterminate");
+        await Assertions.Expect(progress).Not.ToHaveAttributeAsync("aria-valuenow", "31");
+        await Assertions.Expect(progress).ToHaveAttributeAsync("aria-label", "Preparing upload");
+        await Assertions.Expect(page.Locator("#preview .showcase-progress-demo__summary small")).ToHaveTextAsync("Preparing secure upload…");
+        Assert.Equal("none", await progress.Locator("[data-slot='progress-indicator']")
+            .EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/calendar").ToString());
         var calendar = page.Locator("#preview [data-slot='calendar']");

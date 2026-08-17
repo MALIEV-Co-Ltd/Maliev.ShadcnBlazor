@@ -5575,6 +5575,60 @@ body:has(.theme-studio-provider) {
 .component-code__surface pre code .shadcn-code-token-operator { color: var(--shadcn-code-token-operator); font-weight: 600; }
 .component-code__surface pre code .shadcn-code-token-punctuation { color: var(--shadcn-code-token-punctuation); }
 
+.showcase-progress-demo {
+    display: grid;
+    inline-size: min(100%, 28rem);
+    gap: 1rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-card);
+    padding: 1.25rem;
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-progress-demo__summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.showcase-progress-demo__summary > span {
+    display: grid;
+    block-size: 2.5rem;
+    inline-size: 2.5rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-progress-demo__summary svg {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+}
+
+.showcase-progress-demo__summary > div {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.125rem;
+}
+
+.showcase-progress-demo__summary strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.showcase-progress-demo__summary small {
+    color: var(--shadcn-muted-foreground);
+}
+
 .documentation-brand__mark {
     overflow: hidden;
     inline-size: 2.25rem;

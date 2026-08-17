@@ -230,6 +230,28 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
         Assert.Contains("transform: scaleX(var(--shadcn-progress-ratio, 0))", css, StringComparison.Ordinal);
         Assert.Contains("transition: transform", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-progress-indicator { transition: none; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-progress-indicator[data-state=\"indeterminate\"] { animation: none;", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProgressRerendersComposedIndicatorAndValueWhenValueChanges()
+    {
+        var cut = Render<ShadcnProgress>(parameters => parameters
+            .Add(component => component.Value, 64)
+            .Add(component => component.Label, "Upload")
+            .Add(component => component.ShowValue, true));
+
+        cut.Render(parameters => parameters
+            .Add(component => component.Value, 5)
+            .Add(component => component.Label, "Upload")
+            .Add(component => component.ShowValue, true));
+
+        var root = cut.Find("[data-slot='progress']");
+        Assert.Equal("5", root.GetAttribute("aria-valuenow"));
+        Assert.Equal("5%", cut.Find("[data-slot='progress-value']").TextContent);
+        Assert.Contains("--shadcn-progress-percent: 5%", cut.Find("[data-slot='progress-indicator']").GetAttribute("style"));
+        Assert.Contains("--shadcn-progress-ratio: 0.05", cut.Find("[data-slot='progress-indicator']").GetAttribute("style"));
     }
 
     [Theory]
