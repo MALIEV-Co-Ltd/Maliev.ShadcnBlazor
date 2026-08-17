@@ -481,6 +481,7 @@ enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSortDirection: Ascending, 
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTable
   Boolean Borders
   RenderFragment ChildContent
+  Nullable<Int32> ExpectedColumnCount
 enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableAlignment: Start, Center, End
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableBody
   RenderFragment ChildContent

@@ -76,8 +76,10 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Equal(2, footerCells.Count);
         Assert.Equal("3", footerCells[0].GetAttribute("colspan"));
         Assert.Equal("฿37,800", footerCells[1].TextContent.Trim());
+        Assert.Equal("4", rendered.Find("table[data-slot='table']").GetAttribute("data-expected-columns"));
         Assert.Contains("<ShadcnTableHead>Method</ShadcnTableHead>", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnTableCell ColSpan=\"3\">Total</ShadcnTableCell>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ExpectedColumnCount=\"4\"", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -88,7 +90,8 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         var table = registry.GetBySlug("table").Single();
         table.Controls.Single(control => control.Id == "table-borders").Apply("false");
         table.Controls.Single(control => control.Id == "table-selected").Apply("true");
-        Assert.Contains("Class=\"showcase-table showcase-table--borderless\"", table.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Class=\"showcase-table\" Borders=\"false\"", table.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("showcase-table--borderless", table.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Borders=\"false\"", table.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnTableRow Selected=\"true\">", table.RazorSource, StringComparison.Ordinal);
 

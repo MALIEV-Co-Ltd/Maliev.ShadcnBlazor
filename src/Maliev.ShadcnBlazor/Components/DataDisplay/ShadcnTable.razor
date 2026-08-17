@@ -1,15 +1,18 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div class="shadcn-table-container" data-slot="table-container">
-    <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table" data-borders="@(Borders ? "true" : "false")"><CascadingValue Value="TableContext" IsFixed="true">@ChildContent</CascadingValue></table>
+    <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table" data-borders="@(Borders ? "true" : "false")" data-expected-columns="@ExpectedColumnCount"><CascadingValue Value="TableContext" IsFixed="true"><CascadingValue Name="ShadcnTableExpectedColumnCount" Value="ExpectedColumnCount">@ChildContent</CascadingValue></CascadingValue></table>
 </div>
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
     /// <summary>Gets or sets whether row and cell separators are rendered.</summary>
     [Parameter] public bool Borders { get; set; } = true;
+    /// <summary>Gets or sets the optional number of rendered columns each row must provide, including column spans.</summary>
+    [Parameter] public int? ExpectedColumnCount { get; set; }
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
     private static ShadcnTableCompositionContext TableContext { get; } = new(ShadcnTableCompositionKind.Table);
     protected override void OnParametersSet()
     {
         if (ChildContent is null) throw new InvalidOperationException("Table content is required.");
+        if (ExpectedColumnCount is < 1 or > 1000) throw new ArgumentOutOfRangeException(nameof(ExpectedColumnCount), ExpectedColumnCount, "ExpectedColumnCount must be between 1 and 1000 when supplied.");
     }
 }

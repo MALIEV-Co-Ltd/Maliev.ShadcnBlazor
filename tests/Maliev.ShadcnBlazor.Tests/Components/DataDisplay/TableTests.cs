@@ -92,6 +92,52 @@ public sealed class TableTests : BunitContext
     }
 
     [Fact]
+    public void ExpectedColumnCountAcceptsMatchingCellsAndColSpans()
+    {
+        var cut = Render<ShadcnTable>(parameters => parameters
+            .Add(component => component.ExpectedColumnCount, 4)
+            .AddChildContent<ShadcnTableFooter>(footer => footer.AddChildContent<ShadcnTableRow>(row =>
+            {
+                row.AddChildContent<ShadcnTableCell>(cell => cell
+                    .Add(component => component.ColSpan, 3)
+                    .AddChildContent("Total"));
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("฿37,800"));
+            })));
+
+        Assert.Equal("4", cut.Find("table[data-slot='table']").GetAttribute("data-expected-columns"));
+        Assert.Equal("3", cut.Find("td[colspan='3']").GetAttribute("colspan"));
+    }
+
+    [Fact]
+    public void ExpectedColumnCountRejectsStructurallyInvalidRowsWithActionableFailure()
+    {
+        var error = Assert.ThrowsAny<Exception>(() => Render<ShadcnTable>(parameters => parameters
+            .Add(component => component.ExpectedColumnCount, 4)
+            .AddChildContent<ShadcnTableBody>(body => body.AddChildContent<ShadcnTableRow>(row =>
+            {
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("INV001"));
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("Paid"));
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("฿8,500"));
+            }))));
+
+        Assert.Contains("renders 3 columns", error.ToString(), StringComparison.Ordinal);
+        Assert.Contains("ExpectedColumnCount is 4", error.ToString(), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1001)]
+    public void ExpectedColumnCountRejectsInvalidValues(int invalidCount)
+    {
+        var error = Assert.ThrowsAny<Exception>(() => Render<ShadcnTable>(parameters => parameters
+            .Add(component => component.ExpectedColumnCount, invalidCount)
+            .AddChildContent<ShadcnTableBody>(body => body.AddChildContent<ShadcnTableRow>(row =>
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("Value"))))));
+
+        Assert.Contains("ExpectedColumnCount", error.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RowExposesSelectedAndExpandedStateWithoutAllowingOwnedAttributeOverrides()
     {
         var cut = RenderRow(parameters => parameters
@@ -164,6 +210,8 @@ public sealed class TableTests : BunitContext
         Assert.Contains("[data-state=\"selected\"]", css, StringComparison.Ordinal);
         Assert.Contains("[data-expanded=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-table code", css, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: normal", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);

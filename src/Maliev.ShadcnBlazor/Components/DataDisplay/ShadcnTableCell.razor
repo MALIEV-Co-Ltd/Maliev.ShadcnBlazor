@@ -13,6 +13,7 @@
         if (ChildContent is null) throw new InvalidOperationException("Table cell content is required.");
         ValidateSpan(ColSpan, nameof(ColSpan));
         ValidateSpan(RowSpan, nameof(RowSpan));
+        Parent.RegisterColumns(ColSpan ?? 1);
     }
     private static void ValidateSpan(int? value, string name)
     {
