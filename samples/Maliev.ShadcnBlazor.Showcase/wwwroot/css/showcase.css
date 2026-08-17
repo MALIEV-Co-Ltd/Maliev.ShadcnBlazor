@@ -4427,6 +4427,10 @@ a {
 }
 
 @media (max-width: 40rem) {
+    .showcase-button-group-dossier {
+        padding: .875rem;
+    }
+
     .showcase-button-group-dossier__intro {
         align-items: start;
         flex-direction: column;
@@ -4434,6 +4438,12 @@ a {
 
     .showcase-button-group-dossier__toolbar {
         justify-content: start;
+        padding-inline: 0;
+    }
+
+    .showcase-button-group-dossier__toolbar :where(.shadcn-button, .shadcn-button-group-text) {
+        padding-inline: .5rem;
+        font-size: .8125rem;
     }
 }
 
