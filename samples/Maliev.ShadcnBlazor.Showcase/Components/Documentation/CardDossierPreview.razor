@@ -1,38 +1,67 @@
-<ShadcnCard Size="Size" Spacing="@(CompactSpacing ? "0.75rem" : null)" Class="showcase-card-dossier">
+<ShadcnCard Size="Size"
+            Spacing="@(CompactSpacing ? "0.75rem" : null)"
+            Class="showcase-card-dossier"
+            data-testid="card-dossier-preview">
     <ShadcnCardHeader>
         <div class="showcase-card-dossier__heading">
-            <ShadcnCardTitle>Laser cell 04</ShadcnCardTitle>
-            <ShadcnCardDescription>CNC milling · Production line A</ShadcnCardDescription>
+            <ShadcnCardTitle>Production order #MO-2418</ShadcnCardTitle>
+            <ShadcnCardDescription>CNC milling · Aluminium 6061 · Laser cell 04</ShadcnCardDescription>
         </div>
         @if (Action)
         {
             <ShadcnCardAction>
-                <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Running</ShadcnBadge>
+                <ShadcnBadge Variant="@(_isPaused ? ShadcnBadgeVariant.Outline : ShadcnBadgeVariant.Secondary)"
+                             data-testid="card-production-status">
+                    @(_isPaused ? "Paused" : "In progress")
+                </ShadcnBadge>
             </ShadcnCardAction>
         }
     </ShadcnCardHeader>
     <ShadcnCardContent>
-        <div class="showcase-card-dossier__metrics">
+        <dl class="showcase-card-dossier__metrics">
             <div>
-                <span>Utilization</span>
-                <strong>98%</strong>
+                <dt>Quantity</dt>
+                <dd>18 parts</dd>
             </div>
             <div>
-                <span>Next service</span>
-                <strong>22 Aug 2026</strong>
+                <dt>Due</dt>
+                <dd>22 Aug 2026</dd>
             </div>
+            <div>
+                <dt>First article</dt>
+                <dd>Approved</dd>
+            </div>
+        </dl>
+
+        <div class="showcase-card-dossier__progress">
+            <div class="showcase-card-dossier__progress-copy">
+                <span>Production progress</span>
+                <strong>12 of 18 parts complete</strong>
+            </div>
+            <ShadcnProgress Value="66.7">
+                <ShadcnProgressLabel Class="sr-only">Production progress</ShadcnProgressLabel>
+            </ShadcnProgress>
         </div>
-        <div class="showcase-card-dossier__health">
+
+        <div class="showcase-card-dossier__next-step">
             <span class="showcase-card-dossier__health-dot" aria-hidden="true"></span>
-            <span>Within target</span>
-            <span>Updated 2 minutes ago</span>
+            <span>
+                <strong>Next operation</strong>
+                Quality inspection after part 18
+            </span>
         </div>
     </ShadcnCardContent>
     <ShadcnCardFooter>
-        <span>Production cell A</span>
+        <span class="showcase-card-dossier__updated">Updated 2 minutes ago</span>
         @if (Action)
         {
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small">View details</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline"
+                          Size="ShadcnButtonSize.Small"
+                          OnClick="ToggleProduction"
+                          aria-pressed="@_isPaused.ToString().ToLowerInvariant()"
+                          data-testid="card-toggle-production">
+                @(_isPaused ? "Resume production" : "Pause production")
+            </ShadcnButton>
         }
     </ShadcnCardFooter>
 </ShadcnCard>
@@ -41,4 +70,8 @@
     [Parameter] public ShadcnCardSize Size { get; set; }
     [Parameter] public bool CompactSpacing { get; set; }
     [Parameter] public bool Action { get; set; } = true;
+
+    private bool _isPaused;
+
+    private void ToggleProduction() => _isPaused = !_isPaused;
 }

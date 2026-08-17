@@ -6968,3 +6968,130 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
         inline-size: 100%;
     }
 }
+
+/* Card dossier: a compact production-order composition that proves every card
+   slot without nesting decorative cards inside the primary surface. */
+.showcase-card-dossier {
+    inline-size: min(100%, 34rem);
+    margin-inline: auto;
+}
+
+.showcase-card-dossier__heading {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.125rem;
+}
+
+.showcase-card-dossier .shadcn-card-content {
+    display: grid;
+    gap: calc(1.25rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-card-dossier__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    border-block: 1px solid var(--shadcn-border);
+}
+
+.showcase-card-dossier__metrics > div {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.125rem;
+    padding-block: calc(0.75rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-card-dossier__metrics > div + div {
+    border-inline-start: 1px solid var(--shadcn-border);
+    padding-inline-start: calc(0.875rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-card-dossier__metrics dt,
+.showcase-card-dossier__progress-copy span,
+.showcase-card-dossier__updated {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+}
+
+.showcase-card-dossier__metrics dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.showcase-card-dossier__progress,
+.showcase-card-dossier__progress-copy {
+    display: grid;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-card-dossier__progress-copy {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+}
+
+.showcase-card-dossier__progress-copy strong {
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.showcase-card-dossier__next-step {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(0.625rem * var(--shadcn-spacing-multiplier));
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    padding: calc(0.75rem * var(--shadcn-spacing-multiplier));
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-card-dossier__next-step > span:last-child {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.125rem;
+}
+
+.showcase-card-dossier__next-step strong {
+    color: var(--shadcn-foreground);
+    font-weight: 600;
+}
+
+.showcase-card-dossier__health-dot {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    flex: 0 0 auto;
+    margin-block-start: 0.375rem;
+    border-radius: 9999px;
+    background: var(--shadcn-success, oklch(0.72 0.18 145));
+}
+
+.showcase-card-dossier .shadcn-card-footer {
+    justify-content: space-between;
+}
+
+@media (max-width: 40rem) {
+    .showcase-card-dossier__metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .showcase-card-dossier__metrics > div + div {
+        border-block-start: 1px solid var(--shadcn-border);
+        border-inline-start: 0;
+        padding-inline-start: 0;
+    }
+
+    .showcase-card-dossier__progress-copy {
+        grid-template-columns: 1fr;
+    }
+
+    .showcase-card-dossier .shadcn-card-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .showcase-card-dossier .shadcn-card-footer .shadcn-button {
+        inline-size: 100%;
+    }
+}

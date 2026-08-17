@@ -532,6 +532,65 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(trigger).ToContainTextAsync("Pick a delivery date");
     }
 
+    [Fact]
+    public async Task CardDossierStaysCenteredResponsiveAndSynchronizesInteractiveSource()
+    {
+        var errors = new List<string>();
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
+        page.PageError += (_, error) => errors.Add(error);
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/card").ToString());
+        var canvas = page.GetByTestId("component-preview-canvas");
+        var card = page.GetByTestId("card-dossier-preview");
+        var action = page.GetByTestId("card-toggle-production");
+
+        await Assertions.Expect(card).ToContainTextAsync("Production order #MO-2418");
+        await Assertions.Expect(page.GetByTestId("card-production-status")).ToHaveTextAsync("In progress");
+        await action.FocusAsync();
+        await action.PressAsync("Enter");
+        await Assertions.Expect(page.GetByTestId("card-production-status")).ToHaveTextAsync("Paused");
+        await Assertions.Expect(action).ToHaveTextAsync("Resume production");
+        await Assertions.Expect(action).ToHaveAttributeAsync("aria-pressed", "true");
+
+        var centered = await card.EvaluateAsync<bool>("""
+            card => {
+                const canvas = card.closest('[data-testid="component-preview-canvas"]');
+                const cardRect = card.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+                return Math.abs((cardRect.left + cardRect.width / 2) - (canvasRect.left + canvasRect.width / 2)) <= 1;
+            }
+            """);
+        Assert.True(centered, "The Card dossier should remain centered in its preview canvas.");
+
+        await page.GetByTestId("control-card-size").SelectOptionAsync("Small");
+        await Assertions.Expect(card).ToHaveAttributeAsync("data-size", "sm");
+        await Assertions.Expect(page.Locator("#preview pre").First).ToContainTextAsync("Size=\"ShadcnCardSize.Small\"");
+        await page.GetByTestId("control-card-spacing").CheckAsync();
+        await Assertions.Expect(card).ToHaveAttributeAsync("style", new Regex("--shadcn-card-spacing: 0.75rem"));
+        await Assertions.Expect(page.Locator("#preview pre").First).ToContainTextAsync("Spacing=\"0.75rem\"");
+
+        await page.GetByTestId("control-card-action").UncheckAsync();
+        await Assertions.Expect(page.GetByTestId("card-toggle-production")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByTestId("card-production-status")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("#preview pre").First).Not.ToContainTextAsync("ToggleProduction");
+
+        await canvas.EvaluateAsync("element => { element.dir = 'rtl'; element.setAttribute('data-shadcn-theme', 'dark'); }");
+        await Assertions.Expect(card).ToHaveCSSAsync("overflow", "hidden");
+
+        await page.SetViewportSizeAsync(390, 844);
+        Assert.InRange(await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)"), 0, 1);
+        await Assertions.Expect(card).ToBeVisibleAsync();
+        await Assertions.Expect(card.Locator(".showcase-card-dossier__metrics")).ToHaveCSSAsync("grid-template-columns", new Regex("^.+$"));
+        Assert.Empty(errors);
+    }
+
     [Theory]
     [InlineData("input")]
     [InlineData("select")]

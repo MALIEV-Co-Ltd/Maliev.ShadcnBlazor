@@ -97,6 +97,8 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("Laser cell 04", card, StringComparison.Ordinal);
         Assert.Contains("ShadcnCardDescription", card, StringComparison.Ordinal);
         Assert.Contains("ShadcnCardFooter", card, StringComparison.Ordinal);
+        Assert.Contains("private void ToggleProduction()", card, StringComparison.Ordinal);
+        Assert.Contains("OnClick=\"ToggleProduction\"", card, StringComparison.Ordinal);
         Assert.DoesNotContain("...</", card, StringComparison.Ordinal);
 
         var progress = registry.GetBySlug("progress").Single().RazorSource;
@@ -123,6 +125,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("Size=\"ShadcnCardSize.Small\"", card.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Spacing=\"0.75rem\"", card.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ShadcnCardAction", card.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("OnClick=\"ToggleProduction\"", card.RazorSource, StringComparison.Ordinal);
 
         var progress = registry.GetBySlug("progress").Single();
         progress.Controls.Single(control => control.Id == "progress-indeterminate").Apply("true");
@@ -142,6 +145,23 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("MaximumVisible=\"1\"", toast.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Placement=\"ShadcnToastPlacement.BottomStart\"", toast.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Type: ShadcnToastType.Error", toast.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CardPreviewUsesARealInteractiveProductionOrderComposition()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("card"));
+        var cut = Render(example.Preview);
+
+        var preview = cut.Find("[data-testid='card-dossier-preview']");
+        Assert.Contains("Production order #MO-2418", preview.TextContent, StringComparison.Ordinal);
+        Assert.Contains("12 of 18 parts complete", preview.TextContent, StringComparison.Ordinal);
+        Assert.Equal("In progress", cut.Find("[data-testid='card-production-status']").TextContent);
+
+        cut.Find("[data-testid='card-toggle-production']").Click();
+
+        Assert.Equal("Paused", cut.Find("[data-testid='card-production-status']").TextContent);
+        Assert.Equal("Resume production", cut.Find("[data-testid='card-toggle-production']").TextContent);
     }
 
     [Fact]

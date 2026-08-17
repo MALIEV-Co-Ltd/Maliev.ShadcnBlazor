@@ -206,6 +206,9 @@ public sealed class AlertBadgeCardTests : BunitContext
         Assert.Contains(".shadcn-card > img:first-child", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-card-header.border-b", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-card-footer.border-t", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-card-header > :not(.shadcn-card-action) { min-inline-size: 0; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-card-title { overflow-wrap: anywhere;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-card-footer { display: flex; align-items: center; gap:", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
