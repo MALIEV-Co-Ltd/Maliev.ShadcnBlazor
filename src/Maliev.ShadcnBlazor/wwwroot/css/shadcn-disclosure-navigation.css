@@ -30,14 +30,24 @@
 .shadcn-breadcrumb-separator, .shadcn-breadcrumb-ellipsis, .shadcn-pagination-ellipsis { display: inline-flex; align-items: center; justify-content: center; }
 .shadcn-breadcrumb-separator svg, .shadcn-breadcrumb-ellipsis svg, .shadcn-pagination-ellipsis svg, .shadcn-pagination-direction svg { inline-size: 1rem; block-size: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
 .shadcn-breadcrumb-ellipsis, .shadcn-pagination-ellipsis { inline-size: 2.25rem; block-size: 2.25rem; }
-.shadcn-pagination { display: flex; width: 100%; justify-content: center; }
-.shadcn-pagination-content { gap: calc(.25rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-foreground); }
+.shadcn-pagination { display: flex; inline-size: 100%; max-inline-size: 100%; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+.shadcn-pagination::-webkit-scrollbar { display: none; }
+.shadcn-pagination-content { gap: calc(.25rem * var(--shadcn-spacing-multiplier)); margin-inline: auto; color: var(--shadcn-foreground); }
+.shadcn-pagination-pages { flex-wrap: nowrap; }
 .shadcn-pagination-link, .shadcn-pagination-direction { display: inline-flex; align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); block-size: 2.25rem; min-inline-size: 2.25rem; border: 1px solid transparent; border-radius: var(--shadcn-radius-md); background: transparent; color: inherit; padding-inline: calc(.75rem * var(--shadcn-spacing-multiplier)); font: inherit; font-size: .875rem; text-decoration: none; cursor: pointer; }
 .shadcn-pagination-link[data-size="icon"] { inline-size: 2.25rem; padding-inline: 0; }
 .shadcn-pagination-link[data-current="true"] { border-color: var(--shadcn-border); background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-xs); }
 .shadcn-pagination-link:hover:not(:disabled), .shadcn-pagination-direction:hover:not(:disabled) { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 .shadcn-pagination-link:disabled, .shadcn-pagination-direction:disabled, .shadcn-pagination-link[aria-disabled="true"], .shadcn-pagination-direction[aria-disabled="true"] { pointer-events: none; opacity: .5; }
 [dir="rtl"] .shadcn-breadcrumb-separator svg, [dir="rtl"] .shadcn-pagination-direction svg { scale: -1 1; }
+@media (max-width: 36rem) {
+    .shadcn-pagination-pages .shadcn-pagination-direction span { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .shadcn-pagination-pages .shadcn-pagination-direction { inline-size: 2.25rem; min-inline-size: 2.25rem; padding-inline: 0; }
+}
+@media (forced-colors: active) {
+    .shadcn-pagination-link[data-current="true"] { border-color: CanvasText; box-shadow: none; }
+    .shadcn-pagination-link:focus-visible, .shadcn-pagination-direction:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; box-shadow: none; }
+}
 .shadcn-tabs { display: flex; flex-direction: column; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-tabs[data-orientation="vertical"] { flex-direction: row; }
 .shadcn-tabs-list { display: inline-flex; inline-size: fit-content; min-block-size: var(--shadcn-control-height); align-items: center; justify-content: center; gap: 0; border-radius: var(--shadcn-radius-lg); background: var(--shadcn-muted); padding: calc(3px * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); }

@@ -210,6 +210,34 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task PaginationDossierUsesAConfigurableInteractiveWindowAndMatchingSource()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/pagination").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var canvas = page.GetByTestId("component-preview-canvas");
+        var numericPages = canvas.Locator("[data-slot='pagination-link'][data-page]");
+        await Assertions.Expect(numericPages).ToHaveCountAsync(5);
+        await Assertions.Expect(canvas.Locator("[data-slot='pagination-ellipsis']")).ToHaveCountAsync(1);
+
+        var visibleCount = page.GetByTestId("control-pagination-visible");
+        await visibleCount.FillAsync("7");
+        await visibleCount.PressAsync("Tab");
+        await Assertions.Expect(numericPages).ToHaveCountAsync(7);
+        await Assertions.Expect(page.Locator("#preview .component-code pre").First).ToContainTextAsync("VisiblePageCount=\"7\"");
+
+        await canvas.Locator("[data-page='6']").ClickAsync();
+        await Assertions.Expect(canvas.Locator("[data-page='6']")).ToHaveAttributeAsync("aria-current", "page");
+        await Assertions.Expect(canvas.GetByText("Page 6 of 12")).ToBeVisibleAsync();
+    }
+
+    [Fact]
     public async Task DisclosureTabsAndNavigationMenuHaveRealKeyboardFocusAndState()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 900, Height = 800 } });

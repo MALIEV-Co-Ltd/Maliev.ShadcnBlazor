@@ -2,6 +2,7 @@ using Maliev.ShadcnBlazor.Components.Disclosure;
 using Maliev.ShadcnBlazor.Components.Layout;
 using Maliev.ShadcnBlazor.Components.Navigation;
 using Maliev.ShadcnBlazor.Components.Navigation.Sidebar;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
@@ -124,9 +125,44 @@ internal static class DisclosureNavigationExamples
 
     private static ComponentExampleDefinition Pagination()
     {
-        var current = 2d; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnPagination>(0); b.AddAttribute(1, "Label", "Quotation pages"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnPaginationContent>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(l => { AddPaginationDirection<ShadcnPaginationPrevious>(l, 0, disabled, () => current = Math.Max(1, current - 1)); AddPage(l, 10, 1, 1 == (int)current, () => current = 1); AddPage(l, 20, 2, 2 == (int)current, () => current = 2); AddPage(l, 30, 3, 3 == (int)current, () => current = 3); Add<ShadcnPaginationEllipsis>(l, 40); AddPage(l, 50, 8, 8 == (int)current, () => current = 8); AddPaginationDirection<ShadcnPaginationNext>(l, 60, disabled, () => current = Math.Min(8, current + 1)); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("pagination", "Pagination navigation", "Browse a multi-page quotation list with current-page state, previous/next buttons, ellipsis, and disabled navigation.", "<ShadcnPagination Label=\"Quotation pages\">\n    <ShadcnPaginationContent>\n        <ShadcnPaginationPrevious />\n        <ShadcnPaginationLink Current=\"true\">1</ShadcnPaginationLink>\n        <ShadcnPaginationLink>2</ShadcnPaginationLink>\n        <ShadcnPaginationLink>3</ShadcnPaginationLink>\n        <ShadcnPaginationEllipsis />\n        <ShadcnPaginationLink>8</ShadcnPaginationLink>\n        <ShadcnPaginationNext />\n    </ShadcnPaginationContent>\n</ShadcnPagination>", preview, [Number("pagination-current", "Current page", current, v => current = Math.Clamp(v, 1, 8)), Toggle("pagination-disabled", "Disable navigation", v => disabled = v)], ["current", "previous", "next", "ellipsis", "disabled", "link", "button"]);
+        const int totalPages = 12;
+        var current = 2d;
+        var visible = 5d;
+        var disabled = false;
+
+        string Source() => $$"""
+<section class="quotation-pagination" aria-labelledby="quotation-pagination-title">
+    <div>
+        <h3 id="quotation-pagination-title">Production quotations</h3>
+        <p>Page {{(int)current}} of {{totalPages}} · 96 quotations</p>
+    </div>
+    <ShadcnPagination Label="Production quotation pages">
+        <ShadcnPaginationPages TotalPages="{{totalPages}}"
+                               @bind-CurrentPage="currentPage"
+                               VisiblePageCount="{{(int)visible}}"
+                               Disabled="{{disabled.ToString().ToLowerInvariant()}}" />
+    </ShadcnPagination>
+</section>
+
+@code {
+    private int currentPage = {{(int)current}};
+}
+""";
+
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<PaginationDossierPreview>(0);
+            builder.AddAttribute(1, nameof(PaginationDossierPreview.CurrentPage), (int)current);
+            builder.AddAttribute(2, nameof(PaginationDossierPreview.CurrentPageChanged), EventCallback.Factory.Create<int>(new object(), page => current = page));
+            builder.AddAttribute(3, nameof(PaginationDossierPreview.TotalPages), totalPages);
+            builder.AddAttribute(4, nameof(PaginationDossierPreview.TotalItems), 96);
+            builder.AddAttribute(5, nameof(PaginationDossierPreview.VisiblePageCount), (int)visible);
+            builder.AddAttribute(6, nameof(PaginationDossierPreview.Disabled), disabled);
+            builder.CloseComponent();
+        };
+
+        var example = Example("pagination", "Production quotation pages", "Move through a realistic quotation queue with a configurable numeric window, stable boundary pages, automatic ellipses, and accessible previous and next actions.", Source(), preview, [Number("pagination-current", "Current page", current, v => current = Math.Clamp(Math.Round(v), 1, totalPages)), Number("pagination-visible", "Visible pages", visible, v => visible = Math.Clamp(Math.Round(v), 3, 9)), Toggle("pagination-disabled", "Disable navigation", v => disabled = v)], ["current", "previous", "next", "ellipsis", "visible-count", "disabled", "keyboard", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Resizable()
@@ -250,9 +286,6 @@ internal static class DisclosureNavigationExamples
         builder.CloseElement();
     }
     private static void AddBreadcrumbLink(RenderTreeBuilder b, int s, string text, string href) { b.OpenComponent<ShadcnBreadcrumbItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbLink>(0); c.AddAttribute(1, "Href", href); c.AddAttribute(2, "ChildContent", Text(text)); c.CloseComponent(); })); b.CloseComponent(); }
-    private static void AddPaginationItem<T>(RenderTreeBuilder b, int s, bool disabled) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.CloseComponent(); })); b.CloseComponent(); }
-    private static void AddPaginationDirection<T>(RenderTreeBuilder b, int s, bool disabled, Action apply) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.AddAttribute(2, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.CloseComponent(); })); b.CloseComponent(); }
-    private static void AddPage(RenderTreeBuilder b, int s, int page, bool current, Action apply) { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnPaginationLink>(0); c.AddAttribute(1, "Current", current); c.AddAttribute(2, "Href", $"#quotation-page-{page}"); c.AddAttribute(3, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.AddAttribute(4, "ChildContent", Text(page.ToString())); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPanel(RenderTreeBuilder b, int s, string id, string title, bool collapsible, string summary) { b.OpenComponent<ShadcnResizablePanel>(s); b.AddAttribute(s + 1, "Id", id); b.AddAttribute(s + 2, "MinimumSize", 20d); b.AddAttribute(s + 3, "MaximumSize", 80d); b.AddAttribute(s + 4, "Collapsible", collapsible); b.AddAttribute(s + 5, "ChildContent", PanelContent(title, summary)); b.CloseComponent(); }
     private static void AddTab(RenderTreeBuilder b, int s, string value, string text) { b.OpenComponent<ShadcnTabsTrigger>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ChildContent", Text(text)); b.CloseComponent(); }
     private static void AddTabContent(RenderTreeBuilder b, int s, string value, string text, bool force) { b.OpenComponent<ShadcnTabsContent>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ForceMount", force); b.AddAttribute(s + 3, "ChildContent", Text(text)); b.CloseComponent(); }

@@ -123,6 +123,76 @@ public sealed class NavigationCompositionTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnPaginationLink>(p => p.Add(x => x.Size, (ShadcnPaginationLinkSize)999)));
     }
 
+    [Fact]
+    public void PaginationPagesKeepsBoundaryPagesAndCentersTheCurrentWindow()
+    {
+        var cut = Render<ShadcnPaginationPages>(parameters => parameters
+            .Add(component => component.TotalPages, 12)
+            .Add(component => component.CurrentPage, 6)
+            .Add(component => component.VisiblePageCount, 5));
+
+        Assert.Equal(["1", "5", "6", "7", "12"], cut.FindAll("[data-slot='pagination-link']").Select(link => link.TextContent.Trim()));
+        Assert.Equal(2, cut.FindAll("[data-slot='pagination-ellipsis']").Count);
+        Assert.Equal("page", cut.Find("[data-page='6']").GetAttribute("aria-current"));
+        Assert.Equal("Go to page 5", cut.Find("[data-page='5']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void PaginationPagesCollapsesOnlyTheTrailingRangeNearTheStart()
+    {
+        var cut = Render<ShadcnPaginationPages>(parameters => parameters
+            .Add(component => component.TotalPages, 12)
+            .Add(component => component.CurrentPage, 1)
+            .Add(component => component.VisiblePageCount, 5));
+
+        Assert.Equal(["1", "2", "3", "4", "12"], cut.FindAll("[data-slot='pagination-link']").Select(link => link.TextContent.Trim()));
+        Assert.Single(cut.FindAll("[data-slot='pagination-ellipsis']"));
+        Assert.True(cut.Find("[data-slot='pagination-previous']").HasAttribute("disabled"));
+    }
+
+    [Theory]
+    [InlineData(5, 5, 7, "1,2,3,4,5", 0)]
+    [InlineData(12, 12, 5, "1,9,10,11,12", 1)]
+    [InlineData(12, 6, 3, "1,6,12", 2)]
+    public void PaginationPagesHandlesShortTrailingAndMinimumWindows(int totalPages, int currentPage, int visiblePageCount, string expectedPages, int expectedEllipses)
+    {
+        var cut = Render<ShadcnPaginationPages>(parameters => parameters
+            .Add(component => component.TotalPages, totalPages)
+            .Add(component => component.CurrentPage, currentPage)
+            .Add(component => component.VisiblePageCount, visiblePageCount));
+
+        Assert.Equal(expectedPages.Split(','), cut.FindAll("[data-slot='pagination-link']").Select(link => link.TextContent.Trim()));
+        Assert.Equal(expectedEllipses, cut.FindAll("[data-slot='pagination-ellipsis']").Count);
+    }
+
+    [Fact]
+    public void PaginationPagesPublishesPageChangesAndSupportsUncontrolledInteraction()
+    {
+        var published = new List<int>();
+        var cut = Render<ShadcnPaginationPages>(parameters => parameters
+            .Add(component => component.TotalPages, 8)
+            .Add(component => component.CurrentPage, 2)
+            .Add(component => component.VisiblePageCount, 5)
+            .Add(component => component.CurrentPageChanged, EventCallback.Factory.Create<int>(this, published.Add)));
+
+        cut.Find("[data-slot='pagination-next']").Click();
+        cut.Find("[data-page='4']").Click();
+        cut.Find("[data-page='5']").Click();
+
+        Assert.Equal([3, 4, 5], published);
+        Assert.Equal("page", cut.Find("[data-page='5']").GetAttribute("aria-current"));
+    }
+
+    [Theory]
+    [InlineData(0, 5)]
+    [InlineData(8, 2)]
+    public void PaginationPagesRejectsInvalidRangeConfiguration(int totalPages, int visiblePageCount)
+    {
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnPaginationPages>(parameters => parameters
+            .Add(component => component.TotalPages, totalPages)
+            .Add(component => component.VisiblePageCount, visiblePageCount)));
+    }
+
     private static void AddBreadcrumbLink(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder, int sequence, string href, string text)
     {
         builder.OpenComponent<ShadcnBreadcrumbItem>(sequence);

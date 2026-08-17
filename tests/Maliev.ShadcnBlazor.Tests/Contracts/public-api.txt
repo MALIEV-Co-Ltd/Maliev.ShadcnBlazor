@@ -913,6 +913,16 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationNext
   String Href
   String Label
   EventCallback<MouseEventArgs> OnClick
+type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPages
+  Int32 CurrentPage
+  EventCallback<Int32> CurrentPageChanged
+  Boolean Disabled
+  String EllipsisLabel
+  String NextLabel
+  String PageLabelFormat
+  String PreviousLabel
+  Int32 TotalPages
+  Int32 VisiblePageCount
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPrevious
   Boolean Disabled
   String Href
