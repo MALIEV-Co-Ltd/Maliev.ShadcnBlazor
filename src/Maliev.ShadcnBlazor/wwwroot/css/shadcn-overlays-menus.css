@@ -88,7 +88,12 @@
 
 .shadcn-popover, .shadcn-hover-card, .shadcn-tooltip { display: contents; }
 .shadcn-popover-content, .shadcn-hover-card-content, .shadcn-tooltip-content { z-index: var(--shadcn-z-popover, 50); border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); outline: none; transform-origin: var(--shadcn-transform-origin); animation: shadcn-positioned-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
-.shadcn-popover-content { width: 18rem; padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-popover-trigger { display: inline-flex; min-height: 2.25rem; align-items: center; justify-content: center; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-background); color: var(--shadcn-foreground); padding-inline: calc(0.875rem * var(--shadcn-spacing-multiplier)); font: inherit; font-size: 0.875rem; font-weight: 500; box-shadow: var(--shadcn-shadow-xs); cursor: pointer; transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing), color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing); }
+.shadcn-popover-trigger:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.shadcn-popover-trigger:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-ring) 45%, transparent); }
+.shadcn-popover-trigger:disabled { opacity: 0.5; cursor: not-allowed; }
+.shadcn-popover-content { width: min(18rem, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow: auto; padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-popover-content[data-positioned="false"] { visibility: hidden; animation: none; }
 .shadcn-popover-header { display: flex; flex-direction: column; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-popover-title { margin: 0; font-size: 1rem; font-weight: 500; }
 .shadcn-popover-description { margin: 0; color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
@@ -98,6 +103,7 @@
 .shadcn-tooltip-content[data-side="top"] .shadcn-tooltip-arrow { inset-block-end: -0.25rem; inset-inline-start: calc(50% - 0.25rem); }
 .shadcn-tooltip-content[data-side="bottom"] .shadcn-tooltip-arrow { inset-block-start: -0.25rem; inset-inline-start: calc(50% - 0.25rem); }
 @media (prefers-reduced-motion: reduce) { .shadcn-popover-content, .shadcn-hover-card-content, .shadcn-tooltip-content { animation: none; } }
+@media (forced-colors: active) { .shadcn-popover-trigger, .shadcn-popover-content { border-color: CanvasText; } .shadcn-popover-trigger:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; box-shadow: none; } }
 @keyframes shadcn-positioned-in { from { opacity: 0; scale: 0.96; } }
 
 /* Showcase-safe overlay layout: content owns its spacing and close actions stay

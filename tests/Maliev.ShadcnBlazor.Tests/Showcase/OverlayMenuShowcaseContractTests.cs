@@ -91,6 +91,26 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void PopoverDossierUsesARealClosedByDefaultCompositionAndStateAwareSource()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("popover").Single();
+        var markup = Render(example.Preview).Markup;
+
+        Assert.Contains("showcase-popover-dossier", markup, StringComparison.Ordinal);
+        Assert.Contains("Edit part dimensions", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-state=\"open\"", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain(example.Controls, control => control.Id == "popover-open");
+        Assert.Contains("@bind-Open=\"Open\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnPopoverHeader", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnInput", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "popover-top").Apply("true");
+        Assert.Contains("Side=\"ShadcnOverlaySide.Top\"", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "popover-outside").Apply("false");
+        Assert.Contains("CloseOnOutsidePress=\"false\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();

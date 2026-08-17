@@ -1,3 +1,4 @@
+using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -75,9 +76,99 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Popover()
     {
-        var open = false; var top = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnPopover>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnPopoverTrigger>(c, 0, "Open popover"); c.OpenComponent<ShadcnPopoverContent>(10); c.AddAttribute(11, "Side", top ? ShadcnOverlaySide.Top : ShadcnOverlaySide.Bottom); c.AddAttribute(12, "ChildContent", (RenderFragment)(x => { AddText<ShadcnPopoverTitle>(x, 0, "Dimensions"); AddText<ShadcnPopoverDescription>(x, 10, "Set part dimensions."); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("popover", "Collision-aware popover", preview, [Toggle("popover-open", "Open", v => open = v), Toggle("popover-top", "Top placement", v => top = v)], ["controlled", "placement", "collision", "outside-press", "restore-focus"]);
+        var open = false;
+        var top = false;
+        var closeOnOutsidePress = true;
+        decimal width = 120;
+        decimal depth = 80;
+        decimal height = 24;
+
+        RenderFragment preview = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-popover-dossier");
+            builder.AddAttribute(2, "data-placement", top ? "top" : "bottom");
+            builder.AddAttribute(3, "data-close-on-outside-press", closeOnOutsidePress.ToString().ToLowerInvariant());
+            builder.OpenComponent<ShadcnPopover>(4);
+            builder.AddAttribute(5, nameof(ShadcnPopover.Open), open);
+            builder.AddAttribute(6, nameof(ShadcnPopover.OpenChanged), EventCallback.Factory.Create<bool>(new object(), next => open = next));
+            builder.AddAttribute(7, nameof(ShadcnPopover.CloseOnOutsidePress), closeOnOutsidePress);
+            builder.AddAttribute(8, nameof(ShadcnPopover.ChildContent), (RenderFragment)(popover =>
+            {
+                AddText<ShadcnPopoverTrigger>(popover, 0, "Edit part dimensions");
+                popover.OpenComponent<ShadcnPopoverContent>(10);
+                popover.AddAttribute(11, nameof(ShadcnPopoverContent.Side), top ? ShadcnOverlaySide.Top : ShadcnOverlaySide.Bottom);
+                popover.AddAttribute(12, nameof(ShadcnPopoverContent.Align), ShadcnOverlayAlign.Start);
+                popover.AddAttribute(13, nameof(ShadcnPopoverContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnPopoverHeader>(0);
+                    content.AddAttribute(1, nameof(ShadcnPopoverHeader.ChildContent), (RenderFragment)(header =>
+                    {
+                        AddText<ShadcnPopoverTitle>(header, 0, "Part dimensions");
+                        AddText<ShadcnPopoverDescription>(header, 10, "Set the finished size in millimetres.");
+                    }));
+                    content.CloseComponent();
+                    content.OpenElement(10, "div");
+                    content.AddAttribute(11, "class", "showcase-popover-form");
+                    AddPopoverField(content, 20, "part-width", "Width", width, next => width = next);
+                    AddPopoverField(content, 40, "part-depth", "Depth", depth, next => depth = next);
+                    AddPopoverField(content, 60, "part-height", "Height", height, next => height = next);
+                    content.CloseElement();
+                }));
+                popover.CloseComponent();
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        };
+
+        string Source()
+        {
+            var side = top ? "Top" : "Bottom";
+            var outside = closeOnOutsidePress.ToString().ToLowerInvariant();
+            return $$"""
+                @using Maliev.ShadcnBlazor.Components.Forms
+                @using Maliev.ShadcnBlazor.Components.Overlays
+
+                <div class="showcase-popover-dossier" data-placement="{{side.ToLowerInvariant()}}" data-close-on-outside-press="{{outside}}">
+                    <ShadcnPopover @bind-Open="Open" CloseOnOutsidePress="{{outside}}">
+                        <ShadcnPopoverTrigger>Edit part dimensions</ShadcnPopoverTrigger>
+                        <ShadcnPopoverContent Side="ShadcnOverlaySide.{{side}}" Align="ShadcnOverlayAlign.Start">
+                            <ShadcnPopoverHeader>
+                                <ShadcnPopoverTitle>Part dimensions</ShadcnPopoverTitle>
+                                <ShadcnPopoverDescription>Set the finished size in millimetres.</ShadcnPopoverDescription>
+                            </ShadcnPopoverHeader>
+                            <div class="showcase-popover-form">
+                                <ShadcnLabel For="part-width">Width</ShadcnLabel>
+                                <ShadcnInput TValue="decimal" @bind-Value="Width" Type="number" id="part-width" />
+                                <ShadcnLabel For="part-depth">Depth</ShadcnLabel>
+                                <ShadcnInput TValue="decimal" @bind-Value="Depth" Type="number" id="part-depth" />
+                                <ShadcnLabel For="part-height">Height</ShadcnLabel>
+                                <ShadcnInput TValue="decimal" @bind-Value="Height" Type="number" id="part-height" />
+                            </div>
+                        </ShadcnPopoverContent>
+                    </ShadcnPopover>
+                </div>
+
+                @code {
+                    private bool Open { get; set; }
+                    private decimal Width { get; set; } = 120;
+                    private decimal Depth { get; set; } = 80;
+                    private decimal Height { get; set; } = 24;
+                }
+                """;
+        }
+
+        return Example(
+            "popover",
+            "Part dimensions popover",
+            preview,
+            [
+                Toggle("popover-top", "Top placement", value => top = value),
+                Toggle("popover-outside", "Close on outside press", value => closeOnOutsidePress = value, true)
+            ],
+            ["controlled", "placement", "collision", "outside-press", "restore-focus", "rtl"],
+            Source()) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition HoverCard()
@@ -379,6 +470,20 @@ internal static class OverlayMenuExamples
         b.AddAttribute(sequence + 1, "Value", value);
         b.AddAttribute(sequence + 2, "ChildContent", Text(text));
         b.CloseComponent();
+    }
+
+    private static void AddPopoverField(RenderTreeBuilder builder, int sequence, string id, string label, decimal value, Action<decimal> changed)
+    {
+        builder.OpenComponent<ShadcnLabel>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnLabel.For), id);
+        builder.AddAttribute(sequence + 2, nameof(ShadcnLabel.ChildContent), Text(label));
+        builder.CloseComponent();
+        builder.OpenComponent<ShadcnInput<decimal>>(sequence + 10);
+        builder.AddAttribute(sequence + 11, nameof(ShadcnInput<decimal>.Value), value);
+        builder.AddAttribute(sequence + 12, nameof(ShadcnInput<decimal>.ValueChanged), EventCallback.Factory.Create<decimal>(new object(), changed));
+        builder.AddAttribute(sequence + 13, nameof(ShadcnInput<decimal>.Type), "number");
+        builder.AddAttribute(sequence + 14, nameof(ShadcnInput<decimal>.AdditionalAttributes), new Dictionary<string, object> { ["id"] = id });
+        builder.CloseComponent();
     }
     private static void AddCommandItem(RenderTreeBuilder b, int sequence, string value, string text, bool disabled) { b.OpenComponent<ShadcnCommandItem>(sequence); b.AddAttribute(sequence + 1, "Value", value); b.AddAttribute(sequence + 2, "TextValue", text); b.AddAttribute(sequence + 3, "Disabled", disabled); b.AddAttribute(sequence + 4, "ChildContent", Text(text)); b.CloseComponent(); }
 }
