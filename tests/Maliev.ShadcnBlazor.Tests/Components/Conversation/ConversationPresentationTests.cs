@@ -164,7 +164,13 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains("border-end-start-radius", css, StringComparison.Ordinal);
         Assert.Contains("border-end-end-radius", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-bubble-reactions :is(svg,img)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-variant=\"ghost\"] { width:fit-content; max-width:80%; }", css, StringComparison.Ordinal);
+        Assert.Contains(":has(> [data-slot=\"bubble-reactions\"][data-side=\"top\"])", css, StringComparison.Ordinal);
         Assert.Contains("color:var(--shadcn-foreground)", css, StringComparison.Ordinal);
+        Assert.Contains("background-clip:text", css, StringComparison.Ordinal);
+        Assert.Contains("background-position:200% 0", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position:200% 0; } to { background-position:-200% 0; } }", css, StringComparison.Ordinal);
+        Assert.Contains("-webkit-text-fill-color:CanvasText", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);

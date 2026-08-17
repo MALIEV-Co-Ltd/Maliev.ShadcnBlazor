@@ -196,7 +196,7 @@ public sealed class ComponentDossierBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
         var message = page.Locator("#preview [data-slot='message']").First;
         var avatar = message.Locator("[data-slot='message-avatar']");
-        Assert.Equal("flex-start", await avatar.EvaluateAsync<string>("element => getComputedStyle(element).alignSelf"));
+        Assert.Equal("end", await avatar.EvaluateAsync<string>("element => getComputedStyle(element).alignSelf"));
         await Assertions.Expect(message.Locator("img[data-avatar='operator']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#preview img[data-avatar='assistant']")).ToHaveCountAsync(1);

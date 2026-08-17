@@ -262,6 +262,27 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void MessageDossierKeepsAvatarsCircularAndFooterActionsInTheirOwnRow()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Equal(3, cut.FindAll(".showcase-message-body").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] > [data-slot='avatar']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] [data-slot='avatar-fallback']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
+
+        var cssPath = Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+        var css = File.ReadAllText(cssPath);
+        Assert.Contains("grid-template-rows: auto auto", css, StringComparison.Ordinal);
+        Assert.Contains("align-self: end", css, StringComparison.Ordinal);
+        Assert.Contains("justify-content: flex-start !important", css, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-start: auto", css, StringComparison.Ordinal);
+        Assert.Contains("aspect-ratio: 1", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ScrollerDossierShowsAReadableTranscriptWithAnchorsAndLatestAction()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
@@ -273,6 +294,8 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Single(cut.FindAll("form.showcase-scroller-composer"));
+        Assert.Single(cut.FindAll("[data-slot='message-scroller'] form.showcase-scroller-composer"));
+        Assert.Empty(cut.FindAll("[data-testid='scroller-demo'] > form.showcase-scroller-composer"));
         Assert.Equal("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย", cut.Find(".showcase-scroller-composer input").GetAttribute("value"));
         Assert.NotEmpty(cut.FindAll("button[data-testid='scroller-send']"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller-button']"));
@@ -297,6 +320,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
+
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.Contains(".showcase-scroller-frame .showcase-scroller-composer", css, StringComparison.Ordinal);
+        Assert.Contains("padding: 1rem 1.25rem 5rem", css, StringComparison.Ordinal);
     }
 
     [Fact]

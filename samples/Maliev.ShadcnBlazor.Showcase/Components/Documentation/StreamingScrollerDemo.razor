@@ -28,14 +28,14 @@
                 </ShadcnMessageScrollerContent>
             </ShadcnMessageScrollerViewport>
             <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="ไปข้อความล่าสุด">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+            <form class="showcase-scroller-composer" aria-label="ส่งข้อความ" @onsubmit="SendAsync" @onsubmit:preventDefault="true">
+                <input type="text" @bind="Composer" @bind:event="oninput" aria-label="ข้อความใหม่" />
+                <button type="submit" aria-label="ส่งข้อความ" data-testid="scroller-send" disabled="@IsStreaming">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12 14-7-4 14-3.5-5.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M11.5 13.5 19 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                </button>
+            </form>
         </ShadcnMessageScroller>
 
-        <form class="showcase-scroller-composer" aria-label="ส่งข้อความ" @onsubmit="SendAsync" @onsubmit:preventDefault="true">
-            <input type="text" @bind="Composer" @bind:event="oninput" aria-label="ข้อความใหม่" />
-            <button type="submit" aria-label="ส่งข้อความ" data-testid="scroller-send" disabled="@IsStreaming">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12 14-7-4 14-3.5-5.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M11.5 13.5 19 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
-            </button>
-        </form>
         <p class="showcase-scroller-helper">Send a message to watch the assistant response stream into the transcript.</p>
     </ShadcnMessageScrollerProvider>
 </div>

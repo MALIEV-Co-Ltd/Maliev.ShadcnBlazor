@@ -1143,7 +1143,7 @@ a {
 
 .showcase-scroller-frame .shadcn-message-scroller-content {
     gap: 0.25rem;
-    padding: 1rem 1.25rem 4rem;
+    padding: 1rem 1.25rem 5rem;
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-item {
@@ -1170,6 +1170,82 @@ a {
     box-shadow: var(--shadcn-shadow-md);
     font-size: 0.75rem;
     font-weight: 650;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer {
+    position: absolute;
+    inset-inline: .75rem;
+    inset-block-end: .75rem;
+    z-index: 8;
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    gap: .35rem;
+    margin: 0;
+    padding: .25rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--shadcn-card) 94%, transparent);
+    box-shadow: var(--shadcn-shadow-md);
+    backdrop-filter: blur(10px);
+}
+
+.showcase-scroller-frame .showcase-scroller-composer input {
+    min-inline-size: 0;
+    min-block-size: 2.5rem;
+    flex: 1 1 auto;
+    border: 0;
+    border-radius: 999px;
+    padding-inline: .8rem;
+    background: transparent;
+    color: var(--shadcn-foreground);
+    outline: none;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer input::placeholder {
+    color: var(--shadcn-muted-foreground);
+    opacity: 1;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer input:focus-visible {
+    outline: 2px solid var(--shadcn-ring);
+    outline-offset: -2px;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer button {
+    display: inline-grid;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    flex: none;
+    place-items: center;
+    border: 0;
+    border-radius: 999px;
+    background: var(--shadcn-primary);
+    color: var(--shadcn-primary-foreground);
+    cursor: pointer;
+    transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
+        opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
+        transform var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
+}
+
+.showcase-scroller-frame .showcase-scroller-composer button:hover:not(:disabled) {
+    background: color-mix(in oklch, var(--shadcn-primary) 90%, var(--shadcn-background));
+    transform: translateY(-1px);
+}
+
+.showcase-scroller-frame .showcase-scroller-composer button:focus-visible {
+    outline: 2px solid var(--shadcn-ring);
+    outline-offset: 2px;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer button:disabled {
+    cursor: wait;
+    opacity: .55;
+}
+
+.showcase-scroller-frame .showcase-scroller-composer svg {
+    inline-size: 1.1rem;
+    block-size: 1.1rem;
 }
 
 .showcase-scroller-demo {
@@ -1201,6 +1277,7 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
     .showcase-scroller-streaming { animation: none; }
+    .showcase-scroller-frame .showcase-scroller-composer button { transition: none; }
 }
 
 .showcase-questionnaire-card {
@@ -3609,6 +3686,108 @@ a {
 
 .showcase-message-thread.showcase-message-thread--footer-always [data-slot="message"] .shadcn-message-footer {
     pointer-events: auto;
+}
+
+/* Keep the avatar aligned to the message body row. The footer is a separate
+   grid row so action controls/status cannot pull the avatar below the bubble. */
+.showcase-message-thread > [data-slot="message"] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    column-gap: calc(.625rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-message-thread > [data-slot="message"][data-align="end"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.showcase-message-thread > [data-slot="message"] > [data-slot="message-avatar"] {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: end;
+    aspect-ratio: 1;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    min-inline-size: 2.25rem;
+    min-block-size: 2.25rem;
+}
+
+.showcase-message-thread > [data-slot="message"][data-align="end"] > [data-slot="message-avatar"] {
+    grid-column: 2;
+}
+
+.showcase-message-thread > [data-slot="message"] > [data-slot="message-content"] {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: grid;
+    grid-template-rows: auto auto;
+    align-items: stretch;
+    align-content: start;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    justify-self: start;
+}
+
+.showcase-message-thread > [data-slot="message"][data-align="end"] > [data-slot="message-content"] {
+    grid-column: 1;
+    justify-self: end;
+}
+
+.showcase-message-thread .showcase-message-body {
+    display: grid;
+    grid-row: 1;
+    gap: calc(.25rem * var(--shadcn-spacing-multiplier));
+    min-inline-size: 0;
+    max-inline-size: 100%;
+}
+
+.showcase-message-thread .shadcn-message-avatar > [data-slot="avatar"] {
+    display: flex;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.showcase-message-thread .shadcn-message-avatar > [data-slot="avatar"] > :is([data-slot="avatar-image"], [data-slot="avatar-fallback"]) {
+    display: flex;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.showcase-message-thread .shadcn-message-footer {
+    grid-row: 2;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    justify-content: flex-start !important;
+    gap: calc(.25rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-message-thread .showcase-message-action {
+    inline-size: 1.75rem;
+    min-inline-size: 1.75rem !important;
+    padding-inline: 0 !important;
+}
+
+.showcase-message-thread .showcase-message-action[data-copied="true"] {
+    inline-size: auto;
+    min-inline-size: 1.75rem !important;
+    padding-inline: calc(.5rem * var(--shadcn-spacing-multiplier)) !important;
+}
+
+.showcase-message-thread .showcase-message-status {
+    margin-inline-start: auto;
 }
 
 .showcase-message-thread [data-slot="message"][data-align="start"] [data-slot="bubble-content"] {

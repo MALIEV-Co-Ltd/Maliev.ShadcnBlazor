@@ -9,10 +9,12 @@
                 <ConversationAvatar AvatarId="operator" Source="images/avatars/operator-thai.png" Alt="นที · วิศวกร" Fallback="นท" />
             }
             <ShadcnMessageContent>
-                <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
-                <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start">
-                    <ShadcnBubbleContent>ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
-                </ShadcnBubble>
+                <div class="showcase-message-body">
+                    <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
+                    <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start">
+                        <ShadcnBubbleContent>ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
+                    </ShadcnBubble>
+                </div>
                 @if (FooterActions)
                 {
                     <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
@@ -34,10 +36,12 @@
                 <ConversationAvatar AvatarId="placeholder" Alt="มาลี · ผู้ประสานงาน" Fallback="ม" />
             }
             <ShadcnMessageContent>
-                <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
-                <ShadcnBubble Variant="@(AlignMiddleRowEnd ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)" Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
-                    <ShadcnBubbleContent>พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
-                </ShadcnBubble>
+                <div class="showcase-message-body">
+                    <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
+                    <ShadcnBubble Variant="@(AlignMiddleRowEnd ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)" Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
+                        <ShadcnBubbleContent>พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
+                    </ShadcnBubble>
+                </div>
             </ShadcnMessageContent>
         </ShadcnMessage>
 
@@ -47,10 +51,12 @@
                 <ConversationAvatar AvatarId="assistant" Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" Fallback="MA" />
             }
             <ShadcnMessageContent>
-                <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
-                <ShadcnBubble Variant="ShadcnBubbleVariant.Default" Align="ShadcnLogicalAlign.End">
-                    <ShadcnBubbleContent>Sure. I’ll keep the thread easy to scan.</ShadcnBubbleContent>
-                </ShadcnBubble>
+                <div class="showcase-message-body">
+                    <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
+                    <ShadcnBubble Variant="ShadcnBubbleVariant.Default" Align="ShadcnLogicalAlign.End">
+                        <ShadcnBubbleContent>Sure. I’ll keep the thread easy to scan.</ShadcnBubbleContent>
+                    </ShadcnBubble>
+                </div>
                 @if (FooterActions)
                 {
                     <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
