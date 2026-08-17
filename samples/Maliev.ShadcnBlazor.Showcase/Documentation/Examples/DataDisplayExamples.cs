@@ -1,4 +1,5 @@
 using Maliev.ShadcnBlazor.Components.DataDisplay;
+using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -9,14 +10,19 @@ internal static class DataDisplayExamples
     private sealed record Payment(string Id, string Email, string Status, double Amount);
     private sealed record Invoice(string Id, string Status, string Method, string Amount);
     private static readonly Payment[] Payments = [
-        new("1", "somchai@maliev.com", "processing", 837), new("2", "anong@maliev.com", "success", 242), new("3", "niran@maliev.com", "failed", 316),
-        new("4", "pimchanok@maliev.com", "success", 874), new("5", "surasak@maliev.com", "success", 721)
+        new("1", "ken99@example.com", "success", 316), new("2", "abe45@example.com", "success", 242), new("3", "monserrat44@example.com", "processing", 837),
+        new("4", "silas22@example.com", "success", 874), new("5", "carmella@example.com", "failed", 721), new("6", "preecha@example.com", "pending", 590),
+        new("7", "wipada@example.com", "processing", 445), new("8", "niran@example.com", "success", 680)
     ];
     private static readonly Invoice[] Invoices = [
         new("INV001", "Paid", "Credit Card", "฿8,500"), new("INV002", "Pending", "PayPal", "฿3,250"), new("INV003", "Unpaid", "Bank Transfer", "฿12,400"),
         new("INV004", "Paid", "Credit Card", "฿5,900"), new("INV005", "Paid", "PayPal", "฿7,750")
     ];
-    private static readonly ShadcnDataTableColumn<Payment>[] Columns = [new("status", "สถานะ", row => row.Status) { Filterable = true }, new("email", "อีเมล", row => row.Email) { Sortable = true, Filterable = true }, new("amount", "จำนวนเงิน", row => row.Amount) { Sortable = true }];
+    private static readonly ShadcnDataTableColumn<Payment>[] Columns = [
+        new("status", "Status", row => row.Status) { Filterable = true, MinWidth = "8rem" },
+        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, MinWidth = "14rem" },
+        new("amount", "Amount", row => row.Amount) { Sortable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
+    ];
 
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch { "table" => [Table()], "data-table" => [DataTable()], "chart" => [Chart()], _ => [] };
 
@@ -79,46 +85,64 @@ internal static class DataDisplayExamples
     private static ComponentExampleDefinition DataTable()
     {
         var loading = false; var error = false; var manual = false; var empty = false;
+        var state = new ShadcnDataTableState { PageSize = 5 };
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnDataTable<Payment>>(0); b.AddAttribute(1, "Class", "showcase-data-table"); b.AddAttribute(2, "Items", empty ? Array.Empty<Payment>() : Payments); b.AddAttribute(3, "Columns", Columns); b.AddAttribute(4, "RowKey", (Func<Payment, string>)(row => row.Id)); b.AddAttribute(6, "Loading", loading); b.AddAttribute(7, "Error", error ? "โหลดข้อมูลไม่สำเร็จ" : null); b.AddAttribute(8, "Manual", manual); b.AddAttribute(9, "TotalCount", manual ? 12 : 0); b.AddAttribute(10, "FilterPlaceholder", "กรองอีเมล..."); b.AddAttribute(11, "EmptyText", "ไม่พบผลลัพธ์"); b.AddAttribute(12, "RowActionTemplate", (RenderFragment<Payment>)(item => x =>
+            b.OpenComponent<ShadcnDataTable<Payment>>(0); b.AddAttribute(1, "Class", "showcase-data-table"); b.AddAttribute(2, "Items", empty ? Array.Empty<Payment>() : Payments); b.AddAttribute(3, "Columns", Columns); b.AddAttribute(4, "RowKey", (Func<Payment, string>)(row => row.Id)); b.AddAttribute(5, "DefaultState", state); b.AddAttribute(6, "StateChanged", EventCallback.Factory.Create<ShadcnDataTableState>(typeof(DataDisplayExamples), next => state = next)); b.AddAttribute(7, "PageSizeOptions", new[] { 5, 10, 25 }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "Error", error ? "Unable to load payments." : null); b.AddAttribute(10, "Manual", manual); b.AddAttribute(11, "TotalCount", manual ? 12 : 0); b.AddAttribute(12, "FilterPlaceholder", "Filter emails..."); b.AddAttribute(13, "EmptyText", "No results."); b.AddAttribute(14, "ColumnsLabel", "Columns"); b.AddAttribute(15, "ActionsLabel", "Actions"); b.AddAttribute(16, "SelectAllLabel", "Select all payments"); b.AddAttribute(17, "SelectRowLabel", (Func<Payment, string>)(row => $"Select {row.Email}")); b.AddAttribute(18, "RowActionTemplate", (RenderFragment<Payment>)(item => x =>
             {
-                x.OpenElement(0, "button"); x.AddAttribute(1, "type", "button"); x.AddAttribute(2, "class", "showcase-data-table-row-action"); x.AddAttribute(3, "aria-label", $"เปิด {item.Email}");
-                x.OpenElement(4, "svg"); x.AddAttribute(5, "viewBox", "0 0 16 16"); x.AddAttribute(6, "width", "16"); x.AddAttribute(7, "height", "16"); x.AddAttribute(8, "aria-hidden", "true"); x.AddAttribute(9, "focusable", "false");
-                x.OpenElement(10, "circle"); x.AddAttribute(11, "cx", "3"); x.AddAttribute(12, "cy", "8"); x.AddAttribute(13, "r", "1"); x.CloseElement();
-                x.OpenElement(14, "circle"); x.AddAttribute(15, "cx", "8"); x.AddAttribute(16, "cy", "8"); x.AddAttribute(17, "r", "1"); x.CloseElement();
-                x.OpenElement(18, "circle"); x.AddAttribute(19, "cx", "13"); x.AddAttribute(20, "cy", "8"); x.AddAttribute(21, "r", "1"); x.CloseElement();
-                x.CloseElement(); x.CloseElement();
+                x.OpenComponent<ShadcnDropdownMenu>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(menu =>
+                {
+                    menu.OpenComponent<ShadcnDropdownMenuTrigger>(0); menu.AddAttribute(1, "Class", "showcase-data-table-row-action"); menu.AddAttribute(2, "aria-label", $"Open actions for {item.Email}"); menu.AddAttribute(3, "ChildContent", MoreIcon); menu.CloseComponent();
+                    menu.OpenComponent<ShadcnDropdownMenuContent>(10); menu.AddAttribute(11, "Align", ShadcnOverlayAlign.End); menu.AddAttribute(12, "ChildContent", (RenderFragment)(content =>
+                    {
+                        AddText<ShadcnDropdownMenuItem>(content, 0, "View payment");
+                        AddText<ShadcnDropdownMenuItem>(content, 10, $"Copy {item.Id}");
+                    })); menu.CloseComponent();
+                })); x.CloseComponent();
             })); b.CloseComponent();
         };
         const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
+@using Maliev.ShadcnBlazor.Components.Overlays
 
 <ShadcnDataTable TItem="Payment"
                   Items="__ITEMS__"
                   Columns="@Columns"
                   RowKey="@(row => row.Id)"
+                  DefaultState="@TableState"
+                  StateChanged="OnTableStateChanged"
+                  PageSizeOptions="@[5, 10, 25]"
 __STATE_ATTRIBUTES__
-                  FilterPlaceholder="กรองอีเมล..."
-                  EmptyText="ไม่พบผลลัพธ์"
-                  RowActionTemplate="@((Payment row) => @<button type=\"button\" class=\"showcase-data-table-row-action\" aria-label=\"เปิด @row.Email\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><circle cx=\"3\" cy=\"8\" r=\"1\" /><circle cx=\"8\" cy=\"8\" r=\"1\" /><circle cx=\"13\" cy=\"8\" r=\"1\" /></svg></button>)" />
+                  FilterPlaceholder="Filter emails..."
+                  EmptyText="No results."
+                  ColumnsLabel="Columns"
+                  ActionsLabel="Actions"
+                  SelectAllLabel="Select all payments"
+                  SelectRowLabel="@(row => $\"Select {row.Email}\")"
+                  RowActionTemplate="@((Payment row) => @<ShadcnDropdownMenu><ShadcnDropdownMenuTrigger Class=\"showcase-data-table-row-action\" aria-label=\"Open actions for @row.Email\"><svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"3\" cy=\"8\" r=\"1\" /><circle cx=\"8\" cy=\"8\" r=\"1\" /><circle cx=\"13\" cy=\"8\" r=\"1\" /></svg></ShadcnDropdownMenuTrigger><ShadcnDropdownMenuContent Align=\"ShadcnOverlayAlign.End\"><ShadcnDropdownMenuItem>View payment</ShadcnDropdownMenuItem><ShadcnDropdownMenuItem>Copy @row.Id</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu>)" />
 
 @code {
     private sealed record Payment(string Id, string Email, string Status, double Amount);
 
     private IReadOnlyList<Payment> Payments = [
-        new("1", "somchai@maliev.com", "processing", 837),
-        new("2", "anong@maliev.com", "success", 242),
-        new("3", "niran@maliev.com", "failed", 316),
-        new("4", "pimchanok@maliev.com", "success", 874),
-        new("5", "surasak@maliev.com", "success", 721)
+        new("1", "ken99@example.com", "success", 316),
+        new("2", "abe45@example.com", "success", 242),
+        new("3", "monserrat44@example.com", "processing", 837),
+        new("4", "silas22@example.com", "success", 874),
+        new("5", "carmella@example.com", "failed", 721),
+        new("6", "preecha@example.com", "pending", 590),
+        new("7", "wipada@example.com", "processing", 445),
+        new("8", "niran@example.com", "success", 680)
     ];
 
     private IReadOnlyList<ShadcnDataTableColumn<Payment>> Columns = [
-        new("status", "สถานะ", row => row.Status) { Filterable = true },
-        new("email", "อีเมล", row => row.Email) { Sortable = true, Filterable = true },
-        new("amount", "จำนวนเงิน", row => row.Amount) { Sortable = true }
+        new("status", "Status", row => row.Status) { Filterable = true, MinWidth = "8rem" },
+        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, MinWidth = "14rem" },
+        new("amount", "Amount", row => row.Amount) { Sortable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
     ];
+
+    private ShadcnDataTableState TableState = __TABLE_STATE__;
+    private Task OnTableStateChanged(ShadcnDataTableState next) { TableState = next; return Task.CompletedTask; }
 }
 """;
         string Source()
@@ -126,15 +150,37 @@ __STATE_ATTRIBUTES__
             var stateAttributes = string.Join(Environment.NewLine, new[]
             {
                 loading ? "                  Loading=\"true\"" : string.Empty,
-                error ? "                  Error=\"โหลดข้อมูลไม่สำเร็จ\"" : string.Empty,
+                error ? "                  Error=\"Unable to load payments.\"" : string.Empty,
                 manual ? "                  Manual=\"true\"\n                  TotalCount=\"12\"" : string.Empty
             }.Where(value => value.Length > 0));
             return sourceTemplate
                 .Replace("__ITEMS__", empty ? "@(Array.Empty<Payment>())" : "@Payments", StringComparison.Ordinal)
-                .Replace("__STATE_ATTRIBUTES__", stateAttributes, StringComparison.Ordinal);
+                .Replace("__STATE_ATTRIBUTES__", stateAttributes, StringComparison.Ordinal)
+                .Replace("__TABLE_STATE__", StateSource(state), StringComparison.Ordinal);
         }
         var example = Example("data-table", "Typed payments data table", "Filter, sort, select, hide columns, and page through a realistic typed payment collection.", Source(), preview, [Toggle("data-table-loading", "Loading", v => loading = v), Toggle("data-table-error", "Error", v => error = v), Toggle("data-table-empty", "Empty", v => empty = v), Toggle("data-table-manual", "Manual paging", v => manual = v)], ["sort", "filter", "selection", "pagination", "visibility", "row-actions", "manual", "loading", "empty", "error", "rtl"]);
         return example with { RazorSourceProvider = Source };
+    }
+
+    private static RenderFragment MoreIcon => x =>
+    {
+        x.OpenElement(0, "svg"); x.AddAttribute(1, "viewBox", "0 0 16 16"); x.AddAttribute(2, "aria-hidden", "true"); x.AddAttribute(3, "focusable", "false");
+        x.OpenElement(4, "circle"); x.AddAttribute(5, "cx", "3"); x.AddAttribute(6, "cy", "8"); x.AddAttribute(7, "r", "1"); x.CloseElement();
+        x.OpenElement(8, "circle"); x.AddAttribute(9, "cx", "8"); x.AddAttribute(10, "cy", "8"); x.AddAttribute(11, "r", "1"); x.CloseElement();
+        x.OpenElement(12, "circle"); x.AddAttribute(13, "cx", "13"); x.AddAttribute(14, "cy", "8"); x.AddAttribute(15, "r", "1"); x.CloseElement(); x.CloseElement();
+    };
+
+    private static string StateSource(ShadcnDataTableState state)
+    {
+        var properties = new List<string>();
+        if (!string.IsNullOrWhiteSpace(state.Query)) properties.Add($"Query = \"{state.Query.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"");
+        if (state.Sorts.Count > 0) properties.Add($"Sorts = [{string.Join(", ", state.Sorts.Select(sort => $"new(\"{sort.ColumnKey}\", ShadcnSortDirection.{sort.Direction})"))}]");
+        if (state.ColumnFilters.Count > 0) properties.Add($"ColumnFilters = new Dictionary<string, string> {{ {string.Join(", ", state.ColumnFilters.Select(filter => $"[\"{filter.Key}\"] = \"{filter.Value}\""))} }}");
+        if (state.HiddenColumnKeys.Count > 0) properties.Add($"HiddenColumnKeys = new HashSet<string>([{string.Join(", ", state.HiddenColumnKeys.Select(key => $"\"{key}\""))}], StringComparer.Ordinal)");
+        if (state.SelectedKeys.Count > 0) properties.Add($"SelectedKeys = new HashSet<string>([{string.Join(", ", state.SelectedKeys.Select(key => $"\"{key}\""))}], StringComparer.Ordinal)");
+        if (state.PageIndex > 0) properties.Add($"PageIndex = {state.PageIndex}");
+        properties.Add($"PageSize = {state.PageSize}");
+        return $"new() {{ {string.Join(", ", properties)} }}";
     }
 
     private static ComponentExampleDefinition Chart()

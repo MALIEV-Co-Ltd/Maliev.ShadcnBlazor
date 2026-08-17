@@ -17,13 +17,19 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         var table = page.Locator("[data-slot='data-table']");
         await Assertions.Expect(table.Locator("tbody tr[data-row-key]")).ToHaveCountAsync(5);
         await Assertions.Expect(table.Locator(".showcase-data-table-row-action svg")).ToHaveCountAsync(5);
+        await table.Locator(".showcase-data-table-row-action").First.ClickAsync();
+        await Assertions.Expect(page.Locator("[data-slot='dropdown-menu-content']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-slot='dropdown-menu-item']")).ToHaveCountAsync(2);
+        await page.Locator("[data-slot='dropdown-menu-item']").First.ClickAsync();
+        await Assertions.Expect(page.Locator("[data-slot='dropdown-menu-content']")).ToHaveCountAsync(0);
         await Assertions.Expect(table.Locator("input[data-row-key='3']")).ToHaveCSSAsync("appearance", "none");
         var headerBackground = await table.Locator("thead th").Nth(1).EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
-        Assert.NotEqual("rgba(0, 0, 0, 0)", headerBackground);
+        Assert.Equal("rgba(0, 0, 0, 0)", headerBackground);
+        Assert.False(await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
         await table.Locator("button[data-column='email']").ClickAsync();
         await Assertions.Expect(table.Locator("th[data-column='email']")).ToHaveAttributeAsync("aria-sort", "ascending");
         await table.Locator("input[data-slot='data-table-filter']").FillAsync("niran");
-        await Assertions.Expect(table.Locator("tbody tr[data-row-key='3']")).ToHaveCountAsync(1);
+        await Assertions.Expect(table.Locator("tbody tr[data-row-key='8']")).ToHaveCountAsync(1);
         await table.Locator("input[data-slot='data-table-filter']").FillAsync("");
         await table.Locator("input[data-column-filter='status']").FillAsync("success");
         await Assertions.Expect(table.Locator("tbody tr[data-row-key='2']")).ToHaveCountAsync(1);
@@ -42,6 +48,25 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("control-data-table-loading").UncheckAsync();
         await page.GetByTestId("control-data-table-error").CheckAsync();
         await Assertions.Expect(table.Locator("[role='alert']")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task DataTableRemainsBalancedInDesktopDarkRtl()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 1440, Height = 900 }, ColorScheme = ColorScheme.Dark });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/data-table").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        await page.Locator("html").EvaluateAsync("element => element.classList.add('dark')");
+        var table = page.Locator("[data-slot='data-table']");
+
+        await Assertions.Expect(table).ToHaveCSSAsync("direction", "rtl");
+        var geometry = await table.Locator(".shadcn-data-table-frame").EvaluateAsync<double[]>("element => { const table = element.querySelector('table'); return [element.clientWidth, table.getBoundingClientRect().width]; }");
+        Assert.InRange(Math.Abs(geometry[0] - geometry[1]), 0, 1);
+        var actionAlignment = await table.Locator(".shadcn-data-table-action-cell").First.EvaluateAsync<string>("element => getComputedStyle(element).textAlign");
+        Assert.Contains(actionAlignment, new[] { "end", "right" });
+        Assert.False(await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 
     [Fact]

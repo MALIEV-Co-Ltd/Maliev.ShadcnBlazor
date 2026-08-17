@@ -80,6 +80,27 @@ public sealed class DataTableTests : BunitContext
     }
 
     [Fact]
+    public void DefaultStateSeedsAnInteractiveUncontrolledTableOnce()
+    {
+        var states = new List<ShadcnDataTableState>();
+        var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
+            .Add(component => component.Items, Rows)
+            .Add(component => component.Columns, Columns)
+            .Add(component => component.RowKey, row => row.Id)
+            .Add(component => component.DefaultState, new ShadcnDataTableState { PageSize = 1 })
+            .Add(component => component.PageSizeOptions, [1, 10])
+            .Add(component => component.StateChanged, EventCallback.Factory.Create<ShadcnDataTableState>(this, next => states.Add(next))));
+
+        Assert.Equal("1", cut.Find("select[data-slot='data-table-page-size']").GetAttribute("value"));
+        cut.Find("button[data-column='email']").Click();
+        cut.Find("input[data-slot='data-table-filter']").Input("niran");
+
+        Assert.Equal("niran", states[^1].Query);
+        Assert.Equal(ShadcnSortDirection.Ascending, Assert.Single(states[^1].Sorts).Direction);
+        Assert.Equal(1, states[^1].PageSize);
+    }
+
+    [Fact]
     public void SelectAllHasNamedTriStateAndSkipsDisabledRows()
     {
         var states = new List<ShadcnDataTableState>();

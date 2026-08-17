@@ -4426,15 +4426,9 @@ a {
 }
 
 .showcase-data-table .shadcn-data-table-frame .shadcn-table {
-    inline-size: max-content;
-    min-inline-size: 100%;
+    inline-size: 100%;
+    min-inline-size: max-content;
     table-layout: auto;
-}
-
-.showcase-data-table .shadcn-data-table-frame .shadcn-table-header .shadcn-table-row,
-.showcase-data-table .shadcn-data-table-frame .shadcn-table-head {
-    background: var(--shadcn-muted);
-    color: var(--shadcn-foreground);
 }
 
 .showcase-data-table .shadcn-data-table-frame .shadcn-table-head {
@@ -4453,14 +4447,13 @@ a {
     inline-size: 2rem;
     block-size: 2rem;
     place-items: center;
-    border: 1px solid transparent;
+    border: 0;
     border-radius: var(--shadcn-radius-md);
     background: transparent;
     color: var(--shadcn-muted-foreground);
     cursor: pointer;
     transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
-        color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
-        border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
+        color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
 
 .showcase-data-table .showcase-data-table-row-action svg {
@@ -4470,68 +4463,14 @@ a {
 }
 
 .showcase-data-table .showcase-data-table-row-action:hover,
-.showcase-data-table .showcase-data-table-row-action:focus-visible {
-    border-color: var(--shadcn-border);
+.showcase-data-table .showcase-data-table-row-action[aria-expanded="true"] {
     background: var(--shadcn-accent);
     color: var(--shadcn-accent-foreground);
 }
 
 .showcase-data-table .showcase-data-table-row-action:focus-visible {
-    outline: var(--shadcn-focus-ring-width) solid var(--shadcn-ring);
-    outline-offset: var(--shadcn-focus-ring-offset);
-}
-
-.showcase-data-table input[type="checkbox"] {
-    display: inline-grid;
-    inline-size: 1rem;
-    block-size: 1rem;
-    margin: 0;
-    place-content: center;
-    appearance: none;
-    border: 1px solid var(--shadcn-input);
-    border-radius: .25rem;
-    background: var(--shadcn-background);
-    color: var(--shadcn-primary-foreground);
-    cursor: pointer;
-    transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
-        border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
-}
-
-.showcase-data-table input[type="checkbox"]::before {
-    inline-size: .6rem;
-    block-size: .6rem;
-    content: "";
-    scale: 0;
-    background: currentColor;
-    clip-path: polygon(14% 44%, 0 58%, 38% 100%, 100% 16%, 85% 2%, 37% 68%);
-    transition: scale var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
-}
-
-.showcase-data-table input[type="checkbox"]:checked,
-.showcase-data-table input[type="checkbox"][aria-checked="mixed"] {
-    border-color: var(--shadcn-primary);
-    background: var(--shadcn-primary);
-}
-
-.showcase-data-table input[type="checkbox"]:checked::before {
-    scale: 1;
-}
-
-.showcase-data-table input[type="checkbox"][aria-checked="mixed"]::before {
-    inline-size: .55rem;
-    block-size: .12rem;
-    scale: 1;
-    clip-path: none;
-}
-
-.showcase-data-table input[type="checkbox"]:disabled {
-    cursor: not-allowed;
-    opacity: .5;
-}
-
-.showcase-data-table input[type="checkbox"]:focus-visible {
-    outline: var(--shadcn-focus-ring-width) solid var(--shadcn-ring);
-    outline-offset: var(--shadcn-focus-ring-offset);
+    outline: 0;
+    box-shadow: 0 0 0 var(--shadcn-focus-ring-width) color-mix(in oklab, var(--shadcn-ring) 50%, transparent);
 }
 
 .showcase-data-table [data-slot="data-table-loading"],

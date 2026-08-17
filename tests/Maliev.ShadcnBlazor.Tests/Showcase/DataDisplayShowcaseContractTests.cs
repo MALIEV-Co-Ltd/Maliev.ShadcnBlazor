@@ -57,9 +57,43 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
 
         Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] tbody tr[data-row-key]").Count);
         Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action").Count);
-        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action svg").Count);
+        Assert.Equal(5, rendered.FindAll("[data-slot='data-table'] .showcase-data-table-row-action[data-slot='dropdown-menu-trigger']").Count);
         Assert.DoesNotContain("•••", example.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("aria-label=\\\"เปิด @row.Email\\\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-label=\\\"Open actions for @row.Email\\\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenu", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenuItem>View payment</ShadcnDropdownMenuItem>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("PageSize = 5", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ken99@example.com", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("@maliev.com", example.RazorSource, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void DataTablePreviewUsesPackageOwnedControlsAndBalancedColumnGeometry()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(2, rendered.FindAll("[data-slot='data-table-sort-icon']").Count);
+        Assert.DoesNotContain("↕", rendered.Markup, StringComparison.Ordinal);
+        Assert.NotEmpty(rendered.FindAll(".shadcn-data-table-action-cell"));
+        Assert.All(rendered.FindAll(".shadcn-data-table-action-cell"), cell =>
+            Assert.Contains("shadcn-data-table-action-cell", cell.ClassList));
+        Assert.Contains("text-align: end", rendered.Find("[data-column='amount']").GetAttribute("style"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DataTableSourceTracksDirectPreviewInteractions()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var rendered = Render(example.Preview);
+
+        rendered.Find("button[data-column='email']").Click();
+        rendered.Find("input[data-slot='data-table-filter']").Input("ken99");
+        rendered.Find("input[data-row-key='1']").Change(true);
+
+        Assert.Contains("new(\"email\", ShadcnSortDirection.Ascending)", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Query = \"ken99\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("SelectedKeys = new HashSet<string>([\"1\"]", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -102,7 +136,7 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("Items=\"@(Array.Empty<Payment>())\"", dataTable.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Manual=\"true\"", dataTable.RazorSource, StringComparison.Ordinal);
         Assert.Contains("TotalCount=\"12\"", dataTable.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("Error=\"โหลดข้อมูลไม่สำเร็จ\"", dataTable.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Error=\"Unable to load payments.\"", dataTable.RazorSource, StringComparison.Ordinal);
 
         var chart = registry.GetBySlug("chart").Single();
         chart.Controls.Single(control => control.Id == "chart-line").Apply("true");
