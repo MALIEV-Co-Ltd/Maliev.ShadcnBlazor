@@ -116,6 +116,51 @@ public sealed class CalendarDatePickerTests : BunitContext
     }
 
     [Fact]
+    public void UnboundCalendarSelectionUpdatesItsOwnSingleAndRangeState()
+    {
+        var single = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1)));
+
+        single.Find("[data-day='2026-08-18']").Click();
+
+        Assert.Equal("true", single.Find("[data-day='2026-08-18']").GetAttribute("data-selected-single"));
+        Assert.Equal("true", single.Find("[data-day='2026-08-18']").GetAttribute("aria-selected"));
+
+        var range = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.Mode, ShadcnCalendarSelectionMode.Range)
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1)));
+
+        range.Find("[data-day='2026-08-10']").Click();
+        Assert.Equal("false", range.Find("[data-day='2026-08-10']").GetAttribute("data-range-complete"));
+
+        range.Find("[data-day='2026-08-13']").Click();
+        Assert.Equal("true", range.Find("[data-day='2026-08-10']").GetAttribute("data-range-start"));
+        Assert.Equal("true", range.Find("[data-day='2026-08-11']").GetAttribute("data-range-middle"));
+        Assert.Equal("true", range.Find("[data-day='2026-08-13']").GetAttribute("data-range-end"));
+        Assert.All(range.FindAll("[data-range-complete='true']"), element => Assert.Equal("true", element.GetAttribute("data-range-complete")));
+    }
+
+    [Fact]
+    public void CalendarPublishesLocalizedGridStateAndCurrentDateSemantics()
+    {
+        var cut = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.Mode, ShadcnCalendarSelectionMode.Range)
+            .Add(component => component.CaptionLayout, ShadcnCalendarCaptionLayout.Dropdown)
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1))
+            .Add(component => component.Today, new DateOnly(2026, 8, 13))
+            .Add(component => component.ReadOnly, true)
+            .Add(component => component.MonthSelectLabel, "เลือกเดือน")
+            .Add(component => component.YearSelectLabel, "เลือกปี"));
+
+        var grid = cut.Find("[data-slot='calendar-grid']");
+        Assert.Equal("true", grid.GetAttribute("aria-multiselectable"));
+        Assert.Equal("true", grid.GetAttribute("aria-readonly"));
+        Assert.Equal("date", cut.Find("[data-day='2026-08-13']").GetAttribute("aria-current"));
+        Assert.Equal("เลือกเดือน", cut.Find("[data-slot='calendar-month-select']").GetAttribute("aria-label"));
+        Assert.Equal("เลือกปี", cut.Find("[data-slot='calendar-year-select']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void RangeCalendarRequestsStartThenCompletedRange()
     {
         ShadcnDateRange? requested = null;

@@ -15,20 +15,20 @@
         else
         {
             <div class="shadcn-calendar-dropdowns" data-slot="calendar-caption" aria-label="@MonthLabel">
-                <select data-slot="calendar-month-select" aria-label="Month" value="@EffectiveMonth.Month" disabled="@Disabled" @onchange="ChangeMonthAsync">
+                <select data-slot="calendar-month-select" aria-label="@MonthSelectLabel" value="@EffectiveMonth.Month" disabled="@Disabled" @onchange="ChangeMonthAsync">
                     @for (var month = 1; month <= 12; month++) { <option value="@month">@Culture.DateTimeFormat.GetMonthName(month)</option> }
                 </select>
-                <select data-slot="calendar-year-select" aria-label="Year" value="@EffectiveMonth.Year" disabled="@Disabled" @onchange="ChangeYearAsync">
+                <select data-slot="calendar-year-select" aria-label="@YearSelectLabel" value="@EffectiveMonth.Year" disabled="@Disabled" @onchange="ChangeYearAsync">
                     @for (var year = EffectiveFromYear; year <= EffectiveToYear; year++) { <option value="@year">@FormatYear(year)</option> }
                 </select>
             </div>
         }
         <button type="button" data-slot="calendar-next" aria-label="@NextLabel" disabled="@(!CanNavigateNext || Disabled)" @onclick="NextAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg></button>
     </div>
-    <div class="shadcn-calendar-grid" role="grid" aria-label="@MonthLabel" data-slot="calendar-grid">
+    <div class="shadcn-calendar-grid" role="grid" aria-label="@MonthLabel" aria-multiselectable="@(Mode == ShadcnCalendarSelectionMode.Range ? "true" : null)" aria-readonly="@(ReadOnly ? "true" : null)" aria-disabled="@(Disabled ? "true" : null)" data-slot="calendar-grid">
         <div class="shadcn-calendar-weekdays" role="row">
             @if (ShowWeekNumbers) { <div role="columnheader" aria-label="@WeekLabel" data-slot="calendar-week-number-header">#</div> }
-            @foreach (var weekday in Weekdays) { <div class="shadcn-calendar-weekday" role="columnheader" data-slot="calendar-weekday"><abbr title="@weekday.Full">@weekday.Short</abbr></div> }
+            @foreach (var weekday in Weekdays) { <div class="shadcn-calendar-weekday" role="columnheader" data-slot="calendar-weekday"><abbr dir="auto" title="@weekday.Full">@weekday.Short</abbr></div> }
         </div>
         @foreach (var week in Weeks)
         {
@@ -38,10 +38,10 @@
                 {
                     var outside = date.Month != EffectiveMonth.Month;
                     var disabled = IsDisabled(date);
-                    <div class="shadcn-calendar-day" role="gridcell" data-slot="calendar-cell" data-outside="@(outside ? "true" : null)" data-selected="@(IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)">
+                    <div class="shadcn-calendar-day" role="gridcell" data-slot="calendar-cell" data-outside="@(outside ? "true" : null)" data-selected="@(IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)" data-range-complete="@(IsCompletedRangeDate(date) ? "true" : "false")">
                         @if (ShowOutsideDays || !outside)
                         {
-                            <button class="shadcn-calendar-day-button" type="button" data-slot="calendar-day" data-day="@date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" data-today="@(date == Today ? "true" : null)" data-outside="@(outside ? "true" : null)" data-selected-single="@(Mode == ShadcnCalendarSelectionMode.Single && IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)" aria-label="@date.ToString("dddd, d MMMM yyyy", Culture)" aria-selected="@IsSelected(date).ToString().ToLowerInvariant()" aria-disabled="@(disabled ? "true" : null)" disabled="@(Disabled || disabled)" tabindex="@(date == FocusedDate && !disabled ? "0" : "-1")" @onclick="() => SelectAsync(date)" @onkeydown="args => HandleKeyDownAsync(date, args)">@date.Day</button>
+                            <button class="shadcn-calendar-day-button" type="button" data-slot="calendar-day" data-day="@date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" data-today="@(date == Today ? "true" : null)" data-outside="@(outside ? "true" : null)" data-selected-single="@(Mode == ShadcnCalendarSelectionMode.Single && IsSelected(date) ? "true" : null)" data-range-start="@(IsRangeStart(date) ? "true" : null)" data-range-middle="@(IsRangeMiddle(date) ? "true" : null)" data-range-end="@(IsRangeEnd(date) ? "true" : null)" data-range-complete="@(IsCompletedRangeDate(date) ? "true" : "false")" aria-label="@date.ToString("dddd, d MMMM yyyy", Culture)" aria-current="@(date == Today ? "date" : null)" aria-selected="@IsSelected(date).ToString().ToLowerInvariant()" aria-disabled="@(disabled ? "true" : null)" disabled="@(Disabled || disabled)" tabindex="@(date == FocusedDate && !disabled ? "0" : "-1")" @onclick="() => SelectAsync(date)" @onkeydown="args => HandleKeyDownAsync(date, args)">@date.Day</button>
                         }
                     </div>
                 }
@@ -77,6 +77,8 @@
     [Parameter] public string PreviousLabel { get; set; } = "Previous month";
     [Parameter] public string NextLabel { get; set; } = "Next month";
     [Parameter] public string WeekLabel { get; set; } = "Week";
+    [Parameter] public string MonthSelectLabel { get; set; } = "Month";
+    [Parameter] public string YearSelectLabel { get; set; } = "Year";
     [Parameter] public bool UseCultureCalendarYears { get; set; } = true;
     private DateOnly FocusedDate;
     private ElementReference Root;
@@ -87,7 +89,15 @@
     private DateOnly _uncontrolledVisibleMonth;
     private DateOnly _lastVisibleMonthParameter;
     private bool _visibleMonthInitialized;
+    private DateOnly? _uncontrolledValue;
+    private DateOnly? _lastValueParameter;
+    private bool _valueInitialized;
+    private ShadcnDateRange? _uncontrolledRange;
+    private ShadcnDateRange? _lastRangeParameter;
+    private bool _rangeInitialized;
     private DateOnly? PendingFocus;
+    private DateOnly? EffectiveValue => ValueChanged.HasDelegate ? Value : _uncontrolledValue;
+    private ShadcnDateRange? EffectiveRange => RangeChanged.HasDelegate ? Range : _uncontrolledRange;
     private DateOnly EffectiveVisibleMonth => VisibleMonthChanged.HasDelegate ? NormalizeMonth(VisibleMonth) : _uncontrolledVisibleMonth;
     private DateOnly EffectiveMonth => NormalizeMonth(EffectiveVisibleMonth);
     private DayOfWeek EffectiveFirstDay => FirstDayOfWeek ?? Culture.DateTimeFormat.FirstDayOfWeek;
@@ -109,18 +119,26 @@
             _uncontrolledVisibleMonth = incomingVisibleMonth;
         _lastVisibleMonthParameter = incomingVisibleMonth;
         _visibleMonthInitialized = true;
+        if (!_valueInitialized || ValueChanged.HasDelegate || Value != _lastValueParameter)
+            _uncontrolledValue = Value;
+        _lastValueParameter = Value;
+        _valueInitialized = true;
+        if (!_rangeInitialized || RangeChanged.HasDelegate || !Equals(Range, _lastRangeParameter))
+            _uncontrolledRange = Range;
+        _lastRangeParameter = Range;
+        _rangeInitialized = true;
         if (Min > Max) throw new ArgumentException("Min cannot be later than Max.");
-        if (Range?.End is not null && Range.End.Value < Range.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
+        if (EffectiveRange?.End is not null && EffectiveRange.End.Value < EffectiveRange.Start) throw new ArgumentException("Range end cannot be earlier than range start.", nameof(Range));
         if (EffectiveFromYear > EffectiveToYear) throw new ArgumentException("FromYear cannot be later than ToYear.");
-        if (FocusedDate == default || Value != LastValue || !Equals(Range, LastRange) || EffectiveMonth != LastVisibleMonth || !IsVisibleEnabled(FocusedDate))
+        if (FocusedDate == default || EffectiveValue != LastValue || !Equals(EffectiveRange, LastRange) || EffectiveMonth != LastVisibleMonth || !IsVisibleEnabled(FocusedDate))
         {
             var candidate = PendingFocus is not null && PendingFocus.Value.Year == EffectiveMonth.Year && PendingFocus.Value.Month == EffectiveMonth.Month ? PendingFocus.Value
-                : Value is not null && Value.Value.Year == EffectiveMonth.Year && Value.Value.Month == EffectiveMonth.Month ? Value.Value
-                : Range?.Start is not null && Range.Start.Year == EffectiveMonth.Year && Range.Start.Month == EffectiveMonth.Month ? Range.Start
+                : EffectiveValue is not null && EffectiveValue.Value.Year == EffectiveMonth.Year && EffectiveValue.Value.Month == EffectiveMonth.Month ? EffectiveValue.Value
+                : EffectiveRange?.Start is not null && EffectiveRange.Start.Year == EffectiveMonth.Year && EffectiveRange.Start.Month == EffectiveMonth.Month ? EffectiveRange.Start
                 : Today.Year == EffectiveMonth.Year && Today.Month == EffectiveMonth.Month ? Today : EffectiveMonth;
             FocusedDate = FindEnabledInMonth(candidate);
         }
-        LastValue = Value; LastRange = Range; LastVisibleMonth = EffectiveMonth;
+        LastValue = EffectiveValue; LastRange = EffectiveRange; LastVisibleMonth = EffectiveMonth;
     }
     private bool IsVisibleEnabled(DateOnly date)
     {
@@ -147,10 +165,11 @@
         return FindEnabled(candidate, 1);
     }
     private bool IsDisabled(DateOnly date) => date < Min || date > Max || IsDateDisabled?.Invoke(date) == true;
-    private bool IsSelected(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Single ? Value == date : Range is not null && date >= Range.Start && date <= (Range.End ?? Range.Start);
-    private bool IsRangeStart(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.Start == date;
-    private bool IsRangeEnd(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End == date;
-    private bool IsRangeMiddle(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && Range?.End is not null && date > Range.Start && date < Range.End;
+    private bool IsSelected(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Single ? EffectiveValue == date : EffectiveRange is not null && date >= EffectiveRange.Start && date <= (EffectiveRange.End ?? EffectiveRange.Start);
+    private bool IsRangeStart(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && EffectiveRange?.Start == date;
+    private bool IsRangeEnd(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && EffectiveRange?.End == date;
+    private bool IsRangeMiddle(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && EffectiveRange?.End is not null && date > EffectiveRange.Start && date < EffectiveRange.End;
+    private bool IsCompletedRangeDate(DateOnly date) => Mode == ShadcnCalendarSelectionMode.Range && EffectiveRange?.End is not null && date >= EffectiveRange.Start && date <= EffectiveRange.End;
     private int WeekNumber(DateOnly date) => Culture.Calendar.GetWeekOfYear(date.ToDateTime(TimeOnly.MinValue), Culture.DateTimeFormat.CalendarWeekRule, EffectiveFirstDay);
     private async Task PreviousAsync() { if (CanNavigatePrevious && !Disabled) await SetVisibleMonthAsync(EffectiveMonth.AddMonths(-1)); }
     private async Task NextAsync() { if (CanNavigateNext && !Disabled) await SetVisibleMonthAsync(EffectiveMonth.AddMonths(1)); }
@@ -173,9 +192,19 @@
     {
         if (Disabled || ReadOnly || IsDisabled(date)) return;
         FocusedDate = date;
-        if (Mode == ShadcnCalendarSelectionMode.Single) await ValueChanged.InvokeAsync(date);
-        else if (Range is null || Range.End is not null) await RangeChanged.InvokeAsync(new(date, null));
-        else await RangeChanged.InvokeAsync(date < Range.Start ? new(date, Range.Start) : new(Range.Start, date));
+        if (Mode == ShadcnCalendarSelectionMode.Single)
+        {
+            if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(date);
+            else { _uncontrolledValue = date; await InvokeAsync(StateHasChanged); }
+            return;
+        }
+
+        var current = EffectiveRange;
+        var next = current is null || current.End is not null
+            ? new ShadcnDateRange(date, null)
+            : date < current.Start ? new(date, current.Start) : new(current.Start, date);
+        if (RangeChanged.HasDelegate) await RangeChanged.InvokeAsync(next);
+        else { _uncontrolledRange = next; await InvokeAsync(StateHasChanged); }
     }
     private async Task HandleKeyDownAsync(DateOnly date, KeyboardEventArgs args)
     {

@@ -4771,6 +4771,24 @@ a {
     gap: .75rem;
 }
 
+.showcase-calendar-panel {
+    inline-size: min(100%, 24rem);
+}
+
+.showcase-calendar-panel > :is(.shadcn-card-header, .shadcn-card-footer) {
+    text-align: center;
+}
+
+.showcase-calendar-panel > .shadcn-card-content {
+    display: grid;
+    min-inline-size: 0;
+    place-items: center;
+}
+
+.showcase-calendar-panel > .shadcn-card-footer {
+    justify-content: center;
+}
+
 .showcase-calendar-demo .shadcn-calendar {
     inline-size: fit-content;
     max-inline-size: 100%;
@@ -4781,6 +4799,7 @@ a {
     color: var(--shadcn-muted-foreground);
     font-size: .75rem;
     font-variant-numeric: tabular-nums;
+    line-height: 1.5;
 }
 
 .showcase-avatar-demo .shadcn-avatar-fallback svg {

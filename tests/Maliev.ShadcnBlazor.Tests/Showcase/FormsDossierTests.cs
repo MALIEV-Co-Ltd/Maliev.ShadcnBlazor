@@ -238,7 +238,7 @@ public sealed class FormsDossierTests : BunitContext
             ["input-otp"] = ["one-input", "graphemes", "numeric", "invalid"],
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],
             ["combobox"] = ["selected", "multiple", "chips", "open", "invalid"],
-            ["calendar"] = ["single", "range", "culture", "invalid"],
+            ["calendar"] = ["single", "range", "culture", "keyboard", "week-numbers", "invalid"],
             ["date-picker"] = ["single", "range", "calendar", "culture", "clearable", "invalid"]
         };
 

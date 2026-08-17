@@ -94,6 +94,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav { display: grid; grid-template-columns: var(--shadcn-calendar-cell) 1fr var(--shadcn-calendar-cell); align-items: center; margin-bottom: calc(.5rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button { display: grid; width: var(--shadcn-calendar-cell); height: var(--shadcn-calendar-cell); place-items: center; border: 0; border-radius: var(--shadcn-calendar-cell-radius); background: transparent; color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button:hover { background: var(--shadcn-accent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button:focus-visible { outline: none; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 52%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button:disabled { opacity: .5; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav svg { width: 1rem; height: 1rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-caption { text-align: center; font-size: .875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-dropdowns { display: flex; justify-content: center; gap: calc(.375rem * var(--shadcn-spacing-multiplier)); }
@@ -112,10 +114,16 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:focus-visible { outline: none; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 52%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-today="true"]:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { background: var(--shadcn-primary); color: var(--shadcn-primary-foreground); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { background: var(--shadcn-muted); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { background: var(--shadcn-muted); color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] .shadcn-calendar-day-button { border-radius: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-start="true"] .shadcn-calendar-day-button { border-start-start-radius: var(--shadcn-calendar-cell-radius); border-end-start-radius: var(--shadcn-calendar-cell-radius); border-start-end-radius: 0; border-end-end-radius: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-end="true"] .shadcn-calendar-day-button { border-start-start-radius: 0; border-end-start-radius: 0; border-start-end-radius: var(--shadcn-calendar-cell-radius); border-end-end-radius: var(--shadcn-calendar-cell-radius); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"]:where([data-range-start="true"], [data-range-end="true"])::before { position: absolute; z-index: 0; inset-block: 0; inline-size: 50%; background: var(--shadcn-muted); content: ""; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"][data-range-start="true"]:not([data-range-end="true"])::before { inset-inline-end: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"][data-range-end="true"]:not([data-range-start="true"])::before { inset-inline-start: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-start="true"][data-range-end="true"]::before { display: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"][data-range-start="true"]:not([data-range-end="true"]) .shadcn-calendar-day-button { border-start-start-radius: var(--shadcn-calendar-cell-radius); border-end-start-radius: var(--shadcn-calendar-cell-radius); border-start-end-radius: 0; border-end-end-radius: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"][data-range-end="true"]:not([data-range-start="true"]) .shadcn-calendar-day-button { border-start-start-radius: 0; border-end-start-radius: 0; border-start-end-radius: var(--shadcn-calendar-cell-radius); border-end-end-radius: var(--shadcn-calendar-cell-radius); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-start="true"][data-range-end="true"] .shadcn-calendar-day-button { border-radius: var(--shadcn-calendar-cell-radius); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-card-content, .shadcn-popover-content, .shadcn-date-picker-content) .shadcn-calendar { background: transparent; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [dir="rtl"] .shadcn-calendar-nav > button svg { rotate: 180deg; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content { width: max-content; min-width: 0; max-width: min(100vw - 1rem, 22rem); max-height: none; padding: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker { display: inline-grid; align-items: start; }
@@ -145,4 +153,6 @@
 @media (forced-colors: active) {
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-input-group, .shadcn-input-otp-slot, .shadcn-select-trigger, .shadcn-combobox-chips, .shadcn-date-picker-trigger) { border-color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"]::before { forced-color-adjust: none; background: Highlight; }
 }
