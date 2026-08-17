@@ -97,6 +97,27 @@ public sealed class CarouselTests : BunitContext
         Assert.Equal(2, changes.Last());
     }
 
+    [Theory]
+    [InlineData(ShadcnCarouselOrientation.Horizontal, 48, 36, "--shadcn-carousel-drag-x: 48px", "--shadcn-carousel-drag-y")]
+    [InlineData(ShadcnCarouselOrientation.Vertical, 48, 36, "--shadcn-carousel-drag-y: 36px", "--shadcn-carousel-drag-x")]
+    public void PointerPreviewIsConstrainedToTheConfiguredAxis(
+        ShadcnCarouselOrientation orientation,
+        double clientX,
+        double clientY,
+        string activeAxis,
+        string crossAxis)
+    {
+        var cut = RenderCarousel(new ShadcnCarouselOptions(), 0, orientation: orientation);
+        var content = cut.Find("[data-slot='carousel-content']");
+
+        content.PointerDown(new PointerEventArgs { ClientX = 0, ClientY = 0, PointerId = 7 });
+        content.PointerMove(new PointerEventArgs { ClientX = clientX, ClientY = clientY, PointerId = 7 });
+
+        var trackStyle = cut.Find("[data-slot='carousel-track']").GetAttribute("style");
+        Assert.Contains(activeAxis, trackStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain(crossAxis, trackStyle, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void OptionsExposeAlignAndReducedMotionWithoutRawPluginLeakage()
     {

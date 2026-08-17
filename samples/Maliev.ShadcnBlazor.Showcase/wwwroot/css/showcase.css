@@ -5200,8 +5200,14 @@ a {
 }
 
 .showcase-carousel-demo .shadcn-carousel [data-slot="carousel-track"] {
+    margin: 0;
     transition-duration: 420ms;
     transition-timing-function: cubic-bezier(.16, 1, .3, 1);
+}
+
+.showcase-carousel-demo .shadcn-carousel-item,
+.showcase-carousel-demo .shadcn-carousel[data-orientation="vertical"] .shadcn-carousel-item {
+    padding: 0;
 }
 
 .showcase-carousel-demo .shadcn-carousel-previous,
@@ -5218,11 +5224,6 @@ a {
 .showcase-carousel-demo .shadcn-carousel[data-orientation="vertical"] {
     padding-block: 2.75rem;
     padding-inline: 0;
-}
-
-.showcase-carousel-demo .shadcn-carousel[data-orientation="vertical"] .shadcn-carousel-item {
-    padding-block-start: calc(1rem * var(--shadcn-spacing-multiplier));
-    padding-inline-start: 0;
 }
 
 .showcase-carousel-demo .shadcn-carousel[data-orientation="vertical"] .shadcn-carousel-previous,
@@ -5251,13 +5252,13 @@ a {
     justify-items: start;
     gap: .45rem;
     overflow: hidden;
-    border: 1px solid color-mix(in oklch, var(--shadcn-primary) 20%, var(--shadcn-border));
-    border-radius: calc(var(--shadcn-radius-xl) - .25rem);
-    padding: 1.75rem 2rem;
+    border: 0;
+    border-radius: 0;
+    padding: 1.75rem 4rem;
     background: linear-gradient(135deg, color-mix(in oklch, var(--shadcn-primary) 15%, var(--shadcn-card)), var(--shadcn-card) 58%);
     color: var(--shadcn-card-foreground);
     text-align: start;
-    box-shadow: var(--shadcn-shadow-sm);
+    box-shadow: none;
 }
 
 .showcase-carousel-slide::after {
@@ -5334,18 +5335,28 @@ a {
 }
 
 .showcase-carousel-dot {
-    inline-size: .45rem;
-    block-size: .45rem;
+    display: grid;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    place-items: center;
     border: 0;
     border-radius: 9999px;
     padding: 0;
-    background: var(--shadcn-muted-foreground);
-    opacity: .42;
-    transition: inline-size var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
+    background: transparent;
 }
 
-.showcase-carousel-dot:hover,
-.showcase-carousel-dot:focus-visible {
+.showcase-carousel-dot::before {
+    inline-size: .45rem;
+    block-size: .45rem;
+    border-radius: inherit;
+    background: var(--shadcn-muted-foreground);
+    content: "";
+    opacity: .42;
+    transition: transform var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
+}
+
+.showcase-carousel-dot:hover::before,
+.showcase-carousel-dot:focus-visible::before {
     opacity: .8;
 }
 
@@ -5354,10 +5365,10 @@ a {
     outline-offset: 3px;
 }
 
-.showcase-carousel-dot.is-selected {
-    inline-size: 1.25rem;
+.showcase-carousel-dot.is-selected::before {
     background: var(--shadcn-primary);
     opacity: 1;
+    transform: scaleX(2.75);
 }
 
 .showcase-resizable-dossier {
@@ -5423,10 +5434,15 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
     .showcase-carousel-demo [data-slot="carousel-track"],
-    .showcase-carousel-dot { transition: none; }
+    .showcase-carousel-dot::before { transition: none; }
 }
 
 @media (max-width: 42rem) {
+    .showcase-carousel-slide {
+        min-block-size: 12rem;
+        padding-inline: 3.25rem;
+    }
+
     .showcase-data-table .shadcn-data-table-toolbar {
         grid-template-columns: 1fr;
     }

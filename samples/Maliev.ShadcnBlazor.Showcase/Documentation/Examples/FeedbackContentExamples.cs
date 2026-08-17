@@ -283,23 +283,29 @@ internal static class FeedbackContentExamples
             b.AddAttribute(4, "ReducedMotion", reduced);
             b.CloseComponent();
         };
-        const string source = """
+        string Source()
+        {
+            var orientation = vertical ? "Vertical" : "Horizontal";
+            return $$"""
 @using Maliev.ShadcnBlazor.Components.Content
 
 <ShadcnCarousel Label="Production queue"
-                Orientation="@(vertical ? ShadcnCarouselOrientation.Vertical : ShadcnCarouselOrientation.Horizontal)"
+                Orientation="ShadcnCarouselOrientation.{{orientation}}"
                 @bind-SelectedIndex="selectedIndex"
+                @ref="carousel"
                 Options="@Options">
     <ShadcnCarouselContent>
-        <ShadcnCarouselItem Index="0" Label="Operations · Laser cell · 98%">
-            <article class="queue-slide">Operations · Laser cell · 98% · On schedule</article>
-        </ShadcnCarouselItem>
-        <ShadcnCarouselItem Index="1" Label="Quality · First-pass yield · 96.2%">
-            <article class="queue-slide">Quality · First-pass yield · 96.2% · Target met</article>
-        </ShadcnCarouselItem>
-        <ShadcnCarouselItem Index="2" Label="Delivery · Orders shipped · 1,284">
-            <article class="queue-slide">Delivery · Orders shipped · 1,284 · This month</article>
-        </ShadcnCarouselItem>
+        @foreach (var slide in Slides)
+        {
+            <ShadcnCarouselItem Index="slide.Index" Label="@slide.Label">
+                <article class="queue-slide">
+                    <span>@slide.Category</span>
+                    <strong>@slide.Title</strong>
+                    <span>@slide.Metric</span>
+                    <span>@slide.Detail</span>
+                </article>
+            </ShadcnCarouselItem>
+        }
     </ShadcnCarouselContent>
     <ShadcnCarouselPrevious />
     <ShadcnCarouselNext />
@@ -307,33 +313,48 @@ internal static class FeedbackContentExamples
 
 <p aria-live="polite">Slide @(selectedIndex + 1) of 3</p>
 <nav aria-label="Choose production queue slide">
-    @for (var index = 0; index < 3; index++)
+    @foreach (var slide in Slides)
     {
-        var slideIndex = index;
         <button type="button"
-                aria-label="Show slide @(slideIndex + 1)"
-                aria-pressed="@(selectedIndex == slideIndex)"
-                @onclick="() => selectedIndex = slideIndex">
-            @(slideIndex + 1)
-        </button>
+                aria-label="Show @slide.Label"
+                aria-pressed="@(selectedIndex == slide.Index)"
+                @onclick="() => GoToAsync(slide.Index)" />
     }
 </nav>
 
 @code {
-    private bool vertical;
-    private bool loop;
-    private bool rtl;
-    private bool reducedMotion;
+    private ShadcnCarousel? carousel;
     private int selectedIndex;
+    private IReadOnlyList<Slide> Slides { get; } =
+    [
+        new(0, "Operations", "Laser cell", "98%", "On schedule", "Operations · Laser cell · 98%"),
+        new(1, "Quality", "First-pass yield", "96.2%", "Target met", "Quality · First-pass yield · 96.2%"),
+        new(2, "Delivery", "Orders shipped", "1,284", "This month", "Delivery · Orders shipped · 1,284")
+    ];
+
     private ShadcnCarouselOptions Options => new()
     {
-        Loop = loop,
-        RightToLeft = rtl,
-        ReducedMotion = reducedMotion
+        Loop = {{loop.ToString().ToLowerInvariant()}},
+        RightToLeft = {{rtl.ToString().ToLowerInvariant()}},
+        ReducedMotion = {{reduced.ToString().ToLowerInvariant()}}
     };
+
+    private async Task GoToAsync(int index)
+    {
+        if (carousel is not null)
+            await carousel.GoToAsync(index);
+    }
+
+    private sealed record Slide(int Index, string Category, string Title, string Metric, string Detail, string Label);
 }
 """;
-        return Example("carousel", "Carousel engine", "Move through a production queue with arrows, keyboard shortcuts, pointer gestures, slide status, and motion preferences.", source, preview, [Toggle("carousel-vertical", "Vertical", v => vertical = v), Toggle("carousel-loop", "Loop", v => loop = v), Toggle("carousel-rtl", "RTL", v => rtl = v), Toggle("carousel-reduced", "Reduced motion", v => reduced = v)], ["horizontal", "vertical", "loop", "keyboard", "pointer", "status", "dots", "rtl", "reduced-motion"]);
+        }
+
+        var source = Source();
+        return new ComponentExampleDefinition("carousel-primary", "Carousel engine", "Move through a production queue with arrows, keyboard shortcuts, axis-locked pointer gestures, slide status, and motion preferences.", source, preview, [Toggle("carousel-vertical", "Vertical", v => vertical = v), Toggle("carousel-loop", "Loop", v => loop = v), Toggle("carousel-rtl", "RTL", v => rtl = v), Toggle("carousel-reduced", "Reduced motion", v => reduced = v)], ["horizontal", "vertical", "loop", "keyboard", "pointer", "status", "dots", "rtl", "reduced-motion"])
+        {
+            RazorSourceProvider = Source
+        };
     }
     private static ComponentExampleDefinition Progress()
     {

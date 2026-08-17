@@ -151,7 +151,10 @@ public sealed class FeedbackContentBrowserTests(ShowcaseServerFixture server, Pl
         Assert.StartsWith("-", afterButton, StringComparison.Ordinal);
 
         var viewport = carousel.Locator("[data-slot='carousel-content']");
-        await viewport.EvaluateAsync("element => { const box = element.getBoundingClientRect(); element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, clientX: box.left + box.width * .75, clientY: box.top + 1 })); element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, clientX: box.left + box.width * .25, clientY: box.top + 1 })); }");
+        await viewport.EvaluateAsync("element => { const box = element.getBoundingClientRect(); element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, clientX: box.left + box.width * .75, clientY: box.top + 1 })); element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerId: 7, clientX: box.left + box.width * .5, clientY: box.top + 80 })); }");
+        await Assertions.Expect(track).ToHaveAttributeAsync("style", new System.Text.RegularExpressions.Regex("--shadcn-carousel-drag-x"));
+        Assert.DoesNotContain("--shadcn-carousel-drag-y", await track.GetAttributeAsync("style"), StringComparison.Ordinal);
+        await viewport.EvaluateAsync("element => { const box = element.getBoundingClientRect(); element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, clientX: box.left + box.width * .25, clientY: box.top + 80 })); }");
         await Assertions.Expect(carousel.Locator("[data-slot='carousel-item']").Nth(2)).ToHaveAttributeAsync("data-selected", "true");
 
         await page.SetViewportSizeAsync(640, 720);
@@ -173,6 +176,16 @@ public sealed class FeedbackContentBrowserTests(ShowcaseServerFixture server, Pl
         await Assertions.Expect(status).ToContainTextAsync("Slide 1 of 3");
         await Assertions.Expect(page.GetByTestId("showcase-carousel-dot-0")).ToHaveAttributeAsync("aria-pressed", "true");
         await Assertions.Expect(carousel.Locator("[data-slot='carousel-previous']")).ToBeDisabledAsync();
+
+        var contentBox = await carousel.Locator("[data-slot='carousel-content']").BoundingBoxAsync();
+        var selectedBox = await items.Nth(0).BoundingBoxAsync();
+        Assert.NotNull(contentBox);
+        Assert.NotNull(selectedBox);
+        // The item sits inside the content border box. Allow only that small inset,
+        // while still rejecting the former 1rem track/item gutter.
+        Assert.InRange(Math.Abs(selectedBox.X - contentBox.X), 0, 4);
+        Assert.InRange(Math.Abs(selectedBox.Width - contentBox.Width), 0, 4);
+        Assert.NotEqual("0px", await carousel.Locator("[data-slot='carousel-content']").EvaluateAsync<string>("element => getComputedStyle(element).borderRadius"));
 
         await carousel.Locator("[data-slot='carousel-next']").ClickAsync();
         await Assertions.Expect(items.Nth(1)).ToHaveAttributeAsync("data-selected", "true");
@@ -308,6 +321,12 @@ public sealed class FeedbackContentBrowserTests(ShowcaseServerFixture server, Pl
         await vertical.Locator("[data-slot='carousel-previous']").ClickAsync();
         await Assertions.Expect(vertical.Locator("[data-slot='carousel-item']").Nth(2)).ToHaveAttributeAsync("data-selected", "true");
         Assert.Contains("0px", await vertical.Locator("[data-slot='carousel-track']").EvaluateAsync<string>("element => getComputedStyle(element).translate"), StringComparison.Ordinal);
+        var verticalViewport = vertical.Locator("[data-slot='carousel-content']");
+        var verticalTrack = vertical.Locator("[data-slot='carousel-track']");
+        await verticalViewport.EvaluateAsync("element => { const box = element.getBoundingClientRect(); element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 8, clientX: box.left + 1, clientY: box.top + 20 })); element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerId: 8, clientX: box.left + 80, clientY: box.top + 60 })); }");
+        await Assertions.Expect(verticalTrack).ToHaveAttributeAsync("style", new System.Text.RegularExpressions.Regex("--shadcn-carousel-drag-y"));
+        Assert.DoesNotContain("--shadcn-carousel-drag-x", await verticalTrack.GetAttributeAsync("style"), StringComparison.Ordinal);
+        await verticalViewport.DispatchEventAsync("pointercancel");
         var rtl = page.GetByTestId("carousel-rtl").Locator("[data-slot='carousel']");
         await rtl.DispatchEventAsync("keydown", new { key = "ArrowLeft" });
         await Assertions.Expect(rtl.Locator("[data-slot='carousel-item']").Nth(1)).ToHaveAttributeAsync("data-selected", "true");
