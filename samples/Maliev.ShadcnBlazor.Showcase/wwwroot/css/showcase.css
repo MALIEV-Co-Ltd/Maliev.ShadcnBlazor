@@ -4887,7 +4887,7 @@ a {
     display: grid;
     inline-size: min(100%, 38rem);
     max-inline-size: 100%;
-    gap: 1.25rem;
+    gap: .875rem;
     color: var(--shadcn-foreground);
 }
 
@@ -4897,7 +4897,7 @@ a {
     justify-content: space-between;
     gap: 1rem;
     border-block-end: 1px solid var(--shadcn-border);
-    padding-block-end: 1rem;
+    padding-block-end: .75rem;
 }
 
 .showcase-field-dossier__heading > div {
@@ -4923,7 +4923,7 @@ a {
 }
 
 .showcase-field-dossier .shadcn-field-group {
-    gap: 1.25rem;
+    gap: .875rem;
 }
 
 .showcase-field-dossier .shadcn-field[data-orientation="horizontal"] > :is(.shadcn-input, .shadcn-select) {
@@ -4954,10 +4954,14 @@ a {
 }
 
 @media (max-width: 36rem) {
-    .showcase-field-dossier { gap: 1rem; }
+    .showcase-field-dossier { gap: .75rem; }
     .showcase-field-dossier__heading { display: grid; gap: .5rem; }
-    .showcase-field-dossier__security-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .showcase-field-dossier__security-row > :last-child { grid-column: 1 / -1; }
+    .showcase-field-dossier .shadcn-field-group { gap: .625rem; }
+    .showcase-field-dossier .shadcn-field-description { font-size: .75rem; line-height: 1.35; }
+    .showcase-field-dossier .shadcn-textarea { min-block-size: 4rem; }
+    .showcase-field-dossier__security-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+    .showcase-field-dossier__security-row > :last-child .shadcn-field-description,
+    .showcase-field-dossier .shadcn-field:has(.shadcn-textarea) > .shadcn-field-description { display: none; }
     .showcase-field-dossier__actions > .shadcn-button { flex: 1 1 8rem; }
 }
 
