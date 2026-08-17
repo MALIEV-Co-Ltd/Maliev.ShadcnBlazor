@@ -196,7 +196,8 @@ public sealed class SelectComboboxTests : BunitContext
             .Add(component => component.Query, "nu"));
 
         var input = cut.Find("input[role='combobox']");
-        Assert.Equal("listbox", input.GetAttribute("aria-autocomplete"));
+        Assert.Equal("list", input.GetAttribute("aria-autocomplete"));
+        Assert.Equal("listbox", input.GetAttribute("aria-haspopup"));
         Assert.Equal("true", input.GetAttribute("aria-expanded"));
         var options = cut.FindAll("[role='option']");
         Assert.Single(options);
@@ -283,6 +284,29 @@ public sealed class SelectComboboxTests : BunitContext
             .Add(component => component.ShowClear, true));
         cut.Find("[data-slot='combobox-clear']").Click();
         Assert.Null(selected);
+    }
+
+    [Fact]
+    public void ComboboxWithoutBindingsOpensFiltersSelectsAndClearsItsValue()
+    {
+        var cut = Render<ShadcnCombobox<string>>(parameters => parameters
+            .Add(component => component.Options, Frameworks)
+            .Add(component => component.ShowClear, true)
+            .Add(component => component.Placeholder, "Choose framework"));
+
+        var input = cut.Find("input[role='combobox']");
+        input.Focus();
+        Assert.Equal("true", input.GetAttribute("aria-expanded"));
+
+        input.Input("nu");
+        Assert.Single(cut.FindAll("[role='option']"));
+        input.KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
+        input.KeyDown(new KeyboardEventArgs { Key = "Enter" });
+
+        Assert.Equal("Nuxt.js", input.GetAttribute("value"));
+        Assert.Equal("false", input.GetAttribute("aria-expanded"));
+        cut.Find("[data-slot='combobox-clear']").Click();
+        Assert.Equal(string.Empty, input.GetAttribute("value"));
     }
 
     [Fact]

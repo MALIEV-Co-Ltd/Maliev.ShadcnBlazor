@@ -1,7 +1,7 @@
 @using Maliev.ShadcnBlazor.Components.Forms
 
 <div class="showcase-combobox-dossier" data-testid="combobox-dossier-preview">
-    <ShadcnCombobox TValue="string" Value="@Selected" ValueChanged="@HandleValueChanged" Values="@SelectedValues" ValuesChanged="@HandleValuesChanged" Options="@GetMaterialOptions()" Multiple="@Multiple" Open="@Open" OpenChanged="@HandleOpenChanged" Query="@Query" QueryChanged="@HandleQueryChanged" ShowClear="true" ShowTrigger="true" Invalid="@Invalid" AdditionalAttributes="@Attributes" />
+    <ShadcnCombobox TValue="string" Value="@Selected" ValueChanged="@HandleValueChanged" Values="@SelectedValues" ValuesChanged="@HandleValuesChanged" Options="@GetMaterialOptions()" Multiple="@Multiple" Open="@Open" OpenChanged="@HandleOpenChanged" Query="@Query" QueryChanged="@HandleQueryChanged" ShowClear="true" ShowTrigger="true" Invalid="@Invalid" Placeholder="Select a material" AdditionalAttributes="@Attributes" />
 </div>
 
 @code {
@@ -9,7 +9,7 @@
     [Parameter] public bool Multiple { get; set; }
     private string Selected = "al6061";
     private IReadOnlyList<string> SelectedValues = ["al6061", "ss316"];
-    private bool Open = true;
+    private bool Open;
     private string Query = string.Empty;
     private static readonly IReadOnlyList<ShadcnComboboxOption<string>> MaterialOptions =
         [new("al6061", "Aluminum 6061", "Metals"), new("ss316", "Stainless 316L", "Metals"), new("peek", "PEEK", "Polymers")];
