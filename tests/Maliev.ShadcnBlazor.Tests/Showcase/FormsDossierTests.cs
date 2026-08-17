@@ -206,12 +206,19 @@ public sealed class FormsDossierTests : BunitContext
         Assert.NotEmpty(calendar.FindAll("[data-range-start='true']"));
         Assert.NotEmpty(calendar.FindAll("[data-range-end='true']"));
 
-        var datePicker = RenderExample(registry, "date-picker");
+        var datePickerExample = registry.GetBySlug("date-picker").Single();
+        var datePicker = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, datePickerExample));
+        Assert.Empty(datePicker.FindAll("[data-slot='date-picker-content']"));
+        datePicker.Find("[data-testid='forms-dossier-date-picker']").Click();
+        Assert.Single(datePicker.FindAll("[data-slot='date-picker-content']"));
         Change(datePicker, "date-picker-invalid", true);
         Assert.Equal("true", datePicker.Find("[data-testid='forms-dossier-date-picker']").GetAttribute("aria-invalid"));
         Assert.Single(datePicker.FindAll("[data-slot='date-picker-clear']"));
         Change(datePicker, "date-picker-clearable", false);
         Assert.Empty(datePicker.FindAll("[data-slot='date-picker-clear']"));
+        Change(datePicker, "date-picker-mode", "Single");
+        Assert.NotEmpty(datePicker.FindAll("[data-selected-single='true']"));
+        Assert.Contains("@bind-Value=\"SelectedDate\"", datePickerExample.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

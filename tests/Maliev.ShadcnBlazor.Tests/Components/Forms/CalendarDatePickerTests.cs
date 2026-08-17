@@ -304,6 +304,21 @@ public sealed class CalendarDatePickerTests : BunitContext
     }
 
     [Fact]
+    public void DatePickerClearActionStaysInsideTheFieldAndUsesAnIcon()
+    {
+        var cut = Render<ShadcnDatePicker>(parameters => parameters
+            .Add(component => component.Value, new DateOnly(2026, 8, 13))
+            .Add(component => component.Clearable, true));
+
+        var root = cut.Find("[data-slot='date-picker']");
+        var clear = root.Children.SingleOrDefault(element => element.GetAttribute("data-slot") == "date-picker-clear");
+
+        Assert.NotNull(clear);
+        Assert.NotNull(clear!.QuerySelector("svg"));
+        Assert.True(string.IsNullOrWhiteSpace(clear.TextContent));
+    }
+
+    [Fact]
     public void DatePickerWithoutOpenBindingOpensAndSelectsADate()
     {
         DateOnly? selected = null;
