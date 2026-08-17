@@ -198,7 +198,8 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         var accordion = page.Locator("#preview [data-slot='accordion']");
         var triggers = accordion.Locator("[data-slot='accordion-trigger']");
         var contents = accordion.Locator("[data-slot='accordion-content']");
-        await Assertions.Expect(triggers).ToHaveCountAsync(3);
+        await Assertions.Expect(triggers).ToHaveCountAsync(4);
+        await Assertions.Expect(page.Locator("#preview .showcase-accordion-dossier__header")).ToContainTextAsync("Quotation support");
         await Assertions.Expect(contents.First).ToContainTextAsync("Express delivery");
         await Assertions.Expect(contents.First).ToBeVisibleAsync();
 

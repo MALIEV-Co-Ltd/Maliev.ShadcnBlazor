@@ -29,6 +29,7 @@ public sealed class DisclosureTests : BunitContext
         Assert.False(contents[0].HasAttribute("hidden"));
         Assert.True(contents[1].HasAttribute("hidden"));
         Assert.Contains("รายละเอียดที่ยังอยู่ใน DOM", contents[1].TextContent, StringComparison.Ordinal);
+        Assert.NotNull(triggers[0].QuerySelector("[data-slot='accordion-trigger-icon']"));
     }
 
     [Fact]

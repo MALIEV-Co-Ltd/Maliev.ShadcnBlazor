@@ -74,8 +74,12 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     {
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
         var accordion = Assert.Single(registry.GetBySlug("accordion"));
+        var accordionMarkup = Render(accordion.Preview).Markup;
+        Assert.Contains("showcase-accordion-dossier", accordionMarkup, StringComparison.Ordinal);
+        Assert.Contains("Quotation support", accordionMarkup, StringComparison.Ordinal);
         Assert.Contains("What are the delivery options?", accordion.RazorSource, StringComparison.Ordinal);
         Assert.Contains("How can I contact support?", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("How are production changes approved?", accordion.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Express delivery", accordion.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Revision notes", accordion.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("...", accordion.RazorSource, StringComparison.Ordinal);
@@ -153,6 +157,25 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         Assert.Contains("Collapsible=\"true\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("data-direction=\"vertical\"", Render(example.Preview).Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AccordionExampleSourceTracksEveryInteractiveSetting()
+    {
+        var accordion = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("accordion"));
+
+        Assert.Contains("Multiple=\"false\"", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnAccordionOrientation.Vertical", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"false\"", accordion.RazorSource, StringComparison.Ordinal);
+
+        accordion.Controls.Single(control => control.Id == "accordion-multiple").Apply("true");
+        accordion.Controls.Single(control => control.Id == "accordion-horizontal").Apply("true");
+        accordion.Controls.Single(control => control.Id == "accordion-disabled").Apply("true");
+
+        Assert.Contains("Multiple=\"true\"", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnAccordionOrientation.Horizontal", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", accordion.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("new[] { \"delivery\", \"returns\" }", accordion.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

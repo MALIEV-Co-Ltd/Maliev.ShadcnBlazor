@@ -5,17 +5,20 @@
 .shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item:last-child { border-inline-end: 0; }
 .shadcn-accordion-item:not(:last-child) { border-block-end: 1px solid var(--shadcn-border); }
 .shadcn-accordion-heading { margin: 0; font: inherit; }
-.shadcn-accordion-trigger { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: calc(.75rem * var(--shadcn-spacing-multiplier)); min-block-size: var(--shadcn-control-height); padding-block: calc(1rem * var(--shadcn-spacing-multiplier)); border: 1px solid transparent; border-radius: var(--shadcn-radius-md); background: transparent; color: inherit; font: inherit; font-weight: 500; text-align: start; cursor: pointer; transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
+.shadcn-accordion-trigger { display: flex; width: 100%; align-items: flex-start; justify-content: space-between; gap: calc(.75rem * var(--shadcn-spacing-multiplier)); min-block-size: var(--shadcn-control-height); padding-block: calc(1rem * var(--shadcn-spacing-multiplier)); border: 1px solid transparent; border-radius: var(--shadcn-radius-md); background: transparent; color: inherit; font: inherit; font-size: .875rem; font-weight: 500; line-height: 1.35; text-align: start; cursor: pointer; transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
 .shadcn-accordion-trigger:hover { text-decoration: underline; }
 .shadcn-accordion-trigger:focus-visible, .shadcn-collapsible-trigger:focus-visible { outline: 0; box-shadow: 0 0 0 var(--shadcn-focus-ring-width) color-mix(in oklab, var(--shadcn-ring) 50%, transparent); border-radius: var(--shadcn-radius-sm); }
 .shadcn-accordion-trigger:disabled { cursor: not-allowed; opacity: .5; }
-.shadcn-accordion-trigger [data-slot="accordion-chevron"] { inline-size: 1rem; block-size: 1rem; flex: none; fill: none; stroke: currentColor; stroke-width: 2; transition: rotate var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
-.shadcn-accordion-trigger[data-state="open"] [data-slot="accordion-chevron"] { rotate: 90deg; }
+.shadcn-accordion-trigger [data-slot="accordion-trigger-icon"] { inline-size: 1rem; block-size: 1rem; margin-inline-start: auto; flex: none; fill: none; stroke: var(--shadcn-muted-foreground); stroke-width: 2; transition: rotate var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
+.shadcn-accordion-trigger[data-state="open"] [data-slot="accordion-trigger-icon"] { rotate: 90deg; }
 .shadcn-accordion-content { overflow: clip; font-size: .875rem; }
 .shadcn-accordion-content[hidden], .shadcn-collapsible-content[hidden] { display: none; }
 .shadcn-accordion-content[data-state="open"] { animation: shadcn-disclosure-down var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
 .shadcn-accordion-content[data-state="closed"] { animation: shadcn-disclosure-up var(--shadcn-motion-duration) var(--shadcn-motion-easing); }
-.shadcn-accordion-content [data-slot="accordion-content-inner"] { padding-block-end: calc(1rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-accordion-content [data-slot="accordion-content-inner"] { padding-block-end: calc(1rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); line-height: 1.6; }
+.shadcn-accordion-content [data-slot="accordion-content-inner"] > :first-child { margin-block-start: 0; }
+.shadcn-accordion-content [data-slot="accordion-content-inner"] > :last-child { margin-block-end: 0; }
+.shadcn-accordion-content [data-slot="accordion-content-inner"] > p:not(:last-child) { margin-block-end: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-collapsible { inline-size: 100%; }
 .shadcn-collapsible-trigger { color: inherit; font: inherit; }
 @keyframes shadcn-disclosure-down { from { opacity: 0; translate: 0 -.25rem; } to { opacity: 1; translate: 0 0; } }
@@ -167,7 +170,7 @@
 
 /* Keep disclosure and navigation surfaces calm, keyboard-visible, and usable
    in narrow documentation previews. */
-.shadcn-accordion-trigger:hover { text-decoration: none; background: color-mix(in oklab, var(--shadcn-muted) 55%, transparent); }
+.shadcn-accordion-trigger:hover { background: transparent; text-decoration: underline; text-underline-offset: .2em; }
 .shadcn-accordion-trigger:focus-visible,
 .shadcn-collapsible-trigger:focus-visible,
 .shadcn-tabs-trigger:focus-visible,

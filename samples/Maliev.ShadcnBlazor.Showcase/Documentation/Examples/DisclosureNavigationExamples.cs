@@ -30,23 +30,51 @@ internal static class DisclosureNavigationExamples
         var multiple = false; var horizontal = false; var disabled = false;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnAccordion>(0);
-            b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" });
-            b.AddAttribute(2, "Multiple", multiple);
-            b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
-            b.AddAttribute(4, "Disabled", disabled);
-            b.AddAttribute(5, "Label", "Quotation questions");
-            b.AddAttribute(6, "ChildContent", (RenderFragment)(c =>
+            b.OpenElement(0, "section");
+            b.AddAttribute(1, "class", "showcase-accordion-dossier");
+            b.AddAttribute(2, "aria-labelledby", "quotation-support-title");
+            b.OpenElement(3, "header");
+            b.AddAttribute(4, "class", "showcase-accordion-dossier__header");
+            b.OpenElement(5, "h3");
+            b.AddAttribute(6, "id", "quotation-support-title");
+            b.AddContent(7, "Quotation support");
+            b.CloseElement();
+            b.OpenElement(8, "p");
+            b.AddContent(9, "Answers for delivery, revisions, and production handoff.");
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnAccordion>(10);
+            b.AddAttribute(11, "Values", multiple ? new[] { "delivery", "returns" } : new[] { "delivery" });
+            b.AddAttribute(12, "Multiple", multiple);
+            b.AddAttribute(13, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
+            b.AddAttribute(14, "Disabled", disabled);
+            b.AddAttribute(15, "Label", "Quotation questions");
+            b.AddAttribute(16, "ChildContent", (RenderFragment)(c =>
             {
-                AddAccordionItem(c, 0, "shipping", "What are the delivery options?", ShippingAccordionContent());
+                AddAccordionItem(c, 0, "delivery", "What are the delivery options?", DeliveryAccordionContent());
                 AddAccordionItem(c, 10, "returns", "What is the return policy?", ReturnsAccordionContent());
-                AddAccordionItem(c, 20, "support", "How can I contact support?", SupportAccordionContent());
+                AddAccordionItem(c, 20, "changes", "How are production changes approved?", ChangesAccordionContent());
+                AddAccordionItem(c, 30, "support", "How can I contact support?", SupportAccordionContent());
             }));
             b.CloseComponent();
+            b.CloseElement();
         };
-        const string source = """
-<ShadcnAccordion Values='new[] { "shipping" }' Multiple="false" Label="Quotation questions">
-    <ShadcnAccordionItem Value="shipping">
+        string Source()
+        {
+            var values = multiple ? "new[] { \"delivery\", \"returns\" }" : "new[] { \"delivery\" }";
+            var orientation = horizontal ? nameof(ShadcnAccordionOrientation.Horizontal) : nameof(ShadcnAccordionOrientation.Vertical);
+            return $"""
+<section class="showcase-accordion-dossier" aria-labelledby="quotation-support-title">
+    <header class="showcase-accordion-dossier__header">
+        <h3 id="quotation-support-title">Quotation support</h3>
+        <p>Answers for delivery, revisions, and production handoff.</p>
+    </header>
+    <ShadcnAccordion Values='@({values})'
+                     Multiple="{multiple.ToString().ToLowerInvariant()}"
+                     Orientation="ShadcnAccordionOrientation.{orientation}"
+                     Disabled="{disabled.ToString().ToLowerInvariant()}"
+                     Label="Quotation questions">
+    <ShadcnAccordionItem Value="delivery">
         <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>
         <ShadcnAccordionContent>
             <p>Choose the handoff that fits your production deadline.</p>
@@ -64,6 +92,13 @@ internal static class DisclosureNavigationExamples
             <p>Revision notes help production review the requested change.</p>
         </ShadcnAccordionContent>
     </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="changes">
+        <ShadcnAccordionTrigger>How are production changes approved?</ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p>Reply from the quotation workspace before production begins.</p>
+            <p>The revised drawing and pricing remain attached to the same quotation.</p>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
     <ShadcnAccordionItem Value="support">
         <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>
         <ShadcnAccordionContent>
@@ -75,8 +110,11 @@ internal static class DisclosureNavigationExamples
         </ShadcnAccordionContent>
     </ShadcnAccordionItem>
 </ShadcnAccordion>
+</section>
 """;
-        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", source, preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        }
+        var example = Example("accordion", "Quotation FAQ", "Open production answers directly, then compare single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", Source(), preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Breadcrumb()
@@ -398,7 +436,7 @@ internal static class DisclosureNavigationExamples
         }));
         b.CloseComponent();
     }
-    private static RenderFragment ShippingAccordionContent() => builder =>
+    private static RenderFragment DeliveryAccordionContent() => builder =>
     {
         builder.OpenElement(0, "p"); builder.AddContent(1, "Choose the handoff that fits your production deadline."); builder.CloseElement();
         builder.OpenElement(10, "ul");
@@ -411,6 +449,11 @@ internal static class DisclosureNavigationExamples
         builder.OpenElement(0, "p"); builder.AddContent(1, "Returns are accepted within 30 days when the item is unused and in its original packaging."); builder.CloseElement();
         builder.OpenElement(10, "p"); builder.AddContent(11, "Include the quotation number so the team can route the request quickly."); builder.CloseElement();
         builder.OpenElement(20, "p"); builder.AddContent(21, "Revision notes help production review the requested change."); builder.CloseElement();
+    };
+    private static RenderFragment ChangesAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddContent(1, "Reply from the quotation workspace before production begins."); builder.CloseElement();
+        builder.OpenElement(10, "p"); builder.AddContent(11, "The revised drawing and pricing remain attached to the same quotation."); builder.CloseElement();
     };
     private static RenderFragment SupportAccordionContent() => builder =>
     {
