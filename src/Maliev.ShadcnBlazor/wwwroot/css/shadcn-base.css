@@ -42,7 +42,10 @@
 }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy:hover { border-color: var(--shadcn-border); background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy svg { width: 1rem; height: 1rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-status { white-space: nowrap; animation: shadcn-code-block-copy-fade 1.6s var(--shadcn-motion-easing-standard) forwards; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-icon,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback { display: inline-flex; align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback { white-space: nowrap; animation: shadcn-code-block-copy-feedback 1.8s var(--shadcn-motion-easing-standard) forwards; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-status { white-space: nowrap; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block pre { max-height: 32rem; overflow: auto; margin: 0; padding: calc(1rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-background); color: var(--shadcn-foreground); font-family: var(--shadcn-font-mono); font-size: .8rem; line-height: 1.7; tab-size: 2; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block code { color: inherit; font: inherit; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token { color: var(--shadcn-code-token-foreground); }
@@ -52,7 +55,6 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-type { color: var(--shadcn-code-token-type); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-number { color: var(--shadcn-code-token-number); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-literal { color: var(--shadcn-code-token-literal); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-attribute,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-attribute { color: var(--shadcn-code-token-attribute); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-method { color: var(--shadcn-code-token-method); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token-property { color: var(--shadcn-code-token-property); }
@@ -74,8 +76,7 @@
 :where([data-shadcn-theme="dark"], .dark) .shadcn-code-token-punctuation { color: var(--shadcn-code-token-punctuation); }
 :where([data-shadcn-theme="dark"], .dark) .shadcn-code-token-comment { color: var(--shadcn-code-token-comment); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-@keyframes shadcn-code-block-copy-fade { 0%, 65% { opacity: 1; } 100% { opacity: 0; } }
-
+@keyframes shadcn-code-block-copy-feedback { 0%, 78% { opacity: 1; } 100% { opacity: 0; } }
 /* Geist, Noto Sans Thai, and JetBrains Mono are shipped with the package so
    the default typography is stable in offline and self-hosted deployments. */
 @font-face { font-family: "Geist"; src: url("../fonts/geist-sans-variable.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; }
@@ -272,6 +273,12 @@
         animation-duration: var(--shadcn-reduced-motion-duration) !important;
         animation-iteration-count: 1 !important;
         transition-duration: var(--shadcn-reduced-motion-duration) !important;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy,
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback {
+        animation: none;
+        transition: none;
     }
 }
 

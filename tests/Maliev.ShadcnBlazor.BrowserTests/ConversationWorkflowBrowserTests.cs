@@ -141,6 +141,42 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task CodeBlockUsesCanonicalEditorPaletteInLightAndDarkModes()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        foreach (var (theme, expectedTagColor) in new[]
+        {
+            ("light", "rgb(128, 0, 0)"),
+            ("dark", "rgb(86, 156, 214)")
+        })
+        {
+            await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/bubble?theme={theme}").ToString());
+            var code = page.Locator("#preview .component-code");
+            await code.WaitForAsync();
+            if (theme == "dark")
+            {
+                await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+                await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("data-shadcn-theme", "dark");
+            }
+            var canonicalTokens = code.Locator("[class*='shadcn-code-token-']");
+            await Assertions.Expect(canonicalTokens).Not.ToHaveCountAsync(0);
+
+            var distinctColors = await canonicalTokens.EvaluateAllAsync<string[]>("elements => [...new Set(elements.map(element => getComputedStyle(element).color))]");
+            Assert.True(distinctColors.Length >= 5, $"Expected a multi-token editor palette in {theme}; got {string.Join(", ", distinctColors)}");
+
+            var tag = code.Locator(".shadcn-code-token-tag").First;
+            await Assertions.Expect(tag).ToBeVisibleAsync();
+            Assert.Equal(expectedTagColor, await tag.EvaluateAsync<string>("element => getComputedStyle(element).color"));
+        }
+    }
+
+    [Fact]
     public async Task StreamingMarkerUsesLoaderAndShimmerButHonorsReducedMotion()
     {
         await using var animatedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.NoPreference });

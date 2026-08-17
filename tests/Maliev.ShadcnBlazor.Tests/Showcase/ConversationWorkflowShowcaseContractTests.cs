@@ -145,6 +145,14 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("data-variant=\"ghost\"", css, StringComparison.Ordinal);
         Assert.Contains("border: 0 !important", css, StringComparison.Ordinal);
+
+        var showcaseCss = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.Contains("padding-inline: .875rem !important", showcaseCss, StringComparison.Ordinal);
+        var ghostRuleStart = showcaseCss.IndexOf("html body .showcase-bubble-thread > [data-slot=\"bubble\"][data-variant=\"ghost\"] > .shadcn-bubble-content", StringComparison.Ordinal);
+        Assert.True(ghostRuleStart >= 0);
+        var ghostRuleEnd = showcaseCss.IndexOf('}', ghostRuleStart);
+        Assert.True(ghostRuleEnd > ghostRuleStart);
+        Assert.DoesNotContain("padding-inline: 0 !important", showcaseCss[ghostRuleStart..(ghostRuleEnd + 1)], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -183,6 +191,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("@keyframes shadcn-marker-dots", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes shadcn-marker-wave", css, StringComparison.Ordinal);
         Assert.Contains("background-size:200% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("background-position:-200% 0", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position:-200% 0; } to { background-position:200% 0; } }", css, StringComparison.Ordinal);
+        Assert.Contains("background-repeat:no-repeat", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-marker-content[data-streaming=\"true\"]", css, StringComparison.Ordinal);
@@ -280,6 +291,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("justify-content: flex-start !important", css, StringComparison.Ordinal);
         Assert.Contains("margin-inline-start: auto", css, StringComparison.Ordinal);
         Assert.Contains("aspect-ratio: 1", css, StringComparison.Ordinal);
+
+        var conversationCss = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
+        Assert.Contains(".shadcn-message-footer button { min-width:0 !important", conversationCss, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message-avatar > [data-slot=\"avatar\"]", conversationCss, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -320,10 +335,13 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.True(example.RazorSource.IndexOf("showcase-scroller-composer", StringComparison.Ordinal) < example.RazorSource.LastIndexOf("</ShadcnMessageScroller>", StringComparison.Ordinal));
 
         var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
         Assert.Contains(".showcase-scroller-frame .showcase-scroller-composer", css, StringComparison.Ordinal);
         Assert.Contains("padding: 1rem 1.25rem 5rem", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-scroller-frame {", css, StringComparison.Ordinal);
+        Assert.Contains("position: relative", css, StringComparison.Ordinal);
     }
 
     [Fact]

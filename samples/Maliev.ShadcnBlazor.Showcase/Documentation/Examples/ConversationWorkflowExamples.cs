@@ -582,11 +582,11 @@ internal static class ConversationWorkflowExamples
             </ShadcnMessageScrollerContent>
         </ShadcnMessageScrollerViewport>
         <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="Jump to latest">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+        <form class="showcase-scroller-composer" @onsubmit:preventDefault="true">
+            <input @bind="message" aria-label="New message" />
+            <button type="submit" aria-label="Send message">Send</button>
+        </form>
     </ShadcnMessageScroller>
-    <form class="showcase-scroller-composer" @onsubmit:preventDefault="true">
-        <input @bind="message" aria-label="New message" />
-        <button type="submit" aria-label="Send message">Send</button>
-    </form>
 </ShadcnMessageScrollerProvider>
 """;
 
@@ -643,7 +643,6 @@ internal static class ConversationWorkflowExamples
                 <ShadcnBubbleContent>I’ll keep the thread easy to scan.</ShadcnBubbleContent>
             </ShadcnBubble>
             <ShadcnMessageFooter data-visibility="always">
-                <span class="showcase-message-status">Sent · 10:42</span>
                 <button type="button" aria-label="Copy message" class="showcase-message-action showcase-message-action--copy">
                     <span aria-hidden="true">⧉</span>
                     <span class="sr-only">Copy</span>
@@ -654,6 +653,7 @@ internal static class ConversationWorkflowExamples
                     </svg>
                     <span class="sr-only">Reply</span>
                 </button>
+                <span class="showcase-message-status">Sent · 10:42</span>
             </ShadcnMessageFooter>
         </ShadcnMessageContent>
     </ShadcnMessage>

@@ -5,9 +5,9 @@
     <ShadcnAvatar Size="ShadcnAvatarSize.Small">
         @if (!string.IsNullOrWhiteSpace(Source))
         {
-            <ShadcnAvatarImage Source="@Source" Alt="@Alt" data-avatar="@AvatarId" />
+            <ShadcnAvatarImage Class="showcase-message-avatar-image" Source="@Source" Alt="@Alt" data-avatar="@AvatarId" />
         }
-        <ShadcnAvatarFallback data-avatar="@(string.IsNullOrWhiteSpace(Source) ? AvatarId : null)">@Fallback</ShadcnAvatarFallback>
+        <ShadcnAvatarFallback Class="showcase-message-avatar-fallback" data-avatar="@(string.IsNullOrWhiteSpace(Source) ? AvatarId : null)">@Fallback</ShadcnAvatarFallback>
     </ShadcnAvatar>
 </ShadcnMessageAvatar>
 

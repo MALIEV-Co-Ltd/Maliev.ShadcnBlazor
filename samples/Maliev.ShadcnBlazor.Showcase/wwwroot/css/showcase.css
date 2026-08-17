@@ -1095,6 +1095,12 @@ a {
     color: var(--shadcn-foreground);
 }
 
+.showcase-marker-thread .shadcn-marker-content[data-streaming="true"] {
+    background-position: -200% 0;
+    background-repeat: no-repeat;
+    background-color: transparent;
+}
+
 .showcase-message-thread {
     display: grid;
     width: 100%;
@@ -1129,6 +1135,7 @@ a {
 }
 
 .showcase-scroller-frame {
+    position: relative;
     min-height: 20rem;
     overflow: hidden;
     border: 1px solid var(--shadcn-border);
@@ -3679,6 +3686,45 @@ a {
 .showcase-combobox-dossier .shadcn-combobox-control { min-inline-size: 0; }
 .showcase-combobox-dossier .shadcn-combobox-item { min-block-size: 2.25rem; }
 
+.showcase-input-group-dossier {
+    display: grid;
+    inline-size: min(100%, 20rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-otp-card {
+    inline-size: min(100%, 26rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-otp-card .shadcn-card-content {
+    display: grid;
+    justify-items: center;
+    gap: .75rem;
+}
+
+.showcase-otp-card .shadcn-card-footer {
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+.showcase-select-dossier,
+.showcase-date-picker-dossier {
+    display: grid;
+    inline-size: min(100%, 24rem);
+    max-inline-size: 100%;
+    justify-items: center;
+    margin-inline: auto;
+}
+
+.showcase-select-dossier > .shadcn-select,
+.showcase-date-picker-dossier > .shadcn-date-picker {
+    inline-size: 100%;
+    min-inline-size: 0;
+}
+
 @media (max-width: 40rem) {
     .showcase-skeleton-layout__cards { grid-template-columns: 1fr; }
     .showcase-toast-demo .shadcn-toast-viewport { inset-inline: 1rem; inline-size: auto; max-inline-size: none; }
@@ -4089,8 +4135,9 @@ a {
 }
 
 .showcase-data-table .shadcn-data-table-frame .shadcn-table {
-    inline-size: 100%;
-    min-inline-size: 34rem;
+    inline-size: max-content;
+    min-inline-size: 100%;
+    table-layout: auto;
 }
 
 .showcase-data-table .shadcn-data-table-frame .shadcn-table-header .shadcn-table-row,
@@ -4246,13 +4293,14 @@ a {
 }
 
 .showcase-table .shadcn-table {
-    inline-size: 100%;
-    min-inline-size: 34rem;
+    inline-size: max-content;
+    min-inline-size: 100%;
+    table-layout: auto;
 }
 
 .showcase-chart-dossier [data-slot="chart-surface"] rect[data-series] {
-    rx: 0;
-    ry: 0;
+    rx: 0 !important;
+    ry: 0 !important;
 }
 
 .showcase-aspect-ratio-demo {
@@ -4263,6 +4311,7 @@ a {
 
 .showcase-aspect-ratio-demo--1-1 {
     inline-size: min(100%, 26rem);
+    aspect-ratio: 1;
 }
 
 .showcase-aspect-ratio-demo--9-16 {
@@ -5114,17 +5163,36 @@ body:has(.theme-studio-provider) {
     color: var(--shadcn-primary);
 }
 
+.component-code__surface .shadcn-code-block-copy-icon,
+.component-code__surface .shadcn-code-block-copy-feedback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .375rem;
+}
+
+.component-code__surface .shadcn-code-block-copy-feedback {
+    animation: component-code-copied-feedback 1.8s var(--shadcn-motion-easing-standard) forwards;
+}
+
 .component-code__surface .shadcn-code-block-copy-status {
     font-family: var(--shadcn-font-mono);
     font-size: .7rem;
     font-weight: 650;
     letter-spacing: .01em;
-    animation: component-code-copied-fade 1.8s var(--shadcn-motion-easing-standard) forwards;
 }
 
-@keyframes component-code-copied-fade {
-    0%, 55% { opacity: 1; }
+@keyframes component-code-copied-feedback {
+    0%, 78% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-code__surface .shadcn-code-block-copy,
+    .component-code__surface .shadcn-code-block-copy-feedback {
+        animation: none;
+        transition: none;
+    }
 }
 
 .component-code pre code .code-token {
@@ -5246,6 +5314,50 @@ body:has(.theme-studio-provider) {
 .dark .component-code pre code .code-token-punctuation {
     color: var(--shadcn-code-token-punctuation);
 }
+
+/* ShadcnCodeBlock emits canonical shadcn-code-token-* classes alongside the
+   legacy aliases. Keep the canonical classes explicit in the Showcase
+   cascade so the light/dark C# palette cannot be lost to a generic code rule. */
+.component-code pre code .shadcn-code-token-comment { color: var(--shadcn-code-token-comment); font-style: italic; }
+.component-code pre code .shadcn-code-token-tag { color: var(--shadcn-code-token-tag); }
+.component-code pre code .shadcn-code-token-keyword { color: var(--shadcn-code-token-keyword); font-weight: 650; }
+.component-code pre code .shadcn-code-token-type { color: var(--shadcn-code-token-type); }
+.component-code pre code .shadcn-code-token-string { color: var(--shadcn-code-token-string); }
+.component-code pre code .shadcn-code-token-number { color: var(--shadcn-code-token-number); }
+.component-code pre code .shadcn-code-token-literal { color: var(--shadcn-code-token-literal); }
+.component-code pre code .shadcn-code-token-attribute { color: var(--shadcn-code-token-attribute); }
+.component-code pre code .shadcn-code-token-method { color: var(--shadcn-code-token-method); }
+.component-code pre code .shadcn-code-token-property { color: var(--shadcn-code-token-property); }
+.component-code pre code .shadcn-code-token-directive { color: var(--shadcn-code-token-directive); font-weight: 600; }
+.component-code pre code .shadcn-code-token-operator { color: var(--shadcn-code-token-operator); font-weight: 600; }
+.component-code pre code .shadcn-code-token-punctuation { color: var(--shadcn-code-token-punctuation); }
+
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-comment,
+.dark .component-code pre code .shadcn-code-token-comment { color: var(--shadcn-code-token-comment); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-tag,
+.dark .component-code pre code .shadcn-code-token-tag { color: var(--shadcn-code-token-tag); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-keyword,
+.dark .component-code pre code .shadcn-code-token-keyword { color: var(--shadcn-code-token-keyword); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-type,
+.dark .component-code pre code .shadcn-code-token-type { color: var(--shadcn-code-token-type); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-string,
+.dark .component-code pre code .shadcn-code-token-string { color: var(--shadcn-code-token-string); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-number,
+.dark .component-code pre code .shadcn-code-token-number { color: var(--shadcn-code-token-number); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-literal,
+.dark .component-code pre code .shadcn-code-token-literal { color: var(--shadcn-code-token-literal); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-attribute,
+.dark .component-code pre code .shadcn-code-token-attribute { color: var(--shadcn-code-token-attribute); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-method,
+.dark .component-code pre code .shadcn-code-token-method { color: var(--shadcn-code-token-method); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-property,
+.dark .component-code pre code .shadcn-code-token-property { color: var(--shadcn-code-token-property); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-directive,
+.dark .component-code pre code .shadcn-code-token-directive { color: var(--shadcn-code-token-directive); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-operator,
+.dark .component-code pre code .shadcn-code-token-operator { color: var(--shadcn-code-token-operator); }
+[data-shadcn-theme="dark"] .component-code pre code .shadcn-code-token-punctuation,
+.dark .component-code pre code .shadcn-code-token-punctuation { color: var(--shadcn-code-token-punctuation); }
 
 .showcase-bubble-thread [data-bubble-role="incoming"] {
     transition: margin-inline var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
@@ -5504,7 +5616,9 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="ghost"] >
     border: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    padding-inline: 0 !important;
+    min-inline-size: 0;
+    padding-block: .625rem !important;
+    padding-inline: .875rem !important;
 }
 
 html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"] > .shadcn-bubble-content {
