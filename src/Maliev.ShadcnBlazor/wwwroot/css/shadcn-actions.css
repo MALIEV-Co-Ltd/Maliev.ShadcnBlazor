@@ -141,6 +141,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item) { appearance: none; margin: 0; outline: none; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-radio-group-item) { width: 1rem; height: 1rem; border: 1px solid var(--shadcn-input); background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-xs); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox { border-radius: 0.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-checkbox:not(:checked):not([data-state="indeterminate"]) { background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox:checked,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox[data-state="indeterminate"] { border-color: var(--shadcn-primary); background: var(--shadcn-primary); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-indicator { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; color: var(--shadcn-primary-foreground); }
@@ -170,8 +171,10 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):disabled { cursor: default; opacity: 0.5; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox[aria-readonly="true"] { cursor: default; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item)[aria-invalid="true"] { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 20%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item)[aria-invalid="true"] { border-color: color-mix(in oklch, var(--shadcn-destructive) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 40%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox:is(:checked, [data-state="indeterminate"])[aria-invalid="true"] { border-color: var(--shadcn-primary); }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider { position: relative; display: flex; width: 100%; min-width: 6rem; touch-action: none; user-select: none; align-items: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-slider[data-orientation="vertical"] { width: 1.25rem; min-width: 0; height: 10rem; flex-direction: column; justify-content: center; }

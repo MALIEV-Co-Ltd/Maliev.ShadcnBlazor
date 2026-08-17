@@ -10,6 +10,44 @@ public sealed class ComponentDossierBrowserTests(
     PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task CheckboxDossierSupportsDirectPointerKeyboardAndAllDocumentedStates()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            DeviceScaleFactor = 1,
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/checkbox?dir=rtl").ToString());
+        var preview = page.GetByTestId("checkbox-dossier-preview");
+        await preview.WaitForAsync();
+        await Assertions.Expect(preview.Locator("[data-slot='checkbox']")).ToHaveCountAsync(6);
+
+        var terms = page.GetByTestId("action-checkbox");
+        await Assertions.Expect(terms).ToHaveAttributeAsync("aria-checked", "false");
+        await terms.CheckAsync();
+        await Assertions.Expect(terms).ToHaveAttributeAsync("data-state", "checked");
+        await terms.UncheckAsync();
+        await Assertions.Expect(terms).ToHaveAttributeAsync("data-state", "unchecked");
+
+        var updates = page.GetByTestId("checkbox-updates");
+        await updates.FocusAsync();
+        await updates.PressAsync("Space");
+        await Assertions.Expect(updates).ToHaveAttributeAsync("aria-checked", "false");
+        await Assertions.Expect(page.GetByTestId("checkbox-indeterminate")).ToHaveAttributeAsync("aria-checked", "mixed");
+        await Assertions.Expect(page.GetByTestId("checkbox-readonly")).ToHaveAttributeAsync("aria-readonly", "true");
+        await Assertions.Expect(page.GetByTestId("checkbox-invalid")).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(page.GetByTestId("checkbox-disabled")).ToBeDisabledAsync();
+
+        var bounds = await preview.BoundingBoxAsync();
+        Assert.NotNull(bounds);
+        Assert.True(bounds!.X >= 0 && bounds.X + bounds.Width <= 390, $"Checkbox dossier overflows mobile viewport: {bounds.X}, {bounds.Width}");
+    }
+
+    [Fact]
     public async Task SemanticDossierUpdatesRealPreviewCopiesSourceAndListsPublicApi()
     {
         var errors = new List<string>();
@@ -132,11 +170,21 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator(".showcase-button-dossier__icon-sizes [data-slot='button']")).ToHaveCountAsync(4);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/checkbox").ToString());
+        var checkboxPreview = page.GetByTestId("checkbox-dossier-preview");
+        await Assertions.Expect(checkboxPreview.Locator("[data-slot='checkbox']")).ToHaveCountAsync(6);
         var checkbox = page.GetByTestId("action-checkbox");
         await checkbox.CheckAsync();
         await Assertions.Expect(checkbox).ToHaveAttributeAsync("data-state", "checked");
         await checkbox.UncheckAsync();
         await Assertions.Expect(checkbox).ToHaveAttributeAsync("data-state", "unchecked");
+        var updates = page.GetByTestId("checkbox-updates");
+        await updates.FocusAsync();
+        await updates.PressAsync("Space");
+        await Assertions.Expect(updates).ToHaveAttributeAsync("aria-checked", "false");
+        await Assertions.Expect(page.GetByTestId("checkbox-indeterminate")).ToHaveAttributeAsync("aria-checked", "mixed");
+        await Assertions.Expect(page.GetByTestId("checkbox-readonly")).ToHaveAttributeAsync("aria-readonly", "true");
+        await Assertions.Expect(page.GetByTestId("checkbox-invalid")).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(page.GetByTestId("checkbox-disabled")).ToBeDisabledAsync();
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/switch").ToString());
         var switchInput = page.GetByTestId("action-switch");

@@ -168,30 +168,61 @@ internal static class ActionSelectionExamples
 
     private static ComponentExampleDefinition Checkbox()
     {
-        bool? value = null;
-        var disabled = false;
-        var readOnly = false;
-        var invalid = false;
         RenderFragment preview = builder =>
         {
             builder.OpenComponent<CheckboxDossierPreview>(0);
-            builder.AddAttribute(1, nameof(CheckboxDossierPreview.Value), value);
-            builder.AddAttribute(2, nameof(CheckboxDossierPreview.Disabled), disabled);
-            builder.AddAttribute(3, nameof(CheckboxDossierPreview.ReadOnly), readOnly);
-            builder.AddAttribute(4, nameof(CheckboxDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnCheckbox Value=\"{(value is null ? "null" : value.Value.ToString().ToLowerInvariant())}\" Name=\"terms\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Accept terms\" />";
-        return Example("checkbox", "Three-state checkbox", "Preview checked, unchecked, indeterminate, disabled, read-only, and invalid states.",
-            Source(), preview,
-            [
-                new("checkbox-state", "State", ComponentParameterControlKind.Select, "Indeterminate", ["Unchecked", "Checked", "Indeterminate"], state => value = state == "Indeterminate" ? null : state == "Checked"),
-                Toggle("checkbox-disabled", "Disabled", v => disabled = v),
-                Toggle("checkbox-readonly", "Read only", v => readOnly = v),
-                Toggle("checkbox-invalid", "Invalid", v => invalid = v)
-            ],
-            ["unchecked", "checked", "indeterminate", "disabled", "read-only", "invalid", "form"]) with
-        { RazorSourceProvider = Source };
+        const string source = """
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<section class="showcase-checkbox-dossier" aria-labelledby="checkbox-dossier-title">
+    <header class="showcase-checkbox-dossier__header">
+        <div>
+            <h3 id="checkbox-dossier-title">Notification preferences</h3>
+            <p>Choose how the production team can contact you.</p>
+        </div>
+        <span>Workspace settings</span>
+    </header>
+
+    <div class="showcase-checkbox-dossier__list">
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="AcceptTerms" Name="terms" />
+            <span><strong>Accept terms and conditions</strong><small>Required before production files can be released.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="ProductionUpdates" Name="production-updates" />
+            <span><strong>Production updates</strong><small>Receive status changes for active manufacturing orders.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="InspectionRecipients" Name="inspection-recipients" />
+            <span><strong>Inspection recipients</strong><small>Some quality-team recipients are selected.</small></span>
+        </label>
+        <label class="showcase-checkbox-option showcase-checkbox-option--invalid">
+            <ShadcnCheckbox @bind-Value="QualityApproval" Name="quality-approval" Invalid="true" aria-describedby="checkbox-quality-error" />
+            <span><strong>Quality approval</strong><small id="checkbox-quality-error">Select this before submitting the inspection report.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox Value="true" Name="archived-reports" ReadOnly="true" />
+            <span><strong>Archive completed reports</strong><small>This workspace policy is read-only.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox Value="false" Name="legacy-alerts" Disabled="true" />
+            <span><strong>Legacy machine alerts</strong><small>Unavailable for this workspace.</small></span>
+        </label>
+    </div>
+</section>
+
+@code {
+    private bool? AcceptTerms { get; set; } = false;
+    private bool? ProductionUpdates { get; set; } = true;
+    private bool? InspectionRecipients { get; set; }
+    private bool? QualityApproval { get; set; } = false;
+}
+""";
+        return Example("checkbox", "Notification preferences", "Test checked, unchecked, mixed, invalid, read-only, and disabled states in a realistic settings group.",
+            source, preview, [],
+            ["unchecked", "checked", "indeterminate", "disabled", "read-only", "invalid", "form"]);
     }
 
     private static ComponentExampleDefinition RadioGroup()

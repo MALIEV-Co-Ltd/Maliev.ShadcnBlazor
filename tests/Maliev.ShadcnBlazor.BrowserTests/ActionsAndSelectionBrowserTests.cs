@@ -991,17 +991,14 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.Locator("#preview .shadcn-code-block pre").First).ToContainTextAsync("ShadcnButtonGroupOrientation.Vertical");
                 break;
             case "checkbox":
-                await page.GetByTestId("control-checkbox-state").SelectOptionAsync("Checked");
-                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "true");
-                await page.GetByTestId("control-checkbox-state").SelectOptionAsync("Indeterminate");
+                await Assertions.Expect(page.GetByTestId("checkbox-dossier-preview").Locator("[data-slot=checkbox]")).ToHaveCountAsync(6);
                 await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "mixed");
-                await page.GetByTestId("control-checkbox-disabled").CheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToBeDisabledAsync();
-                await page.GetByTestId("control-checkbox-disabled").UncheckAsync();
-                await page.GetByTestId("control-checkbox-readonly").CheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-readonly", "true");
-                await page.GetByTestId("control-checkbox-invalid").CheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-invalid", "true");
+                await page.GetByTestId("action-checkbox").CheckAsync();
+                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "true");
+                await Assertions.Expect(page.GetByTestId("checkbox-indeterminate")).ToHaveAttributeAsync("aria-checked", "mixed");
+                await Assertions.Expect(page.GetByTestId("checkbox-disabled")).ToBeDisabledAsync();
+                await Assertions.Expect(page.GetByTestId("checkbox-readonly")).ToHaveAttributeAsync("aria-readonly", "true");
+                await Assertions.Expect(page.GetByTestId("checkbox-invalid")).ToHaveAttributeAsync("aria-invalid", "true");
                 break;
             case "radio-group":
                 await page.GetByTestId("control-radio-orientation").SelectOptionAsync("Horizontal");
