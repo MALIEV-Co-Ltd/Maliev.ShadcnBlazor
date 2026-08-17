@@ -1,0 +1,88 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<section class="showcase-command-dossier" data-testid="command-dossier-preview" aria-label="Workspace command palette example">
+    <div class="showcase-command-dossier__context">
+        <div>
+            <strong>Workspace command palette</strong>
+            <span>Search pages and start common actions.</span>
+        </div>
+        <kbd>Ctrl K</kbd>
+    </div>
+
+    <ShadcnCommand Label="Workspace commands" Class="showcase-command-dossier__command">
+        <ShadcnCommandInput @bind-Value="_query" Placeholder="Type a command or search..." />
+        <ShadcnCommandList>
+            <ShadcnCommandEmpty>No commands match “@_query”.</ShadcnCommandEmpty>
+            <ShadcnCommandGroup Heading="Workspace">
+                <ShadcnCommandItem Value="overview" TextValue="Overview" Keywords="@(new[] { "home", "dashboard", "หน้าแรก" })" OnSelect="SelectAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path></svg>
+                    <span>Overview</span>
+                    <ShadcnCommandShortcut>G O</ShadcnCommandShortcut>
+                </ShadcnCommandItem>
+                <ShadcnCommandItem Value="orders" TextValue="Orders" Keywords="@(new[] { "purchase", "งาน", "ใบสั่งซื้อ" })" OnSelect="SelectAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="4" rx="2"></rect><path d="M8 2v4M16 2v4M4 10h16"></path></svg>
+                    <span>Orders</span>
+                    <ShadcnCommandShortcut>G R</ShadcnCommandShortcut>
+                </ShadcnCommandItem>
+                <ShadcnCommandItem Value="customers" TextValue="Customers" Keywords="@(new[] { "crm", "ลูกค้า", "contacts" })" OnSelect="SelectAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Customers</span>
+                    <ShadcnCommandShortcut>G C</ShadcnCommandShortcut>
+                </ShadcnCommandItem>
+            </ShadcnCommandGroup>
+            <ShadcnCommandSeparator />
+            <ShadcnCommandGroup Heading="Actions">
+                <ShadcnCommandItem Value="create-quotation" TextValue="Create quotation" Keywords="@(new[] { "new", "quote", "สร้างใบเสนอราคา" })" Disabled="DisableFirstAction" OnSelect="SelectAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                    <span>Create quotation</span>
+                    <ShadcnCommandShortcut>Q</ShadcnCommandShortcut>
+                </ShadcnCommandItem>
+                <ShadcnCommandItem Value="upload-drawing" TextValue="Upload drawing" Keywords="@(new[] { "cad", "file", "อัปโหลดไฟล์" })" OnSelect="SelectAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14"></path></svg>
+                    <span>Upload drawing</span>
+                    <ShadcnCommandShortcut>U</ShadcnCommandShortcut>
+                </ShadcnCommandItem>
+            </ShadcnCommandGroup>
+        </ShadcnCommandList>
+    </ShadcnCommand>
+
+    <div class="showcase-command-dossier__status" aria-live="polite">
+        <span>Command selected</span>
+        <strong>@_selection</strong>
+    </div>
+</section>
+
+@code {
+    [Parameter] public bool EmptyState { get; set; }
+    [Parameter] public bool DisableFirstAction { get; set; }
+
+    private string _query = string.Empty;
+    private string _selection = "None yet";
+    private bool? _lastEmptyState;
+
+    protected override void OnParametersSet()
+    {
+        if (_lastEmptyState == EmptyState)
+        {
+            return;
+        }
+
+        _query = EmptyState ? "no matching command" : string.Empty;
+        _lastEmptyState = EmptyState;
+    }
+
+    private Task SelectAsync(string value)
+    {
+        _selection = value switch
+        {
+            "overview" => "Overview",
+            "orders" => "Orders",
+            "customers" => "Customers",
+            "create-quotation" => "Create quotation",
+            "upload-drawing" => "Upload drawing",
+            _ => value
+        };
+
+        return Task.CompletedTask;
+    }
+}
