@@ -66,14 +66,28 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("component-dossier").WaitForAsync();
 
         var ratio = page.GetByTestId("control-aspect-ratio");
+        var frame = page.Locator(".showcase-aspect-ratio-demo");
+        var landscapeBox = await frame.BoundingBoxAsync();
+        Assert.NotNull(landscapeBox);
+        await Assertions.Expect(frame.Locator("img[alt='Engineering workspace reference']")).ToBeVisibleAsync();
+
         await ratio.SelectOptionAsync("1:1");
         await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1(?:;|$)"));
+        await Assertions.Expect(frame).ToHaveClassAsync(new Regex("showcase-aspect-ratio-demo--1-1"));
+        var squareBox = await frame.BoundingBoxAsync();
+        Assert.NotNull(squareBox);
+        Assert.True(squareBox.Width < landscapeBox.Width, $"Expected the 1:1 frame ({squareBox.Width}px) to narrow from the 16:9 frame ({landscapeBox.Width}px). ");
+
+        await ratio.SelectOptionAsync("4:3");
+        await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1.3333333333333333(?:;|$)"));
 
         var previewSource = page.Locator("#preview").GetByTestId("copy-source");
         await previewSource.ClickAsync();
         await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         var copied = await page.EvaluateAsync<string>("navigator.clipboard.readText()");
         Assert.Contains("<ShadcnAspectRatio", copied, StringComparison.Ordinal);
+        Assert.Contains("Ratio=\"@(4d / 3d)\"", copied, StringComparison.Ordinal);
+        Assert.Contains("showcase-aspect-ratio-demo--4-3", copied, StringComparison.Ordinal);
 
         var api = page.GetByTestId("component-api");
         Assert.True(await api.Locator("table.component-api__table[data-slot='table']").CountAsync() >= 1);

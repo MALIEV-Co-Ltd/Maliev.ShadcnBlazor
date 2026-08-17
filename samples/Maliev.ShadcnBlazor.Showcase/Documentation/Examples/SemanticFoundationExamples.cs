@@ -79,25 +79,28 @@ internal static class SemanticFoundationExamples
             "Aspect ratio",
             ComponentParameterControlKind.Select,
             "16:9",
-            ["16:9", "1:1", "9:16"],
+            ["16:9", "4:3", "1:1"],
             value =>
             {
                 ratioLabel = value;
-                ratio = value switch { "16:9" => 16d / 9d, "1:1" => 1d, "9:16" => 9d / 16d, _ => ratio };
+                ratio = value switch { "16:9" => 16d / 9d, "4:3" => 4d / 3d, "1:1" => 1d, _ => ratio };
             });
         string Source() => $"""
-<ShadcnAspectRatio Ratio="@({RatioExpression(ratioLabel)})">
-    <div class="showcase-aspect-ratio-media">
-        <div class="showcase-aspect-ratio-media__toolbar">
-            <span>Production preview</span>
-            <span>{ratioLabel}</span>
-        </div>
-        <div class="showcase-aspect-ratio-media__body">
-            <strong>CNC enclosure · Revision C</strong>
-            <span>A visible frame makes the ratio easy to verify.</span>
-        </div>
-    </div>
-</ShadcnAspectRatio>
+<div class="showcase-aspect-ratio-demo showcase-aspect-ratio-demo--{ratioLabel.Replace(':', '-')}">
+    <ShadcnAspectRatio Ratio="@({RatioExpression(ratioLabel)})">
+        <figure class="showcase-aspect-ratio-media">
+            <img src="images/attachments/workspace-plan.png"
+                 alt="Engineering workspace reference" />
+            <figcaption>
+                <span class="showcase-aspect-ratio-media__copy">
+                    <strong>Engineering workspace</strong>
+                    <span>Layout reference · Revision C</span>
+                </span>
+                <span class="showcase-aspect-ratio-media__ratio">{ratioLabel}</span>
+            </figcaption>
+        </figure>
+    </ShadcnAspectRatio>
+</div>
 """;
         return Example(
             "aspect-ratio",
@@ -108,8 +111,8 @@ internal static class SemanticFoundationExamples
             [control],
             [
                 "16:9",
-                "1:1",
-                "9:16"
+                "4:3",
+                "1:1"
             ]) with
         { RazorSourceProvider = Source };
     }
@@ -445,16 +448,19 @@ internal static class SemanticFoundationExamples
 
     private static RenderFragment AspectRatioContent(string ratioLabel) => builder =>
     {
-        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-aspect-ratio-media");
-        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-aspect-ratio-media__toolbar"); builder.OpenElement(4, "span"); builder.AddContent(5, "Production preview"); builder.CloseElement(); builder.OpenElement(6, "span"); builder.AddContent(7, ratioLabel); builder.CloseElement(); builder.CloseElement();
-        builder.OpenElement(8, "div"); builder.AddAttribute(9, "class", "showcase-aspect-ratio-media__body"); builder.OpenElement(10, "strong"); builder.AddContent(11, "CNC enclosure · Revision C"); builder.CloseElement(); builder.OpenElement(12, "span"); builder.AddContent(13, "A visible frame makes the ratio easy to verify."); builder.CloseElement(); builder.CloseElement();
+        builder.OpenElement(0, "figure"); builder.AddAttribute(1, "class", "showcase-aspect-ratio-media");
+        builder.OpenElement(2, "img"); builder.AddAttribute(3, "src", "images/attachments/workspace-plan.png"); builder.AddAttribute(4, "alt", "Engineering workspace reference"); builder.CloseElement();
+        builder.OpenElement(5, "figcaption");
+        builder.OpenElement(6, "span"); builder.AddAttribute(7, "class", "showcase-aspect-ratio-media__copy"); builder.OpenElement(8, "strong"); builder.AddContent(9, "Engineering workspace"); builder.CloseElement(); builder.OpenElement(10, "span"); builder.AddContent(11, "Layout reference · Revision C"); builder.CloseElement(); builder.CloseElement();
+        builder.OpenElement(12, "span"); builder.AddAttribute(13, "class", "showcase-aspect-ratio-media__ratio"); builder.AddContent(14, ratioLabel); builder.CloseElement();
+        builder.CloseElement();
         builder.CloseElement();
     };
 
     private static string RatioExpression(string ratioLabel) => ratioLabel switch
     {
+        "4:3" => "4d / 3d",
         "1:1" => "1d / 1d",
-        "9:16" => "9d / 16d",
         _ => "16d / 9d"
     };
 
