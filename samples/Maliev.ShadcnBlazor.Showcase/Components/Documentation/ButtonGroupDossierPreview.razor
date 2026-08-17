@@ -1,0 +1,38 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<section class="showcase-button-group-dossier" data-testid="button-group-dossier-preview" aria-labelledby="button-group-dossier-title">
+    <header class="showcase-button-group-dossier__intro">
+        <div>
+            <h3 id="button-group-dossier-title">Quotation MQ-4189</h3>
+            <p>Production review actions</p>
+        </div>
+        <span>Revision C · ready for approval</span>
+    </header>
+
+    <div class="showcase-button-group-dossier__toolbar">
+        <ShadcnButtonGroup Orientation="Orientation" aria-label="Production review actions" data-testid="action-button-group">
+            <ShadcnButtonGroupText>Revision C</ShadcnButtonGroupText>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" PointerCursor="true" OnClick="Archive" data-testid="button-group-archive">Archive</ShadcnButton>
+            <ShadcnButtonGroupSeparator Orientation="SeparatorOrientation" />
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" PointerCursor="true" OnClick="Preview">Preview</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" PointerCursor="true" OnClick="Report">Report</ShadcnButton>
+        </ShadcnButtonGroup>
+    </div>
+
+    <p class="showcase-button-group-dossier__status" data-testid="button-group-last-action" role="status" aria-live="polite">
+        @(LastAction ?? "Choose an action to continue the production review")
+    </p>
+</section>
+
+@code {
+    [Parameter] public ShadcnButtonGroupOrientation Orientation { get; set; }
+
+    private string? LastAction { get; set; }
+    private ShadcnButtonGroupOrientation SeparatorOrientation => Orientation == ShadcnButtonGroupOrientation.Horizontal
+        ? ShadcnButtonGroupOrientation.Vertical
+        : ShadcnButtonGroupOrientation.Horizontal;
+
+    private void Archive() => LastAction = "Quotation archived";
+    private void Preview() => LastAction = "Opening production preview";
+    private void Report() => LastAction = "Production report requested";
+}
