@@ -1,12 +1,17 @@
 export function focusById(id) {
     document.getElementById(id)?.focus({ preventScroll: true });
 }
-export function focusFirstInId(id) {
-    document.getElementById(id)?.querySelector('a[href],button:not(:disabled),input:not(:disabled),[tabindex]:not([tabindex="-1"])')?.focus({ preventScroll: true });
+export async function focusFirstInId(id) {
+    let root = document.getElementById(id);
+    if (!root) {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        root = document.getElementById(id);
+    }
+    root?.querySelector('a[href],button:not(:disabled),input:not(:disabled),[tabindex]:not([tabindex="-1"])')?.focus({ preventScroll: true });
 }
 
 const navigationViewports = new WeakMap();
-export function attachNavigationViewport(position) {
+export function attachNavigationViewport(position, dotnet) {
     const sync = () => {
         const nav = position.closest('[data-slot="navigation-menu"]');
         const active = nav?.querySelector('[data-slot="navigation-menu-trigger"][data-state="open"]');
@@ -23,10 +28,15 @@ export function attachNavigationViewport(position) {
         position.style.setProperty('--shadcn-navigation-menu-anchor-start', `${screenLeft - navRect.left}px`);
         position.style.setProperty('--shadcn-navigation-menu-available-width', `${availableWidth}px`);
     };
-    const observer = new ResizeObserver(sync); observer.observe(position); const mutations = new MutationObserver(sync); mutations.observe(position.closest('[data-slot="navigation-menu"]'), { subtree: true, attributes: true, attributeFilter: ['data-state'] }); window.addEventListener('resize', sync); window.addEventListener('scroll', sync, true); sync();
-    navigationViewports.set(position, { observer, mutations, sync });
+    const nav = position.closest('[data-slot="navigation-menu"]');
+    const dismiss = event => {
+        if (!position.matches(':popover-open') || nav?.contains(event.target) || position.contains(event.target)) return;
+        dotnet.invokeMethodAsync('CloseNavigationMenuFromOutsideAsync');
+    };
+    const observer = new ResizeObserver(sync); observer.observe(position); const mutations = new MutationObserver(sync); mutations.observe(nav, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-state'] }); window.addEventListener('resize', sync); window.addEventListener('scroll', sync, true); document.addEventListener('pointerdown', dismiss, true); document.addEventListener('focusin', dismiss, true); sync();
+    navigationViewports.set(position, { observer, mutations, sync, dismiss });
 }
-export function detachNavigationViewport(position) { const value = navigationViewports.get(position); if (!value) return; if (position.matches(':popover-open')) position.hidePopover(); value.observer.disconnect(); value.mutations.disconnect(); window.removeEventListener('resize', value.sync); window.removeEventListener('scroll', value.sync, true); navigationViewports.delete(position); }
+export function detachNavigationViewport(position) { const value = navigationViewports.get(position); if (!value) return; if (position.matches(':popover-open')) position.hidePopover(); value.observer.disconnect(); value.mutations.disconnect(); window.removeEventListener('resize', value.sync); window.removeEventListener('scroll', value.sync, true); document.removeEventListener('pointerdown', value.dismiss, true); document.removeEventListener('focusin', value.dismiss, true); navigationViewports.delete(position); }
 
 const keyGuards = new WeakMap();
 export function attachKeyGuard(root, keys) {

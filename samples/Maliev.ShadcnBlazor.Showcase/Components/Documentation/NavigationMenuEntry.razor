@@ -1,0 +1,16 @@
+@using Maliev.ShadcnBlazor.Components.Navigation
+
+<li>
+    <ShadcnNavigationMenuLink Href="@Href">
+        <span class="showcase-navigation-menu__entry">
+            <strong>@Title</strong>
+            <span>@ChildContent</span>
+        </span>
+    </ShadcnNavigationMenuLink>
+</li>
+
+@code {
+    [Parameter, EditorRequired] public string Href { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

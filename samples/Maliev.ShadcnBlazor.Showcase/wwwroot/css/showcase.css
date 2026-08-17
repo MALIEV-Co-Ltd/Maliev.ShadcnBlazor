@@ -5923,3 +5923,87 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-menubar-workspace,
     .showcase-menubar-document { border-color: CanvasText; }
 }
+
+.showcase-navigation-menu {
+    display: flex;
+    inline-size: 100%;
+    min-block-size: 15rem;
+    align-items: flex-start;
+    justify-content: center;
+    padding-block-start: 3.5rem;
+}
+
+.showcase-navigation-menu :is(ul) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.showcase-navigation-menu__list {
+    inline-size: 24rem;
+}
+
+.showcase-navigation-menu__component-grid {
+    display: grid;
+    inline-size: 37rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .125rem;
+}
+
+.showcase-navigation-menu__entry {
+    display: flex;
+    min-inline-size: 0;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.showcase-navigation-menu__entry strong {
+    color: var(--shadcn-popover-foreground);
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.showcase-navigation-menu__entry > span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.showcase-navigation-menu__status-list {
+    inline-size: 13rem;
+}
+
+.showcase-navigation-menu__status-link {
+    gap: .625rem;
+}
+
+.showcase-navigation-menu__status-link svg {
+    inline-size: 1rem;
+    block-size: 1rem;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+}
+
+@media (max-width: 40rem) {
+    .showcase-navigation-menu {
+        min-block-size: 14rem;
+        padding-block-start: 2.5rem;
+    }
+
+    .showcase-navigation-menu__wide-item {
+        display: none;
+    }
+
+    .showcase-navigation-menu__list {
+        inline-size: min(20rem, calc(100vw - 1.5rem));
+    }
+}

@@ -1,0 +1,52 @@
+@using Maliev.ShadcnBlazor.Components.Navigation
+
+<div class="showcase-navigation-menu" data-testid="navigation-menu-dossier-preview">
+    <ShadcnNavigationMenu Value="@OpenValue" Orientation="@Orientation" Disabled="@Disabled" Label="Documentation navigation">
+        <ShadcnNavigationMenuList>
+            <ShadcnNavigationMenuItem Value="getting-started">
+                <ShadcnNavigationMenuTrigger>Getting started</ShadcnNavigationMenuTrigger>
+                <ShadcnNavigationMenuContent>
+                    <ul class="showcase-navigation-menu__list">
+                        <NavigationMenuEntry Href="#overview" Title="Overview">Understand the component library and its accessibility defaults.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#installation" Title="Installation">Install the package and register its theme services.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#theming" Title="Theme setup">Apply semantic tokens for light, dark, and RTL layouts.</NavigationMenuEntry>
+                    </ul>
+                </ShadcnNavigationMenuContent>
+            </ShadcnNavigationMenuItem>
+            <ShadcnNavigationMenuItem Value="components" Class="showcase-navigation-menu__wide-item">
+                <ShadcnNavigationMenuTrigger>Components</ShadcnNavigationMenuTrigger>
+                <ShadcnNavigationMenuContent>
+                    <ul class="showcase-navigation-menu__component-grid">
+                        <NavigationMenuEntry Href="#alert-dialog" Title="Alert Dialog">Confirm a destructive or sensitive action.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#hover-card" Title="Hover Card">Preview supporting information behind a link.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#progress" Title="Progress">Communicate determinate and indeterminate work.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#scroll-area" Title="Scroll Area">Keep long content within a stable viewport.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#tabs" Title="Tabs">Switch between related views without leaving the page.</NavigationMenuEntry>
+                        <NavigationMenuEntry Href="#tooltip" Title="Tooltip">Explain compact controls on hover and focus.</NavigationMenuEntry>
+                    </ul>
+                </ShadcnNavigationMenuContent>
+            </ShadcnNavigationMenuItem>
+            <ShadcnNavigationMenuItem Value="status">
+                <ShadcnNavigationMenuTrigger>Project status</ShadcnNavigationMenuTrigger>
+                <ShadcnNavigationMenuContent>
+                    <ul class="showcase-navigation-menu__status-list">
+                        <NavigationMenuStatusEntry Href="#backlog" State="Backlog" Icon="alert" />
+                        <NavigationMenuStatusEntry Href="#review" State="In review" Icon="progress" />
+                        <NavigationMenuStatusEntry Href="#ready" State="Ready" Icon="ready" />
+                    </ul>
+                </ShadcnNavigationMenuContent>
+            </ShadcnNavigationMenuItem>
+            <ShadcnNavigationMenuItem Value="documentation">
+                <ShadcnNavigationMenuLink Href="#usage" Class="shadcn-navigation-menu-link--trigger">Documentation</ShadcnNavigationMenuLink>
+            </ShadcnNavigationMenuItem>
+        </ShadcnNavigationMenuList>
+        <ShadcnNavigationMenuIndicator />
+        <ShadcnNavigationMenuViewport />
+    </ShadcnNavigationMenu>
+</div>
+
+@code {
+    [Parameter] public string? OpenValue { get; set; }
+    [Parameter] public ShadcnNavigationMenuOrientation Orientation { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+}

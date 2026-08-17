@@ -264,6 +264,44 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task NavigationMenuDossierSupportsPointerKeyboardOutsideDismissAndResponsiveContent()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/navigation-menu").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var menu = page.Locator("#preview [data-slot='navigation-menu']");
+        var triggers = menu.Locator("[data-slot='navigation-menu-trigger']");
+        await Assertions.Expect(triggers).ToHaveCountAsync(3);
+        await Assertions.Expect(menu.Locator("[data-slot='navigation-menu-viewport-position']")).ToBeHiddenAsync();
+
+        await triggers.First.HoverAsync();
+        await Assertions.Expect(triggers.First).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(page.Locator("#preview [data-slot='navigation-menu-content']")).ToContainTextAsync("Install the package");
+        await page.Locator("#preview .component-dossier__heading h2").ClickAsync();
+        await Assertions.Expect(triggers.First).ToHaveAttributeAsync("aria-expanded", "false");
+
+        await triggers.First.FocusAsync();
+        await page.Keyboard.PressAsync("ArrowRight");
+        await Assertions.Expect(triggers.Nth(1)).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("ArrowDown");
+        await Assertions.Expect(page.Locator("#preview [data-slot='navigation-menu-content'] [data-slot='navigation-menu-link']").First).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(triggers.Nth(1)).ToBeFocusedAsync();
+
+        await page.SetViewportSizeAsync(390, 844);
+        var menuWidth = await menu.EvaluateAsync<double>("element => element.getBoundingClientRect().width");
+        var canvasWidth = await page.Locator("#preview .component-preview__canvas").EvaluateAsync<double>("element => element.getBoundingClientRect().width");
+        Assert.InRange(menuWidth, 1, canvasWidth);
+        await Assertions.Expect(menu.Locator(".showcase-navigation-menu__wide-item")).ToBeHiddenAsync();
+    }
+
+    [Fact]
     public async Task ResizableScrollAreaResponsiveSidebarAndForcedColorsRemainOperable()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 390, Height = 844 }, ReducedMotion = ReducedMotion.Reduce, ForcedColors = ForcedColors.Active });

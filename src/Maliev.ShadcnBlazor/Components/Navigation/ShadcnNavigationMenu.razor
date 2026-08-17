@@ -23,7 +23,7 @@
     protected override void OnInitialized() => Context = new(this);
     protected override void OnParametersSet() { if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown navigation menu orientation."); if (OpenDelay < 0) throw new ArgumentOutOfRangeException(nameof(OpenDelay)); if (CloseDelay < 0) throw new ArgumentOutOfRangeException(nameof(CloseDelay)); if (!_initialized || Value != _lastValue) { _effectiveValue = Value; Context?.NotifyContentChanged(); } _lastValue = Value; _initialized = true; }
     protected override Task OnAfterRenderAsync(bool firstRender) { if (!_contentRegisteredRender) { _contentRegisteredRender = true; StateHasChanged(); } return Task.CompletedTask; }
-    internal async ValueTask SetValueAsync(string? value) { if (Disabled || value == _effectiveValue) return; if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(value); else { _effectiveValue = value; await InvokeAsync(StateHasChanged); } }
+    internal async ValueTask SetValueAsync(string? value) { if (Disabled || value == _effectiveValue) return; if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(value); else { _effectiveValue = value; Context.NotifyContentChanged(); await InvokeAsync(StateHasChanged); } }
     internal void CancelScheduledValue() { _hover?.Cancel(); _hover?.Dispose(); _hover = null; }
     internal async ValueTask ScheduleValueAsync(string? value, bool opening)
     {
@@ -36,7 +36,8 @@
     internal async ValueTask HandleTriggerKeyAsync(string value, string key)
     {
         var enabled = Context.Items.Where(item => !item.Disabled).ToArray(); var current = Array.FindIndex(enabled, item => item.Value == value); if (current < 0) return;
-        if (key is "Enter" or " ") { await SetValueAsync(value); return; }
+        // Native button activation owns Enter and Space. Handling them here would
+        // toggle once on keydown and a second time when the browser dispatches click.
         if (key == "ArrowDown" && Orientation == ShadcnNavigationMenuOrientation.Horizontal) { await SetValueAsync(value); await FocusContentAsync(enabled[current].ContentId); return; }
         if (key == "Escape") { await SetValueAsync(null); await FocusTriggerAsync(enabled[current].TriggerId); return; }
         var delta = key switch { "Home" => -int.MaxValue, "End" => int.MaxValue, "ArrowRight" when Orientation == ShadcnNavigationMenuOrientation.Horizontal => IsRtl ? -1 : 1, "ArrowLeft" when Orientation == ShadcnNavigationMenuOrientation.Horizontal => IsRtl ? 1 : -1, "ArrowDown" when Orientation == ShadcnNavigationMenuOrientation.Vertical => 1, "ArrowUp" when Orientation == ShadcnNavigationMenuOrientation.Vertical => -1, _ => 0 }; if (delta == 0) return;

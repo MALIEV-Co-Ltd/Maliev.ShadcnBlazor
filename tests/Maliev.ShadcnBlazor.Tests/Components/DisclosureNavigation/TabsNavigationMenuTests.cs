@@ -150,6 +150,64 @@ public sealed class TabsNavigationMenuTests : BunitContext
     }
 
     [Fact]
+    public void NavigationMenuLetsNativeButtonActivationOwnEnterAndSpace()
+    {
+        string? requested = null;
+        var cut = RenderNavigationMenu(null, value => requested = value);
+        var trigger = cut.Find("[data-slot='navigation-menu-trigger']");
+
+        trigger.KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Enter" });
+        Assert.Null(requested);
+
+        trigger.Click();
+        Assert.Equal("products", requested);
+    }
+
+    [Fact]
+    public void NavigationMenuUncontrolledActivationRendersViewportContent()
+    {
+        var cut = Render<ShadcnNavigationMenu>(parameters => parameters
+            .Add(component => component.Label, "Documentation")
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnNavigationMenuList>(0);
+                builder.AddAttribute(1, nameof(ShadcnNavigationMenuList.ChildContent), (RenderFragment)(list => AddNavigationItem(list, 0, "products", "Products")));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnNavigationMenuViewport>(2);
+                builder.CloseComponent();
+            }));
+
+        cut.Find("[data-slot='navigation-menu-trigger']").Click();
+
+        Assert.Contains("ดูทั้งหมด", cut.Find("[data-slot='navigation-menu-content']").TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NavigationMenuDisabledStateDisablesTriggersAndLinks()
+    {
+        var cut = RenderNavigationMenu("products", _ => { }, rootDisabled: true);
+        var trigger = cut.Find("[data-slot='navigation-menu-trigger']");
+        var link = cut.Find("[data-slot='navigation-menu-link']");
+
+        Assert.True(trigger.HasAttribute("disabled"));
+        Assert.Equal("true", link.GetAttribute("aria-disabled"));
+        Assert.Equal("-1", link.GetAttribute("tabindex"));
+        Assert.Equal("true", link.GetAttribute("data-disabled"));
+    }
+
+    [Fact]
+    public void NavigationMenuViewportOwnsOutsidePointerAndFocusDismissal()
+    {
+        var script = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-disclosure-navigation.js"));
+
+        Assert.Contains("pointerdown", script, StringComparison.Ordinal);
+        Assert.Contains("focusin", script, StringComparison.Ordinal);
+        Assert.Contains("childList: true", script, StringComparison.Ordinal);
+        Assert.Contains("requestAnimationFrame", script, StringComparison.Ordinal);
+        Assert.Contains("CloseNavigationMenuFromOutsideAsync", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void NavigationMenuValidatesDurationsOrientationAndDuplicateValues()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnNavigationMenu>(p => p.Add(x => x.OpenDelay, -1)));
@@ -181,9 +239,10 @@ public sealed class TabsNavigationMenuTests : BunitContext
             AddTabContent(builder, 30, "history", "ประวัติที่ยังอยู่ใน DOM", forceMount);
         }));
 
-    private IRenderedComponent<ShadcnNavigationMenu> RenderNavigationMenu(string? value, Action<string?> changed, int openDelay = 200, int closeDelay = 150, ShadcnNavigationMenuOrientation orientation = ShadcnNavigationMenuOrientation.Horizontal, bool includeSecond = false) => Render<ShadcnNavigationMenu>(p => p
+    private IRenderedComponent<ShadcnNavigationMenu> RenderNavigationMenu(string? value, Action<string?> changed, int openDelay = 200, int closeDelay = 150, ShadcnNavigationMenuOrientation orientation = ShadcnNavigationMenuOrientation.Horizontal, bool includeSecond = false, bool rootDisabled = false) => Render<ShadcnNavigationMenu>(p => p
         .Add(x => x.Value, value)
         .Add(x => x.ValueChanged, EventCallback.Factory.Create(this, changed))
+        .Add(x => x.Disabled, rootDisabled)
         .Add(x => x.OpenDelay, openDelay)
         .Add(x => x.CloseDelay, closeDelay)
         .Add(x => x.Orientation, orientation)
