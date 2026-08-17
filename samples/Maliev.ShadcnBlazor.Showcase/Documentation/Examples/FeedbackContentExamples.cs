@@ -71,49 +71,71 @@ internal static class FeedbackContentExamples
     {
         var size = ShadcnAvatarSize.Default; var failed = false; var badge = false; var group = false;
         RenderFragment preview = b => { b.OpenComponent<AvatarDossierPreview>(0); b.AddAttribute(1, "Size", size); b.AddAttribute(2, "Failed", failed); b.AddAttribute(3, "Badge", badge); b.AddAttribute(4, "Group", group); b.CloseComponent(); };
-        const string source = """
-<div class="team-avatars" aria-label="Project team avatars">
-    <div class="team-avatar-profile">
-        <ShadcnAvatar>
-            <ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Thai CNC operator" />
-            <ShadcnAvatarFallback>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" fill="currentColor" /><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" /></svg>
-            </ShadcnAvatarFallback>
-            <ShadcnAvatarBadge />
+        string Source() => BuildAvatarSource(size, failed, badge, group);
+        var example = Example("avatar", "Avatar gallery", "Compare distinct Thai team portraits, a useful fallback placeholder, presence badge, and stacked group composition in one responsive example.", Source(), preview, [EnumSelect("avatar-size", "Size", size, v => size = v), Toggle("avatar-failed", "Failed image", v => failed = v), Toggle("avatar-badge", "Online badge", v => badge = v), Toggle("avatar-group", "Group", v => group = v)], ["gallery", "sm", "default", "lg", "fallback", "badge", "group", "distinct-images", "responsive"]);
+        return example with { RazorSourceProvider = Source };
+    }
+
+    private static string BuildAvatarSource(ShadcnAvatarSize size, bool failed, bool badge, bool group)
+    {
+        var firstSource = failed ? "images/avatars/missing-avatar.png" : "images/avatars/operator-thai.png";
+        var badgeMarkup = badge ? "\n            <ShadcnAvatarBadge aria-label=\"Online\" />" : string.Empty;
+        var groupMarkup = group
+            ? $$"""
+
+<section aria-label="Recently active team members">
+    <ShadcnAvatarGroup Size="ShadcnAvatarSize.{{size}}" Overlap="0.625rem">
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+            <ShadcnAvatarImage Source="{{firstSource}}" Alt="Thai CNC operator" />
+            <ShadcnAvatarFallback>NT</ShadcnAvatarFallback>{{badgeMarkup}}
         </ShadcnAvatar>
-        <span><strong>Natee</strong><span>Thai CNC operator</span></span>
-    </div>
-    <div class="team-avatar-profile">
-        <ShadcnAvatar>
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
             <ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
             <ShadcnAvatarFallback>QR</ShadcnAvatarFallback>
         </ShadcnAvatar>
-        <span><strong>Pim</strong><span>Thai quality reviewer</span></span>
-    </div>
-    <div class="team-avatar-profile">
-        <ShadcnAvatar>
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+            <ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="Thai support assistant" />
+            <ShadcnAvatarFallback>SA</ShadcnAvatarFallback>
+        </ShadcnAvatar>
+        <ShadcnAvatarGroupCount Size="ShadcnAvatarSize.{{size}}">+1</ShadcnAvatarGroupCount>
+    </ShadcnAvatarGroup>
+</section>
+"""
+            : string.Empty;
+
+        return $$"""
+@using Maliev.ShadcnBlazor.Components.Content
+
+<section class="team-avatars" aria-label="Project team avatar examples">
+    <article class="team-avatar-profile">
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+            <ShadcnAvatarImage Source="{{firstSource}}" Alt="Thai CNC operator" />
+            <ShadcnAvatarFallback>NT</ShadcnAvatarFallback>{{badgeMarkup}}
+        </ShadcnAvatar>
+        <span><strong>นที</strong><span>Thai CNC operator</span></span>
+    </article>
+    <article class="team-avatar-profile">
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+            <ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" />
+            <ShadcnAvatarFallback>QR</ShadcnAvatarFallback>
+        </ShadcnAvatar>
+        <span><strong>พิม</strong><span>Thai quality reviewer</span></span>
+    </article>
+    <article class="team-avatar-profile">
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
             <ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
             <ShadcnAvatarFallback>PC</ShadcnAvatarFallback>
         </ShadcnAvatar>
-        <span><strong>Malee</strong><span>Thai project coordinator</span></span>
-    </div>
-    <div class="team-avatar-profile">
-        <ShadcnAvatar>
-            <ShadcnAvatarFallback>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" fill="currentColor" /><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6" fill="currentColor" /></svg>
-            </ShadcnAvatarFallback>
+        <span><strong>มาลี</strong><span>Thai project coordinator</span></span>
+    </article>
+    <article class="team-avatar-profile">
+        <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+            <ShadcnAvatarFallback>ทีม</ShadcnAvatarFallback>
         </ShadcnAvatar>
-        <span><strong>Team</strong><span>Fallback placeholder</span></span>
-    </div>
-</div>
-<ShadcnAvatarGroup>
-    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Thai CNC operator" /><ShadcnAvatarFallback>NT</ShadcnAvatarFallback></ShadcnAvatar>
-    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Thai quality reviewer" /><ShadcnAvatarFallback>QR</ShadcnAvatarFallback></ShadcnAvatar>
-    <ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="Thai support assistant" /><ShadcnAvatarFallback>SA</ShadcnAvatarFallback></ShadcnAvatar>
-    <ShadcnAvatarGroupCount>+1</ShadcnAvatarGroupCount>
-</ShadcnAvatarGroup>
+        <span><strong>ทีม</strong><span>Fallback placeholder</span></span>
+    </article>
+</section>{{groupMarkup}}
 """;
-        return Example("avatar", "Avatar gallery", "Compare distinct Thai team portraits, a useful fallback placeholder, presence badge, and stacked group composition in one responsive example.", source, preview, [EnumSelect("avatar-size", "Size", size, v => size = v), Toggle("avatar-failed", "Failed image", v => failed = v), Toggle("avatar-badge", "Online badge", v => badge = v), Toggle("avatar-group", "Group", v => group = v)], ["gallery", "sm", "default", "lg", "fallback", "badge", "group", "distinct-images", "responsive"]);
     }
     private static ComponentExampleDefinition Badge()
     {

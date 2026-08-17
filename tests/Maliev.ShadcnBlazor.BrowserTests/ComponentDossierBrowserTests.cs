@@ -175,6 +175,15 @@ public sealed class ComponentDossierBrowserTests(
         var avatarDemo = page.GetByTestId("avatar-dossier-preview");
         await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar']")).ToHaveCountAsync(4);
         await Assertions.Expect(avatarDemo.Locator("img[src*='operator-thai.png']")).ToHaveCountAsync(1);
+        var operatorPortrait = avatarDemo.Locator("img[src*='operator-thai.png']");
+        Assert.True(await operatorPortrait.EvaluateAsync<bool>("image => image.complete && image.naturalWidth > 0"));
+        Assert.Equal("cover", await operatorPortrait.EvaluateAsync<string>("image => getComputedStyle(image).objectFit"));
+        var portraitFrame = await operatorPortrait.EvaluateAsync<double[]>("image => { const rect = image.getBoundingClientRect(); return [rect.width, rect.height]; }");
+        Assert.InRange(Math.Abs(portraitFrame[0] - portraitFrame[1]), 0, 0.5);
+        await page.GetByTestId("control-avatar-badge").CheckAsync();
+        var onlineBadge = avatarDemo.Locator("[data-slot='avatar-badge']").First;
+        await Assertions.Expect(onlineBadge).ToHaveAttributeAsync("aria-label", "Online");
+        Assert.True(await onlineBadge.EvaluateAsync<bool>("element => { const color = getComputedStyle(element).backgroundColor; if (color.startsWith('oklch')) return color.includes('145'); const channels = color.match(/[\\d.]+/g)?.slice(0, 3).map(Number); return channels?.length === 3 && channels[1] > channels[0] && channels[1] > channels[2]; }"));
         await page.GetByTestId("control-avatar-group").CheckAsync();
         await Assertions.Expect(avatarDemo.Locator("[data-testid='avatar-group-preview'] [data-slot='avatar']")).ToHaveCountAsync(3);
         var groupedAvatarSources = await avatarDemo.Locator("img").EvaluateAllAsync<string[]>("elements => elements.map(element => element.getAttribute('src'))");
@@ -184,6 +193,7 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("control-avatar-group").UncheckAsync();
         await page.GetByTestId("control-avatar-failed").CheckAsync();
         Assert.True(await avatarDemo.Locator("[data-slot='avatar-fallback'][data-state='visible']").CountAsync() >= 1);
+        await Assertions.Expect(avatarDemo.Locator("[data-slot='avatar-image'][data-state='error']")).ToHaveCountAsync(1);
         Assert.Equal("32px", await avatarDemo.Locator("[data-slot='avatar']").First.EvaluateAsync<string>("element => getComputedStyle(element).width"));
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/carousel").ToString());

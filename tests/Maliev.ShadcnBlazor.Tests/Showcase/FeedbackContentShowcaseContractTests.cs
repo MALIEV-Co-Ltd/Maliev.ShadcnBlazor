@@ -190,7 +190,8 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Equal(4, avatarCut.FindAll("[data-testid='avatar-gallery'] > [data-testid='avatar-profile']").Count);
         Assert.NotNull(avatarCut.Find("[data-testid='avatar-gallery'] [data-slot='avatar-fallback'] svg"));
         Assert.Equal(3, avatarCut.FindAll("[data-testid='avatar-group-preview'] [data-slot='avatar']").Count);
-        Assert.NotNull(avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar'] > [data-slot='avatar-badge']"));
+        var presence = avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar'] > [data-slot='avatar-badge']");
+        Assert.Equal("Online", presence.GetAttribute("aria-label"));
         Assert.NotNull(avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar-group-count']"));
 
         var card = registry.GetBySlug("card").Single();
@@ -200,6 +201,27 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         card.Controls.Single(control => control.Id == "card-action").Apply("false");
         var cardWithoutAction = Render(card.Preview);
         Assert.Empty(cardWithoutAction.FindAll("[data-slot='card-action']"));
+    }
+
+    [Fact]
+    public void AvatarDossierSourceTracksSizeFailurePresenceAndGroupControls()
+    {
+        var avatar = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("avatar").Single();
+
+        avatar.Controls.Single(control => control.Id == "avatar-size").Apply("Large");
+        avatar.Controls.Single(control => control.Id == "avatar-failed").Apply("true");
+        avatar.Controls.Single(control => control.Id == "avatar-badge").Apply("false");
+        avatar.Controls.Single(control => control.Id == "avatar-group").Apply("false");
+
+        Assert.Contains("Size=\"ShadcnAvatarSize.Large\"", avatar.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Source=\"images/avatars/missing-avatar.png\"", avatar.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ShadcnAvatarBadge", avatar.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ShadcnAvatarGroup", avatar.RazorSource, StringComparison.Ordinal);
+
+        avatar.Controls.Single(control => control.Id == "avatar-badge").Apply("true");
+        avatar.Controls.Single(control => control.Id == "avatar-group").Apply("true");
+        Assert.Contains("<ShadcnAvatarBadge aria-label=\"Online\" />", avatar.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAvatarGroup Size=\"ShadcnAvatarSize.Large\"", avatar.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -275,8 +297,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             case "alert-action": Assert.Empty(cut.FindAll("[data-slot='alert-action']")); break;
             case "avatar-size": Assert.Equal("lg", cut.Find("[data-slot='avatar']").GetAttribute("data-size")); break;
             case "avatar-failed":
-                Assert.Equal("data:image/png;base64,invalid-avatar", cut.Find("[data-slot='avatar-image']").GetAttribute("src"));
-                Assert.DoesNotContain("missing-avatar.webp", cut.Markup, StringComparison.Ordinal);
+                Assert.Equal("images/avatars/missing-avatar.png", cut.Find("[data-slot='avatar-image']").GetAttribute("src"));
                 break;
             case "avatar-badge": Assert.Single(cut.FindAll("[data-slot='avatar-badge']")); break;
             case "avatar-group": Assert.Single(cut.FindAll("[data-slot='avatar-group']")); break;
