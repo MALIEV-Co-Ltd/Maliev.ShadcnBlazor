@@ -80,14 +80,19 @@ public sealed class ContentFoundationTests : BunitContext
     }
 
     [Fact]
-    public void KbdAndKbdGroupUseKeyboardSemantics()
+    public void KbdAndKbdGroupUseNativeKeyboardSemantics()
     {
         var key = Render<ShadcnKbd>(parameters => parameters.AddChildContent("Ctrl"));
-        var group = Render<ShadcnKbdGroup>(parameters => parameters.AddChildContent("Ctrl K"));
+        var group = Render<ShadcnKbdGroup>(parameters => parameters
+            .AddUnmatched("role", "presentation")
+            .AddUnmatched("data-slot", "consumer-slot")
+            .AddChildContent("Ctrl K"));
 
         Assert.Equal("kbd", key.Find("[data-slot='kbd']").TagName, ignoreCase: true);
-        Assert.Equal("span", group.Find("[data-slot='kbd-group']").TagName, ignoreCase: true);
-        Assert.Equal("group", group.Find("[data-slot='kbd-group']").GetAttribute("role"));
+        var groupElement = group.Find("[data-slot='kbd-group']");
+        Assert.Equal("kbd", groupElement.TagName, ignoreCase: true);
+        Assert.Null(groupElement.GetAttribute("role"));
+        Assert.DoesNotContain("consumer-slot", group.Markup, StringComparison.Ordinal);
     }
 
     [Theory]

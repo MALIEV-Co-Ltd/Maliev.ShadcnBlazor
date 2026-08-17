@@ -220,6 +220,30 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void KbdPreviewShowsContextualOneTwoAndThreeKeyShortcutsAndSynchronizesPlatform()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug("kbd"));
+        var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
+
+        Assert.Single(cut.FindAll("[data-slot='card']"));
+        Assert.Equal(3, cut.FindAll("[data-slot='item']").Count);
+        Assert.Equal(
+            [1, 2, 3],
+            cut.FindAll("[data-slot='kbd-group']")
+                .Select(group => group.QuerySelectorAll("[data-slot='kbd']").Length));
+
+        cut.Find("[data-testid='control-kbd-platform']").Change("macOS");
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("⌘", cut.Find(".component-preview__canvas").TextContent, StringComparison.Ordinal);
+            Assert.DoesNotContain("Ctrl", cut.Find(".component-preview__canvas").TextContent, StringComparison.Ordinal);
+            Assert.Contains("<ShadcnKbd>⌘</ShadcnKbd>", example.RazorSource, StringComparison.Ordinal);
+            Assert.Equal("macOS", example.Controls.Single(control => control.Id == "kbd-platform").Value);
+        });
+    }
+
+    [Fact]
     public void AttachmentPreviewKeepsLifecycleStateInTheDemoAndExposesOnlyMeaningfulControls()
     {
         var cut = RenderPreview("attachment");

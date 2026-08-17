@@ -112,4 +112,36 @@ public sealed class SemanticFoundationsBrowserTests(
 
         await Assertions.Expect(page.GetByTestId("responsive-field")).ToHaveCSSAsync("flex-direction", "column");
     }
+
+    [Fact]
+    public async Task KbdDossierKeepsShortcutOrderInRtlAndSynchronizesPlatformSource()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 768, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/kbd").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var canvas = page.GetByTestId("component-preview-canvas");
+        var groups = canvas.Locator("[data-slot='kbd-group']");
+        await Assertions.Expect(groups).ToHaveCountAsync(3);
+        var keyCounts = await groups.EvaluateAllAsync<int[]>("elements => elements.map(element => element.querySelectorAll('[data-slot=kbd]').length)");
+        Assert.Equal(new[] { 1, 2, 3 }, keyCounts);
+        Assert.All(await groups.EvaluateAllAsync<string[]>("elements => elements.map(element => element.tagName)"), tag => Assert.Equal("KBD", tag));
+
+        await page.GetByTestId("documentation-direction-toggle").EvaluateAsync("element => element.click()");
+        await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
+        await Assertions.Expect(groups.Nth(1)).ToHaveCSSAsync("direction", "ltr");
+
+        await page.GetByTestId("control-kbd-platform").SelectOptionAsync("macOS");
+        await Assertions.Expect(canvas).ToContainTextAsync("⌘");
+        await Assertions.Expect(canvas).Not.ToContainTextAsync("Ctrl");
+        await Assertions.Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-label", "Command K");
+        await Assertions.Expect(page.Locator("#preview .component-code pre").First).ToContainTextAsync("<ShadcnKbd>⌘</ShadcnKbd>");
+        await Assertions.Expect(page.Locator("#preview .component-code pre").First).Not.ToContainTextAsync("<ShadcnKbd>Ctrl</ShadcnKbd>");
+    }
 }
