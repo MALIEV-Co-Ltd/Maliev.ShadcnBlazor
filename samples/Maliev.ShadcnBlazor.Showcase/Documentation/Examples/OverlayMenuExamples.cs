@@ -78,7 +78,8 @@ internal static class OverlayMenuExamples
             return Example("alert-dialog", "Delete a saved quotation", alertPreview,
                 [Toggle("alert-dialog-variant", "Small layout", value => compact = value)],
                 ["closed-by-default", "cancel-focus", "destructive", "focus-trap", "restore-focus", "rtl", "reduced-motion"], AlertSource())
-                with { RazorSourceProvider = AlertSource };
+                with
+            { RazorSourceProvider = AlertSource };
         }
         RenderFragment preview = b =>
         {
