@@ -309,17 +309,27 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
-    public void LabelDisabledControlChangesTheAssociatedNativeInput()
+    public void LabelDossierUsesThePackageInputAndKeepsItsStateSynchronized()
     {
         var cut = RenderPreview("label");
         var input = cut.Find("#dossier-label-input");
 
         Assert.Equal("dossier-label-input", cut.Find("[data-slot='label']").GetAttribute("for"));
+        Assert.Equal("input", input.GetAttribute("data-slot"));
+        Assert.Contains("shadcn-input", input.ClassList);
+        Assert.Equal("Project name", input.GetAttribute("aria-label"));
+        Assert.Equal("dossier-label-help", input.GetAttribute("aria-describedby"));
+        Assert.Equal("false", cut.Find("[data-testid='label-dossier']").GetAttribute("data-disabled"));
         Assert.False(input.HasAttribute("disabled"));
+
+        input.Input("Fixture inspection · Revision C");
+        Assert.Contains("Fixture inspection · Revision C", cut.Find("[data-testid='label-project-preview']").TextContent, StringComparison.Ordinal);
 
         cut.Find("[data-testid='control-label-disabled']").Change(true);
 
-        Assert.True(cut.Find("#dossier-label-input").HasAttribute("disabled"));
+        input = cut.Find("#dossier-label-input");
+        Assert.True(input.HasAttribute("disabled"));
+        Assert.Equal("true", cut.Find("[data-testid='label-dossier']").GetAttribute("data-disabled"));
     }
 
     [Fact]
