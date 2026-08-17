@@ -30,6 +30,24 @@ public sealed class SemanticFoundationsShowcaseContractTests
         var keyboard = Assert.Single(registry.GetBySlug("kbd"));
         Assert.Contains("Ctrl", keyboard.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Shift", keyboard.RazorSource, StringComparison.Ordinal);
+
+        var item = Assert.Single(registry.GetBySlug("item"));
+        Assert.Contains("<ShadcnItemGroup", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnItemActions>", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnBadge", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<svg aria-hidden=\"true\"", item.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain(">PDF<", item.RazorSource, StringComparison.OrdinalIgnoreCase);
+
+        item.Controls.Single(control => control.Id == "item-variant").Apply("Muted");
+        item.Controls.Single(control => control.Id == "item-size").Apply("Small");
+        item.Controls.Single(control => control.Id == "item-media-variant").Apply("Image");
+        item.Controls.Single(control => control.Id == "item-link").Apply("true");
+
+        Assert.Contains("Variant=\"ShadcnItemVariant.Muted\"", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Size=\"ShadcnItemSize.Small\"", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Href=\"#item-workspace-plan\"", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnItemMediaVariant.Image\"", item.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<img src=\"images/attachments/workspace-plan.png\"", item.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -46,7 +64,21 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.Contains("<ShadcnAspectRatio", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnField", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnItem", page, StringComparison.Ordinal);
+        Assert.DoesNotContain(">M</span></ShadcnItemMedia>", page, StringComparison.Ordinal);
+        Assert.Contains("<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnEmpty", page, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ItemStylesKeepMediaDecorativeAndVisibleInForcedColors()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-semantic-foundations.css"));
+
+        Assert.Contains(".shadcn-item-media svg", css, StringComparison.Ordinal);
+        Assert.Contains("pointer-events: none", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-item[data-variant=\"outline\"]", css, StringComparison.Ordinal);
+        Assert.Contains("border-color: CanvasText", css, StringComparison.Ordinal);
     }
 
     private static string FindRoot()

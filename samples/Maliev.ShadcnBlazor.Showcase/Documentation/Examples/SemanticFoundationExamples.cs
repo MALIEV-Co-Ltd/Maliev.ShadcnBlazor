@@ -301,15 +301,8 @@ internal static class SemanticFoundationExamples
         var size = ShadcnItemSize.Default;
         var mediaVariant = ShadcnItemMediaVariant.Icon;
         var link = false;
-        RenderFragment preview = builder =>
-        {
-            builder.OpenComponent<ShadcnItem>(0);
-            builder.AddAttribute(1, nameof(ShadcnItem.Variant), variant);
-            builder.AddAttribute(2, nameof(ShadcnItem.Size), size);
-            builder.AddAttribute(3, nameof(ShadcnItem.Href), link ? "#item-example" : null);
-            builder.AddAttribute(4, nameof(ShadcnItem.ChildContent), ItemContent(mediaVariant));
-            builder.CloseComponent();
-        };
+        RenderFragment preview = builder => builder.AddContent(0, ItemDossier(variant, size, mediaVariant, link));
+        string Source() => BuildItemSource(variant, size, mediaVariant, link);
         var options = Enum.GetNames<ShadcnItemVariant>();
         ComponentParameterControl[] controls =
         [
@@ -344,12 +337,13 @@ internal static class SemanticFoundationExamples
         ];
         return Example(
             "item",
-            "Structured content item",
-            "Compose item title and description inside a selectable visual treatment.",
-            "<ShadcnItem Variant=\"ShadcnItemVariant.Outline\">\n    <ShadcnItemMedia Variant=\"ShadcnItemMediaVariant.Icon\">\n        <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M6 3h8l4 4v14H6z\" /><path d=\"M14 3v5h5M9 13h6M9 17h4\" /></svg>\n    </ShadcnItemMedia>\n    <ShadcnItemContent>\n        <ShadcnItemTitle>Production drawing</ShadcnItemTitle>\n        <ShadcnItemDescription>Revision C · Updated 2 minutes ago</ShadcnItemDescription>\n    </ShadcnItemContent>\n</ShadcnItem>",
+            "Production file queue",
+            "Review uploaded project files with real media, status, compact sizing, and optional link behavior.",
+            Source(),
             preview,
             controls,
-            ["default", "outline", "muted", "small", "link", "media-default", "media-icon", "media-image"]);
+            ["default", "outline", "muted", "small", "link", "media-default", "media-icon", "media-image"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Kbd()
@@ -644,23 +638,103 @@ internal static class SemanticFoundationExamples
         }
     };
 
-    private static RenderFragment ItemContent(ShadcnItemMediaVariant mediaVariant) => builder =>
+    private static RenderFragment ItemDossier(
+        ShadcnItemVariant variant,
+        ShadcnItemSize size,
+        ShadcnItemMediaVariant mediaVariant,
+        bool link) => builder =>
+    {
+        builder.OpenElement(0, "section");
+        builder.AddAttribute(1, "class", "showcase-item-dossier");
+        builder.AddAttribute(2, "aria-labelledby", "showcase-item-title");
+        builder.OpenElement(3, "header");
+        builder.AddAttribute(4, "class", "showcase-item-dossier__header");
+        builder.OpenElement(5, "div");
+        builder.OpenElement(6, "h3");
+        builder.AddAttribute(7, "id", "showcase-item-title");
+        builder.AddContent(8, "Production files");
+        builder.CloseElement();
+        builder.OpenElement(9, "p");
+        builder.AddContent(10, "Review the latest references before releasing the drawing package.");
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.OpenElement(11, "span");
+        builder.AddContent(12, $"{ItemFiles.Length} files");
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.OpenComponent<ShadcnItemGroup>(13);
+        builder.AddAttribute(14, nameof(ShadcnItemGroup.Class), "showcase-item-list");
+        builder.AddAttribute(15, nameof(ShadcnItemGroup.ChildContent), (RenderFragment)(group =>
+        {
+            for (var index = 0; index < ItemFiles.Length; index++)
+                AddItem(group, index * 20, ItemFiles[index], variant, size, mediaVariant, link);
+        }));
+        builder.CloseComponent();
+        builder.CloseElement();
+    };
+
+    private static void AddItem(
+        RenderTreeBuilder builder,
+        int sequence,
+        ItemExampleFile file,
+        ShadcnItemVariant variant,
+        ShadcnItemSize size,
+        ShadcnItemMediaVariant mediaVariant,
+        bool link)
+    {
+        builder.OpenElement(sequence, "div");
+        builder.AddAttribute(sequence + 1, "id", $"item-{file.Id}");
+        builder.AddAttribute(sequence + 2, "role", "listitem");
+        builder.OpenComponent<ShadcnItem>(sequence + 3);
+        builder.AddAttribute(sequence + 4, nameof(ShadcnItem.Variant), variant);
+        builder.AddAttribute(sequence + 5, nameof(ShadcnItem.Size), size);
+        builder.AddAttribute(sequence + 6, nameof(ShadcnItem.Href), link ? $"#item-{file.Id}" : null);
+        builder.AddAttribute(sequence + 7, nameof(ShadcnItem.ChildContent), ItemContent(file, mediaVariant));
+        builder.CloseComponent();
+        builder.CloseElement();
+    }
+
+    private static RenderFragment ItemContent(ItemExampleFile file, ShadcnItemMediaVariant mediaVariant) => builder =>
     {
         builder.OpenComponent<ShadcnItemMedia>(0);
         builder.AddAttribute(1, nameof(ShadcnItemMedia.Variant), mediaVariant);
-        builder.AddAttribute(2, nameof(ShadcnItemMedia.ChildContent), FileIcon());
+        builder.AddAttribute(2, nameof(ShadcnItemMedia.ChildContent), ItemMedia(file, mediaVariant));
         builder.CloseComponent();
         builder.OpenComponent<ShadcnItemContent>(3);
-        builder.AddAttribute(4, nameof(ShadcnItemContent.ChildContent), (RenderFragment)(builder2 =>
+        builder.AddAttribute(4, nameof(ShadcnItemContent.ChildContent), (RenderFragment)(content =>
         {
-            builder2.OpenComponent<ShadcnItemTitle>(0);
-            builder2.AddAttribute(1, nameof(ShadcnItemTitle.ChildContent), Text("Production drawing"));
-            builder2.CloseComponent();
-            builder2.OpenComponent<ShadcnItemDescription>(2);
-            builder2.AddAttribute(3, nameof(ShadcnItemDescription.ChildContent), Text("Revision C"));
-            builder2.CloseComponent();
+            content.OpenComponent<ShadcnItemTitle>(0);
+            content.AddAttribute(1, nameof(ShadcnItemTitle.ChildContent), Text(file.Name));
+            content.CloseComponent();
+            content.OpenComponent<ShadcnItemDescription>(2);
+            content.AddAttribute(3, nameof(ShadcnItemDescription.ChildContent), Text(file.Description));
+            content.CloseComponent();
         }));
         builder.CloseComponent();
+        builder.OpenComponent<ShadcnItemActions>(5);
+        builder.AddAttribute(6, nameof(ShadcnItemActions.ChildContent), (RenderFragment)(actions =>
+        {
+            actions.OpenComponent<ShadcnBadge>(0);
+            actions.AddAttribute(1, nameof(ShadcnBadge.Variant), file.BadgeVariant);
+            actions.AddAttribute(2, nameof(ShadcnBadge.ChildContent), Text(file.Status));
+            actions.CloseComponent();
+        }));
+        builder.CloseComponent();
+    };
+
+    private static RenderFragment ItemMedia(ItemExampleFile file, ShadcnItemMediaVariant mediaVariant) => builder =>
+    {
+        if (mediaVariant == ShadcnItemMediaVariant.Image)
+        {
+            builder.OpenElement(0, "img");
+            builder.AddAttribute(1, "src", file.ImageSource);
+            builder.AddAttribute(2, "alt", file.ImageAlt);
+            builder.AddAttribute(3, "loading", "lazy");
+            builder.CloseElement();
+            return;
+        }
+
+        builder.AddContent(0, FileIcon());
     };
 
     private static RenderFragment KeyboardKeys() => builder =>
@@ -676,6 +750,62 @@ internal static class SemanticFoundationExamples
     {
         builder.OpenElement(0, "svg"); builder.AddAttribute(1, "viewBox", "0 0 24 24"); builder.AddAttribute(2, "aria-hidden", "true"); builder.OpenElement(3, "path"); builder.AddAttribute(4, "d", "M6 3h8l4 4v14H6z"); builder.CloseElement(); builder.OpenElement(5, "path"); builder.AddAttribute(6, "d", "M14 3v5h5M9 13h6M9 17h4"); builder.CloseElement(); builder.CloseElement();
     };
+
+    private static string BuildItemSource(
+        ShadcnItemVariant variant,
+        ShadcnItemSize size,
+        ShadcnItemMediaVariant mediaVariant,
+        bool link)
+    {
+        var items = string.Join(
+            Environment.NewLine,
+            ItemFiles.Select(file => BuildItemSource(file, variant, size, mediaVariant, link)));
+
+        return $"""
+<section class="showcase-item-dossier" aria-labelledby="showcase-item-title">
+    <header class="showcase-item-dossier__header">
+        <div>
+            <h3 id="showcase-item-title">Production files</h3>
+            <p>Review the latest references before releasing the drawing package.</p>
+        </div>
+        <span>{ItemFiles.Length} files</span>
+    </header>
+    <ShadcnItemGroup Class="showcase-item-list">
+{items}
+    </ShadcnItemGroup>
+</section>
+""";
+    }
+
+    private static string BuildItemSource(
+        ItemExampleFile file,
+        ShadcnItemVariant variant,
+        ShadcnItemSize size,
+        ShadcnItemMediaVariant mediaVariant,
+        bool link)
+    {
+        var href = link ? $" Href=\"#item-{file.Id}\"" : string.Empty;
+        var media = mediaVariant == ShadcnItemMediaVariant.Image
+            ? $"<img src=\"{file.ImageSource}\" alt=\"{file.ImageAlt}\" loading=\"lazy\" />"
+            : "<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M6 3h8l4 4v14H6z\" /><path d=\"M14 3v5h5M9 13h6M9 17h4\" /></svg>";
+
+        return $"""
+        <div id="item-{file.Id}" role="listitem">
+            <ShadcnItem Variant="ShadcnItemVariant.{variant}" Size="ShadcnItemSize.{size}"{href}>
+                <ShadcnItemMedia Variant="ShadcnItemMediaVariant.{mediaVariant}">
+                    {media}
+                </ShadcnItemMedia>
+                <ShadcnItemContent>
+                    <ShadcnItemTitle>{file.Name}</ShadcnItemTitle>
+                    <ShadcnItemDescription>{file.Description}</ShadcnItemDescription>
+                </ShadcnItemContent>
+                <ShadcnItemActions>
+                    <ShadcnBadge Variant="ShadcnBadgeVariant.{file.BadgeVariant}">{file.Status}</ShadcnBadge>
+                </ShadcnItemActions>
+            </ShadcnItem>
+        </div>
+""";
+    }
 
     private static RenderFragment FolderPlusIcon() => builder =>
     {
@@ -772,4 +902,41 @@ internal static class SemanticFoundationExamples
             }
         })); builder.CloseComponent(); builder.CloseElement();
     }
+
+    private static readonly ItemExampleFile[] ItemFiles =
+    [
+        new(
+            "workspace-plan",
+            "workspace-plan.png",
+            "Workspace layout · Revision C · 2.0 MB",
+            "images/attachments/workspace-plan.png",
+            "Preview of the workspace layout",
+            "Approved",
+            ShadcnBadgeVariant.Secondary),
+        new(
+            "desk-reference",
+            "desk-reference.png",
+            "Reference image · Reviewed 8 minutes ago · 2.0 MB",
+            "images/attachments/desk-reference.png",
+            "Preview of the desk reference",
+            "Reviewed",
+            ShadcnBadgeVariant.Outline),
+        new(
+            "office-reference",
+            "office-reference.png",
+            "Reference image · Awaiting review · 1.8 MB",
+            "images/attachments/office-reference.png",
+            "Preview of the office reference",
+            "Pending",
+            ShadcnBadgeVariant.Ghost)
+    ];
+
+    private sealed record ItemExampleFile(
+        string Id,
+        string Name,
+        string Description,
+        string ImageSource,
+        string ImageAlt,
+        string Status,
+        ShadcnBadgeVariant BadgeVariant);
 }

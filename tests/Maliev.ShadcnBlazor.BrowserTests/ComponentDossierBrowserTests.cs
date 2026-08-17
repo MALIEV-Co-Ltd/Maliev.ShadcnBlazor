@@ -178,6 +178,56 @@ public sealed class ComponentDossierBrowserTests(
     }
 
     [Fact]
+    public async Task ItemDossierUsesRealMediaResponsiveCompositionAndSynchronizedSource()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/item").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var canvas = page.GetByTestId("component-preview-canvas");
+        var dossier = canvas.Locator(".showcase-item-dossier");
+        await Assertions.Expect(dossier.Locator("[data-slot='item-group'] > [role='listitem']")).ToHaveCountAsync(3);
+        await Assertions.Expect(dossier.Locator("[data-slot='item-media'] svg[aria-hidden='true']")).ToHaveCountAsync(3);
+        await Assertions.Expect(dossier.Locator("[data-slot='item-actions'] [data-slot='badge']")).ToHaveCountAsync(3);
+
+        var canvasBox = await canvas.BoundingBoxAsync();
+        var dossierBox = await dossier.BoundingBoxAsync();
+        Assert.NotNull(canvasBox);
+        Assert.NotNull(dossierBox);
+        Assert.InRange(Math.Abs((dossierBox!.X + (dossierBox.Width / 2)) - (canvasBox!.X + (canvasBox.Width / 2))), 0, 2);
+
+        await page.GetByTestId("control-item-variant").SelectOptionAsync("Muted");
+        await page.GetByTestId("control-item-size").SelectOptionAsync("Small");
+        await page.GetByTestId("control-item-media-variant").SelectOptionAsync("Image");
+        await page.GetByTestId("control-item-link").CheckAsync();
+
+        var links = dossier.Locator("a[data-slot='item']");
+        await Assertions.Expect(links).ToHaveCountAsync(3);
+        await Assertions.Expect(links.First).ToHaveAttributeAsync("data-variant", "muted");
+        await Assertions.Expect(links.First).ToHaveAttributeAsync("data-size", "sm");
+        var images = dossier.Locator("[data-slot='item-media'][data-variant='image'] img[alt]");
+        await Assertions.Expect(images).ToHaveCountAsync(3);
+        Assert.True(await images.First.EvaluateAsync<bool>("image => image.complete && image.naturalWidth > 0"));
+
+        var source = page.Locator("#preview .component-code pre").First;
+        await Assertions.Expect(source).ToContainTextAsync("Variant=\"ShadcnItemVariant.Muted\"");
+        await Assertions.Expect(source).ToContainTextAsync("Size=\"ShadcnItemSize.Small\"");
+        await Assertions.Expect(source).ToContainTextAsync("Href=\"#item-workspace-plan\"");
+        await Assertions.Expect(source).ToContainTextAsync("images/attachments/workspace-plan.png");
+
+        await page.SetViewportSizeAsync(390, 844);
+        await Assertions.Expect(dossier).ToBeVisibleAsync();
+        Assert.InRange(await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)"), 0, 1);
+    }
+
+    [Fact]
     public async Task ShowcasePreviewsExposeWorkingStatefulInteractionAndPolishedLayouts()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
