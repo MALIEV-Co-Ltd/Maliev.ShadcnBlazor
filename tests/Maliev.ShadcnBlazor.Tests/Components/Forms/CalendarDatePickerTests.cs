@@ -374,6 +374,7 @@ public sealed class CalendarDatePickerTests : BunitContext
 
         Assert.Contains("10/08/2026", cut.Find("[data-slot='date-picker-trigger']").TextContent, StringComparison.Ordinal);
         Assert.Contains("13/08/2026", cut.Find("[data-slot='date-picker-trigger']").TextContent, StringComparison.Ordinal);
+        Assert.Equal("auto", cut.Find("[data-slot='date-picker-trigger'] span").GetAttribute("dir"));
         cut.Find("input[data-slot='date-picker-input']").Change("14/08/2026 – 18/08/2026");
         Assert.Equal(new ShadcnDateRange(new DateOnly(2026, 8, 14), new DateOnly(2026, 8, 18)), range);
         cut.Find("input[data-slot='date-picker-input']").Change("08/14/2026");
