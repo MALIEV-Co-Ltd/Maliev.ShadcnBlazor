@@ -339,26 +339,24 @@ public sealed class ComponentDossierTests : BunitContext
 
         Assert.Equal(["Vertical", "Horizontal", "Responsive"], OptionValues(cut, "control-field-orientation"));
         Assert.Equal(["Legend", "Label"], OptionValues(cut, "control-field-legend-variant"));
-        var input = cut.Find("#dossier-field-input");
-        Assert.Equal("true", input.GetAttribute("aria-invalid"));
-        Assert.Equal("dossier-field-help dossier-field-error", input.GetAttribute("aria-describedby"));
-        Assert.Equal("dossier-field-help", cut.Find("[data-slot='field-description']").GetAttribute("id"));
-        Assert.Equal("dossier-field-error", cut.Find("[data-slot='field-error']").GetAttribute("id"));
-        Assert.False(input.HasAttribute("disabled"));
-
-        cut.Find("[data-testid='control-field-invalid']").Change(false);
-        input = cut.Find("#dossier-field-input");
+        var input = cut.Find("#field-card-number");
         Assert.False(input.HasAttribute("aria-invalid"));
-        Assert.Equal("dossier-field-help", input.GetAttribute("aria-describedby"));
-        Assert.Empty(cut.FindAll("#dossier-field-error"));
+        Assert.Equal("field-card-number-help", input.GetAttribute("aria-describedby"));
+        Assert.Equal("field-card-number-help", cut.Find("#field-card-number-help").GetAttribute("id"));
+        Assert.Empty(cut.FindAll("#field-card-number-error"));
+
+        cut.Find("[data-testid='control-field-invalid']").Change(true);
+        input = cut.Find("#field-card-number");
+        Assert.Equal("true", input.GetAttribute("aria-invalid"));
+        Assert.Equal("field-card-number-help field-card-number-error", input.GetAttribute("aria-describedby"));
+        Assert.Equal("alert", cut.Find("#field-card-number-error").GetAttribute("role"));
 
         cut.Find("[data-testid='control-field-disabled']").Change(true);
-        Assert.True(cut.Find("#dossier-field-input").HasAttribute("disabled"));
         Assert.True(cut.Find("[data-slot='field-set']").HasAttribute("disabled"));
-        Assert.Equal("true", cut.Find("[data-slot='field']").GetAttribute("data-disabled"));
+        Assert.Equal("true", cut.Find("#field-card-number").ParentElement?.GetAttribute("data-disabled"));
 
         cut.Find("[data-testid='control-field-orientation']").Change("Horizontal");
-        Assert.Equal("horizontal", cut.Find("[data-slot='field']").GetAttribute("data-orientation"));
+        Assert.Equal("horizontal", cut.Find("#field-card-number").ParentElement?.GetAttribute("data-orientation"));
 
         cut.Find("[data-testid='control-field-legend-variant']").Change("Label");
         Assert.Equal("label", cut.Find("[data-slot='field-legend']").GetAttribute("data-variant"));

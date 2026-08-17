@@ -281,6 +281,14 @@
     align-items: center;
 }
 
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"]:has(> .shadcn-field-content) {
+    align-items: flex-start;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"]:has(> .shadcn-field-content) > .shadcn-checkbox-root {
+    margin-block-start: 1px;
+}
+
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"] > .shadcn-field-label,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="horizontal"] > .shadcn-field-title {
     flex: 1 1 auto;
@@ -290,6 +298,10 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] {
         flex-direction: row;
         align-items: center;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"]:has(> .shadcn-field-content) {
+        align-items: flex-start;
     }
 
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field[data-orientation="responsive"] > .shadcn-field-label,

@@ -97,6 +97,35 @@ public sealed class SemanticFoundationsShowcaseContractTests
     }
 
     [Fact]
+    public void FieldExampleUsesLibraryControlsAndKeepsSourceInSyncWithSettings()
+    {
+        var registry = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(new Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationCatalog());
+        var field = Assert.Single(registry.GetBySlug("field"));
+
+        Assert.Contains("<ShadcnInput", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSelect", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnCheckbox", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTextarea", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnButton", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@code", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("HandleSubmit", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Orientation=\"ShadcnFieldOrientation.Vertical\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnFieldLegendVariant.Legend\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"false\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"false\"", field.RazorSource, StringComparison.Ordinal);
+
+        field.Controls.Single(control => control.Id == "field-orientation").Apply("Horizontal");
+        field.Controls.Single(control => control.Id == "field-legend-variant").Apply("Label");
+        field.Controls.Single(control => control.Id == "field-invalid").Apply("true");
+        field.Controls.Single(control => control.Id == "field-disabled").Apply("true");
+
+        Assert.Contains("Orientation=\"ShadcnFieldOrientation.Horizontal\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnFieldLegendVariant.Label\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"true\"", field.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", field.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseLoadsSemanticStylesAndExposesComponentRoute()
     {
         var root = FindRoot();
