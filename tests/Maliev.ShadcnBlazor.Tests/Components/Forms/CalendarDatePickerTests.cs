@@ -304,6 +304,21 @@ public sealed class CalendarDatePickerTests : BunitContext
     }
 
     [Fact]
+    public void DatePickerClearActionStaysInsideTheFieldAndUsesAnIcon()
+    {
+        var cut = Render<ShadcnDatePicker>(parameters => parameters
+            .Add(component => component.Value, new DateOnly(2026, 8, 13))
+            .Add(component => component.Clearable, true));
+
+        var root = cut.Find("[data-slot='date-picker']");
+        var clear = root.Children.SingleOrDefault(element => element.GetAttribute("data-slot") == "date-picker-clear");
+
+        Assert.NotNull(clear);
+        Assert.NotNull(clear!.QuerySelector("svg"));
+        Assert.True(string.IsNullOrWhiteSpace(clear.TextContent));
+    }
+
+    [Fact]
     public void DatePickerWithoutOpenBindingOpensAndSelectsADate()
     {
         DateOnly? selected = null;
@@ -359,6 +374,7 @@ public sealed class CalendarDatePickerTests : BunitContext
 
         Assert.Contains("10/08/2026", cut.Find("[data-slot='date-picker-trigger']").TextContent, StringComparison.Ordinal);
         Assert.Contains("13/08/2026", cut.Find("[data-slot='date-picker-trigger']").TextContent, StringComparison.Ordinal);
+        Assert.Equal("auto", cut.Find("[data-slot='date-picker-trigger'] span").GetAttribute("dir"));
         cut.Find("input[data-slot='date-picker-input']").Change("14/08/2026 – 18/08/2026");
         Assert.Equal(new ShadcnDateRange(new DateOnly(2026, 8, 14), new DateOnly(2026, 8, 18)), range);
         cut.Find("input[data-slot='date-picker-input']").Change("08/14/2026");

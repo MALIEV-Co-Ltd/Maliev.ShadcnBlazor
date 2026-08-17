@@ -202,15 +202,46 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition DatePicker()
     {
-        var invalid = false; var clearable = true;
-        RenderFragment preview = b => { b.OpenComponent<CompactDatePickerDossierPreview>(0); b.AddAttribute(1, nameof(CompactDatePickerDossierPreview.Clearable), clearable); b.AddAttribute(2, nameof(CompactDatePickerDossierPreview.Invalid), invalid); b.CloseComponent(); };
-        string Source() => $"<ShadcnDatePicker Mode=\"ShadcnCalendarSelectionMode.Range\" @bind-Range=\"DeliveryWindow\" AllowTextInput=\"false\" Clearable=\"{clearable.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Culture=\"ThaiCulture\" />";
-        return Example("date-picker", "Date picker composition", "Pick one date or a connected date range from the field, then clear it without a duplicate text control.", Source(), preview,
+        var invalid = false; var clearable = true; var mode = ShadcnCalendarSelectionMode.Range;
+        RenderFragment preview = b => { b.OpenComponent<CompactDatePickerDossierPreview>(0); b.AddAttribute(1, nameof(CompactDatePickerDossierPreview.Mode), mode); b.AddAttribute(2, nameof(CompactDatePickerDossierPreview.Clearable), clearable); b.AddAttribute(3, nameof(CompactDatePickerDossierPreview.Invalid), invalid); b.CloseComponent(); };
+        string Source() => DatePickerSource(mode, clearable, invalid);
+        return Example("date-picker", "Delivery date picker", "Open one field to choose a delivery date or connected date range, then clear the selection without a duplicate text control.", Source(), preview,
             [
+                EnumSelect("date-picker-mode", "Selection", mode, v => mode = v),
                 Toggle("date-picker-invalid", "Invalid", v => invalid = v),
                 Toggle("date-picker-clearable", "Clearable", v => clearable = v, true)
             ], ["single", "range", "calendar", "culture", "clearable", "invalid"]) with
         { RazorSourceProvider = Source };
+    }
+
+    private static string DatePickerSource(ShadcnCalendarSelectionMode mode, bool clearable, bool invalid)
+    {
+        var binding = mode == ShadcnCalendarSelectionMode.Range ? "@bind-Range=\"DeliveryWindow\"" : "@bind-Value=\"SelectedDate\"";
+        var placeholder = mode == ShadcnCalendarSelectionMode.Range ? "Pick a delivery window" : "Pick a delivery date";
+        return $$"""
+            @using System.Globalization
+            @using Maliev.ShadcnBlazor.Components.Forms
+
+            <ShadcnDatePicker Mode="ShadcnCalendarSelectionMode.{{mode}}"
+                              {{binding}}
+                              @bind-Open="DatePickerOpen"
+                              @bind-VisibleMonth="VisibleMonth"
+                              Culture="ThaiCulture"
+                              Today="Today"
+                              Placeholder="{{placeholder}}"
+                              Clearable="{{clearable.ToString().ToLowerInvariant()}}"
+                              Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                              aria-label="Delivery date" />
+
+            @code {
+                private DateOnly? SelectedDate { get; set; } = new(2026, 8, 13);
+                private ShadcnDateRange? DeliveryWindow { get; set; } = new(new(2026, 8, 10), new(2026, 8, 13));
+                private DateOnly VisibleMonth { get; set; } = new(2026, 8, 1);
+                private bool DatePickerOpen { get; set; }
+                private static readonly DateOnly Today = new(2026, 8, 13);
+                private static readonly CultureInfo ThaiCulture = CultureInfo.GetCultureInfo("th-TH");
+            }
+            """;
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, description, source, preview, controls, tags);
@@ -223,12 +254,14 @@ internal static class FormDateExamples
 
     private sealed class CompactDatePickerDossierPreview : ComponentBase
     {
+        [Parameter] public ShadcnCalendarSelectionMode Mode { get; set; } = ShadcnCalendarSelectionMode.Range;
         [Parameter] public bool Invalid { get; set; }
         [Parameter] public bool Clearable { get; set; } = true;
 
+        private DateOnly? SelectedDate { get; set; } = new(2026, 8, 13);
         private ShadcnDateRange? Range { get; set; } = new(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13));
         private DateOnly VisibleMonth { get; set; } = new(2026, 8, 1);
-        private bool Open { get; set; } = true;
+        private bool Open { get; set; }
         private static readonly DateOnly Today = new(2026, 8, 13);
         private static readonly CultureInfo ThaiCulture = CultureInfo.GetCultureInfo("th-TH");
 
@@ -237,9 +270,17 @@ internal static class FormDateExamples
             builder.OpenElement(0, "div");
             builder.AddAttribute(1, "class", "showcase-date-picker-dossier");
             builder.OpenComponent<ShadcnDatePicker>(2);
-            builder.AddAttribute(3, nameof(ShadcnDatePicker.Mode), ShadcnCalendarSelectionMode.Range);
-            builder.AddAttribute(4, nameof(ShadcnDatePicker.Range), Range);
-            builder.AddAttribute(5, nameof(ShadcnDatePicker.RangeChanged), EventCallback.Factory.Create<ShadcnDateRange?>(this, HandleRangeChanged));
+            builder.AddAttribute(3, nameof(ShadcnDatePicker.Mode), Mode);
+            if (Mode == ShadcnCalendarSelectionMode.Range)
+            {
+                builder.AddAttribute(4, nameof(ShadcnDatePicker.Range), Range);
+                builder.AddAttribute(5, nameof(ShadcnDatePicker.RangeChanged), EventCallback.Factory.Create<ShadcnDateRange?>(this, HandleRangeChanged));
+            }
+            else
+            {
+                builder.AddAttribute(4, nameof(ShadcnDatePicker.Value), SelectedDate);
+                builder.AddAttribute(5, nameof(ShadcnDatePicker.ValueChanged), EventCallback.Factory.Create<DateOnly?>(this, HandleValueChanged));
+            }
             builder.AddAttribute(6, nameof(ShadcnDatePicker.Open), Open);
             builder.AddAttribute(7, nameof(ShadcnDatePicker.OpenChanged), EventCallback.Factory.Create<bool>(this, HandleOpenChanged));
             builder.AddAttribute(8, nameof(ShadcnDatePicker.VisibleMonth), VisibleMonth);
@@ -249,6 +290,7 @@ internal static class FormDateExamples
             builder.AddAttribute(12, nameof(ShadcnDatePicker.Clearable), Clearable);
             builder.AddAttribute(13, nameof(ShadcnDatePicker.Invalid), Invalid);
             builder.AddAttribute(14, nameof(ShadcnDatePicker.AdditionalAttributes), Attr("forms-dossier-date-picker", "Delivery date"));
+            builder.AddAttribute(15, nameof(ShadcnDatePicker.Placeholder), Mode == ShadcnCalendarSelectionMode.Range ? "Pick a delivery window" : "Pick a delivery date");
             builder.CloseComponent();
             builder.CloseElement();
         }
@@ -256,6 +298,12 @@ internal static class FormDateExamples
         private Task HandleRangeChanged(ShadcnDateRange? value)
         {
             Range = value;
+            return Task.CompletedTask;
+        }
+
+        private Task HandleValueChanged(DateOnly? value)
+        {
+            SelectedDate = value;
             return Task.CompletedTask;
         }
 

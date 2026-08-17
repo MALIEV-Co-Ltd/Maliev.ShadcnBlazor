@@ -115,6 +115,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker { display: inline-grid; align-items: start; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger { grid-area: 1 / 1; padding-inline-end: calc(2.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker [data-slot="date-picker-clear"] { position: absolute; inset-inline-end: .375rem; inset-block-start: 50%; grid-area: auto; align-self: auto; justify-self: auto; margin-inline-end: 0; translate: 0 -50%; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker [data-slot="date-picker-clear"] svg { width: .875rem; height: .875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker [data-slot="date-picker-clear"]:where(:hover, :focus-visible) { color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-input { grid-area: 2 / 1; width: 100%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-input { margin-top: calc(.375rem * var(--shadcn-spacing-multiplier)); }
 
@@ -127,7 +129,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp { max-width: 100%; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot { width: min(2.25rem, calc((100vw - 4rem) / 6)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { width: 100%; min-width: 0; }
-    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content, .shadcn-date-picker-content) { position: fixed; inset: auto .5rem .5rem; width: auto; max-height: min(70dvh, 32rem); }
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content) { position: fixed; inset: auto .5rem .5rem; width: auto; max-height: min(70dvh, 32rem); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar { margin-inline: auto; --shadcn-calendar-cell: min(2.75rem, calc((100vw - 3rem) / 7)); }
 }
 @media (prefers-reduced-motion: reduce) {

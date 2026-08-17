@@ -26,6 +26,16 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         var datePicker = registry.GetBySlug("date-picker").Single();
         Assert.DoesNotContain("AllowTextInput=\"true\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Mode=\"ShadcnCalendarSelectionMode.Range\"", datePicker.RazorSource, StringComparison.Ordinal);
+        var datePickerCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, datePicker));
+        datePickerCut.Find("[data-testid='control-date-picker-mode']").Change("Single");
+        Assert.Contains("Mode=\"ShadcnCalendarSelectionMode.Single\"", datePicker.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind-Value=\"SelectedDate\"", datePicker.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind-Open=\"DatePickerOpen\"", datePicker.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private DateOnly? SelectedDate", datePicker.RazorSource, StringComparison.Ordinal);
+        datePickerCut.Find("[data-testid='control-date-picker-invalid']").Change(true);
+        datePickerCut.Find("[data-testid='control-date-picker-clearable']").Change(false);
+        Assert.Contains("Invalid=\"true\"", datePicker.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Clearable=\"false\"", datePicker.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

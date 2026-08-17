@@ -160,7 +160,6 @@ public sealed class ComponentDossierBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/date-picker").ToString());
         var datePicker = page.GetByTestId("forms-dossier-date-picker");
         await datePicker.ClickAsync();
-        await datePicker.ClickAsync();
         var datePickerRoot = datePicker.Locator("xpath=ancestor-or-self::*[@data-slot='date-picker'][1]");
         await Assertions.Expect(datePickerRoot.Locator("[data-slot='date-picker-content']")).ToBeVisibleAsync();
         await datePickerRoot.Locator("[data-day='2026-08-20']").ClickAsync();
@@ -250,6 +249,53 @@ public sealed class ComponentDossierBrowserTests(
         Assert.InRange(await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)"), 0, 1);
         await Assertions.Expect(dataTable.Locator(".shadcn-data-table-frame")).ToBeVisibleAsync();
         Assert.Equal("grid", await dataTable.Locator("[data-slot='data-table-toolbar']").EvaluateAsync<string>("element => getComputedStyle(element).display"));
+    }
+
+    [Fact]
+    public async Task DatePickerDossierUsesOneResponsiveTriggerForSingleAndRangeSelection()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            DeviceScaleFactor = 1,
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/date-picker").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+
+        var trigger = page.GetByTestId("forms-dossier-date-picker");
+        var root = trigger.Locator("xpath=ancestor-or-self::*[@data-slot='date-picker'][1]");
+        await Assertions.Expect(root.Locator("[data-slot='date-picker-input']")).ToHaveCountAsync(0);
+        await Assertions.Expect(root.Locator("[data-slot='date-picker-content']")).ToHaveCountAsync(0);
+
+        await trigger.ClickAsync();
+        var content = root.Locator("[data-slot='date-picker-content']");
+        await Assertions.Expect(content).ToBeVisibleAsync();
+        var triggerBox = await trigger.BoundingBoxAsync();
+        var contentBox = await content.BoundingBoxAsync();
+        Assert.NotNull(triggerBox);
+        Assert.NotNull(contentBox);
+        Assert.True(contentBox!.Y >= triggerBox!.Y + triggerBox.Height - 1);
+        Assert.InRange(contentBox.X, 0, 390 - contentBox.Width + 1);
+        await Assertions.Expect(root).ToHaveCSSAsync("direction", "rtl");
+        await trigger.ClickAsync();
+
+        await page.GetByTestId("control-date-picker-mode").SelectOptionAsync("Single");
+        await trigger.ClickAsync();
+        await root.Locator("[data-day='2026-08-20']").ClickAsync();
+        await Assertions.Expect(trigger).ToContainTextAsync("20");
+        await Assertions.Expect(page.Locator("#preview .component-code pre").First).ToContainTextAsync("@bind-Value=\"SelectedDate\"");
+
+        var clear = root.Locator("[data-slot='date-picker-clear']");
+        await Assertions.Expect(clear).ToBeVisibleAsync();
+        await Assertions.Expect(clear.Locator("svg")).ToHaveCountAsync(1);
+        await clear.ClickAsync();
+        await Assertions.Expect(clear).ToHaveCountAsync(0);
+        await Assertions.Expect(trigger).ToContainTextAsync("Pick a delivery date");
     }
 
     [Theory]
