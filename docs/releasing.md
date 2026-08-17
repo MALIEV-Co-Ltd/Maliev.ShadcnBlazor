@@ -12,8 +12,11 @@ No long-lived NuGet API key is stored in repository secrets.
 4. Publish the matching GitHub Release.
 5. The release workflow validates that the tag and package version match,
    obtains a short-lived NuGet credential through GitHub OIDC, and pushes the
-   `.nupkg` and `.snupkg` to NuGet.org.
-6. Verify the package page, repository metadata, symbols, and install command.
+   `.nupkg` and `.snupkg` to NuGet.org. The Pages workflow is also triggered by
+   the published release and builds the Showcase from that exact tag, keeping
+   the public docs synchronized with the package.
+6. Verify the package page, repository metadata, symbols, install command, and
+   the deployed Pages commit.
 
 The NuGet.org Trusted Publishing policy must name this repository, the release
 workflow file, and the protected `nuget` GitHub environment. Publishing fails
