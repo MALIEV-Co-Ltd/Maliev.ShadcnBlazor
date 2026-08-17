@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.OverlaysMenus;
 
@@ -71,6 +72,91 @@ public sealed class MenubarCommandTests : BunitContext
     }
 
     [Fact]
+    public void MenubarPublishesOpenAndLoopStateForInteractionAndStyling()
+    {
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent<ShadcnMenubarMenu>(0);
+            builder.AddAttribute(1, nameof(ShadcnMenubarMenu.Open), true);
+            builder.AddAttribute(2, nameof(ShadcnMenubarMenu.ChildContent), (RenderFragment)(menu =>
+            {
+                menu.OpenComponent<ShadcnMenubarTrigger>(0);
+                menu.AddAttribute(1, nameof(ShadcnMenubarTrigger.ChildContent), (RenderFragment)(text => text.AddContent(0, "File")));
+                menu.CloseComponent();
+                menu.OpenComponent<ShadcnMenubarContent>(2);
+                menu.CloseComponent();
+            }));
+            builder.CloseComponent();
+        };
+        var cut = Render<ShadcnMenubar>(parameters => parameters
+            .Add(component => component.Label, "Workspace menu")
+            .Add(component => component.Loop, false)
+            .Add(component => component.ChildContent, content));
+
+        Assert.Equal("false", cut.Find("[data-slot='menubar']").GetAttribute("data-loop"));
+        Assert.Equal("open", cut.Find("[data-slot='menubar-trigger']").GetAttribute("data-state"));
+        var positioned = Assert.Single(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachPositioned", StringComparison.Ordinal));
+        Assert.Equal(-4d, positioned.Arguments[5]);
+        var contentSource = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "Components", "Overlays", "ShadcnMenubarContent.razor"));
+        Assert.Contains("Context.Owner.TriggerId,_ownerRef", contentSource, StringComparison.Ordinal);
+        Assert.NotNull(typeof(ShadcnMenubarMenu).GetMethod(nameof(ShadcnMenubarMenu.RequestCloseAsync))?.GetCustomAttributes(typeof(JSInvokableAttribute), false).SingleOrDefault());
+
+        cut.Render(parameters => parameters
+            .Add(component => component.Label, "Workspace menu")
+            .Add(component => component.Loop, true)
+            .Add(component => component.ChildContent, content));
+
+        Assert.Equal("true", cut.Find("[data-slot='menubar']").GetAttribute("data-loop"));
+        var attachCalls = JSInterop.Invocations.Where(invocation => invocation.Identifier.EndsWith("attachMenubar", StringComparison.Ordinal)).ToArray();
+        Assert.True(attachCalls.Length >= 2);
+        Assert.Equal(true, attachCalls[^1].Arguments[1]);
+    }
+
+    [Fact]
+    public void MenubarPointerContractDeduplicatesHoverSwitchesAndHonorsNonLoopingNavigation()
+    {
+        var script = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
+
+        Assert.Contains("event.pointerType === 'touch'", script, StringComparison.Ordinal);
+        Assert.Contains("target.contains(event.relatedTarget)", script, StringComparison.Ordinal);
+        Assert.Contains("state.hoveredTrigger === target", script, StringComparison.Ordinal);
+        Assert.Contains("state.loop ?", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MenubarSelectionItemsRemainInteractiveWithoutExternalStateBinding()
+    {
+        var cut = Render<ShadcnMenubar>(parameters => parameters.Add(component => component.Label, "View menu").AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnMenubarMenu>(0);
+            builder.AddAttribute(1, nameof(ShadcnMenubarMenu.Open), true);
+            builder.AddAttribute(2, nameof(ShadcnMenubarMenu.ChildContent), (RenderFragment)(menu =>
+            {
+                menu.OpenComponent<ShadcnMenubarTrigger>(0); menu.AddAttribute(1, nameof(ShadcnMenubarTrigger.ChildContent), (RenderFragment)(text => text.AddContent(0, "View"))); menu.CloseComponent();
+                menu.OpenComponent<ShadcnMenubarContent>(2); menu.AddAttribute(3, nameof(ShadcnMenubarContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnMenubarCheckboxItem>(0); content.AddAttribute(1, nameof(ShadcnMenubarCheckboxItem.Checked), true); content.AddAttribute(2, nameof(ShadcnMenubarCheckboxItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Status bar"))); content.CloseComponent();
+                    content.OpenComponent<ShadcnMenubarRadioGroup>(3); content.AddAttribute(4, nameof(ShadcnMenubarRadioGroup.Value), "comfortable"); content.AddAttribute(5, nameof(ShadcnMenubarRadioGroup.ChildContent), (RenderFragment)(group =>
+                    {
+                        group.OpenComponent<ShadcnMenubarRadioItem>(0); group.AddAttribute(1, nameof(ShadcnMenubarRadioItem.Value), "comfortable"); group.AddAttribute(2, nameof(ShadcnMenubarRadioItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Comfortable"))); group.CloseComponent();
+                        group.OpenComponent<ShadcnMenubarRadioItem>(3); group.AddAttribute(4, nameof(ShadcnMenubarRadioItem.Value), "compact"); group.AddAttribute(5, nameof(ShadcnMenubarRadioItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Compact"))); group.CloseComponent();
+                    })); content.CloseComponent();
+                })); menu.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var checkbox = cut.Find("[data-slot='menubar-checkbox-item']");
+        checkbox.Click();
+        Assert.Equal("false", cut.Find("[data-slot='menubar-checkbox-item']").GetAttribute("aria-checked"));
+
+        cut.FindAll("[data-slot='menubar-radio-item']")[1].Click();
+        var radios = cut.FindAll("[data-slot='menubar-radio-item']");
+        Assert.Equal("false", radios[0].GetAttribute("aria-checked"));
+        Assert.Equal("true", radios[1].GetAttribute("aria-checked"));
+    }
+
+    [Fact]
     public void CommandFiltersNormalizedThaiKeywordsAndSelectsEnabledItem()
     {
         var selected = new List<string>();
@@ -119,5 +205,12 @@ public sealed class MenubarCommandTests : BunitContext
     private static void AddCommandItem(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder, int sequence, string value, string textValue, IReadOnlyList<string> keywords, List<string> selected)
     {
         builder.OpenComponent<ShadcnCommandItem>(sequence); builder.AddAttribute(sequence + 1, nameof(ShadcnCommandItem.Value), value); builder.AddAttribute(sequence + 2, nameof(ShadcnCommandItem.Keywords), keywords); builder.AddAttribute(sequence + 3, nameof(ShadcnCommandItem.OnSelect), EventCallback.Factory.Create<string>(selected, selected.Add)); builder.AddAttribute(sequence + 4, nameof(ShadcnCommandItem.ChildContent), (RenderFragment)(text => text.AddContent(0, textValue))); builder.CloseComponent();
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx"))) directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

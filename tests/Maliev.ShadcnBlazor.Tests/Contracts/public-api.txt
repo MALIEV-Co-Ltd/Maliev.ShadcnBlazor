@@ -1288,8 +1288,10 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarCheckboxItem
   RenderFragment ChildContent
   Boolean CloseOnSelect
   Boolean Disabled
+  Boolean Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarContent
   ShadcnOverlayAlign Align
+  Double AlignOffset
   RenderFragment ChildContent
   ShadcnOverlaySide Side
   Double SideOffset
@@ -1320,6 +1322,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarRadioItem
   RenderFragment ChildContent
   Boolean CloseOnSelect
   Boolean Disabled
+  Boolean Inset
   String Value
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSeparator
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarShortcut
@@ -1329,10 +1332,15 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSub
   Boolean Open
   EventCallback<Boolean> OpenChanged
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSubContent
+  ShadcnOverlayAlign Align
+  Double AlignOffset
   RenderFragment ChildContent
+  ShadcnOverlaySide Side
+  Double SideOffset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSubTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  Boolean Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarTrigger
   RenderFragment ChildContent
   Boolean Disabled

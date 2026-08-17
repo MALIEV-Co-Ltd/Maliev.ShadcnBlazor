@@ -256,23 +256,38 @@ export function placeContextMenu(menu, padding = 8) {
 
 const menubars = new WeakMap();
 export function attachMenubar(menubar, loop = true) {
+    const existing = menubars.get(menubar);
+    if (existing) { existing.loop = loop; return; }
+    const state = { loop, hoveredTrigger: null };
     const triggers = () => [...menubar.querySelectorAll(':scope > [data-slot="menubar-trigger"], :scope > * > [data-slot="menubar-trigger"]')].filter(item => !item.disabled);
-    const focusAt = index => { const items = triggers(); if (!items.length) return; const target = loop ? (index + items.length) % items.length : Math.max(0, Math.min(index, items.length - 1)); items.forEach((item, itemIndex) => item.tabIndex = itemIndex === target ? 0 : -1); items[target].focus({ preventScroll: true }); };
+    const indexAt = (index, length) => state.loop ? (index + length) % length : Math.max(0, Math.min(index, length - 1));
+    const focusAt = index => { const items = triggers(); if (!items.length) return; const target = indexAt(index, items.length); items.forEach((item, itemIndex) => item.tabIndex = itemIndex === target ? 0 : -1); items[target].focus({ preventScroll: true }); };
     let buffer = '', timer = 0;
     const switchOpen = target => { const open = menubar.querySelector('[data-slot="menubar-trigger"][aria-expanded="true"]'); if (open && open !== target) target.click(); };
     const keydown = event => {
         const items = triggers(), activeTrigger = document.activeElement?.closest?.('[data-slot="menubar-trigger"]'), current = activeTrigger ? items.indexOf(activeTrigger) : items.findIndex(item => item.getAttribute('aria-expanded') === 'true'), rtl = getComputedStyle(menubar).direction === 'rtl';
-        if ((event.key === 'ArrowRight' && !rtl) || (event.key === 'ArrowLeft' && rtl)) { event.preventDefault(); const target = items[(current + 1 + items.length) % items.length]; switchOpen(target); requestAnimationFrame(() => requestAnimationFrame(() => target.focus({ preventScroll: true }))); }
-        else if ((event.key === 'ArrowLeft' && !rtl) || (event.key === 'ArrowRight' && rtl)) { event.preventDefault(); const target = items[(current - 1 + items.length) % items.length]; switchOpen(target); requestAnimationFrame(() => requestAnimationFrame(() => target.focus({ preventScroll: true }))); }
+        if (!items.length) return;
+        if ((event.key === 'ArrowRight' && !rtl) || (event.key === 'ArrowLeft' && rtl)) { event.preventDefault(); const target = items[indexAt(current < 0 ? 0 : current + 1, items.length)]; switchOpen(target); requestAnimationFrame(() => requestAnimationFrame(() => target.focus({ preventScroll: true }))); }
+        else if ((event.key === 'ArrowLeft' && !rtl) || (event.key === 'ArrowRight' && rtl)) { event.preventDefault(); const target = items[indexAt(current < 0 ? items.length - 1 : current - 1, items.length)]; switchOpen(target); requestAnimationFrame(() => requestAnimationFrame(() => target.focus({ preventScroll: true }))); }
         else if (event.key === 'Home') { event.preventDefault(); focusAt(0); }
         else if (event.key === 'End') { event.preventDefault(); focusAt(items.length - 1); }
         else if ((event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') && document.activeElement?.matches('[data-slot="menubar-trigger"]')) { event.preventDefault(); document.activeElement.click(); }
         else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) { clearTimeout(timer); const key = event.key.toLocaleLowerCase(); buffer += key; timer = setTimeout(() => buffer = '', 700); const search = [...buffer].every(value => value === key) ? key : buffer; const ordered = [...items.slice(Math.max(0,current+1)),...items.slice(0,Math.max(0,current+1))]; const match=ordered.find(item=>(item.dataset.textValue||item.textContent||'').trim().toLocaleLowerCase().startsWith(search)); if(match){event.preventDefault();focusAt(items.indexOf(match));} }
     };
-    const over = event => { const target = event.target.closest?.('[data-slot="menubar-trigger"]'); const open = menubar.querySelector('[data-slot="menubar-trigger"][aria-expanded="true"]'); if (target && open && open !== target && menubar.contains(target)) target.click(); };
-    menubar.addEventListener('keydown', keydown); menubar.addEventListener('pointerover', over); menubars.set(menubar, { keydown, over, clear:()=>clearTimeout(timer) });
+    const over = event => {
+        if (event.pointerType === 'touch') return;
+        const target = event.target.closest?.('[data-slot="menubar-trigger"]');
+        if (!target || !menubar.contains(target) || target.disabled || target.contains(event.relatedTarget)) return;
+        const open = menubar.querySelector('[data-slot="menubar-trigger"][aria-expanded="true"]');
+        if (!open || open === target) { state.hoveredTrigger = target; return; }
+        if (state.hoveredTrigger === target) return;
+        state.hoveredTrigger = target;
+        target.click();
+    };
+    const leave = event => { if (!menubar.contains(event.relatedTarget)) state.hoveredTrigger = null; };
+    menubar.addEventListener('keydown', keydown); menubar.addEventListener('pointerover', over); menubar.addEventListener('pointerleave', leave); Object.assign(state, { keydown, over, leave, clear:()=>clearTimeout(timer) }); menubars.set(menubar, state);
 }
-export function detachMenubar(menubar) { const value = menubars.get(menubar); if (!value) return; value.clear(); menubar.removeEventListener('keydown', value.keydown); menubar.removeEventListener('pointerover', value.over); menubars.delete(menubar); }
+export function detachMenubar(menubar) { const value = menubars.get(menubar); if (!value) return; value.clear(); menubar.removeEventListener('keydown', value.keydown); menubar.removeEventListener('pointerover', value.over); menubar.removeEventListener('pointerleave', value.leave); menubars.delete(menubar); }
 
 const commands = new WeakMap();
 export function attachCommand(command, loop = true) {
