@@ -271,16 +271,16 @@ public sealed class ComponentDossierTests : BunitContext
     {
         var cut = RenderPreview("direction");
 
-        Assert.Equal(["Inherited", "LeftToRight", "RightToLeft"], OptionValues(cut, "control-direction"));
+        Assert.Equal(["Inherited (RTL)", "Left to right (LTR)", "Right to left (RTL)"], OptionValues(cut, "control-direction"));
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("LeftToRight");
+        cut.Find("[data-testid='control-direction']").Change("Left to right (LTR)");
         Assert.Equal("ltr", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("RightToLeft");
+        cut.Find("[data-testid='control-direction']").Change("Right to left (RTL)");
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("Inherited");
+        cut.Find("[data-testid='control-direction']").Change("Inherited (RTL)");
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
     }
 

@@ -3,6 +3,7 @@ using Maliev.ShadcnBlazor.Components.Direction;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Layout;
 using Maliev.ShadcnBlazor.Components.Typography;
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -30,6 +31,7 @@ internal static class SemanticFoundationExamples
         ShadcnDirection? direction = null;
         RenderFragment preview = builder =>
         {
+            var isRightToLeft = direction is null or ShadcnDirection.RightToLeft;
             builder.OpenComponent<ShadcnDirectionProvider>(0);
             builder.AddAttribute(1, nameof(ShadcnDirectionProvider.Direction), ShadcnDirection.RightToLeft);
             builder.AddAttribute(2, nameof(ShadcnDirectionProvider.ChildContent), (RenderFragment)(content =>
@@ -37,8 +39,13 @@ internal static class SemanticFoundationExamples
                 content.OpenComponent<ShadcnDirectionProvider>(0);
                 content.AddAttribute(1, nameof(ShadcnDirectionProvider.Direction), direction);
                 content.AddAttribute(2, nameof(ShadcnDirectionProvider.AdditionalAttributes),
-                    new Dictionary<string, object> { ["data-testid"] = "direction-example" });
-                content.AddAttribute(3, nameof(ShadcnDirectionProvider.ChildContent), DirectionContent());
+                    new Dictionary<string, object>
+                    {
+                        ["data-testid"] = "direction-example",
+                        ["lang"] = isRightToLeft ? "ar" : "en",
+                        ["data-direction-mode"] = direction?.ToString() ?? "Inherited"
+                    });
+                content.AddAttribute(3, nameof(ShadcnDirectionProvider.ChildContent), DirectionContent(isRightToLeft));
                 content.CloseComponent();
             }));
             builder.CloseComponent();
@@ -47,17 +54,24 @@ internal static class SemanticFoundationExamples
             "direction",
             "Direction",
             ComponentParameterControlKind.Select,
-            "Inherited",
-            ["Inherited", "LeftToRight", "RightToLeft"],
-            value => direction = value == "Inherited" ? null : Enum.Parse<ShadcnDirection>(value));
-        return Example(
+            "Inherited (RTL)",
+            ["Inherited (RTL)", "Left to right (LTR)", "Right to left (RTL)"],
+            value => direction = value switch
+            {
+                "Inherited (RTL)" => null,
+                "Left to right (LTR)" => ShadcnDirection.LeftToRight,
+                "Right to left (RTL)" => ShadcnDirection.RightToLeft,
+                _ => direction
+            });
+        var example = Example(
             "direction",
             "Nested reading direction",
-            "Preview a localized account form while overriding the direction for one component subtree.",
-            "<ShadcnDirectionProvider Direction=\"ShadcnDirection.RightToLeft\">\n    <ShadcnDirectionProvider Direction=\"null\">\n        مرحبا — inherited RTL preview\n    </ShadcnDirectionProvider>\n</ShadcnDirectionProvider>",
+            "Switch a localized production-workspace form between inherited RTL, explicit LTR, and explicit RTL reading order.",
+            DirectionSource(direction),
             preview,
             [control],
-            ["inherited", "ltr", "rtl"]);
+            ["inherited", "ltr", "rtl", "form", "responsive"]);
+        return example with { RazorSourceProvider = () => DirectionSource(direction) };
     }
 
     private static ComponentExampleDefinition AspectRatio()
@@ -431,19 +445,83 @@ internal static class SemanticFoundationExamples
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
 
-    private static RenderFragment DirectionContent() => builder =>
+    private static RenderFragment DirectionContent(bool isRightToLeft) => builder =>
     {
-        builder.OpenElement(0, "section"); builder.AddAttribute(1, "class", "showcase-direction-form");
-        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-direction-form__header"); builder.OpenElement(4, "div"); builder.OpenElement(5, "strong"); builder.AddContent(6, "إنشاء حساب"); builder.CloseElement(); builder.OpenElement(7, "span"); builder.AddContent(8, "Create a workspace account"); builder.CloseElement(); builder.CloseElement(); builder.OpenElement(9, "span"); builder.AddContent(10, "الخطوة 1 من 3"); builder.CloseElement(); builder.CloseElement();
-        AddNativeField(builder, 20, "البريد الإلكتروني", "you@example.com", "سيُستخدم هذا البريد لإشعارات الإنتاج.");
-        AddNativeField(builder, 30, "اسم المشروع", "Quotation workspace", "اختر اسماً يسهل على فريقك تذكره.");
-        builder.OpenElement(40, "div"); builder.AddAttribute(41, "class", "showcase-direction-form__actions"); builder.OpenElement(42, "button"); builder.AddAttribute(43, "type", "button"); builder.AddContent(44, "التالي"); builder.CloseElement(); builder.CloseElement();
+        var title = isRightToLeft ? "إنشاء مساحة عمل للإنتاج" : "Create a production workspace";
+        var description = isRightToLeft ? "تابع عروض الأسعار وملفات الإنتاج مع فريقك." : "Keep quotations and production files together for your team.";
+        var status = isRightToLeft ? "العربية · من اليمين إلى اليسار" : "English · Left to right";
+        var emailLabel = isRightToLeft ? "البريد الإلكتروني" : "Work email";
+        var emailHelp = isRightToLeft ? "سنرسل تحديثات الإنتاج إلى هذا العنوان." : "Production updates will be sent to this address.";
+        var workspaceLabel = isRightToLeft ? "اسم مساحة العمل" : "Workspace name";
+        var workspaceHelp = isRightToLeft ? "استخدم اسماً يسهل على فريقك التعرف عليه." : "Choose a name your team will recognize.";
+        var action = isRightToLeft ? "إنشاء مساحة العمل" : "Create workspace";
+
+        builder.OpenElement(0, "form"); builder.AddAttribute(1, "class", "showcase-direction-form"); builder.AddAttribute(2, "aria-labelledby", "direction-form-title");
+        builder.OpenElement(3, "div"); builder.AddAttribute(4, "class", "showcase-direction-form__header"); builder.OpenElement(5, "div"); builder.OpenElement(6, "strong"); builder.AddAttribute(7, "id", "direction-form-title"); builder.AddContent(8, title); builder.CloseElement(); builder.OpenElement(9, "span"); builder.AddContent(10, description); builder.CloseElement(); builder.CloseElement(); builder.OpenElement(11, "span"); builder.AddContent(12, status); builder.CloseElement(); builder.CloseElement();
+        AddDirectionField(builder, 20, "direction-email", emailLabel, "natee@example.com", emailHelp, "email");
+        AddDirectionField(builder, 40, "direction-workspace", workspaceLabel, "Bangkok Production", workspaceHelp);
+        builder.OpenElement(60, "div"); builder.AddAttribute(61, "class", "showcase-direction-form__actions");
+        builder.OpenComponent<ShadcnButton>(62); builder.AddAttribute(63, nameof(ShadcnButton.ButtonType), ShadcnButtonType.Button); builder.AddAttribute(64, nameof(ShadcnButton.ChildContent), Text(action)); builder.CloseComponent();
+        builder.CloseElement();
         builder.CloseElement();
     };
 
-    private static void AddNativeField(RenderTreeBuilder builder, int sequence, string label, string value, string description)
+    private static void AddDirectionField(RenderTreeBuilder builder, int sequence, string id, string label, string value, string description, string type = "text")
     {
-        builder.OpenElement(sequence, "label"); builder.AddAttribute(sequence + 1, "class", "showcase-direction-field"); builder.OpenElement(sequence + 2, "span"); builder.AddContent(sequence + 3, label); builder.CloseElement(); builder.OpenElement(sequence + 4, "input"); builder.AddAttribute(sequence + 5, "value", value); builder.CloseElement(); builder.OpenElement(sequence + 6, "small"); builder.AddContent(sequence + 7, description); builder.CloseElement(); builder.CloseElement();
+        var helpId = $"{id}-help";
+        builder.OpenElement(sequence, "div"); builder.AddAttribute(sequence + 1, "class", "showcase-direction-field");
+        builder.OpenComponent<ShadcnLabel>(sequence + 2); builder.AddAttribute(sequence + 3, nameof(ShadcnLabel.For), id); builder.AddAttribute(sequence + 4, nameof(ShadcnLabel.ChildContent), Text(label)); builder.CloseComponent();
+        builder.OpenComponent<ShadcnInput<string>>(sequence + 5); builder.AddAttribute(sequence + 6, nameof(ShadcnInput<string>.AdditionalAttributes), new Dictionary<string, object> { ["id"] = id, ["aria-describedby"] = helpId }); builder.AddAttribute(sequence + 7, nameof(ShadcnInput<string>.Type), type); builder.AddAttribute(sequence + 8, nameof(ShadcnInput<string>.Value), value); builder.AddAttribute(sequence + 9, nameof(ShadcnInput<string>.AutoComplete), type == "email" ? "email" : "organization"); builder.CloseComponent();
+        builder.OpenElement(sequence + 10, "small"); builder.AddAttribute(sequence + 11, "id", helpId); builder.AddContent(sequence + 12, description); builder.CloseElement();
+        builder.CloseElement();
+    }
+
+    private static string DirectionSource(ShadcnDirection? direction)
+    {
+        var isRightToLeft = direction is null or ShadcnDirection.RightToLeft;
+        var directionValue = direction is null ? "null" : $"ShadcnDirection.{direction}";
+        var language = isRightToLeft ? "ar" : "en";
+        var title = isRightToLeft ? "إنشاء مساحة عمل للإنتاج" : "Create a production workspace";
+        var description = isRightToLeft ? "تابع عروض الأسعار وملفات الإنتاج مع فريقك." : "Keep quotations and production files together for your team.";
+        var status = isRightToLeft ? "العربية · من اليمين إلى اليسار" : "English · Left to right";
+        var emailLabel = isRightToLeft ? "البريد الإلكتروني" : "Work email";
+        var emailHelp = isRightToLeft ? "سنرسل تحديثات الإنتاج إلى هذا العنوان." : "Production updates will be sent to this address.";
+        var workspaceLabel = isRightToLeft ? "اسم مساحة العمل" : "Workspace name";
+        var workspaceHelp = isRightToLeft ? "استخدم اسماً يسهل على فريقك التعرف عليه." : "Choose a name your team will recognize.";
+        var action = isRightToLeft ? "إنشاء مساحة العمل" : "Create workspace";
+
+        return $"""
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Direction
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<ShadcnDirectionProvider Direction="ShadcnDirection.RightToLeft">
+    <ShadcnDirectionProvider Direction="{directionValue}" lang="{language}">
+        <form class="showcase-direction-form" aria-labelledby="direction-form-title">
+            <div class="showcase-direction-form__header">
+                <div>
+                    <strong id="direction-form-title">{title}</strong>
+                    <span>{description}</span>
+                </div>
+                <span>{status}</span>
+            </div>
+            <div class="showcase-direction-field">
+                <ShadcnLabel For="direction-email">{emailLabel}</ShadcnLabel>
+                <ShadcnInput<string> Id="direction-email" Type="email" Value="natee@example.com" AutoComplete="email" aria-describedby="direction-email-help" />
+                <small id="direction-email-help">{emailHelp}</small>
+            </div>
+            <div class="showcase-direction-field">
+                <ShadcnLabel For="direction-workspace">{workspaceLabel}</ShadcnLabel>
+                <ShadcnInput<string> Id="direction-workspace" Value="Bangkok Production" AutoComplete="organization" aria-describedby="direction-workspace-help" />
+                <small id="direction-workspace-help">{workspaceHelp}</small>
+            </div>
+            <div class="showcase-direction-form__actions">
+                <ShadcnButton>{action}</ShadcnButton>
+            </div>
+        </form>
+    </ShadcnDirectionProvider>
+</ShadcnDirectionProvider>
+""";
     }
 
     private static RenderFragment AspectRatioContent(string ratioLabel) => builder =>
