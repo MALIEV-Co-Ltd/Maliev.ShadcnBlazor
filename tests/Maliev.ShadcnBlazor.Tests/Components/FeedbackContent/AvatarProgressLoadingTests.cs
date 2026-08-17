@@ -74,7 +74,26 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         cut.Find("img").TriggerEvent("onerror", new Microsoft.AspNetCore.Components.Web.ErrorEventArgs());
         Assert.Equal(1, failed);
         Assert.Equal("visible", cut.Find("[data-slot='avatar-fallback']").GetAttribute("data-state"));
+        Assert.Equal("error", cut.Find("[data-slot='avatar-image']").GetAttribute("data-state"));
         Assert.NotNull(cut.Find("[data-slot='avatar-image']"));
+    }
+
+    [Fact]
+    public void AvatarImageContractFillsTheCircularFrameAndPresenceUsesSuccessColor()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(".shadcn-avatar-image { display: block;", css, StringComparison.Ordinal);
+        Assert.Contains("object-fit: cover", css, StringComparison.Ordinal);
+        Assert.Contains("object-position: center", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-success", css, StringComparison.Ordinal);
+        Assert.Contains("inset-inline-end: 0", css, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-start: calc(-1 * var(--shadcn-avatar-overlap))", css, StringComparison.Ordinal);
+
+        var showcaseCss = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains("@media (max-width: 36rem)", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains(".showcase-avatar-gallery { grid-template-columns: 1fr; }", showcaseCss, StringComparison.Ordinal);
     }
 
     [Fact]

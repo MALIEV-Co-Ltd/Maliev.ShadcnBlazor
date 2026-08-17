@@ -1,5 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<img @key="Source" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-image")" style="@MergeStyle(null)" data-slot="avatar-image" data-state="@(Context?.ImageLoaded == true ? "loaded" : "loading")" src="@Source" alt="@Alt" @onload="HandleLoadAsync" @onerror="HandleErrorAsync" />
+<img @key="Source" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-image")" style="@MergeStyle(null)" data-slot="avatar-image" data-state="@(Context?.ImageState ?? "loading")" src="@Source" alt="@Alt" @onload="HandleLoadAsync" @onerror="HandleErrorAsync" />
 @code {
     [CascadingParameter] private ShadcnAvatarContext? Context { get; set; }
     [Parameter, EditorRequired] public string Source { get; set; } = string.Empty;
