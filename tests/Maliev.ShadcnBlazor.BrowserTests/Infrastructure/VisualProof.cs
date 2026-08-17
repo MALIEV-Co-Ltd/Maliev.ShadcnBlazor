@@ -28,6 +28,24 @@ internal static class ComponentCatalogProof
             .Order(StringComparer.Ordinal)
             .ToArray();
     }
+
+    public static IReadOnlyList<string> SelectRequested(IReadOnlyList<string> completed) =>
+        SelectRequested(completed, Environment.GetEnvironmentVariable("SHADCN_VISUAL_PROOF_SLUGS"));
+
+    internal static IReadOnlyList<string> SelectRequested(IReadOnlyList<string> completed, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return completed;
+
+        var requested = value
+            .Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.Ordinal);
+        var unknown = requested.Except(completed, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+        if (unknown.Length > 0)
+            throw new InvalidOperationException($"Unknown component visual-proof slug(s): {string.Join(", ", unknown)}.");
+
+        return completed.Where(requested.Contains).ToArray();
+    }
 }
 
 internal static class VisualProof

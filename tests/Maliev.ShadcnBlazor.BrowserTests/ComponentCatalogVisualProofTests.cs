@@ -30,7 +30,7 @@ public sealed class ComponentCatalogVisualProofTests(
     public async Task EveryCompletedCatalogDossierMatchesReviewedVisualProof()
     {
         var root = VisualProof.FindRoot();
-        var slugs = ComponentCatalogProof.LoadCompleted(root);
+        var slugs = ComponentCatalogProof.SelectRequested(ComponentCatalogProof.LoadCompleted(root));
         var errors = new List<string>();
 
         await CaptureModeAsync(slugs, VisualProofMode.DesktopLight, errors);
@@ -43,7 +43,7 @@ public sealed class ComponentCatalogVisualProofTests(
     public async Task EveryCompletedCatalogDossierRendersItsPrimaryRclComponent()
     {
         var root = VisualProof.FindRoot();
-        var slugs = ComponentCatalogProof.LoadCompleted(root);
+        var slugs = ComponentCatalogProof.SelectRequested(ComponentCatalogProof.LoadCompleted(root));
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
             ViewportSize = new() { Width = 1280, Height = 900 },

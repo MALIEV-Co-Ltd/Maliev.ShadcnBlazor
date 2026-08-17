@@ -69,6 +69,16 @@ dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTe
 Remove-Item Env:SHADCN_UPDATE_VISUAL_BASELINES
 ```
 
+During local component work, set `SHADCN_VISUAL_PROOF_SLUGS` to a comma-separated
+list of catalog slugs to capture and compare only those dossiers. CI leaves this
+unset and always reviews the complete catalog.
+
+```powershell
+$env:SHADCN_VISUAL_PROOF_SLUGS='date-picker,data-table'
+dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --filter ComponentCatalogVisualProofTests
+Remove-Item Env:SHADCN_VISUAL_PROOF_SLUGS
+```
+
 Inspect every changed image at its original resolution, rerun without the
 environment variable, and commit the reviewed images separately. Pull-request
 automation never enables the update variable and cannot approve visual changes.
