@@ -4582,7 +4582,7 @@ a {
 
 .shadcn-table.showcase-table {
     inline-size: max-content;
-    min-inline-size: 42rem;
+    min-inline-size: 36rem;
     table-layout: auto;
 }
 
