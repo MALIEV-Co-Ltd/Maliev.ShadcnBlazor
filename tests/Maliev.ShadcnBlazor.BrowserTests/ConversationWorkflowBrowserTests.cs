@@ -173,6 +173,10 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
             var tag = code.Locator(".shadcn-code-token-tag").First;
             await Assertions.Expect(tag).ToBeVisibleAsync();
             Assert.Equal(expectedTagColor, await tag.EvaluateAsync<string>("element => getComputedStyle(element).color"));
+
+            var typeTokenText = await code.Locator(".shadcn-code-token-type").AllTextContentsAsync();
+            Assert.DoesNotContain("Hey", typeTokenText);
+            Assert.DoesNotContain("I", typeTokenText);
         }
     }
 

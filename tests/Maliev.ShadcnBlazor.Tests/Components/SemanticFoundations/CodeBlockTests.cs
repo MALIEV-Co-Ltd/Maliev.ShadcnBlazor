@@ -109,6 +109,21 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
+    public void LeavesRazorMarkupTextInTheEditorForegroundPalette()
+    {
+        const string source = "<ShadcnBubbleContent>Hey there! I can ship it.</ShadcnBubbleContent>";
+
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, source)
+            .Add(component => component.Language, "razor"));
+
+        var typeTokens = cut.FindAll(".shadcn-code-token-type").Select(element => element.TextContent).ToArray();
+        Assert.DoesNotContain("Hey", typeTokens);
+        Assert.DoesNotContain("I", typeTokens);
+        Assert.Contains(cut.FindAll(".shadcn-code-token-tag"), element => element.TextContent == "ShadcnBubbleContent");
+    }
+
+    [Fact]
     public void UsesOneEditorPaletteAcrossPackageAndShowcaseStyles()
     {
         var root = FindRoot();
