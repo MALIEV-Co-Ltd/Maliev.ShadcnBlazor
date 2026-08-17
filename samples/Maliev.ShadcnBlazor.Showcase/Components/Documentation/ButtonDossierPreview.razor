@@ -3,7 +3,7 @@
 <div class="showcase-button-dossier" data-testid="button-dossier-preview">
     <header class="showcase-button-dossier__intro">
         <div>
-            <span class="showcase-button-dossier__eyebrow">Production order #4189</span>
+            <h3>Production order #4189</h3>
             <p>Use the same action vocabulary across a review workflow: save, remove, inspect, and reveal more.</p>
         </div>
         <span class="showcase-button-dossier__context">Revision C · 3 files ready</span>
@@ -14,8 +14,20 @@
             @foreach (var variant in Enum.GetValues<ShadcnButtonVariant>())
             {
                 <div class="showcase-button-dossier__sample">
-                    <ShadcnButton Variant="variant" Disabled="Disabled" PointerCursor="true" OnClick="@(args => Announce(ButtonLabel(variant)))" AdditionalAttributes="Attributes(variant.ToString())">@ButtonLabel(variant)</ShadcnButton>
+                    <ShadcnButton Variant="variant" Disabled="Disabled" PointerCursor="true" Href="@(variant == ShadcnButtonVariant.Link ? "#usage" : null)" OnClick="@(args => Announce(ButtonLabel(variant)))" AdditionalAttributes="Attributes(variant.ToString())">@ButtonLabel(variant)</ShadcnButton>
                     <span>@VariantLabel(variant)</span>
+                </div>
+            }
+        </div>
+    </section>
+    <section class="showcase-button-dossier__section" aria-labelledby="button-icon-sizes-title">
+        <h3 id="button-icon-sizes-title">Icon sizes</h3>
+        <div class="showcase-button-dossier__icon-sizes">
+            @foreach (var size in new[] { ShadcnButtonSize.IconExtraSmall, ShadcnButtonSize.IconSmall, ShadcnButtonSize.Icon, ShadcnButtonSize.IconLarge })
+            {
+                <div class="showcase-button-dossier__sample">
+                    <ShadcnButton Size="size" Variant="ShadcnButtonVariant.Outline" Disabled="Disabled" PointerCursor="true" LeadingIcon="SaveIcon" OnClick="@(args => Announce($"Save drawing ({SizeLabel(size)})"))" AdditionalAttributes="IconAttributes(size)" />
+                    <span>@SizeLabel(size)</span>
                 </div>
             }
         </div>
@@ -42,6 +54,14 @@
     [Parameter] public bool Disabled { get; set; }
 
     private string? LastAction { get; set; }
+
+    private static RenderFragment SaveIcon => builder => builder.AddMarkupContent(0, """
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path>
+            <path d="M17 21v-8H7v8"></path>
+            <path d="M7 3v5h8"></path>
+        </svg>
+        """);
 
     private void Announce(string action) => LastAction = $"{action} pressed";
 
@@ -70,6 +90,10 @@
         ShadcnButtonSize.Small => "Small",
         ShadcnButtonSize.Default => "Default",
         ShadcnButtonSize.Large => "Large",
+        ShadcnButtonSize.IconExtraSmall => "Icon extra small",
+        ShadcnButtonSize.IconSmall => "Icon small",
+        ShadcnButtonSize.Icon => "Icon default",
+        ShadcnButtonSize.IconLarge => "Icon large",
         _ => size.ToString()
     };
 
@@ -77,5 +101,11 @@
     {
         ["data-testid"] = $"button-variant-{variant.ToLowerInvariant()}",
         ["aria-label"] = ButtonLabel(Enum.Parse<ShadcnButtonVariant>(variant))
+    };
+
+    private static IReadOnlyDictionary<string, object> IconAttributes(ShadcnButtonSize size) => new Dictionary<string, object>
+    {
+        ["data-testid"] = $"button-icon-{size.ToString().ToLowerInvariant()}",
+        ["aria-label"] = $"Save drawing ({SizeLabel(size)})"
     };
 }
