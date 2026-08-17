@@ -89,6 +89,49 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
+    public void KeepsApostrophesInRazorTextOutOfFollowingMarkup()
+    {
+        const string source = "<ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>\n<ShadcnBubbleContent>Still markup.</ShadcnBubbleContent>";
+
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, source)
+            .Add(component => component.Language, "razor"));
+
+        var strings = cut.FindAll(".shadcn-code-token-string").Select(element => element.TextContent).ToArray();
+        Assert.DoesNotContain(strings, value => value.Contains("what's", StringComparison.Ordinal));
+        Assert.Equal(4, cut.FindAll(".shadcn-code-token-tag").Count);
+
+        var razorCode = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, "@code { var label = \"value\"; }")
+            .Add(component => component.Language, "razor"));
+
+        Assert.Contains(razorCode.FindAll(".shadcn-code-token-string"), element => element.TextContent == "\"value\"");
+    }
+
+    [Fact]
+    public void UsesOneEditorPaletteAcrossPackageAndShowcaseStyles()
+    {
+        var root = FindRoot();
+        var baseCss = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-base.css"));
+        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        var darkStart = baseCss.IndexOf("\n[data-shadcn-theme=\"dark\"],", StringComparison.Ordinal);
+        if (darkStart >= 0) darkStart++;
+
+        Assert.True(darkStart > 0, "The dark theme token scope is required.");
+        foreach (var token in new[] { "foreground", "comment", "tag", "string", "keyword", "type", "number", "literal", "attribute", "method", "property", "directive", "operator", "punctuation" })
+        {
+            var declaration = $"--shadcn-code-token-{token}:";
+            Assert.Contains(declaration, baseCss[..darkStart], StringComparison.Ordinal);
+            Assert.Contains(declaration, baseCss[darkStart..], StringComparison.Ordinal);
+            Assert.Contains($"var(--shadcn-code-token-{token})", showcaseCss, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotContain("#8250df", showcaseCss, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("#cf222e", showcaseCss, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("#0a6e3d", showcaseCss, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task CopyFeedbackReturnsToTheCopyIconForSubsequentCopies()
     {
         const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";
@@ -111,5 +154,16 @@ public sealed class CodeBlockTests : BunitContext
 
         cut.Find("[data-testid='copy-source']").Click();
         cut.WaitForAssertion(() => Assert.Equal("true", cut.Find("[data-testid='copy-source']").GetAttribute("data-copied")));
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

@@ -65,6 +65,8 @@ public sealed class WorkflowSecurityTests
     {
         var pages = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "pages.yml"));
 
+        Assert.Contains("release:\n    types: [published]", pages.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Contains("ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}", pages, StringComparison.Ordinal);
         Assert.Contains("permissions:\n  contents: read", pages.ReplaceLineEndings("\n"), StringComparison.Ordinal);
         Assert.Contains("pages: write", pages, StringComparison.Ordinal);
         Assert.Contains("id-token: write", pages, StringComparison.Ordinal);

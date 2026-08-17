@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-08-17
+
+### Fixed
+
+- Restored the editor-style C# and Razor syntax palette across package and
+  Showcase code blocks.
+- Triggered the GitHub Pages Showcase deployment from published releases and
+  pinned release builds to the exact published tag so the docs stay in sync
+  with the NuGet package.
+
 ## [1.0.8] - 2026-08-17
 
 ### Fixed
@@ -90,7 +100,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.9...HEAD
+[1.0.9]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.9
 [1.0.8]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.8
 [1.0.7]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.7
 [1.0.6]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.6

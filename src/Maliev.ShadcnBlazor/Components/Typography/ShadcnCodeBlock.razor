@@ -164,6 +164,7 @@
             || language.Equals("markup", StringComparison.OrdinalIgnoreCase);
         var output = new System.Text.StringBuilder(source.Length + 128);
         var index = 0;
+        var razorCodeDepth = 0;
         while (index < source.Length)
         {
             if (markupLanguage && source[index] == '<' && source.AsSpan(index).StartsWith("<!--", StringComparison.Ordinal))
@@ -189,7 +190,10 @@
                 end = end < 0 ? source.Length : end + 2;
                 AppendToken(output, "comment", source[index..end]); index = end; continue;
             }
-            if (source[index] is '"' or '\'')
+            // In Razor/HTML, apostrophes and quotes in rendered text are not
+            // strings. Only parse quotes in C# mode (or inside a brace-delimited
+            // Razor expression); attribute values are handled by AppendMarkupTag.
+            if (source[index] is '"' or '\'' && (!markupLanguage || razorCodeDepth > 0))
             {
                 var quote = source[index]; var end = index + 1;
                 while (end < source.Length) { if (source[end] == '\\') { end += Math.Min(2, source.Length - end); continue; } if (source[end] == quote) { end++; break; } end++; }
@@ -225,11 +229,21 @@
             if (IsOperator(source[index]))
             {
                 var end = index + 1;
-                while (end < source.Length && IsOperator(source[end])) end++;
+                while (end < source.Length && IsOperator(source[end]))
+                {
+                    // A question mark immediately followed by a closing Razor
+                    // tag is text plus markup, not one operator token. Keep the
+                    // opening angle bracket available for the markup parser.
+                    if (markupLanguage && source[end] == '<' && end + 1 < source.Length
+                        && (char.IsLetter(source[end + 1]) || source[end + 1] == '/')) break;
+                    end++;
+                }
                 AppendToken(output, "operator", source[index..end]); index = end; continue;
             }
             if (IsPunctuation(source[index]))
             {
+                if (markupLanguage && source[index] == '{') razorCodeDepth++;
+                else if (markupLanguage && source[index] == '}' && razorCodeDepth > 0) razorCodeDepth--;
                 AppendToken(output, "punctuation", source[index].ToString()); index++; continue;
             }
             output.Append(System.Net.WebUtility.HtmlEncode(source[index].ToString())); index++;
