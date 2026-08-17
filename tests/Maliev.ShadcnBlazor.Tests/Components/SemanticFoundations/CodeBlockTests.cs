@@ -126,9 +126,35 @@ public sealed class CodeBlockTests : BunitContext
             Assert.Contains($"var(--shadcn-code-token-{token})", showcaseCss, StringComparison.Ordinal);
         }
 
+        // The RCL emits the canonical shadcn-code-token-* classes. The
+        // Showcase also keeps legacy aliases for compatibility, but must not
+        // rely on those aliases for its editor palette.
+        foreach (var token in new[] { "comment", "tag", "string", "keyword", "type", "number", "literal", "attribute", "method", "property", "directive", "operator", "punctuation" })
+        {
+            Assert.Contains($".component-code pre code .shadcn-code-token-{token}", showcaseCss, StringComparison.Ordinal);
+        }
+
         Assert.DoesNotContain("#8250df", showcaseCss, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#cf222e", showcaseCss, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#0a6e3d", showcaseCss, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void UsesQuietCopyControlAndTransientCopiedFeedbackStyles()
+    {
+        var root = FindRoot();
+        var baseCss = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-base.css"));
+        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+
+        Assert.Contains(".shadcn-code-block-copy {", baseCss, StringComparison.Ordinal);
+        Assert.Contains("opacity: 0", baseCss, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-code-block-copy[data-copied=\"true\"]", baseCss, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-code-block-copy-feedback", baseCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("shadcn-code-block-copy-fade", baseCss, StringComparison.Ordinal);
+
+        Assert.Contains(".component-code__surface .shadcn-code-block-copy-feedback", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains("@keyframes component-code-copied-feedback", showcaseCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("component-code-copied-fade", showcaseCss, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -140,20 +166,34 @@ public sealed class CodeBlockTests : BunitContext
         var cut = Render<ShadcnCodeBlock>(parameters => parameters.Add(component => component.Source, source));
         var copy = cut.Find("[data-testid='copy-source']");
 
+        Assert.Equal("idle", copy.GetAttribute("data-copy-state"));
+        Assert.Null(copy.QuerySelector(".shadcn-code-block-copy-feedback"));
         copy.Click();
-        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find("[data-testid='copy-source']").GetAttribute("data-copied")));
+        cut.WaitForAssertion(() =>
+        {
+            var copied = cut.Find("[data-testid='copy-source']");
+            Assert.Equal("true", copied.GetAttribute("data-copied"));
+            Assert.Equal("copied", copied.GetAttribute("data-copy-state"));
+            Assert.NotNull(copied.QuerySelector(".shadcn-code-block-copy-feedback"));
+        });
 
         await Task.Delay(2100);
         cut.WaitForAssertion(() =>
         {
             var reset = cut.Find("[data-testid='copy-source']");
             Assert.Equal("false", reset.GetAttribute("data-copied"));
+            Assert.Equal("idle", reset.GetAttribute("data-copy-state"));
             Assert.Null(reset.QuerySelector(".shadcn-code-block-copy-status"));
             Assert.NotNull(reset.QuerySelector("svg rect"));
         });
 
         cut.Find("[data-testid='copy-source']").Click();
-        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find("[data-testid='copy-source']").GetAttribute("data-copied")));
+        cut.WaitForAssertion(() =>
+        {
+            var copied = cut.Find("[data-testid='copy-source']");
+            Assert.Equal("true", copied.GetAttribute("data-copied"));
+            Assert.Equal("copied", copied.GetAttribute("data-copy-state"));
+        });
     }
 
     private static string FindRoot()

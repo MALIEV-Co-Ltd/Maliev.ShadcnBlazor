@@ -96,10 +96,12 @@ internal static class ActionSelectionExamples
             }));
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnButtonGroup Orientation=\"{orientation}\" aria-label=\"Drawing actions\">\n    <ShadcnButtonGroupText>Status</ShadcnButtonGroupText>\n    <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Archive</ShadcnButton>\n    <ShadcnButtonGroupSeparator />\n    <ShadcnButtonGroup>\n        <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Preview</ShadcnButton>\n        <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Report</ShadcnButton>\n    </ShadcnButtonGroup>\n</ShadcnButtonGroup>";
         return Example("button-group", "Grouped actions", "Compose related action buttons with logical horizontal or vertical geometry.",
-            "<ShadcnButtonGroup aria-label=\"Drawing actions\">\n    <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Archive</ShadcnButton>\n    <ShadcnButtonGroupSeparator />\n    <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Report</ShadcnButton>\n</ShadcnButtonGroup>", preview,
+            Source(), preview,
             [Select("button-group-orientation", "Orientation", orientation, value => orientation = value)],
-            ["horizontal", "vertical", "separator", "nested", "text"]);
+            ["horizontal", "vertical", "separator", "nested", "text"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Checkbox()

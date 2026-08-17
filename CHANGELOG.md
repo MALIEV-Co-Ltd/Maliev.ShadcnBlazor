@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-08-17
+
+- Restore the full light/dark Razor and C# editor palette in documentation code blocks.
+- Make copy feedback discoverable, transient, and repeatable without leaving a persistent outline.
+- Polish conversation, forms, data-display, feedback, and action examples with interactive state, responsive sizing, and source that matches each preview.
+- Refresh reviewed visual proof for the centered date picker, compact input/OTP cards, radio/select controls, table layout, and related annotation fixes.
+
 ## [1.0.9] - 2026-08-17
 
 ### Fixed
@@ -100,7 +107,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.9...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.10
 [1.0.9]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.9
 [1.0.8]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.8
 [1.0.7]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.7

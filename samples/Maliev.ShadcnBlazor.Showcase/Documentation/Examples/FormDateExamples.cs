@@ -1,4 +1,5 @@
 using System.Globalization;
+using Maliev.ShadcnBlazor.Components.Content;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -66,8 +67,30 @@ internal static class FormDateExamples
     private static ComponentExampleDefinition InputGroup()
     {
         var invalid = false; var alignment = ShadcnInputGroupAlignment.InlineStart; var amount = 1250m;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnInputGroup>(0); b.AddAttribute(1, "AdditionalAttributes", invalid ? new Dictionary<string, object> { ["data-testid"] = "forms-dossier-input-group", ["aria-label"] = "Budget", ["aria-invalid"] = "true" } : Attr("forms-dossier-input-group", "Budget")); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnInputGroupAddon>(0); c.AddAttribute(1, "Alignment", alignment); c.AddAttribute(2, "ChildContent", Text("THB")); c.CloseComponent(); c.OpenComponent<ShadcnInput<decimal>>(10); c.AddAttribute(11, "Value", amount); c.AddAttribute(12, "ValueChanged", EventCallback.Factory.Create<decimal>(new object(), next => amount = next)); c.AddAttribute(13, "Type", "number"); c.AddAttribute(14, "AdditionalAttributes", new Dictionary<string, object> { ["aria-label"] = "Budget" }); c.CloseComponent(); })); b.CloseComponent(); };
-        string Source() => $"<ShadcnInputGroup>\n    <ShadcnInputGroupAddon Alignment=\"{alignment}\">THB</ShadcnInputGroupAddon>\n    <ShadcnInput TValue=\"decimal\" Type=\"number\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />\n</ShadcnInputGroup>";
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-input-group-dossier");
+            b.OpenComponent<ShadcnInputGroup>(2);
+            b.AddAttribute(3, "AdditionalAttributes", invalid ? new Dictionary<string, object> { ["data-testid"] = "forms-dossier-input-group", ["aria-label"] = "Budget", ["aria-invalid"] = "true" } : Attr("forms-dossier-input-group", "Budget"));
+            b.AddAttribute(4, "ChildContent", (RenderFragment)(c =>
+            {
+                c.OpenComponent<ShadcnInputGroupAddon>(0);
+                c.AddAttribute(1, "Alignment", alignment);
+                c.AddAttribute(2, "ChildContent", Text("THB"));
+                c.CloseComponent();
+                c.OpenComponent<ShadcnInput<decimal>>(10);
+                c.AddAttribute(11, "Value", amount);
+                c.AddAttribute(12, "ValueChanged", EventCallback.Factory.Create<decimal>(new object(), next => amount = next));
+                c.AddAttribute(13, "Type", "number");
+                c.AddAttribute(14, "Invalid", invalid);
+                c.AddAttribute(15, "AdditionalAttributes", new Dictionary<string, object> { ["aria-label"] = "Budget" });
+                c.CloseComponent();
+            }));
+            b.CloseComponent();
+            b.CloseElement();
+        };
+        string Source() => $"<ShadcnInputGroup>\n    <ShadcnInputGroupAddon Alignment=\"{alignment}\">THB</ShadcnInputGroupAddon>\n    <ShadcnInput TValue=\"decimal\" @bind-Value=\"Budget\" Type=\"number\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Budget\" />\n</ShadcnInputGroup>";
         return Example("input-group", "Input group composition", "Move semantic text and actions across logical addon positions.", Source(), preview,
             [
                 Toggle("input-group-invalid", "Invalid", v => invalid = v),
@@ -78,20 +101,72 @@ internal static class FormDateExamples
     private static ComponentExampleDefinition InputOtp()
     {
         var invalid = false; var numeric = true; var code = "123";
-        RenderFragment preview = b => { b.OpenComponent<ShadcnInputOtp>(0); b.AddAttribute(1, "Value", code); b.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => code = next)); b.AddAttribute(3, "MaxLength", 6); b.AddAttribute(4, "Pattern", numeric ? "[0-9]" : null); b.AddAttribute(5, "InputMode", numeric ? "numeric" : "text"); b.AddAttribute(6, "Invalid", invalid); b.AddAttribute(7, "AdditionalAttributes", Attr("forms-dossier-input-otp", "Verification code")); b.AddAttribute(8, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnInputOtpGroup>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(s => { for (var i = 0; i < 6; i++) { s.OpenComponent<ShadcnInputOtpSlot>(i * 2); s.AddAttribute(i * 2 + 1, "Index", i); s.CloseComponent(); } })); c.CloseComponent(); })); b.CloseComponent(); };
-        string Source() => $"<ShadcnInputOtp @bind-Value=\"Code\" MaxLength=\"6\" Pattern=\"{(numeric ? "[0-9]" : "[\\p{{L}}]")}\" InputMode=\"{(numeric ? "numeric" : "text")}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\">\n    <ShadcnInputOtpGroup>\n        <ShadcnInputOtpSlot Index=\"0\" />\n        <ShadcnInputOtpSlot Index=\"1\" />\n        <ShadcnInputOtpSlot Index=\"2\" />\n        <ShadcnInputOtpSlot Index=\"3\" />\n        <ShadcnInputOtpSlot Index=\"4\" />\n        <ShadcnInputOtpSlot Index=\"5\" />\n    </ShadcnInputOtpGroup>\n</ShadcnInputOtp>";
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<ShadcnCard>(0);
+            b.AddAttribute(1, "Class", "showcase-otp-card");
+            b.AddAttribute(2, "ChildContent", (RenderFragment)(card =>
+            {
+                card.OpenComponent<ShadcnCardHeader>(0);
+                card.AddAttribute(1, "ChildContent", (RenderFragment)(header =>
+                {
+                    header.OpenComponent<ShadcnCardTitle>(0);
+                    header.AddAttribute(1, "ChildContent", Text("Verify your email"));
+                    header.CloseComponent();
+                    header.OpenComponent<ShadcnCardDescription>(2);
+                    header.AddAttribute(3, "ChildContent", Text("Enter the 6-digit code we sent to your inbox."));
+                    header.CloseComponent();
+                }));
+                card.CloseComponent();
+                card.OpenComponent<ShadcnCardContent>(10);
+                card.AddAttribute(11, "ChildContent", (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnInputOtp>(0);
+                    content.AddAttribute(1, "Value", code);
+                    content.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => code = next));
+                    content.AddAttribute(3, "MaxLength", 6);
+                    content.AddAttribute(4, "Pattern", numeric ? "[0-9]" : null);
+                    content.AddAttribute(5, "InputMode", numeric ? "numeric" : "text");
+                    content.AddAttribute(6, "Invalid", invalid);
+                    content.AddAttribute(7, "AdditionalAttributes", Attr("forms-dossier-input-otp", "Verification code"));
+                    content.AddAttribute(8, "ChildContent", OtpSlots());
+                    content.CloseComponent();
+                }));
+                card.CloseComponent();
+                card.OpenComponent<ShadcnCardFooter>(20);
+                card.AddAttribute(21, "ChildContent", Text("Code expires in 10 minutes"));
+                card.CloseComponent();
+            }));
+            b.CloseComponent();
+        };
+        string Source() => $"<ShadcnCard>\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>Verify your email</ShadcnCardTitle>\n        <ShadcnCardDescription>Enter the 6-digit code we sent to your inbox.</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnInputOtp @bind-Value=\"Code\" MaxLength=\"6\" Pattern=\"{(numeric ? "[0-9]" : "[\\p{{L}}]")}\" InputMode=\"{(numeric ? "numeric" : "text")}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\">\n            <ShadcnInputOtpGroup>\n                <ShadcnInputOtpSlot Index=\"0\" />\n                <ShadcnInputOtpSlot Index=\"1\" />\n                <ShadcnInputOtpSlot Index=\"2\" />\n                <ShadcnInputOtpSlot Index=\"3\" />\n                <ShadcnInputOtpSlot Index=\"4\" />\n                <ShadcnInputOtpSlot Index=\"5\" />\n            </ShadcnInputOtpGroup>\n        </ShadcnInputOtp>\n    </ShadcnCardContent>\n    <ShadcnCardFooter>Code expires in 10 minutes</ShadcnCardFooter>\n</ShadcnCard>";
         return Example("input-otp", "One-input OTP", "Verify paste filtering, caret-driven slots, Thai graphemes, and mobile input modes.", Source(), preview,
             [
                 Toggle("input-otp-invalid", "Invalid", v => invalid = v),
                 Toggle("input-otp-numeric", "Numeric", v => { numeric = v; code = numeric ? "123" : "ก้ข"; }, true)
             ], ["one-input", "graphemes", "numeric", "invalid"]) with
         { RazorSourceProvider = Source };
+
+        RenderFragment OtpSlots() => c =>
+        {
+            c.OpenComponent<ShadcnInputOtpGroup>(0);
+            c.AddAttribute(1, "ChildContent", (RenderFragment)(slots =>
+            {
+                for (var i = 0; i < 6; i++)
+                {
+                    slots.OpenComponent<ShadcnInputOtpSlot>(i * 2);
+                    slots.AddAttribute(i * 2 + 1, "Index", i);
+                    slots.CloseComponent();
+                }
+            }));
+            c.CloseComponent();
+        };
     }
     private static ComponentExampleDefinition Select()
     {
         var invalid = false; var open = false;
         RenderFragment preview = b => { b.OpenComponent<SelectDossierPreview>(0); b.AddAttribute(1, nameof(SelectDossierPreview.Invalid), invalid); b.AddAttribute(2, nameof(SelectDossierPreview.Open), open); b.CloseComponent(); };
-        string Source() => $"<ShadcnSelect TValue=\"string\" @bind-Value=\"Process\" @bind-Open=\"IsOpen\" Options=\"ProcessOptions\" Clearable=\"true\" Open=\"{open.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
+        string Source() => $"<ShadcnSelect TValue=\"string\" @bind-Value=\"Process\" @bind-Open=\"IsOpen\" Options=\"ProcessOptions\" Clearable=\"true\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
         return Example("select", "Grouped select", "Choose a manufacturing process from a keyboard-friendly grouped listbox, then clear or change the selection directly in the preview.", Source(), preview,
             [
                 Toggle("select-invalid", "Invalid", v => invalid = v),
@@ -129,7 +204,7 @@ internal static class FormDateExamples
     {
         var invalid = false; var clearable = true;
         RenderFragment preview = b => { b.OpenComponent<CompactDatePickerDossierPreview>(0); b.AddAttribute(1, nameof(CompactDatePickerDossierPreview.Clearable), clearable); b.AddAttribute(2, nameof(CompactDatePickerDossierPreview.Invalid), invalid); b.CloseComponent(); };
-        string Source() => $"<ShadcnDatePicker @bind-Value=\"DeliveryDate\" Mode=\"ShadcnCalendarSelectionMode.Range\" @bind-Range=\"DeliveryWindow\" Clearable=\"{clearable.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Culture=\"ThaiCulture\" />";
+        string Source() => $"<ShadcnDatePicker Mode=\"ShadcnCalendarSelectionMode.Range\" @bind-Range=\"DeliveryWindow\" AllowTextInput=\"false\" Clearable=\"{clearable.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Culture=\"ThaiCulture\" />";
         return Example("date-picker", "Date picker composition", "Pick one date or a connected date range from the field, then clear it without a duplicate text control.", Source(), preview,
             [
                 Toggle("date-picker-invalid", "Invalid", v => invalid = v),
