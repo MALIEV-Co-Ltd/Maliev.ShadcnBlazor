@@ -7897,3 +7897,75 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-tabs-dossier { border-color: CanvasText; }
     .showcase-tabs-dossier__summary > div { border: 1px solid CanvasText; }
 }
+
+/* Alert dialog dossier: realistic destructive confirmation without forcing
+   the modal open before the visitor activates its trigger. */
+.showcase-alert-dialog-dossier { inline-size: min(100%, 42rem); margin-inline: auto; }
+.showcase-alert-dialog-record,
+.showcase-alert-dialog-result {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+    box-shadow: var(--shadcn-shadow-sm);
+}
+.showcase-alert-dialog-dossier[data-layout="small"] :is(.showcase-alert-dialog-record, .showcase-alert-dialog-result) {
+    inline-size: min(100%, 34rem);
+    margin-inline: auto;
+    padding: .75rem;
+}
+.showcase-alert-dialog-record__icon,
+.showcase-alert-dialog-result__icon,
+.showcase-alert-dialog-warning {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+}
+:is(.showcase-alert-dialog-record__icon, .showcase-alert-dialog-result__icon, .showcase-alert-dialog-warning) svg {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+}
+.showcase-alert-dialog-record__copy,
+.showcase-alert-dialog-result > span:nth-child(2) { display: grid; min-inline-size: 0; gap: .125rem; }
+:is(.showcase-alert-dialog-record__copy, .showcase-alert-dialog-result) strong { overflow-wrap: anywhere; }
+:is(.showcase-alert-dialog-record__copy, .showcase-alert-dialog-result) small { color: var(--shadcn-muted-foreground); }
+.showcase-alert-dialog-trigger {
+    min-block-size: 2.25rem;
+    padding-inline: .75rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    font: inherit;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.showcase-alert-dialog-trigger:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.showcase-alert-dialog-warning {
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--shadcn-destructive) 12%, transparent);
+    color: var(--shadcn-destructive);
+}
+.showcase-alert-dialog-action--destructive { background: var(--shadcn-destructive); color: var(--shadcn-destructive-foreground); }
+.showcase-alert-dialog-action--destructive:hover { background: color-mix(in oklch, var(--shadcn-destructive) 88%, var(--shadcn-foreground)); }
+@media (max-width: 40rem) {
+    .showcase-alert-dialog-record,
+    .showcase-alert-dialog-result { grid-template-columns: auto minmax(0, 1fr); gap: .75rem; }
+    .showcase-alert-dialog-trigger,
+    .showcase-alert-dialog-result .shadcn-button { grid-column: 1 / -1; inline-size: 100%; }
+}
