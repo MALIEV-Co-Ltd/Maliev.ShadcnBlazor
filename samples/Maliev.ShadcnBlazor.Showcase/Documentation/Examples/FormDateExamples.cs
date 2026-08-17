@@ -178,7 +178,28 @@ internal static class FormDateExamples
     {
         var invalid = false; var multiple = false;
         RenderFragment preview = b => { b.OpenComponent<ComboboxDossierPreview>(0); b.AddAttribute(1, "Multiple", multiple); b.AddAttribute(2, "Invalid", invalid); b.CloseComponent(); };
-        string Source() => $"<ShadcnCombobox TValue=\"string\" @bind-Value=\"SelectedMaterial\" @bind-Values=\"SelectedMaterials\" @bind-Open=\"IsOpen\" @bind-Query=\"Query\" Options=\"MaterialOptions\" Multiple=\"{multiple.ToString().ToLowerInvariant()}\" ShowClear=\"true\" ShowTrigger=\"true\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Placeholder=\"Select a material\" />";
+        string Source() => $$"""
+            @code {
+                private static readonly IReadOnlyList<ShadcnComboboxOption<string>> MaterialOptions =
+                [
+                    new("al6061", "Aluminum 6061", "Metals"),
+                    new("ss316", "Stainless 316L", "Metals"),
+                    new("peek", "PEEK", "Polymers")
+                ];
+            }
+
+            <ShadcnCombobox TValue="string"
+                {{(multiple ? "@bind-Values=\"SelectedMaterials\"" : "@bind-Value=\"SelectedMaterial\"")}}
+                @bind-Open="IsOpen"
+                @bind-Query="Query"
+                Options="MaterialOptions"
+                Multiple="{{multiple.ToString().ToLowerInvariant()}}"
+                ShowClear="true"
+                ShowTrigger="true"
+                Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                Placeholder="Select a material"
+                aria-label="Material" />
+            """;
         return Example("combobox", "Searchable typed combobox", "Search grouped materials, select with the pointer or keyboard, and try the clear and multi-select states in the field itself.", Source(), preview,
             [
                 Toggle("combobox-invalid", "Invalid", v => invalid = v),

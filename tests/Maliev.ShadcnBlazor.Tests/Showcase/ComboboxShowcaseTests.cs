@@ -23,7 +23,7 @@ public sealed class ComboboxShowcaseTests : BunitContext
         var example = registry.GetBySlug("combobox").Single();
 
         Assert.Contains("@bind-Value=\"SelectedMaterial\"", example.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("@bind-Values=\"SelectedMaterials\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("@bind-Values=\"SelectedMaterials\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind-Open=\"IsOpen\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind-Query=\"Query\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowClear=\"true\"", example.RazorSource, StringComparison.Ordinal);
@@ -34,8 +34,6 @@ public sealed class ComboboxShowcaseTests : BunitContext
         var root = cut.Find("[data-slot='combobox']");
         var trigger = root.QuerySelector("[data-slot='combobox-trigger']")!;
 
-        Assert.Equal("true", input.GetAttribute("aria-expanded"));
-        trigger.Click();
         Assert.Equal("false", input.GetAttribute("aria-expanded"));
         trigger.Click();
         Assert.Equal("true", input.GetAttribute("aria-expanded"));
@@ -54,6 +52,8 @@ public sealed class ComboboxShowcaseTests : BunitContext
         Change(cut, "combobox-multiple", true);
         Assert.Equal("true", root.QuerySelector("[data-slot='combobox-list']")!.GetAttribute("aria-multiselectable"));
         Assert.Equal(2, root.QuerySelectorAll("[data-slot='combobox-chip']").Length);
+        Assert.Contains("@bind-Values=\"SelectedMaterials\"", example.RazorSourceProvider!(), StringComparison.Ordinal);
+        Assert.DoesNotContain("@bind-Value=\"SelectedMaterial\"", example.RazorSourceProvider!(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -65,6 +65,8 @@ public sealed class ComboboxShowcaseTests : BunitContext
         Assert.Contains(".shadcn-combobox-input:has(.shadcn-combobox-control[aria-invalid=\"true\"])", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-combobox-input [data-slot=\"combobox-clear\"] { position: static", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-combobox-input [data-slot=\"combobox-trigger\"] { position: static", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-combobox-input [data-slot=\"combobox-clear\"]:focus-visible { background: transparent", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-combobox-content { inset-inline-end: auto", css, StringComparison.Ordinal);
     }
 
     private static void Change(IRenderedComponent<ComponentPreview> cut, string controlId, object value) =>
