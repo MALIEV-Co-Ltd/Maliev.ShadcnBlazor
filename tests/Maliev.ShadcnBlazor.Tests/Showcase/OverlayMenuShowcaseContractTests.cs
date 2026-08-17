@@ -111,6 +111,34 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DialogDossierShowsAnEditableProfileAndKeepsItsSourceInSync()
+    {
+        var dialog = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("dialog"));
+
+        Assert.Equal("Editable profile dialog", dialog.Title);
+        Assert.Contains("<ShadcnDialogTrigger", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnInput", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("id=\"dialog-profile-name\"", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("id=\"dialog-profile-username\"", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowCloseButton=\"true\"", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Modal=\"true\"", dialog.RazorSource, StringComparison.Ordinal);
+
+        var initial = Render(dialog.Preview);
+        Assert.Empty(initial.FindAll("[data-slot='dialog-content']"));
+        Assert.Contains("Edit profile", initial.Find("[data-slot='dialog-trigger']").TextContent, StringComparison.Ordinal);
+
+        dialog.Controls.Single(control => control.Id == "dialog-open").Apply("true");
+        var opened = Render(dialog.Preview);
+        Assert.NotEmpty(opened.FindAll("[data-slot='dialog-content']"));
+        Assert.Equal(2, opened.FindAll("[data-slot='input']").Count);
+        Assert.Contains("Open=\"true\"", dialog.RazorSource, StringComparison.Ordinal);
+
+        dialog.Controls.Single(control => control.Id == "dialog-variant").Apply("true");
+        Assert.Contains("Modal=\"false\"", dialog.RazorSource, StringComparison.Ordinal);
+        Assert.Null(Render(dialog.Preview).Find("[data-slot='dialog-content']").GetAttribute("aria-modal"));
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();

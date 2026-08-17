@@ -1153,6 +1153,12 @@ a {
     }
 }
 
+.showcase-dialog-dossier {
+    display: grid;
+    min-inline-size: 0;
+    place-items: center;
+}
+
 /* Calendar grids are intrinsically sized; do not let the generic preview
    child rule stretch the seven-column surface across the canvas. */
 .component-preview__canvas > .shadcn-calendar {

@@ -1,5 +1,6 @@
 using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Overlays;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -83,20 +84,56 @@ internal static class OverlayMenuExamples
         }
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Modal", !compact); b.AddAttribute(3, "ChildContent", (RenderFragment)(c =>
-            {
-                AddText<ShadcnDialogTrigger>(c, 0, "Edit profile");
-                c.OpenComponent<ShadcnDialogContent>(10); c.AddAttribute(11, "ShowCloseButton", false); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
-                {
-                    x.OpenComponent<ShadcnDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDialogTitle>(header, 0, "Edit profile"); AddText<ShadcnDialogDescription>(header, 10, "Update the customer details, then save when you are done."); })); x.CloseComponent();
-                    x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Name · Pedro Duarte"); x.AddContent(23, "Username · @peduarte"); x.CloseElement();
-                    x.OpenComponent<ShadcnDialogFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDialogClose>(footer, 0, "Save changes"))); x.CloseComponent();
-                })); c.CloseComponent();
-            })); b.CloseComponent();
+            b.OpenComponent<DialogDossierPreview>(0);
+            b.AddAttribute(1, nameof(DialogDossierPreview.Open), open);
+            b.AddAttribute(2, nameof(DialogDossierPreview.Modal), !compact);
+            b.CloseComponent();
         };
-        return Example("dialog", "Modal and non-modal dialog", preview,
-            [Toggle("dialog-open", "Open", v => open = v), Toggle("dialog-variant", "Non-modal", v => compact = v)],
-            ["open", "modal", "non-modal", "focus-trap", "restore-focus"]);
+
+        string Source() => $$"""
+<ShadcnDialog Open="{{open.ToString().ToLowerInvariant()}}" Modal="{{(!compact).ToString().ToLowerInvariant()}}">
+    <ShadcnDialogTrigger>Edit profile</ShadcnDialogTrigger>
+    <ShadcnDialogContent ShowCloseButton="true" CloseLabel="Close profile editor">
+        <ShadcnDialogHeader>
+            <ShadcnDialogTitle>Edit profile</ShadcnDialogTitle>
+            <ShadcnDialogDescription>
+                Keep the contact details your project team sees up to date.
+            </ShadcnDialogDescription>
+        </ShadcnDialogHeader>
+
+        <ShadcnFieldGroup>
+            <ShadcnField>
+                <ShadcnFieldLabel For="dialog-profile-name">Name</ShadcnFieldLabel>
+                <ShadcnInput TValue="string" id="dialog-profile-name" @bind-Value="_name" AutoComplete="name" />
+            </ShadcnField>
+            <ShadcnField>
+                <ShadcnFieldLabel For="dialog-profile-username">Username</ShadcnFieldLabel>
+                <ShadcnInput TValue="string" id="dialog-profile-username" @bind-Value="_username" AutoComplete="username" />
+            </ShadcnField>
+        </ShadcnFieldGroup>
+
+        <ShadcnDialogFooter>
+            <ShadcnDialogClose>Cancel</ShadcnDialogClose>
+            <ShadcnDialogClose Variant="ShadcnButtonVariant.Default">Save changes</ShadcnDialogClose>
+        </ShadcnDialogFooter>
+    </ShadcnDialogContent>
+</ShadcnDialog>
+
+@code {
+    private string _name = "Narin Chaiyasit";
+    private string _username = "narin.c";
+}
+""";
+
+        var example = new ComponentExampleDefinition(
+            "dialog-primary",
+            "Editable profile dialog",
+            "Open a focused profile editor with labeled inputs, explicit actions, modal focus containment, and trigger restoration.",
+            Source(),
+            preview,
+            [Toggle("dialog-open", "Open", value => open = value), Toggle("dialog-variant", "Non-modal", value => compact = value)],
+            ["trigger", "editable-form", "modal", "non-modal", "focus-trap", "restore-focus", "escape", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Sheet()

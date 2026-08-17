@@ -78,6 +78,44 @@ public sealed class DialogAlertDialogTests : BunitContext
     }
 
     [Fact]
+    public void DialogDistinguishesTheIconDismissalFromFooterCloseActions()
+    {
+        var cut = Render<ShadcnDialog>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDialogContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnDialogContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnDialogTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnDialogTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Edit profile")));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnDialogFooter>(2);
+                    content.AddAttribute(3, nameof(ShadcnDialogFooter.ChildContent), (RenderFragment)(footer =>
+                    {
+                        footer.OpenComponent<ShadcnDialogClose>(0);
+                        footer.AddAttribute(1, nameof(ShadcnDialogClose.ChildContent), (RenderFragment)(text => text.AddContent(0, "Save changes")));
+                        footer.CloseComponent();
+                    }));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var closeButtons = cut.FindAll("[data-slot='dialog-close']");
+        Assert.Equal(2, closeButtons.Count);
+        var iconClose = Assert.Single(closeButtons, button => button.GetAttribute("data-icon-only") == "true");
+        var footerClose = Assert.Single(closeButtons, button => button.GetAttribute("data-icon-only") == "false");
+        Assert.Empty(iconClose.TextContent);
+        Assert.Equal("Close", iconClose.GetAttribute("aria-label"));
+        Assert.Null(footerClose.GetAttribute("aria-label"));
+        Assert.Contains("Save changes", footerClose.TextContent, StringComparison.Ordinal);
+
+        footerClose.Click();
+        Assert.Empty(cut.FindAll("[data-slot='dialog-content']"));
+    }
+
+    [Fact]
     public void AlertDialogUsesAlertSemanticsSmallMediaAndCancelActionContracts()
     {
         var cancelCalls = 0;
@@ -138,6 +176,22 @@ public sealed class DialogAlertDialogTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnAlertDialogContent>(p => p.Add(x => x.Size, (ShadcnAlertDialogSize)999)));
     }
 
+    [Fact]
+    public void DialogInteropKeepsAttachmentIdempotentAndRestoresFocusAfterTheCloseRender()
+    {
+        var script = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "Maliev.ShadcnBlazor",
+            "wwwroot",
+            "js",
+            "shadcn-overlays-menus.js"));
+
+        Assert.Contains("if (dialogs.has(content)) return;", script, StringComparison.Ordinal);
+        Assert.Contains("requestAnimationFrame(restoreFocus)", script, StringComparison.Ordinal);
+        Assert.Contains("focusOwner?.querySelector?.('[data-slot=\"dialog-trigger\"]')", script, StringComparison.Ordinal);
+    }
+
     private IRenderedComponent<ShadcnDialog> RenderDialog(bool open, Action<bool>? changed = null) => Render<ShadcnDialog>(p => p
         .Add(x => x.Open, open)
         .Add(x => x.OpenChanged, changed is null ? default : EventCallback.Factory.Create(this, changed))
@@ -166,4 +220,13 @@ public sealed class DialogAlertDialogTests : BunitContext
         }));
         builder.CloseComponent();
     };
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root was not found.");
+    }
 }

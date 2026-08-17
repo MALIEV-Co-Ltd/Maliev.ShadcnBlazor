@@ -1,11 +1,45 @@
+@using Maliev.ShadcnBlazor.Components.Actions
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-dialog-close")" style="@MergeStyle(null)" data-slot="dialog-close" type="button" aria-label="@Label" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent ?? DefaultContent)</button>
+
+<button @attributes="ForwardedAttributes"
+        class="@MergeClass("shadcn-dialog-close")"
+        style="@MergeStyle(null)"
+        data-slot="dialog-close"
+        data-icon-only="@(ChildContent is null ? "true" : "false")"
+        data-variant="@VariantValue"
+        type="button"
+        aria-label="@(ChildContent is null ? Label : null)"
+        disabled="@Disabled"
+        @onclick="CloseAsync">@(ChildContent ?? DefaultContent)</button>
+
 @code {
     [CascadingParameter] private ShadcnDialogContext Context { get; set; } = default!;
     [Parameter] public string Label { get; set; } = "Close";
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public ShadcnButtonVariant Variant { get; set; } = ShadcnButtonVariant.Outline;
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    private RenderFragment DefaultContent => builder => builder.AddContent(0, "×");
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "aria-label", "disabled");
+    private string VariantValue => ChildContent is null
+        ? "ghost"
+        : Variant switch
+        {
+            ShadcnButtonVariant.Default => "default",
+            ShadcnButtonVariant.Destructive => "destructive",
+            ShadcnButtonVariant.Outline => "outline",
+            ShadcnButtonVariant.Secondary => "secondary",
+            ShadcnButtonVariant.Ghost => "ghost",
+            ShadcnButtonVariant.Link => "link",
+            _ => throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown Shadcn dialog close variant.")
+        };
+    private RenderFragment DefaultContent => builder =>
+    {
+        builder.OpenElement(0, "svg");
+        builder.AddAttribute(1, "viewBox", "0 0 24 24");
+        builder.AddAttribute(2, "aria-hidden", "true");
+        builder.OpenElement(3, "path");
+        builder.AddAttribute(4, "d", "M18 6 6 18M6 6l12 12");
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-icon-only", "data-variant", "type", "aria-label", "disabled");
     private async Task CloseAsync() { if (!Disabled) await Context.Owner.SetOpenAsync(false); }
 }
