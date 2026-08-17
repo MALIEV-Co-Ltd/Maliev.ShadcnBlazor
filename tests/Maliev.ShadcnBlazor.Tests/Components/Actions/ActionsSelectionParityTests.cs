@@ -195,6 +195,9 @@ public sealed class ActionsSelectionParityTests : BunitContext
         Assert.Contains("root.addEventListener(\"pointerdown\"", script, StringComparison.Ordinal);
         Assert.Contains("if (readOnly", script, StringComparison.Ordinal);
         Assert.Contains("Math.abs(Number(input.value) - raw)", script, StringComparison.Ordinal);
+        Assert.Contains("existing.snapshotValues()", script, StringComparison.Ordinal);
+        Assert.Contains("root.addEventListener(\"lostpointercapture\"", script, StringComparison.Ordinal);
+        Assert.Contains("event.isPrimary === false", script, StringComparison.Ordinal);
     }
 
     [Fact]

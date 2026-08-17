@@ -1106,6 +1106,59 @@ public sealed class ActionsAndSelectionBrowserTests(
         }
     }
 
+    [Fact]
+    public async Task SliderPointerDragContinuesAfterTheControlledPreviewRerenders()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 1000 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/slider").ToString());
+        await page.GetByTestId("component-preview").WaitForAsync();
+        await page.GetByTestId("control-slider-values").SelectOptionAsync("Single");
+
+        var slider = page.GetByTestId("action-slider");
+        var thumb = slider.Locator("input[type=range]").First;
+        var trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
+        Assert.NotNull(trackBox);
+
+        await page.Mouse.MoveAsync((float)(trackBox!.X + trackBox.Width * .2), (float)(trackBox.Y + trackBox.Height / 2));
+        await page.Mouse.DownAsync();
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-valuenow", "20");
+
+        await page.Mouse.MoveAsync((float)(trackBox.X + trackBox.Width * .8), (float)(trackBox.Y + trackBox.Height / 2), new() { Steps = 4 });
+        await page.Mouse.UpAsync();
+
+        Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 75, 85);
+
+        await thumb.FillAsync("65");
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-valuenow", "65");
+        await page.GetByTestId("control-slider-readonly").CheckAsync();
+        await page.Mouse.MoveAsync((float)(trackBox.X + trackBox.Width * .1), (float)(trackBox.Y + trackBox.Height / 2));
+        await page.Mouse.DownAsync();
+        await page.Mouse.UpAsync();
+        await Assertions.Expect(thumb).ToHaveValueAsync("65");
+
+        await page.GetByTestId("control-slider-readonly").UncheckAsync();
+        await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Vertical");
+        trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
+        Assert.NotNull(trackBox);
+        await page.Mouse.MoveAsync((float)(trackBox!.X + trackBox.Width / 2), (float)(trackBox.Y + trackBox.Height * .2));
+        await page.Mouse.DownAsync();
+        await page.Mouse.MoveAsync((float)(trackBox.X + trackBox.Width / 2), (float)(trackBox.Y + trackBox.Height * .8), new() { Steps = 4 });
+        await page.Mouse.UpAsync();
+        Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 15, 25);
+
+        await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Horizontal");
+        await slider.EvaluateAsync("element => element.setAttribute('dir', 'rtl')");
+        trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
+        Assert.NotNull(trackBox);
+        await page.Mouse.ClickAsync((float)(trackBox!.X + trackBox.Width * .2), (float)(trackBox.Y + trackBox.Height / 2));
+        Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 75, 85);
+    }
+
     private string FamilyUrl(string theme, string direction, string locale) =>
         new Uri(server.BaseUri, $"/components/actions-and-selection?theme={theme}&dir={direction}&locale={locale}").ToString();
 
