@@ -179,6 +179,25 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void CollapsibleDossierUsesRealOrderContextAndSourceTracksSettings()
+    {
+        var collapsible = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("collapsible"));
+        var markup = Render(collapsible.Preview).Markup;
+        Assert.Contains("showcase-collapsible-dossier", markup, StringComparison.Ordinal);
+        Assert.Contains("Order #4189", markup, StringComparison.Ordinal);
+        Assert.Contains("Shipped", markup, StringComparison.Ordinal);
+        Assert.Contains("Shipping address", collapsible.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Open=\"false\"", collapsible.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"false\"", collapsible.RazorSource, StringComparison.Ordinal);
+
+        collapsible.Controls.Single(control => control.Id == "collapsible-open").Apply("true");
+        collapsible.Controls.Single(control => control.Id == "collapsible-disabled").Apply("true");
+
+        Assert.Contains("Open=\"true\"", collapsible.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", collapsible.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EvidencePairSurfaceOwnsOneDeterministicNamedStatePerComponent()
     {
         var cut = Render<DisclosureNavigationEvidence>();

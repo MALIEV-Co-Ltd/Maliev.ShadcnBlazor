@@ -129,8 +129,34 @@ internal static class DisclosureNavigationExamples
     private static ComponentExampleDefinition Collapsible()
     {
         var open = false; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnCollapsible>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Disabled", disabled); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { AddText<ShadcnCollapsibleTrigger>(c, 0, "Project files"); c.OpenComponent<ShadcnCollapsibleContent>(10); c.AddAttribute(11, "ChildContent", FilesContent()); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("collapsible", "Collapsible disclosure", "Reveal a project file list on demand with a real disclosure trigger, keyboard focus, and disabled state.", "<ShadcnCollapsible Open=\"false\">\n    <ShadcnCollapsibleTrigger>Project files</ShadcnCollapsibleTrigger>\n    <ShadcnCollapsibleContent>\n        <ul><li>Drawing.step</li><li>Inspection-report.pdf</li><li>Revision-notes.md</li></ul>\n    </ShadcnCollapsibleContent>\n</ShadcnCollapsible>", preview, [Toggle("collapsible-open", "Open", v => open = v), Toggle("collapsible-disabled", "Disabled", v => disabled = v)], ["open", "closed", "disabled", "controlled"]);
+        RenderFragment preview = builder => RenderCollapsibleDossier(builder, open, disabled);
+        string Source() => $$"""
+<section class="showcase-collapsible-dossier" aria-labelledby="order-4189-title">
+    <ShadcnCollapsible Open="{{open.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}">
+        <ShadcnCollapsibleTrigger Class="showcase-collapsible-summary">
+            <span>
+                <strong id="order-4189-title">Order #4189</strong>
+                <small>Studio headphones · Shipped</small>
+            </span>
+            <svg data-slot="collapsible-trigger-icon" aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m9 18 6-6-6-6" />
+            </svg>
+        </ShadcnCollapsibleTrigger>
+        <div class="showcase-collapsible-status">
+            <span>Status</span>
+            <strong>Shipped</strong>
+        </div>
+        <ShadcnCollapsibleContent>
+            <div class="showcase-collapsible-details">
+                <div><strong>Shipping address</strong><span>100 Market Street, San Francisco</span></div>
+                <div><strong>Items</strong><span>2 × Studio headphones</span></div>
+            </div>
+        </ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+</section>
+""";
+        var example = Example("collapsible", "Order details", "Expand a compact order summary directly to review fulfillment details, then compare open and disabled states.", Source(), preview, [Toggle("collapsible-open", "Open", v => open = v), Toggle("collapsible-disabled", "Disabled", v => disabled = v)], ["open", "closed", "disabled", "controlled", "keyboard", "responsive"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition NavigationMenu()
@@ -490,15 +516,55 @@ internal static class DisclosureNavigationExamples
     private static void AddTab(RenderTreeBuilder b, int s, string value, string text) { b.OpenComponent<ShadcnTabsTrigger>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ChildContent", Text(text)); b.CloseComponent(); }
     private static void AddTabContent(RenderTreeBuilder b, int s, string value, string text, bool force) { b.OpenComponent<ShadcnTabsContent>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ForceMount", force); b.AddAttribute(s + 3, "ChildContent", Text(text)); b.CloseComponent(); }
 
-    private static RenderFragment FilesContent() => builder =>
+    private static void RenderCollapsibleDossier(RenderTreeBuilder builder, bool open, bool disabled)
     {
-        builder.OpenElement(0, "ul"); builder.AddAttribute(1, "class", "showcase-disclosure-file-list");
-        foreach (var file in new[] { ("Drawing.step", "STEP · 2.4 MB"), ("Inspection-report.pdf", "PDF · 860 KB"), ("Revision-notes.md", "Markdown · 4 KB") })
+        builder.OpenElement(0, "section");
+        builder.AddAttribute(1, "class", "showcase-collapsible-dossier");
+        builder.AddAttribute(2, "aria-labelledby", "order-4189-title");
+        builder.OpenComponent<ShadcnCollapsible>(10);
+        builder.AddAttribute(11, nameof(ShadcnCollapsible.Open), open);
+        builder.AddAttribute(12, nameof(ShadcnCollapsible.Disabled), disabled);
+        builder.AddAttribute(13, nameof(ShadcnCollapsible.ChildContent), (RenderFragment)(content =>
         {
-            builder.OpenElement(10, "li"); builder.OpenElement(11, "strong"); builder.AddContent(12, file.Item1); builder.CloseElement(); builder.OpenElement(13, "span"); builder.AddContent(14, file.Item2); builder.CloseElement(); builder.CloseElement();
-        }
+            content.OpenComponent<ShadcnCollapsibleTrigger>(0);
+            content.AddAttribute(1, nameof(ShadcnCollapsibleTrigger.Class), "showcase-collapsible-summary");
+            content.AddAttribute(2, nameof(ShadcnCollapsibleTrigger.ChildContent), (RenderFragment)(trigger =>
+            {
+                trigger.OpenElement(0, "span");
+                trigger.OpenElement(1, "strong"); trigger.AddAttribute(2, "id", "order-4189-title"); trigger.AddContent(3, "Order #4189"); trigger.CloseElement();
+                trigger.OpenElement(4, "small"); trigger.AddContent(5, "Studio headphones · Shipped"); trigger.CloseElement();
+                trigger.CloseElement();
+                trigger.OpenElement(10, "svg"); trigger.AddAttribute(11, "data-slot", "collapsible-trigger-icon"); trigger.AddAttribute(12, "aria-hidden", "true"); trigger.AddAttribute(13, "viewBox", "0 0 24 24");
+                trigger.OpenElement(14, "path"); trigger.AddAttribute(15, "d", "m9 18 6-6-6-6"); trigger.CloseElement(); trigger.CloseElement();
+            }));
+            content.CloseComponent();
+
+            content.OpenElement(10, "div"); content.AddAttribute(11, "class", "showcase-collapsible-status");
+            content.OpenElement(12, "span"); content.AddContent(13, "Status"); content.CloseElement();
+            content.OpenElement(14, "strong"); content.AddContent(15, "Shipped"); content.CloseElement();
+            content.CloseElement();
+
+            content.OpenComponent<ShadcnCollapsibleContent>(20);
+            content.AddAttribute(21, nameof(ShadcnCollapsibleContent.ChildContent), (RenderFragment)(details =>
+            {
+                details.OpenElement(0, "div"); details.AddAttribute(1, "class", "showcase-collapsible-details");
+                AddCollapsibleDetail(details, 10, "Shipping address", "100 Market Street, San Francisco");
+                AddCollapsibleDetail(details, 20, "Items", "2 × Studio headphones");
+                details.CloseElement();
+            }));
+            content.CloseComponent();
+        }));
+        builder.CloseComponent();
         builder.CloseElement();
-    };
+    }
+
+    private static void AddCollapsibleDetail(RenderTreeBuilder builder, int sequence, string title, string detail)
+    {
+        builder.OpenElement(sequence, "div");
+        builder.OpenElement(sequence + 1, "strong"); builder.AddContent(sequence + 2, title); builder.CloseElement();
+        builder.OpenElement(sequence + 3, "span"); builder.AddContent(sequence + 4, detail); builder.CloseElement();
+        builder.CloseElement();
+    }
 
     private static void AddNavigationItem(RenderTreeBuilder b, int s, string value, string title, IReadOnlyList<(string Label, string Href)> links)
     {
