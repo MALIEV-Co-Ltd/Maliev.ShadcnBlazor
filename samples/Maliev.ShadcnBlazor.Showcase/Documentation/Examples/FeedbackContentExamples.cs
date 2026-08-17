@@ -277,16 +277,17 @@ internal static class FeedbackContentExamples
             b.AddContent(13, "design-assets.zip");
             b.CloseElement();
             b.OpenElement(14, "small");
-            b.AddContent(15, indeterminate
+            b.AddAttribute(15, "dir", "ltr");
+            b.AddContent(16, indeterminate
                 ? "Preparing secure upload…"
                 : $"{Math.Clamp(value, 0d, 100d) * 28.8d / 100d:0.0} MB of 28.8 MB");
             b.CloseElement();
             b.CloseElement();
             b.CloseElement();
-            b.OpenComponent<ShadcnProgress>(16);
-            b.AddAttribute(17, "Value", indeterminate ? null : value);
-            b.AddAttribute(18, "Label", indeterminate ? "Preparing upload" : "Upload progress");
-            b.AddAttribute(19, "ShowValue", showValue);
+            b.OpenComponent<ShadcnProgress>(17);
+            b.AddAttribute(18, "Value", indeterminate ? null : value);
+            b.AddAttribute(19, "Label", indeterminate ? "Preparing upload" : "Upload progress");
+            b.AddAttribute(20, "ShowValue", showValue);
             b.CloseComponent();
             b.CloseElement();
         };
@@ -299,7 +300,7 @@ internal static class FeedbackContentExamples
             "        </span>",
             "        <div>",
             "            <strong>design-assets.zip</strong>",
-            "            <small>@UploadDetail</small>",
+            "            <small dir=\"ltr\">@UploadDetail</small>",
             "        </div>",
             "    </div>",
             "    <ShadcnProgress Value=\"@(Indeterminate ? null : Value)\"",
