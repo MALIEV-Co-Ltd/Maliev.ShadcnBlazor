@@ -3906,7 +3906,7 @@ a {
     overflow-x: auto;
     border-color: var(--shadcn-border);
     background: var(--shadcn-background);
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
 }
 
 .showcase-data-table .shadcn-data-table-frame .shadcn-table {
@@ -4051,14 +4051,51 @@ a {
     inline-size: 100%;
     max-inline-size: 100%;
     min-inline-size: 0;
+    overscroll-behavior-inline: contain;
+}
+
+.showcase-table--borderless :is(.shadcn-table-head, .shadcn-table-cell),
+.showcase-table--borderless .shadcn-table-footer {
+    border-color: transparent;
+}
+
+.shadcn-table-container:has(> .showcase-table) {
+    max-inline-size: 100%;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
 }
 
 .showcase-table .shadcn-table {
     inline-size: 100%;
     min-inline-size: 34rem;
+}
+
+.showcase-chart-dossier [data-slot="chart-surface"] rect[data-series] {
+    rx: 0;
+    ry: 0;
+}
+
+.showcase-aspect-ratio-demo {
+    inline-size: min(100%, 42rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-aspect-ratio-demo--1-1 {
+    inline-size: min(100%, 26rem);
+}
+
+.showcase-aspect-ratio-demo--9-16 {
+    inline-size: min(100%, 18rem);
+}
+
+.showcase-aspect-ratio-demo .shadcn-aspect-ratio {
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-card);
+    box-shadow: var(--shadcn-shadow-sm);
 }
 
 .showcase-toast-demo .shadcn-toast-viewport {
@@ -4374,7 +4411,7 @@ a {
     align-items: center;
 }
 
-.component-code__copy {
+.shadcn-code-block-copy {
     display: inline-grid;
     flex: 0 0 auto;
     inline-size: 2.25rem;
@@ -4390,13 +4427,13 @@ a {
         border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
 
-.component-code__copy:hover {
+.shadcn-code-block-copy:hover {
     border-color: var(--shadcn-primary);
     background: var(--shadcn-accent);
     color: var(--shadcn-accent-foreground);
 }
 
-.component-code__copy svg {
+.shadcn-code-block-copy svg {
     inline-size: 1rem;
     block-size: 1rem;
 }
@@ -4430,14 +4467,8 @@ a {
     box-shadow: 0 1px 2px color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
 }
 
-/* Keep the keyboard focus ring on the actionable attachment itself. The
-   resting preview stays quiet; the ring appears only after focus enters a
-   remove/retry action. */
-.showcase-attachment-file:focus-within,
-.showcase-attachment-card:focus-within {
-    border-color: var(--shadcn-ring);
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-ring) 18%, transparent);
-}
+/* Attachment actions own their keyboard ring in the library stylesheet.
+   Keep the preview card quiet until an actionable child receives focus. */
 
 .showcase-attachment-file-icon {
     display: inline-grid;
@@ -4502,7 +4533,7 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
     .showcase-bubble-thread > [data-slot="bubble"],
-    .component-code__copy,
+    .shadcn-code-block-copy,
     .documentation-on-this-page a {
         transition: none;
     }
@@ -4875,7 +4906,7 @@ body:has(.theme-studio-provider) {
     padding-block-start: 1.25rem;
 }
 
-.component-code__surface .component-code__copy {
+.component-code__surface .shadcn-code-block-copy {
     position: absolute;
     inset-block-start: .625rem;
     inset-inline-end: .625rem;
@@ -4889,14 +4920,14 @@ body:has(.theme-studio-provider) {
         background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
 
-.component-code__surface:hover .component-code__copy,
-.component-code__surface:focus-within .component-code__copy,
-.component-code__surface .component-code__copy[data-copied="true"] {
+.component-code__surface:hover .shadcn-code-block-copy,
+.component-code__surface:focus-within .shadcn-code-block-copy,
+.component-code__surface .shadcn-code-block-copy[data-copied="true"] {
     opacity: 1;
     transform: none;
 }
 
-.component-code__surface .component-code__copy[data-copied="true"] {
+.component-code__surface .shadcn-code-block-copy[data-copied="true"] {
     inline-size: auto;
     padding-inline: .625rem;
     border-color: color-mix(in oklch, var(--shadcn-primary) 55%, var(--shadcn-border));
@@ -4904,7 +4935,7 @@ body:has(.theme-studio-provider) {
     color: var(--shadcn-primary);
 }
 
-.component-code__copy-status {
+.component-code__surface .shadcn-code-block-copy-status {
     font-family: var(--shadcn-font-mono);
     font-size: .7rem;
     font-weight: 650;
@@ -5063,7 +5094,13 @@ body:has(.theme-studio-provider) {
 }
 
 @media (hover: none) {
-    .component-code__surface .component-code__copy {
+    .component-code__surface .shadcn-code-block-copy {
+        opacity: 0;
+        transform: translateY(-.2rem);
+    }
+
+    .component-code__surface:focus-within .shadcn-code-block-copy,
+    .component-code__surface .shadcn-code-block-copy[data-copied="true"] {
         opacity: 1;
         transform: none;
     }
@@ -5104,7 +5141,7 @@ body:has(.theme-studio-provider) {
 
 .documentation-landing__hero h1,
 .component-dossier__hero h1 {
-    font-size: clamp(2rem, 3.6vw, 3rem);
+    font-size: clamp(1.75rem, 2.8vw, 2.5rem);
     line-height: 1.08;
 }
 
@@ -5144,6 +5181,11 @@ body:has(.theme-studio-provider) {
     white-space: nowrap;
     overflow-wrap: normal;
     word-break: normal;
+}
+
+.component-api__scroller {
+    max-inline-size: 100%;
+    overscroll-behavior-inline: contain;
 }
 
 .component-api__required {
@@ -5212,14 +5254,18 @@ body:has(.theme-studio-provider) {
 
 .documentation-brand__mark {
     overflow: hidden;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: 999px;
     background: var(--shadcn-background);
     border: 1px solid var(--shadcn-border);
 }
 
 .documentation-brand__mark img {
     display: block;
-    inline-size: 1.35rem;
-    block-size: auto;
+    inline-size: 1.55rem;
+    block-size: 1.55rem;
+    object-fit: contain;
 }
 
 [data-shadcn-theme="dark"] .documentation-brand__mark img,

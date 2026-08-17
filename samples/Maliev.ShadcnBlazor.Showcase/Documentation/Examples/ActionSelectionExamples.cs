@@ -1,3 +1,4 @@
+using System.Globalization;
 using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Selection;
 using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
@@ -116,10 +117,17 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(4, nameof(CheckboxDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnCheckbox Value=\"{(value is null ? "null" : value.Value.ToString().ToLowerInvariant())}\" Name=\"terms\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Accept terms\" />";
         return Example("checkbox", "Three-state checkbox", "Preview checked, unchecked, indeterminate, disabled, read-only, and invalid states.",
-            "<ShadcnCheckbox Value=\"null\" Name=\"terms\" aria-label=\"Accept terms\" />", preview,
-            [new("checkbox-state", "State", ComponentParameterControlKind.Select, "Indeterminate", ["Unchecked", "Checked", "Indeterminate"], state => value = state == "Indeterminate" ? null : state == "Checked"), Toggle("checkbox-disabled", "Disabled", v => disabled = v), Toggle("checkbox-readonly", "Read only", v => readOnly = v), Toggle("checkbox-invalid", "Invalid", v => invalid = v)],
-            ["unchecked", "checked", "indeterminate", "disabled", "read-only", "invalid", "form"]);
+            Source(), preview,
+            [
+                new("checkbox-state", "State", ComponentParameterControlKind.Select, "Indeterminate", ["Unchecked", "Checked", "Indeterminate"], state => value = state == "Indeterminate" ? null : state == "Checked"),
+                Toggle("checkbox-disabled", "Disabled", v => disabled = v),
+                Toggle("checkbox-readonly", "Read only", v => readOnly = v),
+                Toggle("checkbox-invalid", "Invalid", v => invalid = v)
+            ],
+            ["unchecked", "checked", "indeterminate", "disabled", "read-only", "invalid", "form"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition RadioGroup()
@@ -147,10 +155,17 @@ internal static class ActionSelectionExamples
             }));
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnRadioGroup TValue=\"string\" Value=\"{selected}\" Orientation=\"{orientation}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Name=\"density\">\n    <ShadcnRadioGroupItem Value=\"default\">Default</ShadcnRadioGroupItem>\n    <ShadcnRadioGroupItem Value=\"comfortable\">Comfortable</ShadcnRadioGroupItem>\n    <ShadcnRadioGroupItem Value=\"compact\">Compact</ShadcnRadioGroupItem>\n</ShadcnRadioGroup>";
         return Example("radio-group", "Roving radio choices", "Use native same-name radios with orientation-aware roving focus and typed values.",
-            "<ShadcnRadioGroup TValue=\"string\" Value=\"comfortable\" Name=\"density\">\n    <ShadcnRadioGroupItem Value=\"default\">Default</ShadcnRadioGroupItem>\n    <ShadcnRadioGroupItem Value=\"comfortable\">Comfortable</ShadcnRadioGroupItem>\n</ShadcnRadioGroup>", preview,
-            [Select("radio-orientation", "Orientation", orientation, value => orientation = value), Toggle("radio-disabled", "Disabled", v => disabled = v), Toggle("radio-readonly", "Read only", v => readOnly = v), Toggle("radio-invalid", "Invalid", v => invalid = v)],
-            ["selected", "unselected", "disabled-item", "horizontal", "vertical", "roving-focus", "read-only", "invalid", "form"]);
+            Source(), preview,
+            [
+                Select("radio-orientation", "Orientation", orientation, value => orientation = value),
+                Toggle("radio-disabled", "Disabled", v => disabled = v),
+                Toggle("radio-readonly", "Read only", v => readOnly = v),
+                Toggle("radio-invalid", "Invalid", v => invalid = v)
+            ],
+            ["selected", "unselected", "disabled-item", "horizontal", "vertical", "roving-focus", "read-only", "invalid", "form"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Slider()
@@ -170,10 +185,18 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(5, nameof(SliderDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnSlider Values=\"new[] {{ {string.Join(", ", values.Select(value => $"{value.ToString(CultureInfo.InvariantCulture)}d"))} }}\" Orientation=\"{orientation}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Minimum=\"0\" Maximum=\"100\" Step=\"5\" />";
         return Example("slider", "Single and range values", "A snapped range with native keyboard input, nearest-thumb pointer targeting, RTL, and vertical support.",
-            "<ShadcnSlider Values=\"new[] { 20d, 80d }\" Minimum=\"0\" Maximum=\"100\" Step=\"5\" />", preview,
-            [new("slider-values", "Values", ComponentParameterControlKind.Select, "Range", ["Single", "Range", "Multiple"], mode => values = mode switch { "Single" => [40d], "Multiple" => [20d, 50d, 80d], _ => [20d, 80d] }), Select("slider-orientation", "Orientation", orientation, value => orientation = value), Toggle("slider-disabled", "Disabled", v => disabled = v), Toggle("slider-readonly", "Read only", v => readOnly = v), Toggle("slider-invalid", "Invalid", v => invalid = v)],
-            ["single", "range", "multiple", "horizontal", "vertical", "keyboard", "pointer", "disabled", "read-only", "invalid", "form"]);
+            Source(), preview,
+            [
+                new("slider-values", "Values", ComponentParameterControlKind.Select, "Range", ["Single", "Range", "Multiple"], mode => values = mode switch { "Single" => [40d], "Multiple" => [20d, 50d, 80d], _ => [20d, 80d] }),
+                Select("slider-orientation", "Orientation", orientation, value => orientation = value),
+                Toggle("slider-disabled", "Disabled", v => disabled = v),
+                Toggle("slider-readonly", "Read only", v => readOnly = v),
+                Toggle("slider-invalid", "Invalid", v => invalid = v)
+            ],
+            ["single", "range", "multiple", "horizontal", "vertical", "keyboard", "pointer", "disabled", "read-only", "invalid", "form"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Switch()
@@ -193,10 +216,18 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(5, nameof(SwitchDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnSwitch Value=\"{value.ToString().ToLowerInvariant()}\" Size=\"{size}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Enable notifications\" />";
         return Example("switch", "Boolean switch", "Preview checked state, both sizes, disabled, read-only, invalid, and RTL thumb motion.",
-            "<ShadcnSwitch Value=\"true\" aria-label=\"Enable notifications\" />", preview,
-            [Toggle("switch-value", "On", v => value = v, true), Select("switch-size", "Size", size, v => size = v), Toggle("switch-disabled", "Disabled", v => disabled = v), Toggle("switch-readonly", "Read only", v => readOnly = v), Toggle("switch-invalid", "Invalid", v => invalid = v)],
-            ["checked", "unchecked", "default", "sm", "disabled", "read-only", "invalid", "form"]);
+            Source(), preview,
+            [
+                Toggle("switch-value", "On", v => value = v, true),
+                Select("switch-size", "Size", size, v => size = v),
+                Toggle("switch-disabled", "Disabled", v => disabled = v),
+                Toggle("switch-readonly", "Read only", v => readOnly = v),
+                Toggle("switch-invalid", "Invalid", v => invalid = v)
+            ],
+            ["checked", "unchecked", "default", "sm", "disabled", "read-only", "invalid", "form"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Toggle()
@@ -216,10 +247,18 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(5, nameof(ToggleDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
+        string Source() => $"<ShadcnToggle Pressed=\"{pressed.ToString().ToLowerInvariant()}\" Variant=\"{variant}\" Size=\"{size}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\">Bold</ShadcnToggle>";
         return Example("toggle", "Two-state action", "Control pressed state, outline treatment, and every supported size.",
-            "<ShadcnToggle Pressed=\"true\" Variant=\"ShadcnToggleVariant.Outline\">Bold</ShadcnToggle>", preview,
-            [Toggle("toggle-pressed", "Pressed", v => pressed = v, true), Select("toggle-variant", "Variant", variant, v => variant = v), Select("toggle-size", "Size", size, v => size = v), Toggle("toggle-disabled", "Disabled", v => disabled = v), Toggle("toggle-invalid", "Invalid", v => invalid = v)],
-            ["on", "off", "default", "outline", "sm", "lg", "disabled", "invalid"]);
+            Source(), preview,
+            [
+                Toggle("toggle-pressed", "Pressed", v => pressed = v, true),
+                Select("toggle-variant", "Variant", variant, v => variant = v),
+                Select("toggle-size", "Size", size, v => size = v),
+                Toggle("toggle-disabled", "Disabled", v => disabled = v),
+                Toggle("toggle-invalid", "Invalid", v => invalid = v)
+            ],
+            ["on", "off", "default", "outline", "sm", "lg", "disabled", "invalid"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition ToggleGroup()

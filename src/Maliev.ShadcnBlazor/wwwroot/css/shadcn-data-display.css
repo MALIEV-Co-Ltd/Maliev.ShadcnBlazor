@@ -44,6 +44,8 @@
 .shadcn-table-body .shadcn-table-head { border-block-end: 1px solid var(--shadcn-border); padding: calc(0.75rem * var(--shadcn-spacing-multiplier)); text-align: start; vertical-align: middle; white-space: nowrap; }
 .shadcn-table-body .shadcn-table-row:last-child > :is(.shadcn-table-cell, .shadcn-table-head),
 .shadcn-table-footer .shadcn-table-row:last-child > :is(.shadcn-table-cell, .shadcn-table-head) { border-block-end: 0; }
+.shadcn-table[data-borders="false"] :is(.shadcn-table-head, .shadcn-table-cell),
+.shadcn-table[data-borders="false"] .shadcn-table-footer { border-block-end-color: transparent; border-block-start-color: transparent; }
 .shadcn-table-head:has(input[type="checkbox"]), .shadcn-table-cell:has(input[type="checkbox"]) { padding-inline-end: 0; }
 .shadcn-table-head > input[type="checkbox"], .shadcn-table-cell > input[type="checkbox"], .shadcn-data-table-visibility input[type="checkbox"] { width: 1rem; height: 1rem; margin: 0; translate: 0 1px; accent-color: var(--shadcn-primary); color-scheme: light dark; }
 .shadcn-table-caption { padding-block: calc(0.75rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: 0.8125rem; text-align: start; }

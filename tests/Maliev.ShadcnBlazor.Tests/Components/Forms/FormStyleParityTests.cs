@@ -32,6 +32,19 @@ public sealed class FormStyleParityTests
     }
 
     [Fact]
+    public void FormsStylesKeepClearActionsInsideFieldsAndUseLogicalOtpGeometry()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+
+        Assert.Contains(".shadcn-select:has(> [data-slot=\"select-clear\"]) .shadcn-select-trigger", css, StringComparison.Ordinal);
+        Assert.Contains("padding-inline-end: calc(2.75rem", css, StringComparison.Ordinal);
+        Assert.Contains("border-inline-end: 1px solid var(--shadcn-input)", css, StringComparison.Ordinal);
+        Assert.Contains("border-inline-start: 1px solid var(--shadcn-input)", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("field-sizing: content", css, StringComparison.Ordinal);
+        Assert.Contains(":where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme=\"dark\"]:is(.shadcn-input", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseReferencePairsPinSelectAndDatePickerTriggerGeometry()
     {
         var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));

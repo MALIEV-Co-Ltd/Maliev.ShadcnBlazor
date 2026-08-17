@@ -204,7 +204,7 @@ public sealed class ComponentDossierBrowserTests(
         Assert.Equal("0", await footer.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
         await message.HoverAsync();
         await Assertions.Expect(footer).ToHaveCSSAsync("opacity", "1");
-        await Assertions.Expect(footer.Locator("button")).ToBeVisibleAsync();
+        await Assertions.Expect(footer.Locator("button").First).ToBeVisibleAsync();
         await page.GetByTestId("control-message-footer-always").CheckAsync();
         await page.Mouse.MoveAsync(1, 1);
         await Assertions.Expect(footer).ToHaveAttributeAsync("data-visibility", "always");

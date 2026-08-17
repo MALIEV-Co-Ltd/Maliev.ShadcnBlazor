@@ -2,6 +2,7 @@ using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
+using Maliev.ShadcnBlazor.Components.Conversation;
 using Maliev.ShadcnBlazor.Components.DataDisplay;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -86,6 +87,21 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void AttachmentRestingSurfaceDoesNotUseAnOutlineButInteractiveChildrenKeepFocusStyles()
+    {
+        var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");
+        var css = File.ReadAllText(cssPath);
+        var attachmentRuleStart = css.IndexOf(".shadcn-attachment {", StringComparison.Ordinal);
+        Assert.True(attachmentRuleStart >= 0);
+        var attachmentRuleEnd = css.IndexOf('}', attachmentRuleStart);
+        Assert.True(attachmentRuleEnd > attachmentRuleStart);
+        var attachmentRule = css[attachmentRuleStart..(attachmentRuleEnd + 1)];
+        Assert.Contains("outline: none", attachmentRule, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-attachment-action:focus-visible", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-attachment-trigger:focus-visible", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BubbleDossierUsesAnInteractiveConversationThread()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
@@ -107,6 +123,28 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("I can group messages, switch sides, and keep the whole thread easy to scan.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Very meta. Very on-brand.", cut.Markup, StringComparison.Ordinal);
         Assert.NotEmpty(cut.FindAll("button[data-slot='bubble-content']"));
+    }
+
+    [Fact]
+    public void BubbleDossierUsesSequentialRevealAndGhostRemovesItsSurface()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("bubble").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Equal("true", cut.Find("[data-slot='bubble-group']").GetAttribute("data-reveal"));
+
+        var variant = example.Controls.Single(control => control.Id == "bubble-variant");
+        variant.Apply(nameof(ShadcnBubbleVariant.Ghost));
+        cut = Render(example.Preview);
+        Assert.All(cut.FindAll("[data-bubble-role='incoming']"), bubble => Assert.Equal("ghost", bubble.GetAttribute("data-variant")));
+
+        var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");
+        var css = File.ReadAllText(cssPath);
+        Assert.Contains("@keyframes shadcn-bubble-reveal", css, StringComparison.Ordinal);
+        Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
+        Assert.Contains("data-variant=\"ghost\"", css, StringComparison.Ordinal);
+        Assert.Contains("border: 0 !important", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -167,10 +205,41 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
-        Assert.Single(cut.FindAll(".shadcn-message-action"));
-        Assert.Single(cut.FindAll(".shadcn-message-reply-icon"));
+        Assert.Equal(2, cut.FindAll("[data-testid='message-copy']").Count);
+        Assert.Equal(2, cut.FindAll("[data-testid='message-reply']").Count);
         Assert.Single(cut.FindAll(".showcase-message-status"));
         Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MessageDossierAvatarToggleAndActionsRemainInteractive()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("message").Single();
+
+        var avatarToggle = example.Controls.Single(control => control.Id == "message-avatar");
+        avatarToggle.Apply("False");
+        var withoutAvatars = Render(example.Preview);
+        Assert.Empty(withoutAvatars.FindAll("[data-slot='message-avatar']"));
+
+        var withAvatars = example.Controls.Single(control => control.Id == "message-avatar");
+        withAvatars.Apply("True");
+        var cut = Render(example.Preview);
+        var copy = cut.FindAll("[data-testid='message-copy']");
+        var reply = cut.FindAll("[data-testid='message-reply']");
+        Assert.Equal(2, copy.Count);
+        Assert.Equal(2, reply.Count);
+
+        copy[0].Click();
+        Assert.Contains("Copied", cut.Markup, StringComparison.Ordinal);
+        reply[1].Click();
+        var quote = cut.Find("[data-testid='message-reply-quote']");
+        Assert.Contains("พร้อมส่งแบบให้ตรวจ", quote.TextContent, StringComparison.Ordinal);
+
+        var always = example.Controls.Single(control => control.Id == "message-footer-always");
+        always.Apply("True");
+        cut = Render(example.Preview);
+        Assert.All(cut.FindAll("[data-slot='message-footer']"), footer => Assert.Equal("always", footer.GetAttribute("data-visibility")));
     }
 
     [Fact]
@@ -208,6 +277,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.NotEmpty(cut.FindAll("button[data-testid='scroller-send']"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller-button']"));
         Assert.Contains("ตรวจสอบชิ้นงาน", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find("[data-testid='scroller-demo']").GetAttribute("data-preview-auto"));
+        Assert.Equal("end", cut.Find("[data-slot='message'][data-align='end']").GetAttribute("data-align"));
+        Assert.Equal("start", cut.Find("[data-slot='message'][data-align='start']").GetAttribute("data-align"));
     }
 
     [Fact]
@@ -220,6 +292,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessageScrollerProvider", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"user-1\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"assistant-1\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("AutoScroll=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.End\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
     }

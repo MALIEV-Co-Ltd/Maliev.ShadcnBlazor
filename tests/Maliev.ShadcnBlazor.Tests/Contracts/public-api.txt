@@ -479,6 +479,7 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnIdAllocator
 enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSelectionState: Unchecked, Indeterminate, Checked
 enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSortDirection: Ascending, Descending
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTable
+  Boolean Borders
   RenderFragment ChildContent
 enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableAlignment: Start, Center, End
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnTableBody

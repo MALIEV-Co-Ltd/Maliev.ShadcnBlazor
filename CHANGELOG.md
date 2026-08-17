@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-08-17
+
+### Fixed
+
+- Completed the annotation-driven documentation and component polish pass across
+  conversation, data-display, form, action, feedback, and semantic examples.
+- Synchronized interactive previews and source snippets, including unbound form
+  controls, table borders, chart configuration, carousel motion, and message
+  actions.
+- Refreshed responsive visual-proof baselines for all 64 completed dossiers.
+
 ## [1.0.6] - 2026-08-16
 
 ### Fixed
@@ -64,7 +75,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.7
 [1.0.6]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.6
 [1.0.5]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.5
 [1.0.4]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.4

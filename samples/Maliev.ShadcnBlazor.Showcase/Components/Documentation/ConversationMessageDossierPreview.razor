@@ -6,7 +6,7 @@
         <ShadcnMessage Align="ShadcnLogicalAlign.Start">
             @if (Avatars)
             {
-                <ConversationAvatar AvatarId="operator" Source="/images/avatars/operator-thai.png" Alt="นที · วิศวกร" Fallback="นท" />
+                <ConversationAvatar AvatarId="operator" Source="images/avatars/operator-thai.png" Alt="นที · วิศวกร" Fallback="นท" />
             }
             <ShadcnMessageContent>
                 <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
@@ -15,12 +15,13 @@
                 </ShadcnBubble>
                 @if (FooterActions)
                 {
-                    <ShadcnMessageFooter>
+                    <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
                         <button type="button" class="showcase-message-action showcase-message-action--copy" data-testid="message-copy" aria-label="Copy message" data-copied="@OperatorCopied" @onclick="CopyOperatorAsync">
                             @if (IsCopied("operator")) { <span>Copied</span> } else { <span aria-hidden="true">⧉</span><span class="sr-only">Copy</span> }
                         </button>
                         <button type="button" class="showcase-message-action showcase-message-action--reply" data-testid="message-reply" aria-label="Reply to message" @onclick="ReplyToOperator">
-                            <span aria-hidden="true">↩</span><span class="sr-only">Reply</span>
+                            <svg class="shadcn-message-reply-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            <span class="sr-only">Reply</span>
                         </button>
                     </ShadcnMessageFooter>
                 }
@@ -43,7 +44,7 @@
         <ShadcnMessage Align="ShadcnLogicalAlign.End">
             @if (Avatars)
             {
-                <ConversationAvatar AvatarId="assistant" Source="/images/avatars/assistant-thai.png" Alt="MALIEV Assistant" Fallback="MA" />
+                <ConversationAvatar AvatarId="assistant" Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" Fallback="MA" />
             }
             <ShadcnMessageContent>
                 <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
@@ -52,13 +53,15 @@
                 </ShadcnBubble>
                 @if (FooterActions)
                 {
-                    <ShadcnMessageFooter>
+                    <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
                         <button type="button" class="showcase-message-action showcase-message-action--copy" data-testid="message-copy" aria-label="Copy message" data-copied="@AssistantCopied" @onclick="CopyAssistantAsync">
                             @if (IsCopied("assistant")) { <span>Copied</span> } else { <span aria-hidden="true">⧉</span><span class="sr-only">Copy</span> }
                         </button>
                         <button type="button" class="showcase-message-action showcase-message-action--reply" data-testid="message-reply" aria-label="Reply to message" @onclick="ReplyToCoordinator">
-                            <span aria-hidden="true">↩</span><span class="sr-only">Reply</span>
+                            <svg class="shadcn-message-reply-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            <span class="sr-only">Reply</span>
                         </button>
+                        <span class="showcase-message-status">ส่งแล้ว · 10:42</span>
                     </ShadcnMessageFooter>
                 }
             </ShadcnMessageContent>

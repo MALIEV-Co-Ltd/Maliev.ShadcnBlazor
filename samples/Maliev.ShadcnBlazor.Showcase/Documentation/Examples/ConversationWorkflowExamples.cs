@@ -78,7 +78,8 @@ internal static class ConversationWorkflowExamples
         {
             b.OpenComponent<ShadcnBubbleGroup>(0);
             b.AddAttribute(1, nameof(ShadcnBubbleGroup.Class), "showcase-bubble-thread");
-            b.AddAttribute(2, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
+            b.AddAttribute(2, "data-reveal", "true");
+            b.AddAttribute(3, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
             {
                 AddBubble(thread, 0, ShadcnBubbleVariant.Default, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top);
                 AddBubble(thread, 10, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top, "incoming");
@@ -242,14 +243,11 @@ internal static class ConversationWorkflowExamples
         var footerAlways = false;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnMessageGroup>(0);
-            b.AddAttribute(1, nameof(ShadcnMessageGroup.Class), $"showcase-message-thread{(footerAlways ? " showcase-message-thread--footer-always" : string.Empty)}");
-            b.AddAttribute(2, nameof(ShadcnMessageGroup.ChildContent), (RenderFragment)(thread =>
-            {
-                AddMessage(thread, 0, ShadcnLogicalAlign.Start, avatar ? OperatorAvatar : null, footer, "วิศวกร MALIEV", "ตรวจสอบไฟล์แล้ว 3 รายการ", footerAlways);
-                AddMessage(thread, 20, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, null, false, "ผู้ประสานงาน", "พร้อมส่งแบบให้ตรวจ");
-                AddMessage(thread, 40, ShadcnLogicalAlign.End, avatar ? AssistantAvatar : null, footer, "MALIEV Assistant", "Sure. I’ll keep the thread easy to scan.", footerAlways);
-            }));
+            b.OpenComponent<ConversationMessageDossierPreview>(0);
+            b.AddAttribute(1, nameof(ConversationMessageDossierPreview.AlignMiddleRowEnd), end);
+            b.AddAttribute(2, nameof(ConversationMessageDossierPreview.Avatars), avatar);
+            b.AddAttribute(3, nameof(ConversationMessageDossierPreview.FooterActions), footer);
+            b.AddAttribute(4, nameof(ConversationMessageDossierPreview.AlwaysShowActions), footerAlways);
             b.CloseComponent();
         };
         return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "hover-actions", "bubbles", "rtl"], MessageRazorSource);
@@ -324,7 +322,7 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Scroller()
     {
-        var auto = false; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
+        var auto = true; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
         RenderFragment preview = b =>
         {
             b.OpenComponent<StreamingScrollerDemo>(0);
@@ -484,7 +482,7 @@ internal static class ConversationWorkflowExamples
     private const string BubbleRazorSource = """
 @using Maliev.ShadcnBlazor.Components.Conversation
 
-<ShadcnBubbleGroup>
+<ShadcnBubbleGroup data-reveal="true">
     <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
         <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
     </ShadcnBubble>
@@ -560,22 +558,22 @@ internal static class ConversationWorkflowExamples
         <ShadcnMessageScrollerViewport AccessibleName="Project conversation">
             <ShadcnMessageScrollerContent>
                 <ShadcnMessageScrollerItem MessageId="user-1" ScrollAnchor="true">
-                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+                    <ShadcnMessage Align="ShadcnLogicalAlign.End">
                         <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
                         <ShadcnMessageContent>
                             <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
-                            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Muted">
                                 <ShadcnBubbleContent>เริ่มตรวจสอบชิ้นงานแล้ว</ShadcnBubbleContent>
                             </ShadcnBubble>
                         </ShadcnMessageContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
                 <ShadcnMessageScrollerItem MessageId="assistant-1" ScrollAnchor="true">
-                    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
                         <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
                         <ShadcnMessageContent>
                             <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
-                            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
                                 <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
                             </ShadcnBubble>
                         </ShadcnMessageContent>
@@ -594,6 +592,7 @@ internal static class ConversationWorkflowExamples
 
     private const string MessageRazorSource = """
 @using Maliev.ShadcnBlazor.Components.Conversation
+@using Maliev.ShadcnBlazor.Components.Content
 
 <ShadcnMessageGroup Class="message-thread">
     <ShadcnMessage Align="ShadcnLogicalAlign.Start">
@@ -606,12 +605,31 @@ internal static class ConversationWorkflowExamples
                 <ShadcnBubbleContent>ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
             </ShadcnBubble>
             <ShadcnMessageFooter>
-                <button type="button" aria-label="Reply" class="shadcn-message-action">
+                <button type="button" aria-label="Copy message" class="showcase-message-action showcase-message-action--copy">
+                    <span aria-hidden="true">⧉</span>
+                    <span class="sr-only">Copy</span>
+                </button>
+                <button type="button" aria-label="Reply to message" class="showcase-message-action showcase-message-action--reply">
                     <svg class="shadcn-message-reply-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
+                    <span class="sr-only">Reply</span>
                 </button>
             </ShadcnMessageFooter>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
+
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar>
+            <ShadcnAvatar Size="ShadcnAvatarSize.Small">
+                <ShadcnAvatarFallback>ม</ShadcnAvatarFallback>
+            </ShadcnAvatar>
+        </ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                <ShadcnBubbleContent>พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
+            </ShadcnBubble>
         </ShadcnMessageContent>
     </ShadcnMessage>
 
@@ -625,7 +643,17 @@ internal static class ConversationWorkflowExamples
                 <ShadcnBubbleContent>I’ll keep the thread easy to scan.</ShadcnBubbleContent>
             </ShadcnBubble>
             <ShadcnMessageFooter data-visibility="always">
-                <span>Sent · 10:42</span>
+                <span class="showcase-message-status">Sent · 10:42</span>
+                <button type="button" aria-label="Copy message" class="showcase-message-action showcase-message-action--copy">
+                    <span aria-hidden="true">⧉</span>
+                    <span class="sr-only">Copy</span>
+                </button>
+                <button type="button" aria-label="Reply to message" class="showcase-message-action showcase-message-action--reply">
+                    <svg class="shadcn-message-reply-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="sr-only">Reply</span>
+                </button>
             </ShadcnMessageFooter>
         </ShadcnMessageContent>
     </ShadcnMessage>

@@ -1,7 +1,7 @@
 @using Maliev.ShadcnBlazor.Components.Conversation
 @implements IAsyncDisposable
 
-<div class="showcase-scroller-demo" data-testid="scroller-demo" data-preview-unread="@(AppendUnread ? "true" : "false")">
+<div class="showcase-scroller-demo" data-testid="scroller-demo" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-unread="@(AppendUnread ? "true" : "false")">
     <ShadcnMessageScrollerProvider AutoScroll="@AutoFollow" DefaultScrollPosition="@OpeningPosition">
         <ShadcnMessageScroller Class="showcase-scroller-frame" Style="height:24rem" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-position="@OpeningPosition.ToString().ToLowerInvariant()">
             <ShadcnMessageScrollerViewport AccessibleName="บทสนทนาโครงการ">
@@ -41,15 +41,15 @@
 </div>
 
 @code {
-    [Parameter] public bool AutoFollow { get; set; }
+    [Parameter] public bool AutoFollow { get; set; } = true;
     [Parameter] public bool AppendUnread { get; set; }
     [Parameter] public ShadcnMessageDefaultScrollPosition OpeningPosition { get; set; } = ShadcnMessageDefaultScrollPosition.End;
 
     private readonly CancellationTokenSource _lifetime = new();
     private readonly List<TranscriptMessage> _messages =
     [
-        new("user-1", ShadcnLogicalAlign.Start, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", "images/avatars/operator-thai.png", "นที · วิศวกร"),
-        new("assistant-1", ShadcnLogicalAlign.End, "MALIEV Assistant", "รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว", "images/avatars/assistant-thai.png", "MALIEV Assistant")
+        new("user-1", ShadcnLogicalAlign.End, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", "images/avatars/operator-thai.png", "นที · วิศวกร"),
+        new("assistant-1", ShadcnLogicalAlign.Start, "MALIEV Assistant", "รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว", "images/avatars/assistant-thai.png", "MALIEV Assistant")
     ];
 
     private string Composer { get; set; } = "อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย";
@@ -77,8 +77,8 @@
         var prompt = Composer.Trim();
         Composer = string.Empty;
         IsStreaming = true;
-        _messages.Add(new TranscriptMessage($"user-{_messages.Count + 1}", ShadcnLogicalAlign.Start, "นที · วิศวกร", prompt, "images/avatars/operator-thai.png", "นที · วิศวกร"));
-        var response = new TranscriptMessage($"assistant-{_messages.Count + 1}", ShadcnLogicalAlign.End, "MALIEV Assistant", string.Empty, "images/avatars/assistant-thai.png", "MALIEV Assistant") { IsStreaming = true };
+        _messages.Add(new TranscriptMessage($"user-{_messages.Count + 1}", ShadcnLogicalAlign.End, "นที · วิศวกร", prompt, "images/avatars/operator-thai.png", "นที · วิศวกร"));
+        var response = new TranscriptMessage($"assistant-{_messages.Count + 1}", ShadcnLogicalAlign.Start, "MALIEV Assistant", string.Empty, "images/avatars/assistant-thai.png", "MALIEV Assistant") { IsStreaming = true };
         _messages.Add(response);
         await InvokeAsync(StateHasChanged);
 

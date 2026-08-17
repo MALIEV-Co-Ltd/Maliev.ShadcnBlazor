@@ -55,8 +55,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.DoesNotContain("3px", idleAttachmentShadow, StringComparison.OrdinalIgnoreCase);
         await primaryAttachment.Locator("[data-slot='attachment-action']").FocusAsync();
         await Assertions.Expect(primaryAttachment.Locator("[data-slot='attachment-action']")).ToBeFocusedAsync();
-        var focusedAttachmentShadow = await primaryAttachment.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow");
-        Assert.Contains("3px", focusedAttachmentShadow, StringComparison.OrdinalIgnoreCase);
+        // The preview card intentionally stays visually quiet at rest and when a
+        // child receives focus. The actionable control owns the keyboard ring.
+        var focusedAttachmentOutline = await primaryAttachment.Locator("[data-slot='attachment-action']")
+            .EvaluateAsync<string>("element => `${getComputedStyle(element).outlineWidth} ${getComputedStyle(element).outlineStyle}`");
+        Assert.DoesNotContain("0px", focusedAttachmentOutline, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("solid", focusedAttachmentOutline, StringComparison.OrdinalIgnoreCase);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
         await Assertions.Expect(page.Locator("[data-slot='bubble-group']")).ToHaveCountAsync(1);
