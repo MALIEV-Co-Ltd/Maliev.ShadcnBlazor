@@ -150,10 +150,24 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         });
         var page = await context.NewPageAsync();
 
-        foreach (var (theme, expectedTagColor) in new[]
+        foreach (var (theme, expectedColors) in new[]
         {
-            ("light", "rgb(128, 0, 0)"),
-            ("dark", "rgb(86, 156, 214)")
+            ("light", new Dictionary<string, string>
+            {
+                ["tag"] = "rgb(128, 0, 0)",
+                ["string"] = "rgb(163, 21, 21)",
+                ["type"] = "rgb(38, 127, 153)",
+                ["number"] = "rgb(9, 134, 88)",
+                ["directive"] = "rgb(175, 0, 219)"
+            }),
+            ("dark", new Dictionary<string, string>
+            {
+                ["tag"] = "rgb(86, 156, 214)",
+                ["string"] = "rgb(206, 145, 120)",
+                ["type"] = "rgb(78, 201, 176)",
+                ["number"] = "rgb(181, 206, 168)",
+                ["directive"] = "rgb(197, 134, 192)"
+            })
         })
         {
             await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/bubble?theme={theme}").ToString());
@@ -170,9 +184,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
             var distinctColors = await canonicalTokens.EvaluateAllAsync<string[]>("elements => [...new Set(elements.map(element => getComputedStyle(element).color))]");
             Assert.True(distinctColors.Length >= 5, $"Expected a multi-token editor palette in {theme}; got {string.Join(", ", distinctColors)}");
 
-            var tag = code.Locator(".shadcn-code-token-tag").First;
-            await Assertions.Expect(tag).ToBeVisibleAsync();
-            Assert.Equal(expectedTagColor, await tag.EvaluateAsync<string>("element => getComputedStyle(element).color"));
+            foreach (var (token, expectedColor) in expectedColors)
+            {
+                var tokenLocator = code.Locator($".shadcn-code-token-{token}").First;
+                await Assertions.Expect(tokenLocator).ToBeVisibleAsync();
+                Assert.Equal(expectedColor, await tokenLocator.EvaluateAsync<string>("element => getComputedStyle(element).color"));
+            }
 
             var typeTokenText = await code.Locator(".shadcn-code-token-type").AllTextContentsAsync();
             Assert.DoesNotContain("Hey", typeTokenText);
