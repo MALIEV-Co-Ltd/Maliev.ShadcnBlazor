@@ -10,6 +10,10 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.Contains("16:9", aspectRatio.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("1.7777777777777777", aspectRatio.RazorSource, StringComparison.Ordinal);
 
+        aspectRatio.Controls.Single(control => control.Id == "aspect-ratio").Apply("1:1");
+        Assert.Contains("Ratio=\"@(1d / 1d)\"", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<span>1:1</span>", aspectRatio.RazorSource, StringComparison.Ordinal);
+
         var typography = Assert.Single(registry.GetBySlug("typography"));
         Assert.Contains("Variant=\"ShadcnTypographyVariant.H1\"", typography.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Variant=\"ShadcnTypographyVariant.H3\"", typography.RazorSource, StringComparison.Ordinal);

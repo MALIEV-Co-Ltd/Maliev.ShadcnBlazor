@@ -81,6 +81,37 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DataDisplaySourcesFollowInteractiveStateControls()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+
+        var table = registry.GetBySlug("table").Single();
+        table.Controls.Single(control => control.Id == "table-borders").Apply("false");
+        table.Controls.Single(control => control.Id == "table-selected").Apply("true");
+        Assert.Contains("Class=\"showcase-table showcase-table--borderless\"", table.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Borders=\"false\"", table.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTableRow Selected=\"true\">", table.RazorSource, StringComparison.Ordinal);
+
+        var dataTable = registry.GetBySlug("data-table").Single();
+        dataTable.Controls.Single(control => control.Id == "data-table-empty").Apply("true");
+        dataTable.Controls.Single(control => control.Id == "data-table-manual").Apply("true");
+        dataTable.Controls.Single(control => control.Id == "data-table-error").Apply("true");
+        Assert.Contains("Items=\"@(Array.Empty<Payment>())\"", dataTable.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Manual=\"true\"", dataTable.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("TotalCount=\"12\"", dataTable.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Error=\"โหลดข้อมูลไม่สำเร็จ\"", dataTable.RazorSource, StringComparison.Ordinal);
+
+        var chart = registry.GetBySlug("chart").Single();
+        chart.Controls.Single(control => control.Id == "chart-line").Apply("true");
+        chart.Controls.Single(control => control.Id == "chart-loading").Apply("true");
+        chart.Controls.Single(control => control.Id == "chart-legend").Apply("true");
+        Assert.Contains("Type=\"ShadcnChartType.Line\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Loading=\"true\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowLegend=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksPinnedAndCurrentReferences()
     {
         var route = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));

@@ -51,11 +51,11 @@
     protected override void OnInitialized()
     {
         _messages.AddRange([
-            new("turn-1", ShadcnLogicalAlign.End, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", new("operator", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
-            new("turn-2", ShadcnLogicalAlign.Start, "MALIEV Assistant", "พบไฟล์ CAD ครบ 3 รายการ จัดลำดับการตรวจสอบให้แล้ว", new("assistant", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
-            new("turn-3", ShadcnLogicalAlign.End, "นที · วิศวกร", "กำลังเตรียมใบเสนอราคา", new("operator-2", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
-            new("turn-4", ShadcnLogicalAlign.Start, "MALIEV Assistant", "จะส่งให้ตรวจในอีกสักครู่", new("assistant-2", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
-            new("turn-5", ShadcnLogicalAlign.Start, "MALIEV Assistant", "รับทราบครับ", new("assistant-3", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA"))
+            new("turn-1", ShadcnLogicalAlign.End, "นที · วิศวกร", "เริ่มตรวจสอบชิ้นงานแล้ว", new("operator", "images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
+            new("turn-2", ShadcnLogicalAlign.Start, "MALIEV Assistant", "พบไฟล์ CAD ครบ 3 รายการ จัดลำดับการตรวจสอบให้แล้ว", new("assistant", "images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
+            new("turn-3", ShadcnLogicalAlign.End, "นที · วิศวกร", "กำลังเตรียมใบเสนอราคา", new("operator-2", "images/avatars/operator-thai.png", "นที · วิศวกร", "นท")),
+            new("turn-4", ShadcnLogicalAlign.Start, "MALIEV Assistant", "จะส่งให้ตรวจในอีกสักครู่", new("assistant-2", "images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")),
+            new("turn-5", ShadcnLogicalAlign.Start, "MALIEV Assistant", "รับทราบครับ", new("assistant-3", "images/avatars/assistant-thai.png", "MALIEV Assistant", "MA"))
         ]);
     }
 
@@ -63,7 +63,7 @@
     {
         if (AppendUnread && !_extraWasAdded)
         {
-            _messages.Add(new("turn-unread", ShadcnLogicalAlign.Start, "ผู้ตรวจสอบคุณภาพ", "มีข้อความใหม่เข้ามา พร้อมข้อสังเกตสำหรับรอยพิมพ์และผิวงาน", new("reviewer", "/images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ", "ผต")));
+            _messages.Add(new("turn-unread", ShadcnLogicalAlign.Start, "ผู้ตรวจสอบคุณภาพ", "มีข้อความใหม่เข้ามา พร้อมข้อสังเกตสำหรับรอยพิมพ์และผิวงาน", new("reviewer", "images/avatars/reviewer-thai.png", "ผู้ตรวจสอบคุณภาพ", "ผต")));
             _extraWasAdded = true;
         }
         else if (!AppendUnread && _extraWasAdded)
@@ -80,8 +80,8 @@
         var userText = _composerText.Trim();
         _composerText = string.Empty;
         var userId = $"turn-user-{_messages.Count}";
-        _messages.Add(new(userId, ShadcnLogicalAlign.End, "นที · วิศวกร", userText, new("operator-send", "/images/avatars/operator-thai.png", "นที · วิศวกร", "นท")));
-        var assistant = new TranscriptMessage($"turn-assistant-{_messages.Count}", ShadcnLogicalAlign.Start, "MALIEV Assistant", string.Empty, new("assistant-send", "/images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")) { Streaming = true };
+        _messages.Add(new(userId, ShadcnLogicalAlign.End, "นที · วิศวกร", userText, new("operator-send", "images/avatars/operator-thai.png", "นที · วิศวกร", "นท")));
+        var assistant = new TranscriptMessage($"turn-assistant-{_messages.Count}", ShadcnLogicalAlign.Start, "MALIEV Assistant", string.Empty, new("assistant-send", "images/avatars/assistant-thai.png", "MALIEV Assistant", "MA")) { Streaming = true };
         _messages.Add(assistant);
         await InvokeAsync(StateHasChanged);
 

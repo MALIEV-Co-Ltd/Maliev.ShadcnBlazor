@@ -228,7 +228,7 @@ public sealed class FormsDossierTests : BunitContext
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],
             ["combobox"] = ["selected", "multiple", "chips", "open", "invalid"],
             ["calendar"] = ["single", "range", "culture", "invalid"],
-            ["date-picker"] = ["single", "calendar", "culture", "clearable", "invalid"]
+            ["date-picker"] = ["single", "range", "calendar", "culture", "clearable", "invalid"]
         };
 
         foreach (var (slug, tags) in expected)

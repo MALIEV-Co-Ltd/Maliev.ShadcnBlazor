@@ -218,6 +218,14 @@ public sealed class ActionsSelectionParityTests : BunitContext
     }
 
     [Fact]
+    public void ToggleStyleAdvertisesDirectPointerInteraction()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+
+        Assert.Contains(".shadcn-toggle:not(:disabled) { cursor: pointer; }", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SliderExposesStableThumbFormAndAccessibleNameContracts()
     {
         var cut = Render<ShadcnSlider>(parameters => parameters.Add(slider => slider.Values, [20d, 80d]));

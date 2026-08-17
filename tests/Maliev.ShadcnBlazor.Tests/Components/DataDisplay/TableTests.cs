@@ -75,6 +75,20 @@ public sealed class TableTests : BunitContext
         Assert.NotNull(cut.Find("tfoot[data-slot='table-footer']"));
         Assert.Equal("col", cut.Find("th[data-slot='table-head']").GetAttribute("scope"));
         Assert.Equal("PO-42", cut.Find("td[data-slot='table-cell']").TextContent);
+        Assert.Equal("true", table.GetAttribute("data-borders"));
+    }
+
+    [Fact]
+    public void TableCanDisableDecorativeRowSeparatorsWithoutChangingSemantics()
+    {
+        var cut = Render<ShadcnTable>(parameters => parameters
+            .Add(component => component.Borders, false)
+            .AddChildContent<ShadcnTableBody>(body => body.AddChildContent<ShadcnTableRow>(row =>
+                row.AddChildContent<ShadcnTableCell>(cell => cell.AddChildContent("Value")))));
+
+        var table = cut.Find("table[data-slot='table']");
+        Assert.Equal("false", table.GetAttribute("data-borders"));
+        Assert.Equal("Value", cut.Find("td[data-slot='table-cell']").TextContent);
     }
 
     [Fact]

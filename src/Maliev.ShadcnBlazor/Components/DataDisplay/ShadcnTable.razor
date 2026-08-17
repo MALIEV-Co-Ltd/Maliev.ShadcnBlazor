@@ -1,9 +1,11 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div class="shadcn-table-container" data-slot="table-container">
-    <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table"><CascadingValue Value="TableContext" IsFixed="true">@ChildContent</CascadingValue></table>
+    <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table" data-borders="@(Borders ? "true" : "false")"><CascadingValue Value="TableContext" IsFixed="true">@ChildContent</CascadingValue></table>
 </div>
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    /// <summary>Gets or sets whether row and cell separators are rendered.</summary>
+    [Parameter] public bool Borders { get; set; } = true;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
     private static ShadcnTableCompositionContext TableContext { get; } = new(ShadcnTableCompositionKind.Table);
     protected override void OnParametersSet()

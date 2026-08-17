@@ -106,6 +106,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-variant="outline"] { border-width: 1px; border-color: var(--shadcn-input); background: transparent; box-shadow: var(--shadcn-shadow-xs); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-variant="outline"]:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-state="on"] { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle:not(:disabled) { cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle { min-width: 2.25rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="default"]:has([data-icon="inline-start"]) { padding-inline-start: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle[data-size="default"]:has([data-icon="inline-end"]) { padding-inline-end: calc(0.5rem * var(--shadcn-spacing-multiplier)); }

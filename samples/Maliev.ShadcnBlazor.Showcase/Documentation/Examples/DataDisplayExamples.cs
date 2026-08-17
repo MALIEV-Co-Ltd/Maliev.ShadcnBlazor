@@ -22,10 +22,10 @@ internal static class DataDisplayExamples
 
     private static ComponentExampleDefinition Table()
     {
-        var selected = false; var expanded = false; var disabled = false; var footer = true;
+        var selected = false; var expanded = false; var disabled = false; var footer = true; var borders = true;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", "showcase-table"); b.AddAttribute(2, "ChildContent", (RenderFragment)(t =>
+            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", borders ? "showcase-table" : "showcase-table showcase-table--borderless"); b.AddAttribute(2, "Borders", borders); b.AddAttribute(3, "ChildContent", (RenderFragment)(t =>
             {
                 AddText<ShadcnTableCaption>(t, 0, "รายการใบแจ้งหนี้ล่าสุด");
                 t.OpenComponent<ShadcnTableHeader>(10); t.AddAttribute(11, "ChildContent", (RenderFragment)(h => { h.OpenComponent<ShadcnTableRow>(0); h.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableHead>(r, 0, "Invoice"); AddText<ShadcnTableHead>(r, 10, "Status"); AddText<ShadcnTableHead>(r, 20, "Method"); AddText<ShadcnTableHead>(r, 30, "Amount"); })); h.CloseComponent(); })); t.CloseComponent();
@@ -41,8 +41,22 @@ internal static class DataDisplayExamples
                 if (footer) { t.OpenComponent<ShadcnTableFooter>(30); t.AddAttribute(31, "ChildContent", (RenderFragment)(f => { f.OpenComponent<ShadcnTableRow>(0); f.AddAttribute(1, "ChildContent", (RenderFragment)(r => { r.OpenComponent<ShadcnTableCell>(0); r.AddAttribute(1, "ColSpan", 3); r.AddAttribute(2, "ChildContent", (RenderFragment)(c => c.AddContent(0, "Total"))); r.CloseComponent(); AddText<ShadcnTableCell>(r, 10, "฿37,800"); })); f.CloseComponent(); })); t.CloseComponent(); }
             })); b.CloseComponent();
         };
-        const string source = """
-<ShadcnTable>
+        string Source()
+        {
+            var classAttribute = borders ? " Class=\"showcase-table\"" : " Class=\"showcase-table showcase-table--borderless\"";
+            var firstRowState = string.Join(" ", new[]
+            {
+                selected ? "Selected=\"true\"" : string.Empty,
+                expanded ? "Expanded=\"true\"" : string.Empty,
+                disabled ? "Disabled=\"true\"" : string.Empty
+            }.Where(value => value.Length > 0));
+            var rows = string.Join(Environment.NewLine, Invoices.Select((invoice, index) =>
+                $"        <ShadcnTableRow{(index == 0 && firstRowState.Length > 0 ? $" {firstRowState}" : string.Empty)}><ShadcnTableCell>{invoice.Id}</ShadcnTableCell><ShadcnTableCell>{invoice.Status}</ShadcnTableCell><ShadcnTableCell>{invoice.Method}</ShadcnTableCell><ShadcnTableCell>{invoice.Amount}</ShadcnTableCell></ShadcnTableRow>"));
+            var footerMarkup = footer
+                ? "    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan=\"3\">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>"
+                : string.Empty;
+            return $"""
+<ShadcnTable{classAttribute} Borders="{borders.ToString().ToLowerInvariant()}">
     <ShadcnTableCaption>รายการใบแจ้งหนี้ล่าสุด</ShadcnTableCaption>
     <ShadcnTableHeader>
         <ShadcnTableRow>
@@ -53,16 +67,14 @@ internal static class DataDisplayExamples
         </ShadcnTableRow>
     </ShadcnTableHeader>
     <ShadcnTableBody>
-        <ShadcnTableRow><ShadcnTableCell>INV001</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>Credit Card</ShadcnTableCell><ShadcnTableCell>฿8,500</ShadcnTableCell></ShadcnTableRow>
-        <ShadcnTableRow><ShadcnTableCell>INV002</ShadcnTableCell><ShadcnTableCell>Pending</ShadcnTableCell><ShadcnTableCell>PayPal</ShadcnTableCell><ShadcnTableCell>฿3,250</ShadcnTableCell></ShadcnTableRow>
-        <ShadcnTableRow><ShadcnTableCell>INV003</ShadcnTableCell><ShadcnTableCell>Unpaid</ShadcnTableCell><ShadcnTableCell>Bank Transfer</ShadcnTableCell><ShadcnTableCell>฿12,400</ShadcnTableCell></ShadcnTableRow>
-        <ShadcnTableRow><ShadcnTableCell>INV004</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>Credit Card</ShadcnTableCell><ShadcnTableCell>฿5,900</ShadcnTableCell></ShadcnTableRow>
-        <ShadcnTableRow><ShadcnTableCell>INV005</ShadcnTableCell><ShadcnTableCell>Paid</ShadcnTableCell><ShadcnTableCell>PayPal</ShadcnTableCell><ShadcnTableCell>฿7,750</ShadcnTableCell></ShadcnTableRow>
+{rows}
     </ShadcnTableBody>
-    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan="3">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>
+{footerMarkup}
 </ShadcnTable>
 """;
-        return Example("table", "Responsive semantic table", "Show a realistic invoice list with caption, status, payment method, selection, and a total footer.", source, preview, [Toggle("table-selected", "Selected row", v => selected = v), Toggle("table-expanded", "Expanded row", v => expanded = v), Toggle("table-disabled", "Disabled row", v => disabled = v), Toggle("table-footer", "Footer", v => footer = v, true)], ["caption", "footer", "selected", "expanded", "disabled", "actions", "responsive-overflow", "rtl"]);
+        }
+        var example = Example("table", "Responsive semantic table", "Show a realistic invoice list with caption, status, payment method, selection, and a total footer.", Source(), preview, [Toggle("table-selected", "Selected row", v => selected = v), Toggle("table-expanded", "Expanded row", v => expanded = v), Toggle("table-disabled", "Disabled row", v => disabled = v), Toggle("table-footer", "Footer", v => footer = v, true), Toggle("table-borders", "Borders", v => borders = v, true)], ["caption", "footer", "selected", "expanded", "disabled", "actions", "responsive-overflow", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition DataTable()
@@ -80,13 +92,14 @@ internal static class DataDisplayExamples
                 x.CloseElement(); x.CloseElement();
             })); b.CloseComponent();
         };
-        const string source = """
+        const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
 <ShadcnDataTable TItem="Payment"
-                  Items="@Payments"
+                  Items="__ITEMS__"
                   Columns="@Columns"
                   RowKey="@(row => row.Id)"
+__STATE_ATTRIBUTES__
                   FilterPlaceholder="กรองอีเมล..."
                   EmptyText="ไม่พบผลลัพธ์"
                   RowActionTemplate="@((Payment row) => @<button type=\"button\" class=\"showcase-data-table-row-action\" aria-label=\"เปิด @row.Email\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><circle cx=\"3\" cy=\"8\" r=\"1\" /><circle cx=\"8\" cy=\"8\" r=\"1\" /><circle cx=\"13\" cy=\"8\" r=\"1\" /></svg></button>)" />
@@ -109,27 +122,44 @@ internal static class DataDisplayExamples
     ];
 }
 """;
-        return Example("data-table", "Typed payments data table", "Filter, sort, select, hide columns, and page through a realistic typed payment collection.", source, preview, [Toggle("data-table-loading", "Loading", v => loading = v), Toggle("data-table-error", "Error", v => error = v), Toggle("data-table-empty", "Empty", v => empty = v), Toggle("data-table-manual", "Manual paging", v => manual = v)], ["sort", "filter", "selection", "pagination", "visibility", "row-actions", "manual", "loading", "empty", "error", "rtl"]);
+        string Source()
+        {
+            var stateAttributes = string.Join(Environment.NewLine, new[]
+            {
+                loading ? "                  Loading=\"true\"" : string.Empty,
+                error ? "                  Error=\"โหลดข้อมูลไม่สำเร็จ\"" : string.Empty,
+                manual ? "                  Manual=\"true\"\n                  TotalCount=\"12\"" : string.Empty
+            }.Where(value => value.Length > 0));
+            return sourceTemplate
+                .Replace("__ITEMS__", empty ? "@(Array.Empty<Payment>())" : "@Payments", StringComparison.Ordinal)
+                .Replace("__STATE_ATTRIBUTES__", stateAttributes, StringComparison.Ordinal);
+        }
+        var example = Example("data-table", "Typed payments data table", "Filter, sort, select, hide columns, and page through a realistic typed payment collection.", Source(), preview, [Toggle("data-table-loading", "Loading", v => loading = v), Toggle("data-table-error", "Error", v => error = v), Toggle("data-table-empty", "Empty", v => empty = v), Toggle("data-table-manual", "Manual paging", v => manual = v)], ["sort", "filter", "selection", "pagination", "visibility", "row-actions", "manual", "loading", "empty", "error", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Chart()
     {
         var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false;
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Id", "dossier"); b.AddAttribute(2, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(3, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(4, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(5, "Config", config); b.AddAttribute(6, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(7, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "ShowLegend", !hideLegend); b.AddAttribute(10, "ShowGrid", true); b.AddAttribute(11, "BarRadius", 0d); b.AddAttribute(12, "InitialHeight", 260d); b.AddAttribute(13, "Stacked", stacked); b.AddAttribute(14, "LegendInteractive", true); b.AddAttribute(15, "Animated", true); b.CloseComponent(); };
-        const string source = """
+        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowGrid", true); b.AddAttribute(12, "BarRadius", 0d); b.AddAttribute(13, "InitialHeight", 260d); b.AddAttribute(14, "Stacked", stacked); b.AddAttribute(15, "LegendInteractive", true); b.AddAttribute(16, "Animated", true); b.CloseComponent(); };
+        const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
-<ShadcnChart Id="traffic-overview"
+<ShadcnChart Class="showcase-chart-dossier"
+             Id="dossier"
              Title="ยอดผู้เข้าชม"
              Description="สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"
-             Type="ShadcnChartType.Bar"
+             Type="ShadcnChartType.__TYPE__"
              Categories="@Months"
              Series="@Series"
              Config="@Config"
-             ShowLegend="true"
+             Loading="__LOADING__"
+             ShowLegend="__SHOW_LEGEND__"
              ShowGrid="true"
              BarRadius="0"
+             InitialHeight="260"
+             Stacked="__STACKED__"
              LegendInteractive="true"
              Animated="true" />
 
@@ -142,11 +172,17 @@ internal static class DataDisplayExamples
     private readonly ShadcnChartConfig Config = new()
     {
         ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" },
-        ["mobile"] = new("Mobile") { Color = "var(--shadcn-chart-2)" }
+        ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") }
     };
 }
 """;
-        return Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with a real tooltip, legend, loading state, and responsive SVG surface.", source, preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v)], ["bar", "line", "area", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
+        string Source() => sourceTemplate
+            .Replace("__TYPE__", area ? "Area" : line ? "Line" : "Bar", StringComparison.Ordinal)
+            .Replace("__LOADING__", loading ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__SHOW_LEGEND__", hideLegend ? "false" : "true", StringComparison.Ordinal)
+            .Replace("__STACKED__", stacked ? "true" : "false", StringComparison.Ordinal);
+        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with a real tooltip, legend, loading state, and responsive SVG surface.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v)], ["bar", "line", "area", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", $"<Shadcn{ToPascal(slug)} />", preview, controls, tags);
