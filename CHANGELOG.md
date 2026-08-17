@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-08-17
+
+### Fixed
+
+- Preserved Ghost bubble sizing and reaction spacing so conversation content
+  remains readable in every variant.
+- Reworked streaming marker shimmer to move left-to-right without a masking
+  rectangle and to respect reduced-motion and forced-colors preferences.
+- Aligned message avatars to the message body, compacted footer actions, and
+  kept copy/reply actions and sent status in their intended positions.
+- Moved the Message Scroller composer into the chat window and kept its
+  auto-follow, direction, and streaming behavior interactive.
+- Refreshed responsive conversation visual proofs and regression coverage for
+  the six annotation fixes.
+
 ## [1.0.7] - 2026-08-17
 
 ### Fixed
@@ -75,7 +90,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.7...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.8...HEAD
+[1.0.8]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.8
 [1.0.7]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.7
 [1.0.6]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.6
 [1.0.5]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.5
