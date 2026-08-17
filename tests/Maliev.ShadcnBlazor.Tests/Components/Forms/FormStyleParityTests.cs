@@ -20,6 +20,8 @@ public sealed class FormStyleParityTests
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
 
         Assert.Contains("height: var(--shadcn-control-height)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input::file-selector-button", css, StringComparison.Ordinal);
+        Assert.Contains("file-selector-button { display: inline-flex", css, StringComparison.Ordinal);
         Assert.Contains("--shadcn-calendar-cell: 2rem", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-calendar-week { margin-top: calc(.375rem * var(--shadcn-spacing-multiplier));", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-input-otp-separator { display: flex; width: 1rem; height: 1rem;", css, StringComparison.Ordinal);

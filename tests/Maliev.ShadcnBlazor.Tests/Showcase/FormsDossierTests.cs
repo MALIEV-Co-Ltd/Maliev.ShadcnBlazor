@@ -151,10 +151,27 @@ public sealed class FormsDossierTests : BunitContext
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
 
         var input = RenderExample(registry, "input");
+        Assert.Single(input.FindAll("[data-slot='card']"));
+        Assert.Equal(2, input.FindAll("input[data-slot='input']").Count);
+        Assert.Equal("integration-key", input.Find("[data-slot='field-label']").GetAttribute("for"));
+        Assert.Equal("integration-key-help", input.Find("[data-testid='forms-dossier-input']").GetAttribute("aria-describedby"));
+        Assert.Contains("<ShadcnCard>", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Type=\"file\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("HandleCredentialFile", input.Instance.Example.RazorSource, StringComparison.Ordinal);
         Change(input, "input-invalid", true);
         Assert.Equal("true", input.Find("[data-testid='forms-dossier-input']").GetAttribute("aria-invalid"));
-        Change(input, "input-type", "file");
-        Assert.Equal("file", input.Find("[data-testid='forms-dossier-input']").GetAttribute("type"));
+        Assert.Equal("integration-key-help integration-key-error", input.Find("[data-testid='forms-dossier-input']").GetAttribute("aria-describedby"));
+        Assert.Single(input.FindAll("[data-slot='field-error'][role='alert']"));
+        Assert.Contains("Invalid=\"true\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Change(input, "input-masked", false);
+        Assert.Equal("text", input.Find("[data-testid='forms-dossier-input']").GetAttribute("type"));
+        Assert.Contains("Type=\"text\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Change(input, "input-readonly", true);
+        Assert.True(input.Find("[data-testid='forms-dossier-input']").HasAttribute("readonly"));
+        Change(input, "input-disabled", true);
+        Assert.True(input.Find("[data-testid='forms-dossier-input']").HasAttribute("disabled"));
+        Assert.True(input.Find("[data-testid='forms-dossier-file']").HasAttribute("disabled"));
+        Assert.True(input.Find("[data-testid='forms-dossier-save']").HasAttribute("disabled"));
 
         var textarea = RenderExample(registry, "textarea");
         Change(textarea, "textarea-invalid", true);
@@ -231,7 +248,7 @@ public sealed class FormsDossierTests : BunitContext
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
         var expected = new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
-            ["input"] = ["typed-binding", "required", "file", "invalid"],
+            ["input"] = ["typed-binding", "required", "file", "invalid", "disabled", "read-only"],
             ["textarea"] = ["typed-binding", "rows", "invalid"],
             ["native-select"] = ["selected", "read-only", "invalid"],
             ["input-group"] = ["addons", "inline", "block", "invalid"],

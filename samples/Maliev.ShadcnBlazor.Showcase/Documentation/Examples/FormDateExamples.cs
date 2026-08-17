@@ -1,8 +1,11 @@
 using System.Globalization;
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Content;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 
 namespace Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
@@ -30,15 +33,92 @@ internal static class FormDateExamples
 
     private static ComponentExampleDefinition Input()
     {
-        var invalid = false; var type = "text"; var value = "ชิ้นส่วน";
-        RenderFragment preview = b => { b.OpenComponent<ShadcnInput<string>>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => value = next)); b.AddAttribute(3, "Type", type); b.AddAttribute(4, "Invalid", invalid); b.AddAttribute(5, "Required", true); b.AddAttribute(6, "AdditionalAttributes", Attr("forms-dossier-input", "Part name")); b.CloseComponent(); };
-        string Source() => $"<ShadcnInput TValue=\"string\" @bind-Value=\"PartName\" Type=\"{type}\" Required=\"true\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
-        return Example("input", "Typed input", "Exercise typed binding, native input modes, required and invalid states.", Source(), preview,
+        var invalid = false; var masked = true; var disabled = false; var readOnly = false;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<InputDossierPreview>(0);
+            b.AddAttribute(1, nameof(InputDossierPreview.Invalid), invalid);
+            b.AddAttribute(2, nameof(InputDossierPreview.Masked), masked);
+            b.AddAttribute(3, nameof(InputDossierPreview.Disabled), disabled);
+            b.AddAttribute(4, nameof(InputDossierPreview.ReadOnly), readOnly);
+            b.CloseComponent();
+        };
+        string Source() => InputSource(invalid, masked, disabled, readOnly);
+        return Example("input", "Production credentials", "Edit and upload integration credentials in a realistic, accessible form.", Source(), preview,
             [
                 Toggle("input-invalid", "Invalid", v => invalid = v),
-                Select("input-type", "Type", type, ["text", "search", "file"], v => type = v)
-            ], ["typed-binding", "required", "file", "invalid"]) with
+                Toggle("input-masked", "Mask key", v => masked = v, true),
+                Toggle("input-disabled", "Disabled", v => disabled = v),
+                Toggle("input-readonly", "Read only", v => readOnly = v)
+            ], ["typed-binding", "required", "file", "invalid", "disabled", "read-only"]) with
         { RazorSourceProvider = Source };
+    }
+
+    private static string InputSource(bool invalid, bool masked, bool disabled, bool readOnly)
+    {
+        var invalidText = invalid.ToString().ToLowerInvariant();
+        var disabledText = disabled.ToString().ToLowerInvariant();
+        var readOnlyText = readOnly.ToString().ToLowerInvariant();
+        var errorId = invalid ? " ErrorId=\"integration-key-error\"" : string.Empty;
+        var error = invalid
+            ? "\n            <ShadcnFieldError>Enter a valid integration key.</ShadcnFieldError>"
+            : string.Empty;
+
+        return $$"""
+            @using Maliev.ShadcnBlazor.Components.Actions
+            @using Maliev.ShadcnBlazor.Components.Content
+            @using Maliev.ShadcnBlazor.Components.Forms
+            @using Microsoft.AspNetCore.Components.Forms
+
+            <ShadcnCard>
+                <ShadcnCardHeader>
+                    <ShadcnCardTitle>Production API credentials</ShadcnCardTitle>
+                    <ShadcnCardDescription>Connect the CAD intake service without exposing the key.</ShadcnCardDescription>
+                </ShadcnCardHeader>
+                <ShadcnCardContent>
+                    <ShadcnField Invalid="{{invalidText}}" Disabled="{{disabledText}}" DescriptionId="integration-key-help"{{errorId}}>
+                        <ShadcnFieldLabel For="integration-key">Integration key</ShadcnFieldLabel>
+                        <ShadcnInput TValue="string"
+                                     id="integration-key"
+                                     @bind-Value="ApiKey"
+                                     Type="{{(masked ? "password" : "text")}}"
+                                     Placeholder="api_live_demo_7hK2"
+                                     InputMode="text"
+                                     AutoComplete="off"
+                                     Required="true"
+                                     ReadOnly="{{readOnlyText}}" />
+                        <ShadcnFieldDescription>Stored encrypted and never included in logs.</ShadcnFieldDescription>{{error}}
+                    </ShadcnField>
+
+                    <ShadcnField Disabled="{{disabledText}}" DescriptionId="credential-file-help">
+                        <ShadcnFieldLabel For="credential-file">Credential file</ShadcnFieldLabel>
+                        <ShadcnInput TValue="string"
+                                     id="credential-file"
+                                     Type="file"
+                                     Accept=".json,.pem"
+                                     FilesChanged="HandleCredentialFile" />
+                        <ShadcnFieldDescription>Optional encrypted JSON or PEM credential.</ShadcnFieldDescription>
+                    </ShadcnField>
+                </ShadcnCardContent>
+                <ShadcnCardFooter>
+                    <ShadcnButton Disabled="{{(disabled || invalid).ToString().ToLowerInvariant()}}" OnClick="Save">Save credentials</ShadcnButton>
+                    <p role="status">@Status</p>
+                </ShadcnCardFooter>
+            </ShadcnCard>
+
+            @code {
+                private string ApiKey { get; set; } = "api_live_demo_7hK2";
+                private string Status { get; set; } = "Ready to save";
+
+                private Task HandleCredentialFile(InputFileChangeEventArgs args)
+                {
+                    Status = $"Selected {args.File.Name}";
+                    return Task.CompletedTask;
+                }
+
+                private void Save() => Status = "Credentials saved for this demo.";
+            }
+            """;
     }
     private static ComponentExampleDefinition Textarea()
     {
@@ -305,6 +385,150 @@ internal static class FormDateExamples
     private static IReadOnlyDictionary<string, object> Attr(string testId, string label) => new Dictionary<string, object> { ["data-testid"] = testId, ["aria-label"] = label };
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);
     private static void AddNativeOption(RenderTreeBuilder b, int sequence, string value, string text) { b.OpenComponent<ShadcnNativeSelectOption<string>>(sequence); b.AddAttribute(sequence + 1, "Value", value); b.AddAttribute(sequence + 2, "ChildContent", Text(text)); b.CloseComponent(); }
+
+    private sealed class InputDossierPreview : ComponentBase
+    {
+        [Parameter] public bool Invalid { get; set; }
+        [Parameter] public bool Masked { get; set; } = true;
+        [Parameter] public bool Disabled { get; set; }
+        [Parameter] public bool ReadOnly { get; set; }
+
+        private string ApiKey { get; set; } = "api_live_demo_7hK2";
+        private string Status { get; set; } = "Ready to save";
+
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-input-dossier");
+            builder.AddAttribute(2, "data-testid", "input-dossier-preview");
+            builder.OpenComponent<ShadcnCard>(3);
+            builder.AddAttribute(4, nameof(ShadcnCard.ChildContent), (RenderFragment)(card =>
+            {
+                card.OpenComponent<ShadcnCardHeader>(0);
+                card.AddAttribute(1, nameof(ShadcnCardHeader.ChildContent), (RenderFragment)(header =>
+                {
+                    header.OpenComponent<ShadcnCardTitle>(0);
+                    header.AddAttribute(1, nameof(ShadcnCardTitle.ChildContent), Text("Production API credentials"));
+                    header.CloseComponent();
+                    header.OpenComponent<ShadcnCardDescription>(2);
+                    header.AddAttribute(3, nameof(ShadcnCardDescription.ChildContent), Text("Connect the CAD intake service without exposing the key."));
+                    header.CloseComponent();
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardContent>(10);
+                card.AddAttribute(11, nameof(ShadcnCardContent.ChildContent), (RenderFragment)(content =>
+                {
+                    AddKeyField(content);
+                    AddFileField(content);
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardFooter>(20);
+                card.AddAttribute(21, nameof(ShadcnCardFooter.ChildContent), (RenderFragment)(footer =>
+                {
+                    footer.OpenComponent<ShadcnButton>(0);
+                    footer.AddAttribute(1, nameof(ShadcnButton.Disabled), Disabled || Invalid);
+                    footer.AddAttribute(2, nameof(ShadcnButton.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, Save));
+                    footer.AddAttribute(3, nameof(ShadcnButton.ChildContent), Text("Save credentials"));
+                    footer.AddAttribute(4, nameof(ShadcnButton.AdditionalAttributes), new Dictionary<string, object> { ["data-testid"] = "forms-dossier-save" });
+                    footer.CloseComponent();
+                    footer.OpenElement(5, "p");
+                    footer.AddAttribute(6, "role", "status");
+                    footer.AddAttribute(7, "data-testid", "forms-dossier-status");
+                    footer.AddContent(8, Status);
+                    footer.CloseElement();
+                }));
+                card.CloseComponent();
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        }
+
+        private void AddKeyField(RenderTreeBuilder builder)
+        {
+            builder.OpenComponent<ShadcnField>(0);
+            builder.AddAttribute(1, nameof(ShadcnField.Invalid), Invalid);
+            builder.AddAttribute(2, nameof(ShadcnField.Disabled), Disabled);
+            builder.AddAttribute(3, nameof(ShadcnField.DescriptionId), "integration-key-help");
+            builder.AddAttribute(4, nameof(ShadcnField.ErrorId), Invalid ? "integration-key-error" : null);
+            builder.AddAttribute(5, nameof(ShadcnField.ChildContent), (RenderFragment)(field =>
+            {
+                field.OpenComponent<ShadcnFieldLabel>(0);
+                field.AddAttribute(1, nameof(ShadcnFieldLabel.For), "integration-key");
+                field.AddAttribute(2, nameof(ShadcnFieldLabel.ChildContent), Text("Integration key"));
+                field.CloseComponent();
+                field.OpenComponent<ShadcnInput<string>>(3);
+                field.AddAttribute(4, nameof(ShadcnInput<string>.Value), ApiKey);
+                field.AddAttribute(5, nameof(ShadcnInput<string>.ValueChanged), EventCallback.Factory.Create<string>(this, HandleKeyChanged));
+                field.AddAttribute(6, nameof(ShadcnInput<string>.Type), Masked ? "password" : "text");
+                field.AddAttribute(7, nameof(ShadcnInput<string>.Placeholder), "api_live_demo_7hK2");
+                field.AddAttribute(8, nameof(ShadcnInput<string>.InputMode), "text");
+                field.AddAttribute(9, nameof(ShadcnInput<string>.AutoComplete), "off");
+                field.AddAttribute(10, nameof(ShadcnInput<string>.Required), true);
+                field.AddAttribute(11, nameof(ShadcnInput<string>.ReadOnly), ReadOnly);
+                field.AddAttribute(12, nameof(ShadcnInput<string>.AdditionalAttributes), new Dictionary<string, object>
+                {
+                    ["id"] = "integration-key",
+                    ["data-testid"] = "forms-dossier-input"
+                });
+                field.CloseComponent();
+                field.OpenComponent<ShadcnFieldDescription>(13);
+                field.AddAttribute(14, nameof(ShadcnFieldDescription.ChildContent), Text("Stored encrypted and never included in logs."));
+                field.CloseComponent();
+                if (Invalid)
+                {
+                    field.OpenComponent<ShadcnFieldError>(15);
+                    field.AddAttribute(16, nameof(ShadcnFieldError.ChildContent), Text("Enter a valid integration key."));
+                    field.CloseComponent();
+                }
+            }));
+            builder.CloseComponent();
+        }
+
+        private void AddFileField(RenderTreeBuilder builder)
+        {
+            builder.OpenComponent<ShadcnField>(20);
+            builder.AddAttribute(21, nameof(ShadcnField.Disabled), Disabled);
+            builder.AddAttribute(22, nameof(ShadcnField.DescriptionId), "credential-file-help");
+            builder.AddAttribute(23, nameof(ShadcnField.ChildContent), (RenderFragment)(field =>
+            {
+                field.OpenComponent<ShadcnFieldLabel>(0);
+                field.AddAttribute(1, nameof(ShadcnFieldLabel.For), "credential-file");
+                field.AddAttribute(2, nameof(ShadcnFieldLabel.ChildContent), Text("Credential file"));
+                field.CloseComponent();
+                field.OpenComponent<ShadcnInput<string>>(3);
+                field.AddAttribute(4, nameof(ShadcnInput<string>.Type), "file");
+                field.AddAttribute(5, nameof(ShadcnInput<string>.Accept), ".json,.pem");
+                field.AddAttribute(6, nameof(ShadcnInput<string>.FilesChanged), EventCallback.Factory.Create<InputFileChangeEventArgs>(this, HandleCredentialFile));
+                field.AddAttribute(7, nameof(ShadcnInput<string>.AdditionalAttributes), new Dictionary<string, object>
+                {
+                    ["id"] = "credential-file",
+                    ["data-testid"] = "forms-dossier-file"
+                });
+                field.CloseComponent();
+                field.OpenComponent<ShadcnFieldDescription>(8);
+                field.AddAttribute(9, nameof(ShadcnFieldDescription.ChildContent), Text("Optional encrypted JSON or PEM credential."));
+                field.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }
+
+        private Task HandleKeyChanged(string value)
+        {
+            ApiKey = value;
+            Status = "Unsaved changes";
+            return Task.CompletedTask;
+        }
+
+        private Task HandleCredentialFile(InputFileChangeEventArgs args)
+        {
+            Status = $"Selected {args.File.Name}";
+            return Task.CompletedTask;
+        }
+
+        private void Save() => Status = "Credentials saved for this demo.";
+    }
 
     private sealed class CompactDatePickerDossierPreview : ComponentBase
     {
