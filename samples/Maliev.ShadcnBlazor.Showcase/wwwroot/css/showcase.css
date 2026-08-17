@@ -3907,9 +3907,14 @@ a {
 .showcase-button-dossier__status strong { color: var(--shadcn-foreground); font-size: .8125rem; font-weight: 500; }
 
 @media (max-width: 34rem) {
-    .showcase-button-dossier__intro { display: grid; }
+    .showcase-button-dossier { gap: .875rem; }
+    .showcase-button-dossier__intro { display: grid; padding-block-end: .75rem; }
     .showcase-button-dossier__context { text-align: start; }
+    .showcase-button-dossier__section { gap: .5rem; }
     .showcase-button-dossier__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .showcase-button-dossier__sizes,
+    .showcase-button-dossier__icon-sizes { gap: .625rem; }
+    .showcase-button-dossier__status { padding-block-start: .625rem; }
 }
 
 .showcase-skeleton-layout {
