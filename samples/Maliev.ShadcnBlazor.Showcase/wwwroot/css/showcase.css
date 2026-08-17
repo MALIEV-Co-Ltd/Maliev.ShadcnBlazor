@@ -4418,6 +4418,40 @@ a {
     margin-inline: auto;
 }
 
+.showcase-native-select-dossier {
+    display: grid;
+    inline-size: min(100%, 28rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-native-select-dossier > .shadcn-card {
+    inline-size: 100%;
+}
+
+.showcase-native-select-field {
+    display: grid;
+    gap: .625rem;
+}
+
+.showcase-native-select-field .shadcn-native-select-wrapper {
+    inline-size: 100%;
+}
+
+.showcase-native-select-summary {
+    min-block-size: 1.25rem;
+    margin: 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+.showcase-native-select-dossier .shadcn-card-footer {
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
 .showcase-select-dossier > .shadcn-select,
 .showcase-date-picker-dossier > .shadcn-date-picker {
     inline-size: 100%;

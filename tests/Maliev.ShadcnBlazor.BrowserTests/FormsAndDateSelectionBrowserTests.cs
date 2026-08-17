@@ -7,6 +7,32 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 [Collection(BrowserCollection.Name)]
 public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
+    [Fact]
+    public async Task NativeSelectDossierUsesGroupedNativeSemanticsAndUpdatesItsOperationalSummary()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/native-select").ToString());
+
+        var preview = page.GetByTestId("native-select-dossier-preview");
+        var select = preview.GetByTestId("forms-dossier-native-select");
+        await Assertions.Expect(preview).ToBeVisibleAsync();
+        await Assertions.Expect(select.Locator("optgroup")).ToHaveCountAsync(2);
+        await Assertions.Expect(select.Locator("option:disabled")).ToHaveCountAsync(1);
+        await select.SelectOptionAsync("urgent");
+        await Assertions.Expect(page.GetByTestId("native-select-lead-time")).ToContainTextAsync("2–3 business days");
+        await page.GetByTestId("control-native-select-compact").CheckAsync();
+        await Assertions.Expect(select).ToHaveAttributeAsync("data-size", "sm");
+        await select.FocusAsync();
+        await Assertions.Expect(select).ToBeFocusedAsync();
+        Assert.InRange(await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth, document.body.scrollWidth-document.body.clientWidth)"), 0, 1);
+    }
+
     [Theory]
     [InlineData(1440, 900, "light", "ltr")]
     [InlineData(390, 844, "dark", "ltr")]

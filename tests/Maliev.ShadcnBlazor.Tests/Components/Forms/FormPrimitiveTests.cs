@@ -220,6 +220,23 @@ public sealed class FormPrimitiveTests : BunitContext
     }
 
     [Fact]
+    public void DisabledNativeSelectExposesItsStateOnTheWrapperAndKeepsTheIconDecorative()
+    {
+        var cut = Render<ShadcnNativeSelect<string>>(parameters => parameters
+            .Add(component => component.Value, "standard")
+            .Add(component => component.Disabled, true)
+            .AddChildContent<ShadcnNativeSelectOption<string>>(option => option
+                .Add(component => component.Value, "standard")
+                .AddChildContent("Standard")));
+
+        Assert.Equal("true", cut.Find("[data-slot='native-select-wrapper']").GetAttribute("data-disabled"));
+        var icon = cut.Find("[data-slot='native-select-icon']");
+        Assert.Equal("true", icon.GetAttribute("aria-hidden"));
+        Assert.Equal("round", icon.GetAttribute("stroke-linecap"));
+        Assert.Equal("round", icon.GetAttribute("stroke-linejoin"));
+    }
+
+    [Fact]
     public void ReadOnlyNativeSelectRestoresControlledSelectionWithoutCallback()
     {
         var calls = 0;

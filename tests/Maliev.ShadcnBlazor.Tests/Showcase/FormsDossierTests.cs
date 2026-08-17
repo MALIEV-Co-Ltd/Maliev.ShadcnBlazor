@@ -180,10 +180,18 @@ public sealed class FormsDossierTests : BunitContext
         Assert.Equal("5", textarea.Find("[data-testid='forms-dossier-textarea']").GetAttribute("rows"));
 
         var nativeSelect = RenderExample(registry, "native-select");
+        Assert.Single(nativeSelect.FindAll("[data-testid='native-select-dossier-preview']"));
+        Assert.Equal(2, nativeSelect.FindAll("[data-testid='forms-dossier-native-select'] optgroup").Count);
+        Assert.Single(nativeSelect.FindAll("[data-testid='forms-dossier-native-select'] option:disabled"));
+        Assert.Contains("5–7 business days", nativeSelect.Find("[data-testid='native-select-lead-time']").TextContent, StringComparison.Ordinal);
+        nativeSelect.Find("[data-testid='forms-dossier-native-select']").Change("urgent");
+        Assert.Contains("2–3 business days", nativeSelect.Find("[data-testid='native-select-lead-time']").TextContent, StringComparison.Ordinal);
         Change(nativeSelect, "native-select-invalid", true);
         Assert.Equal("true", nativeSelect.Find("[data-testid='forms-dossier-native-select']").GetAttribute("aria-invalid"));
         Change(nativeSelect, "native-select-readonly", true);
         Assert.Equal("true", nativeSelect.Find("[data-testid='forms-dossier-native-select']").GetAttribute("aria-readonly"));
+        Change(nativeSelect, "native-select-compact", true);
+        Assert.Equal("sm", nativeSelect.Find("[data-testid='forms-dossier-native-select']").GetAttribute("data-size"));
 
         var inputGroupExample = registry.GetBySlug("input-group").Single();
         var inputGroup = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, inputGroupExample));
@@ -294,7 +302,7 @@ public sealed class FormsDossierTests : BunitContext
         {
             ["input"] = ["typed-binding", "required", "file", "invalid", "disabled", "read-only"],
             ["textarea"] = ["typed-binding", "rows", "invalid"],
-            ["native-select"] = ["selected", "read-only", "invalid"],
+            ["native-select"] = ["selected", "groups", "disabled", "read-only", "invalid", "sm"],
             ["input-group"] = ["addons", "inline", "block", "button", "invalid", "rtl"],
             ["input-otp"] = ["one-input", "paste", "keyboard", "status", "graphemes", "numeric", "invalid"],
             ["select"] = ["selected", "groups", "clearable", "open", "invalid"],

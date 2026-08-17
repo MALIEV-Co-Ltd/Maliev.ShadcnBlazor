@@ -23,6 +23,18 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         textareaCut.Find("[data-testid='control-textarea-rows']").Change("5");
         Assert.Contains("Rows=\"5\"", textarea.RazorSource, StringComparison.Ordinal);
 
+        var nativeSelect = registry.GetBySlug("native-select").Single();
+        var nativeSelectCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, nativeSelect));
+        nativeSelectCut.Find("[data-testid='control-native-select-compact']").Change(true);
+        nativeSelectCut.Find("[data-testid='control-native-select-invalid']").Change(true);
+        nativeSelectCut.Find("[data-testid='control-native-select-readonly']").Change(true);
+        Assert.Contains("Size=\"ShadcnControlSize.Small\"", nativeSelect.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"true\"", nativeSelect.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ReadOnly=\"true\"", nativeSelect.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnNativeSelectOptGroup Label=\"Production\">", nativeSelect.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", nativeSelect.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private string Priority", nativeSelect.RazorSource, StringComparison.Ordinal);
+
         var datePicker = registry.GetBySlug("date-picker").Single();
         Assert.DoesNotContain("AllowTextInput=\"true\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Mode=\"ShadcnCalendarSelectionMode.Range\"", datePicker.RazorSource, StringComparison.Ordinal);
