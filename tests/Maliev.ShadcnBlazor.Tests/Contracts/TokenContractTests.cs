@@ -106,6 +106,15 @@ public sealed class TokenContractTests
         Assert.Contains("padding: calc(1rem * var(--shadcn-spacing-multiplier))", semantic, StringComparison.Ordinal);
         Assert.Contains("margin-block-start: calc(var(--shadcn-typeset-flow) * var(--shadcn-spacing-multiplier))", semantic, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typeset-font-mono: var(--shadcn-font-mono)", semantic, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typeset-measure: 70ch", semantic, StringComparison.Ordinal);
+        Assert.Contains("max-inline-size: min(100%, var(--shadcn-typeset-measure))", semantic, StringComparison.Ordinal);
+        Assert.Contains("margin-inline: auto", semantic, StringComparison.Ordinal);
+        Assert.Contains("margin-block: calc(0.5rem * var(--shadcn-spacing-multiplier)) 0", semantic, StringComparison.Ordinal);
+        Assert.Contains("padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier))", semantic, StringComparison.Ordinal);
+        Assert.Contains(":is(.shadcn-typography--unordered-list, .shadcn-typography--ordered-list)", semantic, StringComparison.Ordinal);
+        Assert.DoesNotContain("margin-inline-start: calc(1.5rem * var(--shadcn-spacing-multiplier))", semantic, StringComparison.Ordinal);
+        Assert.DoesNotContain("font-size: 3rem", semantic, StringComparison.Ordinal);
+        Assert.Matches(@"\.shadcn-typography\s*\{[^}]*overflow-wrap:\s*anywhere", semantic);
         Assert.Contains("font-family: var(--shadcn-font-mono)", semantic, StringComparison.Ordinal);
         Assert.Contains("padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier))", mud, StringComparison.Ordinal);
         Assert.Contains("height: var(--shadcn-control-height)", actions, StringComparison.Ordinal);

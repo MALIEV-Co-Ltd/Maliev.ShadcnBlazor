@@ -29,6 +29,17 @@ public sealed class SemanticFoundationsShowcaseContractTests : BunitContext
         Assert.Contains("Variant=\"ShadcnTypographyVariant.H3\"", typography.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Variant=\"ShadcnTypographyVariant.Paragraph\"", typography.RazorSource, StringComparison.Ordinal);
 
+        typography.Controls.Single(control => control.Id == "typography-variant").Apply("OrderedList");
+        typography.Controls.Single(control => control.Id == "typeset-tag").Apply("article");
+        typography.Controls.Single(control => control.Id == "typeset-size").Apply("1.125rem");
+        typography.Controls.Single(control => control.Id == "typeset-leading").Apply("1.8");
+        typography.Controls.Single(control => control.Id == "typeset-flow").Apply("1.5rem");
+        typography.Controls.Single(control => control.Id == "typeset-max-width").Apply("32rem");
+
+        Assert.Contains("<ShadcnTypeset Tag=\"article\" Size=\"1.125rem\" Leading=\"1.8\" Flow=\"1.5rem\" MaxWidth=\"32rem\">", typography.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnTypographyVariant.OrderedList\"", typography.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<li>Confirm the drawing revision</li>", typography.RazorSource, StringComparison.Ordinal);
+
         var keyboard = Assert.Single(registry.GetBySlug("kbd"));
         Assert.Contains("ShadcnCard", keyboard.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Esc", keyboard.RazorSource, StringComparison.Ordinal);

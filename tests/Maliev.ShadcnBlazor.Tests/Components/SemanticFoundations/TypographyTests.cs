@@ -104,7 +104,7 @@ public sealed class TypographyTests : BunitContext
             .Add(x => x.Style, "text-wrap: pretty"));
 
         Assert.Equal(
-            "--shadcn-typeset-size: 15px; --shadcn-typeset-leading: 1.7; --shadcn-typeset-flow: 1.5em; max-width: 72ch; text-wrap: pretty",
+            "--shadcn-typeset-size: 15px; --shadcn-typeset-leading: 1.7; --shadcn-typeset-flow: 1.5em; --shadcn-typeset-measure: 72ch; text-wrap: pretty",
             cut.Find("[data-slot='typeset']").GetAttribute("style"));
     }
 

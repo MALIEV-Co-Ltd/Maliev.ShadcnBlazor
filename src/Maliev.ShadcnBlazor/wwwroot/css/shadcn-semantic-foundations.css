@@ -5,7 +5,11 @@
     --shadcn-typeset-size: 1em;
     --shadcn-typeset-leading: 1.75;
     --shadcn-typeset-flow: 1.25em;
+    --shadcn-typeset-measure: 70ch;
+    inline-size: 100%;
+    max-inline-size: min(100%, var(--shadcn-typeset-measure));
     min-width: 0;
+    margin-inline: auto;
     color: var(--shadcn-foreground);
     font-family: var(--shadcn-typeset-font-body);
     font-size: var(--shadcn-typeset-size);
@@ -40,7 +44,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset h4 { font-size: 1.125em; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset :where(ul, ol) {
-    padding-inline-start: calc(1.5em * var(--shadcn-spacing-multiplier));
+    padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier));
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset li + li {
@@ -98,8 +102,10 @@
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography {
+    min-inline-size: 0;
     margin: 0;
     color: var(--shadcn-foreground);
+    overflow-wrap: anywhere;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h1 {
@@ -183,23 +189,17 @@
     line-height: 1.25rem;
 }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-typography--unordered-list, .shadcn-typography--ordered-list) {
-    margin-block: calc(1.5rem * var(--shadcn-spacing-multiplier));
-    margin-inline-start: calc(1.5rem * var(--shadcn-spacing-multiplier));
+:where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-typography--unordered-list, .shadcn-typography--ordered-list) {
+    margin-block: calc(0.5rem * var(--shadcn-spacing-multiplier)) 0;
+    padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier));
     display: flex;
     flex-direction: column;
     gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+    overflow-wrap: anywhere;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--unordered-list { list-style-type: disc; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--ordered-list { list-style-type: decimal; }
-
-@media (min-width: 64rem) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typography--h1 {
-        font-size: 3rem;
-        line-height: 1;
-    }
-}
 
 @media (max-width: 40rem) {
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-typeset {

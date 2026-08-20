@@ -54,7 +54,7 @@
         AddVariable(declarations, "--shadcn-typeset-size", Size);
         AddVariable(declarations, "--shadcn-typeset-leading", Leading);
         AddVariable(declarations, "--shadcn-typeset-flow", Flow);
-        AddVariable(declarations, "max-width", MaxWidth);
+        AddVariable(declarations, "--shadcn-typeset-measure", MaxWidth);
         return declarations.Count == 0 ? null : string.Join("; ", declarations);
     }
 
