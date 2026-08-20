@@ -90,6 +90,21 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         Assert.NotEqual(initialSource, pagination.RazorSource);
         Assert.Contains("VisiblePageCount=\"7\"", pagination.RazorSource, StringComparison.Ordinal);
 
+        var scrollArea = Assert.Single(registry.GetBySlug("scroll-area"));
+        Assert.Contains("Production activity", scrollArea.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Aluminum housing", scrollArea.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Material @index", scrollArea.RazorSource, StringComparison.Ordinal);
+
+        var horizontal = scrollArea.Controls.Single(control => control.Id == "scroll-horizontal");
+        horizontal.Apply("true");
+        Assert.Contains("ShadcnScrollAreaOrientation.Horizontal", scrollArea.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Weekly machine schedule", scrollArea.RazorSource, StringComparison.Ordinal);
+
+        var visibility = scrollArea.Controls.Single(control => control.Id == "scroll-always");
+        visibility.Apply("false");
+        Assert.Contains("ShadcnScrollAreaType.Auto", scrollArea.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShadcnScrollAreaType.Always", scrollArea.RazorSource, StringComparison.Ordinal);
+
         var tabs = Assert.Single(registry.GetBySlug("tabs"));
         Assert.Contains("Files", tabs.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Activity", tabs.RazorSource, StringComparison.Ordinal);

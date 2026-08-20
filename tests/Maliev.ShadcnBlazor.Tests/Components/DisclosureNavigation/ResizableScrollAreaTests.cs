@@ -7,13 +7,15 @@ namespace Maliev.ShadcnBlazor.Tests.Components.DisclosureNavigation;
 
 public sealed class ResizableScrollAreaTests : BunitContext
 {
+    private readonly BunitJSModuleInterop _module;
+
     public ResizableScrollAreaTests()
     {
-        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
-        module.SetupVoid("attachResizableHandle", _ => true);
-        module.SetupVoid("detachResizableHandle", _ => true);
-        module.SetupVoid("syncScrollArea", _ => true);
-        module.SetupVoid("detachScrollArea", _ => true);
+        _module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
+        _module.SetupVoid("attachResizableHandle", _ => true);
+        _module.SetupVoid("detachResizableHandle", _ => true);
+        _module.SetupVoid("syncScrollArea", _ => true);
+        _module.SetupVoid("detachScrollArea", _ => true);
     }
 
     [Fact]
@@ -146,6 +148,8 @@ public sealed class ResizableScrollAreaTests : BunitContext
         Assert.Contains("--shadcn-resizable-hit-target", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(2, 2px)", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-rows: repeat(3, 2px)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-resizable-handle:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".shadcn-resizable-handle:focus-visible, .shadcn-scroll-area-viewport:focus-visible", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -181,8 +185,18 @@ public sealed class ResizableScrollAreaTests : BunitContext
         Assert.Contains("detectRtlScrollType", script, StringComparison.Ordinal);
         Assert.Contains("grabOffset", script, StringComparison.Ordinal);
         Assert.Contains("pointercancel", script, StringComparison.Ordinal);
+        Assert.Contains("event.button !== 0", script, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault()", script, StringComparison.Ordinal);
+        Assert.Contains("data-scrollbar-x", script, StringComparison.Ordinal);
+        Assert.Contains("data-scrollbar-y", script, StringComparison.Ordinal);
+        Assert.Contains("data-dragging", script, StringComparison.Ordinal);
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
         Assert.Contains("--shadcn-scroll-area-y-ratio", css, StringComparison.Ordinal);
+        Assert.Contains("overscroll-behavior: contain", css, StringComparison.Ordinal);
+        Assert.Contains(":focus-within", css, StringComparison.Ordinal);
+        Assert.Contains("prefers-reduced-motion: reduce", css, StringComparison.Ordinal);
+        Assert.Contains("data-scrollbar-x=\"true\"", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-scroll-area-viewport:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; box-shadow: none; }", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -191,6 +205,19 @@ public sealed class ResizableScrollAreaTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnScrollArea>(p => p.Add(x => x.Type, (ShadcnScrollAreaType)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnScrollArea>(p => p.Add(x => x.HideDelay, -1)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnScrollAreaScrollbar>(p => p.Add(x => x.Orientation, (ShadcnScrollAreaOrientation)999)));
+    }
+
+    [Fact]
+    public void ScrollAreaResynchronizesItsJsGeometryAfterParametersRerender()
+    {
+        var cut = Render<ShadcnScrollArea>(parameters => parameters.Add(component => component.HideDelay, 400));
+
+        cut.Render(parameters => parameters.Add(component => component.HideDelay, 950));
+
+        var calls = _module.Invocations["syncScrollArea"];
+        Assert.Equal(2, calls.Count);
+        Assert.Equal(400, calls[0].Arguments[1]);
+        Assert.Equal(950, calls[1].Arguments[1]);
     }
 
     private IRenderedComponent<ShadcnResizableGroup> RenderResizable(IReadOnlyList<double> sizes, Action<IReadOnlyList<double>>? changed = null, bool disabled = false, bool collapsible = false, bool rightCollapsible = false) => Render<ShadcnResizableGroup>(p => p
