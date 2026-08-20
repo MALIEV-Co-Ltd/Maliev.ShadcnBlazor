@@ -25,7 +25,7 @@ internal static class DataDisplayExamples
         var selected = false; var expanded = false; var disabled = false; var footer = true; var borders = true;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", borders ? "showcase-table" : "showcase-table showcase-table--borderless"); b.AddAttribute(2, "Borders", borders); b.AddAttribute(3, "ChildContent", (RenderFragment)(t =>
+            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", "showcase-table"); b.AddAttribute(2, "Borders", borders); b.AddAttribute(3, "ExpectedColumnCount", 4); b.AddAttribute(4, "ChildContent", (RenderFragment)(t =>
             {
                 AddText<ShadcnTableCaption>(t, 0, "รายการใบแจ้งหนี้ล่าสุด");
                 t.OpenComponent<ShadcnTableHeader>(10); t.AddAttribute(11, "ChildContent", (RenderFragment)(h => { h.OpenComponent<ShadcnTableRow>(0); h.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableHead>(r, 0, "Invoice"); AddText<ShadcnTableHead>(r, 10, "Status"); AddText<ShadcnTableHead>(r, 20, "Method"); AddText<ShadcnTableHead>(r, 30, "Amount"); })); h.CloseComponent(); })); t.CloseComponent();
@@ -43,7 +43,6 @@ internal static class DataDisplayExamples
         };
         string Source()
         {
-            var classAttribute = borders ? " Class=\"showcase-table\"" : " Class=\"showcase-table showcase-table--borderless\"";
             var firstRowState = string.Join(" ", new[]
             {
                 selected ? "Selected=\"true\"" : string.Empty,
@@ -56,7 +55,7 @@ internal static class DataDisplayExamples
                 ? "    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan=\"3\">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>"
                 : string.Empty;
             return $"""
-<ShadcnTable{classAttribute} Borders="{borders.ToString().ToLowerInvariant()}">
+<ShadcnTable Class="showcase-table" Borders="{borders.ToString().ToLowerInvariant()}" ExpectedColumnCount="4">
     <ShadcnTableCaption>รายการใบแจ้งหนี้ล่าสุด</ShadcnTableCaption>
     <ShadcnTableHeader>
         <ShadcnTableRow>

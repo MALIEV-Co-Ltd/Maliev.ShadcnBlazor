@@ -22,6 +22,7 @@
         _ = ScopeValue;
         ValidateSpan(ColSpan, nameof(ColSpan));
         ValidateSpan(RowSpan, nameof(RowSpan));
+        Parent.RegisterColumns(ColSpan ?? 1);
     }
     private static void ValidateSpan(int? value, string name)
     {

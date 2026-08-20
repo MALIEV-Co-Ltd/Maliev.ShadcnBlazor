@@ -4571,21 +4571,18 @@ a {
     overscroll-behavior-inline: contain;
 }
 
-.showcase-table--borderless :is(.shadcn-table-head, .shadcn-table-cell),
-.showcase-table--borderless .shadcn-table-footer {
-    border-color: transparent;
-}
-
 .shadcn-table-container:has(> .showcase-table) {
+    inline-size: min(100%, 48rem);
     max-inline-size: 100%;
+    margin-inline: auto;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scrollbar-gutter: auto;
 }
 
-.showcase-table .shadcn-table {
+.shadcn-table.showcase-table {
     inline-size: max-content;
-    min-inline-size: 100%;
+    min-inline-size: 36rem;
     table-layout: auto;
 }
 

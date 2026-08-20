@@ -77,9 +77,23 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
     [Fact]
     public async Task TableControlsExposeSelectedExpandedAndResponsiveOverflow()
     {
-        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 320, Height = 700 }, ForcedColors = ForcedColors.Active });
+        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 1280, Height = 900 }, ForcedColors = ForcedColors.Active, ReducedMotion = ReducedMotion.Reduce });
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/table").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        var table = page.Locator("#preview table[data-slot='table']");
+        await Assertions.Expect(table).ToHaveAttributeAsync("data-expected-columns", "4");
+        await Assertions.Expect(table.Locator("thead th")).ToHaveCountAsync(4);
+        await Assertions.Expect(table.Locator("tbody tr").First.Locator("td")).ToHaveCountAsync(4);
+        await Assertions.Expect(table.Locator("tfoot td")).ToHaveCountAsync(2);
+        await Assertions.Expect(table.Locator("tfoot td").First).ToHaveAttributeAsync("colspan", "3");
+        await Assertions.Expect(table.Locator("tfoot td").Last).ToContainTextAsync("37,800");
+        var container = page.Locator("#preview [data-slot='table-container']");
+        var centering = await container.EvaluateAsync<double[]>("element => { const box = element.getBoundingClientRect(); const parent = element.parentElement.getBoundingClientRect(); return [box.left - parent.left, parent.right - box.right]; }");
+        Assert.InRange(Math.Abs(centering[0] - centering[1]), 0, 2);
+        await page.GetByTestId("control-table-borders").UncheckAsync();
+        await Assertions.Expect(table).ToHaveAttributeAsync("data-borders", "false");
+        await Assertions.Expect(page.Locator("section.component-code").First).ToContainTextAsync("Borders=\"false\"");
         await page.GetByTestId("control-table-selected").CheckAsync();
         await page.GetByTestId("control-table-expanded").CheckAsync();
         var row = page.Locator("#preview tbody [data-slot='table-row']").First;
@@ -88,6 +102,9 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("control-table-disabled").CheckAsync();
         await Assertions.Expect(row).ToHaveAttributeAsync("aria-disabled", "true");
         await Assertions.Expect(row).Not.ToHaveAttributeAsync("data-state", "selected");
-        await Assertions.Expect(page.Locator("#preview [data-slot='table-container']")).ToHaveCSSAsync("overflow-x", "auto");
+        await page.SetViewportSizeAsync(320, 700);
+        await Assertions.Expect(container).ToHaveCSSAsync("overflow-x", "auto");
+        Assert.True(await container.EvaluateAsync<bool>("element => element.scrollWidth > element.clientWidth"));
+        Assert.True(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth <= document.documentElement.clientWidth"));
     }
 }
