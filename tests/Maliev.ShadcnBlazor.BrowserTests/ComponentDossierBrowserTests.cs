@@ -113,9 +113,9 @@ public sealed class ComponentDossierBrowserTests(
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/direction").ToString());
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "rtl");
-        await page.GetByTestId("control-direction").SelectOptionAsync("LeftToRight");
+        await page.GetByTestId("control-direction").SelectOptionAsync("Left to right (LTR)");
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "ltr");
-        await page.GetByTestId("control-direction").SelectOptionAsync("Inherited");
+        await page.GetByTestId("control-direction").SelectOptionAsync("Inherited (RTL)");
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "rtl");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/field").ToString());
@@ -140,6 +140,41 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("control-typeset-tag").SelectOptionAsync("article");
         await page.GetByTestId("control-typography-variant").SelectOptionAsync("H1");
         await Assertions.Expect(page.Locator("article[data-slot='typeset'] h1[data-slot='typography']")).ToHaveCountAsync(2);
+    }
+
+    [Fact]
+    public async Task DirectionDossierIsInteractiveResponsiveAndForcedColorSafe()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            DeviceScaleFactor = 1,
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/direction?theme=dark&dir=rtl").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var preview = page.GetByTestId("direction-example");
+        await Assertions.Expect(preview).ToHaveAttributeAsync("dir", "rtl");
+        await Assertions.Expect(preview).ToHaveAttributeAsync("lang", "ar");
+
+        await preview.Locator("#direction-email").FillAsync("qa@example.com");
+        await preview.Locator("#direction-workspace").FillAsync("Factory QA");
+        await preview.GetByRole(AriaRole.Button).FocusAsync();
+        await Assertions.Expect(preview.GetByRole(AriaRole.Button)).ToBeFocusedAsync();
+
+        await page.GetByTestId("control-direction").SelectOptionAsync("Left to right (LTR)");
+        await Assertions.Expect(preview).ToHaveAttributeAsync("dir", "ltr");
+        await Assertions.Expect(preview).ToHaveAttributeAsync("lang", "en");
+        await Assertions.Expect(page.Locator("#preview pre")).ToContainTextAsync("ShadcnDirection.LeftToRight");
+        await Assertions.Expect(page.Locator("#preview pre")).ToContainTextAsync("Create a production workspace");
+
+        var hasHorizontalOverflow = await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        Assert.False(hasHorizontalOverflow);
     }
 
     [Fact]
