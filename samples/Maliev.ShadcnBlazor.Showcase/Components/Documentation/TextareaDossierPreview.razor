@@ -1,0 +1,40 @@
+@using Maliev.ShadcnBlazor.Components.Content
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<ShadcnCard Class="showcase-textarea-dossier" data-testid="textarea-dossier-preview">
+    <ShadcnCardHeader>
+        <ShadcnCardTitle dir="auto">Manufacturing note</ShadcnCardTitle>
+        <ShadcnCardDescription dir="auto">Bracket housing · Revision C</ShadcnCardDescription>
+    </ShadcnCardHeader>
+    <ShadcnCardContent>
+        <ShadcnField Invalid="Invalid" DescriptionId="manufacturing-notes-description" ErrorId="manufacturing-notes-error">
+            <ShadcnFieldLabel For="manufacturing-notes" dir="auto">Manufacturing instructions</ShadcnFieldLabel>
+            <ShadcnTextarea TValue="string"
+                            id="manufacturing-notes"
+                            @bind-Value="Notes"
+                            Rows="Rows"
+                            Invalid="Invalid"
+                            Name="manufacturingNotes"
+                            Placeholder="Add setup, finish, or inspection notes"
+                            maxlength="500"
+                            dir="auto"
+                            data-testid="forms-dossier-textarea" />
+            <ShadcnFieldDescription Id="manufacturing-notes-description" dir="auto">Include drawing callouts that the production team must verify.</ShadcnFieldDescription>
+            @if (Invalid)
+            {
+                <ShadcnFieldError Id="manufacturing-notes-error" dir="auto">Add the critical manufacturing instructions before continuing.</ShadcnFieldError>
+            }
+        </ShadcnField>
+    </ShadcnCardContent>
+    <ShadcnCardFooter>
+        <span aria-live="polite" dir="auto">@Notes.Length / 500 characters</span>
+        <span dir="auto">Saved locally</span>
+    </ShadcnCardFooter>
+</ShadcnCard>
+
+@code {
+    [Parameter] public int Rows { get; set; } = 3;
+    [Parameter] public bool Invalid { get; set; }
+
+    private string Notes { get; set; } = "Deburr all edges and inspect the M6 thread before packing.";
+}
