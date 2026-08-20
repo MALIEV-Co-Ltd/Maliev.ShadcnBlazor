@@ -335,6 +335,13 @@ public sealed class ComponentDossierTests : BunitContext
     {
         var cut = RenderPreview("item");
 
+        Assert.NotNull(cut.Find(".showcase-item-dossier"));
+        Assert.Equal(3, cut.FindAll("[data-slot='item-group'] > [role='listitem']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='item-media'] svg[aria-hidden='true']").Count);
+        Assert.Empty(cut.FindAll("[data-slot='item-media'] img"));
+        Assert.Equal(3, cut.FindAll("[data-slot='item-actions'] [data-slot='badge']").Count);
+        Assert.DoesNotContain(">PDF<", cut.Markup, StringComparison.OrdinalIgnoreCase);
+
         Assert.Equal(["Default", "Outline", "Muted"], OptionValues(cut, "control-item-variant"));
         Assert.Equal(["Default", "Small"], OptionValues(cut, "control-item-size"));
         Assert.Equal(["Default", "Icon", "Image"], OptionValues(cut, "control-item-media-variant"));
@@ -347,7 +354,7 @@ public sealed class ComponentDossierTests : BunitContext
         var item = cut.Find("a[data-slot='item']");
         Assert.Equal("muted", item.GetAttribute("data-variant"));
         Assert.Equal("sm", item.GetAttribute("data-size"));
-        Assert.Equal("image", cut.Find("[data-slot='item-media']").GetAttribute("data-variant"));
+        Assert.Equal(3, cut.FindAll("[data-slot='item-media'][data-variant='image'] img[alt]").Count);
     }
 
     [Fact]
