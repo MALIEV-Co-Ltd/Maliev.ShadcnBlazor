@@ -1,18 +1,45 @@
 @using Maliev.ShadcnBlazor.Components.Selection
 
-<label class="action-control-label" data-testid="checkbox-dossier-preview">
-    <ShadcnCheckbox Value="CurrentValue" ValueChanged="HandleChanged" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="terms" AdditionalAttributes="Attributes" />
-    <span>Accept terms</span>
-</label>
+<section class="showcase-checkbox-dossier" data-testid="checkbox-dossier-preview" aria-labelledby="checkbox-dossier-title">
+    <header class="showcase-checkbox-dossier__header">
+        <div dir="auto">
+            <h3 id="checkbox-dossier-title">Notification preferences</h3>
+            <p>Choose how the production team can contact you.</p>
+        </div>
+        <span dir="auto">Workspace settings</span>
+    </header>
+
+    <div class="showcase-checkbox-dossier__list">
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="AcceptTerms" Name="terms" data-testid="action-checkbox" />
+            <span dir="auto"><strong>Accept terms and conditions</strong><small>Required before production files can be released.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="ProductionUpdates" Name="production-updates" data-testid="checkbox-updates" />
+            <span dir="auto"><strong>Production updates</strong><small>Receive status changes for active manufacturing orders.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox @bind-Value="InspectionRecipients" Name="inspection-recipients" data-testid="checkbox-indeterminate" />
+            <span dir="auto"><strong>Inspection recipients</strong><small>Some quality-team recipients are selected.</small></span>
+        </label>
+        <label class="showcase-checkbox-option showcase-checkbox-option--invalid">
+            <ShadcnCheckbox @bind-Value="QualityApproval" Name="quality-approval" Invalid="true" data-testid="checkbox-invalid" aria-describedby="checkbox-quality-error" />
+            <span dir="auto"><strong>Quality approval</strong><small id="checkbox-quality-error">Select this before submitting the inspection report.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox Value="true" Name="archived-reports" ReadOnly="true" data-testid="checkbox-readonly" />
+            <span dir="auto"><strong>Archive completed reports</strong><small>This workspace policy is read-only.</small></span>
+        </label>
+        <label class="showcase-checkbox-option">
+            <ShadcnCheckbox Value="false" Name="legacy-alerts" Disabled="true" data-testid="checkbox-disabled" />
+            <span dir="auto"><strong>Legacy machine alerts</strong><small>Unavailable for this workspace.</small></span>
+        </label>
+    </div>
+</section>
 
 @code {
-    [Parameter] public bool? Value { get; set; }
-    [Parameter] public bool Disabled { get; set; }
-    [Parameter] public bool ReadOnly { get; set; }
-    [Parameter] public bool Invalid { get; set; }
-    private bool? CurrentValue;
-    private bool? LastValue;
-    protected override void OnParametersSet() { if (Value != LastValue) CurrentValue = Value; LastValue = Value; }
-    private Task HandleChanged(bool? value) { CurrentValue = value; return Task.CompletedTask; }
-    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "action-checkbox", ["aria-label"] = "Accept terms" };
+    private bool? AcceptTerms { get; set; } = false;
+    private bool? ProductionUpdates { get; set; } = true;
+    private bool? InspectionRecipients { get; set; }
+    private bool? QualityApproval { get; set; } = false;
 }

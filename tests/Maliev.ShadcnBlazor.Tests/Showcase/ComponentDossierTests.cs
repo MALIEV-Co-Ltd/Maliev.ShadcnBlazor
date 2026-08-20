@@ -71,6 +71,27 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void CheckboxDossierShowsEveryMeaningfulStateWithoutConfigurationControls()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug("checkbox"));
+        var preview = Render(example.Preview);
+        var checkboxes = preview.FindAll("input[data-slot='checkbox']");
+
+        Assert.Equal("Notification preferences", example.Title);
+        Assert.Empty(example.Controls);
+        Assert.Equal(6, checkboxes.Count);
+        Assert.Contains(checkboxes, checkbox => checkbox.GetAttribute("aria-checked") == "true");
+        Assert.Contains(checkboxes, checkbox => checkbox.GetAttribute("aria-checked") == "false");
+        Assert.Contains(checkboxes, checkbox => checkbox.GetAttribute("aria-checked") == "mixed");
+        Assert.Contains(checkboxes, checkbox => checkbox.HasAttribute("disabled"));
+        Assert.Contains(checkboxes, checkbox => checkbox.GetAttribute("aria-readonly") == "true");
+        Assert.Contains(checkboxes, checkbox => checkbox.GetAttribute("aria-invalid") == "true");
+        Assert.Contains("@bind-Value=\"AcceptTerms\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Required before production files can be released.", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Name=\"legacy-alerts\" Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ExampleIdsAreUniqueAcrossTheAuthoritativeCatalog()
     {
         var registry = new ComponentExampleRegistry(_documentation);

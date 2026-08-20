@@ -60,7 +60,15 @@
     {
         if (EffectiveDisabled || ReadOnly) return;
         var next = args.Value is bool value ? value : !Value.GetValueOrDefault();
-        await ValueChanged.InvokeAsync(next);
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(next);
+        }
+        else
+        {
+            Value = next;
+            await InvokeAsync(StateHasChanged);
+        }
         NotifyFieldChanged();
     }
 

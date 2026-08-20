@@ -49,6 +49,25 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void UnboundCheckboxOwnsItsInteractiveState()
+    {
+        var cut = Render<ShadcnCheckbox>();
+        var input = cut.Find("input[data-slot='checkbox']");
+
+        input.Change(true);
+
+        Assert.True(input.HasAttribute("checked"));
+        Assert.Equal("true", input.GetAttribute("aria-checked"));
+        Assert.Equal("checked", input.GetAttribute("data-state"));
+
+        input.Change(false);
+
+        Assert.False(input.HasAttribute("checked"));
+        Assert.Equal("false", input.GetAttribute("aria-checked"));
+        Assert.Equal("unchecked", input.GetAttribute("data-state"));
+    }
+
+    [Fact]
     public void CheckboxConsumesFieldAccessibilityState()
     {
         var cut = Render<ShadcnField>(p => p
