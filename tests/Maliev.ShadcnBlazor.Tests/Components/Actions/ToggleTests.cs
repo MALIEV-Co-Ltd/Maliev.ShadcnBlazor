@@ -106,6 +106,47 @@ public sealed class ToggleTests : BunitContext
     }
 
     [Fact]
+    public void ToggleWithoutPressedBindingOwnsItsInteractiveState()
+    {
+        var cut = Render<ShadcnToggle>(parameters => parameters.AddChildContent("Bold"));
+        var toggle = cut.Find("button[data-slot='toggle']");
+
+        toggle.Click();
+
+        Assert.Equal("true", toggle.GetAttribute("aria-pressed"));
+        Assert.Equal("on", toggle.GetAttribute("data-state"));
+
+        toggle.Click();
+
+        Assert.Equal("false", toggle.GetAttribute("aria-pressed"));
+        Assert.Equal("off", toggle.GetAttribute("data-state"));
+    }
+
+    [Fact]
+    public void ToggleWithPressedBindingWaitsForTheOwnerAndReconcilesParameterChanges()
+    {
+        bool? requested = null;
+        var cut = Render<ShadcnToggle>(parameters => parameters
+            .Add(component => component.Pressed, false)
+            .Add(component => component.PressedChanged, EventCallback.Factory.Create<bool>(this, value => requested = value))
+            .AddChildContent("Bold"));
+        var toggle = cut.Find("button[data-slot='toggle']");
+
+        toggle.Click();
+
+        Assert.True(requested);
+        Assert.Equal("false", toggle.GetAttribute("aria-pressed"));
+
+        cut.Render(parameters => parameters
+            .Add(component => component.Pressed, true)
+            .Add(component => component.PressedChanged, EventCallback.Factory.Create<bool>(this, value => requested = value))
+            .AddChildContent("Bold"));
+
+        Assert.Equal("true", toggle.GetAttribute("aria-pressed"));
+        Assert.Equal("on", toggle.GetAttribute("data-state"));
+    }
+
+    [Fact]
     public void SingleToggleGroupSelectsOneValueAndInheritsPresentation()
     {
         IReadOnlyCollection<string>? requested = null;

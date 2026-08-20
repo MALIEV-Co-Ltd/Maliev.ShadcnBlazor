@@ -60,8 +60,22 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
 
         var toggle = registry.GetBySlug("toggle").Single();
         var toggleCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, toggle));
-        toggleCut.Find("[data-testid='control-toggle-pressed']").Change(false);
-        Assert.Contains("Pressed=\"false\"", toggle.RazorSource, StringComparison.Ordinal);
+        Assert.Empty(toggleCut.FindAll("[data-testid='control-toggle-pressed']"));
+        Assert.Contains("@bind-Pressed=\"Bold\"", toggle.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Invalid=", toggle.RazorSource, StringComparison.Ordinal);
+
+        var preview = toggleCut.Find("[data-testid='action-toggle']");
+        preview.Click();
+        Assert.Equal("false", preview.GetAttribute("aria-pressed"));
+        preview.Click();
+        Assert.Equal("true", preview.GetAttribute("aria-pressed"));
+
+        toggleCut.Find("[data-testid='control-toggle-variant']").Change("Default");
+        toggleCut.Find("[data-testid='control-toggle-size']").Change("Large");
+        toggleCut.Find("[data-testid='control-toggle-invalid']").Change(true);
+        Assert.Contains("Variant=\"ShadcnToggleVariant.Default\"", toggle.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Size=\"ShadcnToggleSize.Large\"", toggle.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-invalid=\"true\"", toggle.RazorSource, StringComparison.Ordinal);
 
         var radioGroup = registry.GetBySlug("radio-group").Single();
         var radioCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, radioGroup));

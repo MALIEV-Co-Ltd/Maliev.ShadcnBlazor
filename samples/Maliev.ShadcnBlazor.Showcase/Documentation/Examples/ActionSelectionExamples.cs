@@ -397,7 +397,6 @@ internal static class ActionSelectionExamples
 
     private static ComponentExampleDefinition Toggle()
     {
-        var pressed = true;
         var variant = ShadcnToggleVariant.Outline;
         var size = ShadcnToggleSize.Default;
         var disabled = false;
@@ -405,18 +404,53 @@ internal static class ActionSelectionExamples
         RenderFragment preview = builder =>
         {
             builder.OpenComponent<ToggleDossierPreview>(0);
-            builder.AddAttribute(1, nameof(ToggleDossierPreview.Pressed), pressed);
+            builder.AddAttribute(1, nameof(ToggleDossierPreview.Pressed), true);
             builder.AddAttribute(2, nameof(ToggleDossierPreview.Variant), variant);
             builder.AddAttribute(3, nameof(ToggleDossierPreview.Size), size);
             builder.AddAttribute(4, nameof(ToggleDossierPreview.Invalid), invalid);
             builder.AddAttribute(5, nameof(ToggleDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnToggle Pressed=\"{pressed.ToString().ToLowerInvariant()}\" Variant=\"{variant}\" Size=\"{size}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\">Bold</ShadcnToggle>";
-        return Example("toggle", "Two-state action", "Control pressed state, outline treatment, and every supported size.",
+        string Source() => $$"""
+            <section class="inspection-note" aria-label="Inspection note editor">
+                <header>
+                    <div>
+                        <strong dir="auto">Inspection note</strong>
+                        <span dir="auto">Revision C · autosaved</span>
+                    </div>
+                    <span dir="auto" aria-live="polite">@(Bold ? "Bold enabled" : "Bold disabled")</span>
+                </header>
+
+                <div role="toolbar" aria-label="Text formatting">
+                    <ShadcnToggle @bind-Pressed="Bold"
+                                  Variant="ShadcnToggleVariant.{{variant}}"
+                                  Size="ShadcnToggleSize.{{size}}"
+                                  Disabled="{{disabled.ToString().ToLowerInvariant()}}"
+                                  PointerCursor="true"
+                                  aria-invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                                  aria-label="Toggle bold emphasis">
+                        <LeadingIcon>
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 4h8a4 4 0 0 1 0 8H6z" />
+                                <path d="M6 12h9a4 4 0 0 1 0 8H6z" />
+                            </svg>
+                        </LeadingIcon>
+                        <ChildContent>Bold</ChildContent>
+                    </ShadcnToggle>
+                </div>
+
+                <p dir="auto" data-emphasis="@(Bold ? "bold" : "regular")">
+                    Confirm the enclosure edge is deburred before final inspection.
+                </p>
+            </section>
+
+            @code {
+                private bool Bold { get; set; } = true;
+            }
+            """;
+        return Example("toggle", "Inspection note emphasis", "Use the button itself to test pressed state, then compare every supported visual and validation state.",
             Source(), preview,
             [
-                Toggle("toggle-pressed", "Pressed", v => pressed = v, true),
                 Select("toggle-variant", "Variant", variant, v => variant = v),
                 Select("toggle-size", "Size", size, v => size = v),
                 Toggle("toggle-disabled", "Disabled", v => disabled = v),
