@@ -64,12 +64,13 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card[data-size="sm"] { --shadcn-card-spacing: calc(1rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-header { display: grid; grid-auto-rows: min-content; align-items: start; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); padding-inline: var(--shadcn-card-spacing); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-header:has(> [data-slot="card-action"]) { grid-template-columns: 1fr auto; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-title { font-size: 1rem; line-height: 1.5; font-weight: 500; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-header > :not(.shadcn-card-action) { min-inline-size: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-title { overflow-wrap: anywhere; font-size: 1rem; line-height: 1.5; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card[data-size="sm"] .shadcn-card-title { font-size: 0.875rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-description { color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-description { overflow-wrap: anywhere; color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-action { grid-column: 2; grid-row: 1 / span 2; align-self: start; justify-self: end; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-card-content, .shadcn-card-footer) { padding-inline: var(--shadcn-card-spacing); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-footer { display: flex; align-items: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-footer { display: flex; align-items: center; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); flex-wrap: wrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card:has(> img:first-child) { padding-block-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card:has(> img:last-child) { padding-block-end: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card > img:first-child { width: 100%; border-start-start-radius: inherit; border-start-end-radius: inherit; }

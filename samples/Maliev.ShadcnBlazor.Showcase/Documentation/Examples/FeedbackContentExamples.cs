@@ -199,42 +199,74 @@ internal static class FeedbackContentExamples
             var actionMarkup = action
                 ? """
         <ShadcnCardAction>
-            <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Running</ShadcnBadge>
+            <ShadcnBadge Variant="@(_isPaused ? ShadcnBadgeVariant.Outline : ShadcnBadgeVariant.Secondary)">
+                @(_isPaused ? "Paused" : "In progress")
+            </ShadcnBadge>
         </ShadcnCardAction>
 """
                 : string.Empty;
             var footerActionMarkup = action
                 ? """
-        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small">View details</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline"
+                      Size="ShadcnButtonSize.Small"
+                      OnClick="ToggleProduction"
+                      aria-pressed="@_isPaused.ToString().ToLowerInvariant()">
+            @(_isPaused ? "Resume production" : "Pause production")
+        </ShadcnButton>
+"""
+                : string.Empty;
+            var stateMarkup = action
+                ? """
+
+@code {
+    private bool _isPaused;
+
+    private void ToggleProduction() => _isPaused = !_isPaused;
+}
 """
                 : string.Empty;
 
-            return $"""
-<ShadcnCard {sizeMarkup}{spacingMarkup}>
+            return $$"""
+<ShadcnCard {{sizeMarkup}}{{spacingMarkup}} Class="showcase-card-dossier">
     <ShadcnCardHeader>
-        <div>
-            <ShadcnCardTitle>Laser cell 04</ShadcnCardTitle>
-            <ShadcnCardDescription>CNC milling · Production line A</ShadcnCardDescription>
+        <div class="showcase-card-dossier__heading">
+            <ShadcnCardTitle>Production order #MO-2418</ShadcnCardTitle>
+            <ShadcnCardDescription>CNC milling · Aluminium 6061 · Laser cell 04</ShadcnCardDescription>
         </div>
-{actionMarkup}    </ShadcnCardHeader>
+{{actionMarkup}}    </ShadcnCardHeader>
     <ShadcnCardContent>
-        <div>
-            <span>Utilization</span>
-            <strong>98%</strong>
-            <span>Next service</span>
-            <strong>22 Aug 2026</strong>
+        <dl class="showcase-card-dossier__metrics">
+            <div><dt>Quantity</dt><dd>18 parts</dd></div>
+            <div><dt>Due</dt><dd>22 Aug 2026</dd></div>
+            <div><dt>First article</dt><dd>Approved</dd></div>
+        </dl>
+        <div class="showcase-card-dossier__progress">
+            <div class="showcase-card-dossier__progress-copy">
+                <span>Production progress</span>
+                <strong>12 of 18 parts complete</strong>
+            </div>
+            <ShadcnProgress Value="66.7">
+                <ShadcnProgressLabel Class="sr-only">Production progress</ShadcnProgressLabel>
+            </ShadcnProgress>
         </div>
-        <div>Within target · Updated 2 minutes ago</div>
+        <div class="showcase-card-dossier__next-step">
+            <span class="showcase-card-dossier__health-dot" aria-hidden="true"></span>
+            <span>
+                <strong>Next operation</strong>
+                Quality inspection after part 18
+            </span>
+        </div>
     </ShadcnCardContent>
     <ShadcnCardFooter>
-        <span>Production cell A</span>
-{footerActionMarkup}    </ShadcnCardFooter>
+        <span class="showcase-card-dossier__updated">Updated 2 minutes ago</span>
+{{footerActionMarkup}}    </ShadcnCardFooter>
 </ShadcnCard>
+{{stateMarkup}}
 """;
         }
 
         var source = Source();
-        return new ComponentExampleDefinition("card-primary", "Composed card", "Show a production-order card with title, description, action, content, and footer hierarchy.", source, preview, [EnumSelect("card-size", "Size", size, v => size = v), Toggle("card-spacing", "Compact spacing", v => compactSpacing = v), Toggle("card-action", "Action", v => action = v, true)], ["default", "sm", "header", "action", "content", "footer"])
+        return new ComponentExampleDefinition("card-primary", "Production order card", "Inspect a realistic manufacturing order, track progress, and pause or resume production directly from the card.", source, preview, [EnumSelect("card-size", "Size", size, v => size = v), Toggle("card-spacing", "Compact spacing", v => compactSpacing = v), Toggle("card-action", "Actions", v => action = v, true)], ["default", "sm", "header", "action", "content", "footer", "interactive", "responsive"])
         {
             RazorSourceProvider = Source
         };
