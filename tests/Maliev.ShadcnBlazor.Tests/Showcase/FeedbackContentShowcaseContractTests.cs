@@ -247,7 +247,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Equal("outline", selected.GetAttribute("data-variant"));
         Assert.Equal("a", selected.NodeName.ToLowerInvariant());
         Assert.Equal("true", selected.GetAttribute("aria-invalid"));
-        Assert.Contains("<ShadcnBadge Variant=\"ShadcnBadgeVariant.Outline\" Href=\"/docs/components/badge\" aria-invalid=\"true\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnBadge Variant=\"ShadcnBadgeVariant.Outline\" Href=\"docs/components/badge\" aria-invalid=\"true\">", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("aria-invalid=\"true\"", example.RazorSource, StringComparison.Ordinal);
     }
 

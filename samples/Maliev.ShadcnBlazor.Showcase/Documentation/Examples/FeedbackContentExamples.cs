@@ -150,7 +150,7 @@ internal static class FeedbackContentExamples
         };
         string Source()
         {
-            var href = link ? " Href=\"/docs/components/badge\"" : string.Empty;
+            var href = link ? " Href=\"docs/components/badge\"" : string.Empty;
             var invalidState = invalid ? " aria-invalid=\"true\"" : string.Empty;
             return $$"""
 @using Maliev.ShadcnBlazor.Components.Content

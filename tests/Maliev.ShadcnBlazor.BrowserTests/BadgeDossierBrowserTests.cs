@@ -41,14 +41,14 @@ public sealed class BadgeDossierBrowserTests(
         await page.GetByTestId("control-badge-invalid").CheckAsync();
         var selected = preview.GetByTestId("badge-current").Locator("[data-slot='badge']");
         await Assertions.Expect(selected).ToHaveAttributeAsync("data-variant", "outline");
-        await Assertions.Expect(selected).ToHaveAttributeAsync("href", "/docs/components/badge");
+        await Assertions.Expect(selected).ToHaveAttributeAsync("href", "docs/components/badge");
         await Assertions.Expect(selected).ToHaveAttributeAsync("aria-invalid", "true");
         await selected.FocusAsync();
         Assert.NotEqual("none", await selected.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
 
         var source = page.Locator("#preview [data-slot='code-block'] pre");
         await Assertions.Expect(source).ToContainTextAsync("ShadcnBadgeVariant.Outline");
-        await Assertions.Expect(source).ToContainTextAsync("Href=\"/docs/components/badge\"");
+        await Assertions.Expect(source).ToContainTextAsync("Href=\"docs/components/badge\"");
         await Assertions.Expect(source).ToContainTextAsync("aria-invalid=\"true\"");
 
         var axe = await preview.RunAxe();
