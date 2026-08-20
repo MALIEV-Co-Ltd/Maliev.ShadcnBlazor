@@ -259,6 +259,61 @@ public sealed class ComponentDossierBrowserTests(
     }
 
     [Fact]
+    public async Task TypographyDossierKeepsReadableLogicalRhythmAcrossInteractiveAndAccessibleModes()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = ColorScheme.Dark,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/typography").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        await page.GetByTestId("documentation-theme-toggle").EvaluateAsync("element => element.click()");
+        await page.GetByTestId("documentation-direction-toggle").EvaluateAsync("element => element.click()");
+
+        var typeset = page.Locator("#preview [data-slot='typeset']");
+        var list = typeset.Locator(".shadcn-typography--unordered-list");
+        var inlineCode = typeset.Locator(".shadcn-typography--inline-code");
+        await Assertions.Expect(typeset).ToHaveCSSAsync("max-inline-size", "min(100%, 768px)");
+        await Assertions.Expect(list).ToHaveCSSAsync("margin-block-start", "8px");
+        await Assertions.Expect(list).ToHaveCSSAsync("padding-inline-start", "16px");
+        await Assertions.Expect(inlineCode).ToHaveCSSAsync("overflow-wrap", "anywhere");
+        await Assertions.Expect(typeset.Locator(".shadcn-typography--h1")).ToHaveCSSAsync("font-size", "36px");
+        await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
+
+        var gaps = await typeset.EvaluateAsync<double[]>("""
+            element => {
+                const canvas = element.closest('[data-testid="component-preview-canvas"]');
+                const content = element.getBoundingClientRect();
+                const bounds = canvas.getBoundingClientRect();
+                return [content.left - bounds.left, bounds.right - content.right];
+            }
+            """);
+        Assert.InRange(Math.Abs(gaps[0] - gaps[1]), 0, 1);
+
+        await page.GetByTestId("control-typography-variant").SelectOptionAsync("OrderedList");
+        await page.GetByTestId("control-typeset-tag").SelectOptionAsync("article");
+        await page.GetByTestId("control-typeset-size").SelectOptionAsync("1.125rem");
+        await page.GetByTestId("control-typeset-leading").SelectOptionAsync("1.8");
+        await page.GetByTestId("control-typeset-flow").SelectOptionAsync("1.5rem");
+        await page.GetByTestId("control-typeset-max-width").SelectOptionAsync("32rem");
+
+        var source = page.Locator("#preview [data-slot='code-block'] pre");
+        await Assertions.Expect(source).ToContainTextAsync("<ShadcnTypeset Tag=\"article\" Size=\"1.125rem\" Leading=\"1.8\" Flow=\"1.5rem\" MaxWidth=\"32rem\">");
+        await Assertions.Expect(source).ToContainTextAsync("Variant=\"ShadcnTypographyVariant.OrderedList\"");
+        await Assertions.Expect(source).ToContainTextAsync("<li>Confirm the drawing revision</li>");
+
+        var select = page.GetByTestId("control-typography-variant");
+        await select.FocusAsync();
+        Assert.NotEqual("none", await select.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+    }
+
+    [Fact]
     public async Task ShowcasePreviewsExposeWorkingStatefulInteractionAndPolishedLayouts()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

@@ -429,7 +429,7 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.Contains("--shadcn-typeset-size: 1.125rem", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typeset-leading: 1.8", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typeset-flow: 1.5rem", style, StringComparison.Ordinal);
-        Assert.Contains("max-width: 48rem", style, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typeset-measure: 48rem", style, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -152,6 +152,32 @@ internal static class SemanticFoundationExamples
             builder.AddAttribute(6, nameof(ShadcnTypeset.ChildContent), TypographyContent(variant));
             builder.CloseComponent();
         };
+        string Source() => $"""
+<ShadcnTypeset Tag="{tag}" Size="{size}" Leading="{leading}" Flow="{flow}" MaxWidth="{maxWidth}">
+    <div class="showcase-typography-preview">
+        <div class="showcase-typography-preview__selected">
+            <span>Selected treatment</span>
+            {TypographySelectedSource(variant)}
+        </div>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.H1">Quotation handoff</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.Lead">CNC enclosure · Revision C</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.H2">Review before production</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.H3">Release checklist</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.H4">Source file</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.Paragraph">
+            Confirm <ShadcnTypography Variant="ShadcnTypographyVariant.InlineCode">Q-2026-0814-R3.step</ShadcnTypography>
+            against the approved drawing before releasing the work order.
+        </ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.Blockquote">Keep tolerances and material notes beside the decision they support.</ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.UnorderedList">
+            <li>Confirm the drawing revision</li>
+            <li>Verify 6061-T6 material availability</li>
+            <li>Record the inspection owner</li>
+        </ShadcnTypography>
+        <ShadcnTypography Variant="ShadcnTypographyVariant.Muted">Updated today · Ready for review</ShadcnTypography>
+    </div>
+</ShadcnTypeset>
+""";
         var options = Enum.GetNames<ShadcnTypographyVariant>();
         ComponentParameterControl[] controls =
         [
@@ -202,12 +228,13 @@ internal static class SemanticFoundationExamples
             "typography",
             "Semantic type scale",
             "Select a semantic text treatment while preserving the matching HTML element. The preview shows the complete hierarchy in a realistic product brief.",
-            "<ShadcnTypeset Tag=\"article\" Size=\"1rem\" Leading=\"1.6\" Flow=\"1rem\" MaxWidth=\"48rem\">\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H1\">Production brief</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Lead\">A compact hierarchy for a quotation workspace.</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H2\">Build calm, capable interfaces</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H3\">Make the next action obvious</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.H4\">Use type to organize the work</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Paragraph\">Use semantic components to make dense manufacturing workflows easier to scan.</ShadcnTypography>\n    <ShadcnTypography Variant=\"ShadcnTypographyVariant.Blockquote\">Good interfaces reduce the number of decisions people must hold in their heads.</ShadcnTypography>\n</ShadcnTypeset>",
+            Source(),
             preview,
             controls,
             options.Select(name => name.ToLowerInvariant())
                 .Concat(["typeset-div", "typeset-article", "typeset-section", "typeset-rhythm"])
-                .ToArray());
+                .ToArray()) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Label()
@@ -728,17 +755,35 @@ internal static class SemanticFoundationExamples
     private static RenderFragment TypographyContent(ShadcnTypographyVariant selected) => builder =>
     {
         builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-typography-preview");
-        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-typography-preview__selected"); builder.OpenElement(4, "span"); builder.AddContent(5, "Selected treatment"); builder.CloseElement(); builder.OpenComponent<ShadcnTypography>(6); builder.AddAttribute(7, nameof(ShadcnTypography.Variant), selected); builder.AddAttribute(8, nameof(ShadcnTypography.ChildContent), Text("Build calm, capable interfaces")); builder.CloseComponent(); builder.CloseElement();
-        AddTypography(builder, 20, ShadcnTypographyVariant.H1, "Production brief");
-        AddTypography(builder, 30, ShadcnTypographyVariant.Lead, "A compact hierarchy for a quotation workspace.");
-        AddTypography(builder, 40, ShadcnTypographyVariant.H2, "Build calm, capable interfaces");
-        AddTypography(builder, 50, ShadcnTypographyVariant.H3, "Make the next action obvious");
-        AddTypography(builder, 60, ShadcnTypographyVariant.H4, "Use type to organize the work");
-        AddTypography(builder, 70, ShadcnTypographyVariant.Paragraph, "Semantic typography lets a production brief stay readable when it moves from a desktop review to a compact mobile handoff.");
-        AddTypography(builder, 80, ShadcnTypographyVariant.Blockquote, "Good interfaces reduce the number of decisions people must hold in their heads.");
-        builder.OpenComponent<ShadcnTypography>(90); builder.AddAttribute(91, nameof(ShadcnTypography.Variant), ShadcnTypographyVariant.UnorderedList); builder.AddAttribute(92, nameof(ShadcnTypography.ChildContent), (RenderFragment)(list => { list.OpenElement(0, "li"); list.AddContent(1, "Clear status at a glance"); list.CloseElement(); list.OpenElement(2, "li"); list.AddContent(3, "Helpful context near each control"); list.CloseElement(); })); builder.CloseComponent();
+        builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-typography-preview__selected"); builder.OpenElement(4, "span"); builder.AddContent(5, "Selected treatment"); builder.CloseElement(); builder.OpenComponent<ShadcnTypography>(6); builder.AddAttribute(7, nameof(ShadcnTypography.Variant), selected); builder.AddAttribute(8, nameof(ShadcnTypography.ChildContent), TypographySelectedContent(selected)); builder.CloseComponent(); builder.CloseElement();
+        AddTypography(builder, 20, ShadcnTypographyVariant.H1, "Quotation handoff");
+        AddTypography(builder, 30, ShadcnTypographyVariant.Lead, "CNC enclosure · Revision C");
+        AddTypography(builder, 40, ShadcnTypographyVariant.H2, "Review before production");
+        AddTypography(builder, 50, ShadcnTypographyVariant.H3, "Release checklist");
+        AddTypography(builder, 60, ShadcnTypographyVariant.H4, "Source file");
+        builder.OpenComponent<ShadcnTypography>(70); builder.AddAttribute(71, nameof(ShadcnTypography.Variant), ShadcnTypographyVariant.Paragraph); builder.AddAttribute(72, nameof(ShadcnTypography.ChildContent), (RenderFragment)(content => { content.AddContent(0, "Confirm "); content.OpenComponent<ShadcnTypography>(1); content.AddAttribute(2, nameof(ShadcnTypography.Variant), ShadcnTypographyVariant.InlineCode); content.AddAttribute(3, nameof(ShadcnTypography.ChildContent), Text("Q-2026-0814-R3.step")); content.CloseComponent(); content.AddContent(4, " against the approved drawing before releasing the work order."); })); builder.CloseComponent();
+        AddTypography(builder, 80, ShadcnTypographyVariant.Blockquote, "Keep tolerances and material notes beside the decision they support.");
+        builder.OpenComponent<ShadcnTypography>(90); builder.AddAttribute(91, nameof(ShadcnTypography.Variant), ShadcnTypographyVariant.UnorderedList); builder.AddAttribute(92, nameof(ShadcnTypography.ChildContent), TypographyListContent()); builder.CloseComponent();
+        AddTypography(builder, 100, ShadcnTypographyVariant.Muted, "Updated today · Ready for review");
         builder.CloseElement();
     };
+
+    private static RenderFragment TypographySelectedContent(ShadcnTypographyVariant variant) =>
+        variant is ShadcnTypographyVariant.UnorderedList or ShadcnTypographyVariant.OrderedList
+            ? TypographyListContent()
+            : Text("CNC enclosure · Revision C");
+
+    private static RenderFragment TypographyListContent() => list =>
+    {
+        list.OpenElement(0, "li"); list.AddContent(1, "Confirm the drawing revision"); list.CloseElement();
+        list.OpenElement(2, "li"); list.AddContent(3, "Verify 6061-T6 material availability"); list.CloseElement();
+        list.OpenElement(4, "li"); list.AddContent(5, "Record the inspection owner"); list.CloseElement();
+    };
+
+    private static string TypographySelectedSource(ShadcnTypographyVariant variant) =>
+        variant is ShadcnTypographyVariant.UnorderedList or ShadcnTypographyVariant.OrderedList
+            ? $"<ShadcnTypography Variant=\"ShadcnTypographyVariant.{variant}\">\n                <li>Confirm the drawing revision</li>\n                <li>Verify 6061-T6 material availability</li>\n                <li>Record the inspection owner</li>\n            </ShadcnTypography>"
+            : $"<ShadcnTypography Variant=\"ShadcnTypographyVariant.{variant}\">CNC enclosure · Revision C</ShadcnTypography>";
 
     private static void AddTypography(RenderTreeBuilder builder, int sequence, ShadcnTypographyVariant variant, string text)
     {
