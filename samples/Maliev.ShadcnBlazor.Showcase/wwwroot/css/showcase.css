@@ -4709,21 +4709,70 @@ a {
     }
 }
 
-.showcase-spinner-task {
-    display: inline-grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    inline-size: min(100%, 22rem);
-    gap: .75rem;
-    padding: .8rem 1rem;
+.showcase-spinner-export {
+    display: grid;
+    inline-size: min(100%, 27rem);
+    gap: 1rem;
+    padding: 1.25rem;
     border: 1px solid var(--shadcn-border);
-    border-radius: var(--shadcn-radius-lg);
+    border-radius: var(--shadcn-radius-xl);
     background: var(--shadcn-card);
     color: var(--shadcn-card-foreground);
 }
 
-.showcase-spinner-task > strong {
-    font-variant-numeric: tabular-nums;
+.showcase-spinner-export__header,
+.showcase-spinner-export__status {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    gap: .75rem;
+}
+
+.showcase-spinner-export__header > span:last-child,
+.showcase-spinner-export__status > span:last-child {
+    display: grid;
+    min-inline-size: 0;
+    gap: .15rem;
+}
+
+.showcase-spinner-export__header small,
+.showcase-spinner-export__status small {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+}
+
+.showcase-spinner-export__file,
+.showcase-spinner-export__paused {
+    display: inline-flex;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-spinner-export__file svg,
+.showcase-spinner-export__paused svg {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.showcase-spinner-export__status {
+    min-block-size: 3rem;
+    padding-block: .85rem;
+    border-block: 1px solid var(--shadcn-border);
+}
+
+.showcase-spinner-export > .shadcn-button {
+    justify-self: end;
+}
+
+@media (max-width: 30rem) {
+    .showcase-spinner-export { padding: 1rem; }
+    .showcase-spinner-export > .shadcn-button { inline-size: 100%; justify-self: stretch; }
 }
 
 .showcase-calendar-demo {

@@ -131,8 +131,13 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-skeleton { animation: none; }
 }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { width: var(--shadcn-spinner-size); height: var(--shadcn-spinner-size); animation: shadcn-spinner-rotate var(--shadcn-motion-duration-slow) linear infinite; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { display: inline-block; width: var(--shadcn-spinner-size); height: var(--shadcn-spinner-size); flex: 0 0 auto; color: currentColor; vertical-align: middle; transform-origin: center; animation: shadcn-spinner-rotate var(--shadcn-motion-duration-slow) linear infinite; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner[data-reduced-motion="true"],
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-reduced-motion="always"] .shadcn-spinner { animation: none; }
 @keyframes shadcn-spinner-rotate { to { rotate: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { animation: none; }
+}
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel { position: relative; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content { overflow: hidden; touch-action: pan-y pinch-zoom; }
@@ -194,4 +199,5 @@
 @media (forced-colors: active) {
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-progress-track, .shadcn-skeleton) { border: 1px solid CanvasText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator { background: Highlight; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { color: CanvasText; }
 }

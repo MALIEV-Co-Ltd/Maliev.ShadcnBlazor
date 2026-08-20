@@ -318,6 +318,33 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         Assert.Equal("กำลังโหลด", spinner.GetAttribute("aria-label"));
         Assert.Contains("--shadcn-spinner-size: 1.25rem", spinner.GetAttribute("style"));
         Assert.Equal("M21 12a9 9 0 1 1-6.219-8.56", spinner.QuerySelector("path")!.GetAttribute("d"));
+        Assert.Equal("false", spinner.GetAttribute("focusable"));
+    }
+
+    [Fact]
+    public void SpinnerCanDisableMotionWithoutChangingItsStatusSemantics()
+    {
+        var cut = Render<ShadcnSpinner>(parameters => parameters
+            .Add(component => component.Label, "Generating report")
+            .Add(component => component.ReducedMotion, true));
+
+        var spinner = cut.Find("svg[data-slot='spinner']");
+        Assert.Equal("true", spinner.GetAttribute("data-reduced-motion"));
+        Assert.Equal("status", spinner.GetAttribute("role"));
+        Assert.Equal("Generating report", spinner.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void SpinnerStylesStopRotationForReducedMotionAndRemainVisibleInForcedColors()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(".shadcn-spinner[data-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains("[data-shadcn-reduced-motion=\"always\"] .shadcn-spinner", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-spinner { animation: none; }", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-spinner { color: CanvasText; }", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -353,4 +380,12 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
+    }
 }

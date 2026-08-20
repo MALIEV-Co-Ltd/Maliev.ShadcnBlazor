@@ -537,21 +537,66 @@ internal static class FeedbackContentExamples
     }
     private static ComponentExampleDefinition Spinner()
     {
-        var decorative = false; var large = false;
+        var decorative = false; var large = false; var reducedMotion = false;
         RenderFragment preview = b =>
         {
-            b.OpenElement(0, "div"); b.AddAttribute(1, "class", "showcase-spinner-task");
-            b.OpenComponent<ShadcnSpinner>(2); b.AddAttribute(3, "Label", decorative ? null : "กำลังประมวลผลการชำระเงิน"); b.AddAttribute(4, "Size", large ? "1.5rem" : "1rem"); b.CloseComponent();
-            b.OpenElement(5, "span"); b.AddContent(6, "Processing payment…"); b.CloseElement(); b.OpenElement(7, "strong"); b.AddContent(8, "฿100.00"); b.CloseElement(); b.CloseElement();
+            b.OpenComponent<SpinnerDossierPreview>(0);
+            b.AddAttribute(1, nameof(SpinnerDossierPreview.Decorative), decorative);
+            b.AddAttribute(2, nameof(SpinnerDossierPreview.Large), large);
+            b.AddAttribute(3, nameof(SpinnerDossierPreview.ReducedMotion), reducedMotion);
+            b.CloseComponent();
         };
-        const string source = """
-<div class="payment-status">
-    <ShadcnSpinner Label="กำลังประมวลผลการชำระเงิน" />
-    <span>Processing payment…</span>
-    <strong>฿100.00</strong>
-</div>
-""";
-        return Example("spinner", "Spinner", "Show loading context with an announced spinner, decorative option, and payment amount.", source, preview, [Toggle("spinner-decorative", "Decorative", v => decorative = v), Toggle("spinner-large", "Large", v => large = v)], ["status", "decorative", "size", "reduced-motion"]);
+        string Source() => string.Join(Environment.NewLine,
+        [
+            "@using Maliev.ShadcnBlazor.Components.Actions",
+            "@using Maliev.ShadcnBlazor.Components.Feedback",
+            string.Empty,
+            "<section class=\"showcase-spinner-export\" data-testid=\"spinner-export\" aria-busy=\"@(_processing ? \"true\" : \"false\")\" aria-label=\"Production report export\">",
+            "    <header class=\"showcase-spinner-export__header\">",
+            "        <span class=\"showcase-spinner-export__file\" aria-hidden=\"true\">",
+            "            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\">",
+            "                <path d=\"M6 2h9l5 5v15H6z\" /><path d=\"M14 2v6h6\" /><path d=\"M9 13h6M9 17h6\" />",
+            "            </svg>",
+            "        </span>",
+            "        <span>",
+            "            <strong>Production summary</strong>",
+            "            <small dir=\"ltr\">6 work orders · PDF</small>",
+            "        </span>",
+            "    </header>",
+            string.Empty,
+            "    <div class=\"showcase-spinner-export__status\" aria-live=\"polite\">",
+            "        @if (_processing)",
+            "        {",
+            "            <ShadcnSpinner Label=\"@(Decorative ? null : \"Generating production report\")\"",
+            "                           SpinnerRole=\"@(Decorative ? ShadcnSpinnerRole.None : ShadcnSpinnerRole.Status)\"",
+            "                           Size=\"@(Large ? \"1.5rem\" : \"1rem\")\"",
+            "                           ReducedMotion=\"@ReducedMotion\" />",
+            "            <span><strong>Preparing production report</strong><small>Collecting inspection results…</small></span>",
+            "        }",
+            "        else",
+            "        {",
+            "            <span class=\"showcase-spinner-export__paused\" aria-hidden=\"true\">",
+            "                <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M9 7v10M15 7v10\" /></svg>",
+            "            </span>",
+            "            <span><strong>Export paused</strong><small>Your report settings are saved.</small></span>",
+            "        }",
+            "    </div>",
+            string.Empty,
+            "    <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\" Size=\"ShadcnButtonSize.Small\" OnClick=\"@(_ => ToggleExport())\">",
+            "        @(_processing ? \"Cancel export\" : \"Resume export\")",
+            "    </ShadcnButton>",
+            "</section>",
+            string.Empty,
+            "@code {",
+            $"    private bool Decorative = {decorative.ToString().ToLowerInvariant()};",
+            $"    private bool Large = {large.ToString().ToLowerInvariant()};",
+            $"    private bool ReducedMotion = {reducedMotion.ToString().ToLowerInvariant()};",
+            "    private bool _processing = true;",
+            "    private void ToggleExport() => _processing = !_processing;",
+            "}"
+        ]);
+        var example = Example("spinner", "Report export", "Show announced and decorative loading in a directly interactive production report workflow.", Source(), preview, [Toggle("spinner-decorative", "Decorative", v => decorative = v), Toggle("spinner-large", "Large", v => large = v), Toggle("spinner-reduced-motion", "Reduce motion", v => reducedMotion = v)], ["status", "decorative", "size", "reduced-motion"]);
+        return example with { RazorSourceProvider = Source };
     }
     private static ComponentExampleDefinition Toast()
     {

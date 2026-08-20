@@ -236,7 +236,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             ["carousel"] = ["carousel-vertical", "carousel-loop", "carousel-rtl", "carousel-reduced"],
             ["progress"] = ["progress-indeterminate", "progress-value", "progress-show-value"],
             ["skeleton"] = ["skeleton-circle", "skeleton-motion"],
-            ["spinner"] = ["spinner-decorative", "spinner-large"],
+            ["spinner"] = ["spinner-decorative", "spinner-large", "spinner-reduced-motion"],
             ["toast"] = ["toast-limit", "toast-start", "toast-reduced", "toast-type", "toast-priority"]
         };
 
@@ -345,6 +345,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             ["skeleton-motion"] = "false",
             ["spinner-decorative"] = "true",
             ["spinner-large"] = "true",
+            ["spinner-reduced-motion"] = "true",
             ["toast-limit"] = "1",
             ["toast-start"] = "true",
             ["toast-reduced"] = "true",
@@ -410,6 +411,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             case "skeleton-motion": Assert.Equal("none", cut.Find("[data-slot='skeleton']").GetAttribute("data-animation")); break;
             case "spinner-decorative": Assert.Equal("true", cut.Find("[data-slot='spinner']").GetAttribute("aria-hidden")); break;
             case "spinner-large": Assert.Contains("--shadcn-spinner-size: 1.5rem", cut.Find("[data-slot='spinner']").GetAttribute("style"), StringComparison.Ordinal); break;
+            case "spinner-reduced-motion": Assert.Equal("true", cut.Find("[data-slot='spinner']").GetAttribute("data-reduced-motion")); break;
             case "toast-limit": Assert.Equal("1", cut.Find("[data-slot='toast-viewport']").GetAttribute("data-maximum-visible")); break;
             case "toast-start": Assert.Equal("bottom-start", cut.Find("[data-slot='toast-viewport']").GetAttribute("data-placement")); break;
             case "toast-reduced": Assert.Equal("true", cut.Find("[data-slot='toast-viewport']").GetAttribute("data-reduced-motion")); break;
@@ -417,6 +419,29 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             case "toast-priority": Assert.NotEmpty(cut.FindAll("[data-slot='toast'][data-priority='high']")); break;
             default: throw new InvalidOperationException($"No exact dossier assertion exists for {controlId}.");
         }
+    }
+
+    [Fact]
+    public void SpinnerDossierShowsAnInteractiveReportExportAndExactDynamicSource()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("spinner").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Equal("true", cut.Find("[data-testid='spinner-export']").GetAttribute("aria-busy"));
+        Assert.Contains("Preparing production report", cut.Markup, StringComparison.Ordinal);
+        cut.Find("button").Click();
+        Assert.Equal("false", cut.Find("[data-testid='spinner-export']").GetAttribute("aria-busy"));
+        Assert.Contains("Export paused", cut.Markup, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "spinner-decorative").Apply("true");
+        example.Controls.Single(control => control.Id == "spinner-large").Apply("true");
+        example.Controls.Single(control => control.Id == "spinner-reduced-motion").Apply("true");
+        Assert.Contains("SpinnerRole=\"@(Decorative ? ShadcnSpinnerRole.None : ShadcnSpinnerRole.Status)\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Label=\"@(Decorative ? null : \"Generating production report\")\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool Decorative = true;", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool Large = true;", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool ReducedMotion = true;", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private void ToggleExport()", example.RazorSource, StringComparison.Ordinal);
     }
 
     private static string FindRoot()
