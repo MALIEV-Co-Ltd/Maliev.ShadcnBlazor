@@ -4883,6 +4883,92 @@ a {
     table-layout: auto;
 }
 
+.showcase-field-dossier {
+    display: grid;
+    inline-size: min(100%, 38rem);
+    max-inline-size: 100%;
+    gap: .875rem;
+    color: var(--shadcn-foreground);
+}
+
+.showcase-field-dossier__heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding-block-end: .75rem;
+}
+
+.showcase-field-dossier__heading > div {
+    display: grid;
+    gap: .25rem;
+}
+
+.showcase-field-dossier__heading strong {
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.showcase-field-dossier__heading span,
+.showcase-field-dossier__status {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+    line-height: 1.5;
+}
+
+.showcase-field-dossier__heading > span {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.showcase-field-dossier .shadcn-field-group {
+    gap: .875rem;
+}
+
+.showcase-field-dossier .shadcn-field[data-orientation="horizontal"] > :is(.shadcn-input, .shadcn-select) {
+    flex: 0 1 20rem;
+}
+
+.showcase-field-dossier__security-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.showcase-field-dossier__security-row .shadcn-select,
+.showcase-field-dossier__security-row .shadcn-input {
+    inline-size: 100%;
+    min-inline-size: 0;
+}
+
+.showcase-field-dossier__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .625rem;
+}
+
+.showcase-field-dossier__status {
+    min-block-size: 1.25rem;
+    margin: -.5rem 0 0;
+}
+
+@media (max-width: 36rem) {
+    .showcase-field-dossier { gap: .75rem; }
+    .showcase-field-dossier__heading { display: grid; gap: .5rem; }
+    .showcase-field-dossier .shadcn-field-group { gap: .625rem; }
+    .showcase-field-dossier .shadcn-field-description { font-size: .75rem; line-height: 1.35; }
+    .showcase-field-dossier .shadcn-textarea { min-block-size: 4rem; }
+    .showcase-field-dossier__security-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+    .showcase-field-dossier__security-row > :last-child .shadcn-field-description,
+    .showcase-field-dossier .shadcn-field:has(.shadcn-textarea) > .shadcn-field-description { display: none; }
+    .showcase-field-dossier__actions > .shadcn-button { flex: 1 1 8rem; }
+}
+
+@media (forced-colors: active) {
+    .showcase-field-dossier__heading { border-block-end-color: CanvasText; }
+}
+
 .showcase-chart-dossier [data-slot="chart-surface"] rect[data-series] {
     rx: 0 !important;
     ry: 0 !important;

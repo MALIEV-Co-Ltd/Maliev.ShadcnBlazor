@@ -119,17 +119,22 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "rtl");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/field").ToString());
-        var input = page.Locator("#dossier-field-input");
+        var fieldPreview = page.GetByTestId("field-dossier-preview");
+        var input = fieldPreview.Locator("#field-card-number");
+        await Assertions.Expect(input).Not.ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(input).ToHaveAttributeAsync("aria-describedby", "field-card-number-help");
+        await page.GetByTestId("control-field-invalid").CheckAsync();
         await Assertions.Expect(input).ToHaveAttributeAsync("aria-invalid", "true");
-        await Assertions.Expect(input).ToHaveAttributeAsync("aria-describedby", "dossier-field-help dossier-field-error");
+        await Assertions.Expect(input).ToHaveAttributeAsync("aria-describedby", "field-card-number-help field-card-number-error");
+        await Assertions.Expect(fieldPreview.GetByRole(AriaRole.Alert)).ToContainTextAsync("Check the card number");
         await page.GetByTestId("control-field-invalid").UncheckAsync();
         await Assertions.Expect(input).Not.ToHaveAttributeAsync("aria-invalid", "true");
-        await Assertions.Expect(input).ToHaveAttributeAsync("aria-describedby", "dossier-field-help");
+        await Assertions.Expect(input).ToHaveAttributeAsync("aria-describedby", "field-card-number-help");
         await page.GetByTestId("control-field-disabled").CheckAsync();
         await Assertions.Expect(input).ToBeDisabledAsync();
-        await Assertions.Expect(page.Locator("[data-slot='field-set']")).ToHaveAttributeAsync("disabled", string.Empty);
+        await Assertions.Expect(fieldPreview.Locator("[data-slot='field-set']")).ToHaveAttributeAsync("disabled", string.Empty);
         await page.GetByTestId("control-field-legend-variant").SelectOptionAsync("Label");
-        await Assertions.Expect(page.Locator("[data-slot='field-legend']")).ToHaveAttributeAsync("data-variant", "label");
+        await Assertions.Expect(fieldPreview.Locator("[data-slot='field-legend']")).ToHaveAttributeAsync("data-variant", "label");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/empty").ToString());
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Create project" })).ToBeVisibleAsync();

@@ -278,15 +278,93 @@ internal static class SemanticFoundationExamples
     {
         var orientation = ShadcnFieldOrientation.Vertical;
         var legendVariant = ShadcnFieldLegendVariant.Legend;
-        var invalid = true;
+        var invalid = false;
         var disabled = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnFieldSet>(0);
-            builder.AddAttribute(1, nameof(ShadcnFieldSet.Disabled), disabled);
-            builder.AddAttribute(2, nameof(ShadcnFieldSet.ChildContent), FieldSetContent(orientation, legendVariant, invalid, disabled));
+            builder.OpenComponent<FieldDossierPreview>(0);
+            builder.AddAttribute(1, nameof(FieldDossierPreview.Orientation), orientation);
+            builder.AddAttribute(2, nameof(FieldDossierPreview.LegendVariant), legendVariant);
+            builder.AddAttribute(3, nameof(FieldDossierPreview.Invalid), invalid);
+            builder.AddAttribute(4, nameof(FieldDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
+
+        string Source() => $$"""
+            <form @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+                <ShadcnFieldSet Disabled="{{disabled.ToString().ToLowerInvariant()}}">
+                    <ShadcnFieldLegend Variant="ShadcnFieldLegendVariant.{{legendVariant}}">Card details</ShadcnFieldLegend>
+                    <ShadcnFieldGroup>
+                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="cardholder-help">
+                            <ShadcnFieldLabel For="cardholder">Name on card</ShadcnFieldLabel>
+                            <ShadcnInput TValue="string" id="cardholder" Name="cardholder" AutoComplete="cc-name" @bind-Value="cardholder" />
+                            <ShadcnFieldDescription Id="cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
+                        </ShadcnField>
+
+                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
+                            <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
+                            <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
+                            <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                            @if (invalid)
+                            {
+                                <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
+                            }
+                        </ShadcnField>
+
+                        <div class="payment-security-row">
+                            <ShadcnField>
+                                <ShadcnFieldLabel For="expiry-month">Month</ShadcnFieldLabel>
+                                <ShadcnSelect TValue="string" id="expiry-month" aria-label="Expiry month" Name="expiry-month" Placeholder="MM" Options="months" @bind-Value="month" />
+                            </ShadcnField>
+                            <ShadcnField>
+                                <ShadcnFieldLabel For="expiry-year">Year</ShadcnFieldLabel>
+                                <ShadcnSelect TValue="string" id="expiry-year" aria-label="Expiry year" Name="expiry-year" Placeholder="YYYY" Options="years" @bind-Value="year" />
+                            </ShadcnField>
+                            <ShadcnField DescriptionId="cvv-help">
+                                <ShadcnFieldLabel For="cvv">CVV</ShadcnFieldLabel>
+                                <ShadcnInput TValue="string" id="cvv" Name="cvv" InputMode="numeric" AutoComplete="cc-csc" @bind-Value="cvv" />
+                                <ShadcnFieldDescription Id="cvv-help">3 digits</ShadcnFieldDescription>
+                            </ShadcnField>
+                        </div>
+
+                        <ShadcnFieldSeparator>Billing</ShadcnFieldSeparator>
+                        <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal">
+                            <ShadcnCheckbox id="same-address" @bind-Value="sameAsShipping" />
+                            <ShadcnFieldContent>
+                                <ShadcnFieldLabel For="same-address">Same as shipping address</ShadcnFieldLabel>
+                                <ShadcnFieldDescription dir="auto">Use the delivery address for this payment.</ShadcnFieldDescription>
+                            </ShadcnFieldContent>
+                        </ShadcnField>
+                        <ShadcnField DescriptionId="comments-help">
+                            <ShadcnFieldLabel For="comments">Comments</ShadcnFieldLabel>
+                            <ShadcnTextarea TValue="string" id="comments" Name="comments" Rows="3" Placeholder="Add a note for this payment" @bind-Value="comments" />
+                            <ShadcnFieldDescription Id="comments-help" dir="auto">Optional notes are included with the billing record.</ShadcnFieldDescription>
+                        </ShadcnField>
+                    </ShadcnFieldGroup>
+                </ShadcnFieldSet>
+                <ShadcnButton ButtonType="ShadcnButtonType.Submit" Disabled="{{disabled.ToString().ToLowerInvariant()}}">Review payment</ShadcnButton>
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="{{disabled.ToString().ToLowerInvariant()}}">Cancel</ShadcnButton>
+                <p role="status" aria-live="polite">@status</p>
+            </form>
+
+            @code {
+                private string cardholder = "Suda Chantarangsu";
+                private string cardNumber = "4242 4242 4242 4242";
+                private string month = "08";
+                private string year = "2029";
+                private string cvv = "123";
+                private string comments = string.Empty;
+                private bool? sameAsShipping = true;
+                private bool invalid = {{invalid.ToString().ToLowerInvariant()}};
+                private string status = string.Empty;
+                private readonly IReadOnlyList<ShadcnSelectOption<string>> months = Enumerable.Range(1, 12).Select(value => new ShadcnSelectOption<string>(value.ToString("00"), value.ToString("00"))).ToArray();
+                private readonly IReadOnlyList<ShadcnSelectOption<string>> years = Enumerable.Range(2026, 8).Select(value => new ShadcnSelectOption<string>(value.ToString(), value.ToString())).ToArray();
+
+                private void HandleSubmit() => status = invalid
+                    ? "Review the highlighted card number before continuing."
+                    : $"Payment details for {cardholder} are ready to review.";
+            }
+            """;
         ComponentParameterControl[] controls =
         [
             new(
@@ -307,7 +385,7 @@ internal static class SemanticFoundationExamples
                 "field-invalid",
                 "Invalid",
                 ComponentParameterControlKind.Toggle,
-                "true",
+                "false",
                 [],
                 value => invalid = bool.Parse(value)),
             new(
@@ -318,14 +396,15 @@ internal static class SemanticFoundationExamples
                 [],
                 value => disabled = bool.Parse(value))
         ];
-        return Example(
+        var example = Example(
             "field",
-            "Validation composition",
-            "Group a label, control, help text, and validation message with shared state.",
-            "<ShadcnFieldSet Disabled=\"false\">\n    <ShadcnFieldLegend Variant=\"ShadcnFieldLegendVariant.Legend\">Contact</ShadcnFieldLegend>\n    <ShadcnField Invalid=\"true\" DescriptionId=\"email-help\" ErrorId=\"email-error\">\n        <ShadcnFieldLabel For=\"email\">Email</ShadcnFieldLabel>\n        <input id=\"email\" aria-invalid=\"true\" aria-describedby=\"email-help email-error\" />\n        <ShadcnFieldDescription>Email used for notifications.</ShadcnFieldDescription>\n        <ShadcnFieldError>Enter a valid address.</ShadcnFieldError>\n    </ShadcnField>\n</ShadcnFieldSet>",
+            "Payment form composition",
+            "Compose a complete payment form with library inputs, descriptions, validation, grouped controls, and actions.",
+            Source(),
             preview,
             controls,
             ["vertical", "horizontal", "responsive", "valid", "invalid", "enabled", "disabled", "legend", "label"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Item()

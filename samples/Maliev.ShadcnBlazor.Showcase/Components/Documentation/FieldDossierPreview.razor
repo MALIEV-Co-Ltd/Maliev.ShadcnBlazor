@@ -1,0 +1,147 @@
+<form class="showcase-field-dossier" data-testid="field-dossier-preview" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+    <div class="showcase-field-dossier__heading">
+        <div>
+            <strong dir="auto">Payment method</strong>
+            <span dir="auto">All transactions are secure and encrypted.</span>
+        </div>
+        <span dir="auto">Secure checkout</span>
+    </div>
+
+    <ShadcnFieldSet Disabled="@Disabled">
+        <ShadcnFieldLegend Variant="@LegendVariant">Card details</ShadcnFieldLegend>
+        <ShadcnFieldGroup>
+            <ShadcnField Orientation="@Orientation" Disabled="@Disabled" DescriptionId="field-cardholder-help">
+                <ShadcnFieldLabel For="field-cardholder">Name on card</ShadcnFieldLabel>
+                <ShadcnInput TValue="string"
+                             id="field-cardholder"
+                             Name="cardholder"
+                             AutoComplete="cc-name"
+                             Value="@_cardholder"
+                             ValueChanged="SetCardholder" />
+                <ShadcnFieldDescription Id="field-cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
+            </ShadcnField>
+
+            <ShadcnField Orientation="@Orientation"
+                         Invalid="@Invalid"
+                         Disabled="@Disabled"
+                         DescriptionId="field-card-number-help"
+                         ErrorId="field-card-number-error">
+                <ShadcnFieldLabel For="field-card-number">Card number</ShadcnFieldLabel>
+                <ShadcnInput TValue="string"
+                             id="field-card-number"
+                             Name="card-number"
+                             InputMode="numeric"
+                             AutoComplete="cc-number"
+                             Value="@_cardNumber"
+                             ValueChanged="SetCardNumber" />
+                <ShadcnFieldDescription Id="field-card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                @if (Invalid)
+                {
+                    <ShadcnFieldError Id="field-card-number-error">Check the card number and try again.</ShadcnFieldError>
+                }
+            </ShadcnField>
+
+            <div class="showcase-field-dossier__security-row">
+                <ShadcnField Disabled="@Disabled">
+                    <ShadcnFieldLabel For="field-expiry-month">Month</ShadcnFieldLabel>
+                    <ShadcnSelect TValue="string"
+                                  id="field-expiry-month"
+                                  aria-label="Expiry month"
+                                  Name="expiry-month"
+                                  Placeholder="MM"
+                                  Options="Months"
+                                  Value="@_month"
+                                  ValueChanged="SetMonth" />
+                </ShadcnField>
+                <ShadcnField Disabled="@Disabled">
+                    <ShadcnFieldLabel For="field-expiry-year">Year</ShadcnFieldLabel>
+                    <ShadcnSelect TValue="string"
+                                  id="field-expiry-year"
+                                  aria-label="Expiry year"
+                                  Name="expiry-year"
+                                  Placeholder="YYYY"
+                                  Options="Years"
+                                  Value="@_year"
+                                  ValueChanged="SetYear" />
+                </ShadcnField>
+                <ShadcnField Disabled="@Disabled" DescriptionId="field-cvv-help">
+                    <ShadcnFieldLabel For="field-cvv">CVV</ShadcnFieldLabel>
+                    <ShadcnInput TValue="string"
+                                 id="field-cvv"
+                                 Name="cvv"
+                                 InputMode="numeric"
+                                 AutoComplete="cc-csc"
+                                 Value="@_cvv"
+                                 ValueChanged="SetCvv" />
+                    <ShadcnFieldDescription Id="field-cvv-help">3 digits</ShadcnFieldDescription>
+                </ShadcnField>
+            </div>
+
+            <ShadcnFieldSeparator>Billing</ShadcnFieldSeparator>
+
+            <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal" Disabled="@Disabled">
+                <ShadcnCheckbox id="field-same-address" Value="@_sameAsShipping" ValueChanged="SetSameAsShipping" />
+                <ShadcnFieldContent>
+                    <ShadcnFieldLabel For="field-same-address">Same as shipping address</ShadcnFieldLabel>
+                    <ShadcnFieldDescription dir="auto">Use the delivery address for this payment.</ShadcnFieldDescription>
+                </ShadcnFieldContent>
+            </ShadcnField>
+
+            <ShadcnField Disabled="@Disabled" DescriptionId="field-comments-help">
+                <ShadcnFieldLabel For="field-comments">Comments</ShadcnFieldLabel>
+                <ShadcnTextarea TValue="string"
+                                id="field-comments"
+                                Name="comments"
+                                Rows="3"
+                                Placeholder="Add a note for this payment"
+                                Value="@_comments"
+                                ValueChanged="SetComments" />
+                <ShadcnFieldDescription Id="field-comments-help" dir="auto">Optional notes are included with the billing record.</ShadcnFieldDescription>
+            </ShadcnField>
+        </ShadcnFieldGroup>
+    </ShadcnFieldSet>
+
+    <div class="showcase-field-dossier__actions">
+        <ShadcnButton ButtonType="ShadcnButtonType.Submit" Disabled="@Disabled">Review payment</ShadcnButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="@Disabled" OnClick="ClearStatus">Cancel</ShadcnButton>
+    </div>
+    <p class="showcase-field-dossier__status" role="status" aria-live="polite">@_status</p>
+</form>
+
+@code {
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> Months =
+        Enumerable.Range(1, 12).Select(month => new ShadcnSelectOption<string>(month.ToString("00"), month.ToString("00"))).ToArray();
+
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> Years =
+        Enumerable.Range(2026, 8).Select(year => new ShadcnSelectOption<string>(year.ToString(), year.ToString())).ToArray();
+
+    [Parameter] public ShadcnFieldOrientation Orientation { get; set; } = ShadcnFieldOrientation.Vertical;
+    [Parameter] public ShadcnFieldLegendVariant LegendVariant { get; set; } = ShadcnFieldLegendVariant.Legend;
+    [Parameter] public bool Invalid { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    private string _cardholder = "Suda Chantarangsu";
+    private string _cardNumber = "4242 4242 4242 4242";
+    private string _month = "08";
+    private string _year = "2029";
+    private string _cvv = "123";
+    private string _comments = string.Empty;
+    private bool? _sameAsShipping = true;
+    private string _status = string.Empty;
+
+    private Task SetCardholder(string value) { _cardholder = value; return Task.CompletedTask; }
+    private Task SetCardNumber(string value) { _cardNumber = value; return Task.CompletedTask; }
+    private Task SetMonth(string value) { _month = value; return Task.CompletedTask; }
+    private Task SetYear(string value) { _year = value; return Task.CompletedTask; }
+    private Task SetCvv(string value) { _cvv = value; return Task.CompletedTask; }
+    private Task SetComments(string value) { _comments = value; return Task.CompletedTask; }
+    private Task SetSameAsShipping(bool? value) { _sameAsShipping = value; return Task.CompletedTask; }
+    private Task ClearStatus(MouseEventArgs _) { _status = string.Empty; return Task.CompletedTask; }
+
+    private void HandleSubmit()
+    {
+        _status = Invalid
+            ? "Review the highlighted card number before continuing."
+            : $"Payment details for {_cardholder} are ready to review.";
+    }
+}
