@@ -214,6 +214,7 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(links.First).ToHaveAttributeAsync("data-size", "sm");
         var images = dossier.Locator("[data-slot='item-media'][data-variant='image'] img[alt]");
         await Assertions.Expect(images).ToHaveCountAsync(3);
+        await images.First.EvaluateAsync("image => image.decode()");
         Assert.True(await images.First.EvaluateAsync<bool>("image => image.complete && image.naturalWidth > 0"));
 
         var source = page.Locator("#preview .component-code pre").First;
