@@ -225,6 +225,33 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void BadgeDossierShowsEveryPinnedVariantAndKeepsSourceInSyncWithControls()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("badge").Single();
+        var cut = Render(example.Preview);
+
+        Assert.NotNull(cut.Find("[data-testid='badge-dossier-preview']"));
+        Assert.Equal(
+            ["default", "secondary", "destructive", "outline", "ghost", "link"],
+            cut.FindAll("[data-testid='badge-variant-gallery'] [data-slot='badge']")
+                .Select(element => element.GetAttribute("data-variant")));
+        Assert.Contains("<ShadcnBadge Variant=\"ShadcnBadgeVariant.Default\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("aria-invalid", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "badge-variant").Apply("Outline");
+        example.Controls.Single(control => control.Id == "badge-link").Apply("true");
+        example.Controls.Single(control => control.Id == "badge-invalid").Apply("true");
+        cut = Render(example.Preview);
+
+        var selected = cut.Find("[data-testid='badge-current'] [data-slot='badge']");
+        Assert.Equal("outline", selected.GetAttribute("data-variant"));
+        Assert.Equal("a", selected.NodeName.ToLowerInvariant());
+        Assert.Equal("true", selected.GetAttribute("aria-invalid"));
+        Assert.Contains("<ShadcnBadge Variant=\"ShadcnBadgeVariant.Outline\" Href=\"docs/components/badge\" aria-invalid=\"true\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-invalid=\"true\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EveryFeedbackDossierControlChangesTheRenderedComponentCanvas()
     {
         var alternate = new Dictionary<string, string>(StringComparer.Ordinal)
