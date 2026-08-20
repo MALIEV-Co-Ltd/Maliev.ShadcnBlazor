@@ -229,6 +229,11 @@
         border-width: 1px;
     }
 
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toggle-group-item {
+        forced-color-adjust: none;
+        border: 1px solid ButtonText;
+    }
+
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-thumb {
         forced-color-adjust: none;
         background: Canvas;
