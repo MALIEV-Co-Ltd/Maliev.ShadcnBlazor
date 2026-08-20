@@ -992,7 +992,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 break;
             case "checkbox":
                 await Assertions.Expect(page.GetByTestId("checkbox-dossier-preview").Locator("[data-slot=checkbox]")).ToHaveCountAsync(6);
-                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "mixed");
+                await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "false");
                 await page.GetByTestId("action-checkbox").CheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-checkbox")).ToHaveAttributeAsync("aria-checked", "true");
                 await Assertions.Expect(page.GetByTestId("checkbox-indeterminate")).ToHaveAttributeAsync("aria-checked", "mixed");

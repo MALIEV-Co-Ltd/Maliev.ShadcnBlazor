@@ -45,7 +45,7 @@ internal static class ActionSelectionExamples
 
     <section aria-labelledby="variants-title">
         <h4 id="variants-title">Variants</h4>
-        <div>
+        <div dir="auto">
             <ShadcnButton Variant="ShadcnButtonVariant.Default" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Save changes"))">Save changes</ShadcnButton>
             <ShadcnButton Variant="ShadcnButtonVariant.Destructive" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Delete"))">Delete</ShadcnButton>
             <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Save changes"))">Save changes</ShadcnButton>
@@ -182,33 +182,33 @@ internal static class ActionSelectionExamples
             <h3 id="checkbox-dossier-title">Notification preferences</h3>
             <p>Choose how the production team can contact you.</p>
         </div>
-        <span>Workspace settings</span>
+        <span dir="auto">Workspace settings</span>
     </header>
 
     <div class="showcase-checkbox-dossier__list">
         <label class="showcase-checkbox-option">
             <ShadcnCheckbox @bind-Value="AcceptTerms" Name="terms" />
-            <span><strong>Accept terms and conditions</strong><small>Required before production files can be released.</small></span>
+            <span dir="auto"><strong>Accept terms and conditions</strong><small>Required before production files can be released.</small></span>
         </label>
         <label class="showcase-checkbox-option">
             <ShadcnCheckbox @bind-Value="ProductionUpdates" Name="production-updates" />
-            <span><strong>Production updates</strong><small>Receive status changes for active manufacturing orders.</small></span>
+            <span dir="auto"><strong>Production updates</strong><small>Receive status changes for active manufacturing orders.</small></span>
         </label>
         <label class="showcase-checkbox-option">
             <ShadcnCheckbox @bind-Value="InspectionRecipients" Name="inspection-recipients" />
-            <span><strong>Inspection recipients</strong><small>Some quality-team recipients are selected.</small></span>
+            <span dir="auto"><strong>Inspection recipients</strong><small>Some quality-team recipients are selected.</small></span>
         </label>
         <label class="showcase-checkbox-option showcase-checkbox-option--invalid">
             <ShadcnCheckbox @bind-Value="QualityApproval" Name="quality-approval" Invalid="true" aria-describedby="checkbox-quality-error" />
-            <span><strong>Quality approval</strong><small id="checkbox-quality-error">Select this before submitting the inspection report.</small></span>
+            <span dir="auto"><strong>Quality approval</strong><small id="checkbox-quality-error">Select this before submitting the inspection report.</small></span>
         </label>
         <label class="showcase-checkbox-option">
             <ShadcnCheckbox Value="true" Name="archived-reports" ReadOnly="true" />
-            <span><strong>Archive completed reports</strong><small>This workspace policy is read-only.</small></span>
+            <span dir="auto"><strong>Archive completed reports</strong><small>This workspace policy is read-only.</small></span>
         </label>
         <label class="showcase-checkbox-option">
             <ShadcnCheckbox Value="false" Name="legacy-alerts" Disabled="true" />
-            <span><strong>Legacy machine alerts</strong><small>Unavailable for this workspace.</small></span>
+            <span dir="auto"><strong>Legacy machine alerts</strong><small>Unavailable for this workspace.</small></span>
         </label>
     </div>
 </section>
