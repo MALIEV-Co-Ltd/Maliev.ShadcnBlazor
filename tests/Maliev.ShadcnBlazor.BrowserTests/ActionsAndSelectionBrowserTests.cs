@@ -1,5 +1,6 @@
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
 
@@ -1154,11 +1155,13 @@ public sealed class ActionsAndSelectionBrowserTests(
         Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 15, 25);
 
         await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Horizontal");
+        await Assertions.Expect(slider).ToHaveAttributeAsync("data-orientation", "horizontal");
         await slider.EvaluateAsync("element => element.setAttribute('dir', 'rtl')");
+        await Assertions.Expect(slider).ToHaveCSSAsync("direction", "rtl");
         trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
         Assert.NotNull(trackBox);
         await page.Mouse.ClickAsync((float)(trackBox!.X + trackBox.Width * .2), (float)(trackBox.Y + trackBox.Height / 2));
-        Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 75, 85);
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-valuenow", new Regex("^(75|80|85)$"));
     }
 
     [Fact]
@@ -1188,10 +1191,22 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(source).ToContainTextAsync("Invalid=\"true\"");
         await Assertions.Expect(source).ToContainTextAsync("@bind-Value=\"ProductionUpdates\"");
 
+        var switchRoot = control.Locator("xpath=..");
         await control.ClickAsync();
-        await page.GetByTestId("documentation-direction-toggle").EvaluateAsync("element => element.click()");
+        await Assertions.Expect(control).ToHaveAttributeAsync("aria-checked", "true");
+        await Assertions.Expect(switchRoot).ToHaveAttributeAsync("data-state", "checked");
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
-        var geometry = await control.Locator("xpath=..").EvaluateAsync<double[]>("""
+        await Assertions.Expect(switchRoot).ToHaveCSSAsync("direction", "rtl");
+        await page.WaitForFunctionAsync("""
+            root => {
+                const track = root.getBoundingClientRect();
+                const thumb = root.querySelector('[data-slot=switch-thumb]').getBoundingClientRect();
+                const startInset = thumb.left - track.left;
+                return thumb.left >= track.left && thumb.right <= track.right && startInset >= 0 && startInset <= 2;
+            }
+            """, await switchRoot.ElementHandleAsync());
+        var geometry = await switchRoot.EvaluateAsync<double[]>("""
             root => {
                 const track = root.getBoundingClientRect();
                 const thumb = root.querySelector('[data-slot=switch-thumb]').getBoundingClientRect();
