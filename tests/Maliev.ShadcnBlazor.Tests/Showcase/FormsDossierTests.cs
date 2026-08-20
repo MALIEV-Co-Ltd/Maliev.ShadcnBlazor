@@ -181,15 +181,19 @@ public sealed class FormsDossierTests : BunitContext
         Assert.Equal("text", otp.Find("[data-testid='forms-dossier-input-otp']").GetAttribute("inputmode"));
         Assert.Null(otp.Find("[data-testid='forms-dossier-input-otp']").GetAttribute("data-pattern"));
 
-        var select = RenderExample(registry, "select");
+        var selectExample = registry.GetBySlug("select").Single();
+        var select = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, selectExample));
         select.Find("[data-testid='forms-dossier-select']").Click();
         Assert.NotEmpty(select.FindAll("[role='listbox']"));
         select.Find("[role='option'][data-value='slm']").Click();
         Assert.Equal("Metal 3D printing", select.Find("[data-slot='select-value']").TextContent);
         Change(select, "select-invalid", true);
         Assert.Equal("true", select.Find("[data-testid='forms-dossier-select']").GetAttribute("aria-invalid"));
-        Change(select, "select-open", true);
-        Assert.Equal("true", select.Find("[data-testid='forms-dossier-select']").GetAttribute("aria-expanded"));
+        Assert.Empty(select.FindAll("#select-open"));
+        var source = selectExample.RazorSourceProvider!();
+        Assert.Contains("Invalid=\"true\"", source, StringComparison.Ordinal);
+        Assert.Contains("ProcessOptions", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("@bind-Open", source, StringComparison.Ordinal);
 
         var combobox = RenderExample(registry, "combobox");
         Change(combobox, "combobox-invalid", true);

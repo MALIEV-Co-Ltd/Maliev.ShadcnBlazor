@@ -36,8 +36,11 @@ public sealed class FormStyleParityTests
     {
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
 
-        Assert.Contains(".shadcn-select:has(> [data-slot=\"select-clear\"]) .shadcn-select-trigger", css, StringComparison.Ordinal);
-        Assert.Contains("padding-inline-end: calc(2.75rem", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-select[data-clearable=\"true\"] .shadcn-select-trigger", css, StringComparison.Ordinal);
+        Assert.Contains("padding-inline-end: calc(3.25rem", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-select[data-clearable=\"true\"] .shadcn-select-trigger-icon", css, StringComparison.Ordinal);
+        Assert.Contains("grid-area: 1 / 1", css, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-end: calc(2rem", css, StringComparison.Ordinal);
         Assert.Contains("border-inline-end: 1px solid var(--shadcn-input)", css, StringComparison.Ordinal);
         Assert.Contains("border-inline-start: 1px solid var(--shadcn-input)", css, StringComparison.Ordinal);
         Assert.DoesNotContain("field-sizing: content", css, StringComparison.Ordinal);

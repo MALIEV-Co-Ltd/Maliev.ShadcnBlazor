@@ -164,13 +164,31 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition Select()
     {
-        var invalid = false; var open = false;
-        RenderFragment preview = b => { b.OpenComponent<SelectDossierPreview>(0); b.AddAttribute(1, nameof(SelectDossierPreview.Invalid), invalid); b.AddAttribute(2, nameof(SelectDossierPreview.Open), open); b.CloseComponent(); };
-        string Source() => $"<ShadcnSelect TValue=\"string\" @bind-Value=\"Process\" @bind-Open=\"IsOpen\" Options=\"ProcessOptions\" Clearable=\"true\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
+        var invalid = false;
+        RenderFragment preview = b => { b.OpenComponent<SelectDossierPreview>(0); b.AddAttribute(1, nameof(SelectDossierPreview.Invalid), invalid); b.CloseComponent(); };
+        string Source() => $$"""
+            <ShadcnSelect TValue="string"
+                          @bind-Value="Process"
+                          Options="ProcessOptions"
+                          Placeholder="Select a process"
+                          Clearable="true"
+                          Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                          aria-label="Manufacturing process" />
+
+            @code {
+                private string Process { get; set; } = "cnc";
+
+                private static readonly IReadOnlyList<ShadcnSelectOption<string>> ProcessOptions =
+                [
+                    new("cnc", "CNC machining", "Subtractive"),
+                    new("slm", "Metal 3D printing", "Additive"),
+                    new("disabled", "Unavailable", "Other", Disabled: true)
+                ];
+            }
+            """;
         return Example("select", "Grouped select", "Choose a manufacturing process from a keyboard-friendly grouped listbox, then clear or change the selection directly in the preview.", Source(), preview,
             [
-                Toggle("select-invalid", "Invalid", v => invalid = v),
-                Toggle("select-open", "Open", v => open = v)
+                Toggle("select-invalid", "Invalid", v => invalid = v)
             ], ["selected", "groups", "clearable", "open", "invalid"]) with
         { RazorSourceProvider = Source };
     }
@@ -344,22 +362,8 @@ internal static class FormDateExamples
     private sealed class SelectDossierPreview : ComponentBase
     {
         [Parameter] public bool Invalid { get; set; }
-        [Parameter] public bool Open { get; set; }
 
         private string Value { get; set; } = "cnc";
-        private bool EffectiveOpen { get; set; }
-        private bool OpenInitialized { get; set; }
-        private bool LastOpenParameter { get; set; }
-
-        protected override void OnParametersSet()
-        {
-            if (!OpenInitialized || Open != LastOpenParameter)
-            {
-                EffectiveOpen = Open;
-                LastOpenParameter = Open;
-                OpenInitialized = true;
-            }
-        }
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
@@ -369,11 +373,10 @@ internal static class FormDateExamples
             builder.AddAttribute(3, "Value", Value);
             builder.AddAttribute(4, "ValueChanged", EventCallback.Factory.Create<string>(this, HandleValueChanged));
             builder.AddAttribute(5, "Options", Processes);
-            builder.AddAttribute(6, "Open", EffectiveOpen);
-            builder.AddAttribute(7, "OpenChanged", EventCallback.Factory.Create<bool>(this, HandleOpenChanged));
-            builder.AddAttribute(8, "Invalid", Invalid);
-            builder.AddAttribute(9, "Clearable", true);
-            builder.AddAttribute(10, "AdditionalAttributes", Attr("forms-dossier-select", "Process"));
+            builder.AddAttribute(6, "Invalid", Invalid);
+            builder.AddAttribute(7, "Clearable", true);
+            builder.AddAttribute(8, "Placeholder", "Select a process");
+            builder.AddAttribute(9, "AdditionalAttributes", Attr("forms-dossier-select", "Manufacturing process"));
             builder.CloseComponent();
             builder.CloseElement();
         }
@@ -384,10 +387,5 @@ internal static class FormDateExamples
             return Task.CompletedTask;
         }
 
-        private Task HandleOpenChanged(bool open)
-        {
-            EffectiveOpen = open;
-            return Task.CompletedTask;
-        }
     }
 }
