@@ -73,5 +73,16 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         Assert.Contains("ReadOnly=\"true\"", radioGroup.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Priority review", radioGroup.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Same-day review", radioGroup.RazorSource, StringComparison.Ordinal);
+
+        var @switch = registry.GetBySlug("switch").Single();
+        var switchCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, @switch));
+        switchCut.Find("[data-testid='action-switch']").Change(false);
+        Assert.Contains("private bool ProductionUpdates = false", @switch.RazorSource, StringComparison.Ordinal);
+        switchCut.Find("[data-testid='control-switch-size']").Change("Small");
+        switchCut.Find("[data-testid='control-switch-invalid']").Change(true);
+        Assert.Contains("Size=\"ShadcnSwitchSize.Small\"", @switch.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"true\"", @switch.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind-Value=\"ProductionUpdates\"", @switch.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool ProductionUpdates", @switch.RazorSource, StringComparison.Ordinal);
     }
 }

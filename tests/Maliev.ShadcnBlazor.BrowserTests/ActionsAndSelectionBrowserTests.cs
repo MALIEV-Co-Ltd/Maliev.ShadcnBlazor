@@ -1159,6 +1159,52 @@ public sealed class ActionsAndSelectionBrowserTests(
         Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 75, 85);
     }
 
+    [Fact]
+    public async Task SwitchDossierSupportsDirectInteractionAndKeepsSourceInSync()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = ColorScheme.Dark
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/switch").ToString());
+        await page.GetByTestId("component-preview").WaitForAsync();
+
+        var control = page.GetByTestId("action-switch");
+        await control.ClickAsync();
+        await Assertions.Expect(control).ToHaveAttributeAsync("aria-checked", "false");
+        await Assertions.Expect(page.GetByTestId("switch-dossier-preview").GetByRole(AriaRole.Status))
+            .ToContainTextAsync("Production updates are paused.");
+
+        await page.GetByTestId("control-switch-size").SelectOptionAsync("Small");
+        await Assertions.Expect(control.Locator("xpath=..")).ToHaveCSSAsync("width", "24px");
+        await page.GetByTestId("control-switch-invalid").CheckAsync();
+        var source = page.Locator("#preview .component-code pre").First;
+        await Assertions.Expect(source).ToContainTextAsync("Size=\"ShadcnSwitchSize.Small\"");
+        await Assertions.Expect(source).ToContainTextAsync("Invalid=\"true\"");
+        await Assertions.Expect(source).ToContainTextAsync("@bind-Value=\"ProductionUpdates\"");
+
+        await control.ClickAsync();
+        await page.GetByTestId("documentation-direction-toggle").EvaluateAsync("element => element.click()");
+        await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
+        var geometry = await control.Locator("xpath=..").EvaluateAsync<double[]>("""
+            root => {
+                const track = root.getBoundingClientRect();
+                const thumb = root.querySelector('[data-slot=switch-thumb]').getBoundingClientRect();
+                return [track.left, track.right, thumb.left, thumb.right, thumb.left - track.left, track.right - thumb.right];
+            }
+            """);
+        Assert.True(geometry[2] >= geometry[0], "RTL checked thumb must remain inside the track's left edge.");
+        Assert.True(geometry[3] <= geometry[1], "RTL checked thumb must remain inside the track's right edge.");
+        Assert.InRange(geometry[4], 0, 2);
+
+        var overflow = await page.EvaluateAsync<double>(
+            "Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)");
+        Assert.InRange(overflow, 0, 1);
+    }
+
     private string FamilyUrl(string theme, string direction, string locale) =>
         new Uri(server.BaseUri, $"/components/actions-and-selection?theme={theme}&dir={direction}&locale={locale}").ToString();
 
