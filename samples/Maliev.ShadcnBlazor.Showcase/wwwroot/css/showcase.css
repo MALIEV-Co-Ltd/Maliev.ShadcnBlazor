@@ -6658,3 +6658,43 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-toggle-group-dossier__drawing,
     .showcase-toggle-group-dossier__drawing span { border-color: CanvasText; }
 }
+
+.showcase-empty-dossier {
+    display: grid;
+    inline-size: min(100%, 34rem);
+    min-block-size: 20rem;
+    margin-inline: auto;
+}
+
+.showcase-empty-dossier > .shadcn-empty {
+    min-block-size: inherit;
+}
+
+.showcase-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
+}
+
+.showcase-empty-status {
+    min-block-size: 1.25rem;
+    margin: 0;
+    color: var(--shadcn-muted-foreground);
+    line-height: 1.4;
+}
+
+@media (max-width: 30rem) {
+    .showcase-empty-dossier {
+        min-block-size: 18rem;
+    }
+
+    .showcase-empty-actions {
+        inline-size: 100%;
+        flex-direction: column;
+    }
+
+    .showcase-empty-actions .shadcn-button {
+        inline-size: 100%;
+    }
+}

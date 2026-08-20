@@ -1,11 +1,12 @@
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Content;
 using Maliev.ShadcnBlazor.Components.Direction;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Layout;
 using Maliev.ShadcnBlazor.Components.Typography;
-using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Rendering;
 
 namespace Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
@@ -413,15 +414,52 @@ internal static class SemanticFoundationExamples
         var mediaVariant = ShadcnEmptyMediaVariant.Icon;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnEmpty>(0);
-            builder.AddAttribute(1, nameof(ShadcnEmpty.ChildContent), EmptyContent(mediaVariant));
+            builder.OpenComponent<EmptyDossierPreview>(0);
+            builder.AddAttribute(1, nameof(EmptyDossierPreview.MediaVariant), mediaVariant);
             builder.CloseComponent();
         };
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
+
+<section class="showcase-empty-dossier" aria-label="Project workspace empty state" dir="auto">
+    <ShadcnEmpty>
+        <ShadcnEmptyHeader>
+            <ShadcnEmptyMedia Variant="ShadcnEmptyMediaVariant.{{mediaVariant}}">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z" />
+                    <path d="M12 11v5M9.5 13.5h5" />
+                </svg>
+            </ShadcnEmptyMedia>
+            <ShadcnEmptyTitle>No projects yet</ShadcnEmptyTitle>
+            <ShadcnEmptyDescription>
+                Create your first project or import an existing project archive.
+            </ShadcnEmptyDescription>
+        </ShadcnEmptyHeader>
+        <ShadcnEmptyContent>
+            <div class="showcase-empty-actions">
+                <ShadcnButton OnClick="StartProject">Create project</ShadcnButton>
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="ImportProject">Import project</ShadcnButton>
+            </div>
+            <p class="showcase-empty-status" role="status" aria-live="polite">@Feedback</p>
+        </ShadcnEmptyContent>
+    </ShadcnEmpty>
+</section>
+
+@code {
+    private string Feedback = "Choose how you want to start.";
+
+    private void StartProject() => Feedback = "A new project workspace is ready.";
+
+    private void ImportProject() =>
+        Feedback = "Project import opened. Select a project archive to continue.";
+}
+""";
         return Example(
             "empty",
             "Empty collection",
-            "Explain why a collection is empty and offer clear create or import actions.",
-            "<ShadcnEmpty>\n    <ShadcnEmptyHeader>\n        <ShadcnEmptyMedia Variant=\"ShadcnEmptyMediaVariant.Icon\">\n            <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z\" /><path d=\"M12 11v5M9.5 13.5h5\" /></svg>\n        </ShadcnEmptyMedia>\n        <ShadcnEmptyTitle>No projects yet</ShadcnEmptyTitle>\n        <ShadcnEmptyDescription>You have not created any projects yet.</ShadcnEmptyDescription>\n    </ShadcnEmptyHeader>\n    <ShadcnEmptyContent Class=\"showcase-empty-actions\"><button type=\"button\">Create project</button><button type=\"button\">Import project</button></ShadcnEmptyContent>\n</ShadcnEmpty>",
+            "Start a project workspace from a clear empty state, with distinct create and import paths and immediate action feedback.",
+            Source(),
             preview,
             [new ComponentParameterControl(
                 "empty-media-variant",
@@ -430,7 +468,8 @@ internal static class SemanticFoundationExamples
                 mediaVariant.ToString(),
                 Enum.GetNames<ShadcnEmptyMediaVariant>(),
                 value => mediaVariant = Enum.Parse<ShadcnEmptyMediaVariant>(value))],
-            ["media-default", "media-icon", "description", "action"]);
+            ["media-default", "media-icon", "description", "primary-action", "secondary-action", "status"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Example(
@@ -633,40 +672,6 @@ internal static class SemanticFoundationExamples
         builder.CloseElement();
     };
 
-    private static RenderFragment EmptyContent(ShadcnEmptyMediaVariant mediaVariant) => builder =>
-    {
-        builder.OpenComponent<ShadcnEmptyHeader>(0);
-        builder.AddAttribute(1, nameof(ShadcnEmptyHeader.ChildContent), (RenderFragment)(builder2 =>
-        {
-            builder2.OpenComponent<ShadcnEmptyMedia>(0);
-            builder2.AddAttribute(1, nameof(ShadcnEmptyMedia.Variant), mediaVariant);
-            builder2.AddAttribute(2, nameof(ShadcnEmptyMedia.ChildContent), FolderPlusIcon());
-            builder2.CloseComponent();
-            builder2.OpenComponent<ShadcnEmptyTitle>(3);
-            builder2.AddAttribute(4, nameof(ShadcnEmptyTitle.ChildContent), Text("No projects yet"));
-            builder2.CloseComponent();
-            builder2.OpenComponent<ShadcnEmptyDescription>(5);
-            builder2.AddAttribute(6, nameof(ShadcnEmptyDescription.ChildContent), Text("Create a project to begin."));
-            builder2.CloseComponent();
-        }));
-        builder.CloseComponent();
-        builder.OpenComponent<ShadcnEmptyContent>(2);
-        builder.AddAttribute(3, nameof(ShadcnEmptyContent.Class), "showcase-empty-actions");
-        builder.AddAttribute(4, nameof(ShadcnEmptyContent.ChildContent), (RenderFragment)(content =>
-        {
-            content.OpenElement(0, "button");
-            content.AddAttribute(1, "type", "button");
-            content.AddContent(2, "Create project");
-            content.CloseElement();
-            content.OpenElement(3, "button");
-            content.AddAttribute(4, "type", "button");
-            content.AddAttribute(5, "class", "shadcn-button shadcn-button--outline");
-            content.AddContent(6, "Import project");
-            content.CloseElement();
-        }));
-        builder.CloseComponent();
-    };
-
     private static RenderFragment FileIcon() => builder =>
     {
         builder.OpenElement(0, "svg"); builder.AddAttribute(1, "viewBox", "0 0 24 24"); builder.AddAttribute(2, "aria-hidden", "true"); builder.OpenElement(3, "path"); builder.AddAttribute(4, "d", "M6 3h8l4 4v14H6z"); builder.CloseElement(); builder.OpenElement(5, "path"); builder.AddAttribute(6, "d", "M14 3v5h5M9 13h6M9 17h4"); builder.CloseElement(); builder.CloseElement();
@@ -676,6 +681,84 @@ internal static class SemanticFoundationExamples
     {
         builder.OpenElement(0, "svg"); builder.AddAttribute(1, "viewBox", "0 0 24 24"); builder.AddAttribute(2, "aria-hidden", "true"); builder.OpenElement(3, "path"); builder.AddAttribute(4, "d", "M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"); builder.CloseElement(); builder.OpenElement(5, "path"); builder.AddAttribute(6, "d", "M12 11v5M9.5 13.5h5"); builder.CloseElement(); builder.CloseElement();
     };
+
+    private sealed class EmptyDossierPreview : ComponentBase
+    {
+        [Parameter] public ShadcnEmptyMediaVariant MediaVariant { get; set; } = ShadcnEmptyMediaVariant.Icon;
+
+        private string Feedback { get; set; } = "Choose how you want to start.";
+
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "section");
+            builder.AddAttribute(1, "class", "showcase-empty-dossier");
+            builder.AddAttribute(2, "aria-label", "Project workspace empty state");
+            builder.AddAttribute(3, "dir", "auto");
+            builder.OpenComponent<ShadcnEmpty>(4);
+            builder.AddAttribute(5, nameof(ShadcnEmpty.ChildContent), EmptyContent());
+            builder.CloseComponent();
+            builder.CloseElement();
+        }
+
+        private RenderFragment EmptyContent() => builder =>
+        {
+            builder.OpenComponent<ShadcnEmptyHeader>(0);
+            builder.AddAttribute(1, nameof(ShadcnEmptyHeader.ChildContent), (RenderFragment)(header =>
+            {
+                header.OpenComponent<ShadcnEmptyMedia>(0);
+                header.AddAttribute(1, nameof(ShadcnEmptyMedia.Variant), MediaVariant);
+                header.AddAttribute(2, nameof(ShadcnEmptyMedia.ChildContent), FolderPlusIcon());
+                header.CloseComponent();
+                header.OpenComponent<ShadcnEmptyTitle>(3);
+                header.AddAttribute(4, nameof(ShadcnEmptyTitle.ChildContent), Text("No projects yet"));
+                header.CloseComponent();
+                header.OpenComponent<ShadcnEmptyDescription>(5);
+                header.AddAttribute(6, nameof(ShadcnEmptyDescription.ChildContent), Text("Create your first project or import an existing project archive."));
+                header.CloseComponent();
+            }));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnEmptyContent>(2);
+            builder.AddAttribute(3, nameof(ShadcnEmptyContent.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenElement(0, "div");
+                content.AddAttribute(1, "class", "showcase-empty-actions");
+                AddAction(content, 2, "Create project", ShadcnButtonVariant.Default, "create", StartProject);
+                AddAction(content, 10, "Import project", ShadcnButtonVariant.Outline, "import", ImportProject);
+                content.CloseElement();
+                content.OpenElement(20, "p");
+                content.AddAttribute(21, "class", "showcase-empty-status");
+                content.AddAttribute(22, "role", "status");
+                content.AddAttribute(23, "aria-live", "polite");
+                content.AddContent(24, Feedback);
+                content.CloseElement();
+            }));
+            builder.CloseComponent();
+        };
+
+        private void AddAction(
+            RenderTreeBuilder builder,
+            int sequence,
+            string label,
+            ShadcnButtonVariant variant,
+            string action,
+            Action handler)
+        {
+            builder.OpenComponent<ShadcnButton>(sequence);
+            builder.AddAttribute(sequence + 1, nameof(ShadcnButton.Variant), variant);
+            builder.AddAttribute(sequence + 2, nameof(ShadcnButton.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, handler));
+            builder.AddAttribute(sequence + 3, nameof(ShadcnButton.AdditionalAttributes), new Dictionary<string, object>
+            {
+                ["data-empty-action"] = action
+            });
+            builder.AddAttribute(sequence + 4, nameof(ShadcnButton.ChildContent), Text(label));
+            builder.CloseComponent();
+        }
+
+        private void StartProject() => Feedback = "A new project workspace is ready.";
+
+        private void ImportProject() =>
+            Feedback = "Project import opened. Select a project archive to continue.";
+    }
 
     private static void AddShortcut(RenderTreeBuilder builder, int sequence, string label, IReadOnlyList<string> keys)
     {
