@@ -4290,6 +4290,16 @@ a {
     .showcase-toggle-dossier__header { display: grid; }
     .showcase-toggle-dossier__state { text-align: start; }
 }
+.showcase-input-dossier {
+    inline-size: min(100%, 30rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-input-dossier .shadcn-card { inline-size: 100%; }
+.showcase-input-dossier .shadcn-card-content { display: grid; gap: 1.25rem; }
+.showcase-input-dossier .shadcn-card-footer { justify-content: space-between; gap: 1rem; }
+.showcase-input-dossier .shadcn-card-footer [role="status"] { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; text-align: end; }
 
 .showcase-otp-card {
     inline-size: min(100%, 26rem);
@@ -4334,6 +4344,9 @@ a {
     .showcase-skeleton-layout__status,
     .showcase-skeleton-layout__row > .shadcn-badge { grid-column: 2; justify-self: start; }
     .showcase-toast-demo .shadcn-toast-viewport { inset-inline: 1rem; inline-size: auto; max-inline-size: none; }
+    .showcase-input-dossier .shadcn-card-footer { flex-direction: column; align-items: stretch; }
+    .showcase-input-dossier .shadcn-card-footer [data-slot="button"] { inline-size: 100%; }
+    .showcase-input-dossier .shadcn-card-footer [role="status"] { text-align: center; }
 }
 
 .showcase-message-thread.showcase-message-thread--footer-always [data-slot="message"] .shadcn-message-footer {

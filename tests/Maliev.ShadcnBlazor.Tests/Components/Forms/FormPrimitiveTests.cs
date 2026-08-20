@@ -43,9 +43,16 @@ public sealed class FormPrimitiveTests : BunitContext
     {
         var cut = Render<ShadcnInput<string>>(parameters => parameters
             .Add(component => component.Type, "file")
-            .Add(component => component.Value, "forbidden-path"));
+            .Add(component => component.Value, "forbidden-path")
+            .Add(component => component.Accept, ".json,.pem")
+            .Add(component => component.Multiple, true)
+            .Add(component => component.Capture, "environment"));
 
-        Assert.False(cut.Find("input").HasAttribute("value"));
+        var input = cut.Find("input");
+        Assert.False(input.HasAttribute("value"));
+        Assert.Equal(".json,.pem", input.GetAttribute("accept"));
+        Assert.True(input.HasAttribute("multiple"));
+        Assert.Equal("environment", input.GetAttribute("capture"));
         var parameters = typeof(ShadcnInput<string>).GetProperties().Select(property => property.Name).ToHashSet(StringComparer.Ordinal);
         Assert.Contains("FilesChanged", parameters);
         Assert.Contains("Accept", parameters);
