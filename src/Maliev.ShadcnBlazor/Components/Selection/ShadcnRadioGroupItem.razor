@@ -4,25 +4,27 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State">
-    <input @attributes="ForwardedAttributes"
-           id="@EffectiveId"
-           class="@MergeClass("shadcn-radio-group-item")"
-           style="@MergeStyle(null)"
-           type="radio"
-           name="@Context?.Name"
-           value="@SerializedValue"
-           checked="@Selected"
-           disabled="@EffectiveDisabled"
-           tabindex="@TabIndex"
-           aria-checked="@(Selected ? "true" : "false")"
-           aria-readonly="@(Context?.ReadOnly == true ? "true" : null)"
-           aria-invalid="@(Context?.Invalid == true ? "true" : null)"
-           aria-describedby="@Context?.AriaDescribedBy"
-           data-slot="radio-group-item"
-           data-state="@State"
-           @onclick:preventDefault="@(Context?.ReadOnly == true)"
-           @onchange="HandleChangeAsync" />
-    <span class="shadcn-radio-indicator" data-slot="radio-group-indicator" aria-hidden="true"></span>
+    <span class="shadcn-radio-control" data-slot="radio-group-control">
+        <input @attributes="ForwardedAttributes"
+               id="@EffectiveId"
+               class="@MergeClass("shadcn-radio-group-item")"
+               style="@MergeStyle(null)"
+               type="radio"
+               name="@Context?.Name"
+               value="@SerializedValue"
+               checked="@Selected"
+               disabled="@EffectiveDisabled"
+               tabindex="@TabIndex"
+               aria-checked="@(Selected ? "true" : "false")"
+               aria-readonly="@(Context?.ReadOnly == true ? "true" : null)"
+               aria-invalid="@(Context?.Invalid == true ? "true" : null)"
+               aria-describedby="@Context?.AriaDescribedBy"
+               data-slot="radio-group-item"
+               data-state="@State"
+               @onclick:preventDefault="@(Context?.ReadOnly == true)"
+               @onchange="HandleChangeAsync" />
+        <span class="shadcn-radio-indicator" data-slot="radio-group-indicator" aria-hidden="true"></span>
+    </span>
     @if (ChildContent is not null)
     {
         <span class="shadcn-radio-label" data-slot="radio-group-label">@ChildContent</span>

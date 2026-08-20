@@ -159,10 +159,12 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group { display: grid; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group[data-orientation="horizontal"] { display: flex; flex-wrap: wrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-control { position: relative; display: inline-grid; flex: 0 0 1rem; width: 1rem; height: 1rem; place-items: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item { border-radius: 50%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item:checked { border-color: var(--shadcn-primary); background: var(--shadcn-primary); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-indicator { position: absolute; inset-inline-start: 50%; top: 50%; width: 0.5rem; height: 0.5rem; transform: translate(-50%, -50%); border-radius: 50%; background: var(--shadcn-primary-foreground); opacity: 0; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-indicator { position: absolute; inset-block-start: 50%; inset-inline-start: 50%; width: 0.5rem; height: 0.5rem; transform: translate(-50%, -50%); border-radius: 50%; background: var(--shadcn-primary-foreground); opacity: 0; pointer-events: none; transition: opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-state="checked"] .shadcn-radio-indicator { opacity: 1; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-label { min-inline-size: 0; line-height: 1.25rem; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 var(--shadcn-focus-ring-offset) var(--shadcn-background), 0 0 0 calc(var(--shadcn-focus-ring-offset) + var(--shadcn-focus-ring-width)) color-mix(in oklch, var(--shadcn-ring) 50%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item):disabled { cursor: default; opacity: 0.5; }
@@ -198,7 +200,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-toggle[aria-invalid="true"] { box-shadow: 0 0 0 3px color-mix(in oklch, var(--shadcn-destructive) 40%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-switch, .shadcn-switch-thumb, .shadcn-slider-thumb) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-switch, .shadcn-switch-thumb, .shadcn-radio-indicator, .shadcn-slider-thumb) {
         transition: none;
     }
 }
@@ -218,5 +220,9 @@
         forced-color-adjust: none;
         background: Highlight;
         color: HighlightText;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-state="checked"] .shadcn-radio-indicator {
+        background: HighlightText;
     }
 }

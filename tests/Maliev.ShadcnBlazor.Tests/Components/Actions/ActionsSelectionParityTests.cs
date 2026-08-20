@@ -75,6 +75,39 @@ public sealed class ActionsSelectionParityTests : BunitContext
     }
 
     [Fact]
+    public void RadioIndicatorSharesAControlSizedPositioningContextWithItsInput()
+    {
+        var cut = Render<ShadcnRadioGroup<string>>(parameters => parameters
+            .Add(group => group.Value, "priority")
+            .AddChildContent<ShadcnRadioGroupItem<string>>(item => item
+                .Add(control => control.Value, "priority")
+                .AddChildContent("Priority review")));
+
+        var control = cut.Find("[data-slot='radio-group-control']");
+
+        Assert.Equal(control, cut.Find("[data-slot='radio-group-item']").ParentElement);
+        Assert.Equal(control, cut.Find("[data-slot='radio-group-indicator']").ParentElement);
+    }
+
+    [Fact]
+    public void UncontrolledRadioGroupRetainsDirectSelection()
+    {
+        var cut = Render<ShadcnRadioGroup<string>>(parameters => parameters
+            .AddChildContent(builder =>
+            {
+                AddRadioItem(builder, 0, "standard", "Standard review");
+                AddRadioItem(builder, 10, "priority", "Priority review");
+            }));
+
+        var inputs = cut.FindAll("input[data-slot='radio-group-item']");
+        inputs[1].Change(true);
+
+        Assert.False(cut.FindAll("input[data-slot='radio-group-item']")[0].HasAttribute("checked"));
+        Assert.True(cut.FindAll("input[data-slot='radio-group-item']")[1].HasAttribute("checked"));
+        Assert.Equal("checked", cut.FindAll("[data-slot='radio-group-item-root']")[1].GetAttribute("data-state"));
+    }
+
+    [Fact]
     public void BooleanControlsRenderStableIds()
     {
         var checkbox = Render<ShadcnCheckbox>();
