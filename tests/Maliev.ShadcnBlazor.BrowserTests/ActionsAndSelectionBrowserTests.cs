@@ -1075,12 +1075,14 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("name", "production-updates");
                 break;
             case "toggle":
+                await Assertions.Expect(page.GetByTestId("control-toggle-pressed")).ToHaveCountAsync(0);
+                await Assertions.Expect(page.GetByTestId("toggle-dossier-preview")).ToBeVisibleAsync();
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold enabled");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "false");
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold disabled");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "true");
-                await page.GetByTestId("control-toggle-pressed").UncheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "false");
                 await page.GetByTestId("control-toggle-variant").SelectOptionAsync("Default");
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("data-variant", "default");
                 await page.GetByTestId("control-toggle-size").SelectOptionAsync("Large");

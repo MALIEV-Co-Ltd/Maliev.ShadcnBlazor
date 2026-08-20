@@ -1,13 +1,36 @@
 @using Maliev.ShadcnBlazor.Components.Actions
 
-<ShadcnToggle Pressed="CurrentPressed"
-              PressedChanged="HandlePressedChanged"
-              Variant="Variant"
-              Size="Size"
-              Disabled="Disabled"
-              AdditionalAttributes="Attributes">
-    Bold
-</ShadcnToggle>
+<section class="showcase-toggle-dossier" data-testid="toggle-dossier-preview" aria-label="Inspection note editor">
+    <header class="showcase-toggle-dossier__header">
+        <div>
+            <strong dir="auto">Inspection note</strong>
+            <span dir="auto">Revision C · autosaved</span>
+        </div>
+        <span class="showcase-toggle-dossier__state" dir="auto" aria-live="polite" data-testid="toggle-format-state">
+            @(CurrentPressed ? "Bold enabled" : "Bold disabled")
+        </span>
+    </header>
+    <div class="showcase-toggle-dossier__toolbar" role="toolbar" aria-label="Text formatting">
+        <ShadcnToggle Pressed="CurrentPressed"
+                      PressedChanged="HandlePressedChanged"
+                      Variant="Variant"
+                      Size="Size"
+                      Disabled="Disabled"
+                      PointerCursor="true"
+                      AdditionalAttributes="Attributes">
+            <LeadingIcon>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 4h8a4 4 0 0 1 0 8H6z" />
+                    <path d="M6 12h9a4 4 0 0 1 0 8H6z" />
+                </svg>
+            </LeadingIcon>
+            <ChildContent>Bold</ChildContent>
+        </ShadcnToggle>
+    </div>
+    <p class="showcase-toggle-dossier__copy" dir="auto" data-emphasis="@(CurrentPressed ? "bold" : "regular")">
+        Confirm the enclosure edge is deburred before final inspection.
+    </p>
+</section>
 
 @code {
     [Parameter] public bool Pressed { get; set; }
@@ -36,7 +59,7 @@
     private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
     {
         ["data-testid"] = "action-toggle",
-        ["aria-label"] = "Bold",
+        ["aria-label"] = "Toggle bold emphasis",
         ["aria-invalid"] = Invalid ? "true" : "false"
     };
 }

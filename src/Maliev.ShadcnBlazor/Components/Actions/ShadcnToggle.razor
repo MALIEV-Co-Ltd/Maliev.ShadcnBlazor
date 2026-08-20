@@ -6,9 +6,9 @@
         style="@MergeStyle(null)"
         type="button"
         disabled="@Disabled"
-        aria-pressed="@(Pressed ? "true" : "false")"
+        aria-pressed="@(EffectivePressed ? "true" : "false")"
         data-slot="toggle"
-        data-state="@(Pressed ? "on" : "off")"
+        data-state="@(EffectivePressed ? "on" : "off")"
         data-variant="@VariantValue"
         data-size="@SizeValue"
         data-pointer-cursor="@(PointerCursor ? "true" : null)"
@@ -36,12 +36,21 @@
     [Parameter] public RenderFragment? TrailingIcon { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
+    private bool _effectivePressed;
+    private bool _lastParameterPressed;
+    private bool _initialized;
+    private bool EffectivePressed => _effectivePressed;
     private string VariantValue => ShadcnToggleValues.Variant(Variant);
     private string SizeValue => ShadcnToggleValues.Size(Size);
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("type", "disabled", "aria-pressed", "data-slot", "data-state", "data-variant", "data-size", "data-pointer-cursor");
 
     protected override void OnParametersSet()
     {
+        if (!_initialized || Pressed != _lastParameterPressed)
+            _effectivePressed = Pressed;
+
+        _lastParameterPressed = Pressed;
+        _initialized = true;
         _ = VariantValue;
         _ = SizeValue;
     }
@@ -49,7 +58,11 @@
     private async Task HandleClickAsync(MouseEventArgs args)
     {
         if (Disabled) return;
-        await PressedChanged.InvokeAsync(!Pressed);
+        var next = !EffectivePressed;
+        if (PressedChanged.HasDelegate)
+            await PressedChanged.InvokeAsync(next);
+        else
+            _effectivePressed = next;
         await OnClick.InvokeAsync(args);
     }
 }
