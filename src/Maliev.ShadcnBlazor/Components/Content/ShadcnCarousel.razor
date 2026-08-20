@@ -119,11 +119,21 @@
     }
     internal ValueTask PointerMoveAsync(double x, double y, long pointerId)
     {
-        if (_pointerStart is { } start && start.Id == pointerId) { _pointerOffset = (x - start.X, y - start.Y); StateHasChanged(); }
+        if (_pointerStart is { } start && start.Id == pointerId)
+        {
+            _pointerOffset = Orientation == ShadcnCarouselOrientation.Horizontal
+                ? (x - start.X, 0d)
+                : (0d, y - start.Y);
+            StateHasChanged();
+        }
         return ValueTask.CompletedTask;
     }
     internal ValueTask PointerCancelAsync() { _pointerStart = null; _pointerOffset = null; StateHasChanged(); return ValueTask.CompletedTask; }
-    internal string? DragStyle => _pointerOffset is { } value ? FormattableString.Invariant($"--shadcn-carousel-drag-x: {value.X:0.###}px; --shadcn-carousel-drag-y: {value.Y:0.###}px") : null;
+    internal string? DragStyle => _pointerOffset is not { } value
+        ? null
+        : Orientation == ShadcnCarouselOrientation.Horizontal
+            ? FormattableString.Invariant($"--shadcn-carousel-drag-x: {value.X:0.###}px")
+            : FormattableString.Invariant($"--shadcn-carousel-drag-y: {value.Y:0.###}px");
     internal async ValueTask PointerUpAsync(double x, double y, long pointerId)
     {
         if (_pointerStart is not { } start || start.Id != pointerId) return;

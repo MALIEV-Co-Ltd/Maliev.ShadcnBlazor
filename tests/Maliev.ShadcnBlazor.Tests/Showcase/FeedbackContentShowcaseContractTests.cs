@@ -138,6 +138,17 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("Label=\"@(Indeterminate ? \"Preparing upload\" : \"Upload progress\")\"", progress.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowValue=\"@ShowValue\"", progress.RazorSource, StringComparison.Ordinal);
 
+        var carousel = registry.GetBySlug("carousel").Single();
+        carousel.Controls.Single(control => control.Id == "carousel-vertical").Apply("true");
+        carousel.Controls.Single(control => control.Id == "carousel-loop").Apply("true");
+        carousel.Controls.Single(control => control.Id == "carousel-rtl").Apply("true");
+        carousel.Controls.Single(control => control.Id == "carousel-reduced").Apply("true");
+        Assert.Contains("Orientation=\"ShadcnCarouselOrientation.Vertical\"", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Loop = true", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("RightToLeft = true", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ReducedMotion = true", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("GoToAsync(slide.Index)", carousel.RazorSource, StringComparison.Ordinal);
+
         var toast = registry.GetBySlug("toast").Single();
         toast.Controls.Single(control => control.Id == "toast-limit").Apply("1");
         toast.Controls.Single(control => control.Id == "toast-start").Apply("true");

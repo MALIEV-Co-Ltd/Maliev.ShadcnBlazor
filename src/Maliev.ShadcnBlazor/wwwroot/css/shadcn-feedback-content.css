@@ -135,7 +135,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content { overflow: hidden; touch-action: pan-y pinch-zoom; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] { touch-action: pan-x pinch-zoom; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { display: flex; margin-inline-start: calc(-1rem * var(--shadcn-spacing-multiplier)); transition: translate var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
-:where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"][style*="--shadcn-carousel-drag"] { transform: translate(var(--shadcn-carousel-drag-x, 0), var(--shadcn-carousel-drag-y, 0)); transition: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="horizontal"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-x"] { transform: translateX(var(--shadcn-carousel-drag-x)); transition: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="vertical"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-y"] { transform: translateY(var(--shadcn-carousel-drag-y)); transition: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-reduced-motion="true"] [data-slot="carousel-track"] { transition: none; }
 @media (prefers-reduced-motion: reduce) {
     :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { transition: none; }
