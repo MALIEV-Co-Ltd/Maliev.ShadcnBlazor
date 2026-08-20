@@ -576,6 +576,7 @@ enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSkeletonAnimation: Pulse, Non
 enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSkeletonShape: Default, Circle
 type Maliev.ShadcnBlazor.Components.Feedback.ShadcnSpinner
   String Label
+  Boolean ReducedMotion
   String Size
   ShadcnSpinnerRole SpinnerRole
 enum Maliev.ShadcnBlazor.Components.Feedback.ShadcnSpinnerRole: Status, None

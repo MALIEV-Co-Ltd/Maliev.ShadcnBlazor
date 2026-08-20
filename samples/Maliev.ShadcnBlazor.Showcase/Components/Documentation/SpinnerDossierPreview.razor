@@ -1,0 +1,47 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Feedback
+
+<section class="showcase-spinner-export" data-testid="spinner-export" aria-busy="@(_processing ? "true" : "false")" aria-label="Production report export">
+    <header class="showcase-spinner-export__header">
+        <span class="showcase-spinner-export__file" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2h9l5 5v15H6z" /><path d="M14 2v6h6" /><path d="M9 13h6M9 17h6" />
+            </svg>
+        </span>
+        <span>
+            <strong>Production summary</strong>
+            <small dir="ltr">6 work orders · PDF</small>
+        </span>
+    </header>
+
+    <div class="showcase-spinner-export__status" aria-live="polite">
+        @if (_processing)
+        {
+            <ShadcnSpinner Label="@(Decorative ? null : "Generating production report")"
+                           SpinnerRole="@(Decorative ? ShadcnSpinnerRole.None : ShadcnSpinnerRole.Status)"
+                           Size="@(Large ? "1.5rem" : "1rem")"
+                           ReducedMotion="@ReducedMotion" />
+            <span><strong>Preparing production report</strong><small>Collecting inspection results…</small></span>
+        }
+        else
+        {
+            <span class="showcase-spinner-export__paused" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 7v10M15 7v10" /></svg>
+            </span>
+            <span><strong>Export paused</strong><small>Your report settings are saved.</small></span>
+        }
+    </div>
+
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(_ => ToggleExport())">
+        @(_processing ? "Cancel export" : "Resume export")
+    </ShadcnButton>
+</section>
+
+@code {
+    [Parameter] public bool Decorative { get; set; }
+    [Parameter] public bool Large { get; set; }
+    [Parameter] public bool ReducedMotion { get; set; }
+
+    private bool _processing = true;
+    private void ToggleExport() => _processing = !_processing;
+}
