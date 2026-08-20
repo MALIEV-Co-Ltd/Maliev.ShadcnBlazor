@@ -11,10 +11,13 @@
          class="@MergeClass("shadcn-toggle-group")"
          style="@MergeStyle(GroupStyle)"
          role="group"
+         aria-orientation="@OrientationValue"
+         aria-disabled="@(Disabled ? "true" : null)"
          data-slot="toggle-group"
          data-orientation="@OrientationValue"
          data-variant="@VariantValue"
          data-size="@SizeValue"
+         data-disabled="@Disabled.ToString().ToLowerInvariant()"
          data-spacing="@Spacing.ToString(CultureInfo.InvariantCulture)">
         @ChildContent
     </div>
@@ -26,7 +29,7 @@
     [Parameter] public bool Multiple { get; set; }
     [Parameter] public ShadcnToggleGroupOrientation Orientation { get; set; } = ShadcnToggleGroupOrientation.Horizontal;
     [Parameter] public bool Disabled { get; set; }
-    [Parameter] public double Spacing { get; set; } = 2;
+    [Parameter] public double Spacing { get; set; }
     [Parameter] public ShadcnToggleVariant Variant { get; set; } = ShadcnToggleVariant.Default;
     [Parameter] public ShadcnToggleSize Size { get; set; } = ShadcnToggleSize.Default;
     [Parameter] public RenderFragment? ChildContent { get; set; }
@@ -35,6 +38,9 @@
     private ElementReference GroupReference;
     private IJSObjectReference? Module;
     private int RenderedRegistrationVersion = -1;
+    private IReadOnlyCollection<TValue> CurrentValues = Array.Empty<TValue>();
+    private IReadOnlyCollection<TValue> LastSuppliedValues = Array.Empty<TValue>();
+    private bool InitializedValues;
     private string GroupStyle => $"--shadcn-toggle-group-gap: {Spacing.ToString(CultureInfo.InvariantCulture)}";
     private string VariantValue => ShadcnToggleValues.Variant(Variant);
     private string SizeValue => ShadcnToggleValues.Size(Size);
@@ -44,7 +50,7 @@
         ShadcnToggleGroupOrientation.Vertical => "vertical",
         _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn toggle group orientation.")
     };
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "data-slot", "data-orientation", "data-variant", "data-size", "data-spacing");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "aria-orientation", "aria-disabled", "data-slot", "data-orientation", "data-variant", "data-size", "data-disabled", "data-spacing");
 
     protected override void OnInitialized() => _context = new(ToggleAsync);
 
@@ -56,7 +62,16 @@
         _ = ShadcnToggleValues.Size(Size);
         if (!double.IsFinite(Spacing) || Spacing < 0) throw new ArgumentOutOfRangeException(nameof(Spacing), Spacing, "Spacing must be finite and non-negative.");
         if (!Multiple && Values.Count > 1) throw new ArgumentException("A single-select toggle group accepts at most one value.", nameof(Values));
-        _context.Update(Values, Multiple, Disabled, Variant, Size, Spacing);
+
+        if (ValuesChanged.HasDelegate || !InitializedValues || !SequenceEqual(Values, LastSuppliedValues))
+            CurrentValues = Values.ToArray();
+
+        if (!Multiple && CurrentValues.Count > 1)
+            CurrentValues = [CurrentValues.First()];
+
+        LastSuppliedValues = Values.ToArray();
+        InitializedValues = true;
+        _context.Update(CurrentValues, Multiple, Disabled, Variant, Size, Spacing);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -71,17 +86,25 @@
         }
     }
 
-    private Task ToggleAsync(TValue value)
+    private async Task ToggleAsync(TValue value)
     {
-        if (Disabled) return Task.CompletedTask;
-        var selected = Values.Contains(value, EqualityComparer<TValue>.Default);
+        if (Disabled) return;
+
+        var selected = CurrentValues.Contains(value, EqualityComparer<TValue>.Default);
         IReadOnlyCollection<TValue> next = Multiple
             ? selected
-                ? Values.Where(item => !EqualityComparer<TValue>.Default.Equals(item, value)).ToArray()
-                : Values.Append(value).ToArray()
+                ? CurrentValues.Where(item => !EqualityComparer<TValue>.Default.Equals(item, value)).ToArray()
+                : CurrentValues.Append(value).ToArray()
             : selected ? Array.Empty<TValue>() : new[] { value };
-        return ValuesChanged.InvokeAsync(next);
+
+        CurrentValues = next;
+        _context.Update(CurrentValues, Multiple, Disabled, Variant, Size, Spacing);
+        _context.NotifyItems();
+        await ValuesChanged.InvokeAsync(next);
     }
+
+    private static bool SequenceEqual(IReadOnlyCollection<TValue> left, IReadOnlyCollection<TValue> right) =>
+        left.Count == right.Count && left.SequenceEqual(right, EqualityComparer<TValue>.Default);
 
     public async ValueTask DisposeAsync()
     {

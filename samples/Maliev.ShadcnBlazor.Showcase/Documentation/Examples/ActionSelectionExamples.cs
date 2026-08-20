@@ -463,37 +463,81 @@ internal static class ActionSelectionExamples
     private static ComponentExampleDefinition ToggleGroup()
     {
         var orientation = ShadcnToggleGroupOrientation.Horizontal;
-        var spacing = 2d;
+        var spacing = 0d;
         var multiple = true;
         var variant = ShadcnToggleVariant.Outline;
         var size = ShadcnToggleSize.Default;
+        var disabled = false;
+        var invalid = false;
+        IReadOnlyCollection<string> values = ["dimensions"];
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnToggleGroup<string>>(0);
-            builder.AddAttribute(1, nameof(ShadcnToggleGroup<string>.Values), new[] { "bold" });
-            builder.AddAttribute(2, nameof(ShadcnToggleGroup<string>.Multiple), multiple);
-            builder.AddAttribute(3, nameof(ShadcnToggleGroup<string>.Orientation), orientation);
-            builder.AddAttribute(4, nameof(ShadcnToggleGroup<string>.Spacing), spacing);
-            builder.AddAttribute(5, nameof(ShadcnToggleGroup<string>.Variant), variant);
-            builder.AddAttribute(6, nameof(ShadcnToggleGroup<string>.Size), size);
-            builder.AddAttribute(7, nameof(ShadcnToggleGroup<string>.AdditionalAttributes), new Dictionary<string, object>
-            {
-                ["data-testid"] = "action-toggle-group",
-                ["aria-label"] = "Text formatting",
-                ["data-fixture-multiple"] = multiple.ToString().ToLowerInvariant()
-            });
-            builder.AddAttribute(8, nameof(ShadcnToggleGroup<string>.ChildContent), (RenderFragment)(content =>
-            {
-                AddToggleItem(content, 0, "bold", "Bold");
-                AddToggleItem(content, 10, "italic", "Italic");
-                AddToggleItem(content, 20, "underline", "Underline", true);
-            }));
+            builder.OpenComponent<ToggleGroupDossierPreview>(0);
+            builder.AddAttribute(1, nameof(ToggleGroupDossierPreview.Values), values);
+            builder.AddAttribute(2, nameof(ToggleGroupDossierPreview.ValuesChanged), EventCallback.Factory.Create<IReadOnlyCollection<string>>(new object(), next => values = next));
+            builder.AddAttribute(3, nameof(ToggleGroupDossierPreview.Multiple), multiple);
+            builder.AddAttribute(4, nameof(ToggleGroupDossierPreview.Orientation), orientation);
+            builder.AddAttribute(5, nameof(ToggleGroupDossierPreview.Spacing), spacing);
+            builder.AddAttribute(6, nameof(ToggleGroupDossierPreview.Variant), variant);
+            builder.AddAttribute(7, nameof(ToggleGroupDossierPreview.Size), size);
+            builder.AddAttribute(8, nameof(ToggleGroupDossierPreview.Disabled), disabled);
+            builder.AddAttribute(9, nameof(ToggleGroupDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
-        return Example("toggle-group", "Roving toggle choices", "Multiple selection with inherited presentation, spacing, disabled items, orientation, and RTL arrows.",
-            "<ShadcnToggleGroup TValue=\"string\" Values=\"new[] { \"bold\" }\" Multiple=\"true\" Variant=\"ShadcnToggleVariant.Outline\">\n    <ShadcnToggleGroupItem Value=\"bold\">Bold</ShadcnToggleGroupItem>\n    <ShadcnToggleGroupItem Value=\"italic\">Italic</ShadcnToggleGroupItem>\n</ShadcnToggleGroup>", preview,
-            [Toggle("toggle-group-multiple", "Multiple", value => multiple = value, true), Select("toggle-group-orientation", "Orientation", orientation, value => orientation = value), new("toggle-group-spacing", "Spacing", ComponentParameterControlKind.Select, "2", ["0", "1", "2", "4"], value => spacing = double.Parse(value, System.Globalization.CultureInfo.InvariantCulture)), Select("toggle-group-variant", "Variant", variant, value => variant = value), Select("toggle-group-size", "Size", size, value => size = value)],
-            ["single", "multiple", "spacing", "connected", "horizontal", "vertical", "roving-focus", "disabled-item", "outline", "sizes"]);
+        string Source()
+        {
+            var selected = string.Join(", ", values.Select(value => $"\"{value}\""));
+            var invalidAttributes = invalid ? " aria-invalid=\"true\" aria-describedby=\"overlay-error\"" : string.Empty;
+            return $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<section class="drawing-review" aria-labelledby="drawing-review-title">
+    <header>
+        <h3 id="drawing-review-title">Drawing review layers</h3>
+        <p>Choose which annotations are visible while checking revision C.</p>
+    </header>
+
+    <ShadcnToggleGroup TValue="string"
+                       @bind-Values="VisibleLayers"
+                       Multiple="{{multiple.ToString().ToLowerInvariant()}}"
+                       Orientation="ShadcnToggleGroupOrientation.{{orientation}}"
+                       Spacing="{{spacing.ToString(CultureInfo.InvariantCulture)}}"
+                       Variant="ShadcnToggleVariant.{{variant}}"
+                       Size="ShadcnToggleSize.{{size}}"
+                       Disabled="{{disabled.ToString().ToLowerInvariant()}}"
+                       aria-label="Drawing review layers"{{invalidAttributes}}>
+        <ShadcnToggleGroupItem Value="dimensions">Dimensions</ShadcnToggleGroupItem>
+        <ShadcnToggleGroupItem Value="notes">Notes</ShadcnToggleGroupItem>
+        <ShadcnToggleGroupItem Value="inspection" Disabled="true">Inspection</ShadcnToggleGroupItem>
+    </ShadcnToggleGroup>
+
+    <article aria-label="Final inspection note">
+        <h4>Final inspection note</h4>
+        <p>WI-2418 · CNC enclosure · Revision C</p>
+        <p><strong>Visible:</strong> @string.Join(", ", VisibleLayers)</p>
+    </article>
+    {{(invalid ? "<p id=\"overlay-error\">Select at least one editable review layer.</p>" : string.Empty)}}
+</section>
+
+@code {
+    private IReadOnlyCollection<string> VisibleLayers { get; set; } = [{{selected}}];
+}
+""";
+        }
+
+        return Example("toggle-group", "Drawing review layers", "Switch a production drawing between single- and multi-layer review with connected, orientation-aware controls.",
+            Source(), preview,
+            [
+                Toggle("toggle-group-multiple", "Multiple", value => { multiple = value; if (!value && values.Count > 1) values = [values.First()]; }, true),
+                Select("toggle-group-orientation", "Orientation", orientation, value => orientation = value),
+                new("toggle-group-spacing", "Spacing", ComponentParameterControlKind.Select, "0", ["0", "1", "2", "4"], value => spacing = double.Parse(value, CultureInfo.InvariantCulture)),
+                Select("toggle-group-variant", "Variant", variant, value => variant = value),
+                Select("toggle-group-size", "Size", size, value => size = value),
+                Toggle("toggle-group-disabled", "Disabled", value => disabled = value),
+                Toggle("toggle-group-invalid", "Invalid", value => invalid = value)
+            ],
+            ["single", "multiple", "spacing", "connected", "horizontal", "vertical", "roving-focus", "disabled-item", "outline", "sizes", "disabled", "invalid"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentParameterControl Select<TEnum>(string id, string label, TEnum value, Action<TEnum> apply) where TEnum : struct, Enum =>

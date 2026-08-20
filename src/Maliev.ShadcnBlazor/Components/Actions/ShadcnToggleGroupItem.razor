@@ -47,7 +47,7 @@
     protected override void OnInitialized()
     {
         if (Context is not null)
-            RegistrationKey = Context.Register(Value, () => Disabled);
+            RegistrationKey = Context.Register(Value, () => Disabled, StateHasChanged);
     }
 
     private Task HandleClickAsync() => EffectiveDisabled || Context is null ? Task.CompletedTask : Context.ToggleAsync(Value);
