@@ -1,0 +1,56 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<section class="showcase-hover-card-dossier"
+         data-testid="hover-card-dossier-preview"
+         data-fast="@Fast.ToString().ToLowerInvariant()"
+         data-top="@Top.ToString().ToLowerInvariant()"
+         aria-labelledby="hover-card-dossier-title">
+    <header class="showcase-hover-card-dossier__header">
+        <div>
+            <h3 id="hover-card-dossier-title">Quotation review</h3>
+            <p>QT-4189 · CNC enclosure</p>
+        </div>
+        <span>Due today</span>
+    </header>
+
+    <div class="showcase-hover-card-assignment" id="hover-card-reviewer">
+        <ShadcnAvatar Size="ShadcnAvatarSize.Small">
+            <ShadcnAvatarFallback>NS</ShadcnAvatarFallback>
+        </ShadcnAvatar>
+        <div>
+            <ShadcnHoverCard @bind-Open="Open"
+                             OpenDelay="@TimeSpan.FromMilliseconds(Fast ? 100 : 600)"
+                             CloseDelay="@TimeSpan.FromMilliseconds(300)">
+                <ShadcnHoverCardTrigger Href="#hover-card-reviewer">Narin S.</ShadcnHoverCardTrigger>
+                <ShadcnHoverCardContent Side="@(Top ? ShadcnOverlaySide.Top : ShadcnOverlaySide.Bottom)"
+                                        Align="ShadcnOverlayAlign.Start"
+                                        Class="showcase-hover-card-profile">
+                    <div class="showcase-hover-card-profile__identity">
+                        <ShadcnAvatar>
+                            <ShadcnAvatarFallback>NS</ShadcnAvatarFallback>
+                        </ShadcnAvatar>
+                        <div>
+                            <strong>Narin S.</strong>
+                            <span>Manufacturing engineer</span>
+                        </div>
+                    </div>
+                    <p>Reviews machining feasibility, tolerances, and inspection notes before quotation release.</p>
+                    <dl>
+                        <div><dt>Assigned reviews</dt><dd>6</dd></div>
+                        <div><dt>Last active</dt><dd>12 min ago</dd></div>
+                    </dl>
+                </ShadcnHoverCardContent>
+            </ShadcnHoverCard>
+            <span>Manufacturing engineer</span>
+        </div>
+        <span>Feasibility review</span>
+    </div>
+
+    <p class="showcase-hover-card-dossier__hint">Hover or focus the reviewer name to preview supporting details.</p>
+</section>
+
+@code {
+    [Parameter] public bool Fast { get; set; }
+    [Parameter] public bool Top { get; set; }
+    private bool Open { get; set; }
+}

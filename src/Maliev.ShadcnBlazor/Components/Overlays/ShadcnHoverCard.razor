@@ -3,7 +3,7 @@
 @code {
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
-    [Parameter] public TimeSpan OpenDelay { get; set; } = TimeSpan.FromMilliseconds(700);
+    [Parameter] public TimeSpan OpenDelay { get; set; } = TimeSpan.FromMilliseconds(600);
     [Parameter] public TimeSpan CloseDelay { get; set; } = TimeSpan.FromMilliseconds(300);
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private static long _next; private readonly ShadcnHoverCardContext _context; private bool _open, _last, _initialized;
@@ -13,5 +13,13 @@
     private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "data-state", "data-open-delay", "data-close-delay");
     protected override void OnParametersSet() { _ = OpenDelayMs; _ = CloseDelayMs; if (!_initialized || Open != _last) _open = Open; _last = Open; _initialized = true; }
     [JSInvokable] public Task RequestCloseAsync() => RequestOpenAsync(false);
-    [JSInvokable] public async Task RequestOpenAsync(bool value) { if (_open == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _open = value; await InvokeAsync(StateHasChanged); } }
+    [JSInvokable]
+    public async Task RequestOpenAsync(bool value)
+    {
+        if (_open == value) return;
+        _open = value;
+        _last = value;
+        if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value);
+        await InvokeAsync(StateHasChanged);
+    }
 }

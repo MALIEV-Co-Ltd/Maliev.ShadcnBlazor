@@ -206,37 +206,97 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     const previous = restoreFocusOnDetach ? focusTarget : null;
     const sync = () => placePositioned(content, trigger, side, align, sideOffset, alignOffset, padding);
     acquireLayer(content);
-    const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
-    const outside = event => { if (isTopLayer(content) && closeOnOutside && !content.contains(event.target) && !trigger.contains(event.target)) { focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
+    const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); if (restoreFocusOnDetach) focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
+    const outside = event => { if (isTopLayer(content) && closeOnOutside && !content.contains(event.target) && !trigger.contains(event.target)) { if (restoreFocusOnDetach) focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
     const observer = new ResizeObserver(sync); observer.observe(content); observer.observe(trigger);
     const anchorObserver = new MutationObserver(() => { if (!content.isConnected) detachPositioned(content); else if (!trigger.isConnected) dotnet?.invokeMethodAsync('RequestCloseAsync'); });
     anchorObserver.observe(document.body, { childList: true, subtree: true });
     addEventListener('resize', sync); addEventListener('scroll', sync, true); document.addEventListener('keydown', keydown); document.addEventListener('pointerdown', outside);
     queueMicrotask(() => { sync(); if (focusContent) (focusable(content)[0] || content).focus({ preventScroll: true }); });
-    positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver });
+    positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver, restoreFocus: restoreFocusOnDetach });
 }
-export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
+export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
 export function isPositionedAttached(content) { return positioned.has(content); }
 
-const delayedTriggers = new WeakMap();
-export function attachDelayedTrigger(trigger, dotnet, openDelay, closeDelay, contentId) {
-    let timer = 0;
-    const schedule = (open, delay) => { clearTimeout(timer); timer = setTimeout(() => dotnet.invokeMethodAsync('RequestOpenAsync', open), delay); };
-    const enter = () => schedule(true, openDelay), leave = event => { const content = document.getElementById(contentId); if (content?.contains(event.relatedTarget)) return; schedule(false, closeDelay); };
-    const focus = () => schedule(true, openDelay), blur = event => { const content = document.getElementById(contentId); if (content?.contains(event.relatedTarget)) return; schedule(false, closeDelay); };
-    trigger.addEventListener('pointerenter', enter); trigger.addEventListener('pointerleave', leave); trigger.addEventListener('focus', focus); trigger.addEventListener('blur', blur);
-    delayedTriggers.set(trigger, { enter, leave, focus, blur, clear: () => clearTimeout(timer) });
+const hoverCards = new Map();
+const hoverCardTriggers = new WeakMap();
+const hoverCardContents = new WeakMap();
+function hoverCardState(contentId, dotnet, openDelay, closeDelay) {
+    let state = hoverCards.get(contentId);
+    if (!state) {
+        state = { contentId, trigger: null, content: null, timer: 0, dotnet, openDelay, closeDelay };
+        hoverCards.set(contentId, state);
+    }
+    state.dotnet = dotnet;
+    if (openDelay !== null) state.openDelay = openDelay;
+    if (closeDelay !== null) state.closeDelay = closeDelay;
+    return state;
 }
-export function detachDelayedTrigger(trigger) { const value = delayedTriggers.get(trigger); if (!value) return; value.clear(); trigger.removeEventListener('pointerenter', value.enter); trigger.removeEventListener('pointerleave', value.leave); trigger.removeEventListener('focus', value.focus); trigger.removeEventListener('blur', value.blur); delayedTriggers.delete(trigger); }
-
-const hoverContents = new WeakMap();
-export function attachHoverContent(content, dotnet, closeDelay) {
-    let timer = 0;
-    const enter = () => clearTimeout(timer);
-    const leave = event => { if (event.relatedTarget?.closest?.('[data-slot="hover-card-trigger"]')) return; clearTimeout(timer); timer = setTimeout(() => dotnet.invokeMethodAsync('RequestOpenAsync', false), closeDelay); };
-    content.addEventListener('pointerenter', enter); content.addEventListener('pointerleave', leave); hoverContents.set(content, { enter, leave, clear: () => clearTimeout(timer) });
+function scheduleHoverCard(state, open, delay) {
+    clearTimeout(state.timer);
+    state.timer = setTimeout(() => {
+        state.timer = 0;
+        state.dotnet.invokeMethodAsync('RequestOpenAsync', open);
+    }, delay);
 }
-export function detachHoverContent(content) { const value = hoverContents.get(content); if (!value) return; value.clear(); content.removeEventListener('pointerenter', value.enter); content.removeEventListener('pointerleave', value.leave); hoverContents.delete(content); }
+function cancelHoverCardTimer(state) { clearTimeout(state.timer); state.timer = 0; }
+function movingWithinHoverCard(state, target) { return !!target && (state.trigger?.contains(target) || state.content?.contains(target)); }
+function releaseHoverCardState(state) {
+    if (state.trigger || state.content) return;
+    cancelHoverCardTimer(state);
+    hoverCards.delete(state.contentId);
+}
+export function attachHoverCardTrigger(trigger, dotnet, openDelay, closeDelay, contentId) {
+    detachHoverCardTrigger(trigger);
+    const state = hoverCardState(contentId, dotnet, openDelay, closeDelay);
+    state.trigger = trigger;
+    const enter = () => scheduleHoverCard(state, true, state.openDelay);
+    const leave = event => { if (!movingWithinHoverCard(state, event.relatedTarget)) scheduleHoverCard(state, false, state.closeDelay); };
+    const focus = () => scheduleHoverCard(state, true, state.openDelay);
+    const blur = event => { if (!movingWithinHoverCard(state, event.relatedTarget)) scheduleHoverCard(state, false, state.closeDelay); };
+    trigger.addEventListener('pointerenter', enter);
+    trigger.addEventListener('pointerleave', leave);
+    trigger.addEventListener('focus', focus);
+    trigger.addEventListener('blur', blur);
+    hoverCardTriggers.set(trigger, { state, enter, leave, focus, blur });
+}
+export function detachHoverCardTrigger(trigger) {
+    const value = hoverCardTriggers.get(trigger);
+    if (!value) return;
+    trigger.removeEventListener('pointerenter', value.enter);
+    trigger.removeEventListener('pointerleave', value.leave);
+    trigger.removeEventListener('focus', value.focus);
+    trigger.removeEventListener('blur', value.blur);
+    if (value.state.trigger === trigger) value.state.trigger = null;
+    hoverCardTriggers.delete(trigger);
+    releaseHoverCardState(value.state);
+}
+export function attachHoverCardContent(content, triggerId, dotnet, closeDelay) {
+    detachHoverCardContent(content);
+    const state = hoverCardState(content.id, dotnet, null, closeDelay);
+    state.trigger ??= document.getElementById(triggerId);
+    state.content = content;
+    const enter = () => cancelHoverCardTimer(state);
+    const leave = event => { if (!movingWithinHoverCard(state, event.relatedTarget)) scheduleHoverCard(state, false, state.closeDelay); };
+    const focusin = () => cancelHoverCardTimer(state);
+    const focusout = event => { if (!movingWithinHoverCard(state, event.relatedTarget)) scheduleHoverCard(state, false, state.closeDelay); };
+    content.addEventListener('pointerenter', enter);
+    content.addEventListener('pointerleave', leave);
+    content.addEventListener('focusin', focusin);
+    content.addEventListener('focusout', focusout);
+    hoverCardContents.set(content, { state, enter, leave, focusin, focusout });
+}
+export function detachHoverCardContent(content) {
+    const value = hoverCardContents.get(content);
+    if (!value) return;
+    content.removeEventListener('pointerenter', value.enter);
+    content.removeEventListener('pointerleave', value.leave);
+    content.removeEventListener('focusin', value.focusin);
+    content.removeEventListener('focusout', value.focusout);
+    if (value.state.content === content) value.state.content = null;
+    hoverCardContents.delete(content);
+    releaseHoverCardState(value.state);
+}
 
 const menus = new WeakMap();
 export function attachMenu(menu, triggerId, dotnet = null, loop = true) {

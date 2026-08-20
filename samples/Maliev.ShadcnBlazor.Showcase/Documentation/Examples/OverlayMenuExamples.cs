@@ -398,9 +398,84 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition HoverCard()
     {
-        var open = false; var fast = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnHoverCard>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "OpenDelay", TimeSpan.FromMilliseconds(fast ? 0 : 700)); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { AddText<ShadcnHoverCardTrigger>(c, 0, "@maliev"); AddText<ShadcnHoverCardContent>(c, 10, "Thai digital manufacturing platform."); })); b.CloseComponent(); };
-        return Example("hover-card", "Delayed hover card", preview, [Toggle("hover-card-open", "Open", v => open = v), Toggle("hover-card-fast", "No open delay", v => fast = v)], ["hover", "focus", "delays", "pointer-bridge", "collision"]);
+        var fast = false;
+        var top = false;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<HoverCardDossierPreview>(0);
+            builder.AddAttribute(1, nameof(HoverCardDossierPreview.Fast), fast);
+            builder.AddAttribute(2, nameof(HoverCardDossierPreview.Top), top);
+            builder.CloseComponent();
+        };
+
+        string Source()
+        {
+            var delay = fast ? 100 : 600;
+            var side = top ? "Top" : "Bottom";
+            return $$"""
+                @using Maliev.ShadcnBlazor.Components.Content
+                @using Maliev.ShadcnBlazor.Components.Overlays
+
+                <section class="showcase-hover-card-dossier" aria-labelledby="hover-card-dossier-title">
+                    <header class="showcase-hover-card-dossier__header">
+                        <div>
+                            <h3 id="hover-card-dossier-title">Quotation review</h3>
+                            <p>QT-4189 · CNC enclosure</p>
+                        </div>
+                        <span>Due today</span>
+                    </header>
+                    <div class="showcase-hover-card-assignment" id="hover-card-reviewer">
+                        <ShadcnAvatar Size="ShadcnAvatarSize.Small">
+                            <ShadcnAvatarFallback>NS</ShadcnAvatarFallback>
+                        </ShadcnAvatar>
+                        <div>
+                            <ShadcnHoverCard @bind-Open="Open"
+                                             OpenDelay="@TimeSpan.FromMilliseconds({{delay}})"
+                                             CloseDelay="@TimeSpan.FromMilliseconds(300)">
+                                <ShadcnHoverCardTrigger Href="#hover-card-reviewer">Narin S.</ShadcnHoverCardTrigger>
+                                <ShadcnHoverCardContent Side="ShadcnOverlaySide.{{side}}"
+                                                        Align="ShadcnOverlayAlign.Start"
+                                                        Class="showcase-hover-card-profile">
+                                    <div class="showcase-hover-card-profile__identity">
+                                        <ShadcnAvatar>
+                                            <ShadcnAvatarFallback>NS</ShadcnAvatarFallback>
+                                        </ShadcnAvatar>
+                                        <div>
+                                            <strong>Narin S.</strong>
+                                            <span>Manufacturing engineer</span>
+                                        </div>
+                                    </div>
+                                    <p>Reviews machining feasibility, tolerances, and inspection notes before quotation release.</p>
+                                    <dl>
+                                        <div><dt>Assigned reviews</dt><dd>6</dd></div>
+                                        <div><dt>Last active</dt><dd>12 min ago</dd></div>
+                                    </dl>
+                                </ShadcnHoverCardContent>
+                            </ShadcnHoverCard>
+                            <span>Manufacturing engineer</span>
+                        </div>
+                        <span>Feasibility review</span>
+                    </div>
+                    <p class="showcase-hover-card-dossier__hint">Hover or focus the reviewer name to preview supporting details.</p>
+                </section>
+
+                @code {
+                    private bool Open { get; set; }
+                }
+                """;
+        }
+
+        return Example(
+            "hover-card",
+            "Reviewer preview card",
+            preview,
+            [
+                Toggle("hover-card-fast", "Short open delay", value => fast = value),
+                Toggle("hover-card-top", "Top placement", value => top = value)
+            ],
+            ["hover", "focus", "delays", "pointer-bridge", "collision", "responsive", "rtl"],
+            Source()) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Tooltip()

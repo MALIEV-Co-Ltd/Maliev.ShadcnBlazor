@@ -13,6 +13,10 @@ public sealed class PositionedOverlayTests : BunitContext
         module.SetupVoid("detachPositioned", _ => true);
         module.SetupVoid("attachDelayedTrigger", _ => true);
         module.SetupVoid("detachDelayedTrigger", _ => true);
+        module.SetupVoid("attachHoverCardTrigger", _ => true);
+        module.SetupVoid("detachHoverCardTrigger", _ => true);
+        module.SetupVoid("attachHoverCardContent", _ => true);
+        module.SetupVoid("detachHoverCardContent", _ => true);
         var tooltipModule = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-tooltip.js");
         tooltipModule.SetupVoid("attachDelayedTrigger", _ => true);
         tooltipModule.SetupVoid("detachDelayedTrigger", _ => true);
@@ -100,12 +104,62 @@ public sealed class PositionedOverlayTests : BunitContext
             }));
 
         var root = cut.Find("[data-slot='hover-card']");
+        var trigger = cut.Find("[data-slot='hover-card-trigger']");
         var content = cut.Find("[data-slot='hover-card-content']");
         Assert.Equal("100", root.GetAttribute("data-open-delay"));
         Assert.Equal("200", root.GetAttribute("data-close-delay"));
         Assert.Equal("right", content.GetAttribute("data-side"));
         Assert.False(content.HasAttribute("aria-modal"));
         Assert.Null(content.GetAttribute("role"));
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal(content.Id, trigger.GetAttribute("aria-controls"));
+        Assert.Equal("false", content.GetAttribute("data-positioned"));
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachHoverCardTrigger", StringComparison.Ordinal));
+        var positioned = Assert.Single(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachPositioned", StringComparison.Ordinal));
+        Assert.Equal(trigger.Id, positioned.Arguments[11]);
+        Assert.False(Assert.IsType<bool>(positioned.Arguments[^1]));
+    }
+
+    [Fact]
+    public async Task ControlledHoverCardRequestUpdatesRenderedStateBeforeParentRender()
+    {
+        var changes = new List<bool>();
+        var cut = Render<ShadcnHoverCard>(parameters => parameters
+            .Add(component => component.Open, false)
+            .Add(component => component.OpenChanged, changes.Add)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnHoverCardTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnHoverCardTrigger.ChildContent), (RenderFragment)(content => content.AddContent(0, "Reviewer profile")));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnHoverCardContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnHoverCardContent.ChildContent), (RenderFragment)(content => content.AddContent(0, "Manufacturing reviewer")));
+                builder.CloseComponent();
+            }));
+
+        await cut.Instance.RequestOpenAsync(true);
+
+        Assert.Equal([true], changes);
+        Assert.Equal("open", cut.Find("[data-slot='hover-card']").GetAttribute("data-state"));
+        Assert.Equal("true", cut.Find("[data-slot='hover-card-trigger']").GetAttribute("aria-expanded"));
+        Assert.Single(cut.FindAll("[data-slot='hover-card-content']"));
+    }
+
+    [Fact]
+    public void HoverCardAssetsShareBridgeStateAndCoverResponsiveAccessibilityModes()
+    {
+        var root = FindRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
+        var styles = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+
+        Assert.Contains("const hoverCards = new Map()", script, StringComparison.Ordinal);
+        Assert.Contains("attachHoverCardTrigger", script, StringComparison.Ordinal);
+        Assert.Contains("attachHoverCardContent", script, StringComparison.Ordinal);
+        Assert.Contains("focusout", script, StringComparison.Ordinal);
+        Assert.Contains("calc(100vw - 1rem)", styles, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-hover-card-content[data-positioned=\"false\"]", styles, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", styles, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", styles, StringComparison.Ordinal);
     }
 
     [Fact]
