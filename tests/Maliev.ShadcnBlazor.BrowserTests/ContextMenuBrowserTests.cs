@@ -28,9 +28,9 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
 
         var bounds = await menu.BoundingBoxAsync();
         Assert.NotNull(bounds);
-        Assert.True(bounds!.X >= 8 && bounds.Y >= 8);
-        Assert.True(bounds.X + bounds.Width <= 1272);
-        Assert.True(bounds.Y + bounds.Height <= 892);
+        Assert.True(bounds!.X >= 8 && bounds.Y >= 8, $"Menu origin was ({bounds.X}, {bounds.Y}).");
+        Assert.True(bounds.X + bounds.Width <= 1272, $"Menu right edge was {bounds.X + bounds.Width}.");
+        Assert.True(bounds.Y + bounds.Height <= 892, $"Menu bottom edge was {bounds.Y + bounds.Height}.");
 
         await page.Keyboard.PressAsync("ArrowDown");
         await Assertions.Expect(menu.GetByRole(AriaRole.Menuitem, new() { Name = "Rename", Exact = true })).ToBeFocusedAsync();
