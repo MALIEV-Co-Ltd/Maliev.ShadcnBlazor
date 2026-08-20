@@ -68,8 +68,45 @@ public sealed class SidebarTests : BunitContext
         var sheet = cut.Find("aside[data-mobile='true']");
         Assert.Equal("dialog", sheet.GetAttribute("role"));
         Assert.Equal("true", sheet.GetAttribute("aria-modal"));
+        Assert.Equal("-1", sheet.GetAttribute("tabindex"));
         Assert.NotNull(cut.Find("button[data-slot='sidebar-backdrop']"));
         Assert.Equal("ปิดเมนู", cut.Find("button[data-slot='sidebar-backdrop']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public async Task NonCollapsibleSidebarRemainsAVisibleLandmarkOnMobile()
+    {
+        var cut = Render<ShadcnSidebarProvider>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnSidebar>(0);
+            builder.AddAttribute(1, nameof(ShadcnSidebar.Collapsible), ShadcnSidebarCollapsible.None);
+            builder.AddAttribute(2, nameof(ShadcnSidebar.Label), "Permanent navigation");
+            builder.AddAttribute(3, nameof(ShadcnSidebar.ChildContent), (RenderFragment)(content => content.AddContent(0, "Navigation")));
+            builder.CloseComponent();
+        }));
+
+        await cut.Instance.SetMobileAsync(true);
+        cut.Render();
+
+        var sidebar = cut.Find("aside[data-slot='sidebar']");
+        Assert.Equal("Permanent navigation", sidebar.GetAttribute("aria-label"));
+        Assert.Equal("none", sidebar.GetAttribute("data-collapsible"));
+        Assert.Equal("false", sidebar.GetAttribute("data-mobile"));
+        Assert.Empty(cut.FindAll("[aria-modal='true']"));
+    }
+
+    [Fact]
+    public void UncontrolledTriggerSynchronizesWrapperSidebarAndExpandedState()
+    {
+        var cut = RenderSidebar(open: true);
+        var trigger = cut.Find("button[data-slot='sidebar-trigger']");
+
+        trigger.Click();
+
+        Assert.Equal("collapsed", cut.Find("[data-slot='sidebar-wrapper']").GetAttribute("data-state"));
+        Assert.Equal("collapsed", cut.Find("aside[data-slot='sidebar']").GetAttribute("data-state"));
+        Assert.Equal("false", cut.Find("button[data-slot='sidebar-trigger']").GetAttribute("aria-expanded"));
+        Assert.NotNull(cut.Find("[role='tooltip']"));
     }
 
     [Fact]
@@ -147,8 +184,8 @@ public sealed class SidebarTests : BunitContext
         Assert.Contains("element.inert = inert", script, StringComparison.Ordinal);
         Assert.Contains("while (branch && branch !== document.body)", script, StringComparison.Ordinal);
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
-        Assert.Contains("left: 0", css, StringComparison.Ordinal);
-        Assert.Contains("right: 0", css, StringComparison.Ordinal);
+        Assert.Contains("inset-inline-start: 0", css, StringComparison.Ordinal);
+        Assert.Contains("inset-inline-end: 0", css, StringComparison.Ordinal);
     }
 
     private IRenderedComponent<ShadcnSidebarProvider> RenderSidebar(bool open, Action<bool>? changed = null, bool mobileOpen = false, Action? menuClick = null) => Render<ShadcnSidebarProvider>(p => p
@@ -174,7 +211,7 @@ public sealed class SidebarTests : BunitContext
                         {
                             groupContent.OpenComponent<ShadcnSidebarMenu>(0); groupContent.AddAttribute(1, nameof(ShadcnSidebarMenu.ChildContent), (RenderFragment)(menu =>
                             {
-                                menu.OpenComponent<ShadcnSidebarMenuItem>(0); menu.AddAttribute(1, nameof(ShadcnSidebarMenuItem.ChildContent), (RenderFragment)(item => { item.OpenComponent<ShadcnSidebarMenuButton>(0); item.AddAttribute(1, nameof(ShadcnSidebarMenuButton.Href), "/orders"); item.AddAttribute(2, nameof(ShadcnSidebarMenuButton.Active), true); item.AddAttribute(3, nameof(ShadcnSidebarMenuButton.ChildContent), (RenderFragment)(button => button.AddContent(0, "Orders"))); item.CloseComponent(); })); menu.CloseComponent();
+                                menu.OpenComponent<ShadcnSidebarMenuItem>(0); menu.AddAttribute(1, nameof(ShadcnSidebarMenuItem.ChildContent), (RenderFragment)(item => { item.OpenComponent<ShadcnSidebarMenuButton>(0); item.AddAttribute(1, nameof(ShadcnSidebarMenuButton.Href), "/orders"); item.AddAttribute(2, nameof(ShadcnSidebarMenuButton.Active), true); item.AddAttribute(3, nameof(ShadcnSidebarMenuButton.Tooltip), "Orders"); item.AddAttribute(4, nameof(ShadcnSidebarMenuButton.ChildContent), (RenderFragment)(button => button.AddContent(0, "Orders"))); item.CloseComponent(); })); menu.CloseComponent();
                                 menu.OpenComponent<ShadcnSidebarMenuItem>(2); menu.AddAttribute(3, nameof(ShadcnSidebarMenuItem.ChildContent), (RenderFragment)(item => { item.OpenComponent<ShadcnSidebarMenuButton>(0); item.AddAttribute(1, nameof(ShadcnSidebarMenuButton.Disabled), true); item.AddAttribute(2, "data-testid", "disabled-menu"); item.AddAttribute(3, nameof(ShadcnSidebarMenuButton.OnClick), EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this, _ => (menuClick ?? (() => { }))())); item.CloseComponent(); })); menu.CloseComponent();
                             })); groupContent.CloseComponent();
                         })); group.CloseComponent();

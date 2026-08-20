@@ -384,6 +384,57 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         Assert.Contains("ภาษาไทย", await page.Locator("section[dir='rtl']").InnerTextAsync(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task SidebarDossierCollapsesToIconsUpdatesSourceAndUsesFocusedMobileModal()
+    {
+        await using var desktopContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var desktop = await desktopContext.NewPageAsync();
+        await desktop.GotoAsync(new Uri(server.BaseUri, "/docs/components/sidebar").ToString());
+        var canvas = desktop.GetByTestId("component-preview-canvas");
+        await canvas.WaitForAsync();
+        var shell = canvas.Locator(".showcase-sidebar-shell");
+        var shellBox = await shell.BoundingBoxAsync();
+        Assert.NotNull(shellBox);
+        Assert.InRange(shellBox.Height, 480, 620);
+
+        var trigger = canvas.Locator("[data-slot='sidebar-trigger']");
+        await trigger.ClickAsync();
+        await Assertions.Expect(shell).ToHaveAttributeAsync("data-state", "collapsed");
+        var active = canvas.Locator("[data-slot='sidebar-menu-button'][data-active='true']");
+        await active.HoverAsync();
+        await Assertions.Expect(canvas.Locator("[role='tooltip']").First).ToBeVisibleAsync();
+
+        await desktop.GetByTestId("control-sidebar-side").SelectOptionAsync("Right");
+        await Assertions.Expect(canvas.Locator("aside[data-slot='sidebar']")).ToHaveAttributeAsync("data-side", "right");
+        await Assertions.Expect(desktop.Locator("#preview .component-code pre")).ToContainTextAsync("Side=\"ShadcnSidebarSide.Right\"");
+
+        await using var mobileContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = ColorScheme.Dark,
+        });
+        var mobile = await mobileContext.NewPageAsync();
+        await mobile.GotoAsync(new Uri(server.BaseUri, "/docs/components/sidebar?theme=dark&dir=rtl").ToString());
+        var mobileCanvas = mobile.GetByTestId("component-preview-canvas");
+        await mobileCanvas.WaitForAsync();
+        var mobileShell = mobileCanvas.Locator(".showcase-sidebar-shell");
+        await Assertions.Expect(mobileShell).ToHaveAttributeAsync("data-device", "mobile");
+        var mobileTrigger = mobileCanvas.Locator("[data-slot='sidebar-trigger']");
+        await mobileTrigger.ClickAsync();
+        var dialog = mobile.Locator("aside[data-mobile='true']");
+        await Assertions.Expect(dialog).ToHaveAttributeAsync("aria-modal", "true");
+        Assert.True(await dialog.EvaluateAsync<bool>("element => element.contains(document.activeElement)"));
+        Assert.True(await mobileCanvas.Locator("[data-slot='sidebar-inset']").EvaluateAsync<bool>("element => element.inert"));
+        await mobile.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await Assertions.Expect(mobileTrigger).ToBeFocusedAsync();
+    }
+
     private static async Task AssertAxeCleanAsync(ILocator locator, string state)
     {
         var axe = await locator.RunAxe();

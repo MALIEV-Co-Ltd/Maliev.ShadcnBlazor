@@ -494,26 +494,79 @@ internal static class DisclosureNavigationExamples
 
     private static ComponentExampleDefinition Sidebar()
     {
-        var open = true; var right = false; var none = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnSidebarProvider>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnSidebar>(0); c.AddAttribute(1, "Id", "dossier"); c.AddAttribute(2, "Side", right ? ShadcnSidebarSide.Right : ShadcnSidebarSide.Left); c.AddAttribute(3, "Collapsible", none ? ShadcnSidebarCollapsible.None : ShadcnSidebarCollapsible.Icon); c.AddAttribute(4, "Label", "Workspace"); c.AddAttribute(5, "ChildContent", SidebarContent()); c.CloseComponent(); c.OpenComponent<ShadcnSidebarInset>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(inset => { inset.OpenComponent<ShadcnSidebarTrigger>(0); inset.AddAttribute(1, "TargetId", "dossier"); inset.CloseComponent(); inset.OpenElement(10, "div"); inset.AddAttribute(11, "class", "showcase-sidebar-main"); inset.OpenElement(12, "h3"); inset.AddContent(13, "Quotation workspace"); inset.CloseElement(); inset.OpenElement(14, "p"); inset.AddContent(15, "Review active quotations and production handoffs."); inset.CloseElement(); inset.CloseElement(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        var source = """
-<ShadcnSidebarProvider Open="true">
-    <ShadcnSidebar Id="dossier" Collapsible="ShadcnSidebarCollapsible.Icon" Label="Workspace">
-        <ShadcnSidebarHeader>MALIEV</ShadcnSidebarHeader>
+        var open = true;
+        var side = ShadcnSidebarSide.Left;
+        var collapsible = ShadcnSidebarCollapsible.Icon;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<SidebarDossierPreview>(0);
+            builder.AddAttribute(1, nameof(SidebarDossierPreview.Open), open);
+            builder.AddAttribute(2, nameof(SidebarDossierPreview.Side), side);
+            builder.AddAttribute(3, nameof(SidebarDossierPreview.Collapsible), collapsible);
+            builder.CloseComponent();
+        };
+        string Source() => $$"""
+<ShadcnSidebarProvider @bind-Open="SidebarOpen" Width="15rem" MobileWidth="18rem" IconWidth="3.5rem">
+    <ShadcnSidebar Id="production-navigation"
+                   Label="Production workspace"
+                   Side="{{nameof(ShadcnSidebarSide)}}.{{side}}"
+                   Variant="ShadcnSidebarVariant.Inset"
+                   Collapsible="{{nameof(ShadcnSidebarCollapsible)}}.{{collapsible}}">
+        <ShadcnSidebarHeader>
+            <strong>MALIEV</strong>
+            <span>Production</span>
+        </ShadcnSidebarHeader>
         <ShadcnSidebarContent>
-            <ShadcnSidebarMenuItem>Quotations</ShadcnSidebarMenuItem>
-            <ShadcnSidebarMenuItem>Materials</ShadcnSidebarMenuItem>
-            <ShadcnSidebarMenuItem>Team settings</ShadcnSidebarMenuItem>
+            <ShadcnSidebarGroup>
+                <ShadcnSidebarGroupLabel>Workspace</ShadcnSidebarGroupLabel>
+                <ShadcnSidebarGroupContent>
+                    <ShadcnSidebarMenu>
+                        <ShadcnSidebarMenuItem>
+                            <ShadcnSidebarMenuButton Active="true" Tooltip="Production queue">
+                                <QueueIcon />
+                                <span>Production queue</span>
+                            </ShadcnSidebarMenuButton>
+                            <ShadcnSidebarMenuBadge>3</ShadcnSidebarMenuBadge>
+                        </ShadcnSidebarMenuItem>
+                        <ShadcnSidebarMenuItem>
+                            <ShadcnSidebarMenuButton Tooltip="Quotations">
+                                <FileIcon />
+                                <span>Quotations</span>
+                            </ShadcnSidebarMenuButton>
+                            <ShadcnSidebarMenuBadge>8</ShadcnSidebarMenuBadge>
+                        </ShadcnSidebarMenuItem>
+                    </ShadcnSidebarMenu>
+                </ShadcnSidebarGroupContent>
+            </ShadcnSidebarGroup>
         </ShadcnSidebarContent>
+        <ShadcnSidebarFooter>Production planner</ShadcnSidebarFooter>
+        <ShadcnSidebarRail TargetId="production-navigation" />
     </ShadcnSidebar>
     <ShadcnSidebarInset>
-        <ShadcnSidebarTrigger TargetId="dossier" />
-        <h3>Quotation workspace</h3>
-        <p>Review active quotations and production handoffs.</p>
+        <header>
+            <ShadcnSidebarTrigger TargetId="production-navigation" />
+            <span>Factory workspace</span>
+        </header>
+        <main>
+            <h3>Production queue</h3>
+            <p>Track parts moving from quotation approval into production.</p>
+        </main>
     </ShadcnSidebarInset>
 </ShadcnSidebarProvider>
 """;
-        return Example("sidebar", "Responsive sidebar shell", "A realistic quotation workspace with navigation groups, active state, responsive collapse, physical sides, and mobile modal behavior.", source, preview, [Toggle("sidebar-open", "Expanded", v => open = v, true), Toggle("sidebar-right", "Right side", v => right = v), Toggle("sidebar-none", "Non-collapsible", v => none = v)], ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "rtl"]);
+        var example = Example(
+            "sidebar",
+            "Production workspace sidebar",
+            "Navigate a realistic production queue, collapse to its icon rail, switch physical sides, and open the same focused modal navigation on mobile.",
+            Source(),
+            preview,
+            [
+                Toggle("sidebar-open", "Expanded", value => open = value, true),
+                Select("sidebar-side", "Side", side.ToString(), Enum.GetNames<ShadcnSidebarSide>(), value => side = Enum.Parse<ShadcnSidebarSide>(value)),
+                Select("sidebar-mode", "Collapse mode", collapsible.ToString(), Enum.GetNames<ShadcnSidebarCollapsible>(), value => collapsible = Enum.Parse<ShadcnSidebarCollapsible>(value)),
+            ],
+            ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "focus", "inert", "rtl", "responsive"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Tabs()
@@ -526,6 +579,7 @@ internal static class DisclosureNavigationExamples
     private static ComponentExampleDefinition Example(string id, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{id}-primary", title, description, source, preview, controls, tags);
     private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], text => apply(bool.Parse(text)));
     private static ComponentParameterControl Number(string id, string label, double value, Action<double> apply) => new(id, label, ComponentParameterControlKind.Number, value.ToString(System.Globalization.CultureInfo.InvariantCulture), [], text => apply(double.Parse(text, System.Globalization.CultureInfo.InvariantCulture)));
+    private static ComponentParameterControl Select(string id, string label, string value, IReadOnlyList<string> options, Action<string> apply) => new(id, label, ComponentParameterControlKind.Select, value, options, apply);
     private static RenderFragment Text(string text) => b => b.AddContent(0, text);
     private static void Add<T>(RenderTreeBuilder b, int sequence) where T : IComponent { b.OpenComponent<T>(sequence); b.CloseComponent(); }
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
