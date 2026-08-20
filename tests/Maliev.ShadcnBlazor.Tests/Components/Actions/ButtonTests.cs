@@ -130,8 +130,25 @@ public sealed class ButtonTests : BunitContext
         var group = cut.Find("[data-slot='button-group']");
         Assert.Equal("group", group.GetAttribute("role"));
         Assert.Equal("vertical", group.GetAttribute("data-orientation"));
-        Assert.Equal("Total", group.QuerySelector("[data-slot='button-group-text']")!.TextContent);
+        var groupText = group.QuerySelector("[data-slot='button-group-text']")!;
+        Assert.Equal("DIV", groupText.TagName);
+        Assert.Equal("Total", groupText.TextContent);
         Assert.Equal("vertical", group.QuerySelector("[data-slot='button-group-separator']")!.GetAttribute("aria-orientation"));
+    }
+
+    [Fact]
+    public void ButtonGroupStylesUseConnectedLogicalGeometry()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+        var groupRules = string.Join('\n', css.Split('\n').Where(line => line.Contains("shadcn-button-group[data-orientation", StringComparison.Ordinal)));
+
+        Assert.Contains("border-start-end-radius: 0", groupRules, StringComparison.Ordinal);
+        Assert.Contains("border-end-end-radius: 0", groupRules, StringComparison.Ordinal);
+        Assert.Contains("border-inline-start-width: 0", groupRules, StringComparison.Ordinal);
+        Assert.Contains("border-block-start-width: 0", groupRules, StringComparison.Ordinal);
+        Assert.DoesNotContain("border-left-width", groupRules, StringComparison.Ordinal);
+        Assert.DoesNotContain(":has(> [data-slot=\"button-group\"])", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -141,5 +158,14 @@ public sealed class ButtonTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnButton>(p => p.Add(x => x.Size, (ShadcnButtonSize)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnButton>(p => p.Add(x => x.ButtonType, (ShadcnButtonType)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnButtonGroup>(p => p.Add(x => x.Orientation, (ShadcnButtonGroupOrientation)999)));
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root was not found.");
     }
 }

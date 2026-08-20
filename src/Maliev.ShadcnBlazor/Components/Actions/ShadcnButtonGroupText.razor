@@ -1,8 +1,8 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
-<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-button-group-text")" style="@MergeStyle(null)" data-slot="button-group-text">
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-button-group-text")" style="@MergeStyle(null)" data-slot="button-group-text">
     @ChildContent
-</span>
+</div>
 
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }

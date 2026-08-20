@@ -215,14 +215,13 @@ public sealed class ActionsAndSelectionBrowserTests(
                 return [
                     style(first).borderTopLeftRadius,
                     style(first).borderTopRightRadius,
-                    style(first).borderRightWidth,
                     style(last).borderTopLeftRadius,
                     style(last).borderTopRightRadius,
-                    style(last).borderLeftWidth
+                    style(last).borderRightWidth
                 ];
             }
             """);
-        Assert.Equal(["8px", "8px", "1px", "8px", "8px", "0px"], defaultMetrics);
+        Assert.Equal(["0px", "8px", "8px", "0px", "0px"], defaultMetrics);
 
         var metrics = await page.GetByTestId("button-group-vertical").EvaluateAsync<string[]>("""
             root => {
@@ -232,7 +231,6 @@ public sealed class ActionsAndSelectionBrowserTests(
                 const nested = root.children[4];
                 return [
                     style(root).gap,
-                    style(root).height,
                     style(text).paddingLeft,
                     style(text).paddingRight,
                     style(text).borderTopLeftRadius,
@@ -245,7 +243,7 @@ public sealed class ActionsAndSelectionBrowserTests(
             }
             """);
 
-        Assert.Equal(["8px", "198px", "10px", "10px", "8px", "8px", "0px", "8px", "8px", "true"], metrics);
+        Assert.Equal(["normal", "10px", "10px", "8px", "0px", "0px", "8px", "8px", "true"], metrics);
     }
 
     [Fact]
@@ -983,10 +981,14 @@ public sealed class ActionsAndSelectionBrowserTests(
                 break;
             case "button-group":
                 await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button-group-text]")).ToHaveCountAsync(1);
-                await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button-group]")).ToHaveCountAsync(1);
+                await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button-group-separator]")).ToHaveCountAsync(1);
+                await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button]")).ToHaveCountAsync(3);
+                await page.GetByTestId("button-group-archive").ClickAsync();
+                await Assertions.Expect(page.GetByTestId("button-group-last-action")).ToContainTextAsync("Quotation archived");
                 await page.GetByTestId("control-button-group-orientation").SelectOptionAsync("Vertical");
                 await Assertions.Expect(page.GetByTestId("action-button-group")).ToHaveAttributeAsync("data-orientation", "vertical");
                 await Assertions.Expect(page.GetByTestId("action-button-group")).ToHaveCSSAsync("flex-direction", "column");
+                await Assertions.Expect(page.Locator("#preview .shadcn-code-block pre").First).ToContainTextAsync("ShadcnButtonGroupOrientation.Vertical");
                 break;
             case "checkbox":
                 await page.GetByTestId("control-checkbox-state").SelectOptionAsync("Checked");

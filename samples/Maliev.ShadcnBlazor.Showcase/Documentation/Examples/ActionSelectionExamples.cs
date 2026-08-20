@@ -129,29 +129,37 @@ internal static class ActionSelectionExamples
         var orientation = ShadcnButtonGroupOrientation.Horizontal;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnButtonGroup>(0);
-            builder.AddAttribute(1, nameof(ShadcnButtonGroup.Orientation), orientation);
-            builder.AddAttribute(2, nameof(ShadcnButtonGroup.AdditionalAttributes), Attributes("action-button-group", "Drawing actions"));
-            builder.AddAttribute(3, nameof(ShadcnButtonGroup.ChildContent), (RenderFragment)(content =>
-            {
-                content.OpenComponent<ShadcnButtonGroupText>(0);
-                content.AddAttribute(1, nameof(ShadcnButtonGroupText.ChildContent), Text("Status"));
-                content.CloseComponent();
-                AddButton(content, 10, "Archive", ShadcnButtonVariant.Outline);
-                content.OpenComponent<ShadcnButtonGroupSeparator>(20);
-                content.CloseComponent();
-                content.OpenComponent<ShadcnButtonGroup>(30);
-                content.AddAttribute(31, nameof(ShadcnButtonGroup.ChildContent), (RenderFragment)(nested =>
-                {
-                    AddButton(nested, 0, "Preview", ShadcnButtonVariant.Outline);
-                    AddButton(nested, 10, "Report", ShadcnButtonVariant.Outline);
-                }));
-                content.CloseComponent();
-            }));
+            builder.OpenComponent<ButtonGroupDossierPreview>(0);
+            builder.AddAttribute(1, nameof(ButtonGroupDossierPreview.Orientation), orientation);
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnButtonGroup Orientation=\"{orientation}\" aria-label=\"Drawing actions\">\n    <ShadcnButtonGroupText>Status</ShadcnButtonGroupText>\n    <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Archive</ShadcnButton>\n    <ShadcnButtonGroupSeparator />\n    <ShadcnButtonGroup>\n        <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Preview</ShadcnButton>\n        <ShadcnButton Variant=\"ShadcnButtonVariant.Outline\">Report</ShadcnButton>\n    </ShadcnButtonGroup>\n</ShadcnButtonGroup>";
-        return Example("button-group", "Grouped actions", "Compose related action buttons with logical horizontal or vertical geometry.",
+        string Source()
+        {
+            var separatorOrientation = orientation == ShadcnButtonGroupOrientation.Horizontal
+                ? ShadcnButtonGroupOrientation.Vertical
+                : ShadcnButtonGroupOrientation.Horizontal;
+            return $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<ShadcnButtonGroup Orientation="ShadcnButtonGroupOrientation.{{orientation}}" aria-label="Production review actions">
+    <ShadcnButtonGroupText>Revision C</ShadcnButtonGroupText>
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="Archive">Archive</ShadcnButton>
+    <ShadcnButtonGroupSeparator Orientation="ShadcnButtonGroupOrientation.{{separatorOrientation}}" />
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="Preview">Preview</ShadcnButton>
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="Report">Report</ShadcnButton>
+</ShadcnButtonGroup>
+
+<p role="status" aria-live="polite">@lastAction</p>
+
+@code {
+    private string lastAction = "Choose an action to continue the production review";
+    private void Archive() => lastAction = "Quotation archived";
+    private void Preview() => lastAction = "Opening production preview";
+    private void Report() => lastAction = "Production report requested";
+}
+""";
+        }
+        return Example("button-group", "Connected production actions", "Try a realistic review toolbar with pinned shadcn/ui geometry, logical orientation, and an announced result for every action.",
             Source(), preview,
             [Select("button-group-orientation", "Orientation", orientation, value => orientation = value)],
             ["horizontal", "vertical", "separator", "nested", "text"]) with

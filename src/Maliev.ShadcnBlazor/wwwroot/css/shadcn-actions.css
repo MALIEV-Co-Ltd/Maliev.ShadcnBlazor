@@ -68,13 +68,14 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button:disabled,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button[aria-disabled="true"] { pointer-events: none; opacity: 0.5; cursor: default; }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group { display: inline-flex; width: fit-content; align-items: stretch; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group:has(> [data-slot="button-group"]) { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group { display: inline-flex; width: fit-content; max-width: 100%; align-items: stretch; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] { flex-direction: column; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot] ~ [data-slot] { border-left-width: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot]:not(:has(~ [data-slot])) { border-top-right-radius: var(--shadcn-radius-md); border-bottom-right-radius: var(--shadcn-radius-md); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot] ~ [data-slot] { border-top-width: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot]:not(:has(~ [data-slot])) { border-bottom-right-radius: var(--shadcn-radius-md); border-bottom-left-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot] { border-start-end-radius: 0; border-end-end-radius: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot] ~ [data-slot] { border-start-start-radius: 0; border-end-start-radius: 0; border-inline-start-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="horizontal"] > [data-slot]:last-child { border-start-end-radius: var(--shadcn-radius-md); border-end-end-radius: var(--shadcn-radius-md); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot] { border-end-start-radius: 0; border-end-end-radius: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot] ~ [data-slot] { border-start-start-radius: 0; border-start-end-radius: 0; border-block-start-width: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group[data-orientation="vertical"] > [data-slot]:last-child { border-end-start-radius: var(--shadcn-radius-md); border-end-end-radius: var(--shadcn-radius-md); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group > :focus-visible { position: relative; z-index: 1; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-group-text { display: inline-flex; align-items: center; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-muted); padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-foreground); font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; box-shadow: var(--shadcn-shadow-xs); }
