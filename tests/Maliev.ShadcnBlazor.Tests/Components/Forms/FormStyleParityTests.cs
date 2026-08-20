@@ -24,11 +24,14 @@ public sealed class FormStyleParityTests
         Assert.Contains(".shadcn-calendar-week { margin-top: calc(.375rem * var(--shadcn-spacing-multiplier));", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-input-otp-separator { display: flex; width: 1rem; height: 1rem;", css, StringComparison.Ordinal);
         Assert.Contains("data-range-middle=\"true\"", css, StringComparison.Ordinal);
+        Assert.Contains("data-range-complete=\"true\"", css, StringComparison.Ordinal);
+        Assert.Contains("data-range-start=\"true\"][data-range-end=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains("[dir=\"rtl\"]", css, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 40rem)", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("forced-color-adjust: none", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-calendar-day[data-range-middle=\"true\"]", css, StringComparison.Ordinal);
     }
 
     [Fact]

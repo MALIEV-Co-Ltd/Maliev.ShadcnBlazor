@@ -1,32 +1,43 @@
 @using System.Globalization
+@using Maliev.ShadcnBlazor.Components.Content
 @using Maliev.ShadcnBlazor.Components.Forms
 
 <div class="showcase-calendar-demo" data-testid="forms-calendar-demo">
-    <ShadcnCalendar Mode="Mode"
-                    Value="Selected"
-                    ValueChanged="OnValueChanged"
-                    Range="SelectedRange"
-                    RangeChanged="OnRangeChanged"
-                    VisibleMonth="VisibleMonth"
-                    VisibleMonthChanged="OnVisibleMonthChanged"
-                    Today="Today"
-                    Culture="ThaiCulture"
-                    Invalid="Invalid"
-                    AdditionalAttributes="Attributes" />
-    <output class="showcase-calendar-selection" data-testid="calendar-selection" aria-live="polite">
-        @if (Mode == ShadcnCalendarSelectionMode.Range)
-        {
-            <span>@(SelectedRange is null ? "เลือกช่วงวันที่" : $"{SelectedRange.Start:dd MMM} — {SelectedRange.End:dd MMM}")</span>
-        }
-        else
-        {
-            <span>@(Selected is null ? "ยังไม่ได้เลือกวันที่" : $"เลือกแล้ว · {Selected:dd MMM yyyy}")</span>
-        }
-    </output>
+    <ShadcnCard Class="showcase-calendar-panel">
+        <ShadcnCardHeader>
+            <ShadcnCardTitle>กำหนดวันตรวจรับ</ShadcnCardTitle>
+            <ShadcnCardDescription>เลือกวันที่หรือช่วงเวลาสำหรับตรวจรับชิ้นงาน</ShadcnCardDescription>
+        </ShadcnCardHeader>
+        <ShadcnCardContent>
+            <ShadcnCalendar Mode="Mode"
+                            CaptionLayout="CaptionLayout"
+                            Value="@(Mode == ShadcnCalendarSelectionMode.Single ? Selected : null)"
+                            ValueChanged="OnValueChanged"
+                            Range="@(Mode == ShadcnCalendarSelectionMode.Range ? SelectedRange : null)"
+                            RangeChanged="OnRangeChanged"
+                            VisibleMonth="VisibleMonth"
+                            VisibleMonthChanged="OnVisibleMonthChanged"
+                            Today="Today"
+                            Culture="ThaiCulture"
+                            ShowWeekNumbers="ShowWeekNumbers"
+                            Invalid="Invalid"
+                            PreviousLabel="เดือนก่อนหน้า"
+                            NextLabel="เดือนถัดไป"
+                            WeekLabel="สัปดาห์"
+                            MonthSelectLabel="เลือกเดือน"
+                            YearSelectLabel="เลือกปี"
+                            AdditionalAttributes="Attributes" />
+        </ShadcnCardContent>
+        <ShadcnCardFooter>
+            <output class="showcase-calendar-selection" data-testid="calendar-selection" aria-live="polite">@SelectionSummary</output>
+        </ShadcnCardFooter>
+    </ShadcnCard>
 </div>
 
 @code {
     [Parameter] public ShadcnCalendarSelectionMode Mode { get; set; } = ShadcnCalendarSelectionMode.Single;
+    [Parameter] public ShadcnCalendarCaptionLayout CaptionLayout { get; set; } = ShadcnCalendarCaptionLayout.Label;
+    [Parameter] public bool ShowWeekNumbers { get; set; }
     [Parameter] public bool Invalid { get; set; }
 
     private DateOnly? Selected { get; set; } = new(2026, 8, 13);
@@ -37,9 +48,18 @@
     private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
     {
         ["data-testid"] = "forms-dossier-calendar",
-        ["aria-label"] = "Delivery calendar",
+        ["aria-label"] = "ปฏิทินตรวจรับชิ้นงาน",
+        ["data-selection-mode"] = Mode.ToString().ToLowerInvariant(),
         ["data-selected-date"] = Selected?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty
     };
+    private string SelectionSummary => Mode == ShadcnCalendarSelectionMode.Range
+        ? SelectedRange switch
+        {
+            null => "เลือกช่วงวันที่ตรวจรับ",
+            { End: null } => $"เริ่ม {SelectedRange.Start.ToString("d MMM yyyy", ThaiCulture)} · เลือกวันสิ้นสุด",
+            _ => $"{SelectedRange.Start.ToString("d MMM", ThaiCulture)} — {SelectedRange.End!.Value.ToString("d MMM yyyy", ThaiCulture)}"
+        }
+        : Selected is null ? "ยังไม่ได้เลือกวันที่" : $"เลือกแล้ว · {Selected.Value.ToString("d MMMM yyyy", ThaiCulture)}";
 
     private Task OnValueChanged(DateOnly? value)
     {

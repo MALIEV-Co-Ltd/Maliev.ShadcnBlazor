@@ -227,16 +227,31 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition Calendar()
     {
-        var invalid = false; var mode = ShadcnCalendarSelectionMode.Single;
-        RenderFragment preview = b => { b.OpenComponent<CalendarDossierPreview>(0); b.AddAttribute(1, "Mode", mode); b.AddAttribute(2, "Invalid", invalid); b.CloseComponent(); };
-        string Source() => mode == ShadcnCalendarSelectionMode.Range
-            ? $"<ShadcnCalendar Mode=\"ShadcnCalendarSelectionMode.Range\" @bind-Range=\"Window\" Culture=\"ThaiCulture\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />"
-            : $"<ShadcnCalendar Mode=\"ShadcnCalendarSelectionMode.Single\" @bind-Value=\"SelectedDate\" Culture=\"ThaiCulture\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
-        return Example("calendar", "DateOnly calendar", "Switch single/range selection in a deterministic Thai-localized keyboard grid.", Source(), preview,
+        var invalid = false; var mode = ShadcnCalendarSelectionMode.Single; var captionLayout = ShadcnCalendarCaptionLayout.Label; var showWeekNumbers = false;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<CalendarDossierPreview>(0);
+            b.AddAttribute(1, nameof(CalendarDossierPreview.Mode), mode);
+            b.AddAttribute(2, nameof(CalendarDossierPreview.CaptionLayout), captionLayout);
+            b.AddAttribute(3, nameof(CalendarDossierPreview.ShowWeekNumbers), showWeekNumbers);
+            b.AddAttribute(4, nameof(CalendarDossierPreview.Invalid), invalid);
+            b.CloseComponent();
+        };
+        string Source()
+        {
+            var binding = mode == ShadcnCalendarSelectionMode.Range ? "@bind-Range=\"InspectionWindow\"" : "@bind-Value=\"InspectionDate\"";
+            var summary = mode == ShadcnCalendarSelectionMode.Range
+                ? "    private string SelectionSummary => InspectionWindow switch\n    {\n        null => \"เลือกช่วงวันที่ตรวจรับ\",\n        { End: null } => $\"เริ่ม {InspectionWindow.Start.ToString(\"d MMM yyyy\", ThaiCulture)} · เลือกวันสิ้นสุด\",\n        _ => $\"{InspectionWindow.Start.ToString(\"d MMM\", ThaiCulture)} — {InspectionWindow.End!.Value.ToString(\"d MMM yyyy\", ThaiCulture)}\"\n    };"
+                : "    private string SelectionSummary => InspectionDate is null\n        ? \"ยังไม่ได้เลือกวันที่\"\n        : $\"เลือกแล้ว · {InspectionDate.Value.ToString(\"d MMMM yyyy\", ThaiCulture)}\";";
+            return $"@using System.Globalization\n@using Maliev.ShadcnBlazor.Components.Content\n@using Maliev.ShadcnBlazor.Components.Forms\n\n<ShadcnCard>\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>กำหนดวันตรวจรับ</ShadcnCardTitle>\n        <ShadcnCardDescription>เลือกวันที่หรือช่วงเวลาสำหรับตรวจรับชิ้นงาน</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnCalendar Mode=\"ShadcnCalendarSelectionMode.{mode}\"\n                        CaptionLayout=\"ShadcnCalendarCaptionLayout.{captionLayout}\"\n                        {binding}\n                        @bind-VisibleMonth=\"VisibleMonth\"\n                        Today=\"Today\"\n                        Culture=\"ThaiCulture\"\n                        ShowWeekNumbers=\"{showWeekNumbers.ToString().ToLowerInvariant()}\"\n                        Invalid=\"{invalid.ToString().ToLowerInvariant()}\"\n                        PreviousLabel=\"เดือนก่อนหน้า\"\n                        NextLabel=\"เดือนถัดไป\"\n                        WeekLabel=\"สัปดาห์\"\n                        MonthSelectLabel=\"เลือกเดือน\"\n                        YearSelectLabel=\"เลือกปี\"\n                        aria-label=\"ปฏิทินตรวจรับชิ้นงาน\" />\n    </ShadcnCardContent>\n    <ShadcnCardFooter>\n        <output aria-live=\"polite\">@SelectionSummary</output>\n    </ShadcnCardFooter>\n</ShadcnCard>\n\n@code {{\n    private CultureInfo ThaiCulture {{ get; }} = CultureInfo.GetCultureInfo(\"th-TH\");\n    private DateOnly Today {{ get; }} = new(2026, 8, 13);\n    private DateOnly VisibleMonth {{ get; set; }} = new(2026, 8, 1);\n    private DateOnly? InspectionDate {{ get; set; }} = new(2026, 8, 13);\n    private ShadcnDateRange? InspectionWindow {{ get; set; }} = new(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13));\n{summary}\n}}";
+        }
+        return Example("calendar", "Inspection calendar", "Select a Thai-localized inspection date or connected date range with keyboard navigation and optional week numbers.", Source(), preview,
             [
                 Toggle("calendar-invalid", "Invalid", v => invalid = v),
-                EnumSelect("calendar-mode", "Mode", mode, v => mode = v)
-            ], ["single", "range", "culture", "invalid"]) with
+                EnumSelect("calendar-mode", "Mode", mode, v => mode = v),
+                EnumSelect("calendar-caption-layout", "Caption", captionLayout, v => captionLayout = v),
+                Toggle("calendar-week-numbers", "Week numbers", v => showWeekNumbers = v)
+            ], ["single", "range", "culture", "keyboard", "week-numbers", "invalid"]) with
         { RazorSourceProvider = Source };
     }
     private static ComponentExampleDefinition DatePicker()

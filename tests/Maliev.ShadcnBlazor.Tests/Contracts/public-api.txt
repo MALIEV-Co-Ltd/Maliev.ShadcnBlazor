@@ -609,6 +609,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendar
   Nullable<DateOnly> Max
   Nullable<DateOnly> Min
   ShadcnCalendarSelectionMode Mode
+  String MonthSelectLabel
   String NextLabel
   String PreviousLabel
   ShadcnDateRange Range
@@ -624,6 +625,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendar
   DateOnly VisibleMonth
   EventCallback<DateOnly> VisibleMonthChanged
   String WeekLabel
+  String YearSelectLabel
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarCaptionLayout: Label, Dropdown
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarSelectionMode: Single, Range
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnComboboxOption`1
