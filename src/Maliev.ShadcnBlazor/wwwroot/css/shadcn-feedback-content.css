@@ -127,6 +127,9 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-skeleton[data-animation="wave"] { background: linear-gradient(100deg, var(--shadcn-muted) 30%, color-mix(in oklch, var(--shadcn-muted-foreground) 18%, var(--shadcn-muted)) 50%, var(--shadcn-muted) 70%); background-size: 240% 100%; animation: shadcn-skeleton-wave var(--shadcn-motion-duration-slow) linear infinite; }
 @keyframes shadcn-skeleton-pulse { 50% { opacity: 0.5; } }
 @keyframes shadcn-skeleton-wave { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-skeleton { animation: none; }
+}
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { width: var(--shadcn-spinner-size); height: var(--shadcn-spinner-size); animation: shadcn-spinner-rotate var(--shadcn-motion-duration-slow) linear infinite; }
 @keyframes shadcn-spinner-rotate { to { rotate: 360deg; } }

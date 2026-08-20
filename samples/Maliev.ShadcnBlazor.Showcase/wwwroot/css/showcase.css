@@ -4124,18 +4124,58 @@ a {
 
 .showcase-skeleton-layout {
     display: grid;
-    inline-size: min(100%, 38rem);
-    gap: 1.25rem;
+    inline-size: min(100%, 36rem);
+    max-inline-size: 100%;
+    gap: 0;
+    margin-inline: auto;
     border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-xl);
     background: var(--shadcn-card);
-    padding: clamp(1rem, 3vw, 1.75rem);
+    color: var(--shadcn-card-foreground);
+    overflow: hidden;
 }
-.showcase-skeleton-layout__header { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .75rem; }
-.showcase-skeleton-layout__header > div { display: grid; align-content: center; }
-.showcase-skeleton-layout__body { display: grid; gap: .55rem; }
-.showcase-skeleton-layout__cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-.showcase-skeleton-layout__cards article { min-width: 0; }
+.showcase-skeleton-layout__header {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding: 1rem 1.25rem;
+}
+.showcase-skeleton-layout__header > div { display: grid; min-inline-size: 0; gap: .125rem; }
+.showcase-skeleton-layout__header h3 { margin: 0; font-size: .9375rem; font-weight: 600; line-height: 1.4; }
+.showcase-skeleton-layout__header p { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.45; }
+.showcase-skeleton-layout__header .shadcn-button { flex: 0 0 auto; }
+.showcase-skeleton-layout__list { display: grid; margin: 0; padding: .25rem 1.25rem; list-style: none; }
+.showcase-skeleton-layout__row {
+    display: grid;
+    min-inline-size: 0;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .875rem;
+    padding-block: .875rem;
+}
+.showcase-skeleton-layout__row + .showcase-skeleton-layout__row { border-block-start: 1px solid var(--shadcn-border); }
+.showcase-skeleton-layout__media { inline-size: 3rem; block-size: 3rem; }
+.showcase-skeleton-layout__copy { display: grid; min-inline-size: 0; gap: .375rem; }
+.showcase-skeleton-layout__copy > :is(strong, span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.showcase-skeleton-layout__copy strong { font-size: .8125rem; font-weight: 550; line-height: 1.35; }
+.showcase-skeleton-layout__copy span { color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.35; }
+.showcase-skeleton-layout__title { inline-size: min(15rem, 78%); block-size: .875rem; }
+.showcase-skeleton-layout__meta { inline-size: min(20rem, 94%); block-size: .6875rem; }
+.showcase-skeleton-layout__status { inline-size: 4.75rem; block-size: 1.25rem; border-radius: 9999px; }
+.showcase-skeleton-layout__job-mark {
+    display: inline-grid;
+    inline-size: 3rem;
+    block-size: 3rem;
+    place-items: center;
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+    font-family: var(--shadcn-font-mono);
+    font-size: .75rem;
+}
 
 .showcase-slider-values { display: block; margin-block-start: .65rem; color: var(--shadcn-muted-foreground); font-family: var(--shadcn-font-mono); font-size: .75rem; text-align: center; }
 
@@ -4297,7 +4337,15 @@ a {
 }
 
 @media (max-width: 40rem) {
-    .showcase-skeleton-layout__cards { grid-template-columns: 1fr; }
+    .showcase-skeleton-layout__header { display: grid; align-items: start; justify-content: stretch; padding: 1rem; }
+    .showcase-skeleton-layout__header .shadcn-button { justify-self: start; }
+    .showcase-skeleton-layout__header .shadcn-button { padding-inline: .625rem; white-space: nowrap; }
+    .showcase-skeleton-layout__list { padding-inline: 1rem; }
+    .showcase-skeleton-layout__row { grid-template-columns: 2.5rem minmax(0, 1fr); gap: .75rem; }
+    .showcase-skeleton-layout__media,
+    .showcase-skeleton-layout__job-mark { inline-size: 2.5rem; block-size: 2.5rem; }
+    .showcase-skeleton-layout__status,
+    .showcase-skeleton-layout__row > .shadcn-badge { grid-column: 2; justify-self: start; }
     .showcase-toast-demo .shadcn-toast-viewport { inset-inline: 1rem; inline-size: auto; max-inline-size: none; }
 }
 
