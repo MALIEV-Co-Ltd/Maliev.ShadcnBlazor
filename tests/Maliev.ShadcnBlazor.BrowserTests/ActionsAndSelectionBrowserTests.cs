@@ -1072,7 +1072,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("aria-readonly", "true");
                 await page.GetByTestId("control-switch-invalid").CheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("aria-invalid", "true");
-                await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("name", "notifications");
+                await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("name", "production-updates");
                 break;
             case "toggle":
                 await page.GetByTestId("action-toggle").ClickAsync();
