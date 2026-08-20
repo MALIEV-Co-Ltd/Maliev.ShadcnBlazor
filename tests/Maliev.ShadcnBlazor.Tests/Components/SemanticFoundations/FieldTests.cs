@@ -6,6 +6,19 @@ namespace Maliev.ShadcnBlazor.Tests.Components.SemanticFoundations;
 
 public sealed class FieldTests : BunitContext
 {
+    [Fact]
+    public void LabelStylesMatchPinnedDisabledAndPlatformBehavior()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-semantic-foundations.css"));
+
+        Assert.Contains("line-height: 1", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-label:has(+ :disabled)", css, StringComparison.Ordinal);
+        Assert.Contains("[data-disabled=\"true\"] .shadcn-label", css, StringComparison.Ordinal);
+        Assert.Contains("cursor: not-allowed", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains("color: GrayText", css, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(false, "help", "error", "help")]
     [InlineData(true, "help", "error", "help error")]
@@ -183,5 +196,13 @@ public sealed class FieldTests : BunitContext
         public Action<ShadcnFieldContext>? OnCaptured { get; set; }
 
         protected override void OnParametersSet() => OnCaptured?.Invoke(Context);
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Could not locate the repository root.");
     }
 }

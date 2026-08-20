@@ -4,6 +4,7 @@ using Maliev.ShadcnBlazor.Components.Direction;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Layout;
 using Maliev.ShadcnBlazor.Components.Typography;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -214,22 +215,15 @@ internal static class SemanticFoundationExamples
         var disabled = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenElement(0, "div");
-            builder.OpenComponent<ShadcnLabel>(1);
-            builder.AddAttribute(2, nameof(ShadcnLabel.For), "dossier-label-input");
-            builder.AddAttribute(3, nameof(ShadcnLabel.ChildContent), Text("Project name"));
+            builder.OpenComponent<LabelDossierPreview>(0);
+            builder.AddAttribute(1, nameof(LabelDossierPreview.Disabled), disabled);
             builder.CloseComponent();
-            builder.OpenElement(4, "input");
-            builder.AddAttribute(5, "id", "dossier-label-input");
-            builder.AddAttribute(6, "disabled", disabled);
-            builder.CloseElement();
-            builder.CloseElement();
         };
-        return Example(
+        var example = Example(
             "label",
-            "Associated form label",
-            "Connect visible text to its form control with a stable identifier.",
-            "<ShadcnLabel For=\"project-name\">Project name</ShadcnLabel>\n<input id=\"project-name\" disabled />",
+            "Project naming field",
+            "Use a visible, associated label with the package input in a realistic project setup flow.",
+            LabelSource(disabled),
             preview,
             [new ComponentParameterControl(
                 "label-disabled",
@@ -238,7 +232,46 @@ internal static class SemanticFoundationExamples
                 "false",
                 [],
                 value => disabled = bool.Parse(value))],
-            ["associated", "enabled", "disabled"]);
+            ["associated", "required", "interactive", "enabled", "disabled"]);
+        return example with { RazorSourceProvider = () => LabelSource(disabled) };
+    }
+
+    private static string LabelSource(bool disabled)
+    {
+        var state = disabled.ToString().ToLowerInvariant();
+        return $$"""
+            <section class="showcase-label-dossier" data-disabled="{{state}}" aria-labelledby="project-form-title">
+                <header>
+                    <h3 id="project-form-title">Create a production project</h3>
+                    <p>Give the quotation workspace a name your team can recognize at a glance.</p>
+                </header>
+                <div>
+                    <ShadcnLabel For="project-name">
+                        Project name <span>Required</span>
+                    </ShadcnLabel>
+                    <ShadcnInput TValue="string"
+                                 id="project-name"
+                                 @bind-Value="ProjectName"
+                                 Name="project-name"
+                                 Placeholder="e.g. Fixture inspection · Revision C"
+                                 Disabled="{{state}}"
+                                 Required="true"
+                                 aria-label="Project name"
+                                 aria-describedby="project-name-help" />
+                    <p id="project-name-help">Shown to engineering, quality, and purchasing throughout the quotation.</p>
+                </div>
+                <output for="project-name" aria-live="polite">
+                    <span>Workspace preview</span>
+                    <strong>@DisplayName</strong>
+                    <code>Production / @DisplayName</code>
+                </output>
+            </section>
+
+            @code {
+                private string ProjectName { get; set; } = "Fixture inspection · Revision C";
+                private string DisplayName => string.IsNullOrWhiteSpace(ProjectName) ? "Untitled project" : ProjectName.Trim();
+            }
+            """;
     }
 
     private static ComponentExampleDefinition Field()

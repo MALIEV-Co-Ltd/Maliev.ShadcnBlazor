@@ -3980,6 +3980,108 @@ a {
     overflow: visible;
 }
 
+.showcase-label-dossier {
+    display: grid;
+    inline-size: min(100%, 38rem);
+    gap: 1.5rem;
+}
+
+.showcase-label-dossier__header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding-block-end: 1rem;
+}
+
+.showcase-label-dossier__header h3 {
+    margin: 0;
+    color: var(--shadcn-foreground);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.showcase-label-dossier__header p {
+    max-inline-size: 46ch;
+    margin: 0.35rem 0 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.showcase-label-dossier__header > span,
+.showcase-label-dossier__preview > span {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+}
+
+.showcase-label-dossier__header > span {
+    flex: 0 0 auto;
+    padding-block-start: 0.125rem;
+}
+
+.showcase-label-dossier__field {
+    display: grid;
+    gap: 0.625rem;
+}
+
+.showcase-label-dossier__field .shadcn-input {
+    inline-size: 100%;
+}
+
+.showcase-label-dossier__field > p {
+    margin: 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1.45;
+}
+
+.showcase-label-dossier__required {
+    color: var(--shadcn-destructive);
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.showcase-label-dossier__preview {
+    display: grid;
+    gap: 0.3rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: color-mix(in oklch, var(--shadcn-muted) 55%, var(--shadcn-background));
+    padding: 1rem;
+    color: var(--shadcn-foreground);
+}
+
+.showcase-label-dossier__preview strong {
+    overflow-wrap: anywhere;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.showcase-label-dossier__preview code {
+    overflow-wrap: anywhere;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 34rem) {
+    .showcase-label-dossier {
+        gap: 1.125rem;
+    }
+
+    .showcase-label-dossier__header {
+        display: grid;
+        gap: 0.25rem;
+        padding-block-end: 0.875rem;
+    }
+
+    .showcase-label-dossier__header > span {
+        padding-block-start: 0;
+    }
+}
+
 .showcase-button-dossier {
     display: grid;
     inline-size: min(100%, 48rem);

@@ -79,12 +79,31 @@ public sealed class SemanticFoundationsShowcaseContractTests
     }
 
     [Fact]
+    public void LabelExampleUsesPackageComponentsAndMatchesTheDisabledSetting()
+    {
+        var registry = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(new Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationCatalog());
+        var label = Assert.Single(registry.GetBySlug("label"));
+
+        Assert.Contains("<ShadcnLabel For=\"project-name\">", label.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnInput TValue=\"string\"", label.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind-Value=\"ProjectName\"", label.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<input", label.RazorSource, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Disabled=\"false\"", label.RazorSource, StringComparison.Ordinal);
+
+        label.Controls.Single(control => control.Id == "label-disabled").Apply("true");
+
+        Assert.Contains("Disabled=\"true\"", label.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("data-disabled=\"true\"", label.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseLoadsSemanticStylesAndExposesComponentRoute()
     {
         var root = FindRoot();
         var index = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "index.html"));
         var layout = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Layout", "MainLayout.razor"));
         var page = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "SemanticFoundations.razor"));
+        var documentation = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "Docs", "ComponentDocumentation.razor"));
 
         Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css", index, StringComparison.Ordinal);
         Assert.Contains("components/semantic-foundations", layout, StringComparison.Ordinal);
@@ -95,6 +114,7 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.DoesNotContain(">M</span></ShadcnItemMedia>", page, StringComparison.Ordinal);
         Assert.Contains("<svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"", page, StringComparison.Ordinal);
         Assert.Contains("<ShadcnEmpty", page, StringComparison.Ordinal);
+        Assert.Contains("\"label\" => [\"apps/v4/registry/bases/base/ui/label.tsx\"]", documentation, StringComparison.Ordinal);
     }
 
     [Fact]

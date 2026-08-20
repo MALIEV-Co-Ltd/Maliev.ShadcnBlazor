@@ -216,14 +216,24 @@
     gap: calc(0.5rem * var(--shadcn-spacing-multiplier));
     font-size: 0.875rem;
     font-weight: 500;
-    line-height: 1.375;
+    line-height: 1;
     user-select: none;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-field[data-disabled="true"] .shadcn-field-label, .shadcn-field[data-disabled="true"] .shadcn-field-title),
+:where(.shadcn-scope, .shadcn-overlay-scope) :where([data-disabled="true"] .shadcn-label, .shadcn-label:has(+ :disabled)),
 :where(.shadcn-scope, .shadcn-overlay-scope) fieldset:disabled .shadcn-label {
     pointer-events: none;
+    cursor: not-allowed;
     opacity: 0.5;
+}
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where([data-disabled="true"] .shadcn-label, .shadcn-label:has(+ :disabled)),
+    :where(.shadcn-scope, .shadcn-overlay-scope) fieldset:disabled .shadcn-label {
+        color: GrayText;
+        opacity: 1;
+    }
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-field-set {

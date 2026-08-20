@@ -229,6 +229,31 @@ public sealed class ComponentDossierBrowserTests(
     }
 
     [Fact]
+    public async Task LabelDossierUsesThePackageInputAndSynchronizesInteractionAndSource()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/label").ToString());
+        var labelDossier = page.GetByTestId("label-dossier");
+        var labelInput = page.GetByTestId("label-project-input");
+        await Assertions.Expect(labelDossier).ToBeVisibleAsync();
+        await Assertions.Expect(labelInput).ToHaveAttributeAsync("data-slot", "input");
+        await Assertions.Expect(page.Locator("label[for='dossier-label-input']")).ToContainTextAsync("Project name");
+        await labelInput.FillAsync("Fixture inspection · Revision D");
+        await Assertions.Expect(page.GetByTestId("label-project-preview")).ToHaveTextAsync("Fixture inspection · Revision D");
+        await page.GetByTestId("control-label-disabled").CheckAsync();
+        await Assertions.Expect(labelInput).ToBeDisabledAsync();
+        await Assertions.Expect(labelDossier).ToHaveAttributeAsync("data-disabled", "true");
+        await Assertions.Expect(page.Locator("#preview .component-code")).ToContainTextAsync("Disabled=\"true\"");
+    }
+
+    [Fact]
     public async Task ShowcasePreviewsExposeWorkingStatefulInteractionAndPolishedLayouts()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

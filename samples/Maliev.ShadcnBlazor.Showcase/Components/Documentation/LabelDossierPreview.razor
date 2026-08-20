@@ -1,0 +1,55 @@
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<section class="showcase-label-dossier"
+         data-testid="label-dossier"
+         data-disabled="@Disabled.ToString().ToLowerInvariant()"
+         aria-labelledby="label-dossier-title">
+    <header class="showcase-label-dossier__header">
+        <div>
+            <h3 id="label-dossier-title">Create a production project</h3>
+            <p>Give the quotation workspace a name your team can recognize at a glance.</p>
+        </div>
+        <span>Project setup</span>
+    </header>
+
+    <div class="showcase-label-dossier__field">
+        <ShadcnLabel For="dossier-label-input">
+            Project name
+            <span class="showcase-label-dossier__required">Required</span>
+        </ShadcnLabel>
+        <ShadcnInput TValue="string"
+                     @bind-Value="ProjectName"
+                     Name="project-name"
+                     Placeholder="e.g. Fixture inspection · Revision C"
+                     Disabled="Disabled"
+                     Required="true"
+                     AdditionalAttributes="InputAttributes" />
+        <p id="dossier-label-help">Shown to engineering, quality, and purchasing throughout the quotation.</p>
+    </div>
+
+    <output class="showcase-label-dossier__preview"
+            for="dossier-label-input"
+            aria-live="polite">
+        <span>Workspace preview</span>
+        <strong data-testid="label-project-preview">@DisplayName</strong>
+        <code>Production / @DisplayName</code>
+    </output>
+</section>
+
+@code {
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    private string ProjectName { get; set; } = "Fixture inspection · Revision C";
+
+    private string DisplayName => string.IsNullOrWhiteSpace(ProjectName) ? "Untitled project" : ProjectName.Trim();
+
+    private static IReadOnlyDictionary<string, object> InputAttributes { get; } = new Dictionary<string, object>
+    {
+        ["id"] = "dossier-label-input",
+        ["aria-label"] = "Project name",
+        ["aria-describedby"] = "dossier-label-help",
+        ["autocomplete"] = "organization-title",
+        ["data-testid"] = "label-project-input"
+    };
+}
