@@ -46,7 +46,17 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         var slider = registry.GetBySlug("slider").Single();
         var sliderCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, slider));
         sliderCut.Find("[data-testid='control-slider-values']").Change("Single");
-        Assert.Contains("Values=\"new[] { 40d }\"", slider.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@bind-Values=\"SliderValues\"", slider.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private IReadOnlyList<double> SliderValues { get; set; } = [40d];", slider.RazorSource, StringComparison.Ordinal);
+
+        sliderCut.Find("[data-testid='action-slider'] input[type='range']").Input("65");
+        sliderCut.WaitForAssertion(() =>
+            Assert.Contains("private IReadOnlyList<double> SliderValues { get; set; } = [65d];", slider.RazorSource, StringComparison.Ordinal));
+
+        sliderCut.Find("[data-testid='control-slider-orientation']").Change("Vertical");
+        sliderCut.Find("[data-testid='control-slider-readonly']").Change(true);
+        Assert.Contains("Orientation=\"ShadcnSliderOrientation.Vertical\"", slider.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ReadOnly=\"true\"", slider.RazorSource, StringComparison.Ordinal);
 
         var toggle = registry.GetBySlug("toggle").Single();
         var toggleCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, toggle));

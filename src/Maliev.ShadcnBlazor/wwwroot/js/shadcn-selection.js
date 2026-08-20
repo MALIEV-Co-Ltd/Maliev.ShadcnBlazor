@@ -61,14 +61,20 @@ export function attachSlider(root, readOnly) {
     const existing = listeners.get(root)
     if (existing && typeof existing === "object" && existing.kind === "slider") {
         existing.readOnly = readOnly
+        existing.snapshotValues()
         return
     }
 
     detach(root)
     const inputs = () => Array.from(root.querySelectorAll("input[type='range']"))
-    const readOnlyValues = new Map(inputs().map((input) => [input, input.value]))
+    let readOnlyValues = inputs().map((input) => input.value)
+    const snapshotValues = () => {
+        readOnlyValues = inputs().map((input) => input.value)
+    }
     const restoreReadOnlyValues = () => {
-        for (const [input, value] of readOnlyValues) input.value = value
+        inputs().forEach((input, index) => {
+            if (readOnlyValues[index] !== undefined) input.value = readOnlyValues[index]
+        })
     }
 
     const state = {
@@ -76,8 +82,10 @@ export function attachSlider(root, readOnly) {
         get readOnly() { return readOnly },
         set readOnly(value) { readOnly = Boolean(value) }
     }
-    let activeTarget = null
+    let activeIndex = null
     let activePointerId = null
+
+    const activeTarget = () => activeIndex === null ? null : inputs()[activeIndex] ?? null
 
     const valueFromPointer = (event, target) => {
         event.preventDefault()
@@ -102,7 +110,7 @@ export function attachSlider(root, readOnly) {
             restoreReadOnlyValues()
             return
         }
-        if (root.dataset.disabled === "true" || event.button !== 0) return
+        if (root.dataset.disabled === "true" || event.button !== 0 || event.isPrimary === false || activePointerId !== null) return
         const thumbs = inputs().filter((input) => !input.disabled)
         if (thumbs.length === 0) return
 
@@ -118,12 +126,14 @@ export function attachSlider(root, readOnly) {
         const minimum = Number(thumbs[0].dataset.minimum)
         const maximum = Number(thumbs[0].dataset.maximum)
         const raw = minimum + ratio * (maximum - minimum)
-        activeTarget = thumbs.reduce((nearest, input) =>
+        const target = thumbs.reduce((nearest, input) =>
             Math.abs(Number(input.value) - raw) < Math.abs(Number(nearest.value) - raw) ? input : nearest)
+        activeIndex = inputs().indexOf(target)
         activePointerId = event.pointerId
-        valueFromPointer(event, activeTarget)
-        activeTarget.focus()
+        root.dataset.dragging = "true"
         root.setPointerCapture?.(event.pointerId)
+        target.focus({ preventScroll: true })
+        valueFromPointer(event, target)
     }
 
     const pointerMove = (event) => {
@@ -132,14 +142,23 @@ export function attachSlider(root, readOnly) {
             restoreReadOnlyValues()
             return
         }
-        if (activeTarget && activePointerId === event.pointerId) valueFromPointer(event, activeTarget)
+        const target = activeTarget()
+        if (target && activePointerId === event.pointerId) valueFromPointer(event, target)
     }
 
     const pointerUp = (event) => {
         if (activePointerId !== event.pointerId) return
         if (root.hasPointerCapture?.(event.pointerId)) root.releasePointerCapture(event.pointerId)
-        activeTarget = null
+        activeIndex = null
         activePointerId = null
+        delete root.dataset.dragging
+    }
+
+    const lostPointerCapture = (event) => {
+        if (activePointerId !== event.pointerId) return
+        activeIndex = null
+        activePointerId = null
+        delete root.dataset.dragging
     }
 
     const keyDown = (event) => {
@@ -160,7 +179,8 @@ export function attachSlider(root, readOnly) {
     root.addEventListener("pointercancel", pointerUp, true)
     root.addEventListener("keydown", keyDown)
     root.addEventListener("input", input, true)
-    Object.assign(state, { pointerDown, pointerMove, pointerUp, keyDown, input })
+    root.addEventListener("lostpointercapture", lostPointerCapture, true)
+    Object.assign(state, { pointerDown, pointerMove, pointerUp, lostPointerCapture, keyDown, input, snapshotValues })
     listeners.set(root, state)
 }
 
@@ -174,8 +194,10 @@ export function detach(root) {
         root.removeEventListener("pointermove", listener.pointerMove, true)
         root.removeEventListener("pointerup", listener.pointerUp, true)
         root.removeEventListener("pointercancel", listener.pointerUp, true)
+        root.removeEventListener("lostpointercapture", listener.lostPointerCapture, true)
         root.removeEventListener("keydown", listener.keyDown)
         root.removeEventListener("input", listener.input, true)
+        delete root.dataset.dragging
     }
     listeners.delete(root)
 }

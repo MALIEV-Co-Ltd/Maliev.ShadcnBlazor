@@ -157,6 +157,7 @@ public sealed class SliderTests : BunitContext
             .Add(x => x.ValuesChanged, EventCallback.Factory.Create<IReadOnlyList<double>>(this, _ => calls++)));
 
         Assert.False(cut.Find("input").HasAttribute("disabled"));
+        Assert.Equal("true", cut.Find("[data-slot='slider']").GetAttribute("data-readonly"));
         Assert.Equal("true", cut.Find("input").GetAttribute("aria-readonly"));
         cut.Find("input").Input("20");
         Assert.Equal(0, calls);

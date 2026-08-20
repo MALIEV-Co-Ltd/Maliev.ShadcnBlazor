@@ -13,7 +13,8 @@
      style="@MergeStyle(RootStyle)"
      data-slot="slider"
      data-orientation="@OrientationValue"
-     data-disabled="@(EffectiveDisabled ? "true" : null)">
+     data-disabled="@(EffectiveDisabled ? "true" : null)"
+     data-readonly="@(ReadOnly ? "true" : null)">
     <span class="shadcn-slider-track" data-slot="slider-track" aria-hidden="true">
         <span class="shadcn-slider-range" data-slot="slider-range"></span>
     </span>
@@ -82,7 +83,7 @@
         _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn slider orientation.")
     };
     private string RootStyle => $"--shadcn-slider-start: {(Values.Count == 1 ? 0 : Percent(Values[0])).ToString(CultureInfo.InvariantCulture)}%; --shadcn-slider-end: {Percent(Values[^1]).ToString(CultureInfo.InvariantCulture)}%";
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-disabled");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-disabled", "data-readonly");
 
     protected override void OnParametersSet()
     {

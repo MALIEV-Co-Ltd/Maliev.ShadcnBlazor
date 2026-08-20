@@ -289,9 +289,32 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(3, nameof(SliderDossierPreview.Disabled), disabled);
             builder.AddAttribute(4, nameof(SliderDossierPreview.ReadOnly), readOnly);
             builder.AddAttribute(5, nameof(SliderDossierPreview.Invalid), invalid);
+            builder.AddAttribute(6, nameof(SliderDossierPreview.ValuesChanged), EventCallback.Factory.Create<IReadOnlyList<double>>(new object(), next => values = next));
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnSlider Values=\"new[] {{ {string.Join(", ", values.Select(value => $"{value.ToString(CultureInfo.InvariantCulture)}d"))} }}\" Orientation=\"{orientation}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Minimum=\"0\" Maximum=\"100\" Step=\"5\" />";
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<ShadcnSlider @bind-Values="SliderValues"
+              Minimum="0"
+              Maximum="100"
+              Step="5"
+              Orientation="ShadcnSliderOrientation.{{orientation}}"
+              Disabled="{{disabled.ToString().ToLowerInvariant()}}"
+              ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}"
+              Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+              Name="budget"
+              Form="slider-form"
+              Required="true"
+              aria-label="Budget range" />
+
+<form id="slider-form"></form>
+<output aria-live="polite">@string.Join(" – ", SliderValues)</output>
+
+@code {
+    private IReadOnlyList<double> SliderValues { get; set; } = [{{string.Join(", ", values.Select(value => $"{value.ToString(CultureInfo.InvariantCulture)}d"))}}];
+}
+""";
         return Example("slider", "Single and range values", "A snapped range with native keyboard input, nearest-thumb pointer targeting, RTL, and vertical support.",
             Source(), preview,
             [
