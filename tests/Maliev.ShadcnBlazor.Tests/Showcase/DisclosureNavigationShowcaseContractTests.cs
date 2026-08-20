@@ -96,6 +96,33 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void NavigationMenuMatchesReferenceCompositionAndKeepsSourceInSync()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("navigation-menu"));
+        var initialMarkup = Render(example.Preview).Markup;
+
+        Assert.Contains("Getting started", initialMarkup, StringComparison.Ordinal);
+        Assert.Contains("Components", initialMarkup, StringComparison.Ordinal);
+        Assert.Contains("Project status", initialMarkup, StringComparison.Ordinal);
+        Assert.Contains("Documentation", initialMarkup, StringComparison.Ordinal);
+        Assert.Contains("showcase-navigation-menu__component-grid", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-navigation-menu__status-link", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Confirm a destructive or sensitive action.", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-navigation-menu__entry", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-navigation-menu__wide-item", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<svg viewBox=\"0 0 24 24\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-state=\"open\"", initialMarkup, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "navigation-open").Apply("true");
+        Assert.Contains("Value=\"getting-started\"", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "navigation-vertical").Apply("true");
+        Assert.Contains("Orientation=\"ShadcnNavigationMenuOrientation.Vertical\"", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "navigation-disabled").Apply("true");
+        Assert.Contains("Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnNavigationMenuViewport", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EvidencePairSurfaceOwnsOneDeterministicNamedStatePerComponent()
     {
         var cut = Render<DisclosureNavigationEvidence>();

@@ -96,31 +96,68 @@ internal static class DisclosureNavigationExamples
     private static ComponentExampleDefinition NavigationMenu()
     {
         string? value = null; var vertical = false; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnNavigationMenu>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "Orientation", vertical ? ShadcnNavigationMenuOrientation.Vertical : ShadcnNavigationMenuOrientation.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "Label", "Workspace navigation"); b.AddAttribute(5, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnNavigationMenuList>(0); c.AddAttribute(1, "ChildContent", (RenderFragment)(l => { AddNavigationItem(l, 0, "services", "Services", [("CNC machining", "#cnc"), ("Finishing", "#finishing"), ("Quality inspection", "#quality")]); AddNavigationItem(l, 10, "resources", "Resources", [("Material library", "#materials"), ("Guides", "#guides")]); AddNavigationItem(l, 20, "account", "Account", [("Team settings", "#team"), ("Billing", "#billing")]); })); c.CloseComponent(); Add<ShadcnNavigationMenuIndicator>(c, 10); Add<ShadcnNavigationMenuViewport>(c, 20); })); b.CloseComponent(); };
-        var source = """
-<ShadcnNavigationMenu Label="Workspace navigation">
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<NavigationMenuDossierPreview>(0);
+            b.AddAttribute(1, nameof(NavigationMenuDossierPreview.OpenValue), value);
+            b.AddAttribute(2, nameof(NavigationMenuDossierPreview.Orientation), vertical ? ShadcnNavigationMenuOrientation.Vertical : ShadcnNavigationMenuOrientation.Horizontal);
+            b.AddAttribute(3, nameof(NavigationMenuDossierPreview.Disabled), disabled);
+            b.CloseComponent();
+        };
+        string Source()
+        {
+            var state = value is null ? string.Empty : " Value=\"getting-started\"";
+            var orientation = vertical ? " Orientation=\"ShadcnNavigationMenuOrientation.Vertical\"" : string.Empty;
+            var disabledAttribute = disabled ? " Disabled=\"true\"" : string.Empty;
+            return $"""
+<div class="showcase-navigation-menu">
+<ShadcnNavigationMenu Label="Documentation navigation"{state}{orientation}{disabledAttribute}>
     <ShadcnNavigationMenuList>
-        <ShadcnNavigationMenuItem Value="services">
-            <ShadcnNavigationMenuTrigger>Services</ShadcnNavigationMenuTrigger>
+        <ShadcnNavigationMenuItem Value="getting-started">
+            <ShadcnNavigationMenuTrigger>Getting started</ShadcnNavigationMenuTrigger>
             <ShadcnNavigationMenuContent>
-                <ShadcnNavigationMenuLink Href="#cnc">CNC machining</ShadcnNavigationMenuLink>
-                <ShadcnNavigationMenuLink Href="#finishing">Finishing</ShadcnNavigationMenuLink>
-                <ShadcnNavigationMenuLink Href="#quality">Quality inspection</ShadcnNavigationMenuLink>
+                <ul class="showcase-navigation-menu__list">
+                    <li><ShadcnNavigationMenuLink Href="#overview"><span class="showcase-navigation-menu__entry"><strong>Overview</strong><span>Understand the component library and its accessibility defaults.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#installation"><span class="showcase-navigation-menu__entry"><strong>Installation</strong><span>Install the package and register its theme services.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#theming"><span class="showcase-navigation-menu__entry"><strong>Theme setup</strong><span>Apply semantic tokens for light, dark, and RTL layouts.</span></span></ShadcnNavigationMenuLink></li>
+                </ul>
             </ShadcnNavigationMenuContent>
         </ShadcnNavigationMenuItem>
-        <ShadcnNavigationMenuItem Value="resources">
-            <ShadcnNavigationMenuTrigger>Resources</ShadcnNavigationMenuTrigger>
+        <ShadcnNavigationMenuItem Value="components" Class="showcase-navigation-menu__wide-item">
+            <ShadcnNavigationMenuTrigger>Components</ShadcnNavigationMenuTrigger>
             <ShadcnNavigationMenuContent>
-                <ShadcnNavigationMenuLink Href="#materials">Material library</ShadcnNavigationMenuLink>
-                <ShadcnNavigationMenuLink Href="#guides">Guides</ShadcnNavigationMenuLink>
+                <ul class="showcase-navigation-menu__component-grid">
+                    <li><ShadcnNavigationMenuLink Href="#alert-dialog"><span class="showcase-navigation-menu__entry"><strong>Alert Dialog</strong><span>Confirm a destructive or sensitive action.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#hover-card"><span class="showcase-navigation-menu__entry"><strong>Hover Card</strong><span>Preview supporting information behind a link.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#progress"><span class="showcase-navigation-menu__entry"><strong>Progress</strong><span>Communicate determinate and indeterminate work.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#scroll-area"><span class="showcase-navigation-menu__entry"><strong>Scroll Area</strong><span>Keep long content within a stable viewport.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#tabs"><span class="showcase-navigation-menu__entry"><strong>Tabs</strong><span>Switch between related views without leaving the page.</span></span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#tooltip"><span class="showcase-navigation-menu__entry"><strong>Tooltip</strong><span>Explain compact controls on hover and focus.</span></span></ShadcnNavigationMenuLink></li>
+                </ul>
             </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+        <ShadcnNavigationMenuItem Value="status">
+            <ShadcnNavigationMenuTrigger>Project status</ShadcnNavigationMenuTrigger>
+            <ShadcnNavigationMenuContent>
+                <ul class="showcase-navigation-menu__status-list">
+                    <li><ShadcnNavigationMenuLink Href="#backlog" Class="showcase-navigation-menu__status-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 8v5m0 3h.01" /></svg><span>Backlog</span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#review" Class="showcase-navigation-menu__status-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-dasharray="4 3" /></svg><span>In review</span></ShadcnNavigationMenuLink></li>
+                    <li><ShadcnNavigationMenuLink Href="#ready" Class="showcase-navigation-menu__status-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8 12 2.5 2.5L16 9" /></svg><span>Ready</span></ShadcnNavigationMenuLink></li>
+                </ul>
+            </ShadcnNavigationMenuContent>
+        </ShadcnNavigationMenuItem>
+        <ShadcnNavigationMenuItem Value="documentation">
+            <ShadcnNavigationMenuLink Href="#usage" Class="shadcn-navigation-menu-link--trigger">Documentation</ShadcnNavigationMenuLink>
         </ShadcnNavigationMenuItem>
     </ShadcnNavigationMenuList>
     <ShadcnNavigationMenuIndicator />
     <ShadcnNavigationMenuViewport />
 </ShadcnNavigationMenu>
+</div>
 """;
-        return Example("navigation-menu", "Navigation menu portal", "Explore a realistic workspace navigation with delayed hover, click, keyboard focus, collision-aware viewport, RTL, and disabled behavior.", source, preview, [Toggle("navigation-open", "Open Services", v => value = v ? "services" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["open", "closed", "hover", "keyboard", "portal", "collision", "rtl"]);
+        }
+        var example = Example("navigation-menu", "Responsive application navigation", "Explore a realistic component workspace with descriptive menus, project-status icons, direct links, delayed pointer disclosure, keyboard focus, collision-aware viewport, RTL, and mobile adaptation.", Source(), preview, [Toggle("navigation-open", "Open getting started", v => value = v ? "getting-started" : null), Toggle("navigation-vertical", "Vertical", v => vertical = v), Toggle("navigation-disabled", "Disabled", v => disabled = v)], ["pointer", "keyboard", "responsive", "outside-press", "portal", "collision", "rtl", "reduced-motion"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Pagination()

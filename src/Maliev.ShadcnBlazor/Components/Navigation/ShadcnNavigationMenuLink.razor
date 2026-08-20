@@ -1,12 +1,14 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-link")" style="@MergeStyle(null)" data-slot="navigation-menu-link" data-active="@(Current ? "true" : null)" href="@Href" target="@Target" aria-current="@(Current ? "page" : null)" @onclick="HandleClickAsync">@ChildContent</a>
+<a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-link")" style="@MergeStyle(null)" data-slot="navigation-menu-link" data-active="@(Current ? "true" : null)" data-disabled="@(Disabled ? "true" : null)" href="@Href" target="@Target" aria-current="@(Current ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync" @onclick:preventDefault="Disabled">@ChildContent</a>
 @code {
     [CascadingParameter] private ShadcnNavigationMenuContext Menu { get; set; } = default!;
+    [CascadingParameter] private ShadcnNavigationMenuItemContext? Item { get; set; }
     [Parameter] public string? Href { get; set; }
     [Parameter] public string? Target { get; set; }
     [Parameter] public bool Current { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-active", "href", "target", "aria-current");
-    private async Task HandleClickAsync(MouseEventArgs args) { await OnClick.InvokeAsync(args); await Menu.Owner.SetValueAsync(null); }
+    private bool Disabled => Menu.Owner.Disabled || Item?.Disabled == true;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-active", "data-disabled", "href", "target", "aria-current", "aria-disabled", "tabindex");
+    private async Task HandleClickAsync(MouseEventArgs args) { if (Disabled) return; await OnClick.InvokeAsync(args); await Menu.Owner.SetValueAsync(null); }
 }
