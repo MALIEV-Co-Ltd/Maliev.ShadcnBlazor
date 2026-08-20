@@ -102,7 +102,11 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator($"#{inactivePanelId}")).ToBeVisibleAsync();
 
         var menuTrigger = page.Locator("[data-component='navigation-menu'] [data-slot='navigation-menu-trigger']");
+        var menuValue = page.Locator("[data-component='navigation-menu'] select");
+        await menuValue.SelectOptionAsync("services");
+        await Assertions.Expect(menuTrigger).ToHaveAttributeAsync("aria-expanded", "true");
         await menuTrigger.ClickAsync();
+        await Assertions.Expect(menuValue).ToHaveValueAsync(string.Empty);
         await Assertions.Expect(menuTrigger).ToHaveAttributeAsync("aria-expanded", "false");
         await menuTrigger.ClickAsync();
         await Assertions.Expect(menuTrigger).ToHaveAttributeAsync("aria-expanded", "true");
@@ -259,6 +263,8 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(tabs.Nth(1)).ToHaveAttributeAsync("aria-selected", "true");
 
         var trigger = page.Locator("[data-component='navigation-menu'] [data-slot='navigation-menu-trigger']");
+        await page.Locator("[data-component='navigation-menu'] select").SelectOptionAsync("services");
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
         await trigger.ClickAsync();
         await Assertions.Expect(page.Locator("[data-component='navigation-menu'] [data-slot='navigation-menu-content']")).ToBeHiddenAsync();
     }
