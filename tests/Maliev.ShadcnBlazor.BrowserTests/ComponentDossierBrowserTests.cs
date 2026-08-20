@@ -436,7 +436,7 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(page.Locator("#preview [data-slot='carousel-item'][data-selected='true']")).ToContainTextAsync("First-pass yield");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/toast").ToString());
-        var showToast = page.GetByRole(AriaRole.Button, new() { Name = "Show localized toast" });
+        var showToast = page.GetByRole(AriaRole.Button, new() { Name = "บันทึกใบงาน — Save work order" });
         await showToast.ClickAsync();
         await showToast.ClickAsync();
         var toasts = page.Locator("#preview [data-slot='toast']");

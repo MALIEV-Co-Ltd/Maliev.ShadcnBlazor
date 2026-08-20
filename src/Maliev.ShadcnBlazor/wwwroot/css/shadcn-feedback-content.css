@@ -180,18 +180,25 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-swipe="move"] { transition: none; transform: translate(var(--shadcn-toast-swipe-x, 0), var(--shadcn-toast-swipe-y, 0)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-state="closing"] { opacity: 0; transform: translateY(0.75rem) scale(0.96); pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-limited="true"] { position: absolute; visibility: hidden; pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-reduced-motion="true"] .shadcn-toast { transition: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport:not([data-expanded="true"]) .shadcn-toast:not(:last-child) { margin-block-end: -3rem; transform: scale(0.96); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-content { display: flex; min-height: 4rem; box-sizing: border-box; align-items: center; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-icon { display: inline-flex; width: 1rem; height: 1rem; flex: 0 0 auto; align-items: center; justify-content: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-icon, .shadcn-toast-close) svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="error"] .shadcn-toast-icon { color: var(--shadcn-destructive); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="loading"] .shadcn-toast-icon { animation: shadcn-spinner-rotate var(--shadcn-motion-duration-slow) linear infinite; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-reduced-motion="true"] .shadcn-toast-icon { animation: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-title { font-size: 0.875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-description { color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-action, .shadcn-toast-close) { appearance: none; flex: 0 0 auto; border: 0; background: transparent; color: inherit; font: inherit; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-action { min-height: var(--shadcn-control-height-sm); border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); padding-inline: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-close { position: relative; width: var(--shadcn-control-height-sm); height: var(--shadcn-control-height-sm); color: var(--shadcn-muted-foreground); font-size: 1.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-close { position: relative; display: inline-flex; width: var(--shadcn-control-height-sm); height: var(--shadcn-control-height-sm); align-items: center; justify-content: center; color: var(--shadcn-muted-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-action, .shadcn-toast-close):focus-visible { border-color: var(--shadcn-ring); outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast { transition: none; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="loading"] .shadcn-toast-icon { animation: none; }
+}
 @media (max-width: 40rem) {
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport { inset-inline: 1rem; width: auto; max-width: none; margin-inline: 0; }
 }
@@ -200,4 +207,8 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-progress-track, .shadcn-skeleton) { border: 1px solid CanvasText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator { background: Highlight; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { color: CanvasText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast, .shadcn-toast-action, .shadcn-toast-close) { forced-color-adjust: auto; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast { border-color: CanvasText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-action { border-color: ButtonText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-action, .shadcn-toast-close):focus-visible { outline-color: Highlight; }
 }
