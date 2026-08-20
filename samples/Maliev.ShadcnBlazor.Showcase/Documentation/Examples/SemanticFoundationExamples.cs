@@ -422,7 +422,7 @@ internal static class SemanticFoundationExamples
 @using Maliev.ShadcnBlazor.Components.Actions
 @using Maliev.ShadcnBlazor.Components.Content
 
-<section class="showcase-empty-dossier" aria-label="Project workspace empty state">
+<section class="showcase-empty-dossier" aria-label="Project workspace empty state" dir="auto">
     <ShadcnEmpty>
         <ShadcnEmptyHeader>
             <ShadcnEmptyMedia Variant="ShadcnEmptyMediaVariant.{{mediaVariant}}">
@@ -693,8 +693,9 @@ internal static class SemanticFoundationExamples
             builder.OpenElement(0, "section");
             builder.AddAttribute(1, "class", "showcase-empty-dossier");
             builder.AddAttribute(2, "aria-label", "Project workspace empty state");
-            builder.OpenComponent<ShadcnEmpty>(3);
-            builder.AddAttribute(4, nameof(ShadcnEmpty.ChildContent), EmptyContent());
+            builder.AddAttribute(3, "dir", "auto");
+            builder.OpenComponent<ShadcnEmpty>(4);
+            builder.AddAttribute(5, nameof(ShadcnEmpty.ChildContent), EmptyContent());
             builder.CloseComponent();
             builder.CloseElement();
         }
