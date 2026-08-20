@@ -7,7 +7,12 @@
 @inherits ShadcnFormComponentBase<string>
 
 <CascadingValue Value="Context">
-    <div class="@MergeClass("shadcn-input-otp")" style="@MergeStyle()" data-slot="input-otp-root" data-disabled="@(EffectiveDisabled ? "true" : null)">
+    <div class="@MergeClass("shadcn-input-otp")"
+         style="@MergeStyle()"
+         data-slot="input-otp-root"
+         data-complete="@(IsComplete ? "true" : null)"
+         data-disabled="@(EffectiveDisabled ? "true" : null)"
+         data-invalid="@(EffectiveInvalid ? "true" : null)">
         <input @ref="InputElement" @attributes="ForwardedAttributes" class="shadcn-input-otp-input" data-slot="input-otp" data-pattern="@Pattern" type="text" name="@Name" value="@Value" inputmode="@InputMode" autocomplete="@AutoComplete" spellcheck="false" disabled="@EffectiveDisabled" readonly="@ReadOnly" required="@Required" aria-invalid="@(EffectiveInvalid ? "true" : null)" aria-describedby="@DescribedBy" @oninput="HandleInputAsync" />
         @ChildContent
     </div>
@@ -24,6 +29,7 @@
     private ElementReference InputElement;
     private IJSObjectReference? Module;
     private DotNetObjectReference<ShadcnInputOtp>? SelfReference;
+    private bool IsComplete => StringInfo.ParseCombiningCharacters(Value ?? string.Empty).Length == MaxLength;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "data-pattern", "type", "name", "value", "maxlength", "inputmode", "autocomplete", "pattern", "spellcheck", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
     protected override void OnParametersSet() { base.OnParametersSet(); if (MaxLength <= 0) throw new ArgumentOutOfRangeException(nameof(MaxLength)); Context.Update(Value ?? string.Empty, null); }
     private async Task HandleInputAsync(ChangeEventArgs args)

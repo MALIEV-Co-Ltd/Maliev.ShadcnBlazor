@@ -36,6 +36,14 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         datePickerCut.Find("[data-testid='control-date-picker-clearable']").Change(false);
         Assert.Contains("Invalid=\"true\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Clearable=\"false\"", datePicker.RazorSource, StringComparison.Ordinal);
+
+        var otp = registry.GetBySlug("input-otp").Single();
+        var otpCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, otp));
+        otpCut.Find("[data-testid='control-input-otp-invalid']").Change(true);
+        Assert.Contains("Invalid=\"true\"", otp.RazorSource, StringComparison.Ordinal);
+        otpCut.Find("[data-testid='control-input-otp-numeric']").Change(false);
+        Assert.Contains("InputMode=\"text\"", otp.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pattern=", otp.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

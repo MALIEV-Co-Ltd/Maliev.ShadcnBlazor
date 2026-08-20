@@ -235,6 +235,36 @@ public sealed class InputGroupOtpTests : BunitContext
     }
 
     [Fact]
+    public void InputOtpExposesCompletionInvalidAndDisabledStateOnItsVisibleRoot()
+    {
+        var cut = Render<ShadcnInputOtp>(parameters => parameters
+            .Add(component => component.Value, "123456")
+            .Add(component => component.MaxLength, 6)
+            .Add(component => component.Invalid, true)
+            .Add(component => component.Disabled, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnInputOtpGroup>(0);
+                builder.AddAttribute(1, nameof(ShadcnInputOtpGroup.ChildContent), (RenderFragment)(slots =>
+                {
+                    for (var index = 0; index < 6; index++)
+                    {
+                        slots.OpenComponent<ShadcnInputOtpSlot>(index * 2);
+                        slots.AddAttribute(index * 2 + 1, nameof(ShadcnInputOtpSlot.Index), index);
+                        slots.CloseComponent();
+                    }
+                }));
+                builder.CloseComponent();
+            }));
+
+        var root = cut.Find("[data-slot='input-otp-root']");
+        Assert.Equal("true", root.GetAttribute("data-complete"));
+        Assert.Equal("true", root.GetAttribute("data-invalid"));
+        Assert.Equal("true", root.GetAttribute("data-disabled"));
+        Assert.Equal("true", cut.Find("input").GetAttribute("aria-invalid"));
+    }
+
+    [Fact]
     public void OtpSeparatorUsesNativeSeparatorSemantics()
     {
         var cut = Render<ShadcnInputOtpSeparator>();

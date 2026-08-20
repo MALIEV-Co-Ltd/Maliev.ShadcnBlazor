@@ -164,67 +164,115 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition InputOtp()
     {
-        var invalid = false; var numeric = true; var code = "123";
+        var invalid = false; var numeric = true;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnCard>(0);
-            b.AddAttribute(1, "Class", "showcase-otp-card");
-            b.AddAttribute(2, "ChildContent", (RenderFragment)(card =>
-            {
-                card.OpenComponent<ShadcnCardHeader>(0);
-                card.AddAttribute(1, "ChildContent", (RenderFragment)(header =>
-                {
-                    header.OpenComponent<ShadcnCardTitle>(0);
-                    header.AddAttribute(1, "ChildContent", Text("Verify your email"));
-                    header.CloseComponent();
-                    header.OpenComponent<ShadcnCardDescription>(2);
-                    header.AddAttribute(3, "ChildContent", Text("Enter the 6-digit code we sent to your inbox."));
-                    header.CloseComponent();
-                }));
-                card.CloseComponent();
-                card.OpenComponent<ShadcnCardContent>(10);
-                card.AddAttribute(11, "ChildContent", (RenderFragment)(content =>
-                {
-                    content.OpenComponent<ShadcnInputOtp>(0);
-                    content.AddAttribute(1, "Value", code);
-                    content.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => code = next));
-                    content.AddAttribute(3, "MaxLength", 6);
-                    content.AddAttribute(4, "Pattern", numeric ? "[0-9]" : null);
-                    content.AddAttribute(5, "InputMode", numeric ? "numeric" : "text");
-                    content.AddAttribute(6, "Invalid", invalid);
-                    content.AddAttribute(7, "AdditionalAttributes", Attr("forms-dossier-input-otp", "Verification code"));
-                    content.AddAttribute(8, "ChildContent", OtpSlots());
-                    content.CloseComponent();
-                }));
-                card.CloseComponent();
-                card.OpenComponent<ShadcnCardFooter>(20);
-                card.AddAttribute(21, "ChildContent", Text("Code expires in 10 minutes"));
-                card.CloseComponent();
-            }));
+            b.OpenComponent<InputOtpDossierPreview>(0);
+            b.AddAttribute(1, nameof(InputOtpDossierPreview.Invalid), invalid);
+            b.AddAttribute(2, nameof(InputOtpDossierPreview.Numeric), numeric);
             b.CloseComponent();
         };
-        string Source() => $"<ShadcnCard>\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>Verify your email</ShadcnCardTitle>\n        <ShadcnCardDescription>Enter the 6-digit code we sent to your inbox.</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnInputOtp @bind-Value=\"Code\" MaxLength=\"6\" Pattern=\"{(numeric ? "[0-9]" : "[\\p{{L}}]")}\" InputMode=\"{(numeric ? "numeric" : "text")}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\">\n            <ShadcnInputOtpGroup>\n                <ShadcnInputOtpSlot Index=\"0\" />\n                <ShadcnInputOtpSlot Index=\"1\" />\n                <ShadcnInputOtpSlot Index=\"2\" />\n                <ShadcnInputOtpSlot Index=\"3\" />\n                <ShadcnInputOtpSlot Index=\"4\" />\n                <ShadcnInputOtpSlot Index=\"5\" />\n            </ShadcnInputOtpGroup>\n        </ShadcnInputOtp>\n    </ShadcnCardContent>\n    <ShadcnCardFooter>Code expires in 10 minutes</ShadcnCardFooter>\n</ShadcnCard>";
-        return Example("input-otp", "One-input OTP", "Verify paste filtering, caret-driven slots, Thai graphemes, and mobile input modes.", Source(), preview,
+        string Source() => InputOtpSource(numeric, invalid);
+        return Example("input-otp", "Email verification", "Enter or paste a one-time code, inspect validation feedback, and complete a realistic verification flow.", Source(), preview,
             [
                 Toggle("input-otp-invalid", "Invalid", v => invalid = v),
-                Toggle("input-otp-numeric", "Numeric", v => { numeric = v; code = numeric ? "123" : "ก้ข"; }, true)
-            ], ["one-input", "graphemes", "numeric", "invalid"]) with
+                Toggle("input-otp-numeric", "Numeric", v => numeric = v, true)
+            ], ["one-input", "paste", "keyboard", "status", "graphemes", "numeric", "invalid"]) with
         { RazorSourceProvider = Source };
+    }
 
-        RenderFragment OtpSlots() => c =>
-        {
-            c.OpenComponent<ShadcnInputOtpGroup>(0);
-            c.AddAttribute(1, "ChildContent", (RenderFragment)(slots =>
-            {
-                for (var i = 0; i < 6; i++)
-                {
-                    slots.OpenComponent<ShadcnInputOtpSlot>(i * 2);
-                    slots.AddAttribute(i * 2 + 1, "Index", i);
-                    slots.CloseComponent();
-                }
-            }));
-            c.CloseComponent();
-        };
+    private static string InputOtpSource(bool numeric, bool invalid)
+    {
+        var pattern = numeric ? " Pattern=\"[0-9]\"" : string.Empty;
+        var inputMode = numeric ? "numeric" : "text";
+        var invalidValue = invalid.ToString().ToLowerInvariant();
+        return $$"""
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<ShadcnCard Class="otp-verification-card">
+    <ShadcnCardHeader>
+        <div>
+            <ShadcnCardTitle>Verify your email</ShadcnCardTitle>
+            <ShadcnCardDescription>
+                Enter the 6-digit code sent to <strong>n•••@@maliev.example</strong>.
+            </ShadcnCardDescription>
+        </div>
+        <ShadcnCardAction>
+            <span aria-label="Secure verification">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
+            </span>
+        </ShadcnCardAction>
+    </ShadcnCardHeader>
+    <ShadcnCardContent>
+        <label for="verification-code">Verification code</label>
+        <ShadcnInputOtp id="verification-code" Value="@Code" ValueChanged="HandleCodeChanged" MaxLength="6"{{pattern}} InputMode="{{inputMode}}" Required="true" Invalid="{{invalidValue}}" aria-label="Verification code" aria-describedby="otp-status">
+            <ShadcnInputOtpGroup>
+                <ShadcnInputOtpSlot Index="0" />
+                <ShadcnInputOtpSlot Index="1" />
+                <ShadcnInputOtpSlot Index="2" />
+            </ShadcnInputOtpGroup>
+            <ShadcnInputOtpSeparator />
+            <ShadcnInputOtpGroup>
+                <ShadcnInputOtpSlot Index="3" />
+                <ShadcnInputOtpSlot Index="4" />
+                <ShadcnInputOtpSlot Index="5" />
+            </ShadcnInputOtpGroup>
+        </ShadcnInputOtp>
+        <p id="otp-status" role="status" aria-live="polite">@StatusText</p>
+        <ShadcnButton Disabled="@(!CanVerify)" OnClick="VerifyCode">Verify code</ShadcnButton>
+    </ShadcnCardContent>
+    <ShadcnCardFooter>
+        <span>Didn't receive a code?</span>
+        <ShadcnButton Variant="ShadcnButtonVariant.Link" OnClick="SendNewCode">Send a new code</ShadcnButton>
+    </ShadcnCardFooter>
+</ShadcnCard>
+
+@code {
+    private string Code = string.Empty;
+    private bool Verified;
+    private bool Resent;
+    private bool IsInvalid => {{invalidValue}};
+    private int CodeLength => StringInfo.ParseCombiningCharacters(Code).Length;
+    private bool CanVerify => CodeLength == 6 && !Verified && !IsInvalid;
+    private string StatusText => IsInvalid
+        ? "That code is invalid. Check the email and try again."
+        : Verified
+            ? "Email verified. You can continue."
+            : Resent
+                ? "A new code was sent. Enter it below."
+                : CodeLength == 6
+                    ? "Code ready to verify."
+                    : $"Enter {6 - CodeLength} more characters.";
+
+    private Task HandleCodeChanged(string value)
+    {
+        Code = value;
+        Verified = false;
+        Resent = false;
+        return Task.CompletedTask;
+    }
+
+    private Task VerifyCode()
+    {
+        if (CanVerify) Verified = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SendNewCode()
+    {
+        Code = string.Empty;
+        Verified = false;
+        Resent = true;
+        return Task.CompletedTask;
+    }
+}
+""";
     }
     private static ComponentExampleDefinition Select()
     {
