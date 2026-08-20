@@ -136,8 +136,15 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Equal("tooltip", content.GetAttribute("role"));
         Assert.Equal(content.Id, trigger.GetAttribute("aria-describedby"));
         Assert.Equal("bottom", content.GetAttribute("data-side"));
+        Assert.Equal("4", content.GetAttribute("data-side-offset"));
+        Assert.Equal("0", content.GetAttribute("data-align-offset"));
+        Assert.Equal("8", content.GetAttribute("data-collision-padding"));
         Assert.NotEmpty(cut.FindAll("[data-slot='tooltip-arrow']"));
         Assert.Equal("300", cut.Find("[data-slot='tooltip']").GetAttribute("data-open-delay"));
+
+        var positioned = Assert.Single(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachPositioned", StringComparison.Ordinal));
+        Assert.Equal(trigger.Id, positioned.Arguments[1]);
+        Assert.Equal(trigger.Id, positioned.Arguments[11]);
     }
 
     [Fact]
@@ -168,6 +175,12 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Equal("บันทึก", wrapper.GetAttribute("aria-label"));
         Assert.Equal(tooltipContent.Id, wrapper.GetAttribute("aria-describedby"));
         Assert.Equal("true", cut.Find("[data-slot='tooltip-trigger']").GetAttribute("aria-hidden"));
+
+        var innerTrigger = cut.Find("[data-slot='tooltip-trigger']");
+        Assert.NotEqual(innerTrigger.Id, wrapper.Id);
+        var positioned = Assert.Single(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachPositioned", StringComparison.Ordinal));
+        Assert.Equal(wrapper.Id, positioned.Arguments[1]);
+        Assert.Equal(wrapper.Id, positioned.Arguments[11]);
     }
 
     [Fact]
@@ -200,5 +213,27 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnPopoverContent>(p => p.Add(x => x.Side, (ShadcnOverlaySide)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnHoverCard>(p => p.Add(x => x.OpenDelay, TimeSpan.FromMilliseconds(-1))));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnTooltipProvider>(p => p.Add(x => x.CloseDelay, TimeSpan.FromDays(1))));
+    }
+
+    [Fact]
+    public void TooltipAssetsCoverAllSidesForcedColorsAndRepeatableTriggerAttachment()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+        var tooltipScript = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-tooltip.js"));
+        var positionedScript = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
+
+        Assert.Contains(".shadcn-tooltip-content[data-side=\"left\"] .shadcn-tooltip-arrow", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-tooltip-content[data-side=\"right\"] .shadcn-tooltip-arrow", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains("detachDelayedTrigger(trigger)", tooltipScript, StringComparison.Ordinal);
+        Assert.Contains("focusTargetId", positionedScript, StringComparison.Ordinal);
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx"))) directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

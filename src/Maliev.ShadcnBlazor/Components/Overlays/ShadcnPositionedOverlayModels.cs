@@ -15,5 +15,5 @@ internal static class ShadcnPositionedOverlayValues
 
 internal sealed class ShadcnPopoverContext(ShadcnPopover owner, string triggerId, string contentId) { internal ShadcnPopover Owner { get; } = owner; internal string TriggerId { get; } = triggerId; internal string ContentId { get; } = contentId; internal string? TitleId { get; set; } internal string? DescriptionId { get; set; } }
 internal sealed class ShadcnHoverCardContext(ShadcnHoverCard owner, string triggerId, string contentId) { internal ShadcnHoverCard Owner { get; } = owner; internal string TriggerId { get; } = triggerId; internal string ContentId { get; } = contentId; }
-internal sealed class ShadcnTooltipContext(ShadcnTooltip owner, string triggerId, string contentId) { internal ShadcnTooltip Owner { get; } = owner; internal string TriggerId { get; } = triggerId; internal string ContentId { get; } = contentId; }
+internal sealed class ShadcnTooltipContext(ShadcnTooltip owner, string anchorId, string triggerId, string contentId) { internal ShadcnTooltip Owner { get; } = owner; internal string AnchorId { get; } = anchorId; internal string TriggerId { get; } = triggerId; internal string ContentId { get; } = contentId; internal bool TriggerDisabled { get; set; } }
 internal sealed record ShadcnTooltipProviderContext(TimeSpan OpenDelay, TimeSpan CloseDelay);

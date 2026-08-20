@@ -23,7 +23,7 @@ public sealed class TooltipBrowserTests(ShowcaseServerFixture server, Playwright
         await trigger.HoverAsync();
         var content = page.Locator("#preview [data-slot='tooltip-content']");
         await Assertions.Expect(content).ToBeVisibleAsync();
-        await Assertions.Expect(content).ToContainTextAsync("Save quotation");
+        await Assertions.Expect(content).ToContainTextAsync("Save draft");
         var triggerBox = await trigger.BoundingBoxAsync();
         var contentBox = await content.BoundingBoxAsync();
         Assert.NotNull(triggerBox);
@@ -34,9 +34,19 @@ public sealed class TooltipBrowserTests(ShowcaseServerFixture server, Playwright
         await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(content).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).ToBeFocusedAsync();
+
+        await page.Locator("[data-testid='control-tooltip-disabled']").CheckAsync();
+        var wrapper = page.Locator("#preview [data-slot='tooltip-trigger-wrapper']");
+        await Assertions.Expect(trigger).ToBeDisabledAsync();
+        await wrapper.FocusAsync();
+        await Assertions.Expect(content).ToContainTextAsync("Saving is unavailable");
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(content).ToHaveCountAsync(0);
+        await Assertions.Expect(wrapper).ToBeFocusedAsync();
         await page.WaitForTimeoutAsync(350);
         await Assertions.Expect(content).ToHaveCountAsync(0);
 
+        await page.Locator("[data-testid='control-tooltip-disabled']").UncheckAsync();
         await page.EvaluateAsync("document.activeElement?.blur()");
         await trigger.FocusAsync();
         await Assertions.Expect(trigger).ToBeFocusedAsync();
@@ -64,9 +74,9 @@ public sealed class TooltipBrowserTests(ShowcaseServerFixture server, Playwright
         var sourceText = await source.InnerTextAsync();
         Assert.Contains("<ShadcnTooltipProvider", sourceText, StringComparison.Ordinal);
         Assert.Contains("OpenDelay=\"@(TimeSpan.FromMilliseconds(200))\"", sourceText, StringComparison.Ordinal);
-        Assert.Contains("<ShadcnTooltipTrigger>Save</ShadcnTooltipTrigger>", sourceText, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTooltipTrigger AccessibleLabel=\"Save quotation draft\">Save quotation draft</ShadcnTooltipTrigger>", sourceText, StringComparison.Ordinal);
         Assert.Contains("<ShadcnTooltipContent", sourceText, StringComparison.Ordinal);
-        Assert.Contains("Save quotation", sourceText, StringComparison.Ordinal);
+        Assert.Contains("Save draft · Ctrl+S", sourceText, StringComparison.Ordinal);
         Assert.DoesNotContain("...", sourceText, StringComparison.Ordinal);
     }
 }

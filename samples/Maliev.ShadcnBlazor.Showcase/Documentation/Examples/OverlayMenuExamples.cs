@@ -406,36 +406,83 @@ internal static class OverlayMenuExamples
     private static ComponentExampleDefinition Tooltip()
     {
         var bottom = false;
+        var instant = false;
+        var disabled = false;
         RenderFragment preview = b =>
         {
             b.OpenElement(0, "div");
-            b.AddAttribute(1, "class", "showcase-tooltip-preview");
-            b.AddAttribute(2, "style", "display:grid; place-items:center; min-block-size:8rem; padding:2rem;");
-            b.OpenComponent<ShadcnTooltipProvider>(3);
-            b.AddAttribute(4, "OpenDelay", TimeSpan.FromMilliseconds(200));
-            b.AddAttribute(5, "ChildContent", (RenderFragment)(p =>
+            b.AddAttribute(1, "class", "showcase-tooltip-dossier");
+            b.AddAttribute(2, "data-testid", "tooltip-dossier-preview");
+            b.AddAttribute(3, "data-side", bottom ? "bottom" : "top");
+            b.AddAttribute(4, "data-disabled", disabled ? "true" : "false");
+            b.OpenElement(5, "section");
+            b.AddAttribute(6, "class", "showcase-tooltip-dossier__card");
+            b.AddAttribute(7, "aria-label", "Quotation draft actions");
+            b.OpenElement(8, "div");
+            b.AddAttribute(9, "class", "showcase-tooltip-dossier__copy");
+            b.OpenElement(10, "strong");
+            b.AddContent(11, "QT-4189 · CNC enclosure");
+            b.CloseElement();
+            b.OpenElement(12, "span");
+            b.AddContent(13, "Saved just now");
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnTooltipProvider>(20);
+            b.AddAttribute(21, "OpenDelay", instant ? TimeSpan.Zero : TimeSpan.FromMilliseconds(200));
+            b.AddAttribute(22, "ChildContent", (RenderFragment)(p =>
             {
                 p.OpenComponent<ShadcnTooltip>(0);
                 p.AddAttribute(1, "ChildContent", (RenderFragment)(c =>
                 {
-                    AddText<ShadcnTooltipTrigger>(c, 0, "Save");
+                    c.OpenComponent<ShadcnTooltipTrigger>(0);
+                    c.AddAttribute(1, "Class", "showcase-tooltip-dossier__action");
+                    c.AddAttribute(2, "Disabled", disabled);
+                    c.AddAttribute(3, "AccessibleLabel", "Save quotation draft");
+                    c.AddAttribute(4, "ChildContent", Text("Save quotation draft"));
+                    c.CloseComponent();
                     c.OpenComponent<ShadcnTooltipContent>(10);
                     c.AddAttribute(11, "Side", bottom ? ShadcnOverlaySide.Bottom : ShadcnOverlaySide.Top);
-                    c.AddAttribute(12, "ChildContent", Text("Save quotation"));
+                    c.AddAttribute(12, "ChildContent", Text(disabled ? "Saving is unavailable while totals update" : "Save draft · Ctrl+S"));
                     c.CloseComponent();
                 }));
                 p.CloseComponent();
             }));
             b.CloseComponent();
             b.CloseElement();
+            b.CloseElement();
         };
-        var side = bottom ? "Bottom" : "Top";
-        var source = $"<ShadcnTooltipProvider OpenDelay=\"@(TimeSpan.FromMilliseconds(200))\">{Environment.NewLine}" +
-            $"    <ShadcnTooltip>{Environment.NewLine}" +
-            $"        <ShadcnTooltipTrigger>Save</ShadcnTooltipTrigger>{Environment.NewLine}" +
-            $"        <ShadcnTooltipContent Side=\"{side}\">Save quotation</ShadcnTooltipContent>{Environment.NewLine}" +
-            $"    </ShadcnTooltip>{Environment.NewLine}</ShadcnTooltipProvider>";
-        return Example("tooltip", "Hover and focus tooltip", preview, [Toggle("tooltip-bottom", "Bottom placement", v => bottom = v)], ["hover", "focus", "provider-delay", "arrow", "noninteractive"], source);
+        string Source()
+        {
+            var delay = instant ? "TimeSpan.Zero" : "@(TimeSpan.FromMilliseconds(200))";
+            var side = bottom ? "Bottom" : "Top";
+            var disabledAttribute = disabled ? " Disabled=\"true\"" : string.Empty;
+            var content = disabled ? "Saving is unavailable while totals update" : "Save draft · Ctrl+S";
+            return $"""
+                <section class="quotation-draft-actions" aria-label="Quotation draft actions">
+                    <div>
+                        <strong>QT-4189 · CNC enclosure</strong>
+                        <span>Saved just now</span>
+                    </div>
+                    <ShadcnTooltipProvider OpenDelay="{delay}">
+                        <ShadcnTooltip>
+                            <ShadcnTooltipTrigger AccessibleLabel="Save quotation draft"{disabledAttribute}>Save quotation draft</ShadcnTooltipTrigger>
+                            <ShadcnTooltipContent Side="ShadcnOverlaySide.{side}">{content}</ShadcnTooltipContent>
+                        </ShadcnTooltip>
+                    </ShadcnTooltipProvider>
+                </section>
+                """;
+        }
+        return Example(
+            "tooltip",
+            "Quotation draft tooltip",
+            preview,
+            [Toggle("tooltip-bottom", "Bottom placement", v => bottom = v), Toggle("tooltip-instant", "No open delay", v => instant = v), Toggle("tooltip-disabled", "Disabled action", v => disabled = v)],
+            ["pointer", "focus", "escape", "provider-delay", "disabled", "collision", "rtl", "reduced-motion"],
+            Source()) with
+        {
+            Description = "Hover or focus a real quotation action to inspect delayed, disabled, and collision-aware tooltip behavior.",
+            RazorSourceProvider = Source
+        };
     }
 
     private static ComponentExampleDefinition Menu(bool context)

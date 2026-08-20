@@ -6,6 +6,7 @@ function isWithinContent(contentId, target) {
 }
 
 export function attachDelayedTrigger(trigger, dotnet, openDelay, closeDelay, contentId) {
+    detachDelayedTrigger(trigger);
     let timer = 0;
     let suppressionTimer = 0;
     let suppressFocusOpen = false;

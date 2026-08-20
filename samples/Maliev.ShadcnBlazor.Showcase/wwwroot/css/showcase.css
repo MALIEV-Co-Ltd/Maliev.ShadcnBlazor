@@ -7360,6 +7360,82 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     }
 }
 
+/* Tooltip: a compact quotation action provides a realistic hover and focus
+   target while keeping the example centered at every supported viewport. */
+.showcase-tooltip-dossier {
+    display: grid;
+    inline-size: min(100%, 34rem);
+    min-block-size: 13rem;
+    margin-inline: auto;
+    padding: clamp(1rem, 5vw, 2rem);
+    place-items: center;
+}
+
+.showcase-tooltip-dossier__card {
+    display: flex;
+    inline-size: 100%;
+    min-inline-size: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+    padding: 1rem;
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-tooltip-dossier__copy {
+    display: grid;
+    min-inline-size: 0;
+    gap: .1875rem;
+}
+
+.showcase-tooltip-dossier__copy strong,
+.showcase-tooltip-dossier__copy span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.showcase-tooltip-dossier__copy strong { font-size: .875rem; font-weight: 600; }
+.showcase-tooltip-dossier__copy span { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+
+.showcase-tooltip-dossier__action {
+    min-block-size: 2.5rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    padding-inline: .875rem;
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
+}
+
+.showcase-tooltip-dossier__action:hover:not(:disabled) { background: var(--shadcn-accent); }
+.showcase-tooltip-dossier__action:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
+.showcase-tooltip-dossier__action:disabled { cursor: not-allowed; opacity: .55; }
+
+@media (max-width: 32rem) {
+    .showcase-tooltip-dossier { padding-inline: .5rem; }
+    .showcase-tooltip-dossier__card { align-items: stretch; flex-direction: column; }
+    .showcase-tooltip-dossier__action { inline-size: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .showcase-tooltip-dossier__action { transition: none; }
+}
+
+@media (forced-colors: active) {
+    .showcase-tooltip-dossier__card,
+    .showcase-tooltip-dossier__action { border-color: CanvasText; }
+    .showcase-tooltip-dossier__action:disabled { opacity: 1; }
+}
+
 /* Menubar: a compact, real editor shell keeps the primitive in context while
    preserving enough room for collision-aware menus at narrow widths. */
 .showcase-drawer-dossier {
