@@ -1,0 +1,70 @@
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<section class="showcase-radio-dossier" data-testid="radio-group-dossier-preview" aria-labelledby="review-speed-title">
+    <header class="showcase-radio-dossier__header">
+        <div>
+            <h3 id="review-speed-title">Inspection turnaround</h3>
+            <p>Choose how quickly the production drawing should be reviewed.</p>
+        </div>
+        <span>Order #4189</span>
+    </header>
+
+    <ShadcnRadioGroup TValue="string"
+                      Value="CurrentValue"
+                      ValueChanged="HandleChanged"
+                      Orientation="Orientation"
+                      Disabled="Disabled"
+                      ReadOnly="ReadOnly"
+                      Invalid="Invalid"
+                      Name="review-speed"
+                      AdditionalAttributes="GroupAttributes">
+        <ShadcnRadioGroupItem TValue="string" Value="@("standard")">
+            <span class="showcase-radio-dossier__option"><strong>Standard review</strong><span>Within 2 business days</span></span>
+        </ShadcnRadioGroupItem>
+        <ShadcnRadioGroupItem TValue="string" Value="@("priority")">
+            <span class="showcase-radio-dossier__option"><strong>Priority review</strong><span>By the next business day</span></span>
+        </ShadcnRadioGroupItem>
+        <ShadcnRadioGroupItem TValue="string" Value="@("same-day")" Disabled="true">
+            <span class="showcase-radio-dossier__option"><strong>Same-day review</strong><span>Unavailable after 2:00 PM</span></span>
+        </ShadcnRadioGroupItem>
+    </ShadcnRadioGroup>
+
+    <p class="showcase-radio-dossier__status" role="status" aria-live="polite">@Status</p>
+</section>
+
+@code {
+    [Parameter] public string Value { get; set; } = "priority";
+    [Parameter] public ShadcnRadioGroupOrientation Orientation { get; set; } = ShadcnRadioGroupOrientation.Vertical;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+
+    private string CurrentValue = "priority";
+    private string? LastValue;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.Equals(Value, LastValue, StringComparison.Ordinal))
+            CurrentValue = Value;
+        LastValue = Value;
+    }
+
+    private Task HandleChanged(string value)
+    {
+        CurrentValue = value;
+        return Task.CompletedTask;
+    }
+
+    private string Status => CurrentValue switch
+    {
+        "standard" => "Standard review selected · estimated completion in 2 business days.",
+        "priority" => "Priority review selected · estimated completion by the next business day.",
+        _ => "Choose an available turnaround option."
+    };
+
+    private IReadOnlyDictionary<string, object> GroupAttributes => new Dictionary<string, object>
+    {
+        ["data-testid"] = "action-radio-group",
+        ["aria-label"] = "Inspection turnaround"
+    };
+}

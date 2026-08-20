@@ -134,31 +134,42 @@ internal static class ActionSelectionExamples
 
     private static ComponentExampleDefinition RadioGroup()
     {
-        var selected = "comfortable";
+        var selected = "priority";
         var orientation = ShadcnRadioGroupOrientation.Vertical;
         var disabled = false;
         var readOnly = false;
         var invalid = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenComponent<ShadcnRadioGroup<string>>(0);
-            builder.AddAttribute(1, nameof(ShadcnRadioGroup<string>.Value), selected);
-            builder.AddAttribute(2, nameof(ShadcnRadioGroup<string>.Orientation), orientation);
-            builder.AddAttribute(3, nameof(ShadcnRadioGroup<string>.Disabled), disabled);
-            builder.AddAttribute(4, nameof(ShadcnRadioGroup<string>.ReadOnly), readOnly);
-            builder.AddAttribute(5, nameof(ShadcnRadioGroup<string>.AdditionalAttributes), Attributes("action-radio-group", "Density"));
-            builder.AddAttribute(6, nameof(ShadcnRadioGroup<string>.Name), "density");
-            builder.AddAttribute(7, nameof(ShadcnRadioGroup<string>.Invalid), invalid);
-            builder.AddAttribute(8, nameof(ShadcnRadioGroup<string>.ChildContent), (RenderFragment)(content =>
-            {
-                AddRadio(content, 0, "default", "Default");
-                AddRadio(content, 10, "comfortable", "Comfortable");
-                AddRadio(content, 20, "compact", "Compact", true);
-            }));
+            builder.OpenComponent<RadioGroupDossierPreview>(0);
+            builder.AddAttribute(1, nameof(RadioGroupDossierPreview.Value), selected);
+            builder.AddAttribute(2, nameof(RadioGroupDossierPreview.Orientation), orientation);
+            builder.AddAttribute(3, nameof(RadioGroupDossierPreview.Disabled), disabled);
+            builder.AddAttribute(4, nameof(RadioGroupDossierPreview.ReadOnly), readOnly);
+            builder.AddAttribute(5, nameof(RadioGroupDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnRadioGroup TValue=\"string\" Value=\"{selected}\" Orientation=\"{orientation}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" Name=\"density\">\n    <ShadcnRadioGroupItem Value=\"default\">Default</ShadcnRadioGroupItem>\n    <ShadcnRadioGroupItem Value=\"comfortable\">Comfortable</ShadcnRadioGroupItem>\n    <ShadcnRadioGroupItem Value=\"compact\">Compact</ShadcnRadioGroupItem>\n</ShadcnRadioGroup>";
-        return Example("radio-group", "Roving radio choices", "Use native same-name radios with orientation-aware roving focus and typed values.",
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<section aria-labelledby="review-speed-title">
+    <h3 id="review-speed-title">Inspection turnaround</h3>
+    <p>Choose how quickly the production drawing should be reviewed.</p>
+
+    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
+        <ShadcnRadioGroupItem Value="standard">Standard review · Within 2 business days</ShadcnRadioGroupItem>
+        <ShadcnRadioGroupItem Value="priority">Priority review · By the next business day</ShadcnRadioGroupItem>
+        <ShadcnRadioGroupItem Value="same-day" Disabled="true">Same-day review · Unavailable after 2:00 PM</ShadcnRadioGroupItem>
+    </ShadcnRadioGroup>
+
+    <p role="status" aria-live="polite">Selected: @ReviewSpeed</p>
+</section>
+
+@code {
+    private string ReviewSpeed { get; set; } = "{{selected}}";
+}
+""";
+        return Example("radio-group", "Inspection turnaround", "Choose a production-drawing review speed with native pointer input and orientation-aware keyboard navigation.",
             Source(), preview,
             [
                 Select("radio-orientation", "Orientation", orientation, value => orientation = value),
@@ -318,15 +329,6 @@ internal static class ActionSelectionExamples
         builder.OpenComponent<ShadcnButton>(sequence);
         builder.AddAttribute(sequence + 1, nameof(ShadcnButton.Variant), variant);
         builder.AddAttribute(sequence + 2, nameof(ShadcnButton.ChildContent), Text(text));
-        builder.CloseComponent();
-    }
-
-    private static void AddRadio(RenderTreeBuilder builder, int sequence, string value, string text, bool disabled = false)
-    {
-        builder.OpenComponent<ShadcnRadioGroupItem<string>>(sequence);
-        builder.AddAttribute(sequence + 1, nameof(ShadcnRadioGroupItem<string>.Value), value);
-        builder.AddAttribute(sequence + 2, nameof(ShadcnRadioGroupItem<string>.Disabled), disabled);
-        builder.AddAttribute(sequence + 3, nameof(ShadcnRadioGroupItem<string>.ChildContent), Text(text));
         builder.CloseComponent();
     }
 

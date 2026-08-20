@@ -1001,8 +1001,29 @@ public sealed class ActionsAndSelectionBrowserTests(
             case "radio-group":
                 await page.GetByTestId("control-radio-orientation").SelectOptionAsync("Horizontal");
                 await Assertions.Expect(page.GetByTestId("action-radio-group")).ToHaveCSSAsync("display", "flex");
-                await page.GetByTestId("action-radio-group").Locator("input[type='radio']").First.CheckAsync();
-                await Assertions.Expect(page.GetByTestId("action-radio-group").Locator("input[type='radio']").First).ToBeCheckedAsync();
+                var dossierRadios = page.GetByTestId("action-radio-group").Locator("input[type='radio']");
+                await dossierRadios.First.CheckAsync();
+                await Assertions.Expect(dossierRadios.First).ToBeCheckedAsync();
+                await Assertions.Expect(page.GetByTestId("radio-group-dossier-preview").GetByRole(AriaRole.Status)).ToContainTextAsync("Standard review selected");
+                var centers = await page.GetByTestId("action-radio-group").Locator("[data-slot='radio-group-control']").First.EvaluateAsync<double[]>("""
+                    control => {
+                        const input = control.querySelector('[data-slot=radio-group-item]').getBoundingClientRect();
+                        const indicator = control.querySelector('[data-slot=radio-group-indicator]').getBoundingClientRect();
+                        return [input.x + input.width / 2, input.y + input.height / 2, indicator.x + indicator.width / 2, indicator.y + indicator.height / 2];
+                    }
+                    """);
+                Assert.InRange(Math.Abs(centers[0] - centers[2]), 0, .5);
+                Assert.InRange(Math.Abs(centers[1] - centers[3]), 0, .5);
+                await page.GetByTestId("radio-group-dossier-preview").EvaluateAsync("element => element.setAttribute('dir', 'rtl')");
+                var rtlCenters = await page.GetByTestId("action-radio-group").Locator("[data-slot='radio-group-control']").First.EvaluateAsync<double[]>("""
+                    control => {
+                        const input = control.querySelector('[data-slot=radio-group-item]').getBoundingClientRect();
+                        const indicator = control.querySelector('[data-slot=radio-group-indicator]').getBoundingClientRect();
+                        return [input.x + input.width / 2, input.y + input.height / 2, indicator.x + indicator.width / 2, indicator.y + indicator.height / 2];
+                    }
+                    """);
+                Assert.InRange(Math.Abs(rtlCenters[0] - rtlCenters[2]), 0, .5);
+                Assert.InRange(Math.Abs(rtlCenters[1] - rtlCenters[3]), 0, .5);
                 await page.GetByTestId("control-radio-disabled").CheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-radio-group").Locator("input").First).ToBeDisabledAsync();
                 await page.GetByTestId("control-radio-disabled").UncheckAsync();

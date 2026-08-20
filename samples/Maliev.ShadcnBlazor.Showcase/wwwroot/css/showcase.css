@@ -3753,6 +3753,31 @@ a {
 
 .showcase-slider-values { display: block; margin-block-start: .65rem; color: var(--shadcn-muted-foreground); font-family: var(--shadcn-font-mono); font-size: .75rem; text-align: center; }
 
+.showcase-radio-dossier {
+    display: grid;
+    inline-size: min(100%, 28rem);
+    gap: 1.25rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-card);
+    padding: clamp(1rem, 4vw, 1.5rem);
+}
+.showcase-radio-dossier__header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.showcase-radio-dossier__header h3 { margin: 0; font-size: 1rem; line-height: 1.5; }
+.showcase-radio-dossier__header p { max-inline-size: 34ch; margin: .25rem 0 0; color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.5; }
+.showcase-radio-dossier__header > span { flex: 0 0 auto; color: var(--shadcn-muted-foreground); font-size: .75rem; }
+.showcase-radio-dossier .shadcn-radio-group { inline-size: 100%; }
+.showcase-radio-dossier .shadcn-radio-item-root { align-items: start; min-inline-size: 0; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-lg); padding: .75rem; }
+.showcase-radio-dossier .shadcn-radio-control { margin-block-start: .125rem; }
+.showcase-radio-dossier__option { display: grid; min-inline-size: 0; gap: .125rem; }
+.showcase-radio-dossier__option strong { font-weight: 500; }
+.showcase-radio-dossier__option > span { color: var(--shadcn-muted-foreground); font-size: .75rem; font-weight: 400; line-height: 1.4; }
+.showcase-radio-dossier__status { margin: 0; border-block-start: 1px solid var(--shadcn-border); padding-block-start: .875rem; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.5; }
+
+@media (max-width: 28rem) {
+    .showcase-radio-dossier__header { display: grid; }
+}
+
 .showcase-toast-demo .shadcn-toast-viewport {
     position: fixed;
     inset: auto 1rem 1rem auto;

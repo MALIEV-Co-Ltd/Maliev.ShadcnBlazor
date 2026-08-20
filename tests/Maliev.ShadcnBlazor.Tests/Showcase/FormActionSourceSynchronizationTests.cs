@@ -52,5 +52,16 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         var toggleCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, toggle));
         toggleCut.Find("[data-testid='control-toggle-pressed']").Change(false);
         Assert.Contains("Pressed=\"false\"", toggle.RazorSource, StringComparison.Ordinal);
+
+        var radioGroup = registry.GetBySlug("radio-group").Single();
+        var radioCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, radioGroup));
+        radioCut.Find("[data-testid='control-radio-orientation']").Change("Horizontal");
+        radioCut.Find("[data-testid='control-radio-readonly']").Change(true);
+
+        Assert.Contains("@bind-Value=\"ReviewSpeed\"", radioGroup.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Orientation=\"ShadcnRadioGroupOrientation.Horizontal\"", radioGroup.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ReadOnly=\"true\"", radioGroup.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Priority review", radioGroup.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Same-day review", radioGroup.RazorSource, StringComparison.Ordinal);
     }
 }

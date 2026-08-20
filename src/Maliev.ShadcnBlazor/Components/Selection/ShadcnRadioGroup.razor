@@ -40,8 +40,12 @@
     private ElementReference GroupReference;
     private IJSObjectReference? Module;
     private int RenderedRegistrationVersion = -1;
+    private TValue UncontrolledValue = default!;
+    private TValue LastParameterValue = default!;
+    private bool HasParameterValue;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
+    private TValue EffectiveValue => ValueChanged.HasDelegate ? Value : UncontrolledValue;
     private string EffectiveName => string.IsNullOrWhiteSpace(Name) ? GeneratedName : Name;
     private string OrientationValue => Orientation switch
     {
@@ -56,7 +60,14 @@
     protected override void OnParametersSet()
     {
         _ = OrientationValue;
-        _context.Update(Value, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
+        if (!HasParameterValue || !EqualityComparer<TValue>.Default.Equals(Value, LastParameterValue))
+        {
+            UncontrolledValue = Value;
+            LastParameterValue = Value;
+            HasParameterValue = true;
+        }
+
+        _context.Update(EffectiveValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -73,9 +84,17 @@
     private async Task SelectAsync(TValue value)
     {
         if (EffectiveDisabled || ReadOnly) return;
+
+        if (!ValueChanged.HasDelegate)
+        {
+            UncontrolledValue = value;
+            _context.Update(UncontrolledValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
+        }
+
         await ValueChanged.InvokeAsync(value);
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+        await InvokeAsync(StateHasChanged);
     }
 
     public async ValueTask DisposeAsync()
