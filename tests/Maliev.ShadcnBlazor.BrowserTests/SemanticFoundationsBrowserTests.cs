@@ -144,4 +144,60 @@ public sealed class SemanticFoundationsBrowserTests(
         await Assertions.Expect(page.Locator("#preview .component-code pre").First).ToContainTextAsync("<ShadcnKbd>⌘</ShadcnKbd>");
         await Assertions.Expect(page.Locator("#preview .component-code pre").First).Not.ToContainTextAsync("<ShadcnKbd>Ctrl</ShadcnKbd>");
     }
+
+    [Fact]
+    public async Task SeparatorDossierKeepsGeometrySemanticsAndSourceInSyncAtDesktopAndMobile()
+    {
+        await using var desktopContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var desktop = await desktopContext.NewPageAsync();
+        await desktop.GotoAsync(new Uri(server.BaseUri, "/docs/components/separator").ToString());
+        await desktop.GetByTestId("component-dossier").WaitForAsync();
+
+        var separator = desktop.Locator("#preview [data-slot='separator']");
+        await Assertions.Expect(separator).ToHaveAttributeAsync("role", "separator");
+        await Assertions.Expect(separator).ToHaveAttributeAsync("data-orientation", "horizontal");
+        await Assertions.Expect(separator).ToHaveCSSAsync("height", "1px");
+
+        var canvasBox = await desktop.GetByTestId("component-preview-canvas").BoundingBoxAsync();
+        var demoBox = await desktop.Locator("#preview .showcase-separator-demo").BoundingBoxAsync();
+        Assert.NotNull(canvasBox);
+        Assert.NotNull(demoBox);
+        Assert.InRange(Math.Abs((canvasBox!.X + (canvasBox.Width / 2)) - (demoBox!.X + (demoBox.Width / 2))), 0, 1);
+
+        await desktop.GetByTestId("control-separator-orientation").SelectOptionAsync("Vertical");
+        await Assertions.Expect(separator).ToHaveAttributeAsync("data-orientation", "vertical");
+        await Assertions.Expect(separator).ToHaveAttributeAsync("aria-orientation", "vertical");
+        await Assertions.Expect(desktop.Locator("#preview .shadcn-code-block")).ToContainTextAsync("ShadcnSeparatorOrientation.Vertical");
+
+        await desktop.GetByTestId("control-separator-decorative").CheckAsync();
+        await Assertions.Expect(separator).ToHaveAttributeAsync("role", "none");
+        await Assertions.Expect(separator).ToHaveAttributeAsync("aria-hidden", "true");
+        await Assertions.Expect(desktop.Locator("#preview .shadcn-code-block")).ToContainTextAsync("Decorative=\"true\"");
+
+        await using var mobileContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 320, Height = 568 },
+            DeviceScaleFactor = 1,
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var mobile = await mobileContext.NewPageAsync();
+        await mobile.GotoAsync(new Uri(server.BaseUri, "/docs/components/separator?theme=dark&dir=rtl&locale=th").ToString());
+        await mobile.GetByTestId("component-dossier").WaitForAsync();
+        await mobile.GetByTestId("control-separator-orientation").SelectOptionAsync("Vertical");
+
+        var mobileSeparator = mobile.Locator("#preview [data-slot='separator']");
+        var mobileSeparatorBox = await mobileSeparator.BoundingBoxAsync();
+        Assert.NotNull(mobileSeparatorBox);
+        Assert.InRange(mobileSeparatorBox!.Width, 0.5, 1.5);
+        Assert.True(mobileSeparatorBox.Height >= 80, $"Expected a visible vertical separator, received {mobileSeparatorBox.Height}px.");
+        var overflow = await mobile.GetByTestId("component-preview-canvas")
+            .EvaluateAsync<double>("element => element.scrollWidth - element.clientWidth");
+        Assert.InRange(overflow, 0, 1);
+    }
 }

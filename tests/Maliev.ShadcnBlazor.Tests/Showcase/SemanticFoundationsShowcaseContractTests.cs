@@ -1,6 +1,8 @@
+using Bunit;
+
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
-public sealed class SemanticFoundationsShowcaseContractTests
+public sealed class SemanticFoundationsShowcaseContractTests : BunitContext
 {
     [Fact]
     public void SemanticExamplesShowTheFullHierarchyAndHumanReadableRatios()
@@ -156,6 +158,31 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.Contains("pointer-events: none", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-item[data-variant=\"outline\"]", css, StringComparison.Ordinal);
         Assert.Contains("border-color: CanvasText", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SeparatorPreviewAndSourceStaySynchronizedAcrossMeaningfulStates()
+    {
+        var registry = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(new Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationCatalog());
+        var separator = Assert.Single(registry.GetBySlug("separator"));
+
+        Assert.Contains("Orientation=\"ShadcnSeparatorOrientation.Horizontal\"", separator.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Decorative=\"false\"", separator.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Quotation #Q-4189", separator.RazorSource, StringComparison.Ordinal);
+        var initial = Render(separator.Preview);
+        Assert.Equal("horizontal", initial.Find("[data-slot='separator']").GetAttribute("data-orientation"));
+        Assert.Equal("separator", initial.Find("[data-slot='separator']").GetAttribute("role"));
+
+        separator.Controls.Single(control => control.Id == "separator-orientation").Apply("Vertical");
+        separator.Controls.Single(control => control.Id == "separator-decorative").Apply("true");
+
+        Assert.Contains("Orientation=\"ShadcnSeparatorOrientation.Vertical\"", separator.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Decorative=\"true\"", separator.RazorSource, StringComparison.Ordinal);
+        var updated = Render(separator.Preview);
+        Assert.Equal("vertical", updated.Find("[data-slot='separator']").GetAttribute("data-orientation"));
+        Assert.Equal("none", updated.Find("[data-slot='separator']").GetAttribute("role"));
+        Assert.Equal("true", updated.Find("[data-slot='separator']").GetAttribute("aria-hidden"));
+        Assert.Contains("showcase-separator-demo--vertical", updated.Find(".showcase-separator-demo").ClassList);
     }
 
     private static string FindRoot()
