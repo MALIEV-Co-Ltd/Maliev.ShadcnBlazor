@@ -226,6 +226,31 @@ public sealed class ToastTests : BunitContext
     }
 
     [Fact]
+    public void BuiltInStatusAndCloseIconsUseTheSharedSvgVisualLanguage()
+    {
+        var service = new ShadcnToastService(new ManualTimeProvider());
+        Services.AddSingleton<IShadcnToastService>(service);
+        service.Show(new ShadcnToastOptions("Saved", Type: ShadcnToastType.Success));
+
+        var cut = Render<ShadcnToaster>();
+
+        Assert.Single(cut.FindAll("[data-slot='toast-icon'] svg[aria-hidden='true']"));
+        Assert.Single(cut.FindAll("[data-slot='toast-close'] svg[aria-hidden='true']"));
+        Assert.DoesNotContain(">×<", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ToastStylesRespectExplicitAndSystemMotionPreferencesAndForcedColors()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(".shadcn-toast-viewport[data-reduced-motion=\"true\"] .shadcn-toast", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-toast-viewport[data-reduced-motion=\"true\"] .shadcn-toast-icon", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains(":where(.shadcn-toast, .shadcn-toast-action, .shadcn-toast-close) { forced-color-adjust: auto; }", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ToasterCloseDismissesAndInvalidLimitFailsClosed()
     {
         var service = new ShadcnToastService(new ManualTimeProvider());

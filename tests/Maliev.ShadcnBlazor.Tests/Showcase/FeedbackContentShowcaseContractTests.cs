@@ -85,7 +85,9 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains(example.Controls, control => control.Id == "toast-type");
         var cut = Render(example.Preview);
         cut.Find("button").Click();
-        Assert.Contains("บันทึกแล้ว", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("บันทึกใบงานแล้ว", cut.Markup, StringComparison.Ordinal);
+        cut.Find("[data-slot='toast-action']").Click();
+        cut.WaitForAssertion(() => Assert.Contains("ยกเลิกการบันทึกแล้ว", cut.Markup, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -111,6 +113,20 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("private void Show()", toast, StringComparison.Ordinal);
         Assert.Contains("MaximumVisible=\"3\"", toast, StringComparison.Ordinal);
         Assert.Contains("ActionLabel: \"เลิกทำ\"", toast, StringComparison.Ordinal);
+        Assert.Contains("Description: \"ใบงาน WO-2048 พร้อมส่งให้ฝ่ายผลิต\"", toast, StringComparison.Ordinal);
+        Assert.Contains("private Task UndoAsync()", toast, StringComparison.Ordinal);
+        Assert.Contains("ยกเลิกการบันทึกแล้ว — Save undone", toast, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ToastDossierCentersItsRealTriggerWithoutRelocatingThePageLevelViewport()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+
+        Assert.Contains(".showcase-toast-demo {", css, StringComparison.Ordinal);
+        Assert.Contains("place-items: center", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-toast-demo .shadcn-toast-viewport", css, StringComparison.Ordinal);
     }
 
     [Fact]
