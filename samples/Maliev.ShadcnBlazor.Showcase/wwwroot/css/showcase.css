@@ -1287,6 +1287,31 @@ a {
     .showcase-scroller-frame .showcase-scroller-composer button { transition: none; }
 }
 
+/* Popover dossier: keep the trigger centered while the real fixed overlay
+   demonstrates collision-aware placement with production form controls. */
+.showcase-popover-dossier {
+    display: grid;
+    min-block-size: 18rem;
+    inline-size: 100%;
+    place-items: center;
+}
+
+.showcase-popover-form {
+    display: grid;
+    grid-template-columns: minmax(4rem, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-block-start: 1rem;
+}
+
+.showcase-popover-form .shadcn-label {
+    color: var(--shadcn-muted-foreground);
+}
+
+.showcase-popover-form .shadcn-input {
+    min-inline-size: 0;
+}
+
 .showcase-questionnaire-card {
     width: min(100%, 34rem);
     margin-inline: auto;

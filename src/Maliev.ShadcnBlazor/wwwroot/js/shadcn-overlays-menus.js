@@ -177,6 +177,7 @@ function placePositioned(content, trigger, preferredSide, align, sideOffset, ali
     top = Math.min(Math.max(padding, top), Math.max(padding, innerHeight - padding - popup.height));
     content.dataset.side = side; content.dataset.align = align; content.style.position = 'fixed'; content.style.left = `${left}px`; content.style.top = `${top}px`;
     content.style.setProperty('--shadcn-transform-origin', side === 'top' ? 'bottom' : side === 'bottom' ? 'top' : side === 'left' ? 'right' : 'left');
+    content.dataset.positioned = 'true';
 }
 export function attachPositioned(content, triggerId, side, align, sideOffset, alignOffset, padding, dotnet, closeOnEscape, closeOnOutside, focusContent) {
     const trigger = document.getElementById(triggerId); if (!trigger) return;

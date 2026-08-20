@@ -1,3 +1,64 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<CascadingValue Value="Context" IsFixed="true"><span @attributes="Forwarded" class="@MergeClass("shadcn-popover")" style="@MergeStyle(null)" data-slot="popover" data-state="@(EffectiveOpen?"open":"closed")">@ChildContent</span></CascadingValue>
-@code { [Parameter]public bool Open{get;set;}[Parameter]public EventCallback<bool> OpenChanged{get;set;}[Parameter]public bool CloseOnEscape{get;set;}=true;[Parameter]public bool CloseOnOutsidePress{get;set;}=true;[Parameter]public RenderFragment? ChildContent{get;set;}private static long _next;private readonly ShadcnPopoverContext _context;private bool _open,_last,_initialized;public ShadcnPopover(){var id=Interlocked.Increment(ref _next);_context=new(this,$"shadcn-popover-{id}-trigger",$"shadcn-popover-{id}-content");}private ShadcnPopoverContext Context=>_context;internal bool EffectiveOpen=>_open;private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","data-state");protected override void OnParametersSet(){if(!_initialized||Open!=_last)_open=Open;_last=Open;_initialized=true;}internal async ValueTask SetOpenAsync(bool value){if(_open==value)return;if(OpenChanged.HasDelegate)await OpenChanged.InvokeAsync(value);else{_open=value;await InvokeAsync(StateHasChanged);}}[JSInvokable]public Task RequestCloseAsync()=>SetOpenAsync(false).AsTask(); }
+
+<CascadingValue Value="Context" IsFixed="true">
+    <span @attributes="Forwarded"
+          class="@MergeClass("shadcn-popover")"
+          style="@MergeStyle(null)"
+          data-slot="popover"
+          data-state="@(EffectiveOpen ? "open" : "closed")"
+          data-close-on-escape="@CloseOnEscape.ToString().ToLowerInvariant()"
+          data-close-on-outside-press="@CloseOnOutsidePress.ToString().ToLowerInvariant()">
+        @ChildContent
+    </span>
+</CascadingValue>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public bool CloseOnEscape { get; set; } = true;
+    [Parameter] public bool CloseOnOutsidePress { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private static long _next;
+    private readonly ShadcnPopoverContext _context;
+    private bool _open;
+    private bool _last;
+    private bool _initialized;
+
+    public ShadcnPopover()
+    {
+        var id = Interlocked.Increment(ref _next);
+        _context = new(this, $"shadcn-popover-{id}-trigger", $"shadcn-popover-{id}-content");
+    }
+
+    private ShadcnPopoverContext Context => _context;
+    internal bool EffectiveOpen => _open;
+
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept(
+        "data-slot", "data-state", "data-close-on-escape", "data-close-on-outside-press");
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized || Open != _last)
+            _open = Open;
+
+        _last = Open;
+        _initialized = true;
+    }
+
+    internal async ValueTask SetOpenAsync(bool value)
+    {
+        if (_open == value)
+            return;
+
+        _open = value;
+        _last = value;
+        if (OpenChanged.HasDelegate)
+            await OpenChanged.InvokeAsync(value);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task RequestCloseAsync() => SetOpenAsync(false).AsTask();
+}

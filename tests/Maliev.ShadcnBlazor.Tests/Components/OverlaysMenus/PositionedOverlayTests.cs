@@ -50,6 +50,35 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Equal("8", content.GetAttribute("data-side-offset"));
         Assert.Equal(content.Id, trigger.GetAttribute("aria-controls"));
         Assert.Equal(cut.Find("[data-slot='popover-title']").Id, content.GetAttribute("aria-labelledby"));
+        Assert.Equal("false", content.GetAttribute("data-positioned"));
+    }
+
+    [Fact]
+    public void PopoverTriggerUpdatesControlledStateWithoutWaitingForAParentRender()
+    {
+        var changes = new List<bool>();
+        var cut = Render<ShadcnPopover>(parameters => parameters
+            .Add(component => component.Open, false)
+            .Add(component => component.OpenChanged, changes.Add)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnPopoverTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnPopoverTrigger.ChildContent), (RenderFragment)(content => content.AddContent(0, "Part dimensions")));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnPopoverContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnPopoverContent.ChildContent), (RenderFragment)(content => content.AddContent(0, "Dimensions form")));
+                builder.CloseComponent();
+            }));
+
+        var trigger = cut.Find("[data-slot='popover-trigger']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='popover-content']"));
+
+        trigger.Click();
+
+        Assert.Equal([true], changes);
+        Assert.Equal("true", cut.Find("[data-slot='popover-trigger']").GetAttribute("aria-expanded"));
+        Assert.Single(cut.FindAll("[data-slot='popover-content']"));
     }
 
     [Fact]
