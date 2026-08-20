@@ -158,14 +158,14 @@ internal static class FeedbackContentExamples
 <section class="production-queue" aria-labelledby="production-queue-title">
     <header>
         <div>
-            <strong id="production-queue-title">Production queue</strong>
-            <span>Scan work states without opening each order.</span>
+            <strong id="production-queue-title" dir="auto">Production queue</strong>
+            <span dir="auto">Scan work states without opening each order.</span>
         </div>
-        <span>Line 04 · Today</span>
+        <span dir="auto">Line 04 · Today</span>
     </header>
 
     <div class="current-order">
-        <span><strong>CNC enclosure</strong><span>Order MO-1842</span></span>
+        <span><strong dir="auto">CNC enclosure</strong><span dir="auto">Order MO-1842</span></span>
         <ShadcnBadge Variant="ShadcnBadgeVariant.{{variant}}"{{href}}{{invalidState}}>
             <svg data-icon="inline-start" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                 <path d="m3.25 8.2 2.7 2.65 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
@@ -175,12 +175,12 @@ internal static class FeedbackContentExamples
     </div>
 
     <ul aria-label="Badge variants">
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Default">Approved</ShadcnBadge><span>Released to production</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Queued</ShadcnBadge><span>Waiting for a machine</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">Blocked</ShadcnBadge><span>Requires attention</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">In review</ShadcnBadge><span>Quality check in progress</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Ghost">Draft</ShadcnBadge><span>Not yet scheduled</span></li>
-        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Link" Href="docs/components/badge">View order</ShadcnBadge><span>Linked badge treatment</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Default">Approved</ShadcnBadge><span dir="auto">Released to production</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Queued</ShadcnBadge><span dir="auto">Waiting for a machine</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">Blocked</ShadcnBadge><span dir="auto">Requires attention</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">In review</ShadcnBadge><span dir="auto">Quality check in progress</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Ghost">Draft</ShadcnBadge><span dir="auto">Not yet scheduled</span></li>
+        <li><ShadcnBadge Variant="ShadcnBadgeVariant.Link" Href="docs/components/badge">View order</ShadcnBadge><span dir="auto">Linked badge treatment</span></li>
     </ul>
 </section>
 """;
