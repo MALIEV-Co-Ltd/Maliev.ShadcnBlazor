@@ -755,6 +755,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupButton
   EventCallback<MouseEventArgs> OnClick
   ShadcnInputGroupButtonSize Size
   String Type
+  ShadcnButtonVariant Variant
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupButtonSize: ExtraSmall, Small, IconExtraSmall, IconSmall
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroupText
   RenderFragment ChildContent

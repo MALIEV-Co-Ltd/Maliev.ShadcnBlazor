@@ -19,22 +19,35 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper[data-size="sm"] .shadcn-native-select { height: var(--shadcn-control-height-sm); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-icon { position: absolute; inset-inline-end: .625rem; top: 50%; width: 1rem; height: 1rem; translate: 0 -50%; color: var(--shadcn-muted-foreground); pointer-events: none; }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group { position: relative; display: flex; width: 100%; min-width: 0; height: var(--shadcn-control-height); align-items: center; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); background: transparent; box-shadow: var(--shadcn-shadow-xs); font-size: 1rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group { position: relative; display: flex; width: 100%; min-width: 0; height: var(--shadcn-control-height); align-items: center; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); background: transparent; box-shadow: var(--shadcn-shadow-xs); font-size: 1rem; outline: none; transition: border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-input-group { background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:is([aria-invalid="true"], :has(> [data-slot="input-group-control"][aria-invalid="true"])) { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 24%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> .shadcn-textarea), :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align^="block-"]) { height: auto; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align^="block-"]) { flex-direction: column; align-items: stretch; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="inline-start"]) > .shadcn-input { padding-inline-start: calc(.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="inline-end"]) > .shadcn-input { padding-inline-end: calc(.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="block-start"]) > .shadcn-input { padding-block-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="block-end"]) > .shadcn-input { padding-block-start: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group > :where(.shadcn-input, .shadcn-textarea) { flex: 1; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group > :where(.shadcn-input, .shadcn-textarea):focus-visible { box-shadow: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon { display: flex; align-items: center; justify-content: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); padding: calc(.375rem * var(--shadcn-spacing-multiplier)) calc(.5rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .875rem; font-weight: 500; cursor: text; user-select: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-start"] { order: -1; padding-inline-start: calc(.5rem * var(--shadcn-spacing-multiplier)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-end"] { order: 1; padding-inline-end: calc(.5rem * var(--shadcn-spacing-multiplier)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="block-start"] { order: -1; width: 100%; justify-content: flex-start; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="block-end"] { order: 1; width: 100%; justify-content: flex-start; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button { display: inline-flex; align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); height: 1.5rem; border: 0; border-radius: calc(var(--shadcn-radius) - 5px); background: transparent; color: var(--shadcn-foreground); padding-inline: calc(.375rem * var(--shadcn-spacing-multiplier)); font: inherit; font-size: .875rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button:hover { background: var(--shadcn-muted); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="sm"] { height: 2rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="icon-xs"] { width: 1.5rem; padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon { display: flex; align-items: center; justify-content: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-block: calc(.375rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .875rem; font-weight: 500; cursor: text; user-select: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-start"] { order: -1; padding-inline-start: calc(.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-end"] { order: 1; padding-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-start"]:has(> button) { margin-inline-start: -.45rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-end"]:has(> button) { margin-inline-end: -.4rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="block-start"] { order: -1; width: 100%; justify-content: flex-start; padding: calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.75rem * var(--shadcn-spacing-multiplier)) 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="block-end"] { order: 1; width: 100%; justify-content: flex-start; padding: 0 calc(.75rem * var(--shadcn-spacing-multiplier)) calc(.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-slot="input-group-control"]:disabled) .shadcn-input-group-addon { opacity: .5; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon :where(svg:not([class*="size-"])) { width: 1rem; height: 1rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button { display: inline-flex; align-items: center; justify-content: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); border-radius: calc(var(--shadcn-radius) - 5px); box-shadow: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="xs"] { height: 1.5rem; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="xs"] > svg:not([class*="size-"]) { width: .875rem; height: .875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="sm"] { height: 2rem; gap: calc(.375rem * var(--shadcn-spacing-multiplier)); border-radius: var(--shadcn-radius-md); padding-inline: calc(.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="icon-xs"] { width: 1.5rem; height: 1.5rem; padding: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-button[data-size="icon-sm"] { width: 2rem; height: 2rem; padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-text { display: flex; align-items: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-text :where(svg) { pointer-events: none; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp { position: relative; display: flex; align-items: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); width: fit-content; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-input { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; margin: 0; border: 0; opacity: .01; color: transparent; caret-color: transparent; }
