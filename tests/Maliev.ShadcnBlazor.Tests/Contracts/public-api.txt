@@ -449,6 +449,7 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTable`1
   String ColumnFilterLabel
   IReadOnlyList<ShadcnDataTableColumn<TItem>> Columns
   String ColumnsLabel
+  ShadcnDataTableState DefaultState
   String EmptyText
   String Error
   String FilterPlaceholder

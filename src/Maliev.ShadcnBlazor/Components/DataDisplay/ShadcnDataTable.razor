@@ -50,13 +50,16 @@
                                 @if (column.Sortable)
                                 {
                                     <button type="button" class="shadcn-data-table-sort" data-column="@column.Key" data-sort="@SortValue(column)" @onclick="eventArgs => ToggleSortAsync(column, eventArgs.ShiftKey)">
-                                        @(column.HeaderTemplate ?? Text(column.Label))<span aria-hidden="true">↕</span>
+                                        @(column.HeaderTemplate ?? Text(column.Label))
+                                        <svg class="shadcn-data-table-sort__icon" data-slot="data-table-sort-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                            <path d="M5.25 3.25 3 5.5l2.25 2.25M3 5.5h8.5M10.75 12.75 13 10.5l-2.25-2.25M13 10.5H4.5" />
+                                        </svg>
                                     </button>
                                 }
                                 else { @(column.HeaderTemplate ?? Text(column.Label)) }
                             </ShadcnTableHead>
                         }
-                        @if (RowActionTemplate is not null) { <ShadcnTableHead><span class="shadcn-sr-only">@ActionsLabel</span></ShadcnTableHead> }
+                        @if (RowActionTemplate is not null) { <ShadcnTableHead Class="shadcn-data-table-action-cell"><span class="shadcn-sr-only">@ActionsLabel</span></ShadcnTableHead> }
                     </ShadcnTableRow>
                 </ShadcnTableHeader>
                 <ShadcnTableBody>
@@ -80,7 +83,7 @@
                                 {
                                     <ShadcnTableCell Style="@ColumnStyle(column)" AdditionalAttributes="@(new Dictionary<string, object> { ["data-column"] = column.Key })">@(column.CellTemplate?.Invoke(item) ?? Text(column.Value(item)?.ToString() ?? string.Empty))</ShadcnTableCell>
                                 }
-                                @if (RowActionTemplate is not null) { <ShadcnTableCell>@RowActionTemplate(item)</ShadcnTableCell> }
+                                @if (RowActionTemplate is not null) { <ShadcnTableCell Class="shadcn-data-table-action-cell">@RowActionTemplate(item)</ShadcnTableCell> }
                             </ShadcnTableRow>
                         }
                     }
@@ -108,6 +111,7 @@
     [Parameter, EditorRequired] public IReadOnlyList<ShadcnDataTableColumn<TItem>> Columns { get; set; } = [];
     [Parameter, EditorRequired] public Func<TItem, string> RowKey { get; set; } = default!;
     [Parameter] public ShadcnDataTableState? State { get; set; }
+    [Parameter] public ShadcnDataTableState DefaultState { get; set; } = new();
     [Parameter] public EventCallback<ShadcnDataTableState> StateChanged { get; set; }
     [Parameter] public bool Manual { get; set; }
     [Parameter] public int TotalCount { get; set; }
@@ -137,6 +141,7 @@
     [Parameter] public Func<int, int, string> PageSummary { get; set; } = (page, pages) => $"Page {page} of {pages}";
 
     private ShadcnDataTableState _internalState = new();
+    private bool _defaultStateApplied;
     private ShadcnDataTableState? _pendingReconciliation;
     private ShadcnDataTableState CurrentState => State ?? _internalState;
     private IReadOnlyList<ShadcnDataTableColumn<TItem>> OrderedColumns => Columns.OrderBy(column => column.Order).ThenBy(column => Array.IndexOf(Columns.ToArray(), column)).ToList();
@@ -153,6 +158,7 @@
     {
         if (RowKey is null) throw new InvalidOperationException("Data table RowKey is required.");
         if (State is not null && !StateChanged.HasDelegate) throw new InvalidOperationException("Controlled data-table State requires StateChanged.");
+        if (State is null && !_defaultStateApplied) { _internalState = DefaultState; _defaultStateApplied = true; }
         if (PageSizeOptions.Count == 0 || PageSizeOptions.Any(size => size < 1)) throw new InvalidOperationException("Page-size options must contain positive values.");
         ShadcnDataTableEngine.ValidateColumns(Columns);
         var result = Result;
