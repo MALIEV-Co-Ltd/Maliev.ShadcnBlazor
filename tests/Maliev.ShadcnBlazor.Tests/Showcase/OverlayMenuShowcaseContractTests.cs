@@ -98,6 +98,30 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void ContextMenuDossierUsesTheCompleteInteractiveCompositionAndKeepsSourceInSync()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("context-menu").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.NotNull(rendered.Find("[data-testid='context-menu-dossier-preview']"));
+        Assert.Contains("Right-click or press Shift+F10", rendered.Markup, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnContextMenuCheckboxItem", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnContextMenuRadioGroup", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnContextMenuSub>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnContextMenuShortcut", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Open=\"true\"", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "context-menu-archived").Apply("false");
+        example.Controls.Single(control => control.Id == "context-menu-compact").Apply("true");
+
+        rendered = Render(example.Preview);
+        Assert.Equal("false", rendered.Find("[data-testid='context-menu-dossier-preview']").GetAttribute("data-show-archived"));
+        Assert.Equal("true", rendered.Find("[data-testid='context-menu-dossier-preview']").GetAttribute("data-compact"));
+        Assert.Contains("private bool ShowArchived { get; set; } = false;", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private string Density { get; set; } = \"compact\";", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PopoverDossierUsesARealClosedByDefaultCompositionAndStateAwareSource()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("popover").Single();

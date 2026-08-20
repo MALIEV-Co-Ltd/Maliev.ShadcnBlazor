@@ -1,3 +1,26 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="Forwarded" id="@Context.Owner.TriggerId" class="@MergeClass("shadcn-context-menu-trigger")" style="@MergeStyle(null)" data-slot="context-menu-trigger" tabindex="@(Focusable?"0":null)" role="@(Focusable?"button":null)" aria-haspopup="menu" aria-expanded="@(Context.Owner.EffectiveOpen?"true":"false")" @oncontextmenu="OpenAsync" @oncontextmenu:preventDefault @onkeydown="KeyDownAsync">@ChildContent</div>
-@code { [CascadingParameter]private ShadcnMenuContext Context{get;set;}=default!;[Parameter]public bool Focusable{get;set;}=true;[Parameter]public RenderFragment? ChildContent{get;set;}private ShadcnContextMenu Owner=>(ShadcnContextMenu)Context.Owner;private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("id","data-slot","tabindex","role","aria-haspopup","aria-expanded");private Task OpenAsync(MouseEventArgs args)=>Owner.OpenAtAsync(args.ClientX,args.ClientY);private async Task KeyDownAsync(KeyboardEventArgs args){if(args.Key=="ContextMenu"||(args.Key=="F10"&&args.ShiftKey))await Owner.OpenAtAsync(8,8);} }
+@implements IAsyncDisposable
+@inject IJSRuntime JavaScript
+<div @ref="_element" @attributes="Forwarded" id="@Context.Owner.TriggerId" class="@MergeClass("shadcn-context-menu-trigger")" style="@MergeStyle(null)" data-slot="context-menu-trigger" tabindex="@(Focusable?"0":null)" role="@(Focusable?"button":null)" aria-haspopup="menu" aria-expanded="@(Context.Owner.EffectiveOpen?"true":"false")" aria-controls="@(Context.Owner.EffectiveOpen?Context.Owner.ContentId:null)" @oncontextmenu="OpenAsync" @oncontextmenu:preventDefault>@ChildContent</div>
+@code {
+    [CascadingParameter] private ShadcnMenuContext Context { get; set; } = default!;
+    [Parameter] public bool Focusable { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ShadcnContextMenu Owner => (ShadcnContextMenu)Context.Owner;
+    private ElementReference _element;
+    private IJSObjectReference? _module;
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("id", "data-slot", "tabindex", "role", "aria-haspopup", "aria-expanded", "aria-controls");
+    private Task OpenAsync(MouseEventArgs args) => Owner.OpenAtAsync(args.ClientX, args.ClientY);
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if (!first) return;
+        _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
+        await _module.InvokeVoidAsync("attachContextMenuTrigger", _element);
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { await _module.InvokeVoidAsync("detachContextMenuTrigger", _element); await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

@@ -1164,6 +1164,8 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSubContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSubTrigger
   RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuTrigger
   RenderFragment ChildContent
   Boolean Focusable

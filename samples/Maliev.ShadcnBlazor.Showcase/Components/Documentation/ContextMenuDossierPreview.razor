@@ -1,0 +1,78 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-context-menu-dossier"
+     data-testid="context-menu-dossier-preview"
+     data-show-archived="@_showArchived.ToString().ToLowerInvariant()"
+     data-compact="@(_density == "compact" ? "true" : "false")">
+    <ShadcnContextMenu @bind-Open="_open">
+        <ShadcnContextMenuTrigger Class="showcase-context-menu-workspace">
+            <header class="showcase-context-menu-workspace__header">
+                <div>
+                    <strong>Quotation files</strong>
+                    <span>QT-4189 · CNC enclosure</span>
+                </div>
+                <span>3 files</span>
+            </header>
+            <div class="showcase-context-menu-workspace__files" data-density="@_density">
+                <div><span>STEP</span><strong>enclosure.step</strong><small>2.4 MB</small></div>
+                <div><span>PDF</span><strong>drawing-rev-c.pdf</strong><small>860 KB</small></div>
+                <div><span>XLSX</span><strong>cost-breakdown.xlsx</strong><small>124 KB</small></div>
+            </div>
+            <p>Right-click or press Shift+F10 for file actions.</p>
+        </ShadcnContextMenuTrigger>
+        <ShadcnContextMenuContent>
+            <ShadcnContextMenuLabel>File actions</ShadcnContextMenuLabel>
+            <ShadcnContextMenuGroup>
+                <ShadcnContextMenuItem OnSelect="@(_ => Record("Opened enclosure.step"))">
+                    Open
+                    <ShadcnContextMenuShortcut>Enter</ShadcnContextMenuShortcut>
+                </ShadcnContextMenuItem>
+                <ShadcnContextMenuItem OnSelect="@(_ => Record("Renamed enclosure.step"))">
+                    Rename
+                    <ShadcnContextMenuShortcut>F2</ShadcnContextMenuShortcut>
+                </ShadcnContextMenuItem>
+                <ShadcnContextMenuItem Disabled="true">Publish revision</ShadcnContextMenuItem>
+            </ShadcnContextMenuGroup>
+            <ShadcnContextMenuSeparator />
+            <ShadcnContextMenuCheckboxItem Checked="_showArchived" CheckedChanged="SetShowArchived">Show archived files</ShadcnContextMenuCheckboxItem>
+            <ShadcnContextMenuRadioGroup Value="_density" ValueChanged="SetDensity">
+                <ShadcnContextMenuRadioItem Value="comfortable">Comfortable rows</ShadcnContextMenuRadioItem>
+                <ShadcnContextMenuRadioItem Value="compact">Compact rows</ShadcnContextMenuRadioItem>
+            </ShadcnContextMenuRadioGroup>
+            <ShadcnContextMenuSeparator />
+            <ShadcnContextMenuSub>
+                <ShadcnContextMenuSubTrigger>Export as</ShadcnContextMenuSubTrigger>
+                <ShadcnContextMenuSubContent>
+                    <ShadcnContextMenuItem OnSelect="@(_ => Record("Exported PDF package"))">PDF package</ShadcnContextMenuItem>
+                    <ShadcnContextMenuItem OnSelect="@(_ => Record("Exported ZIP archive"))">ZIP archive</ShadcnContextMenuItem>
+                </ShadcnContextMenuSubContent>
+            </ShadcnContextMenuSub>
+            <ShadcnContextMenuSeparator />
+            <ShadcnContextMenuItem Variant="ShadcnMenuItemVariant.Destructive" OnSelect="@(_ => Record("Moved enclosure.step to trash"))">
+                Move to trash
+                <ShadcnContextMenuShortcut>Delete</ShadcnContextMenuShortcut>
+            </ShadcnContextMenuItem>
+        </ShadcnContextMenuContent>
+    </ShadcnContextMenu>
+    <p class="showcase-context-menu-dossier__status" role="status" aria-live="polite">@(_lastAction ?? "No file action selected")</p>
+</div>
+
+@code {
+    [Parameter] public bool ShowArchived { get; set; } = true;
+    [Parameter] public string Density { get; set; } = "comfortable";
+    private bool _open;
+    private bool _showArchived;
+    private string _density = "comfortable";
+    private string? _lastAction;
+
+    protected override void OnParametersSet()
+    {
+        if (Density is not ("comfortable" or "compact")) throw new ArgumentOutOfRangeException(nameof(Density));
+        _showArchived = ShowArchived;
+        _density = Density;
+    }
+
+    private Task SetShowArchived(bool value) { _showArchived = value; return Task.CompletedTask; }
+    private Task SetDensity(string? value) { if (value is not null) _density = value; return Task.CompletedTask; }
+    private void Record(string message) => _lastAction = message;
+}

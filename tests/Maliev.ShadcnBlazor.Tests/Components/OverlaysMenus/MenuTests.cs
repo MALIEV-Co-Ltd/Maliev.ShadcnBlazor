@@ -14,6 +14,10 @@ public sealed class MenuTests : BunitContext
         module.SetupVoid("detachPositioned", _ => true);
         module.SetupVoid("attachMenu", _ => true);
         module.SetupVoid("detachMenu", _ => true);
+        module.SetupVoid("attachContextMenuTrigger", _ => true);
+        module.SetupVoid("detachContextMenuTrigger", _ => true);
+        module.SetupVoid("attachContextMenuSubmenu", _ => true);
+        module.SetupVoid("detachContextMenuSubmenu", _ => true);
     }
 
     [Fact]
@@ -70,6 +74,90 @@ public sealed class MenuTests : BunitContext
         Assert.Equal("125", content.GetAttribute("data-anchor-x"));
         Assert.Equal("240", content.GetAttribute("data-anchor-y"));
         Assert.Equal("destructive", cut.Find("[data-slot='context-menu-item']").GetAttribute("data-variant"));
+
+        cut.Find("[data-slot='context-menu-trigger']").ContextMenu(new MouseEventArgs { ClientX = 520, ClientY = 360 });
+        content = cut.Find("[data-slot='context-menu-content']");
+        Assert.Equal("520", content.GetAttribute("data-anchor-x"));
+        Assert.Equal("360", content.GetAttribute("data-anchor-y"));
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachContextMenuTrigger", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ContextMenuComposesCheckedRadioDisabledShortcutAndPositionedSubmenuSemantics()
+    {
+        var checkedChanges = new List<bool>();
+        var radioChanges = new List<string?>();
+        var cut = Render<ShadcnContextMenu>(parameters => parameters
+            .Add(component => component.Open, true)
+            .Add(component => component.ChildContent, (RenderFragment)(builder =>
+            {
+                builder.OpenComponent<ShadcnContextMenuTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnContextMenuTrigger.ChildContent), (RenderFragment)(text => text.AddContent(0, "Workspace")));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnContextMenuContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnContextMenuContent.ChildContent), (RenderFragment)(menu =>
+                {
+                    menu.OpenComponent<ShadcnContextMenuCheckboxItem>(0);
+                    menu.AddAttribute(1, nameof(ShadcnContextMenuCheckboxItem.Checked), true);
+                    menu.AddAttribute(2, nameof(ShadcnContextMenuCheckboxItem.CheckedChanged), EventCallback.Factory.Create<bool>(this, value => checkedChanges.Add(value)));
+                    menu.AddAttribute(3, nameof(ShadcnContextMenuCheckboxItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Show archived")));
+                    menu.CloseComponent();
+                    menu.OpenComponent<ShadcnContextMenuRadioGroup>(4);
+                    menu.AddAttribute(5, nameof(ShadcnContextMenuRadioGroup.Value), "comfortable");
+                    menu.AddAttribute(6, nameof(ShadcnContextMenuRadioGroup.ValueChanged), EventCallback.Factory.Create<string?>(this, value => radioChanges.Add(value)));
+                    menu.AddAttribute(7, nameof(ShadcnContextMenuRadioGroup.ChildContent), (RenderFragment)(radio =>
+                    {
+                        radio.OpenComponent<ShadcnContextMenuRadioItem>(0);
+                        radio.AddAttribute(1, nameof(ShadcnContextMenuRadioItem.Value), "compact");
+                        radio.AddAttribute(2, nameof(ShadcnContextMenuRadioItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Compact")));
+                        radio.CloseComponent();
+                        radio.OpenComponent<ShadcnContextMenuRadioItem>(3);
+                        radio.AddAttribute(4, nameof(ShadcnContextMenuRadioItem.Value), "comfortable");
+                        radio.AddAttribute(5, nameof(ShadcnContextMenuRadioItem.ChildContent), (RenderFragment)(text => text.AddContent(0, "Comfortable")));
+                        radio.CloseComponent();
+                    }));
+                    menu.CloseComponent();
+                    menu.OpenComponent<ShadcnContextMenuItem>(8);
+                    menu.AddAttribute(9, nameof(ShadcnContextMenuItem.Disabled), true);
+                    menu.AddAttribute(10, nameof(ShadcnContextMenuItem.ChildContent), (RenderFragment)(item =>
+                    {
+                        item.AddContent(0, "Publish");
+                        item.OpenComponent<ShadcnContextMenuShortcut>(1);
+                        item.AddAttribute(2, nameof(ShadcnContextMenuShortcut.ChildContent), (RenderFragment)(text => text.AddContent(0, "Ctrl+P")));
+                        item.CloseComponent();
+                    }));
+                    menu.CloseComponent();
+                    menu.OpenComponent<ShadcnContextMenuSub>(11);
+                    menu.AddAttribute(12, nameof(ShadcnContextMenuSub.Open), true);
+                    menu.AddAttribute(13, nameof(ShadcnContextMenuSub.ChildContent), (RenderFragment)(sub =>
+                    {
+                        sub.OpenComponent<ShadcnContextMenuSubTrigger>(0);
+                        sub.AddAttribute(1, nameof(ShadcnContextMenuSubTrigger.Disabled), false);
+                        sub.AddAttribute(2, nameof(ShadcnContextMenuSubTrigger.ChildContent), (RenderFragment)(text => text.AddContent(0, "Export")));
+                        sub.CloseComponent();
+                        sub.OpenComponent<ShadcnContextMenuSubContent>(3);
+                        sub.AddAttribute(4, nameof(ShadcnContextMenuSubContent.ChildContent), (RenderFragment)(text => text.AddContent(0, "PDF")));
+                        sub.CloseComponent();
+                    }));
+                    menu.CloseComponent();
+                }));
+                builder.CloseComponent();
+            })));
+
+        Assert.Equal("true", cut.Find("[data-slot='context-menu-checkbox-item']").GetAttribute("aria-checked"));
+        Assert.NotNull(cut.Find("[data-slot='context-menu-checkbox-item-indicator'] svg"));
+        Assert.Equal("true", cut.FindAll("[data-slot='context-menu-radio-item']")[1].GetAttribute("aria-checked"));
+        Assert.NotNull(cut.Find("[data-slot='context-menu-radio-item-indicator'] svg"));
+        Assert.Equal("true", cut.Find("[data-slot='context-menu-item'][data-disabled='true']").GetAttribute("aria-disabled"));
+        Assert.Equal("true", cut.Find("[data-slot='context-menu-shortcut']").GetAttribute("aria-hidden"));
+        Assert.Equal("menu", cut.Find("[data-slot='context-menu-sub-trigger']").GetAttribute("aria-haspopup"));
+        Assert.NotNull(cut.Find("[data-slot='context-menu-sub-trigger-icon']"));
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachContextMenuSubmenu", StringComparison.Ordinal));
+
+        cut.Find("[data-slot='context-menu-checkbox-item']").Click();
+        cut.FindAll("[data-slot='context-menu-radio-item']")[0].Click();
+        Assert.Equal([false], checkedChanges);
+        Assert.Equal(["compact"], radioChanges);
     }
 
     [Fact]
@@ -77,5 +165,29 @@ public sealed class MenuTests : BunitContext
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnDropdownMenuItem>(p => p.Add(x => x.Variant, (ShadcnMenuItemVariant)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnContextMenuRadioItem>(p => p.Add(x => x.Value, " ")));
+    }
+
+    [Fact]
+    public void ContextMenuAssetsCoverKeyboardCollisionRtlMotionAndForcedColors()
+    {
+        var root = FindRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+
+        Assert.Contains("attachContextMenuTrigger", script, StringComparison.Ordinal);
+        Assert.Contains("event.key !== 'ContextMenu'", script, StringComparison.Ordinal);
+        Assert.Contains("event.shiftKey && event.key === 'F10'", script, StringComparison.Ordinal);
+        Assert.Contains("attachContextMenuSubmenu", script, StringComparison.Ordinal);
+        Assert.Contains(":dir(rtl) [data-slot=\"context-menu-sub-trigger-icon\"]", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-context-menu-content", css, StringComparison.Ordinal);
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx"))) directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

@@ -488,13 +488,81 @@ internal static class OverlayMenuExamples
     private static ComponentExampleDefinition Menu(bool context)
     {
         var open = false; var checkedValue = true;
+        var compact = false;
         RenderFragment preview = b =>
         {
-            if (context) { b.OpenComponent<ShadcnContextMenu>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnContextMenuTrigger>(c, 0, "Right-click this surface"); c.OpenComponent<ShadcnContextMenuContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnContextMenuItem>(x, 0, "New quotation"); AddChecked<ShadcnContextMenuCheckboxItem>(x, 10, checkedValue, "Show archived"); })); c.CloseComponent(); })); b.CloseComponent(); }
+            if (context)
+            {
+                b.OpenComponent<ContextMenuDossierPreview>(0);
+                b.AddAttribute(1, nameof(ContextMenuDossierPreview.ShowArchived), checkedValue);
+                b.AddAttribute(2, nameof(ContextMenuDossierPreview.Density), compact ? "compact" : "comfortable");
+                b.CloseComponent();
+            }
             else { b.OpenComponent<ShadcnDropdownMenu>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDropdownMenuTrigger>(c, 0, "Actions"); c.OpenComponent<ShadcnDropdownMenuContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnDropdownMenuItem>(x, 0, "Duplicate"); AddChecked<ShadcnDropdownMenuCheckboxItem>(x, 10, checkedValue, "Show details"); })); c.CloseComponent(); })); b.CloseComponent(); }
         };
         var slug = context ? "context-menu" : "dropdown-menu";
-        return Example(slug, context ? "Pointer and keyboard context menu" : "Dropdown menu states", preview, [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-checked", "Checked item", v => checkedValue = v, true)], ["keyboard", "typeahead", "checkbox", "radio", "submenu", "rtl", context ? "Shift+F10" : "trigger"]);
+        if (!context)
+            return Example(slug, "Dropdown menu states", preview, [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-checked", "Checked item", v => checkedValue = v, true)], ["keyboard", "typeahead", "checkbox", "radio", "submenu", "rtl", "trigger"]);
+
+        string Source() => $$"""
+            @using Maliev.ShadcnBlazor.Components.Overlays
+
+            <ShadcnContextMenu>
+                <ShadcnContextMenuTrigger Class="file-workspace">
+                    <strong>Quotation files</strong>
+                    <span>QT-4189 · CNC enclosure · 3 files</span>
+                    <p>Right-click or press Shift+F10 for file actions.</p>
+                </ShadcnContextMenuTrigger>
+                <ShadcnContextMenuContent>
+                    <ShadcnContextMenuLabel>File actions</ShadcnContextMenuLabel>
+                    <ShadcnContextMenuGroup>
+                        <ShadcnContextMenuItem OnSelect="@(_ => LastAction = "Opened enclosure.step")">
+                            Open
+                            <ShadcnContextMenuShortcut>Enter</ShadcnContextMenuShortcut>
+                        </ShadcnContextMenuItem>
+                        <ShadcnContextMenuItem Disabled="true">Publish revision</ShadcnContextMenuItem>
+                    </ShadcnContextMenuGroup>
+                    <ShadcnContextMenuSeparator />
+                    <ShadcnContextMenuCheckboxItem @bind-Checked="ShowArchived">Show archived files</ShadcnContextMenuCheckboxItem>
+                    <ShadcnContextMenuRadioGroup @bind-Value="Density">
+                        <ShadcnContextMenuRadioItem Value="comfortable">Comfortable rows</ShadcnContextMenuRadioItem>
+                        <ShadcnContextMenuRadioItem Value="compact">Compact rows</ShadcnContextMenuRadioItem>
+                    </ShadcnContextMenuRadioGroup>
+                    <ShadcnContextMenuSeparator />
+                    <ShadcnContextMenuSub>
+                        <ShadcnContextMenuSubTrigger>Export as</ShadcnContextMenuSubTrigger>
+                        <ShadcnContextMenuSubContent>
+                            <ShadcnContextMenuItem>PDF package</ShadcnContextMenuItem>
+                            <ShadcnContextMenuItem>ZIP archive</ShadcnContextMenuItem>
+                        </ShadcnContextMenuSubContent>
+                    </ShadcnContextMenuSub>
+                    <ShadcnContextMenuSeparator />
+                    <ShadcnContextMenuItem Variant="ShadcnMenuItemVariant.Destructive">
+                        Move to trash
+                        <ShadcnContextMenuShortcut>Delete</ShadcnContextMenuShortcut>
+                    </ShadcnContextMenuItem>
+                </ShadcnContextMenuContent>
+            </ShadcnContextMenu>
+            <p role="status">@LastAction</p>
+
+            @code {
+                private bool ShowArchived { get; set; } = {{checkedValue.ToString().ToLowerInvariant()}};
+                private string Density { get; set; } = "{{(compact ? "compact" : "comfortable")}}";
+                private string LastAction { get; set; } = "No file action selected";
+            }
+            """;
+
+        return Example(
+            slug,
+            "File workspace context menu",
+            preview,
+            [Toggle("context-menu-archived", "Show archived files", value => checkedValue = value, true), Toggle("context-menu-compact", "Compact rows", value => compact = value)],
+            ["pointer", "Shift+F10", "focus-restore", "typeahead", "checkbox", "radio", "submenu", "disabled", "shortcut", "collision", "rtl"],
+            Source()) with
+        {
+            Description = "Right-click a realistic file workspace or use Shift+F10 to inspect selection, density, submenu, disabled, and destructive states.",
+            RazorSourceProvider = Source
+        };
     }
 
     private static ComponentExampleDefinition Menubar()

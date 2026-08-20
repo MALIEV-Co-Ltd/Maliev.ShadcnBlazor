@@ -1,3 +1,3 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<span @attributes="Forwarded" class="@MergeClass("shadcn-context-menu-shortcut")" style="@MergeStyle(null)" data-slot="context-menu-shortcut" aria-hidden="@AriaHidden">@ChildContent</span>
+<span @attributes="Forwarded" class="@MergeClass("shadcn-context-menu-shortcut")" style="@MergeStyle(null)" data-slot="context-menu-shortcut" aria-hidden="@(AriaHidden?"true":"false")">@ChildContent</span>
 @code { [Parameter]public bool AriaHidden{get;set;}=true;[Parameter]public RenderFragment? ChildContent{get;set;}private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","aria-hidden"); }
