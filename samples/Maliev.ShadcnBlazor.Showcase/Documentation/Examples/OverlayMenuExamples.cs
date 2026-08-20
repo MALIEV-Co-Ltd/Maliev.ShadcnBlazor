@@ -17,8 +17,8 @@ internal static class OverlayMenuExamples
         "popover" => [Popover()],
         "hover-card" => [HoverCard()],
         "tooltip" => [Tooltip()],
-        "dropdown-menu" => [Menu(false)],
-        "context-menu" => [Menu(true)],
+        "dropdown-menu" => [DropdownMenu()],
+        "context-menu" => [ContextMenu()],
         "menubar" => [Menubar()],
         "command" => [Command()],
         _ => []
@@ -485,24 +485,132 @@ internal static class OverlayMenuExamples
         };
     }
 
-    private static ComponentExampleDefinition Menu(bool context)
+    private static ComponentExampleDefinition DropdownMenu()
     {
-        var open = false; var checkedValue = true;
+        var loop = true;
+        var showDetails = true;
+        var density = "comfortable";
+
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-dropdown-menu-dossier");
+            b.AddAttribute(2, "data-testid", "dropdown-menu-dossier-preview");
+            b.OpenElement(3, "section");
+            b.AddAttribute(4, "class", "showcase-dropdown-menu-card");
+            b.AddAttribute(5, "aria-label", "Quotation QT-4189 summary");
+            b.OpenElement(6, "div");
+            b.AddAttribute(7, "class", "showcase-dropdown-menu-card__identity");
+            b.OpenElement(8, "span");
+            b.AddAttribute(9, "class", "showcase-dropdown-menu-card__eyebrow");
+            b.AddContent(10, "READY FOR REVIEW");
+            b.CloseElement();
+            b.OpenElement(11, "strong");
+            b.AddContent(12, "Quotation QT-4189");
+            b.CloseElement();
+            b.OpenElement(13, "span");
+            b.AddContent(14, "CNC enclosure · Revision C");
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnDropdownMenu>(20);
+            b.AddAttribute(21, nameof(ShadcnDropdownMenu.Loop), loop);
+            b.AddAttribute(22, nameof(ShadcnDropdownMenu.ChildContent), (RenderFragment)(menu =>
+            {
+                menu.OpenComponent<ShadcnDropdownMenuTrigger>(0);
+                menu.AddAttribute(1, nameof(ShadcnDropdownMenuTrigger.ChildContent), (RenderFragment)(trigger =>
+                {
+                    trigger.AddContent(0, "Actions");
+                    trigger.OpenElement(1, "svg");
+                    trigger.AddAttribute(2, "viewBox", "0 0 24 24");
+                    trigger.AddAttribute(3, "aria-hidden", "true");
+                    trigger.OpenElement(4, "circle"); trigger.AddAttribute(5, "cx", "5"); trigger.AddAttribute(6, "cy", "12"); trigger.AddAttribute(7, "r", "1"); trigger.CloseElement();
+                    trigger.OpenElement(8, "circle"); trigger.AddAttribute(9, "cx", "12"); trigger.AddAttribute(10, "cy", "12"); trigger.AddAttribute(11, "r", "1"); trigger.CloseElement();
+                    trigger.OpenElement(12, "circle"); trigger.AddAttribute(13, "cx", "19"); trigger.AddAttribute(14, "cy", "12"); trigger.AddAttribute(15, "r", "1"); trigger.CloseElement();
+                    trigger.CloseElement();
+                }));
+                menu.CloseComponent();
+                menu.OpenComponent<ShadcnDropdownMenuContent>(10);
+                menu.AddAttribute(11, nameof(ShadcnDropdownMenuContent.ChildContent), (RenderFragment)(content => AddDropdownMenuContent(content, showDetails, density)));
+                menu.CloseComponent();
+            }));
+            b.CloseComponent();
+            b.OpenElement(30, "div");
+            b.AddAttribute(31, "class", "showcase-dropdown-menu-card__meta");
+            b.OpenElement(32, "span"); b.AddContent(33, "Customer"); b.OpenElement(34, "strong"); b.AddContent(35, "Siam Precision Co., Ltd."); b.CloseElement(); b.CloseElement();
+            b.OpenElement(36, "span"); b.AddContent(37, "Total"); b.OpenElement(38, "strong"); b.AddContent(39, "฿128,400"); b.CloseElement(); b.CloseElement();
+            b.OpenElement(40, "span"); b.AddContent(41, "Updated"); b.OpenElement(42, "strong"); b.AddContent(43, "Today, 10:42"); b.CloseElement(); b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+        };
+
+        string Source() => $$"""
+            @using Maliev.ShadcnBlazor.Components.Overlays
+
+            <ShadcnDropdownMenu @bind-Open="Open" Loop="{{loop.ToString().ToLowerInvariant()}}">
+                <ShadcnDropdownMenuTrigger>Actions</ShadcnDropdownMenuTrigger>
+                <ShadcnDropdownMenuContent>
+                    <ShadcnDropdownMenuLabel>Quotation actions</ShadcnDropdownMenuLabel>
+                    <ShadcnDropdownMenuGroup>
+                        <ShadcnDropdownMenuItem>
+                            Open quotation <ShadcnDropdownMenuShortcut>Enter</ShadcnDropdownMenuShortcut>
+                        </ShadcnDropdownMenuItem>
+                        <ShadcnDropdownMenuItem>
+                            Duplicate <ShadcnDropdownMenuShortcut>Ctrl+D</ShadcnDropdownMenuShortcut>
+                        </ShadcnDropdownMenuItem>
+                        <ShadcnDropdownMenuItem Disabled="true">Request approval</ShadcnDropdownMenuItem>
+                    </ShadcnDropdownMenuGroup>
+                    <ShadcnDropdownMenuSeparator />
+                    <ShadcnDropdownMenuCheckboxItem Checked="{{showDetails.ToString().ToLowerInvariant()}}">
+                        Show archived details
+                    </ShadcnDropdownMenuCheckboxItem>
+                    <ShadcnDropdownMenuLabel Inset="true">Interface density</ShadcnDropdownMenuLabel>
+                    <ShadcnDropdownMenuRadioGroup Value="comfortable">
+                        <ShadcnDropdownMenuRadioItem Value="comfortable">Comfortable</ShadcnDropdownMenuRadioItem>
+                        <ShadcnDropdownMenuRadioItem Value="compact">Compact</ShadcnDropdownMenuRadioItem>
+                    </ShadcnDropdownMenuRadioGroup>
+                    <ShadcnDropdownMenuSub>
+                        <ShadcnDropdownMenuSubTrigger>Export</ShadcnDropdownMenuSubTrigger>
+                        <ShadcnDropdownMenuSubContent>
+                            <ShadcnDropdownMenuItem>PDF package</ShadcnDropdownMenuItem>
+                            <ShadcnDropdownMenuItem>CSV costing</ShadcnDropdownMenuItem>
+                            <ShadcnDropdownMenuItem>STEP files</ShadcnDropdownMenuItem>
+                        </ShadcnDropdownMenuSubContent>
+                    </ShadcnDropdownMenuSub>
+                    <ShadcnDropdownMenuSeparator />
+                    <ShadcnDropdownMenuItem Variant="ShadcnMenuItemVariant.Destructive">Archive quotation</ShadcnDropdownMenuItem>
+                </ShadcnDropdownMenuContent>
+            </ShadcnDropdownMenu>
+
+            @code {
+                private bool Open { get; set; }
+            }
+            """;
+
+        return Example(
+            "dropdown-menu",
+            "Quotation action menu",
+            preview,
+            [Toggle("dropdown-menu-loop", "Loop keyboard navigation", value => loop = value, true), Toggle("dropdown-menu-details", "Show archived details", value => showDetails = value, true)],
+            ["trigger", "keyboard", "typeahead", "checkbox", "radio", "submenu", "disabled", "destructive", "rtl", "reduced-motion"],
+            Source()) with
+        {
+            Description = "Open a complete quotation command menu with selection state, shortcuts, disabled actions, and a nested export workflow.",
+            RazorSourceProvider = Source
+        };
+    }
+
+    private static ComponentExampleDefinition ContextMenu()
+    {
+        var checkedValue = true;
         var compact = false;
         RenderFragment preview = b =>
         {
-            if (context)
-            {
-                b.OpenComponent<ContextMenuDossierPreview>(0);
-                b.AddAttribute(1, nameof(ContextMenuDossierPreview.ShowArchived), checkedValue);
-                b.AddAttribute(2, nameof(ContextMenuDossierPreview.Density), compact ? "compact" : "comfortable");
-                b.CloseComponent();
-            }
-            else { b.OpenComponent<ShadcnDropdownMenu>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDropdownMenuTrigger>(c, 0, "Actions"); c.OpenComponent<ShadcnDropdownMenuContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnDropdownMenuItem>(x, 0, "Duplicate"); AddChecked<ShadcnDropdownMenuCheckboxItem>(x, 10, checkedValue, "Show details"); })); c.CloseComponent(); })); b.CloseComponent(); }
+            b.OpenComponent<ContextMenuDossierPreview>(0);
+            b.AddAttribute(1, nameof(ContextMenuDossierPreview.ShowArchived), checkedValue);
+            b.AddAttribute(2, nameof(ContextMenuDossierPreview.Density), compact ? "compact" : "comfortable");
+            b.CloseComponent();
         };
-        var slug = context ? "context-menu" : "dropdown-menu";
-        if (!context)
-            return Example(slug, "Dropdown menu states", preview, [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-checked", "Checked item", v => checkedValue = v, true)], ["keyboard", "typeahead", "checkbox", "radio", "submenu", "rtl", "trigger"]);
 
         string Source() => $$"""
             @using Maliev.ShadcnBlazor.Components.Overlays
@@ -553,7 +661,7 @@ internal static class OverlayMenuExamples
             """;
 
         return Example(
-            slug,
+            "context-menu",
             "File workspace context menu",
             preview,
             [Toggle("context-menu-archived", "Show archived files", value => checkedValue = value, true), Toggle("context-menu-compact", "Compact rows", value => compact = value)],
@@ -817,6 +925,77 @@ internal static class OverlayMenuExamples
         content.OpenComponent<ShadcnMenubarSeparator>(20); content.CloseComponent();
         AddMenubarItem(content, 30, "Save draft", "Ctrl+S");
     });
+
+    private static void AddDropdownMenuContent(RenderTreeBuilder content, bool showDetails, string density)
+    {
+        AddText<ShadcnDropdownMenuLabel>(content, 0, "Quotation actions");
+        content.OpenComponent<ShadcnDropdownMenuGroup>(10);
+        content.AddAttribute(11, nameof(ShadcnDropdownMenuGroup.ChildContent), (RenderFragment)(group =>
+        {
+            AddDropdownMenuItem(group, 0, "Open quotation", "Enter");
+            AddDropdownMenuItem(group, 10, "Duplicate", "Ctrl+D");
+            group.OpenComponent<ShadcnDropdownMenuItem>(20);
+            group.AddAttribute(21, nameof(ShadcnDropdownMenuItem.Disabled), true);
+            group.AddAttribute(22, nameof(ShadcnDropdownMenuItem.ChildContent), Text("Request approval"));
+            group.CloseComponent();
+        }));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuSeparator>(20); content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuCheckboxItem>(30);
+        content.AddAttribute(31, nameof(ShadcnDropdownMenuCheckboxItem.Checked), showDetails);
+        content.AddAttribute(32, nameof(ShadcnDropdownMenuCheckboxItem.ChildContent), Text("Show archived details"));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuLabel>(40);
+        content.AddAttribute(41, nameof(ShadcnDropdownMenuLabel.Inset), true);
+        content.AddAttribute(42, nameof(ShadcnDropdownMenuLabel.ChildContent), Text("Interface density"));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuRadioGroup>(50);
+        content.AddAttribute(51, nameof(ShadcnDropdownMenuRadioGroup.Value), density);
+        content.AddAttribute(52, nameof(ShadcnDropdownMenuRadioGroup.ChildContent), (RenderFragment)(radio =>
+        {
+            AddDropdownRadioItem(radio, 0, "comfortable", "Comfortable");
+            AddDropdownRadioItem(radio, 10, "compact", "Compact");
+        }));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuSub>(60);
+        content.AddAttribute(61, nameof(ShadcnDropdownMenuSub.ChildContent), (RenderFragment)(sub =>
+        {
+            AddText<ShadcnDropdownMenuSubTrigger>(sub, 0, "Export");
+            sub.OpenComponent<ShadcnDropdownMenuSubContent>(10);
+            sub.AddAttribute(11, nameof(ShadcnDropdownMenuSubContent.ChildContent), (RenderFragment)(export =>
+            {
+                AddText<ShadcnDropdownMenuItem>(export, 0, "PDF package");
+                AddText<ShadcnDropdownMenuItem>(export, 10, "CSV costing");
+                AddText<ShadcnDropdownMenuItem>(export, 20, "STEP files");
+            }));
+            sub.CloseComponent();
+        }));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuSeparator>(70); content.CloseComponent();
+        content.OpenComponent<ShadcnDropdownMenuItem>(80);
+        content.AddAttribute(81, nameof(ShadcnDropdownMenuItem.Variant), ShadcnMenuItemVariant.Destructive);
+        content.AddAttribute(82, nameof(ShadcnDropdownMenuItem.ChildContent), Text("Archive quotation"));
+        content.CloseComponent();
+    }
+
+    private static void AddDropdownMenuItem(RenderTreeBuilder builder, int sequence, string text, string shortcut)
+    {
+        builder.OpenComponent<ShadcnDropdownMenuItem>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnDropdownMenuItem.ChildContent), (RenderFragment)(child =>
+        {
+            child.AddContent(0, text);
+            AddText<ShadcnDropdownMenuShortcut>(child, 1, shortcut);
+        }));
+        builder.CloseComponent();
+    }
+
+    private static void AddDropdownRadioItem(RenderTreeBuilder builder, int sequence, string value, string text)
+    {
+        builder.OpenComponent<ShadcnDropdownMenuRadioItem>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnDropdownMenuRadioItem.Value), value);
+        builder.AddAttribute(sequence + 2, nameof(ShadcnDropdownMenuRadioItem.ChildContent), Text(text));
+        builder.CloseComponent();
+    }
 
     private static void AddMenubarEditMenu(RenderTreeBuilder b, int sequence) => AddMenubarMenu(b, sequence, "Edit", content =>
     {

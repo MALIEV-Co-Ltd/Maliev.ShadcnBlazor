@@ -1238,9 +1238,12 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuCheckboxItem
   Boolean Checked
   EventCallback<Boolean> CheckedChanged
   RenderFragment ChildContent
+  Boolean CloseOnSelect
   Boolean Disabled
+  Boolean Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuContent
   ShadcnOverlayAlign Align
+  Double AlignOffset
   RenderFragment ChildContent
   ShadcnOverlaySide Side
   Double SideOffset
@@ -1265,7 +1268,9 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuRadioGroup
   EventCallback<String> ValueChanged
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuRadioItem
   RenderFragment ChildContent
+  Boolean CloseOnSelect
   Boolean Disabled
+  Boolean Inset
   String Value
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSeparator
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuShortcut
@@ -1276,9 +1281,15 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSub
   Boolean Open
   EventCallback<Boolean> OpenChanged
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSubContent
+  ShadcnOverlayAlign Align
+  Double AlignOffset
   RenderFragment ChildContent
+  ShadcnOverlaySide Side
+  Double SideOffset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSubTrigger
   RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuTrigger
   RenderFragment ChildContent
   Boolean Disabled

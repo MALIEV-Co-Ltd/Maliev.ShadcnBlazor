@@ -1,3 +1,13 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<CascadingValue Value="Context" IsFixed="false"><div @attributes="Forwarded" class="@MergeClass("shadcn-dropdown-menu-radio-group")" style="@MergeStyle(null)" data-slot="dropdown-menu-radio-group" role="group">@ChildContent</div></CascadingValue>
-@code { [Parameter]public string? Value{get;set;}[Parameter]public EventCallback<string?> ValueChanged{get;set;}[Parameter]public RenderFragment? ChildContent{get;set;}private ShadcnMenuRadioContext Context=>new(Value,ValueChanged);private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","role"); }
+<CascadingValue Value="Context"><div @attributes="Forwarded" class="@MergeClass("shadcn-dropdown-menu-radio-group")" style="@MergeStyle(null)" data-slot="dropdown-menu-radio-group" role="group">@ChildContent</div></CascadingValue>
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private string? _value, _last;
+    private bool _initialized;
+    private ShadcnMenuRadioContext Context => new(_value, EventCallback.Factory.Create<string?>(this, SelectAsync));
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "role");
+    protected override void OnParametersSet() { if (!_initialized || Value != _last) _value = Value; _last = Value; _initialized = true; }
+    private async Task SelectAsync(string? value) { if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(value); else { _value = value; await InvokeAsync(StateHasChanged); } }
+}

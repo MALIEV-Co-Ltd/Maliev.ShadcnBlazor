@@ -1,3 +1,10 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="Forwarded" class="@MergeClass("shadcn-dropdown-menu-sub-trigger")" style="@MergeStyle(null)" data-slot="dropdown-menu-sub-trigger" data-state="@(Sub.Open?"open":"closed")" role="menuitem" aria-haspopup="menu" aria-expanded="@(Sub.Open?"true":"false")" aria-controls="@Sub.ContentId" tabindex="-1" @onclick="ToggleAsync">@ChildContent<span aria-hidden="true">›</span></div>
-@code { [CascadingParameter]private ShadcnDropdownMenuSub Sub{get;set;}=default!;[Parameter]public RenderFragment? ChildContent{get;set;}private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","data-state","role","aria-haspopup","aria-expanded","aria-controls","tabindex");private Task ToggleAsync()=>Sub.SetOpenAsync(!Sub.Open).AsTask(); }
+<div @attributes="Forwarded" id="@Sub.TriggerId" class="@MergeClass("shadcn-dropdown-menu-sub-trigger")" style="@MergeStyle(null)" data-slot="dropdown-menu-sub-trigger" data-state="@(Sub.EffectiveOpen?"open":"closed")" data-disabled="@(Disabled?"true":null)" data-inset="@(Inset?"true":null)" role="menuitem" aria-haspopup="menu" aria-expanded="@(Sub.EffectiveOpen?"true":"false")" aria-controls="@Sub.ContentId" aria-disabled="@(Disabled?"true":null)" tabindex="-1" @onclick="ToggleAsync">@ChildContent<svg data-slot="dropdown-menu-sub-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></div>
+@code {
+    [CascadingParameter] private ShadcnDropdownMenuSub Sub { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Inset { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("id", "data-slot", "data-state", "data-disabled", "data-inset", "role", "aria-haspopup", "aria-expanded", "aria-controls", "aria-disabled", "tabindex");
+    private Task ToggleAsync() => Disabled ? Task.CompletedTask : Sub.ToggleAsync();
+}

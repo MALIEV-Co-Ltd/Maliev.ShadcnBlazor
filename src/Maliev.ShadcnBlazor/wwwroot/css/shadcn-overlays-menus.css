@@ -207,6 +207,7 @@
 .shadcn-dropdown-menu-item:focus, .shadcn-context-menu-item:focus, .shadcn-dropdown-menu-checkbox-item:focus, .shadcn-context-menu-checkbox-item:focus, .shadcn-dropdown-menu-radio-item:focus, .shadcn-context-menu-radio-item:focus, .shadcn-dropdown-menu-sub-trigger:focus, .shadcn-context-menu-sub-trigger:focus { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 [data-slot$="menu-item"][data-variant="destructive"] { color: var(--shadcn-destructive); }
 [data-slot$="menu-item"][data-disabled="true"], [data-slot$="checkbox-item"][data-disabled="true"], [data-slot$="radio-item"][data-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.shadcn-dropdown-menu-sub-trigger[data-disabled="true"] { opacity: .5; pointer-events: none; }
 .shadcn-dropdown-menu-label, .shadcn-context-menu-label { padding: calc(0.375rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.75rem; font-weight: 500; }
 .shadcn-dropdown-menu-separator, .shadcn-context-menu-separator { height: 1px; margin-block: calc(0.25rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-border); }
 .shadcn-dropdown-menu-shortcut, .shadcn-context-menu-shortcut { margin-inline-start: auto; color: var(--shadcn-muted-foreground); font-size: 0.75rem; }
@@ -246,6 +247,97 @@
     .shadcn-context-menu-checkbox-item:focus,
     .shadcn-context-menu-radio-item:focus,
     .shadcn-context-menu-sub-trigger:focus { background: Highlight; color: HighlightText; }
+}
+
+/* Dropdown menu follows the pinned Base UI composition while retaining the
+   library's semantic tokens and resilient text boundaries. */
+.shadcn-dropdown-menu-trigger {
+    display: inline-flex;
+    min-block-size: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: calc(.5rem * var(--shadcn-spacing-multiplier));
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    padding: calc(.5rem * var(--shadcn-spacing-multiplier)) calc(.75rem * var(--shadcn-spacing-multiplier));
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    box-shadow: var(--shadcn-shadow-xs);
+    cursor: pointer;
+    transition: background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter);
+}
+.shadcn-dropdown-menu-trigger:hover,
+.shadcn-dropdown-menu-trigger[data-state="open"] { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.shadcn-dropdown-menu-trigger:focus-visible { outline: none; box-shadow: 0 0 0 var(--shadcn-focus-ring-width) var(--shadcn-ring); }
+.shadcn-dropdown-menu-trigger:disabled { opacity: .5; cursor: not-allowed; }
+.shadcn-dropdown-menu-trigger > svg { inline-size: 1rem; block-size: 1rem; flex: none; fill: currentColor; }
+.shadcn-dropdown-menu-content,
+.shadcn-dropdown-menu-sub-content {
+    min-inline-size: 12rem;
+    max-inline-size: min(22rem, calc(100vw - 1rem));
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: color-mix(in oklch, var(--shadcn-popover) 97%, transparent);
+    transform-origin: var(--shadcn-transform-origin);
+    animation: shadcn-dropdown-menu-content-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter);
+}
+.shadcn-dropdown-menu-item,
+.shadcn-dropdown-menu-checkbox-item,
+.shadcn-dropdown-menu-radio-item,
+.shadcn-dropdown-menu-sub-trigger {
+    min-inline-size: 0;
+    line-height: 1.25rem;
+    overflow-wrap: anywhere;
+}
+.shadcn-dropdown-menu-checkbox-item,
+.shadcn-dropdown-menu-radio-item { padding-inline-start: calc(2rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-dropdown-menu-item[data-inset="true"],
+.shadcn-dropdown-menu-label[data-inset="true"],
+.shadcn-dropdown-menu-sub-trigger[data-inset="true"] { padding-inline-start: calc(2rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-dropdown-menu-item-indicator {
+    position: absolute;
+    inset-inline-start: calc(.5rem * var(--shadcn-spacing-multiplier));
+    display: inline-flex;
+    inline-size: 1rem;
+    block-size: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+[data-slot="dropdown-menu-item-indicator"],
+[data-slot="dropdown-menu-sub-trigger-icon"] {
+    inline-size: 1rem;
+    block-size: 1rem;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+[data-slot="dropdown-menu-sub-trigger-icon"] { margin-inline-start: auto; }
+:dir(rtl) [data-slot="dropdown-menu-sub-trigger-icon"] { transform: scaleX(-1); }
+.shadcn-dropdown-menu-shortcut { flex: none; padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); letter-spacing: .04em; white-space: nowrap; }
+.shadcn-dropdown-menu-item[data-variant="destructive"]:focus { background: color-mix(in oklch, var(--shadcn-destructive) 12%, transparent); color: var(--shadcn-destructive); }
+@keyframes shadcn-dropdown-menu-content-in { from { opacity: 0; scale: .98; } }
+@media (prefers-reduced-motion: reduce) {
+    .shadcn-dropdown-menu-trigger { transition: none; }
+    .shadcn-dropdown-menu-content,
+    .shadcn-dropdown-menu-sub-content { animation: none; }
+}
+@media (forced-colors: active) {
+    .shadcn-dropdown-menu-trigger,
+    .shadcn-dropdown-menu-content,
+    .shadcn-dropdown-menu-sub-content { border-color: CanvasText; forced-color-adjust: none; background: Canvas; color: CanvasText; }
+    .shadcn-dropdown-menu-trigger:hover,
+    .shadcn-dropdown-menu-trigger[data-state="open"],
+    .shadcn-dropdown-menu-item:focus,
+    .shadcn-dropdown-menu-checkbox-item:focus,
+    .shadcn-dropdown-menu-radio-item:focus,
+    .shadcn-dropdown-menu-sub-trigger:focus { background: Highlight; color: HighlightText; }
 }
 
 .shadcn-menubar { display: flex; width: max-content; max-width: 100%; align-items: center; gap: calc(0.125rem * var(--shadcn-spacing-multiplier)); min-height: 2.5rem; overflow-x: auto; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); padding: calc(0.25rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-background); color: var(--shadcn-foreground); scrollbar-width: none; }

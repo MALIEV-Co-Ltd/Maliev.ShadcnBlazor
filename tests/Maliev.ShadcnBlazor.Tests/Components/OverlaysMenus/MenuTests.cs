@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.OverlaysMenus;
@@ -59,6 +60,98 @@ public sealed class MenuTests : BunitContext
         cut.FindAll("[data-slot='dropdown-menu-radio-item']")[1].Click();
         Assert.Equal([false], checkedChanges);
         Assert.Equal(["comfortable"], radioChanges);
+    }
+
+    [Fact]
+    public void DropdownMenuSelectionItemsSupportUncontrolledStateAndPinnedParityAttributes()
+    {
+        var cut = Render<ShadcnDropdownMenu>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDropdownMenuTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnDropdownMenuTrigger.ChildContent), Text("Quotation actions"));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnDropdownMenuContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnDropdownMenuContent.ChildContent), (RenderFragment)(menu =>
+                {
+                    menu.OpenComponent<ShadcnDropdownMenuCheckboxItem>(0);
+                    menu.AddAttribute(1, nameof(ShadcnDropdownMenuCheckboxItem.Inset), true);
+                    menu.AddAttribute(2, nameof(ShadcnDropdownMenuCheckboxItem.CloseOnSelect), false);
+                    menu.AddAttribute(3, nameof(ShadcnDropdownMenuCheckboxItem.ChildContent), Text("Show archived quotations"));
+                    menu.CloseComponent();
+                    menu.OpenComponent<ShadcnDropdownMenuRadioGroup>(4);
+                    menu.AddAttribute(5, nameof(ShadcnDropdownMenuRadioGroup.Value), "comfortable");
+                    menu.AddAttribute(6, nameof(ShadcnDropdownMenuRadioGroup.ChildContent), (RenderFragment)(radio =>
+                    {
+                        AddRadioItem(radio, 0, "comfortable", "Comfortable", false);
+                        AddRadioItem(radio, 5, "compact", "Compact", true);
+                    }));
+                    menu.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var checkbox = cut.Find("[data-slot='dropdown-menu-checkbox-item']");
+        Assert.Equal("unchecked", checkbox.GetAttribute("data-state"));
+        Assert.Equal("true", checkbox.GetAttribute("data-inset"));
+        checkbox.Click();
+        checkbox = cut.Find("[data-slot='dropdown-menu-checkbox-item']");
+        Assert.Equal("checked", checkbox.GetAttribute("data-state"));
+        Assert.Equal("true", checkbox.GetAttribute("aria-checked"));
+        Assert.Single(checkbox.QuerySelectorAll("svg[data-slot='dropdown-menu-item-indicator']"));
+
+        var compact = cut.FindAll("[data-slot='dropdown-menu-radio-item']")[1];
+        Assert.Equal("true", compact.GetAttribute("data-inset"));
+        compact.Click();
+        Assert.Equal("false", cut.FindAll("[data-slot='dropdown-menu-radio-item']")[0].GetAttribute("aria-checked"));
+        Assert.Equal("checked", cut.FindAll("[data-slot='dropdown-menu-radio-item']")[1].GetAttribute("data-state"));
+        Assert.Single(cut.FindAll("[data-slot='dropdown-menu-radio-item']")[1].QuerySelectorAll("svg[data-slot='dropdown-menu-item-indicator']"));
+    }
+
+    [Fact]
+    public void DropdownMenuSubmenuExposesPositioningAndDisabledTriggerSemantics()
+    {
+        var cut = Render<ShadcnDropdownMenu>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDropdownMenuTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnDropdownMenuTrigger.ChildContent), Text("Quotation actions"));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnDropdownMenuContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnDropdownMenuContent.AlignOffset), 6d);
+                builder.AddAttribute(4, nameof(ShadcnDropdownMenuContent.ChildContent), (RenderFragment)(menu =>
+                {
+                    menu.OpenComponent<ShadcnDropdownMenuSub>(0);
+                    menu.AddAttribute(1, nameof(ShadcnDropdownMenuSub.Open), true);
+                    menu.AddAttribute(2, nameof(ShadcnDropdownMenuSub.ChildContent), (RenderFragment)(sub =>
+                    {
+                        sub.OpenComponent<ShadcnDropdownMenuSubTrigger>(0);
+                        sub.AddAttribute(1, nameof(ShadcnDropdownMenuSubTrigger.Disabled), true);
+                        sub.AddAttribute(2, nameof(ShadcnDropdownMenuSubTrigger.Inset), true);
+                        sub.AddAttribute(3, nameof(ShadcnDropdownMenuSubTrigger.ChildContent), Text("Export"));
+                        sub.CloseComponent();
+                        sub.OpenComponent<ShadcnDropdownMenuSubContent>(4);
+                        sub.AddAttribute(5, nameof(ShadcnDropdownMenuSubContent.ChildContent), Text("PDF package"));
+                        sub.CloseComponent();
+                    }));
+                    menu.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var trigger = cut.Find("[data-slot='dropdown-menu-sub-trigger']");
+        var content = cut.Find("[data-slot='dropdown-menu-sub-content']");
+        Assert.False(string.IsNullOrWhiteSpace(trigger.Id));
+        Assert.Equal("true", trigger.GetAttribute("data-disabled"));
+        Assert.Equal("true", trigger.GetAttribute("data-inset"));
+        Assert.Equal("true", trigger.GetAttribute("aria-disabled"));
+        Assert.Equal(trigger.Id, content.GetAttribute("aria-labelledby"));
+        Assert.Equal("right", content.GetAttribute("data-side"));
+        Assert.Equal("start", content.GetAttribute("data-align"));
+        Assert.Equal("-1", content.GetAttribute("tabindex"));
+        Assert.Single(trigger.QuerySelectorAll("svg[data-slot='dropdown-menu-sub-trigger-icon']"));
     }
 
     [Fact]
@@ -192,6 +285,30 @@ public sealed class MenuTests : BunitContext
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-context-menu-content", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-context-menu-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DropdownMenuStylesCoverMotionForcedColorsRtlAndLongContentBoundaries()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains(":dir(rtl) [data-slot=\"dropdown-menu-sub-trigger-icon\"]", css, StringComparison.Ordinal);
+        Assert.Contains("max-inline-size: min(22rem, calc(100vw - 1rem))", css, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: anywhere", css, StringComparison.Ordinal);
+    }
+
+    private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private static void AddRadioItem(RenderTreeBuilder builder, int sequence, string value, string text, bool inset)
+    {
+        builder.OpenComponent<ShadcnDropdownMenuRadioItem>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnDropdownMenuRadioItem.Value), value);
+        builder.AddAttribute(sequence + 2, nameof(ShadcnDropdownMenuRadioItem.Inset), inset);
+        builder.AddAttribute(sequence + 3, nameof(ShadcnDropdownMenuRadioItem.CloseOnSelect), false);
+        builder.AddAttribute(sequence + 4, nameof(ShadcnDropdownMenuRadioItem.ChildContent), Text(text));
+        builder.CloseComponent();
     }
 
     private static string FindRoot()

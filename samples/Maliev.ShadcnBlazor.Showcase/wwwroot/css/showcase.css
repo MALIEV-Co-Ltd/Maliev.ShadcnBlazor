@@ -7520,6 +7520,54 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-context-menu-workspace__files > div:hover { background: Highlight; color: HighlightText; }
 }
 
+/* Dropdown menu: a compact quotation record gives the trigger real product
+   context while the popup remains user-triggered and collision-aware. */
+.showcase-dropdown-menu-dossier {
+    display: grid;
+    inline-size: min(100%, 38rem);
+    margin-inline: auto;
+    place-items: center;
+}
+
+.showcase-dropdown-menu-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    inline-size: 100%;
+    align-items: start;
+    gap: 1rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+    padding: 1.25rem;
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-dropdown-menu-card__identity { display: grid; min-inline-size: 0; gap: .25rem; }
+.showcase-dropdown-menu-card__identity strong { font-size: 1rem; font-weight: 600; line-height: 1.4; }
+.showcase-dropdown-menu-card__identity > span:last-child { color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.45; }
+.showcase-dropdown-menu-card__eyebrow { color: var(--shadcn-muted-foreground); font-size: .625rem; font-weight: 700; letter-spacing: .08em; }
+.showcase-dropdown-menu-card__meta {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    border-block-start: 1px solid var(--shadcn-border);
+    padding-block-start: 1rem;
+}
+.showcase-dropdown-menu-card__meta > span { display: grid; min-inline-size: 0; gap: .2rem; color: var(--shadcn-muted-foreground); font-size: .6875rem; }
+.showcase-dropdown-menu-card__meta strong { overflow: hidden; color: var(--shadcn-foreground); font-size: .75rem; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 32rem) {
+    .showcase-dropdown-menu-card { padding: 1rem; }
+    .showcase-dropdown-menu-card__meta { grid-template-columns: 1fr 1fr; }
+    .showcase-dropdown-menu-card__meta > span:first-child { grid-column: 1 / -1; }
+}
+
+@media (forced-colors: active) {
+    .showcase-dropdown-menu-card { border-color: CanvasText; }
+}
+
 /* Menubar: a compact, real editor shell keeps the primitive in context while
    preserving enough room for collision-aware menus at narrow widths. */
 .showcase-drawer-dossier {
