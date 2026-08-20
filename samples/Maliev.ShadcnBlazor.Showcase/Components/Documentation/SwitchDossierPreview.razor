@@ -1,19 +1,55 @@
 @using Maliev.ShadcnBlazor.Components.Selection
 
-<label class="action-control-label" data-testid="switch-dossier-preview">
-    <ShadcnSwitch Value="CurrentValue" ValueChanged="HandleChanged" Size="Size" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="notifications" AdditionalAttributes="Attributes" />
-    <span>Enable notifications</span>
-</label>
+<section class="showcase-switch-dossier" aria-labelledby="notification-preferences-title" data-testid="switch-dossier-preview">
+    <header class="showcase-switch-dossier__header">
+        <div dir="auto">
+            <h3 id="notification-preferences-title">Notification preferences</h3>
+            <p>Choose which production updates reach your team.</p>
+        </div>
+        <span class="showcase-switch-dossier__scope" dir="auto">Workspace</span>
+    </header>
+
+    <div class="showcase-switch-dossier__setting">
+        <label for="production-updates-switch" dir="auto">
+            <strong>Production updates</strong>
+            <span>Receive alerts when drawings are approved or a job needs attention.</span>
+        </label>
+        <ShadcnSwitch Value="CurrentValue"
+                      ValueChanged="HandleChanged"
+                      Size="Size"
+                      Disabled="Disabled"
+                      ReadOnly="ReadOnly"
+                      Invalid="Invalid"
+                      Name="production-updates"
+                      AdditionalAttributes="Attributes" />
+    </div>
+
+    <p class="showcase-switch-dossier__status" data-state="@(CurrentValue ? "checked" : "unchecked")" dir="auto" role="status" aria-live="polite">
+        <span aria-hidden="true"></span>
+        @(CurrentValue ? "Production updates are enabled." : "Production updates are paused.")
+    </p>
+</section>
 
 @code {
     [Parameter] public bool Value { get; set; }
-    [Parameter] public ShadcnSwitchSize Size { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+    [Parameter] public ShadcnSwitchSize Size { get; set; } = ShadcnSwitchSize.Default;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public bool Invalid { get; set; }
     private bool CurrentValue;
     private bool LastValue;
     protected override void OnParametersSet() { if (Value != LastValue) CurrentValue = Value; LastValue = Value; }
-    private Task HandleChanged(bool value) { CurrentValue = value; return Task.CompletedTask; }
-    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object> { ["data-testid"] = "action-switch", ["aria-label"] = "Enable notifications" };
+    private async Task HandleChanged(bool value)
+    {
+        CurrentValue = value;
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
+    {
+        ["id"] = "production-updates-switch",
+        ["data-testid"] = "action-switch",
+        ["aria-label"] = "Production updates"
+    };
 }

@@ -109,6 +109,39 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void UncontrolledSwitchOwnsItsChangedState()
+    {
+        var cut = Render<ShadcnSwitch>();
+
+        cut.Find("input").Change(true);
+
+        var input = cut.Find("input[data-slot='switch']");
+        Assert.True(input.HasAttribute("checked"));
+        Assert.Equal("true", input.GetAttribute("aria-checked"));
+        Assert.Equal("checked", input.GetAttribute("data-state"));
+        Assert.Equal("checked", cut.Find("[data-slot='switch-root']").GetAttribute("data-state"));
+        Assert.Equal("checked", cut.Find("[data-slot='switch-thumb']").GetAttribute("data-state"));
+    }
+
+    [Fact]
+    public void ControlledSwitchKeepsCallerOwnedValueUntilParametersChange()
+    {
+        var requested = false;
+        var cut = Render<ShadcnSwitch>(parameters => parameters
+            .Add(component => component.Value, false)
+            .Add(component => component.ValueChanged, EventCallback.Factory.Create<bool>(this, value => requested = value)));
+
+        cut.Find("input").Change(true);
+
+        Assert.True(requested);
+        Assert.Equal("false", cut.Find("input").GetAttribute("aria-checked"));
+        cut.Render(parameters => parameters
+            .Add(component => component.Value, true)
+            .Add(component => component.ValueChanged, EventCallback.Factory.Create<bool>(this, value => requested = value)));
+        Assert.Equal("true", cut.Find("input").GetAttribute("aria-checked"));
+    }
+
+    [Fact]
     public void RadioGroupUsesSharedNameAndRequestsTypedValue()
     {
         int requested = 0;

@@ -3,7 +3,13 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
-<span class="shadcn-switch-root" data-slot="switch-root" data-state="@State" data-size="@SizeValue">
+<span class="shadcn-switch-root"
+      data-slot="switch-root"
+      data-state="@State"
+      data-size="@SizeValue"
+      data-disabled="@(EffectiveDisabled ? "true" : null)"
+      data-readonly="@(ReadOnly ? "true" : null)"
+      data-invalid="@(EffectiveInvalid ? "true" : null)">
     <input @attributes="ForwardedAttributes"
            id="@EffectiveId"
            class="@MergeClass("shadcn-switch")"
@@ -12,9 +18,9 @@
            role="switch"
            name="@Name"
            value="@FormValue"
-           checked="@Value"
+           checked="@CurrentValue"
            disabled="@EffectiveDisabled"
-           aria-checked="@(Value ? "true" : "false")"
+           aria-checked="@(CurrentValue ? "true" : "false")"
            aria-readonly="@(ReadOnly ? "true" : null)"
            aria-invalid="@(EffectiveInvalid ? "true" : null)"
            aria-describedby="@FieldContext?.AriaDescribedBy"
@@ -23,7 +29,7 @@
            data-size="@SizeValue"
            @onclick:preventDefault="@ReadOnly"
            @onchange="HandleChangeAsync" />
-    <span class="shadcn-switch-thumb" data-slot="switch-thumb" aria-hidden="true"></span>
+    <span class="shadcn-switch-thumb" data-slot="switch-thumb" data-state="@State" aria-hidden="true"></span>
 </span>
 
 @code {
@@ -40,9 +46,12 @@
     [Parameter] public string FormValue { get; set; } = "on";
 
     private readonly string GeneratedId = $"shadcn-switch-{Guid.NewGuid():N}";
+    private bool CurrentValue;
+    private bool LastParameterValue;
+    private bool Initialized;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
-    private string State => Value ? "checked" : "unchecked";
+    private string State => CurrentValue ? "checked" : "unchecked";
     private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
     private string SizeValue => Size switch
     {
@@ -52,12 +61,25 @@
     };
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "role", "name", "value", "checked", "disabled", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state", "data-size");
 
-    protected override void OnParametersSet() => _ = SizeValue;
+    protected override void OnParametersSet()
+    {
+        _ = SizeValue;
+        if (!Initialized || ValueChanged.HasDelegate || Value != LastParameterValue)
+            CurrentValue = Value;
+
+        LastParameterValue = Value;
+        Initialized = true;
+    }
 
     private async Task HandleChangeAsync(ChangeEventArgs args)
     {
         if (EffectiveDisabled || ReadOnly) return;
-        await ValueChanged.InvokeAsync(args.Value is bool value ? value : !Value);
+        var nextValue = args.Value is bool value ? value : !CurrentValue;
+        if (ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync(nextValue);
+        else
+            CurrentValue = nextValue;
+
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
     }

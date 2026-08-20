@@ -339,14 +339,50 @@ internal static class ActionSelectionExamples
         {
             builder.OpenComponent<SwitchDossierPreview>(0);
             builder.AddAttribute(1, nameof(SwitchDossierPreview.Value), value);
-            builder.AddAttribute(2, nameof(SwitchDossierPreview.Size), size);
-            builder.AddAttribute(3, nameof(SwitchDossierPreview.Disabled), disabled);
-            builder.AddAttribute(4, nameof(SwitchDossierPreview.ReadOnly), readOnly);
-            builder.AddAttribute(5, nameof(SwitchDossierPreview.Invalid), invalid);
+            builder.AddAttribute(2, nameof(SwitchDossierPreview.ValueChanged), EventCallback.Factory.Create<bool>(new object(), next => value = next));
+            builder.AddAttribute(3, nameof(SwitchDossierPreview.Size), size);
+            builder.AddAttribute(4, nameof(SwitchDossierPreview.Disabled), disabled);
+            builder.AddAttribute(5, nameof(SwitchDossierPreview.ReadOnly), readOnly);
+            builder.AddAttribute(6, nameof(SwitchDossierPreview.Invalid), invalid);
             builder.CloseComponent();
         };
-        string Source() => $"<ShadcnSwitch Value=\"{value.ToString().ToLowerInvariant()}\" Size=\"{size}\" Disabled=\"{disabled.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" aria-label=\"Enable notifications\" />";
-        return Example("switch", "Boolean switch", "Preview checked state, both sizes, disabled, read-only, invalid, and RTL thumb motion.",
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<section aria-labelledby="notification-preferences-title">
+    <header>
+        <div dir="auto">
+            <h3 id="notification-preferences-title">Notification preferences</h3>
+            <p>Choose which production updates reach your team.</p>
+        </div>
+        <span dir="auto">Workspace</span>
+    </header>
+
+    <div>
+        <label for="production-updates-switch" dir="auto">
+            <strong>Production updates</strong>
+            <span>Receive alerts when drawings are approved or a job needs attention.</span>
+        </label>
+        <ShadcnSwitch id="production-updates-switch"
+                      @bind-Value="ProductionUpdates"
+                      Size="ShadcnSwitchSize.{{size}}"
+                      Disabled="{{disabled.ToString().ToLowerInvariant()}}"
+                      ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}"
+                      Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                      Name="production-updates"
+                      aria-label="Production updates" />
+    </div>
+
+    <p dir="auto" role="status" aria-live="polite">
+        @(ProductionUpdates ? "Production updates are enabled." : "Production updates are paused.")
+    </p>
+</section>
+
+@code {
+    private bool ProductionUpdates = {{value.ToString().ToLowerInvariant()}};
+}
+""";
+        return Example("switch", "Notification preference", "Try a real workspace notification setting while comparing size, availability, validation, and RTL thumb motion.",
             Source(), preview,
             [
                 Toggle("switch-value", "On", v => value = v, true),
