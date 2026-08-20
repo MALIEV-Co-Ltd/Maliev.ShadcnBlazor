@@ -176,6 +176,40 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void SkeletonDossierShowsACompleteInteractiveLoadingStateAndTracksItsSource()
+    {
+        var skeleton = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("skeleton").Single();
+        var loading = Render(skeleton.Preview);
+
+        Assert.Equal("true", loading.Find("[data-testid='skeleton-dossier-preview']").GetAttribute("aria-busy"));
+        Assert.Equal(12, loading.FindAll("[data-testid='skeleton-loading-list'] [data-slot='skeleton']").Count);
+        Assert.Equal("Show loaded queue", loading.Find("[data-testid='skeleton-state-toggle']").TextContent.Trim());
+
+        loading.Find("[data-testid='skeleton-state-toggle']").Click();
+        Assert.Equal("false", loading.Find("[data-testid='skeleton-dossier-preview']").GetAttribute("aria-busy"));
+        Assert.Empty(loading.FindAll("[data-testid='skeleton-loading-list']"));
+        Assert.Equal(3, loading.FindAll("[data-testid='skeleton-loaded-list'] > li").Count);
+        Assert.Contains("WO-2486", loading.Markup, StringComparison.Ordinal);
+        Assert.Equal("Reset loading preview", loading.Find("[data-testid='skeleton-state-toggle']").TextContent.Trim());
+
+        skeleton.Controls.Single(control => control.Id == "skeleton-circle").Apply("true");
+        skeleton.Controls.Single(control => control.Id == "skeleton-motion").Apply("false");
+        var configured = Render(skeleton.Preview);
+        Assert.All(configured.FindAll("[data-testid='skeleton-loading-list'] [data-testid='skeleton-media']"), media =>
+        {
+            Assert.Equal("circle", media.GetAttribute("data-shape"));
+            Assert.Equal("none", media.GetAttribute("data-animation"));
+        });
+        Assert.All(configured.FindAll("[data-testid='skeleton-loading-list'] [data-slot='skeleton']"), placeholder =>
+            Assert.Equal("none", placeholder.GetAttribute("data-animation")));
+        Assert.Contains("private bool RoundMedia = true;", skeleton.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private ShadcnSkeletonAnimation Motion = ShadcnSkeletonAnimation.None;", skeleton.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool Loading = true;", skeleton.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Show loaded queue", skeleton.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("WO-2486", skeleton.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AlertDossierUsesTheComposedShadcnCalloutPattern()
     {
         var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("alert"));

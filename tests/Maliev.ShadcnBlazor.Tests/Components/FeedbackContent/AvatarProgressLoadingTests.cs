@@ -294,6 +294,19 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
+    public void SkeletonCssMatchesPinnedGeometryAndStopsMotionForReducedMotion()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(".shadcn-skeleton { border-radius: var(--shadcn-radius-md); background: var(--shadcn-muted); }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-skeleton[data-shape=\"circle\"] { border-radius: 9999px; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-skeleton[data-animation=\"pulse\"] { animation: shadcn-skeleton-pulse", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-skeleton { animation: none; }", css, StringComparison.Ordinal);
+        Assert.Contains(":where(.shadcn-progress-track, .shadcn-skeleton) { border: 1px solid CanvasText; }", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SpinnerUsesPinnedLoaderPathAndCustomizableLocalizedName()
     {
         var cut = Render<ShadcnSpinner>(parameters => parameters

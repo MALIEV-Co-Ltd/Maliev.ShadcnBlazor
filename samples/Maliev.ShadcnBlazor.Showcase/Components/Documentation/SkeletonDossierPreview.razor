@@ -1,24 +1,88 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
 @using Maliev.ShadcnBlazor.Components.Feedback
 
-<div class="showcase-skeleton-layout" data-testid="skeleton-dossier-preview">
-    <div class="showcase-skeleton-layout__header">
-        <ShadcnSkeleton Shape="@(Circle ? ShadcnSkeletonShape.Circle : ShadcnSkeletonShape.Default)" Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 2.75rem; height: 2.75rem;" />
-        <div><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 12rem; height: 1rem;" /><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 8rem; height: .75rem; margin-top: .5rem;" /></div>
-    </div>
-    <div class="showcase-skeleton-layout__body">
-        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 68%; height: 1rem;" />
-        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 92%; height: 1rem;" />
-        <ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 48%; height: 1rem;" />
-    </div>
-    <div class="showcase-skeleton-layout__cards">
-        @for (var i = 0; i < 3; i++)
-        {
-            <article><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 100%; height: 4.5rem;" /><ShadcnSkeleton Animation="@(Motion ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None)" Style="width: 70%; height: .75rem; margin-top: .65rem;" /></article>
-        }
-    </div>
-</div>
+<section class="showcase-skeleton-layout"
+         data-testid="skeleton-dossier-preview"
+         aria-labelledby="skeleton-preview-title"
+         aria-busy="@Loading.ToString().ToLowerInvariant()">
+    <header class="showcase-skeleton-layout__header">
+        <div>
+            <h3 id="skeleton-preview-title">Production queue</h3>
+            <p>@(Loading ? "Fetching the latest work orders…" : "Three work orders are ready for review.")</p>
+        </div>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline"
+                      Size="ShadcnButtonSize.Small"
+                      OnClick="ToggleState"
+                      data-testid="skeleton-state-toggle">
+            @(Loading ? "Show loaded queue" : "Reset loading preview")
+        </ShadcnButton>
+    </header>
+
+    @if (Loading)
+    {
+        <ol class="showcase-skeleton-layout__list"
+            data-testid="skeleton-loading-list"
+            aria-hidden="true">
+            @for (var index = 0; index < 3; index++)
+            {
+                <li class="showcase-skeleton-layout__row">
+                    <ShadcnSkeleton Class="showcase-skeleton-layout__media"
+                                    data-testid="skeleton-media"
+                                    Shape="@(RoundMedia ? ShadcnSkeletonShape.Circle : ShadcnSkeletonShape.Default)"
+                                    Animation="@Motion" />
+                    <div class="showcase-skeleton-layout__copy">
+                        <ShadcnSkeleton Class="showcase-skeleton-layout__title" Animation="@Motion" />
+                        <ShadcnSkeleton Class="showcase-skeleton-layout__meta" Animation="@Motion" />
+                    </div>
+                    <ShadcnSkeleton Class="showcase-skeleton-layout__status" Animation="@Motion" />
+                </li>
+            }
+        </ol>
+        <span class="shadcn-sr-only" role="status">Loading three production work orders.</span>
+    }
+    else
+    {
+        <ol class="showcase-skeleton-layout__list showcase-skeleton-layout__list--loaded"
+            data-testid="skeleton-loaded-list">
+            @foreach (var job in Jobs)
+            {
+                <li class="showcase-skeleton-layout__row">
+                    <span class="showcase-skeleton-layout__job-mark" aria-hidden="true">@job.Sequence</span>
+                    <div class="showcase-skeleton-layout__copy">
+                        <strong>@job.Number · @job.Part</strong>
+                        <span>@job.Process · @job.Schedule</span>
+                    </div>
+                    <ShadcnBadge Variant="@job.Badge">@job.Status</ShadcnBadge>
+                </li>
+            }
+        </ol>
+        <span class="shadcn-sr-only" role="status">Production queue loaded.</span>
+    }
+</section>
 
 @code {
-    [Parameter] public bool Circle { get; set; }
-    [Parameter] public bool Motion { get; set; } = true;
+    [Parameter] public bool RoundMedia { get; set; }
+
+    [Parameter] public ShadcnSkeletonAnimation Motion { get; set; } = ShadcnSkeletonAnimation.Pulse;
+
+    private bool Loading { get; set; } = true;
+
+    private static readonly ProductionJob[] Jobs =
+    [
+        new("01", "WO-2486", "Valve housing", "5-axis milling", "Due 14:30", "Machining", ShadcnBadgeVariant.Secondary),
+        new("02", "WO-2491", "Sensor bracket", "Laser cutting", "Due tomorrow", "Queued", ShadcnBadgeVariant.Outline),
+        new("03", "WO-2494", "Pump cover", "Quality inspection", "Updated 2 min ago", "Review", ShadcnBadgeVariant.Default)
+    ];
+
+    private void ToggleState(MouseEventArgs _) => Loading = !Loading;
+
+    private sealed record ProductionJob(
+        string Sequence,
+        string Number,
+        string Part,
+        string Process,
+        string Schedule,
+        string Status,
+        ShadcnBadgeVariant Badge);
 }

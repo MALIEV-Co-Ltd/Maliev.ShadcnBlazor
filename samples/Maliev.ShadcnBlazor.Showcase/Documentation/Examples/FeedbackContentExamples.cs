@@ -428,19 +428,112 @@ internal static class FeedbackContentExamples
     }
     private static ComponentExampleDefinition Skeleton()
     {
-        var circle = false; var motion = true;
-        RenderFragment preview = b => { b.OpenComponent<SkeletonDossierPreview>(0); b.AddAttribute(1, "Circle", circle); b.AddAttribute(2, "Motion", motion); b.CloseComponent(); };
-        const string source = """
-<section class="showcase-skeleton-layout" aria-label="Loading production overview">
-    <div class="showcase-skeleton-layout__header">
-        <ShadcnSkeleton Shape="ShadcnSkeletonShape.Circle" Animation="ShadcnSkeletonAnimation.Pulse" Style="width:2.75rem;height:2.75rem" />
-        <div><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:12rem;height:1rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:8rem;height:.75rem" /></div>
-    </div>
-    <div class="showcase-skeleton-layout__body"><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:68%;height:1rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:92%;height:1rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:48%;height:1rem" /></div>
-    <div class="showcase-skeleton-layout__cards"><article><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:100%;height:4.5rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:70%;height:.75rem" /></article><article><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:100%;height:4.5rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:70%;height:.75rem" /></article><article><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:100%;height:4.5rem" /><ShadcnSkeleton Animation="ShadcnSkeletonAnimation.Pulse" Style="width:70%;height:.75rem" /></article></div>
+        var roundMedia = false;
+        var animate = true;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<SkeletonDossierPreview>(0);
+            builder.AddAttribute(1, "RoundMedia", roundMedia);
+            builder.AddAttribute(2, "Motion", animate ? ShadcnSkeletonAnimation.Pulse : ShadcnSkeletonAnimation.None);
+            builder.CloseComponent();
+        };
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
+@using Maliev.ShadcnBlazor.Components.Feedback
+
+<section class="showcase-skeleton-layout"
+         aria-labelledby="skeleton-preview-title"
+         aria-busy="@Loading.ToString().ToLowerInvariant()">
+    <header class="showcase-skeleton-layout__header">
+        <div>
+            <h3 id="skeleton-preview-title">Production queue</h3>
+            <p>@(Loading ? "Fetching the latest work orders…" : "Three work orders are ready for review.")</p>
+        </div>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline"
+                      Size="ShadcnButtonSize.Small"
+                      OnClick="ToggleState">
+            @(Loading ? "Show loaded queue" : "Reset loading preview")
+        </ShadcnButton>
+    </header>
+
+    @if (Loading)
+    {
+        <ol class="showcase-skeleton-layout__list" aria-hidden="true">
+            @for (var index = 0; index < 3; index++)
+            {
+                <li class="showcase-skeleton-layout__row">
+                    <ShadcnSkeleton Class="showcase-skeleton-layout__media"
+                                    Shape="@(RoundMedia ? ShadcnSkeletonShape.Circle : ShadcnSkeletonShape.Default)"
+                                    Animation="@Motion" />
+                    <div class="showcase-skeleton-layout__copy">
+                        <ShadcnSkeleton Class="showcase-skeleton-layout__title" Animation="@Motion" />
+                        <ShadcnSkeleton Class="showcase-skeleton-layout__meta" Animation="@Motion" />
+                    </div>
+                    <ShadcnSkeleton Class="showcase-skeleton-layout__status" Animation="@Motion" />
+                </li>
+            }
+        </ol>
+        <span class="shadcn-sr-only" role="status">Loading three production work orders.</span>
+    }
+    else
+    {
+        <ol class="showcase-skeleton-layout__list showcase-skeleton-layout__list--loaded">
+            @foreach (var job in Jobs)
+            {
+                <li class="showcase-skeleton-layout__row">
+                    <span class="showcase-skeleton-layout__job-mark" aria-hidden="true">@job.Sequence</span>
+                    <div class="showcase-skeleton-layout__copy">
+                        <strong>@job.Number · @job.Part</strong>
+                        <span>@job.Process · @job.Schedule</span>
+                    </div>
+                    <ShadcnBadge Variant="@job.Badge">@job.Status</ShadcnBadge>
+                </li>
+            }
+        </ol>
+        <span class="shadcn-sr-only" role="status">Production queue loaded.</span>
+    }
 </section>
+
+@code {
+    private bool RoundMedia = {{roundMedia.ToString().ToLowerInvariant()}};
+    private ShadcnSkeletonAnimation Motion = ShadcnSkeletonAnimation.{{(animate ? nameof(ShadcnSkeletonAnimation.Pulse) : nameof(ShadcnSkeletonAnimation.None))}};
+    private bool Loading = true;
+
+    private static readonly ProductionJob[] Jobs =
+    [
+        new("01", "WO-2486", "Valve housing", "5-axis milling", "Due 14:30", "Machining", ShadcnBadgeVariant.Secondary),
+        new("02", "WO-2491", "Sensor bracket", "Laser cutting", "Due tomorrow", "Queued", ShadcnBadgeVariant.Outline),
+        new("03", "WO-2494", "Pump cover", "Quality inspection", "Updated 2 min ago", "Review", ShadcnBadgeVariant.Default)
+    ];
+
+    private void ToggleState(MouseEventArgs _) => Loading = !Loading;
+
+    private sealed record ProductionJob(
+        string Sequence,
+        string Number,
+        string Part,
+        string Process,
+        string Schedule,
+        string Status,
+        ShadcnBadgeVariant Badge);
+}
 """;
-        return Example("skeleton", "Skeleton", "Preview a realistic page-loading layout with shared geometry and respectful motion.", source, preview, [Toggle("skeleton-circle", "Avatar circle", v => circle = v), Toggle("skeleton-motion", "Pulse", v => motion = v, true)], ["layout", "circle", "pulse", "reduced-motion"]);
+        var source = Source();
+        return Example(
+            "skeleton",
+            "Skeleton",
+            "Preview a production queue while it loads, then reveal the final content without layout drift.",
+            source,
+            preview,
+            [
+                Toggle("skeleton-circle", "Round media", value => roundMedia = value),
+                Toggle("skeleton-motion", "Animated pulse", value => animate = value, true)
+            ],
+            ["loading", "loaded", "shape", "motion", "reduced-motion"]) with
+        {
+            RazorSourceProvider = Source
+        };
     }
     private static ComponentExampleDefinition Spinner()
     {
