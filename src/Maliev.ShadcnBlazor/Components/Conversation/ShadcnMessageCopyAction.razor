@@ -1,0 +1,126 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<button @attributes="ForwardedAttributes"
+        class="@MergeClass("shadcn-message-action shadcn-message-copy-action")"
+        style="@MergeStyle(FeedbackStyle)"
+        data-slot="message-copy-action"
+        data-copy-state="@CopyState"
+        type="button"
+        disabled="@Disabled"
+        aria-label="@CurrentLabel"
+        title="@CurrentLabel"
+        @onclick="CopyAsync">
+    @if (_copied)
+    {
+        <span @key="_feedbackId" class="shadcn-message-copy-feedback" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span>@CopiedLabel</span>
+        </span>
+    }
+    else
+    {
+        <svg class="shadcn-message-action-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+    }
+    <span class="shadcn-sr-only">@CurrentLabel</span>
+</button>
+<span class="shadcn-sr-only" aria-live="polite">@_announcement</span>
+
+@code {
+    [CascadingParameter] private ShadcnMessageActions? Owner { get; set; }
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+    [Parameter] public string Label { get; set; } = "Copy message";
+    [Parameter] public string CopiedLabel { get; set; } = "Copied";
+    [Parameter] public string FailedLabel { get; set; } = "Copy failed";
+    [Parameter] public TimeSpan FeedbackDuration { get; set; } = TimeSpan.FromMilliseconds(1600);
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback OnCopied { get; set; }
+
+    private CancellationTokenSource? _feedbackCancellation;
+    private bool _copied;
+    private bool _failed;
+    private int _feedbackId;
+    private string _announcement = string.Empty;
+    private string CopyState => _copied ? "copied" : _failed ? "error" : "idle";
+    private string CurrentLabel => _copied ? CopiedLabel : _failed ? FailedLabel : Label;
+    private string FeedbackStyle => $"--shadcn-message-copy-feedback-duration:{FeedbackDuration.TotalMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture)}ms";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-copy-state", "type", "disabled", "aria-label", "title");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null) throw new InvalidOperationException("ShadcnMessageCopyAction must be inside ShadcnMessageActions.");
+        if (string.IsNullOrWhiteSpace(Text)) throw new ArgumentException("Copy text is required.", nameof(Text));
+        if (string.IsNullOrWhiteSpace(Label)) throw new ArgumentException("Copy label is required.", nameof(Label));
+        if (string.IsNullOrWhiteSpace(CopiedLabel)) throw new ArgumentException("Copied label is required.", nameof(CopiedLabel));
+        if (string.IsNullOrWhiteSpace(FailedLabel)) throw new ArgumentException("Failure label is required.", nameof(FailedLabel));
+        if (FeedbackDuration <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(FeedbackDuration));
+    }
+
+    private async Task CopyAsync()
+    {
+        if (Disabled) return;
+        CancelFeedback();
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Text);
+            _copied = true;
+            _failed = false;
+            _feedbackId++;
+            _announcement = CopiedLabel;
+            await OnCopied.InvokeAsync();
+        }
+        catch (JSException)
+        {
+            _copied = false;
+            _failed = true;
+            _announcement = FailedLabel;
+        }
+        BeginFeedbackReset();
+    }
+
+    private void BeginFeedbackReset()
+    {
+        var cancellation = new CancellationTokenSource();
+        _feedbackCancellation = cancellation;
+        _ = ResetFeedbackAsync(cancellation);
+    }
+
+    private async Task ResetFeedbackAsync(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(FeedbackDuration, cancellation.Token);
+            if (cancellation.IsCancellationRequested) return;
+            await InvokeAsync(() =>
+            {
+                if (cancellation.IsCancellationRequested) return;
+                _copied = false;
+                _failed = false;
+                _announcement = string.Empty;
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException) { }
+        catch (ObjectDisposedException) { }
+        finally
+        {
+            if (ReferenceEquals(_feedbackCancellation, cancellation)) _feedbackCancellation = null;
+            cancellation.Dispose();
+        }
+    }
+
+    private void CancelFeedback()
+    {
+        _feedbackCancellation?.Cancel();
+        _feedbackCancellation?.Dispose();
+        _feedbackCancellation = null;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        CancelFeedback();
+        return ValueTask.CompletedTask;
+    }
+}

@@ -1,0 +1,25 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-action shadcn-message-reply-action")" style="@MergeStyle(null)" data-slot="message-reply-action" type="button" disabled="@Disabled" aria-label="@Label" title="@Label" @onclick="ReplyAsync">
+    <svg class="shadcn-message-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    <span class="shadcn-sr-only">@Label</span>
+</button>
+
+@code {
+    [CascadingParameter] private ShadcnMessageActions? Owner { get; set; }
+    [Parameter, EditorRequired] public string Quote { get; set; } = string.Empty;
+    [Parameter] public string Label { get; set; } = "Reply to message";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<string> OnReply { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "disabled", "aria-label", "title");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null) throw new InvalidOperationException("ShadcnMessageReplyAction must be inside ShadcnMessageActions.");
+        if (string.IsNullOrWhiteSpace(Quote)) throw new ArgumentException("Reply quote is required.", nameof(Quote));
+        if (string.IsNullOrWhiteSpace(Label)) throw new ArgumentException("Reply label is required.", nameof(Label));
+    }
+
+    private Task ReplyAsync() => Disabled ? Task.CompletedTask : OnReply.InvokeAsync(Quote);
+}

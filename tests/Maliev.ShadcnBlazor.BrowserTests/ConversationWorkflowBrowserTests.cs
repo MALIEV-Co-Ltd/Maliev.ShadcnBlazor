@@ -100,6 +100,51 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task MessagePackageActionsCopyRepeatQuoteAndKeepStructuredGeometry()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+            Permissions = ["clipboard-read", "clipboard-write"]
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
+        await page.GetByTestId("control-message-footer-always").CheckAsync();
+
+        var firstCopy = page.GetByTestId("message-copy").First;
+        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "idle");
+        await firstCopy.ClickAsync();
+        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "copied");
+        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("aria-label", "Copied");
+        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "idle", new() { Timeout = 3000 });
+        await firstCopy.ClickAsync();
+        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "copied");
+
+        await page.GetByTestId("message-reply").First.ClickAsync();
+        var quote = page.GetByTestId("message-reply-quote");
+        await Assertions.Expect(quote).ToContainTextAsync("ตรวจสอบไฟล์แล้ว 3 รายการ");
+        await quote.GetByRole(AriaRole.Button, new() { Name = "Cancel reply" }).ClickAsync();
+        await Assertions.Expect(quote).ToHaveCountAsync(0);
+
+        var firstMessage = page.Locator("[data-slot='message']").First;
+        var body = firstMessage.Locator("[data-slot='message-body']");
+        var avatar = firstMessage.Locator("[data-slot='message-avatar']");
+        var avatarImage = avatar.Locator("[data-slot='avatar-image']");
+        var geometry = await firstMessage.EvaluateAsync<double[]>("element => { const body = element.querySelector('[data-slot=message-body]').getBoundingClientRect(); const avatar = element.querySelector('[data-slot=message-avatar]').getBoundingClientRect(); const image = element.querySelector('[data-slot=avatar-image]').getBoundingClientRect(); return [body.bottom, avatar.bottom, avatar.width, avatar.height, image.width, image.height]; }");
+        Assert.InRange(Math.Abs(geometry[0] - geometry[1]), 0, 1);
+        Assert.InRange(Math.Abs((geometry[2] - 2) - geometry[4]), 0, 1);
+        Assert.InRange(Math.Abs((geometry[3] - 2) - geometry[5]), 0, 1);
+        await Assertions.Expect(body).ToBeVisibleAsync();
+        await Assertions.Expect(avatarImage).ToBeVisibleAsync();
+
+        var outgoing = page.Locator("[data-slot='message'][data-align='end']").Last;
+        var footerGeometry = await outgoing.EvaluateAsync<double[]>("element => { const actions = element.querySelector('[data-slot=message-actions]').getBoundingClientRect(); const status = element.querySelector('[data-slot=message-status]').getBoundingClientRect(); const button = element.querySelector('[data-slot=message-reply-action]').getBoundingClientRect(); return [actions.left, status.left, button.width]; }");
+        Assert.True(footerGeometry[0] < footerGeometry[1]);
+        Assert.InRange(footerGeometry[2], 24, 32);
+    }
+
+    [Fact]
     public async Task BubblePreviewAppliesVariantTailRadiusAndReactionIconTreatment()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

@@ -250,10 +250,22 @@ enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerVariant: Default, S
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessage
   ShadcnLogicalAlign Align
   RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageActions
+  RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageAvatar
+  RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageBody
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageContent
   RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageCopyAction
+  String CopiedLabel
+  Boolean Disabled
+  String FailedLabel
+  TimeSpan FeedbackDuration
+  String Label
+  EventCallback OnCopied
+  String Text
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageDefaultScrollPosition: Start, End, LastAnchor
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageFooter
   RenderFragment ChildContent
@@ -261,6 +273,16 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageGroup
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageHeader
   RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageReplyAction
+  Boolean Disabled
+  String Label
+  EventCallback<String> OnReply
+  String Quote
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageReplyQuote
+  String DismissLabel
+  String Label
+  EventCallback OnDismiss
+  String Quote
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollAlign: Start, Center, End, Nearest
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollBehavior: Auto, Smooth
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollDirection: Start, End
@@ -314,6 +336,8 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerViewport
   RenderFragment ChildContent
   Boolean PreserveScrollOnPrepend
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerVisibility
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageStatus
+  RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaire
   String AccessibleName
   IReadOnlyDictionary<String, ShadcnQuestionnaireAnswer> Answers
