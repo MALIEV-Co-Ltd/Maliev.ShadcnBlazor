@@ -7,12 +7,20 @@ public sealed class SemanticFoundationsShowcaseContractTests
     {
         var registry = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(new Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationCatalog());
         var aspectRatio = Assert.Single(registry.GetBySlug("aspect-ratio"));
+        var ratioControl = Assert.Single(aspectRatio.Controls, control => control.Id == "aspect-ratio");
+        Assert.Equal(["16:9", "4:3", "1:1"], ratioControl.Options);
         Assert.Contains("16:9", aspectRatio.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("1.7777777777777777", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<img src=\"images/attachments/workspace-plan.png\"", aspectRatio.RazorSource, StringComparison.Ordinal);
 
-        aspectRatio.Controls.Single(control => control.Id == "aspect-ratio").Apply("1:1");
+        ratioControl.Apply("4:3");
+        Assert.Contains("Ratio=\"@(4d / 3d)\"", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-aspect-ratio-demo--4-3", aspectRatio.RazorSource, StringComparison.Ordinal);
+
+        ratioControl.Apply("1:1");
         Assert.Contains("Ratio=\"@(1d / 1d)\"", aspectRatio.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("<span>1:1</span>", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("showcase-aspect-ratio-demo--1-1", aspectRatio.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<span class=\"showcase-aspect-ratio-media__ratio\">1:1</span>", aspectRatio.RazorSource, StringComparison.Ordinal);
 
         var typography = Assert.Single(registry.GetBySlug("typography"));
         Assert.Contains("Variant=\"ShadcnTypographyVariant.H1\"", typography.RazorSource, StringComparison.Ordinal);

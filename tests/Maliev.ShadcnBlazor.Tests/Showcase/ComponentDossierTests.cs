@@ -209,9 +209,14 @@ public sealed class ComponentDossierTests : BunitContext
         var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug("aspect-ratio"));
         var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
 
-        cut.Find("[data-testid='control-aspect-ratio']").Change("1");
+        cut.Find("[data-testid='control-aspect-ratio']").Change("1:1");
 
-        cut.WaitForAssertion(() => Assert.Contains("aspect-ratio: 1", cut.Find("[data-slot='aspect-ratio']").GetAttribute("style"), StringComparison.Ordinal));
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("aspect-ratio: 1", cut.Find("[data-slot='aspect-ratio']").GetAttribute("style"), StringComparison.Ordinal);
+            Assert.Contains("showcase-aspect-ratio-demo--1-1", cut.Find(".showcase-aspect-ratio-demo").ClassList);
+            Assert.Equal("Engineering workspace reference", cut.Find(".showcase-aspect-ratio-media img").GetAttribute("alt"));
+        });
     }
 
     [Fact]
