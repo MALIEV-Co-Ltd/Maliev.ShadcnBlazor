@@ -1,0 +1,148 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<ShadcnPaginationContent @attributes="ForwardedAttributes" Class="@MergeClass("shadcn-pagination-pages")" Style="@MergeStyle(null)">
+    <ShadcnPaginationItem>
+        <ShadcnPaginationPrevious Label="@PreviousLabel" Disabled="@(Disabled || EffectiveCurrentPage == 1)" OnClick="@(_ => SelectPageAsync(EffectiveCurrentPage - 1))" />
+    </ShadcnPaginationItem>
+    @foreach (var entry in PageEntries)
+    {
+        <ShadcnPaginationItem @key="entry.Key">
+            @if (entry.Page is int pageNumber)
+            {
+                <ShadcnPaginationLink Current="@(pageNumber == EffectiveCurrentPage)"
+                                      Disabled="@Disabled"
+                                      aria-label="@FormatPageLabel(pageNumber)"
+                                      data-page="@pageNumber"
+                                      OnClick="@(_ => SelectPageAsync(pageNumber))">
+                    @pageNumber
+                </ShadcnPaginationLink>
+            }
+            else
+            {
+                <ShadcnPaginationEllipsis Label="@EllipsisLabel" />
+            }
+        </ShadcnPaginationItem>
+    }
+    <ShadcnPaginationItem>
+        <ShadcnPaginationNext Label="@NextLabel" Disabled="@(Disabled || EffectiveCurrentPage == TotalPages)" OnClick="@(_ => SelectPageAsync(EffectiveCurrentPage + 1))" />
+    </ShadcnPaginationItem>
+</ShadcnPaginationContent>
+
+@code {
+    /// <summary>Gets or sets the total number of available pages.</summary>
+    [Parameter] public int TotalPages { get; set; } = 1;
+
+    /// <summary>Gets or sets the current one-based page.</summary>
+    [Parameter] public int CurrentPage { get; set; } = 1;
+
+    /// <summary>Gets or sets the maximum number of numeric page buttons. Boundary pages are included in this count.</summary>
+    [Parameter] public int VisiblePageCount { get; set; } = 5;
+
+    /// <summary>Gets or sets whether every pagination action is disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Gets or sets the visible and accessible previous-page label.</summary>
+    [Parameter] public string PreviousLabel { get; set; } = "Previous";
+
+    /// <summary>Gets or sets the visible and accessible next-page label.</summary>
+    [Parameter] public string NextLabel { get; set; } = "Next";
+
+    /// <summary>Gets or sets the accessible label for a collapsed page range.</summary>
+    [Parameter] public string EllipsisLabel { get; set; } = "More pages";
+
+    /// <summary>Gets or sets the composite-format string used to name a page button.</summary>
+    [Parameter] public string PageLabelFormat { get; set; } = "Go to page {0}";
+
+    /// <summary>Occurs when the current page changes.</summary>
+    [Parameter] public EventCallback<int> CurrentPageChanged { get; set; }
+
+    private int EffectiveCurrentPage => Math.Clamp(CurrentPage, 1, TotalPages);
+
+    private IReadOnlyList<PageEntry> PageEntries => BuildPageEntries(TotalPages, EffectiveCurrentPage, VisiblePageCount);
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+
+    protected override void OnParametersSet()
+    {
+        if (TotalPages < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(TotalPages), TotalPages, "Total pages must be at least one.");
+        }
+
+        if (VisiblePageCount < 3)
+        {
+            throw new ArgumentOutOfRangeException(nameof(VisiblePageCount), VisiblePageCount, "Visible page count must be at least three.");
+        }
+
+        CurrentPage = EffectiveCurrentPage;
+    }
+
+    private async Task SelectPageAsync(int page)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        var nextPage = Math.Clamp(page, 1, TotalPages);
+        if (nextPage == CurrentPage)
+        {
+            return;
+        }
+
+        CurrentPage = nextPage;
+        await CurrentPageChanged.InvokeAsync(nextPage);
+    }
+
+    private string FormatPageLabel(int page) => string.Format(System.Globalization.CultureInfo.CurrentCulture, PageLabelFormat, page);
+
+    private static IReadOnlyList<PageEntry> BuildPageEntries(int totalPages, int currentPage, int visiblePageCount)
+    {
+        if (totalPages <= visiblePageCount)
+        {
+            return Enumerable.Range(1, totalPages).Select(PageEntry.ForPage).ToArray();
+        }
+
+        var interiorSlots = visiblePageCount - 2;
+        var start = currentPage - (interiorSlots / 2);
+        var end = start + interiorSlots - 1;
+
+        if (start < 2)
+        {
+            start = 2;
+            end = start + interiorSlots - 1;
+        }
+
+        if (end > totalPages - 1)
+        {
+            end = totalPages - 1;
+            start = end - interiorSlots + 1;
+        }
+
+        var entries = new List<PageEntry>(visiblePageCount + 2) { PageEntry.ForPage(1) };
+        if (start > 2)
+        {
+            entries.Add(PageEntry.ForEllipsis("start"));
+        }
+
+        for (var page = start; page <= end; page++)
+        {
+            entries.Add(PageEntry.ForPage(page));
+        }
+
+        if (end < totalPages - 1)
+        {
+            entries.Add(PageEntry.ForEllipsis("end"));
+        }
+
+        entries.Add(PageEntry.ForPage(totalPages));
+        return entries;
+    }
+
+    private sealed record PageEntry(int? Page, string Key)
+    {
+        public static PageEntry ForPage(int page) => new(page, $"page-{page}");
+
+        public static PageEntry ForEllipsis(string position) => new(null, $"ellipsis-{position}");
+    }
+}

@@ -1607,6 +1607,73 @@ a {
     font-size: 0.75rem;
 }
 
+.showcase-pagination-demo {
+    inline-size: min(100%, 40rem);
+    margin-inline: auto;
+    padding: 1.25rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+}
+
+.showcase-pagination-demo__header,
+.showcase-pagination-demo__list article {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.showcase-pagination-demo__header {
+    padding-block-end: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+}
+
+.showcase-pagination-demo__header h3,
+.showcase-pagination-demo__header p {
+    margin: 0;
+}
+
+.showcase-pagination-demo__header p,
+.showcase-pagination-demo__list span,
+.showcase-pagination-demo__range {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+}
+
+.showcase-pagination-demo__range {
+    direction: ltr;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+}
+
+.showcase-pagination-demo__list {
+    display: grid;
+    margin-block: .5rem 1rem;
+}
+
+.showcase-pagination-demo__list article {
+    min-block-size: 3.25rem;
+    padding-block: .625rem;
+    border-block-end: 1px solid var(--shadcn-border);
+}
+
+.showcase-pagination-demo__list article > div {
+    display: grid;
+    gap: .125rem;
+}
+
+.showcase-pagination-demo__list article > span {
+    text-align: end;
+}
+
+@media (max-width: 36rem) {
+    .showcase-pagination-demo { padding: 1rem; }
+    .showcase-pagination-demo__list article { align-items: start; }
+    .showcase-pagination-demo .shadcn-pagination-content { gap: .125rem; }
+}
+
 @media (max-width: 80rem) {
     .documentation-trigger--outline,
     .documentation-outline .documentation-panel-close {

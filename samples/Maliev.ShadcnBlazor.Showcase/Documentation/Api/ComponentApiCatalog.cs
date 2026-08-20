@@ -85,7 +85,8 @@ public sealed class ComponentApiCatalog
                 "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationLink",
                 "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPrevious",
                 "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationNext",
-                "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationEllipsis"),
+                "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationEllipsis",
+                "Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPages"),
             ["resizable"] = Types(
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableGroup",
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnResizablePanel",

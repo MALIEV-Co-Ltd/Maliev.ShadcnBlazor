@@ -46,7 +46,7 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
             ["breadcrumb"] = ["breadcrumb-ellipsis"],
             ["collapsible"] = ["collapsible-open", "collapsible-disabled"],
             ["navigation-menu"] = ["navigation-open", "navigation-vertical", "navigation-disabled"],
-            ["pagination"] = ["pagination-current", "pagination-disabled"],
+            ["pagination"] = ["pagination-current", "pagination-visible", "pagination-disabled"],
             ["resizable"] = ["resizable-vertical", "resizable-collapsible", "resizable-disabled"],
             ["scroll-area"] = ["scroll-always", "scroll-horizontal"],
             ["sidebar"] = ["sidebar-open", "sidebar-right", "sidebar-none"],
@@ -81,7 +81,14 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         Assert.DoesNotContain("...", accordion.RazorSource, StringComparison.Ordinal);
 
         var pagination = Assert.Single(registry.GetBySlug("pagination"));
-        Assert.Contains("ShadcnPaginationEllipsis", pagination.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnPaginationPages", pagination.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("TotalPages=\"12\"", pagination.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Production quotations", Render(pagination.Preview).Markup, StringComparison.Ordinal);
+
+        var initialSource = pagination.RazorSource;
+        pagination.Controls.Single(control => control.Id == "pagination-visible").Apply("7");
+        Assert.NotEqual(initialSource, pagination.RazorSource);
+        Assert.Contains("VisiblePageCount=\"7\"", pagination.RazorSource, StringComparison.Ordinal);
 
         var tabs = Assert.Single(registry.GetBySlug("tabs"));
         Assert.Contains("Files", tabs.RazorSource, StringComparison.Ordinal);
