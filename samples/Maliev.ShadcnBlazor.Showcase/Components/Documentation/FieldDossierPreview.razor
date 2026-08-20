@@ -1,10 +1,10 @@
 <form class="showcase-field-dossier" data-testid="field-dossier-preview" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
     <div class="showcase-field-dossier__heading">
         <div>
-            <strong>Payment method</strong>
-            <span>All transactions are secure and encrypted.</span>
+            <strong dir="auto">Payment method</strong>
+            <span dir="auto">All transactions are secure and encrypted.</span>
         </div>
-        <span>Secure checkout</span>
+        <span dir="auto">Secure checkout</span>
     </div>
 
     <ShadcnFieldSet Disabled="@Disabled">
@@ -34,7 +34,7 @@
                              AutoComplete="cc-number"
                              Value="@_cardNumber"
                              ValueChanged="SetCardNumber" />
-                <ShadcnFieldDescription Id="field-card-number-help">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                <ShadcnFieldDescription Id="field-card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
                 @if (Invalid)
                 {
                     <ShadcnFieldError Id="field-card-number-error">Check the card number and try again.</ShadcnFieldError>
@@ -83,7 +83,7 @@
                 <ShadcnCheckbox id="field-same-address" Value="@_sameAsShipping" ValueChanged="SetSameAsShipping" />
                 <ShadcnFieldContent>
                     <ShadcnFieldLabel For="field-same-address">Same as shipping address</ShadcnFieldLabel>
-                    <ShadcnFieldDescription>Use the delivery address for this payment.</ShadcnFieldDescription>
+                    <ShadcnFieldDescription dir="auto">Use the delivery address for this payment.</ShadcnFieldDescription>
                 </ShadcnFieldContent>
             </ShadcnField>
 
@@ -96,7 +96,7 @@
                                 Placeholder="Add a note for this payment"
                                 Value="@_comments"
                                 ValueChanged="SetComments" />
-                <ShadcnFieldDescription Id="field-comments-help">Optional notes are included with the billing record.</ShadcnFieldDescription>
+                <ShadcnFieldDescription Id="field-comments-help" dir="auto">Optional notes are included with the billing record.</ShadcnFieldDescription>
             </ShadcnField>
         </ShadcnFieldGroup>
     </ShadcnFieldSet>

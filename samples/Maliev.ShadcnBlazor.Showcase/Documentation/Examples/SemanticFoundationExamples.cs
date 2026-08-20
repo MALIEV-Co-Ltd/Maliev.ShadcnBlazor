@@ -304,7 +304,7 @@ internal static class SemanticFoundationExamples
                         <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
                             <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
                             <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
-                            <ShadcnFieldDescription Id="card-number-help">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                            <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
                             @if (invalid)
                             {
                                 <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
@@ -332,13 +332,13 @@ internal static class SemanticFoundationExamples
                             <ShadcnCheckbox id="same-address" @bind-Value="sameAsShipping" />
                             <ShadcnFieldContent>
                                 <ShadcnFieldLabel For="same-address">Same as shipping address</ShadcnFieldLabel>
-                                <ShadcnFieldDescription>Use the delivery address for this payment.</ShadcnFieldDescription>
+                                <ShadcnFieldDescription dir="auto">Use the delivery address for this payment.</ShadcnFieldDescription>
                             </ShadcnFieldContent>
                         </ShadcnField>
                         <ShadcnField DescriptionId="comments-help">
                             <ShadcnFieldLabel For="comments">Comments</ShadcnFieldLabel>
                             <ShadcnTextarea TValue="string" id="comments" Name="comments" Rows="3" Placeholder="Add a note for this payment" @bind-Value="comments" />
-                            <ShadcnFieldDescription Id="comments-help">Optional notes are included with the billing record.</ShadcnFieldDescription>
+                            <ShadcnFieldDescription Id="comments-help" dir="auto">Optional notes are included with the billing record.</ShadcnFieldDescription>
                         </ShadcnField>
                     </ShadcnFieldGroup>
                 </ShadcnFieldSet>
