@@ -8062,3 +8062,54 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-alert-dialog-trigger,
     .showcase-alert-dialog-result .shadcn-button { grid-column: 1 / -1; inline-size: 100%; }
 }
+
+/* Sheet dossier: keep the resting preview compact while the package portal
+   demonstrates a realistic, full-edge delivery workflow. */
+.showcase-sheet-dossier {
+    display: grid;
+    inline-size: min(100%, 28rem);
+    justify-items: center;
+    gap: .75rem;
+}
+
+.showcase-sheet-dossier__trigger {
+    display: inline-flex;
+    min-block-size: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    padding-inline: 1rem;
+    font: inherit;
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.showcase-sheet-dossier__trigger:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.showcase-sheet-dossier__trigger:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
+.showcase-sheet-dossier__status { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.5; text-align: center; }
+
+.showcase-sheet-dossier__header { border-block-end: 1px solid var(--shadcn-border); }
+.showcase-sheet-dossier__body { display: grid; align-content: start; gap: 1.25rem; padding-block: 1rem; }
+.showcase-sheet-dossier__summary { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .375rem 1rem; border-block-end: 1px solid var(--shadcn-border); padding-block-end: 1rem; font-size: .8125rem; }
+.showcase-sheet-dossier__summary span { color: var(--shadcn-muted-foreground); }
+.showcase-sheet-dossier__summary strong { min-inline-size: 0; font-weight: 500; text-align: end; }
+.showcase-sheet-dossier__footer { display: grid; grid-template-columns: 1fr 1fr; border-block-start: 1px solid var(--shadcn-border); }
+.showcase-sheet-dossier__footer > * { inline-size: 100%; }
+.showcase-sheet-dossier__cancel { background: transparent; }
+
+@media (max-width: 30rem) {
+    .showcase-sheet-dossier__summary { grid-template-columns: 1fr; gap: .25rem; }
+    .showcase-sheet-dossier__summary strong { margin-block-end: .5rem; text-align: start; }
+    .showcase-sheet-dossier__footer { grid-template-columns: 1fr; }
+}
+
+@media (forced-colors: active) {
+    .showcase-sheet-dossier__trigger,
+    .showcase-sheet-dossier__header,
+    .showcase-sheet-dossier__summary,
+    .showcase-sheet-dossier__footer { border-color: CanvasText; }
+}

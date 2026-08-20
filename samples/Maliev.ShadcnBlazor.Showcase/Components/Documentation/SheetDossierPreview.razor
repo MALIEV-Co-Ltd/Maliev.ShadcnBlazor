@@ -1,0 +1,100 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-sheet-dossier">
+    <ShadcnSheet Open="CurrentOpen"
+                 OpenChanged="HandleOpenChanged">
+        <ShadcnSheetTrigger Class="showcase-sheet-dossier__trigger">
+            Review delivery schedule
+        </ShadcnSheetTrigger>
+        <ShadcnSheetContent Side="Side" CloseLabel="Close delivery schedule">
+            <ShadcnSheetHeader Class="showcase-sheet-dossier__header">
+                <ShadcnSheetTitle>Delivery schedule</ShadcnSheetTitle>
+                <ShadcnSheetDescription>
+                    Confirm the production contact and release notifications for quotation Q-4189.
+                </ShadcnSheetDescription>
+            </ShadcnSheetHeader>
+
+            <div class="showcase-sheet-dossier__body">
+                <div class="showcase-sheet-dossier__summary" aria-label="Quotation summary">
+                    <span>Quotation</span>
+                    <strong>Q-4189 · CNC enclosure</strong>
+                    <span>Target dispatch</span>
+                    <strong>Friday, 21 Aug · 16:30</strong>
+                </div>
+
+                <ShadcnField>
+                    <ShadcnFieldLabel For="sheet-contact">Production contact</ShadcnFieldLabel>
+                    <ShadcnInput TValue="string"
+                                 id="sheet-contact"
+                                 Value="Contact"
+                                 ValueChanged="HandleContactChanged"
+                                 AutoComplete="name" />
+                    <ShadcnFieldDescription>Shown to the dispatch team.</ShadcnFieldDescription>
+                </ShadcnField>
+
+                <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal">
+                    <ShadcnFieldContent>
+                        <ShadcnFieldLabel For="sheet-notifications">Release notifications</ShadcnFieldLabel>
+                        <ShadcnFieldDescription>Email the project team when dispatch is confirmed.</ShadcnFieldDescription>
+                    </ShadcnFieldContent>
+                    <ShadcnSwitch id="sheet-notifications"
+                                  Value="NotificationsEnabled"
+                                  ValueChanged="HandleNotificationsChanged"
+                                  Name="release-notifications" />
+                </ShadcnField>
+            </div>
+
+            <ShadcnSheetFooter Class="showcase-sheet-dossier__footer">
+                <ShadcnSheetClose Class="showcase-sheet-dossier__cancel" Label="Cancel delivery schedule">Cancel</ShadcnSheetClose>
+                <ShadcnButton OnClick="SaveAsync">Save schedule</ShadcnButton>
+            </ShadcnSheetFooter>
+        </ShadcnSheetContent>
+    </ShadcnSheet>
+    <p class="showcase-sheet-dossier__status" role="status" aria-live="polite" dir="auto">@Status</p>
+</div>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public ShadcnSheetSide Side { get; set; } = ShadcnSheetSide.Right;
+
+    private bool CurrentOpen;
+    private bool LastOpen;
+    private string Contact = "Narin S.";
+    private bool NotificationsEnabled = true;
+    private string Status = "Open the schedule to review delivery settings.";
+
+    protected override void OnParametersSet()
+    {
+        if (Open != LastOpen)
+            CurrentOpen = Open;
+
+        LastOpen = Open;
+    }
+
+    private Task HandleOpenChanged(bool value)
+    {
+        CurrentOpen = value;
+        if (!value && !Status.StartsWith("Schedule saved", StringComparison.Ordinal))
+            Status = "Delivery schedule closed without changes.";
+        return Task.CompletedTask;
+    }
+
+    private Task HandleContactChanged(string? value)
+    {
+        Contact = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleNotificationsChanged(bool value)
+    {
+        NotificationsEnabled = value;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveAsync()
+    {
+        Status = $"Schedule saved for {(string.IsNullOrWhiteSpace(Contact) ? "the production team" : Contact)}. Notifications {(NotificationsEnabled ? "enabled" : "disabled")}.";
+        CurrentOpen = false;
+        return Task.CompletedTask;
+    }
+}

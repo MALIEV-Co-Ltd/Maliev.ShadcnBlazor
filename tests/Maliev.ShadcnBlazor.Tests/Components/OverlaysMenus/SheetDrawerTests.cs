@@ -61,6 +61,68 @@ public sealed class SheetDrawerTests : BunitContext
     }
 
     [Fact]
+    public void UncontrolledSheetOpensFromItsTriggerAndClosesFromItsCloseAction()
+    {
+        var cut = Render<ShadcnSheet>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnSheetTrigger>(0);
+            builder.AddAttribute(1, nameof(ShadcnSheetTrigger.ChildContent), (RenderFragment)(content => content.AddContent(0, "Review delivery")));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnSheetContent>(10);
+            builder.AddAttribute(11, nameof(ShadcnSheetContent.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnSheetTitle>(0);
+                content.AddAttribute(1, nameof(ShadcnSheetTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Delivery schedule")));
+                content.CloseComponent();
+                content.OpenComponent<ShadcnSheetClose>(10);
+                content.AddAttribute(11, nameof(ShadcnSheetClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Save schedule")));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        Assert.Empty(cut.FindAll("[data-slot='sheet-content']"));
+        cut.Find("[data-slot='sheet-trigger']").Click();
+        Assert.Equal("true", cut.Find("[data-slot='sheet-trigger']").GetAttribute("aria-expanded"));
+        Assert.NotEmpty(cut.FindAll("[data-slot='sheet-content']"));
+
+        cut.Find("[data-slot='sheet-close']").Click();
+        Assert.Equal("false", cut.Find("[data-slot='sheet-trigger']").GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='sheet-content']"));
+    }
+
+    [Fact]
+    public void DefaultSheetCloseUsesAnAccessibleSvgIconWithoutStylingTextActionsAsIconButtons()
+    {
+        var cut = Render<ShadcnSheet>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnSheetContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnSheetContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnSheetTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnSheetTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Delivery schedule")));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnSheetClose>(10);
+                    content.AddAttribute(11, nameof(ShadcnSheetClose.Label), "Cancel delivery schedule");
+                    content.AddAttribute(12, nameof(ShadcnSheetClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Cancel")));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var closes = cut.FindAll("[data-slot='sheet-close']");
+        Assert.Equal(2, closes.Count);
+        var textClose = closes.Single(close => close.TextContent.Contains("Cancel", StringComparison.Ordinal));
+        Assert.DoesNotContain("shadcn-sheet-close-icon", textClose.ClassList);
+        var iconClose = closes.Single(close => close.QuerySelector("svg") is not null);
+        Assert.Contains("shadcn-sheet-close-icon", iconClose.ClassList);
+        Assert.Equal("Close", iconClose.GetAttribute("aria-label"));
+        Assert.Equal("true", iconClose.QuerySelector("svg")?.GetAttribute("aria-hidden"));
+    }
+
+    [Fact]
     public void DrawerExposesTypedDirectionAxisSnapAndModalState()
     {
         var snapChanges = new List<ShadcnDrawerSnapPoint?>();

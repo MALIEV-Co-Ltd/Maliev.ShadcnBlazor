@@ -1,3 +1,32 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="Forwarded" class="@MergeClass("shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" type="button" aria-label="@Label" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
-@code { [CascadingParameter] private ShadcnSheetContext Context { get; set; }=default!; [Parameter] public string Label { get; set; }="Close"; [Parameter] public bool Disabled { get; set; } [Parameter] public RenderFragment? ChildContent { get; set; } private RenderFragment DefaultContent=>b=>b.AddContent(0,"×");private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","type","aria-label","disabled");private async Task CloseAsync(){if(!Disabled)await Context.Owner.SetOpenAsync(false);} }
+<button @attributes="Forwarded" class="@MergeClass(ChildContent is null ? "shadcn-sheet-close shadcn-sheet-close-icon" : "shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" type="button" aria-label="@Label" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
+@code {
+    [CascadingParameter] private ShadcnSheetContext Context { get; set; } = default!;
+    [Parameter] public string Label { get; set; } = "Close";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private RenderFragment DefaultContent => builder =>
+    {
+        builder.OpenElement(0, "svg");
+        builder.AddAttribute(1, "viewBox", "0 0 24 24");
+        builder.AddAttribute(2, "aria-hidden", "true");
+        builder.AddAttribute(3, "focusable", "false");
+        builder.OpenElement(4, "path");
+        builder.AddAttribute(5, "d", "M18 6 6 18M6 6l12 12");
+        builder.AddAttribute(6, "fill", "none");
+        builder.AddAttribute(7, "stroke", "currentColor");
+        builder.AddAttribute(8, "stroke-linecap", "round");
+        builder.AddAttribute(9, "stroke-linejoin", "round");
+        builder.AddAttribute(10, "stroke-width", "2");
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "type", "aria-label", "disabled");
+    private async Task CloseAsync()
+    {
+        if (!Disabled)
+            await Context.Owner.SetOpenAsync(false);
+    }
+}

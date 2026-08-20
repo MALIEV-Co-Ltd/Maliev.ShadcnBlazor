@@ -48,7 +48,14 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
                 var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
                 var control = example.Controls.Single(candidate => candidate.Id == controlId);
                 var before = Render(example.Preview).Markup;
-                control.Apply(bool.Parse(control.Value) ? "false" : "true");
+                var alternate = control.Kind switch
+                {
+                    ComponentParameterControlKind.Toggle => bool.Parse(control.Value) ? "false" : "true",
+                    ComponentParameterControlKind.Select => control.Options.First(option => !string.Equals(option, control.Value, StringComparison.Ordinal)),
+                    ComponentParameterControlKind.Number => (int.Parse(control.Value, System.Globalization.CultureInfo.InvariantCulture) + 1).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    _ => throw new ArgumentOutOfRangeException(nameof(control.Kind), control.Kind, "Unknown dossier control kind.")
+                };
+                control.Apply(alternate);
                 Assert.NotEqual(before, Render(example.Preview).Markup);
             }
     }
@@ -159,6 +166,34 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
         example.Controls.Single(control => control.Id == "command-empty").Apply("true");
         Assert.Contains("Value=\"no matching command\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("value=\"no matching command\"", Render(example.Preview).Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SheetDossierUsesTheLiveTriggerAndKeepsItsSourceInSyncWithEveryEdge()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("sheet").Single();
+        var cut = Render(example.Preview);
+
+        Assert.Empty(cut.FindAll("[data-slot='sheet-content']"));
+        cut.Find("[data-slot='sheet-trigger']").Click();
+        Assert.Equal("right", cut.Find("[data-slot='sheet-content']").GetAttribute("data-side"));
+        Assert.Contains("@bind-Open=\"open\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Side=\"ShadcnSheetSide.Right\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnInput", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSwitch", example.RazorSource, StringComparison.Ordinal);
+
+        cut.Find("[data-slot='sheet-close']").Click();
+        Assert.Empty(cut.FindAll("[data-slot='sheet-content']"));
+
+        var sideControl = example.Controls.Single(control => control.Id == "sheet-side");
+        foreach (var side in Enum.GetNames<Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetSide>())
+        {
+            sideControl.Apply(side);
+            var rerendered = Render(example.Preview);
+            rerendered.Find("[data-slot='sheet-trigger']").Click();
+            Assert.Equal(side.ToLowerInvariant(), rerendered.Find("[data-slot='sheet-content']").GetAttribute("data-side"));
+            Assert.Contains($"Side=\"ShadcnSheetSide.{side}\"", example.RazorSource, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
