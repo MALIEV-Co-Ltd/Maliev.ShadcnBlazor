@@ -70,7 +70,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(incomingBubbles).ToHaveCountAsync(3);
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "secondary");
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-align", "start");
-        await page.GetByTestId("control-bubble-variant").SelectOptionAsync("Tinted");
+        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         for (var index = 0; index < await incomingBubbles.CountAsync(); index++)
             await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
         await page.GetByTestId("control-bubble-end").CheckAsync();
@@ -158,7 +158,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var defaultBubble = page.Locator("[data-slot='bubble']").First.Locator("[data-slot='bubble-content']");
         var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
-        await page.GetByTestId("control-bubble-variant").SelectOptionAsync("Tinted");
+        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         var incoming = page.Locator("[data-bubble-role='incoming']").First;
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "tinted");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "start");

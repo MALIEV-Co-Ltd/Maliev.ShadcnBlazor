@@ -214,8 +214,13 @@ public sealed class MockSiteComponentTests : BunitContext
 
         Assert.True(cut.FindAll("[data-slot='field']").Count >= 5);
         Assert.NotEmpty(cut.FindAll("input[type='date']"));
-        Assert.NotEmpty(cut.FindAll("select"));
+        Assert.Empty(cut.FindAll("select"));
+        Assert.Equal(3, cut.FindAll("[data-slot='select']").Count);
         Assert.NotEmpty(cut.FindAll("[role='progressbar']"));
+
+        cut.Find("#manufacturing-material").Click();
+        cut.Find("[role='option'][data-value='Stainless 304']").Click();
+        Assert.Equal("Stainless 304", state.Manufacturing.Material);
 
         cut.Find("[data-testid='manufacturing-state-loading']").Click();
         Assert.NotEmpty(cut.FindAll("[data-testid='manufacturing-skeleton']"));

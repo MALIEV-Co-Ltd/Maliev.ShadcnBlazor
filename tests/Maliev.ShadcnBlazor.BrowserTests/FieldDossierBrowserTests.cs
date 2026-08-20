@@ -33,7 +33,7 @@ public sealed class FieldDossierBrowserTests(
         await preview.GetByRole(AriaRole.Button, new() { Name = "Review payment" }).ClickAsync();
         await Assertions.Expect(preview.GetByRole(AriaRole.Status)).ToContainTextAsync("Niran Sutham");
 
-        await page.GetByTestId("control-field-orientation").SelectOptionAsync("Horizontal");
+        await page.ChooseOptionAsync("control-field-orientation", "Horizontal");
         await page.GetByTestId("control-field-invalid").CheckAsync();
         await Assertions.Expect(preview.Locator("#field-card-number")).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(preview.GetByRole(AriaRole.Alert)).ToBeVisibleAsync();

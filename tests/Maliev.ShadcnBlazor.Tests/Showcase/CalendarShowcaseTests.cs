@@ -13,6 +13,9 @@ public sealed class CalendarShowcaseTests : BunitContext
         Services.AddMalievShadcn();
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
         module.SetupVoid("focusCalendarDay", _ => true);
+        module.SetupVoid("observePopupDismissal", _ => true);
+        module.SetupVoid("disconnectPopupDismissal", _ => true);
+        module.SetupVoid("focusElement", _ => true);
     }
 
     [Fact]
@@ -42,5 +45,5 @@ public sealed class CalendarShowcaseTests : BunitContext
     }
 
     private static void Change(IRenderedComponent<ComponentPreview> cut, string controlId, object value) =>
-        cut.Find($"[data-testid='control-{controlId}']").Change(value);
+        cut.ChangeControl(controlId, value);
 }

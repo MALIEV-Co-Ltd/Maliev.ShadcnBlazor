@@ -20,7 +20,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
 
         var textarea = registry.GetBySlug("textarea").Single();
         var textareaCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, textarea));
-        textareaCut.Find("[data-testid='control-textarea-rows']").Change("5");
+        textareaCut.SelectControl("textarea-rows", "5");
         Assert.Contains("Rows=\"5\"", textarea.RazorSource, StringComparison.Ordinal);
 
         var nativeSelect = registry.GetBySlug("native-select").Single();
@@ -39,7 +39,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         Assert.DoesNotContain("AllowTextInput=\"true\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Mode=\"ShadcnCalendarSelectionMode.Range\"", datePicker.RazorSource, StringComparison.Ordinal);
         var datePickerCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, datePicker));
-        datePickerCut.Find("[data-testid='control-date-picker-mode']").Change("Single");
+        datePickerCut.SelectControl("date-picker-mode", "Single");
         Assert.Contains("Mode=\"ShadcnCalendarSelectionMode.Single\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind-Value=\"SelectedDate\"", datePicker.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind-Open=\"DatePickerOpen\"", datePicker.RazorSource, StringComparison.Ordinal);
@@ -65,7 +65,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
 
         var slider = registry.GetBySlug("slider").Single();
         var sliderCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, slider));
-        sliderCut.Find("[data-testid='control-slider-values']").Change("Single");
+        sliderCut.SelectControl("slider-values", "Single");
         Assert.Contains("@bind-Values=\"SliderValues\"", slider.RazorSource, StringComparison.Ordinal);
         Assert.Contains("private IReadOnlyList<double> SliderValues { get; set; } = [40d];", slider.RazorSource, StringComparison.Ordinal);
 
@@ -73,7 +73,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         sliderCut.WaitForAssertion(() =>
             Assert.Contains("private IReadOnlyList<double> SliderValues { get; set; } = [65d];", slider.RazorSource, StringComparison.Ordinal));
 
-        sliderCut.Find("[data-testid='control-slider-orientation']").Change("Vertical");
+        sliderCut.SelectControl("slider-orientation", "Vertical");
         sliderCut.Find("[data-testid='control-slider-readonly']").Change(true);
         Assert.Contains("Orientation=\"ShadcnSliderOrientation.Vertical\"", slider.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ReadOnly=\"true\"", slider.RazorSource, StringComparison.Ordinal);
@@ -90,8 +90,8 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         preview.Click();
         Assert.Equal("true", preview.GetAttribute("aria-pressed"));
 
-        toggleCut.Find("[data-testid='control-toggle-variant']").Change("Default");
-        toggleCut.Find("[data-testid='control-toggle-size']").Change("Large");
+        toggleCut.SelectControl("toggle-variant", "Default");
+        toggleCut.SelectControl("toggle-size", "Large");
         toggleCut.Find("[data-testid='control-toggle-invalid']").Change(true);
         Assert.Contains("Variant=\"ShadcnToggleVariant.Default\"", toggle.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Size=\"ShadcnToggleSize.Large\"", toggle.RazorSource, StringComparison.Ordinal);
@@ -99,7 +99,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
 
         var radioGroup = registry.GetBySlug("radio-group").Single();
         var radioCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, radioGroup));
-        radioCut.Find("[data-testid='control-radio-orientation']").Change("Horizontal");
+        radioCut.SelectControl("radio-orientation", "Horizontal");
         radioCut.Find("[data-testid='control-radio-readonly']").Change(true);
 
         Assert.Contains("@bind-Value=\"ReviewSpeed\"", radioGroup.RazorSource, StringComparison.Ordinal);
@@ -112,7 +112,7 @@ public sealed class FormActionSourceSynchronizationTests : BunitContext
         var switchCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, @switch));
         switchCut.Find("[data-testid='action-switch']").Change(false);
         Assert.Contains("private bool ProductionUpdates = false", @switch.RazorSource, StringComparison.Ordinal);
-        switchCut.Find("[data-testid='control-switch-size']").Change("Small");
+        switchCut.SelectControl("switch-size", "Small");
         switchCut.Find("[data-testid='control-switch-invalid']").Change(true);
         Assert.Contains("Size=\"ShadcnSwitchSize.Small\"", @switch.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Invalid=\"true\"", @switch.RazorSource, StringComparison.Ordinal);

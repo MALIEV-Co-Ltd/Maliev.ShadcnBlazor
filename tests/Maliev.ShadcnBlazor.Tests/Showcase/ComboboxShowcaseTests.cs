@@ -70,7 +70,7 @@ public sealed class ComboboxShowcaseTests : BunitContext
     }
 
     private static void Change(IRenderedComponent<ComponentPreview> cut, string controlId, object value) =>
-        cut.Find($"[data-testid='control-{controlId}']").Change(value);
+        cut.ChangeControl(controlId, value);
 
     private static string FindRoot()
     {

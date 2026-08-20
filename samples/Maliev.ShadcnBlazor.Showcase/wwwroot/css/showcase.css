@@ -963,7 +963,7 @@ a {
     font-weight: 600;
 }
 
-.component-preview__control :is(select, input:not([type="checkbox"])),
+.component-preview__control input:not([type="checkbox"]),
 .component-code textarea {
     min-block-size: 2.5rem;
     border: 1px solid var(--shadcn-input);
@@ -971,6 +971,14 @@ a {
     background: var(--shadcn-background);
     color: var(--shadcn-foreground);
     padding-inline: 0.75rem;
+}
+
+.component-preview__control > .shadcn-select {
+    inline-size: 100%;
+}
+
+.component-preview__control > .shadcn-select .shadcn-select-trigger {
+    inline-size: 100%;
 }
 
 .component-preview__control label:has(input[type="checkbox"]) {
@@ -3541,12 +3549,11 @@ a {
 .mock-dialog-actions { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
 .mock-search { display: block; min-width: min(100%, 11rem); flex: 1 1 11rem; }
 .mock-site input,
-.mock-site select,
 .mock-site textarea,
 .mock-search input { width: 100%; min-height: 2.5rem; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); background: var(--shadcn-background); color: var(--shadcn-foreground); padding: 0.55rem 0.7rem; font: inherit; }
+.mock-site .shadcn-select { width: 100%; }
 .mock-site textarea { min-height: 6rem; resize: vertical; }
 .mock-site input:focus-visible,
-.mock-site select:focus-visible,
 .mock-site textarea:focus-visible,
 .mock-site button:focus-visible,
 .mock-site summary:focus-visible,
@@ -3677,7 +3684,7 @@ a {
     .mock-tabs button,
     .mock-pagination button,
     .mock-site input,
-    .mock-site select,
+    .mock-site .shadcn-select-trigger,
     .mock-site textarea,
     .mock-drop-zone { min-height: 2.75rem; }
 }

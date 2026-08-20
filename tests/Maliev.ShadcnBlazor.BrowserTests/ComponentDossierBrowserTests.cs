@@ -65,20 +65,20 @@ public sealed class ComponentDossierBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/aspect-ratio").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
 
-        var ratio = page.GetByTestId("control-aspect-ratio");
         var frame = page.Locator(".showcase-aspect-ratio-demo");
         var landscapeBox = await frame.BoundingBoxAsync();
         Assert.NotNull(landscapeBox);
         await Assertions.Expect(frame.Locator("img[alt='Engineering workspace reference']")).ToBeVisibleAsync();
 
-        await ratio.SelectOptionAsync("1:1");
+        await page.ChooseOptionAsync("control-aspect-ratio", "1:1");
         await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1(?:;|$)"));
         await Assertions.Expect(frame).ToHaveClassAsync(new Regex("showcase-aspect-ratio-demo--1-1"));
+        await Assertions.Expect(frame).ToHaveCSSAsync("width", "322.875px");
         var squareBox = await frame.BoundingBoxAsync();
         Assert.NotNull(squareBox);
         Assert.True(squareBox.Width < landscapeBox.Width, $"Expected the 1:1 frame ({squareBox.Width}px) to narrow from the 16:9 frame ({landscapeBox.Width}px). ");
 
-        await ratio.SelectOptionAsync("4:3");
+        await page.ChooseOptionAsync("control-aspect-ratio", "4:3");
         await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1.3333333333333333(?:;|$)"));
 
         var previewSource = page.Locator("#preview").GetByTestId("copy-source");
@@ -113,9 +113,9 @@ public sealed class ComponentDossierBrowserTests(
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/direction").ToString());
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "rtl");
-        await page.GetByTestId("control-direction").SelectOptionAsync("Left to right (LTR)");
+        await page.ChooseOptionAsync("control-direction", "Left to right (LTR)");
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "ltr");
-        await page.GetByTestId("control-direction").SelectOptionAsync("Inherited (RTL)");
+        await page.ChooseOptionAsync("control-direction", "Inherited (RTL)");
         await Assertions.Expect(page.GetByTestId("direction-example")).ToHaveAttributeAsync("dir", "rtl");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/field").ToString());
@@ -133,17 +133,17 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("control-field-disabled").CheckAsync();
         await Assertions.Expect(input).ToBeDisabledAsync();
         await Assertions.Expect(fieldPreview.Locator("[data-slot='field-set']")).ToHaveAttributeAsync("disabled", string.Empty);
-        await page.GetByTestId("control-field-legend-variant").SelectOptionAsync("Label");
+        await page.ChooseOptionAsync("control-field-legend-variant", "Label");
         await Assertions.Expect(fieldPreview.Locator("[data-slot='field-legend']")).ToHaveAttributeAsync("data-variant", "label");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/empty").ToString());
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Create project" })).ToBeVisibleAsync();
-        await page.GetByTestId("control-empty-media-variant").SelectOptionAsync("Default");
+        await page.ChooseOptionAsync("control-empty-media-variant", "Default");
         await Assertions.Expect(page.Locator("[data-slot='empty-icon']")).ToHaveAttributeAsync("data-variant", "default");
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/typography").ToString());
-        await page.GetByTestId("control-typeset-tag").SelectOptionAsync("article");
-        await page.GetByTestId("control-typography-variant").SelectOptionAsync("H1");
+        await page.ChooseOptionAsync("control-typeset-tag", "article");
+        await page.ChooseOptionAsync("control-typography-variant", "H1");
         await Assertions.Expect(page.Locator("article[data-slot='typeset'] h1[data-slot='typography']")).ToHaveCountAsync(2);
     }
 
@@ -172,7 +172,7 @@ public sealed class ComponentDossierBrowserTests(
         await preview.GetByRole(AriaRole.Button).FocusAsync();
         await Assertions.Expect(preview.GetByRole(AriaRole.Button)).ToBeFocusedAsync();
 
-        await page.GetByTestId("control-direction").SelectOptionAsync("Left to right (LTR)");
+        await page.ChooseOptionAsync("control-direction", "Left to right (LTR)");
         await Assertions.Expect(preview).ToHaveAttributeAsync("dir", "ltr");
         await Assertions.Expect(preview).ToHaveAttributeAsync("lang", "en");
         await Assertions.Expect(page.Locator("#preview pre")).ToContainTextAsync("ShadcnDirection.LeftToRight");
@@ -208,9 +208,9 @@ public sealed class ComponentDossierBrowserTests(
         Assert.NotNull(dossierBox);
         Assert.InRange(Math.Abs((dossierBox!.X + (dossierBox.Width / 2)) - (canvasBox!.X + (canvasBox.Width / 2))), 0, 2);
 
-        await page.GetByTestId("control-item-variant").SelectOptionAsync("Muted");
-        await page.GetByTestId("control-item-size").SelectOptionAsync("Small");
-        await page.GetByTestId("control-item-media-variant").SelectOptionAsync("Image");
+        await page.ChooseOptionAsync("control-item-variant", "Muted");
+        await page.ChooseOptionAsync("control-item-size", "Small");
+        await page.ChooseOptionAsync("control-item-media-variant", "Image");
         await page.GetByTestId("control-item-link").CheckAsync();
 
         var links = dossier.Locator("a[data-slot='item']");
@@ -296,12 +296,12 @@ public sealed class ComponentDossierBrowserTests(
             """);
         Assert.InRange(Math.Abs(gaps[0] - gaps[1]), 0, 1);
 
-        await page.GetByTestId("control-typography-variant").SelectOptionAsync("OrderedList");
-        await page.GetByTestId("control-typeset-tag").SelectOptionAsync("article");
-        await page.GetByTestId("control-typeset-size").SelectOptionAsync("1.125rem");
-        await page.GetByTestId("control-typeset-leading").SelectOptionAsync("1.8");
-        await page.GetByTestId("control-typeset-flow").SelectOptionAsync("1.5rem");
-        await page.GetByTestId("control-typeset-max-width").SelectOptionAsync("32rem");
+        await page.ChooseOptionAsync("control-typography-variant", "OrderedList");
+        await page.ChooseOptionAsync("control-typeset-tag", "article");
+        await page.ChooseOptionAsync("control-typeset-size", "1.125rem");
+        await page.ChooseOptionAsync("control-typeset-leading", "1.8");
+        await page.ChooseOptionAsync("control-typeset-flow", "1.5rem");
+        await page.ChooseOptionAsync("control-typeset-max-width", "32rem");
 
         var source = page.Locator("#preview [data-slot='code-block'] pre");
         await Assertions.Expect(source).ToContainTextAsync("<ShadcnTypeset Tag=\"article\" Size=\"1.125rem\" Leading=\"1.8\" Flow=\"1.5rem\" MaxWidth=\"32rem\">");
@@ -310,6 +310,8 @@ public sealed class ComponentDossierBrowserTests(
 
         var select = page.GetByTestId("control-typography-variant");
         await select.FocusAsync();
+        await select.PressAsync("ArrowDown");
+        await Assertions.Expect(select).ToHaveAttributeAsync("aria-expanded", "true");
         Assert.NotEqual("none", await select.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
     }
 
@@ -518,7 +520,7 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(root).ToHaveCSSAsync("direction", "rtl");
         await trigger.ClickAsync();
 
-        await page.GetByTestId("control-date-picker-mode").SelectOptionAsync("Single");
+        await page.ChooseOptionAsync("control-date-picker-mode", "Single");
         await trigger.ClickAsync();
         await root.Locator("[data-day='2026-08-20']").ClickAsync();
         await Assertions.Expect(trigger).ToContainTextAsync("20");
@@ -569,7 +571,7 @@ public sealed class ComponentDossierBrowserTests(
             """);
         Assert.True(centered, "The Card dossier should remain centered in its preview canvas.");
 
-        await page.GetByTestId("control-card-size").SelectOptionAsync("Small");
+        await page.ChooseOptionAsync("control-card-size", "Small");
         await Assertions.Expect(card).ToHaveAttributeAsync("data-size", "sm");
         await Assertions.Expect(page.Locator("#preview pre").First).ToContainTextAsync("Size=\"ShadcnCardSize.Small\"");
         await page.GetByTestId("control-card-spacing").CheckAsync();
@@ -626,7 +628,7 @@ public sealed class ComponentDossierBrowserTests(
         var sideControl = page.GetByTestId("control-sheet-side");
         foreach (var side in new[] { "Top", "Bottom", "Left" })
         {
-            await sideControl.SelectOptionAsync(side);
+            await page.ChooseOptionAsync("control-sheet-side", side);
             await trigger.ClickAsync();
             sheet = page.Locator("[data-slot='sheet-content']");
             await Assertions.Expect(sheet).ToHaveAttributeAsync("data-side", side.ToLowerInvariant());
@@ -641,7 +643,7 @@ public sealed class ComponentDossierBrowserTests(
 
         await page.SetViewportSizeAsync(390, 844);
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
-        await sideControl.SelectOptionAsync("Left");
+        await page.ChooseOptionAsync("control-sheet-side", "Left");
         await trigger.ClickAsync();
         sheet = page.Locator("[data-slot='sheet-content']");
         await sheet.EvaluateAsync("element => Promise.all(element.getAnimations().map(animation => animation.finished))");

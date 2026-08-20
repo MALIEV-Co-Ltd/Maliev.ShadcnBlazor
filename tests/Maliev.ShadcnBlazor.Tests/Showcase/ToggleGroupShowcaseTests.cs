@@ -48,10 +48,10 @@ public sealed class ToggleGroupShowcaseTests : BunitContext
             cut.FindAll(".component-preview__control > label").Select(control => control.TextContent.Trim()));
 
         cut.Find("[data-testid='control-toggle-group-multiple']").Change(false);
-        cut.Find("[data-testid='control-toggle-group-orientation']").Change("Vertical");
-        cut.Find("[data-testid='control-toggle-group-spacing']").Change("0");
-        cut.Find("[data-testid='control-toggle-group-variant']").Change("Default");
-        cut.Find("[data-testid='control-toggle-group-size']").Change("Large");
+        cut.SelectControl("toggle-group-orientation", "Vertical");
+        cut.SelectControl("toggle-group-spacing", "0");
+        cut.SelectControl("toggle-group-variant", "Default");
+        cut.SelectControl("toggle-group-size", "Large");
         cut.Find("[data-testid='control-toggle-group-disabled']").Change(true);
         cut.Find("[data-testid='control-toggle-group-invalid']").Change(true);
 

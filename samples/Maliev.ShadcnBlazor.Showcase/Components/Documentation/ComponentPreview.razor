@@ -43,15 +43,14 @@
                     else
                     {
                         <label for="@control.Id">@control.Label</label>
-                        <select id="@control.Id"
-                                data-testid="control-@control.Id"
-                                value="@control.Value"
-                                @onchange="args => Update(control, args.Value?.ToString() ?? string.Empty)">
-                            @foreach (var option in control.Options)
-                            {
-                                <option value="@option">@option</option>
-                            }
-                        </select>
+                        <ShadcnSelect TValue="string"
+                                      id="@control.Id"
+                                      data-testid="@($"control-{control.Id}")"
+                                      aria-label="@control.Label"
+                                      Value="@control.Value"
+                                      ValueChanged="value => Update(control, value)"
+                                      Options="@SelectOptions(control)"
+                                      Size="ShadcnControlSize.Small" />
                     }
                 </div>
             }
@@ -69,6 +68,9 @@
     [Parameter] public EventCallback SourceChanged { get; set; }
 
     private string HeadingId => $"{Example.Id}-title";
+
+    private static IReadOnlyList<ShadcnSelectOption<string>> SelectOptions(ComponentParameterControl control) =>
+        control.Options.Select(option => new ShadcnSelectOption<string>(option, option)).ToArray();
 
     private async Task Update(ComponentParameterControl control, string value)
     {
