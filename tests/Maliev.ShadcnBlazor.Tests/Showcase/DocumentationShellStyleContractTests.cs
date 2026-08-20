@@ -14,6 +14,16 @@ public sealed class DocumentationShellStyleContractTests
         Assert.Contains("documentation-topnav a", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr) minmax(13rem, 16rem)", css, StringComparison.Ordinal);
         Assert.Contains(".documentation-on-this-page ul", css, StringComparison.Ordinal);
+        Assert.Contains(".component-api__table code", css, StringComparison.Ordinal);
+        Assert.Contains("white-space: nowrap", css, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: normal", css, StringComparison.Ordinal);
+        Assert.Contains("word-break: normal", css, StringComparison.Ordinal);
+        Assert.Contains(".component-api__required", css, StringComparison.Ordinal);
+        Assert.Contains("background: color-mix(in oklch, var(--shadcn-primary) 12%, var(--shadcn-background))", css, StringComparison.Ordinal);
+        Assert.Contains("color: var(--shadcn-primary)", css, StringComparison.Ordinal);
+        Assert.Contains(".component-reference li", css, StringComparison.Ordinal);
+        Assert.Contains("margin-block-start: .5rem", css, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-start: 1rem", css, StringComparison.Ordinal);
     }
 
     private static string FindRoot()
