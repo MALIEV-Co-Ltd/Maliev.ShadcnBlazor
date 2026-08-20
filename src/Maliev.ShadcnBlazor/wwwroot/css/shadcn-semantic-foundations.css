@@ -549,6 +549,25 @@
     display: inline-flex;
     align-items: center;
     gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="tooltip-content"] .shadcn-kbd {
+    background: color-mix(in oklch, var(--shadcn-background) 20%, transparent);
+    color: var(--shadcn-background);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] [data-slot="tooltip-content"] .shadcn-kbd {
+    background: color-mix(in oklch, var(--shadcn-background) 10%, transparent);
+}
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-kbd {
+        border: 1px solid ButtonText;
+        background: ButtonFace;
+        color: ButtonText;
+    }
 }
 
 /* Context-rich showcase compositions for semantic foundations. */
@@ -571,10 +590,6 @@
 .showcase-typography-preview { display: grid; gap: calc(1rem * var(--shadcn-spacing-multiplier)); inline-size: min(100%, 48rem); margin-inline: auto; }
 .showcase-typography-preview__selected { display: grid; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); border-inline-start: 2px solid var(--shadcn-primary); padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .showcase-typography-preview__selected > span { color: var(--shadcn-muted-foreground); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.showcase-kbd-list { display: grid; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); inline-size: min(100%, 30rem); margin-inline: auto; }
-.showcase-kbd-row { display: flex; align-items: center; justify-content: space-between; gap: calc(1rem * var(--shadcn-spacing-multiplier)); border-block-end: 1px solid var(--shadcn-border); padding-block: calc(0.5rem * var(--shadcn-spacing-multiplier)); }
-.showcase-kbd-row > span { color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
-.showcase-kbd-row .shadcn-kbd-group { flex-shrink: 0; }
 .showcase-item-dossier { display: grid; gap: calc(1rem * var(--shadcn-spacing-multiplier)); inline-size: min(100%, 38rem); margin-inline: auto; }
 .showcase-item-dossier__header { display: flex; align-items: flex-start; justify-content: space-between; gap: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .showcase-item-dossier__header > div { display: grid; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); min-inline-size: 0; }

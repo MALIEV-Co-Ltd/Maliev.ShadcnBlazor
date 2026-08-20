@@ -28,6 +28,8 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.Contains("Variant=\"ShadcnTypographyVariant.Paragraph\"", typography.RazorSource, StringComparison.Ordinal);
 
         var keyboard = Assert.Single(registry.GetBySlug("kbd"));
+        Assert.Contains("ShadcnCard", keyboard.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Esc", keyboard.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Ctrl", keyboard.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Shift", keyboard.RazorSource, StringComparison.Ordinal);
 
@@ -48,6 +50,32 @@ public sealed class SemanticFoundationsShowcaseContractTests
         Assert.Contains("Href=\"#item-workspace-plan\"", item.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Variant=\"ShadcnItemMediaVariant.Image\"", item.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<img src=\"images/attachments/workspace-plan.png\"", item.RazorSource, StringComparison.Ordinal);
+        var platform = Assert.Single(keyboard.Controls, control => control.Id == "kbd-platform");
+        platform.Apply("macOS");
+        Assert.Contains("<ShadcnKbd>⌘</ShadcnKbd>", keyboard.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ShadcnKbd>Ctrl</ShadcnKbd>", keyboard.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnKbd>Shift</ShadcnKbd>", keyboard.RazorSource, StringComparison.Ordinal);
+        Assert.Equal("macOS", platform.Value);
+    }
+
+    [Fact]
+    public void KbdStylesPreserveLiteralShortcutOrderAndForcedColorDefinition()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Maliev.ShadcnBlazor",
+            "wwwroot",
+            "css",
+            "shadcn-semantic-foundations.css"));
+
+        Assert.Contains(".shadcn-kbd-group", css, StringComparison.Ordinal);
+        Assert.Contains("direction: ltr", css, StringComparison.Ordinal);
+        Assert.Contains("unicode-bidi: isolate", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-kbd {", css, StringComparison.Ordinal);
+        Assert.Contains("border: 1px solid ButtonText", css, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -348,20 +348,25 @@ internal static class SemanticFoundationExamples
 
     private static ComponentExampleDefinition Kbd()
     {
-        RenderFragment preview = builder =>
-        {
-            builder.OpenComponent<ShadcnKbdGroup>(0);
-            builder.AddAttribute(1, nameof(ShadcnKbdGroup.ChildContent), KeyboardKeys());
-            builder.CloseComponent();
-        };
+        var platform = "Windows";
+        RenderFragment preview = builder => builder.AddContent(0, KeyboardReference(platform));
+        var control = new ComponentParameterControl(
+            "kbd-platform",
+            "Platform",
+            ComponentParameterControlKind.Select,
+            platform,
+            ["Windows", "macOS"],
+            value => platform = value);
+        string Source() => KeyboardReferenceSource(platform);
         return Example(
             "kbd",
-            "Keyboard shortcut",
-            "Present single-key and multi-key shortcuts in a compact, readable command reference.",
-            "<ShadcnKbdGroup>\n    <ShadcnKbd>Esc</ShadcnKbd>\n</ShadcnKbdGroup>\n<ShadcnKbdGroup>\n    <ShadcnKbd>Ctrl</ShadcnKbd><span>+</span><ShadcnKbd>K</ShadcnKbd>\n</ShadcnKbdGroup>\n<ShadcnKbdGroup>\n    <ShadcnKbd>Ctrl</ShadcnKbd><span>+</span><ShadcnKbd>Shift</ShadcnKbd><span>+</span><ShadcnKbd>P</ShadcnKbd>\n</ShadcnKbdGroup>",
+            "Command shortcuts",
+            "Show a compact command reference with one-, two-, and three-key combinations for each platform.",
+            Source(),
             preview,
-            [],
-            ["single-key", "grouped"]);
+            [control],
+            ["single-key", "two-key", "three-key", "windows", "macos", "rtl", "forced-colors"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Separator()
@@ -737,14 +742,93 @@ internal static class SemanticFoundationExamples
         builder.AddContent(0, FileIcon());
     };
 
-    private static RenderFragment KeyboardKeys() => builder =>
+    private static RenderFragment KeyboardReference(string platform) => builder =>
     {
-        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-kbd-list");
-        AddShortcut(builder, 10, "Open command palette", ["Ctrl", "K"]);
-        AddShortcut(builder, 20, "Search files", ["Ctrl", "Shift", "P"]);
-        AddShortcut(builder, 30, "Close dialog", ["Esc"]);
-        builder.CloseElement();
+        var modifier = platform == "macOS" ? "⌘" : "Ctrl";
+        var modifierName = platform == "macOS" ? "Command" : "Control";
+
+        builder.OpenComponent<ShadcnCard>(0);
+        builder.AddAttribute(1, nameof(ShadcnCard.Size), ShadcnCardSize.Small);
+        builder.AddAttribute(2, nameof(ShadcnCard.ChildContent), (RenderFragment)(card =>
+        {
+            card.OpenComponent<ShadcnCardHeader>(0);
+            card.AddAttribute(1, nameof(ShadcnCardHeader.ChildContent), (RenderFragment)(header =>
+            {
+                header.OpenComponent<ShadcnCardTitle>(0);
+                header.AddAttribute(1, nameof(ShadcnCardTitle.ChildContent), Text("Command shortcuts"));
+                header.AddAttribute(2, "dir", "auto");
+                header.CloseComponent();
+                header.OpenComponent<ShadcnCardDescription>(3);
+                header.AddAttribute(4, nameof(ShadcnCardDescription.ChildContent), Text($"Common shortcuts for {platform}."));
+                header.AddAttribute(5, "dir", "auto");
+                header.CloseComponent();
+            }));
+            card.CloseComponent();
+
+            card.OpenComponent<ShadcnCardContent>(2);
+            card.AddAttribute(3, nameof(ShadcnCardContent.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnItemGroup>(0);
+                content.AddAttribute(1, nameof(ShadcnItemGroup.ChildContent), (RenderFragment)(items =>
+                {
+                    AddShortcut(items, 0, "Close current dialog", ["Esc"], "Escape");
+                    AddShortcut(items, 10, "Open command palette", [modifier, "K"], $"{modifierName} K");
+                    AddShortcut(items, 20, "Search commands", [modifier, "Shift", "P"], $"{modifierName} Shift P");
+                }));
+                content.CloseComponent();
+            }));
+            card.CloseComponent();
+        }));
+        builder.CloseComponent();
     };
+
+    private static string KeyboardReferenceSource(string platform)
+    {
+        var modifier = platform == "macOS" ? "⌘" : "Ctrl";
+        var modifierName = platform == "macOS" ? "Command" : "Control";
+        return $"""
+<ShadcnCard Size="ShadcnCardSize.Small">
+    <ShadcnCardHeader>
+        <ShadcnCardTitle dir="auto">Command shortcuts</ShadcnCardTitle>
+        <ShadcnCardDescription dir="auto">Common shortcuts for {platform}.</ShadcnCardDescription>
+    </ShadcnCardHeader>
+    <ShadcnCardContent>
+        <ShadcnItemGroup>
+            <ShadcnItem Size="ShadcnItemSize.Small">
+                <ShadcnItemContent>
+                    <ShadcnItemTitle dir="auto">Close current dialog</ShadcnItemTitle>
+                </ShadcnItemContent>
+                <ShadcnItemActions>
+                    <ShadcnKbdGroup aria-label="Escape">
+                        <ShadcnKbd>Esc</ShadcnKbd>
+                    </ShadcnKbdGroup>
+                </ShadcnItemActions>
+            </ShadcnItem>
+            <ShadcnItem Size="ShadcnItemSize.Small">
+                <ShadcnItemContent>
+                    <ShadcnItemTitle dir="auto">Open command palette</ShadcnItemTitle>
+                </ShadcnItemContent>
+                <ShadcnItemActions>
+                    <ShadcnKbdGroup aria-label="{modifierName} K">
+                        <ShadcnKbd>{modifier}</ShadcnKbd><span aria-hidden="true">+</span><ShadcnKbd>K</ShadcnKbd>
+                    </ShadcnKbdGroup>
+                </ShadcnItemActions>
+            </ShadcnItem>
+            <ShadcnItem Size="ShadcnItemSize.Small">
+                <ShadcnItemContent>
+                    <ShadcnItemTitle dir="auto">Search commands</ShadcnItemTitle>
+                </ShadcnItemContent>
+                <ShadcnItemActions>
+                    <ShadcnKbdGroup aria-label="{modifierName} Shift P">
+                        <ShadcnKbd>{modifier}</ShadcnKbd><span aria-hidden="true">+</span><ShadcnKbd>Shift</ShadcnKbd><span aria-hidden="true">+</span><ShadcnKbd>P</ShadcnKbd>
+                    </ShadcnKbdGroup>
+                </ShadcnItemActions>
+            </ShadcnItem>
+        </ShadcnItemGroup>
+    </ShadcnCardContent>
+</ShadcnCard>
+""";
+    }
 
     private static RenderFragment FileIcon() => builder =>
     {
@@ -890,17 +974,54 @@ internal static class SemanticFoundationExamples
             Feedback = "Project import opened. Select a project archive to continue.";
     }
 
-    private static void AddShortcut(RenderTreeBuilder builder, int sequence, string label, IReadOnlyList<string> keys)
+    private static void AddShortcut(
+        RenderTreeBuilder builder,
+        int sequence,
+        string label,
+        IReadOnlyList<string> keys,
+        string accessibleName)
     {
-        builder.OpenElement(sequence, "div"); builder.AddAttribute(sequence + 1, "class", "showcase-kbd-row"); builder.OpenElement(sequence + 2, "span"); builder.AddContent(sequence + 3, label); builder.CloseElement(); builder.OpenComponent<ShadcnKbdGroup>(sequence + 4); builder.AddAttribute(sequence + 5, nameof(ShadcnKbdGroup.ChildContent), (RenderFragment)(group =>
+        builder.OpenComponent<ShadcnItem>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnItem.Size), ShadcnItemSize.Small);
+        builder.AddAttribute(sequence + 2, nameof(ShadcnItem.ChildContent), (RenderFragment)(item =>
         {
-            var keySequence = 0;
-            foreach (var key in keys)
+            item.OpenComponent<ShadcnItemContent>(0);
+            item.AddAttribute(1, nameof(ShadcnItemContent.ChildContent), (RenderFragment)(itemContent =>
             {
-                if (keySequence > 0) group.AddContent(keySequence * 10, "+");
-                group.OpenComponent<ShadcnKbd>(keySequence * 10 + 1); group.AddAttribute(keySequence * 10 + 2, nameof(ShadcnKbd.ChildContent), Text(key)); group.CloseComponent(); keySequence++;
-            }
-        })); builder.CloseComponent(); builder.CloseElement();
+                itemContent.OpenComponent<ShadcnItemTitle>(0);
+                itemContent.AddAttribute(1, nameof(ShadcnItemTitle.ChildContent), Text(label));
+                itemContent.AddAttribute(2, "dir", "auto");
+                itemContent.CloseComponent();
+            }));
+            item.CloseComponent();
+
+            item.OpenComponent<ShadcnItemActions>(2);
+            item.AddAttribute(3, nameof(ShadcnItemActions.ChildContent), (RenderFragment)(actions =>
+            {
+                actions.OpenComponent<ShadcnKbdGroup>(0);
+                actions.AddAttribute(1, "aria-label", accessibleName);
+                actions.AddAttribute(2, nameof(ShadcnKbdGroup.ChildContent), (RenderFragment)(group =>
+                {
+                    for (var index = 0; index < keys.Count; index++)
+                    {
+                        if (index > 0)
+                        {
+                            group.OpenElement(index * 10, "span");
+                            group.AddAttribute(index * 10 + 1, "aria-hidden", "true");
+                            group.AddContent(index * 10 + 2, "+");
+                            group.CloseElement();
+                        }
+
+                        group.OpenComponent<ShadcnKbd>(index * 10 + 3);
+                        group.AddAttribute(index * 10 + 4, nameof(ShadcnKbd.ChildContent), Text(keys[index]));
+                        group.CloseComponent();
+                    }
+                }));
+                actions.CloseComponent();
+            }));
+            item.CloseComponent();
+        }));
+        builder.CloseComponent();
     }
 
     private static readonly ItemExampleFile[] ItemFiles =
