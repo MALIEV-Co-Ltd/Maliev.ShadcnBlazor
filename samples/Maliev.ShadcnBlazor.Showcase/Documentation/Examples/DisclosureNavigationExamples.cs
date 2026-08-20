@@ -571,9 +571,102 @@ internal static class DisclosureNavigationExamples
 
     private static ComponentExampleDefinition Tabs()
     {
-        var value = "overview"; var vertical = false; var manual = false; var force = true;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnTabs>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "Orientation", vertical ? ShadcnTabsOrientation.Vertical : ShadcnTabsOrientation.Horizontal); b.AddAttribute(3, "ActivationMode", manual ? ShadcnTabsActivationMode.Manual : ShadcnTabsActivationMode.Automatic); b.AddAttribute(4, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnTabsList>(0); c.AddAttribute(1, "Label", "Quotation views"); c.AddAttribute(2, "ChildContent", (RenderFragment)(l => { AddTab(l, 0, "overview", "Overview"); AddTab(l, 10, "history", "History"); AddTab(l, 20, "files", "Files"); AddTab(l, 30, "activity", "Activity"); })); c.CloseComponent(); AddTabContent(c, 40, "overview", "Current quotation · 3 parts ready for review.", force); AddTabContent(c, 50, "history", "Project history · Revision B was approved yesterday.", force); AddTabContent(c, 60, "files", "Files · Drawing.step, inspection-report.pdf, revision-notes.md.", force); AddTabContent(c, 70, "activity", "Activity · The production team left two updates.", force); })); b.CloseComponent(); };
-        return Example("tabs", "Tabs state machine", "Switch between realistic quotation views with automatic/manual activation, horizontal/vertical roving focus, controlled value, keep-mounted panels, RTL, and native activation.", "<ShadcnTabs Value=\"overview\">\n    <ShadcnTabsList Label=\"Quotation views\">\n        <ShadcnTabsTrigger Value=\"overview\">Overview</ShadcnTabsTrigger>\n        <ShadcnTabsTrigger Value=\"history\">History</ShadcnTabsTrigger>\n        <ShadcnTabsTrigger Value=\"files\">Files</ShadcnTabsTrigger>\n        <ShadcnTabsTrigger Value=\"activity\">Activity</ShadcnTabsTrigger>\n    </ShadcnTabsList>\n    <ShadcnTabsContent Value=\"overview\">Current quotation</ShadcnTabsContent>\n</ShadcnTabs>", preview, [Toggle("tabs-history", "Select history", v => value = v ? "history" : "overview"), Toggle("tabs-vertical", "Vertical", v => vertical = v), Toggle("tabs-manual", "Manual activation", v => manual = v), Toggle("tabs-force", "Keep panels mounted", v => force = v, true)], ["automatic", "manual", "horizontal", "vertical", "force-mount", "disabled-recovery", "rtl", "keyboard"]);
+        var value = "overview";
+        var orientation = ShadcnTabsOrientation.Horizontal;
+        var activation = ShadcnTabsActivationMode.Automatic;
+        var variant = ShadcnTabsListVariant.Default;
+        var loop = true;
+        var force = true;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<TabsDossierPreview>(0);
+            builder.AddAttribute(1, nameof(TabsDossierPreview.Value), value);
+            builder.AddAttribute(2, nameof(TabsDossierPreview.ValueChanged), EventCallback.Factory.Create<string>(new object(), next => value = next));
+            builder.AddAttribute(3, nameof(TabsDossierPreview.Orientation), orientation);
+            builder.AddAttribute(4, nameof(TabsDossierPreview.ActivationMode), activation);
+            builder.AddAttribute(5, nameof(TabsDossierPreview.Variant), variant);
+            builder.AddAttribute(6, nameof(TabsDossierPreview.Loop), loop);
+            builder.AddAttribute(7, nameof(TabsDossierPreview.ForceMount), force);
+            builder.CloseComponent();
+        };
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
+@using Maliev.ShadcnBlazor.Components.Layout
+@using Maliev.ShadcnBlazor.Components.Navigation
+
+<section aria-label="Project workspace">
+    <header>
+        <div>
+            <h3>CNC enclosure · Revision C</h3>
+            <p>Northstar Workshop · Updated 12 minutes ago</p>
+        </div>
+        <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">In review</ShadcnBadge>
+    </header>
+    <ShadcnSeparator />
+    <ShadcnTabs @bind-Value="value"
+                 Orientation="ShadcnTabsOrientation.{{orientation}}"
+                 ActivationMode="ShadcnTabsActivationMode.{{activation}}"
+                 Loop="{{loop.ToString().ToLowerInvariant()}}">
+        <ShadcnTabsList Label="Project workspace views" Variant="ShadcnTabsListVariant.{{variant}}">
+            <ShadcnTabsTrigger Value="overview">Overview</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="files">Files</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="activity">Activity</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="quality" Disabled="true">Quality</ShadcnTabsTrigger>
+        </ShadcnTabsList>
+        <ShadcnTabsContent Value="overview" ForceMount="{{force.ToString().ToLowerInvariant()}}">
+            <dl>
+                <div><dt>Status</dt><dd>Design review</dd></div>
+                <div><dt>Parts</dt><dd>3 ready</dd></div>
+                <div><dt>Due date</dt><dd>28 Aug 2026</dd></div>
+            </dl>
+            <div>
+                <div>
+                    <strong>Production handoff</strong>
+                    <span>Two dimensions need final approval.</span>
+                </div>
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(() => Announce("Review opened"))">Review</ShadcnButton>
+            </div>
+        </ShadcnTabsContent>
+        <ShadcnTabsContent Value="files" ForceMount="{{force.ToString().ToLowerInvariant()}}">
+            <ul aria-label="Project files">
+                <li><div><strong>enclosure.step</strong><span>STEP · 4.8 MB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Current</ShadcnBadge></li>
+                <li><div><strong>inspection-plan.pdf</strong><span>PDF · 820 KB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Approved</ShadcnBadge></li>
+                <li><div><strong>revision-notes.md</strong><span>Markdown · 12 KB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Updated</ShadcnBadge></li>
+            </ul>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(() => Announce("File picker opened"))">Add file</ShadcnButton>
+        </ShadcnTabsContent>
+        <ShadcnTabsContent Value="activity" ForceMount="{{force.ToString().ToLowerInvariant()}}">
+            <ol>
+                <li><strong>Design review started</strong><span>12 minutes ago · Niran</span></li>
+                <li><strong>Revision C uploaded</strong><span>Yesterday · Mali</span></li>
+                <li><strong>Inspection plan approved</strong><span>18 Aug 2026 · Arun</span></li>
+            </ol>
+        </ShadcnTabsContent>
+        <ShadcnTabsContent Value="quality" ForceMount="{{force.ToString().ToLowerInvariant()}}">
+            Quality reporting becomes available after design approval.
+        </ShadcnTabsContent>
+    </ShadcnTabs>
+    <p role="status" aria-live="polite">@(_announcement ?? $"Showing {value}")</p>
+</section>
+
+@code {
+    private string value = "{{value}}";
+    private string? _announcement;
+
+    private void Announce(string message) => _announcement = message;
+}
+""";
+        return Example("tabs", "Project workspace tabs", "Switch a realistic project workspace with automatic or manual activation, horizontal or vertical roving focus, both shadcn list treatments, loop control, disabled state, keep-mounted panels, RTL, and native activation.", Source(), preview,
+        [
+            new("tabs-value", "Selected view", ComponentParameterControlKind.Select, value, ["overview", "files", "activity"], next => value = next),
+            new("tabs-orientation", "Orientation", ComponentParameterControlKind.Select, orientation.ToString(), Enum.GetNames<ShadcnTabsOrientation>(), next => orientation = Enum.Parse<ShadcnTabsOrientation>(next)),
+            new("tabs-activation", "Activation", ComponentParameterControlKind.Select, activation.ToString(), Enum.GetNames<ShadcnTabsActivationMode>(), next => activation = Enum.Parse<ShadcnTabsActivationMode>(next)),
+            new("tabs-variant", "List style", ComponentParameterControlKind.Select, variant.ToString(), Enum.GetNames<ShadcnTabsListVariant>(), next => variant = Enum.Parse<ShadcnTabsListVariant>(next)),
+            Toggle("tabs-loop", "Loop focus", next => loop = next, true),
+            Toggle("tabs-force", "Keep panels mounted", next => force = next, true)
+        ], ["automatic", "manual", "default", "line", "horizontal", "vertical", "loop", "force-mount", "disabled", "rtl", "keyboard"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Example(string id, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{id}-primary", title, description, source, preview, controls, tags);

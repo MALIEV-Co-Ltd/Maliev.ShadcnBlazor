@@ -1,6 +1,6 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IDisposable
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs-trigger")" style="@MergeStyle(null)" data-slot="tabs-trigger" data-value="@Value" data-state="@(Selected ? "active" : "inactive")" id="@_triggerId" role="tab" type="button" disabled="@EffectiveDisabled" aria-selected="@(Selected ? "true" : "false")" aria-controls="@_contentId" tabindex="@(Selected ? "0" : "-1")" @onclick="ActivateAsync" @onkeydown="HandleKeyAsync">@ChildContent</button>
+<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs-trigger")" style="@MergeStyle(null)" data-slot="tabs-trigger" data-value="@Value" data-state="@(Selected ? "active" : "inactive")" id="@_triggerId" role="tab" type="button" disabled="@EffectiveDisabled" aria-selected="@(Selected ? "true" : "false")" aria-controls="@_contentId" tabindex="@(Focused ? "0" : "-1")" @onclick="ActivateAsync" @onfocus="FocusAsync" @onkeydown="HandleKeyAsync">@ChildContent</button>
 @code {
     [CascadingParameter] private ShadcnTabsContext Context { get; set; } = default!;
     [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
@@ -12,11 +12,13 @@
     private string _contentId => $"{_id}-content";
     private string? _registeredValue;
     private bool Selected => Context.Owner.EffectiveValue == Value;
+    private bool Focused => Context.Owner.FocusedValue == Value;
     private bool EffectiveDisabled => Context.Owner.Disabled || Disabled;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-value", "data-state", "id", "role", "type", "disabled", "aria-selected", "aria-controls", "tabindex");
     protected override void OnInitialized() { Context.Register(new(Value, _triggerId, _contentId, Disabled)); _registeredValue = Value; }
     protected override void OnParametersSet() { if (_registeredValue is not null && _registeredValue != Value) throw new InvalidOperationException("Tab values cannot change after registration."); Context.Update(Value, Disabled); }
     private Task ActivateAsync() => Context.Owner.ActivateAsync(Value, Disabled).AsTask();
+    private Task FocusAsync() => Context.Owner.SetFocusedValueAsync(Value, Disabled).AsTask();
     private Task HandleKeyAsync(KeyboardEventArgs args) => Context.Owner.HandleKeyAsync(Value, Disabled, args.Key).AsTask();
     public void Dispose() { if (_registeredValue is not null) Context.Unregister(_registeredValue); }
 }

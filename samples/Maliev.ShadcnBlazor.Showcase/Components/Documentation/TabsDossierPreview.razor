@@ -1,0 +1,104 @@
+@using Maliev.ShadcnBlazor.Components.Navigation
+
+<section class="showcase-tabs-dossier" aria-label="Project workspace">
+    <header class="showcase-tabs-dossier__header">
+        <div>
+            <h3>CNC enclosure · Revision C</h3>
+            <p>Northstar Workshop · Updated 12 minutes ago</p>
+        </div>
+        <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">In review</ShadcnBadge>
+    </header>
+
+    <ShadcnSeparator />
+
+    <ShadcnTabs Value="@_effectiveValue"
+                 ValueChanged="HandleValueChanged"
+                 Orientation="Orientation"
+                 ActivationMode="ActivationMode"
+                 Loop="Loop"
+                 Class="showcase-tabs-dossier__tabs">
+        <ShadcnTabsList Label="Project workspace views" Variant="Variant">
+            <ShadcnTabsTrigger Value="overview">Overview</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="files">Files</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="activity">Activity</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="quality" Disabled="true">Quality</ShadcnTabsTrigger>
+        </ShadcnTabsList>
+
+        <ShadcnTabsContent Value="overview" ForceMount="ForceMount">
+            <div class="showcase-tabs-dossier__panel">
+                <dl class="showcase-tabs-dossier__summary">
+                    <div><dt>Status</dt><dd>Design review</dd></div>
+                    <div><dt>Parts</dt><dd>3 ready</dd></div>
+                    <div><dt>Due date</dt><dd>28 Aug 2026</dd></div>
+                </dl>
+                <div class="showcase-tabs-dossier__handoff">
+                    <div>
+                        <strong>Production handoff</strong>
+                        <span>Two dimensions need final approval.</span>
+                    </div>
+                    <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(() => Announce("Review opened"))">Review</ShadcnButton>
+                </div>
+            </div>
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent Value="files" ForceMount="ForceMount">
+            <div class="showcase-tabs-dossier__panel">
+                <ul class="showcase-tabs-dossier__files" aria-label="Project files">
+                    <li><div><strong>enclosure.step</strong><span>STEP · 4.8 MB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Current</ShadcnBadge></li>
+                    <li><div><strong>inspection-plan.pdf</strong><span>PDF · 820 KB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Approved</ShadcnBadge></li>
+                    <li><div><strong>revision-notes.md</strong><span>Markdown · 12 KB</span></div><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Updated</ShadcnBadge></li>
+                </ul>
+                <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(() => Announce("File picker opened"))">Add file</ShadcnButton>
+            </div>
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent Value="activity" ForceMount="ForceMount">
+            <div class="showcase-tabs-dossier__panel">
+                <ol class="showcase-tabs-dossier__activity">
+                    <li><strong>Design review started</strong><span>12 minutes ago · Niran</span></li>
+                    <li><strong>Revision C uploaded</strong><span>Yesterday · Mali</span></li>
+                    <li><strong>Inspection plan approved</strong><span>18 Aug 2026 · Arun</span></li>
+                </ol>
+            </div>
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent Value="quality" ForceMount="ForceMount">
+            <div class="showcase-tabs-dossier__panel"><p>Quality reporting becomes available after design approval.</p></div>
+        </ShadcnTabsContent>
+    </ShadcnTabs>
+
+    <p class="showcase-tabs-dossier__status" role="status" aria-live="polite">@(_announcement ?? $"Showing {_effectiveValue}")</p>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Value { get; set; } = "overview";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public ShadcnTabsOrientation Orientation { get; set; }
+    [Parameter] public ShadcnTabsActivationMode ActivationMode { get; set; }
+    [Parameter] public ShadcnTabsListVariant Variant { get; set; }
+    [Parameter] public bool Loop { get; set; } = true;
+    [Parameter] public bool ForceMount { get; set; } = true;
+
+    private string? _announcement;
+    private string _effectiveValue = "overview";
+    private string? _lastParameterValue;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.Equals(Value, _lastParameterValue, StringComparison.Ordinal))
+        {
+            _effectiveValue = Value;
+            _lastParameterValue = Value;
+            _announcement = null;
+        }
+    }
+
+    private async Task HandleValueChanged(string value)
+    {
+        _effectiveValue = value;
+        _announcement = $"Showing {value}";
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    private void Announce(string message) => _announcement = message;
+}
