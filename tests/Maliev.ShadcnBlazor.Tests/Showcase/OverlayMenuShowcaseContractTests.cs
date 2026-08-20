@@ -68,6 +68,29 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void MenubarDossierUsesTheCompleteLibraryCompositionAndKeepsSourceInSync()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("menubar").Single();
+        var rendered = Render(example.Preview);
+        var markup = rendered.Markup;
+
+        Assert.Contains("data-testid=\"menubar-dossier-preview\"", markup, StringComparison.Ordinal);
+        Assert.Equal(4, rendered.FindAll("[data-slot='menubar-trigger']").Count);
+        Assert.Contains("<ShadcnMenubarCheckboxItem", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMenubarRadioItem", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMenubarSubTrigger>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMenubarContent>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Loop=\"true\"", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "menubar-loop").Apply("false");
+        example.Controls.Single(control => control.Id == "menubar-status").Apply("false");
+
+        Assert.Contains("Loop=\"false\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Checked=\"false\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Equal("false", Render(example.Preview).Find("[data-slot='menubar']").GetAttribute("data-loop"));
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();

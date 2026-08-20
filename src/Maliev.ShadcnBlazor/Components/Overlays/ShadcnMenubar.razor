@@ -1,14 +1,14 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
 @inject IJSRuntime JavaScript
-<CascadingValue Value="Context" IsFixed="true"><div @ref="_element" @attributes="Forwarded" class="@MergeClass("shadcn-menubar")" style="@MergeStyle(null)" data-slot="menubar" role="menubar" aria-label="@Label">@ChildContent</div></CascadingValue>
+<CascadingValue Value="Context" IsFixed="true"><div @ref="_element" @attributes="Forwarded" class="@MergeClass("shadcn-menubar")" style="@MergeStyle(null)" data-slot="menubar" data-loop="@(Loop ? "true" : "false")" role="menubar" aria-label="@Label">@ChildContent</div></CascadingValue>
 @code {
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
     [Parameter] public bool Loop { get; set; } = true;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private readonly ShadcnMenubarContext Context = new(); private ElementReference _element; private IJSObjectReference? _module;
-    private IReadOnlyDictionary<string,object> Forwarded => AttributesExcept("data-slot", "role", "aria-label");
+    private IReadOnlyDictionary<string,object> Forwarded => AttributesExcept("data-slot", "data-loop", "role", "aria-label");
     protected override void OnParametersSet() { if (string.IsNullOrWhiteSpace(Label)) throw new ArgumentException("Menubar label cannot be empty.", nameof(Label)); Context.BeginRender(); }
-    protected override async Task OnAfterRenderAsync(bool first) { if (!first) return; _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js"); await _module.InvokeVoidAsync("attachMenubar", _element, Loop); }
+    protected override async Task OnAfterRenderAsync(bool first) { _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js"); await _module.InvokeVoidAsync("attachMenubar", _element, Loop); }
     public async ValueTask DisposeAsync() { if (_module is null) return; try { await _module.InvokeVoidAsync("detachMenubar", _element); await _module.DisposeAsync(); } catch (JSDisconnectedException) { } }
 }

@@ -10,6 +10,7 @@
     public bool EffectiveOpen => _open; public string TriggerId => _triggerId; public string ContentId => _contentId;
     protected override void OnParametersSet() { _index = Menubar.Register(this); if (!_initialized || Open != _last) _open = Open; _last = Open; _initialized = true; }
     public async ValueTask SetOpenAsync(bool value) { if (_open == value) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _open = value; await InvokeAsync(StateHasChanged); } }
+    [JSInvokable] public Task RequestCloseAsync() => SetOpenAsync(false).AsTask();
     internal ValueTask ToggleAsync() => Menubar.OpenAsync(this);
     public void Dispose() => Menubar.Unregister(this);
 }

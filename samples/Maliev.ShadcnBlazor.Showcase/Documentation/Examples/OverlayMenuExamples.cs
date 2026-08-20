@@ -136,9 +136,147 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Menubar()
     {
-        var second = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnMenubar>(0); b.AddAttribute(1, "Label", "Application menu"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddMenubarMenu(c, 0, "File", "New quotation", false); AddMenubarMenu(c, 10, "Edit", "Undo", second); })); b.CloseComponent(); };
-        return Example("menubar", "Application menubar", preview, [Toggle("menubar-second", "Open Edit menu", v => second = v)], ["roving-focus", "open-switching", "submenu", "checkbox", "radio", "rtl"]);
+        var loop = true;
+        var showStatus = true;
+
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "showcase-menubar-dossier");
+            b.AddAttribute(2, "data-testid", "menubar-dossier-preview");
+            b.OpenElement(3, "section");
+            b.AddAttribute(4, "class", "showcase-menubar-workspace");
+            b.AddAttribute(5, "aria-label", "Quotation editor preview");
+            b.OpenElement(6, "header");
+            b.AddAttribute(7, "class", "showcase-menubar-workspace__header");
+            b.OpenElement(8, "div");
+            b.AddAttribute(9, "class", "showcase-menubar-workspace__identity");
+            b.OpenElement(10, "span");
+            b.AddAttribute(11, "class", "showcase-menubar-workspace__mark");
+            b.AddAttribute(12, "aria-hidden", "true");
+            b.AddContent(13, "M");
+            b.CloseElement();
+            b.OpenElement(14, "div");
+            b.OpenElement(15, "strong");
+            b.AddContent(16, "Quotation editor");
+            b.CloseElement();
+            b.OpenElement(17, "span");
+            b.AddContent(18, "QT-4189");
+            b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenElement(19, "span");
+            b.AddAttribute(20, "class", "showcase-menubar-workspace__save-state");
+            b.AddContent(21, "Saved just now");
+            b.CloseElement();
+            b.CloseElement();
+
+            b.OpenComponent<ShadcnMenubar>(30);
+            b.AddAttribute(31, "Label", "Quotation editor commands");
+            b.AddAttribute(32, "Loop", loop);
+            b.AddAttribute(33, "ChildContent", (RenderFragment)(c =>
+            {
+                AddMenubarFileMenu(c, 0);
+                AddMenubarEditMenu(c, 100);
+                AddMenubarViewMenu(c, 200, showStatus);
+                AddMenubarHelpMenu(c, 300);
+            }));
+            b.CloseComponent();
+
+            b.OpenElement(40, "div");
+            b.AddAttribute(41, "class", "showcase-menubar-workspace__canvas");
+            b.OpenElement(42, "div");
+            b.AddAttribute(43, "class", "showcase-menubar-document");
+            b.OpenElement(44, "span");
+            b.AddAttribute(45, "class", "showcase-menubar-document__eyebrow");
+            b.AddContent(46, "PRODUCTION DRAWING");
+            b.CloseElement();
+            b.OpenElement(47, "strong");
+            b.AddContent(48, "CNC enclosure · Revision C");
+            b.CloseElement();
+            b.OpenElement(49, "span");
+            b.AddContent(50, "3 files ready for engineering review");
+            b.CloseElement();
+            b.CloseElement();
+            b.CloseElement();
+
+            if (showStatus)
+            {
+                b.OpenElement(60, "footer");
+                b.AddAttribute(61, "class", "showcase-menubar-workspace__status");
+                b.AddContent(62, "Ready");
+                b.OpenElement(63, "span");
+                b.AddContent(64, "Page 1 of 3 · 100%");
+                b.CloseElement();
+                b.CloseElement();
+            }
+
+            b.CloseElement();
+            b.CloseElement();
+        };
+
+        string Source() => $$"""
+            <ShadcnMenubar Label="Quotation editor commands" Loop="{{loop.ToString().ToLowerInvariant()}}">
+                <ShadcnMenubarMenu>
+                    <ShadcnMenubarTrigger>File</ShadcnMenubarTrigger>
+                    <ShadcnMenubarContent>
+                        <ShadcnMenubarItem>New quotation <ShadcnMenubarShortcut>Ctrl+N</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                        <ShadcnMenubarSub>
+                            <ShadcnMenubarSubTrigger>Open recent</ShadcnMenubarSubTrigger>
+                            <ShadcnMenubarSubContent>
+                                <ShadcnMenubarItem>QT-4189 · CNC enclosure</ShadcnMenubarItem>
+                                <ShadcnMenubarItem>QT-4176 · Fixture plate</ShadcnMenubarItem>
+                            </ShadcnMenubarSubContent>
+                        </ShadcnMenubarSub>
+                        <ShadcnMenubarSeparator />
+                        <ShadcnMenubarItem>Save draft <ShadcnMenubarShortcut>Ctrl+S</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                    </ShadcnMenubarContent>
+                </ShadcnMenubarMenu>
+                <ShadcnMenubarMenu>
+                    <ShadcnMenubarTrigger>Edit</ShadcnMenubarTrigger>
+                    <ShadcnMenubarContent>
+                        <ShadcnMenubarItem>Undo <ShadcnMenubarShortcut>Ctrl+Z</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                        <ShadcnMenubarItem Disabled="true">Redo <ShadcnMenubarShortcut>Ctrl+Shift+Z</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                        <ShadcnMenubarSeparator />
+                        <ShadcnMenubarItem>Copy <ShadcnMenubarShortcut>Ctrl+C</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                        <ShadcnMenubarItem>Paste <ShadcnMenubarShortcut>Ctrl+V</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                    </ShadcnMenubarContent>
+                </ShadcnMenubarMenu>
+                <ShadcnMenubarMenu>
+                    <ShadcnMenubarTrigger>View</ShadcnMenubarTrigger>
+                    <ShadcnMenubarContent>
+                        <ShadcnMenubarCheckboxItem Checked="{{showStatus.ToString().ToLowerInvariant()}}">Show status bar</ShadcnMenubarCheckboxItem>
+                        <ShadcnMenubarSeparator />
+                        <ShadcnMenubarLabel>Interface density</ShadcnMenubarLabel>
+                        <ShadcnMenubarRadioGroup Value="comfortable">
+                            <ShadcnMenubarRadioItem Value="comfortable">Comfortable</ShadcnMenubarRadioItem>
+                            <ShadcnMenubarRadioItem Value="compact">Compact</ShadcnMenubarRadioItem>
+                        </ShadcnMenubarRadioGroup>
+                    </ShadcnMenubarContent>
+                </ShadcnMenubarMenu>
+                <ShadcnMenubarMenu>
+                    <ShadcnMenubarTrigger>Help</ShadcnMenubarTrigger>
+                    <ShadcnMenubarContent>
+                        <ShadcnMenubarItem>Documentation</ShadcnMenubarItem>
+                        <ShadcnMenubarItem>Keyboard shortcuts <ShadcnMenubarShortcut>Ctrl+/</ShadcnMenubarShortcut></ShadcnMenubarItem>
+                        <ShadcnMenubarSeparator />
+                        <ShadcnMenubarItem>About Shadcn Blazor</ShadcnMenubarItem>
+                    </ShadcnMenubarContent>
+                </ShadcnMenubarMenu>
+            </ShadcnMenubar>
+            """;
+
+        return Example(
+            "menubar",
+            "Quotation editor menubar",
+            preview,
+            [Toggle("menubar-loop", "Loop keyboard navigation", value => loop = value, true), Toggle("menubar-status", "Show status bar", value => showStatus = value, true)],
+            ["roving-focus", "open-switching", "submenu", "checkbox", "radio", "rtl", "reduced-motion"],
+            Source()) with
+        {
+            Description = "Explore realistic file, edit, view, and help commands with stable pointer switching and complete keyboard navigation.",
+            RazorSourceProvider = Source
+        };
     }
 
     private static ComponentExampleDefinition Command()
@@ -155,6 +293,92 @@ internal static class OverlayMenuExamples
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
     private static void AddChecked<T>(RenderTreeBuilder b, int sequence, bool value, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "Checked", value); b.AddAttribute(sequence + 2, "ChildContent", Text(text)); b.CloseComponent(); }
-    private static void AddMenubarMenu(RenderTreeBuilder b, int sequence, string trigger, string item, bool open) { b.OpenComponent<ShadcnMenubarMenu>(sequence); b.AddAttribute(sequence + 1, "Open", open); b.AddAttribute(sequence + 2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnMenubarTrigger>(c, 0, trigger); c.OpenComponent<ShadcnMenubarContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => AddText<ShadcnMenubarItem>(x, 0, item))); c.CloseComponent(); })); b.CloseComponent(); }
+    private static void AddMenubarFileMenu(RenderTreeBuilder b, int sequence) => AddMenubarMenu(b, sequence, "File", content =>
+    {
+        AddMenubarItem(content, 0, "New quotation", "Ctrl+N");
+        content.OpenComponent<ShadcnMenubarSub>(10);
+        content.AddAttribute(11, "ChildContent", (RenderFragment)(sub =>
+        {
+            AddText<ShadcnMenubarSubTrigger>(sub, 0, "Open recent");
+            sub.OpenComponent<ShadcnMenubarSubContent>(10);
+            sub.AddAttribute(11, "ChildContent", (RenderFragment)(recent =>
+            {
+                AddText<ShadcnMenubarItem>(recent, 0, "QT-4189 · CNC enclosure");
+                AddText<ShadcnMenubarItem>(recent, 10, "QT-4176 · Fixture plate");
+            }));
+            sub.CloseComponent();
+        }));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnMenubarSeparator>(20); content.CloseComponent();
+        AddMenubarItem(content, 30, "Save draft", "Ctrl+S");
+    });
+
+    private static void AddMenubarEditMenu(RenderTreeBuilder b, int sequence) => AddMenubarMenu(b, sequence, "Edit", content =>
+    {
+        AddMenubarItem(content, 0, "Undo", "Ctrl+Z");
+        AddMenubarItem(content, 10, "Redo", "Ctrl+Shift+Z", true);
+        content.OpenComponent<ShadcnMenubarSeparator>(20); content.CloseComponent();
+        AddMenubarItem(content, 30, "Copy", "Ctrl+C");
+        AddMenubarItem(content, 40, "Paste", "Ctrl+V");
+    });
+
+    private static void AddMenubarViewMenu(RenderTreeBuilder b, int sequence, bool showStatus) => AddMenubarMenu(b, sequence, "View", content =>
+    {
+        content.OpenComponent<ShadcnMenubarCheckboxItem>(0);
+        content.AddAttribute(1, "Checked", showStatus);
+        content.AddAttribute(2, "ChildContent", Text("Show status bar"));
+        content.CloseComponent();
+        content.OpenComponent<ShadcnMenubarSeparator>(10); content.CloseComponent();
+        AddText<ShadcnMenubarLabel>(content, 20, "Interface density");
+        content.OpenComponent<ShadcnMenubarRadioGroup>(30);
+        content.AddAttribute(31, "Value", "comfortable");
+        content.AddAttribute(32, "ChildContent", (RenderFragment)(radio =>
+        {
+            AddMenubarRadioItem(radio, 0, "comfortable", "Comfortable");
+            AddMenubarRadioItem(radio, 10, "compact", "Compact");
+        }));
+        content.CloseComponent();
+    });
+
+    private static void AddMenubarHelpMenu(RenderTreeBuilder b, int sequence) => AddMenubarMenu(b, sequence, "Help", content =>
+    {
+        AddText<ShadcnMenubarItem>(content, 0, "Documentation");
+        AddMenubarItem(content, 10, "Keyboard shortcuts", "Ctrl+/");
+        content.OpenComponent<ShadcnMenubarSeparator>(20); content.CloseComponent();
+        AddText<ShadcnMenubarItem>(content, 30, "About Shadcn Blazor");
+    });
+
+    private static void AddMenubarMenu(RenderTreeBuilder b, int sequence, string trigger, RenderFragment content)
+    {
+        b.OpenComponent<ShadcnMenubarMenu>(sequence);
+        b.AddAttribute(sequence + 1, "ChildContent", (RenderFragment)(menu =>
+        {
+            AddText<ShadcnMenubarTrigger>(menu, 0, trigger);
+            menu.OpenComponent<ShadcnMenubarContent>(10);
+            menu.AddAttribute(11, "ChildContent", content);
+            menu.CloseComponent();
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddMenubarItem(RenderTreeBuilder b, int sequence, string text, string shortcut, bool disabled = false)
+    {
+        b.OpenComponent<ShadcnMenubarItem>(sequence);
+        b.AddAttribute(sequence + 1, "Disabled", disabled);
+        b.AddAttribute(sequence + 2, "ChildContent", (RenderFragment)(content =>
+        {
+            content.AddContent(0, text);
+            AddText<ShadcnMenubarShortcut>(content, 1, shortcut);
+        }));
+        b.CloseComponent();
+    }
+
+    private static void AddMenubarRadioItem(RenderTreeBuilder b, int sequence, string value, string text)
+    {
+        b.OpenComponent<ShadcnMenubarRadioItem>(sequence);
+        b.AddAttribute(sequence + 1, "Value", value);
+        b.AddAttribute(sequence + 2, "ChildContent", Text(text));
+        b.CloseComponent();
+    }
     private static void AddCommandItem(RenderTreeBuilder b, int sequence, string value, string text, bool disabled) { b.OpenComponent<ShadcnCommandItem>(sequence); b.AddAttribute(sequence + 1, "Value", value); b.AddAttribute(sequence + 2, "TextValue", text); b.AddAttribute(sequence + 3, "Disabled", disabled); b.AddAttribute(sequence + 4, "ChildContent", Text(text)); b.CloseComponent(); }
 }
