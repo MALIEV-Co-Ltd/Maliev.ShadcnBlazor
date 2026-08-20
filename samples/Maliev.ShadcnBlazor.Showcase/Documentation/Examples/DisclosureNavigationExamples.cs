@@ -205,21 +205,50 @@ internal static class DisclosureNavigationExamples
     private static ComponentExampleDefinition Resizable()
     {
         var vertical = false; var disabled = false; var collapsible = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnResizableGroup>(0); b.AddAttribute(1, "Sizes", new[] { 40d, 60d }); b.AddAttribute(2, "Direction", vertical ? ShadcnResizableDirection.Vertical : ShadcnResizableDirection.Horizontal); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "ChildContent", (RenderFragment)(c => { AddPanel(c, 0, "queue", "Incoming queue", collapsible, "3 quotations waiting"); c.OpenComponent<ShadcnResizableHandle>(10); c.AddAttribute(11, "WithHandle", true); c.AddAttribute(12, "Label", "Resize queue and detail panels"); c.CloseComponent(); AddPanel(c, 20, "detail", "Quotation detail", false, "Select an item to review its production timeline."); })); b.CloseComponent(); };
-        var source = """
-<ShadcnResizableGroup Sizes="new[] { 40d, 60d }">
-    <ShadcnResizablePanel Id="queue">
-        <h3>Incoming queue</h3>
-        <p>3 quotations waiting</p>
-    </ShadcnResizablePanel>
-    <ShadcnResizableHandle WithHandle="true" Label="Resize queue and detail panels" />
-    <ShadcnResizablePanel Id="detail">
-        <h3>Quotation detail</h3>
-        <p>Select an item to review its production timeline.</p>
-    </ShadcnResizablePanel>
-</ShadcnResizableGroup>
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "div"); b.AddAttribute(1, "class", "showcase-resizable-dossier");
+            b.OpenComponent<ShadcnResizableGroup>(2);
+            b.AddAttribute(3, "Class", "showcase-resizable-group");
+            b.AddAttribute(4, "Sizes", new[] { 44d, 56d });
+            b.AddAttribute(5, "Direction", vertical ? ShadcnResizableDirection.Vertical : ShadcnResizableDirection.Horizontal);
+            b.AddAttribute(6, "Disabled", disabled);
+            b.AddAttribute(7, "ChildContent", (RenderFragment)(c =>
+            {
+                AddPanel(c, 0, "queue", "Production queue", collapsible, "3 jobs require review");
+                c.OpenComponent<ShadcnResizableHandle>(10); c.AddAttribute(11, "WithHandle", true); c.AddAttribute(12, "Label", "Resize production queue and job detail panels"); c.CloseComponent();
+                AddPanel(c, 20, "detail", "Job Q-1842", false, "Aluminum 6061 enclosure · Revision C");
+            }));
+            b.CloseComponent();
+            b.CloseElement();
+        };
+
+        string Source() => $$"""
+<div class="showcase-resizable-dossier">
+    <ShadcnResizableGroup Class="showcase-resizable-group"
+                           Sizes="new[] { 44d, 56d }"
+                           Direction="ShadcnResizableDirection.{{(vertical ? "Vertical" : "Horizontal")}}"
+                           Disabled="{{disabled.ToString().ToLowerInvariant()}}">
+        <ShadcnResizablePanel Id="queue" MinimumSize="20" MaximumSize="80" Collapsible="{{collapsible.ToString().ToLowerInvariant()}}">
+            <div class="showcase-resizable-panel-content">
+                <span>Production queue</span>
+                <strong>3 jobs require review</strong>
+                <small>Q-1842 · CNC milling · Due today</small>
+            </div>
+        </ShadcnResizablePanel>
+        <ShadcnResizableHandle WithHandle="true" Label="Resize production queue and job detail panels" />
+        <ShadcnResizablePanel Id="detail" MinimumSize="20" MaximumSize="80" Collapsible="false">
+            <div class="showcase-resizable-panel-content">
+                <span>Selected job</span>
+                <strong>Job Q-1842</strong>
+                <small>Aluminum 6061 enclosure · Revision C</small>
+            </div>
+        </ShadcnResizablePanel>
+    </ShadcnResizableGroup>
+</div>
 """;
-        return Example("resizable", "Resizable panels", "Pointer and keyboard resizing, live panel IDs, constraints, collapsible panels, persistence, vertical layout, and RTL deltas.", source, preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible first panel", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]);
+
+        return Example("resizable", "Production workspace", "Resize a production queue and job inspector directly with pointer or keyboard, then switch orientation to verify both axes.", Source(), preview, [Toggle("resizable-vertical", "Vertical", v => vertical = v), Toggle("resizable-collapsible", "Collapsible queue", v => collapsible = v), Toggle("resizable-disabled", "Disabled", v => disabled = v)], ["horizontal", "vertical", "pointer", "keyboard", "constraints", "collapse", "persistence", "rtl"]) with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition ScrollArea()
@@ -323,7 +352,10 @@ internal static class DisclosureNavigationExamples
         builder.CloseElement();
     }
     private static void AddBreadcrumbLink(RenderTreeBuilder b, int s, string text, string href) { b.OpenComponent<ShadcnBreadcrumbItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbLink>(0); c.AddAttribute(1, "Href", href); c.AddAttribute(2, "ChildContent", Text(text)); c.CloseComponent(); })); b.CloseComponent(); }
-    private static void AddPanel(RenderTreeBuilder b, int s, string id, string title, bool collapsible, string summary) { b.OpenComponent<ShadcnResizablePanel>(s); b.AddAttribute(s + 1, "Id", id); b.AddAttribute(s + 2, "MinimumSize", 20d); b.AddAttribute(s + 3, "MaximumSize", 80d); b.AddAttribute(s + 4, "Collapsible", collapsible); b.AddAttribute(s + 5, "ChildContent", PanelContent(title, summary)); b.CloseComponent(); }
+    private static void AddPaginationItem<T>(RenderTreeBuilder b, int s, bool disabled) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.CloseComponent(); })); b.CloseComponent(); }
+    private static void AddPaginationDirection<T>(RenderTreeBuilder b, int s, bool disabled, Action apply) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.AddAttribute(2, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.CloseComponent(); })); b.CloseComponent(); }
+    private static void AddPage(RenderTreeBuilder b, int s, int page, bool current, Action apply) { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnPaginationLink>(0); c.AddAttribute(1, "Current", current); c.AddAttribute(2, "Href", $"#quotation-page-{page}"); c.AddAttribute(3, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.AddAttribute(4, "ChildContent", Text(page.ToString())); c.CloseComponent(); })); b.CloseComponent(); }
+    private static void AddPanel(RenderTreeBuilder b, int s, string id, string title, bool collapsible, string summary) { b.OpenComponent<ShadcnResizablePanel>(s); b.AddAttribute(s + 1, "Id", id); b.AddAttribute(s + 2, "MinimumSize", 20d); b.AddAttribute(s + 3, "MaximumSize", 80d); b.AddAttribute(s + 4, "Collapsible", collapsible); b.AddAttribute(s + 5, "ChildContent", PanelContent(id, title, summary)); b.CloseComponent(); }
     private static void AddTab(RenderTreeBuilder b, int s, string value, string text) { b.OpenComponent<ShadcnTabsTrigger>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ChildContent", Text(text)); b.CloseComponent(); }
     private static void AddTabContent(RenderTreeBuilder b, int s, string value, string text, bool force) { b.OpenComponent<ShadcnTabsContent>(s); b.AddAttribute(s + 1, "Value", value); b.AddAttribute(s + 2, "ForceMount", force); b.AddAttribute(s + 3, "ChildContent", Text(text)); b.CloseComponent(); }
 
@@ -405,9 +437,12 @@ internal static class DisclosureNavigationExamples
         b.OpenComponent<ShadcnSidebarMenuButton>(sequence); b.AddAttribute(sequence + 1, "Active", active); b.AddAttribute(sequence + 2, "Tooltip", text); b.AddAttribute(sequence + 3, "ChildContent", Text(text)); b.CloseComponent();
     }
 
-    private static RenderFragment PanelContent(string title, string summary) => builder =>
+    private static RenderFragment PanelContent(string id, string title, string summary) => builder =>
     {
-        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-resizable-panel-content"); builder.OpenElement(2, "strong"); builder.AddContent(3, title); builder.CloseElement(); builder.OpenElement(4, "p"); builder.AddContent(5, summary); builder.CloseElement();
-        builder.OpenElement(6, "span"); builder.AddContent(7, "Drag the handle or use arrow keys"); builder.CloseElement(); builder.CloseElement();
+        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", "showcase-resizable-panel-content");
+        builder.OpenElement(2, "span"); builder.AddContent(3, id == "queue" ? title : "Selected job"); builder.CloseElement();
+        builder.OpenElement(4, "strong"); builder.AddContent(5, id == "queue" ? summary : title); builder.CloseElement();
+        builder.OpenElement(6, "small"); builder.AddContent(7, id == "queue" ? "Q-1842 · CNC milling · Due today" : summary); builder.CloseElement();
+        builder.CloseElement();
     };
 }

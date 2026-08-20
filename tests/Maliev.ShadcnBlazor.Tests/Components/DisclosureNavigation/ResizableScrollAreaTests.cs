@@ -94,6 +94,61 @@ public sealed class ResizableScrollAreaTests : BunitContext
     }
 
     [Fact]
+    public async Task ResizableUnboundPointerUpdatesRerenderPanelsAndSeparatorValue()
+    {
+        var cut = RenderResizable([40d, 60d]);
+
+        await cut.InvokeAsync(() => cut.Instance.ResizeFromPointerByPanelIdAsync("primary", 10));
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("--shadcn-resizable-size: 50%", cut.FindAll("[data-slot='resizable-panel']")[0].GetAttribute("style"), StringComparison.Ordinal);
+            Assert.Equal("50", cut.Find("[data-slot='resizable-handle']").GetAttribute("aria-valuenow"));
+        });
+    }
+
+    [Fact]
+    public void ResizableReattachesPointerInteractionWhenDirectionChanges()
+    {
+        var cut = RenderResizable([40d, 60d]);
+
+        cut.Render(parameters => parameters
+            .Add(x => x.Sizes, new[] { 40d, 60d })
+            .Add(x => x.Direction, ShadcnResizableDirection.Vertical)
+            .AddChildContent(builder =>
+            {
+                AddPanel(builder, 0, "primary", 10, 80);
+                builder.OpenComponent<ShadcnResizableHandle>(10);
+                builder.AddAttribute(11, nameof(ShadcnResizableHandle.WithHandle), true);
+                builder.CloseComponent();
+                AddPanel(builder, 20, "secondary", 20, 90);
+            }));
+
+        var attachments = JSInterop.Invocations
+            .Where(invocation => invocation.Identifier == "attachResizableHandle")
+            .ToArray();
+        Assert.Equal(2, attachments.Length);
+        Assert.Equal("horizontal", attachments[0].Arguments[2]);
+        Assert.Equal("vertical", attachments[1].Arguments[2]);
+        var source = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "Components", "Layout", "ShadcnResizableHandle.razor"));
+        Assert.Contains("InvokeVoidAsync(\"detachResizableHandle\"", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ResizableUsesAnAxisLockedPointerDeltaAndCompactVisualGrip()
+    {
+        var root = FindRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-disclosure-navigation.js"));
+        Assert.Contains("const coordinate = direction === 'horizontal' ? event.clientX : event.clientY", script, StringComparison.Ordinal);
+        Assert.Contains("touchAction", script, StringComparison.Ordinal);
+
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
+        Assert.Contains("--shadcn-resizable-hit-target", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: repeat(2, 2px)", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-rows: repeat(3, 2px)", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ScrollAreaUsesNativeFocusableViewportAndBothLogicalScrollbars()
     {
         var cut = Render<ShadcnScrollArea>(p => p
