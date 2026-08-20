@@ -123,6 +123,24 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void ResizableDossierMirrorsOrientationCollapseAndDisabledStateInSource()
+    {
+        var example = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("resizable"));
+        Assert.Contains("showcase-resizable-dossier", Render(example.Preview).Markup, StringComparison.Ordinal);
+        Assert.Contains("Production queue", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnResizableDirection.Horizontal", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "resizable-vertical").Apply("true");
+        example.Controls.Single(control => control.Id == "resizable-collapsible").Apply("true");
+        example.Controls.Single(control => control.Id == "resizable-disabled").Apply("true");
+
+        Assert.Contains("ShadcnResizableDirection.Vertical", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Collapsible=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("data-direction=\"vertical\"", Render(example.Preview).Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EvidencePairSurfaceOwnsOneDeterministicNamedStatePerComponent()
     {
         var cut = Render<DisclosureNavigationEvidence>();

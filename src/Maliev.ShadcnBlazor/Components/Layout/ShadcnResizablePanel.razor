@@ -13,8 +13,9 @@
     private string? _registeredId;
     private string PanelStyle => FormattableString.Invariant($"--shadcn-resizable-size: {Context.Owner.SizeAt(Context.IndexOf(Id)):0.###}%");
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-panel-id");
-    protected override void OnInitialized() { Validate(); Context.Register(new(Id, MinimumSize, MaximumSize, DefaultSize, Collapsible, CollapsedSize)); _registeredId = Id; }
+    protected override void OnInitialized() { Validate(); Context.Register(new(Id, MinimumSize, MaximumSize, DefaultSize, Collapsible, CollapsedSize)); Context.SizesChanged += Refresh; _registeredId = Id; }
     protected override void OnParametersSet() { Validate(); if (_registeredId is not null) { Context.Update(_registeredId, new(Id, MinimumSize, MaximumSize, DefaultSize, Collapsible, CollapsedSize)); _registeredId = Id; } }
     private void Validate() { if (string.IsNullOrWhiteSpace(Id)) throw new ArgumentException("Resizable panel IDs cannot be empty.", nameof(Id)); if (!double.IsFinite(MinimumSize) || !double.IsFinite(MaximumSize) || MinimumSize < 0 || MaximumSize > 100 || MinimumSize > MaximumSize) throw new ArgumentOutOfRangeException(nameof(MinimumSize)); if (DefaultSize < MinimumSize || DefaultSize > MaximumSize) throw new ArgumentOutOfRangeException(nameof(DefaultSize)); if (CollapsedSize < 0 || CollapsedSize > MaximumSize) throw new ArgumentOutOfRangeException(nameof(CollapsedSize)); }
-    public void Dispose() { if (_registeredId is not null) Context.Unregister(_registeredId); }
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() { Context.SizesChanged -= Refresh; if (_registeredId is not null) Context.Unregister(_registeredId); }
 }

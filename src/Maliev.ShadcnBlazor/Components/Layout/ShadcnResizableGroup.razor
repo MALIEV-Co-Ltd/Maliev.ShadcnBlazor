@@ -63,7 +63,7 @@
         var next = _effectiveSizes.Count == Context.Panels.Count ? _effectiveSizes.ToArray() : Enumerable.Repeat(100d / Context.Panels.Count, Context.Panels.Count).ToArray();
         pairTotal = next[handleIndex] + next[handleIndex + 1]; next[handleIndex] = nextLeft; next[handleIndex + 1] = pairTotal - nextLeft;
         if (SizesChanged.HasDelegate) await SizesChanged.InvokeAsync(next);
-        else { SetEffective(next); await InvokeAsync(StateHasChanged); }
+        else { SetEffective(next); Context.NotifySizesChanged(); await InvokeAsync(StateHasChanged); }
         if (StateStore is not null && !string.IsNullOrWhiteSpace(PersistenceKey)) try { await StateStore.SaveAsync(PersistenceKey, next); } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); }
     }
     private void SetEffective(IEnumerable<double> sizes)

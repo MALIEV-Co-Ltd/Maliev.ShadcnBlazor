@@ -3,6 +3,7 @@ namespace Maliev.ShadcnBlazor.Components.Layout;
 internal sealed class ShadcnResizableContext(ShadcnResizableGroup owner)
 {
     private readonly List<ShadcnResizablePanelRegistration> _panels = [];
+    internal event Action? SizesChanged;
     internal ShadcnResizableGroup Owner { get; } = owner;
     internal IReadOnlyList<ShadcnResizablePanelRegistration> Panels => _panels;
     internal int IndexOf(string id) => _panels.FindIndex(panel => panel.Id == id);
@@ -13,6 +14,7 @@ internal sealed class ShadcnResizableContext(ShadcnResizableGroup owner)
         _panels.Add(panel); Owner.NotifyLayoutChanged(); return _panels.Count - 1;
     }
     internal void Unregister(string id) { _panels.RemoveAll(panel => panel.Id == id); Owner.NotifyLayoutChanged(); }
+    internal void NotifySizesChanged() => SizesChanged?.Invoke();
     internal void Update(string registeredId, ShadcnResizablePanelRegistration panel)
     {
         var index = _panels.FindIndex(candidate => candidate.Id == registeredId);

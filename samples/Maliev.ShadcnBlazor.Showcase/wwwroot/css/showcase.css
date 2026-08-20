@@ -4657,6 +4657,67 @@ a {
     opacity: 1;
 }
 
+.showcase-resizable-dossier {
+    inline-size: min(100%, 42rem);
+    block-size: clamp(18rem, 42vw, 22rem);
+    margin-inline: auto;
+}
+
+.showcase-resizable-group {
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-background);
+}
+
+.showcase-resizable-panel-content {
+    display: grid;
+    min-inline-size: 0;
+    min-block-size: 100%;
+    align-content: start;
+    gap: calc(.375rem * var(--shadcn-spacing-multiplier));
+    padding: calc(1.25rem * var(--shadcn-spacing-multiplier));
+    overflow-wrap: anywhere;
+}
+
+.showcase-resizable-panel-content > span,
+.showcase-resizable-panel-content > strong,
+.showcase-resizable-panel-content > small {
+    min-inline-size: 0;
+    margin: 0;
+}
+
+.showcase-resizable-panel-content > span {
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.showcase-resizable-panel-content > strong {
+    color: var(--shadcn-foreground);
+    font-size: .9375rem;
+}
+
+.showcase-resizable-panel-content > small {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+    line-height: 1.45;
+}
+
+.showcase-resizable-group > .shadcn-resizable-panel:first-child {
+    background: color-mix(in oklab, var(--shadcn-muted) 35%, var(--shadcn-background));
+}
+
+@media (max-width: 40rem) {
+    .showcase-resizable-dossier {
+        block-size: 20rem;
+    }
+
+    .showcase-resizable-panel-content {
+        padding: calc(1rem * var(--shadcn-spacing-multiplier));
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .showcase-carousel-demo [data-slot="carousel-track"],
     .showcase-carousel-dot { transition: none; }
