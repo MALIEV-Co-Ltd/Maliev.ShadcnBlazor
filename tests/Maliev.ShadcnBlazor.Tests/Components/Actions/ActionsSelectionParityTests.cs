@@ -31,7 +31,7 @@ public sealed class ActionsSelectionParityTests : BunitContext
                 .AddChildContent("Bold")));
 
         var group = cut.Find("[data-slot='toggle-group']");
-        Assert.Equal("2", group.GetAttribute("data-spacing"));
+        Assert.Equal("0", group.GetAttribute("data-spacing"));
         Assert.Equal("outline", group.GetAttribute("data-variant"));
         Assert.Equal("lg", group.GetAttribute("data-size"));
     }

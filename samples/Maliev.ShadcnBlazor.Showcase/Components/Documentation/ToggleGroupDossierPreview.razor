@@ -1,0 +1,115 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<section class="showcase-toggle-group-dossier" data-testid="toggle-group-dossier" aria-labelledby="toggle-group-dossier-title">
+    <header class="showcase-toggle-group-dossier__header">
+        <div>
+            <h3 id="toggle-group-dossier-title">Drawing review layers</h3>
+            <p>Choose which annotations are visible while checking revision C.</p>
+        </div>
+        <span class="showcase-toggle-group-dossier__status">Review in progress</span>
+    </header>
+
+    <div class="showcase-toggle-group-dossier__workspace" data-orientation="@OrientationValue">
+        <div class="showcase-toggle-group-dossier__toolbar">
+            <span class="showcase-toggle-group-dossier__toolbar-label">Visible layers</span>
+            <ShadcnToggleGroup TValue="string"
+                               Values="CurrentValues"
+                               ValuesChanged="HandleValuesChanged"
+                               Multiple="Multiple"
+                               Orientation="Orientation"
+                               Spacing="Spacing"
+                               Variant="Variant"
+                               Size="Size"
+                               Disabled="Disabled"
+                               AdditionalAttributes="GroupAttributes">
+                <ShadcnToggleGroupItem TValue="string" Value="@("dimensions")" AdditionalAttributes="@ItemAttributes("dimensions")">Dimensions</ShadcnToggleGroupItem>
+                <ShadcnToggleGroupItem TValue="string" Value="@("notes")" AdditionalAttributes="@ItemAttributes("notes")">Notes</ShadcnToggleGroupItem>
+                <ShadcnToggleGroupItem TValue="string" Value="@("inspection")" Disabled="true" AdditionalAttributes="@ItemAttributes("inspection")">Inspection</ShadcnToggleGroupItem>
+            </ShadcnToggleGroup>
+            @if (Invalid)
+            {
+                <p id="toggle-group-error" class="showcase-toggle-group-dossier__error">Select at least one editable review layer.</p>
+            }
+        </div>
+
+        <article class="showcase-toggle-group-dossier__sheet" aria-label="Final inspection note">
+            <div class="showcase-toggle-group-dossier__sheet-heading">
+                <div>
+                    <h4>Final inspection note</h4>
+                    <p>WI-2418 · CNC enclosure · Revision C</p>
+                </div>
+                <span>Page 1 of 1</span>
+            </div>
+            <div class="showcase-toggle-group-dossier__drawing" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            <p class="showcase-toggle-group-dossier__selection" data-testid="toggle-group-selection">
+                <strong>Visible:</strong> @SelectionSummary
+            </p>
+        </article>
+    </div>
+</section>
+
+@code {
+    [Parameter] public IReadOnlyCollection<string> Values { get; set; } = ["dimensions"];
+    [Parameter] public EventCallback<IReadOnlyCollection<string>> ValuesChanged { get; set; }
+    [Parameter] public bool Multiple { get; set; } = true;
+    [Parameter] public ShadcnToggleGroupOrientation Orientation { get; set; } = ShadcnToggleGroupOrientation.Horizontal;
+    [Parameter] public double Spacing { get; set; }
+    [Parameter] public ShadcnToggleVariant Variant { get; set; } = ShadcnToggleVariant.Outline;
+    [Parameter] public ShadcnToggleSize Size { get; set; } = ShadcnToggleSize.Default;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Invalid { get; set; }
+
+    private IReadOnlyCollection<string> CurrentValues = ["dimensions"];
+    private IReadOnlyCollection<string> LastValues = [];
+
+    protected override void OnParametersSet()
+    {
+        if (!Values.SequenceEqual(LastValues, StringComparer.Ordinal))
+            CurrentValues = Values.ToArray();
+
+        LastValues = Values.ToArray();
+    }
+
+    private async Task HandleValuesChanged(IReadOnlyCollection<string> values)
+    {
+        CurrentValues = values;
+        LastValues = values.ToArray();
+        await ValuesChanged.InvokeAsync(values);
+    }
+
+    private string OrientationValue => Orientation == ShadcnToggleGroupOrientation.Vertical ? "vertical" : "horizontal";
+
+    private string SelectionSummary => CurrentValues.Count == 0
+        ? "No editable layers"
+        : string.Join(", ", CurrentValues.Select(value => value switch
+        {
+            "dimensions" => "Dimensions",
+            "notes" => "Notes",
+            "inspection" => "Inspection",
+            _ => value
+        }));
+
+    private IReadOnlyDictionary<string, object> GroupAttributes
+    {
+        get
+        {
+            var attributes = new Dictionary<string, object>
+            {
+                ["data-testid"] = "action-toggle-group",
+                ["data-fixture-multiple"] = Multiple.ToString().ToLowerInvariant(),
+                ["aria-label"] = "Drawing review layers",
+                ["aria-invalid"] = Invalid ? "true" : "false"
+            };
+            if (Invalid)
+                attributes["aria-describedby"] = "toggle-group-error";
+            return attributes;
+        }
+    }
+
+    private static IReadOnlyDictionary<string, object> ItemAttributes(string value) => new Dictionary<string, object>
+    {
+        ["data-testid"] = $"toggle-group-{value}"
+    };
+}

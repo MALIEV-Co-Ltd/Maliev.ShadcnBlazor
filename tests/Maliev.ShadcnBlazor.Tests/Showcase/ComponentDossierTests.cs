@@ -116,7 +116,7 @@ public sealed class ComponentDossierTests : BunitContext
             ["slider"] = ["single", "range", "multiple", "horizontal", "vertical", "keyboard", "pointer", "disabled", "read-only", "invalid", "form"],
             ["switch"] = ["checked", "unchecked", "default", "sm", "disabled", "read-only", "invalid", "form"],
             ["toggle"] = ["on", "off", "default", "outline", "sm", "lg", "disabled", "invalid"],
-            ["toggle-group"] = ["single", "multiple", "spacing", "connected", "horizontal", "vertical", "roving-focus", "disabled-item", "outline", "sizes"]
+            ["toggle-group"] = ["single", "multiple", "spacing", "connected", "horizontal", "vertical", "roving-focus", "disabled-item", "outline", "sizes", "disabled", "invalid"]
         };
 
         foreach (var (slug, states) in expected)

@@ -31,9 +31,9 @@ internal sealed class ShadcnToggleGroupContext<TValue>
         Spacing = spacing;
     }
 
-    internal Guid Register(TValue value, Func<bool> disabled)
+    internal Guid Register(TValue value, Func<bool> disabled, Action refresh)
     {
-        var registration = new ItemRegistration(Guid.NewGuid(), value, disabled);
+        var registration = new ItemRegistration(Guid.NewGuid(), value, disabled, refresh);
         _items.Add(registration);
         RegistrationVersion++;
         return registration.Key;
@@ -61,5 +61,11 @@ internal sealed class ShadcnToggleGroupContext<TValue>
 
     internal Task ToggleAsync(TValue value) => Disabled ? Task.CompletedTask : _toggleAsync(value);
 
-    private sealed record ItemRegistration(Guid Key, TValue Value, Func<bool> Disabled);
+    internal void NotifyItems()
+    {
+        foreach (var item in _items)
+            item.Refresh();
+    }
+
+    private sealed record ItemRegistration(Guid Key, TValue Value, Func<bool> Disabled, Action Refresh);
 }
