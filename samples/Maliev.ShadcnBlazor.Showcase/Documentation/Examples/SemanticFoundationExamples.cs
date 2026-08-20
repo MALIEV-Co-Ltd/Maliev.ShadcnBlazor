@@ -487,10 +487,15 @@ internal static class SemanticFoundationExamples
         var decorative = false;
         RenderFragment preview = builder =>
         {
-            builder.OpenElement(0, "section"); builder.AddAttribute(1, "class", orientation == ShadcnSeparatorOrientation.Vertical ? "showcase-separator-demo showcase-separator-demo--vertical" : "showcase-separator-demo");
-            builder.OpenElement(2, "div"); builder.AddAttribute(3, "class", "showcase-separator-demo__section"); builder.OpenElement(4, "strong"); builder.AddContent(5, "Production details"); builder.CloseElement(); builder.OpenElement(6, "span"); builder.AddContent(7, "Material and finish requirements."); builder.CloseElement(); builder.CloseElement();
-            builder.OpenComponent<ShadcnSeparator>(10); builder.AddAttribute(11, nameof(ShadcnSeparator.Orientation), orientation); builder.AddAttribute(12, nameof(ShadcnSeparator.Decorative), decorative); builder.CloseComponent();
-            builder.OpenElement(20, "div"); builder.AddAttribute(21, "class", "showcase-separator-demo__section"); builder.OpenElement(22, "strong"); builder.AddContent(23, "Delivery"); builder.CloseElement(); builder.OpenElement(24, "span"); builder.AddContent(25, "Dispatch estimate and shipping method."); builder.CloseElement(); builder.CloseElement();
+            builder.OpenElement(0, "section");
+            builder.AddAttribute(1, "class", orientation == ShadcnSeparatorOrientation.Vertical ? "showcase-separator-demo showcase-separator-demo--vertical" : "showcase-separator-demo");
+            builder.AddAttribute(2, "aria-label", "Quotation summary");
+            builder.OpenElement(3, "header"); builder.AddAttribute(4, "class", "showcase-separator-demo__header"); builder.OpenElement(5, "strong"); builder.OpenElement(6, "bdi"); builder.AddContent(7, "Quotation #Q-4189"); builder.CloseElement(); builder.CloseElement(); builder.OpenElement(8, "span"); builder.OpenElement(9, "bdi"); builder.AddContent(10, "CNC enclosure · Revision C"); builder.CloseElement(); builder.CloseElement(); builder.CloseElement();
+            builder.OpenElement(10, "div"); builder.AddAttribute(11, "class", "showcase-separator-demo__content");
+            AddSeparatorDetail(builder, 20, "Material", "Aluminium 6061", "Clear anodized finish");
+            builder.OpenComponent<ShadcnSeparator>(30); builder.AddAttribute(31, nameof(ShadcnSeparator.Orientation), orientation); builder.AddAttribute(32, nameof(ShadcnSeparator.Decorative), decorative); if (!decorative) builder.AddAttribute(33, "aria-label", "Production and delivery details"); builder.CloseComponent();
+            AddSeparatorDetail(builder, 40, "Delivery", "Ready in 8 business days", "24 parts · Bangkok");
+            builder.CloseElement();
             builder.CloseElement();
         };
         ComponentParameterControl[] controls =
@@ -510,14 +515,42 @@ internal static class SemanticFoundationExamples
                 [],
                 value => decorative = bool.Parse(value))
         ];
+        string Source()
+        {
+            var semanticName = decorative ? string.Empty : " aria-label=\"Production and delivery details\"";
+            return $"""
+@using Maliev.ShadcnBlazor.Components.Content
+
+<section class="showcase-separator-demo{(orientation == ShadcnSeparatorOrientation.Vertical ? " showcase-separator-demo--vertical" : string.Empty)}" aria-label="Quotation summary">
+    <header class="showcase-separator-demo__header">
+        <strong><bdi>Quotation #Q-4189</bdi></strong>
+        <span><bdi>CNC enclosure · Revision C</bdi></span>
+    </header>
+    <div class="showcase-separator-demo__content">
+        <div class="showcase-separator-demo__section">
+            <span>Material</span>
+            <strong><bdi>Aluminium 6061</bdi></strong>
+            <small><bdi>Clear anodized finish</bdi></small>
+        </div>
+        <ShadcnSeparator Orientation="ShadcnSeparatorOrientation.{orientation}" Decorative="{decorative.ToString().ToLowerInvariant()}"{semanticName} />
+        <div class="showcase-separator-demo__section">
+            <span>Delivery</span>
+            <strong><bdi>Ready in 8 business days</bdi></strong>
+            <small><bdi>24 parts · Bangkok</bdi></small>
+        </div>
+    </div>
+</section>
+""";
+        }
         return Example(
             "separator",
             "Semantic section separator",
             "Show a meaningful boundary between quotation sections, or switch to a decorative rule when the relationship is only visual.",
-            "<section>\n    <h3>Production details</h3>\n    <p>Material and finish requirements.</p>\n    <ShadcnSeparator Decorative=\"false\" />\n    <h3>Delivery</h3>\n    <p>Dispatch estimate and shipping method.</p>\n</section>",
+            Source(),
             preview,
             controls,
-            ["horizontal", "vertical", "decorative", "semantic"]);
+            ["horizontal", "vertical", "decorative", "semantic", "rtl", "forced-colors"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Empty()
@@ -1172,4 +1205,28 @@ internal static class SemanticFoundationExamples
         string ImageAlt,
         string Status,
         ShadcnBadgeVariant BadgeVariant);
+    private static void AddSeparatorDetail(
+        RenderTreeBuilder builder,
+        int sequence,
+        string label,
+        string value,
+        string detail)
+    {
+        builder.OpenElement(sequence, "div");
+        builder.AddAttribute(sequence + 1, "class", "showcase-separator-demo__section");
+        builder.OpenElement(sequence + 2, "span");
+        builder.AddContent(sequence + 3, label);
+        builder.CloseElement();
+        builder.OpenElement(sequence + 4, "strong");
+        builder.OpenElement(sequence + 5, "bdi");
+        builder.AddContent(sequence + 6, value);
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.OpenElement(sequence + 7, "small");
+        builder.OpenElement(sequence + 8, "bdi");
+        builder.AddContent(sequence + 9, detail);
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.CloseElement();
+    }
 }

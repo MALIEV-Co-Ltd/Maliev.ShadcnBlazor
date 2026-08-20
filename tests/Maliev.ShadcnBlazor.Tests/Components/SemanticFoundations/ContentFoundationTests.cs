@@ -116,6 +116,51 @@ public sealed class ContentFoundationTests : BunitContext
     }
 
     [Fact]
+    public void SeparatorProtectsOwnedSemanticsAndPreservesAnAccessibleName()
+    {
+        var cut = Render<ShadcnSeparator>(parameters => parameters
+            .Add(x => x.Orientation, ShadcnSeparatorOrientation.Vertical)
+            .Add(x => x.Decorative, false)
+            .Add(x => x.AdditionalAttributes, new Dictionary<string, object>
+            {
+                ["role"] = "presentation",
+                ["aria-hidden"] = "true",
+                ["aria-orientation"] = "horizontal",
+                ["data-orientation"] = "horizontal",
+                ["aria-label"] = "Quotation sections"
+            }));
+
+        var separator = cut.Find("[data-slot='separator']");
+        Assert.Equal("separator", separator.GetAttribute("role"));
+        Assert.Equal("vertical", separator.GetAttribute("aria-orientation"));
+        Assert.Equal("vertical", separator.GetAttribute("data-orientation"));
+        Assert.False(separator.HasAttribute("aria-hidden"));
+        Assert.Equal("Quotation sections", separator.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void SeparatorStylesMatchPinnedGeometryAndForcedColors()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Maliev.ShadcnBlazor",
+            "wwwroot",
+            "css",
+            "shadcn-semantic-foundations.css"));
+
+        Assert.Contains(".shadcn-separator[data-orientation=\"horizontal\"]", css, StringComparison.Ordinal);
+        Assert.Contains("inline-size: 100%;", css, StringComparison.Ordinal);
+        Assert.Contains("block-size: 1px;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-separator[data-orientation=\"vertical\"]", css, StringComparison.Ordinal);
+        Assert.Contains("inline-size: 1px;", css, StringComparison.Ordinal);
+        Assert.Contains("block-size: 100%;", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains("background: CanvasText;", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EmptyCompositionExposesAllSlotsAndIconVariant()
     {
         var root = Render<ShadcnEmpty>(parameters => parameters.AddChildContent("empty"));
@@ -148,5 +193,13 @@ public sealed class ContentFoundationTests : BunitContext
             parameters.Add(x => x.Orientation, (ShadcnSeparatorOrientation)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnEmptyMedia>(parameters =>
             parameters.Add(x => x.Variant, (ShadcnEmptyMediaVariant)999)));
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }
