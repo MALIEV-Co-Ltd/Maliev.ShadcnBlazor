@@ -129,6 +129,7 @@ public sealed class ComponentDossierBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/button").ToString());
         await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator("[data-testid^='button-variant-']")).ToHaveCountAsync(6);
         await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator(".showcase-button-dossier__sizes [data-slot='button']")).ToHaveCountAsync(4);
+        await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator(".showcase-button-dossier__icon-sizes [data-slot='button']")).ToHaveCountAsync(4);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/checkbox").ToString());
         var checkbox = page.GetByTestId("action-checkbox");

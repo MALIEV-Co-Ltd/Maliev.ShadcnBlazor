@@ -88,7 +88,7 @@ public sealed class ComponentDossierTests : BunitContext
         var create = examplesType.GetMethod("Create", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
         var expected = new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
-            ["button"] = ["variants", "sizes", "disabled"],
+            ["button"] = ["variants", "sizes", "icons", "link", "disabled"],
             ["button-group"] = ["horizontal", "vertical", "separator", "nested", "text"],
             ["checkbox"] = ["unchecked", "checked", "indeterminate", "disabled", "read-only", "invalid", "form"],
             ["radio-group"] = ["selected", "unselected", "disabled-item", "horizontal", "vertical", "roving-focus", "read-only", "invalid", "form"],

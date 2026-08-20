@@ -22,6 +22,8 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await dossier.WaitForAsync();
         await Assertions.Expect(dossier.Locator("[data-testid^='button-variant-']")).ToHaveCountAsync(6);
         await Assertions.Expect(dossier.Locator(".showcase-button-dossier__sizes [data-slot='button']")).ToHaveCountAsync(4);
+        await Assertions.Expect(dossier.Locator(".showcase-button-dossier__icon-sizes [data-slot='button']")).ToHaveCountAsync(4);
+        await Assertions.Expect(dossier.GetByTestId("button-variant-link")).ToHaveAttributeAsync("href", "#usage");
 
         var defaultButton = dossier.GetByTestId("button-variant-default");
         await Assertions.Expect(defaultButton).ToHaveCSSAsync("cursor", "pointer");
@@ -30,7 +32,14 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
 
         await page.GetByTestId("control-button-disabled").CheckAsync();
         await Assertions.Expect(defaultButton).ToBeDisabledAsync();
+        await Assertions.Expect(dossier.Locator("button[data-slot='button']:disabled")).ToHaveCountAsync(13);
+        await Assertions.Expect(dossier.GetByTestId("button-variant-link")).ToHaveAttributeAsync("aria-disabled", "true");
+        await Assertions.Expect(dossier.GetByTestId("button-variant-link")).Not.ToHaveAttributeAsync("href", "#usage");
         await Assertions.Expect(dossier.GetByTestId("button-last-action")).ToContainTextAsync("Save changes pressed");
+
+        var updatedSource = await page.Locator("#preview [data-slot='code-block']").First.InnerTextAsync();
+        Assert.Contains("Disabled=\"true\"", updatedSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Disabled=\"false\"", updatedSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -59,7 +68,12 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
             "ShadcnButtonSize.Small",
             "ShadcnButtonSize.Default",
             "ShadcnButtonSize.Large",
-            "@bind=\"disabled\"",
+            "ShadcnButtonSize.IconExtraSmall",
+            "ShadcnButtonSize.IconSmall",
+            "ShadcnButtonSize.Icon",
+            "ShadcnButtonSize.IconLarge",
+            "Href=\"#usage\"",
+            "Disabled=\"false\"",
             "aria-live=\"polite\""
         })
         {
@@ -67,5 +81,35 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         }
 
         Assert.DoesNotContain("...", sourceText, StringComparison.Ordinal);
+        Assert.DoesNotContain("<input type=\"checkbox\"", sourceText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ButtonDossierRemainsUsableOnMobileDarkRtlAndForcedColors()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            DeviceScaleFactor = 1,
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/button?theme=dark&dir=rtl").ToString());
+        var dossier = page.GetByTestId("button-dossier-preview");
+        await dossier.WaitForAsync();
+        await page.GetByTestId("component-preview-canvas").EvaluateAsync("element => element.setAttribute('dir', 'rtl')");
+        await Assertions.Expect(dossier).ToHaveCSSAsync("direction", "rtl");
+        await Assertions.Expect(dossier.Locator(".showcase-button-dossier__icon-sizes [data-slot='button']")).ToHaveCountAsync(4);
+
+        var overflows = await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        Assert.False(overflows);
+
+        var iconButton = dossier.GetByTestId("button-icon-iconextrasmall");
+        await iconButton.FocusAsync();
+        await Assertions.Expect(iconButton).ToBeFocusedAsync();
+        await iconButton.ClickAsync();
+        await Assertions.Expect(dossier.GetByTestId("button-last-action")).ToContainTextAsync("Save drawing");
     }
 }

@@ -3880,6 +3880,7 @@ a {
 .showcase-button-dossier {
     display: grid;
     inline-size: min(100%, 48rem);
+    margin-inline: auto;
     gap: 1.25rem;
 }
 
@@ -3892,22 +3893,28 @@ a {
     padding-block-end: 1rem;
 }
 
-.showcase-button-dossier__intro p { margin: .25rem 0 0; color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.5; }
-.showcase-button-dossier__eyebrow { color: var(--shadcn-foreground); font-size: .875rem; font-weight: 600; }
+.showcase-button-dossier__intro h3 { margin: 0; color: var(--shadcn-foreground); font-size: .9375rem; font-weight: 600; }
+.showcase-button-dossier__intro p { max-inline-size: 52ch; margin: .25rem 0 0; color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.5; }
 .showcase-button-dossier__context { flex: 0 0 auto; color: var(--shadcn-muted-foreground); font-size: .75rem; text-align: end; }
 .showcase-button-dossier__section { display: grid; gap: .75rem; }
 .showcase-button-dossier__section h3 { margin: 0; color: var(--shadcn-foreground); font-size: .8125rem; font-weight: 600; }
 .showcase-button-dossier__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: .75rem; }
 .showcase-button-dossier__sizes { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
+.showcase-button-dossier__icon-sizes { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
 .showcase-button-dossier__sample { display: grid; justify-items: start; gap: .4rem; min-inline-size: 0; }
 .showcase-button-dossier__sample > span { color: var(--shadcn-muted-foreground); font-size: .6875rem; }
 .showcase-button-dossier__status { display: grid; gap: .25rem; margin: 0; border-block-start: 1px solid var(--shadcn-border); padding-block-start: .875rem; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.4; }
 .showcase-button-dossier__status strong { color: var(--shadcn-foreground); font-size: .8125rem; font-weight: 500; }
 
 @media (max-width: 34rem) {
-    .showcase-button-dossier__intro { display: grid; }
+    .showcase-button-dossier { gap: .875rem; }
+    .showcase-button-dossier__intro { display: grid; padding-block-end: .75rem; }
     .showcase-button-dossier__context { text-align: start; }
+    .showcase-button-dossier__section { gap: .5rem; }
     .showcase-button-dossier__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .showcase-button-dossier__sizes,
+    .showcase-button-dossier__icon-sizes { gap: .625rem; }
+    .showcase-button-dossier__status { padding-block-start: .625rem; }
 }
 
 .showcase-skeleton-layout {

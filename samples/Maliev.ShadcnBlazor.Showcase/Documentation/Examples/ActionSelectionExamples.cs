@@ -31,43 +31,97 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(1, nameof(ButtonDossierPreview.Disabled), disabled);
             builder.CloseComponent();
         };
-        const string source = """
+        string Source()
+        {
+            var disabledValue = disabled.ToString().ToLowerInvariant();
+            return $$"""
 @using Maliev.ShadcnBlazor.Components.Actions
 
 <section aria-label="Button variants and sizes">
-    <p>Production order #4189 · Revision C · 3 files ready</p>
+    <header>
+        <h3>Production order #4189</h3>
+        <p>Revision C · 3 files ready</p>
+    </header>
 
-    <div>
-        <ShadcnButton Variant="ShadcnButtonVariant.Default" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
-        <ShadcnButton Variant="ShadcnButtonVariant.Destructive" Disabled="@disabled" OnClick="@(() => Announce(\"Delete\"))">Delete</ShadcnButton>
-        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
-        <ShadcnButton Variant="ShadcnButtonVariant.Secondary" Disabled="@disabled" OnClick="@(() => Announce(\"Save changes\"))">Save changes</ShadcnButton>
-        <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Disabled="@disabled" OnClick="@(() => Announce(\"More actions\"))">More actions</ShadcnButton>
-        <ShadcnButton Variant="ShadcnButtonVariant.Link" Disabled="@disabled" OnClick="@(() => Announce(\"View details\"))">View details</ShadcnButton>
-    </div>
+    <section aria-labelledby="variants-title">
+        <h4 id="variants-title">Variants</h4>
+        <div>
+            <ShadcnButton Variant="ShadcnButtonVariant.Default" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Save changes"))">Save changes</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Destructive" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Delete"))">Delete</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Save changes"))">Save changes</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Secondary" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("Save changes"))">Save changes</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("More actions"))">More actions</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Link" Href="#usage" Disabled="{{disabledValue}}" PointerCursor="true" OnClick="@(() => Announce("View details"))">View details</ShadcnButton>
+        </div>
+    </section>
 
-    <div aria-label="Button sizes">
-        <ShadcnButton Size="ShadcnButtonSize.ExtraSmall" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
-        <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
-        <ShadcnButton Size="ShadcnButtonSize.Default" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
-        <ShadcnButton Size="ShadcnButtonSize.Large" Variant="ShadcnButtonVariant.Outline" Disabled="@disabled">Save changes</ShadcnButton>
-    </div>
+    <section aria-labelledby="sizes-title">
+        <h4 id="sizes-title">Sizes</h4>
+        <div>
+            <ShadcnButton Size="ShadcnButtonSize.ExtraSmall" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true">Save changes</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true">Save changes</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Default" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true">Save changes</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Large" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true">Save changes</ShadcnButton>
+        </div>
+    </section>
 
-    <label><input type="checkbox" @bind="disabled" /> Disable actions</label>
+    <section aria-labelledby="icon-sizes-title">
+        <h4 id="icon-sizes-title">Icon sizes</h4>
+        <div>
+            <ShadcnButton Size="ShadcnButtonSize.IconExtraSmall" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" aria-label="Save drawing (Icon extra small)">
+                <LeadingIcon>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                        <path d="M17 21v-8H7v8" />
+                        <path d="M7 3v5h8" />
+                    </svg>
+                </LeadingIcon>
+            </ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.IconSmall" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" aria-label="Save drawing (Icon small)">
+                <LeadingIcon>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                        <path d="M17 21v-8H7v8" />
+                        <path d="M7 3v5h8" />
+                    </svg>
+                </LeadingIcon>
+            </ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Icon" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" aria-label="Save drawing (Icon default)">
+                <LeadingIcon>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                        <path d="M17 21v-8H7v8" />
+                        <path d="M7 3v5h8" />
+                    </svg>
+                </LeadingIcon>
+            </ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.IconLarge" Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" PointerCursor="true" aria-label="Save drawing (Icon large)">
+                <LeadingIcon>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                        <path d="M17 21v-8H7v8" />
+                        <path d="M7 3v5h8" />
+                    </svg>
+                </LeadingIcon>
+            </ShadcnButton>
+        </div>
+    </section>
+
     <p role="status" aria-live="polite">@(_lastAction ?? "Choose an enabled action to try it")</p>
 </section>
 
 @code {
-    private bool disabled;
     private string? _lastAction;
 
     private void Announce(string action) => _lastAction = $"{action} pressed";
 }
 """;
+        }
         return Example("button", "Button variants and sizes", "Compare every supported treatment at once, scan the size scale, and try each action in a production-order context.",
-            source, preview,
+            Source(), preview,
             [Toggle("button-disabled", "Disabled", value => disabled = value)],
-            ["variants", "sizes", "disabled"]);
+            ["variants", "sizes", "icons", "link", "disabled"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition ButtonGroup()
