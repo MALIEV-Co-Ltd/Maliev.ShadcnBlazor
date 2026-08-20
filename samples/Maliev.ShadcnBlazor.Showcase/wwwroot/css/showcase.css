@@ -7362,6 +7362,150 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 
 /* Menubar: a compact, real editor shell keeps the primitive in context while
    preserving enough room for collision-aware menus at narrow widths. */
+.showcase-drawer-dossier {
+    display: grid;
+    inline-size: min(100%, 32rem);
+    min-block-size: 14rem;
+    place-items: center;
+}
+
+.showcase-drawer-dossier__summary {
+    display: grid;
+    inline-size: min(100%, 24rem);
+    gap: .4rem;
+    border-block: 1px solid var(--shadcn-border);
+    padding-block: 1rem;
+    text-align: start;
+}
+
+.showcase-drawer-dossier__eyebrow {
+    color: var(--shadcn-muted-foreground);
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.showcase-drawer-dossier__summary > strong {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.showcase-drawer-dossier__summary > span:not(.showcase-drawer-dossier__eyebrow) {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+}
+
+.showcase-drawer-dossier__trigger,
+.showcase-drawer-panel__action {
+    display: inline-flex;
+    min-block-size: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    padding-inline: 1rem;
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.showcase-drawer-dossier__trigger {
+    justify-self: start;
+    margin-block-start: .75rem;
+}
+
+.showcase-drawer-dossier__trigger:hover,
+.showcase-drawer-panel__action:hover {
+    background: var(--shadcn-accent);
+    color: var(--shadcn-accent-foreground);
+}
+
+.showcase-drawer-dossier__trigger:focus-visible,
+.showcase-drawer-panel__action:focus-visible {
+    outline: 2px solid var(--shadcn-ring);
+    outline-offset: 2px;
+}
+
+.showcase-drawer-panel__body {
+    min-block-size: 0;
+    overflow: auto;
+    padding-block: 1rem;
+}
+
+.showcase-drawer-panel__body dl {
+    display: grid;
+    gap: .75rem;
+    margin: 0;
+}
+
+.showcase-drawer-panel__body dl > div {
+    display: grid;
+    grid-template-columns: minmax(6rem, .55fr) minmax(0, 1fr);
+    gap: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding-block-end: .75rem;
+}
+
+.showcase-drawer-panel__body dt {
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+.showcase-drawer-panel__body dd {
+    margin: 0;
+    font-size: .8125rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.showcase-drawer-panel__body p {
+    margin: 1rem 0 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+.showcase-drawer-panel .shadcn-drawer-footer {
+    flex-direction: column;
+}
+
+.showcase-drawer-panel__action {
+    inline-size: 100%;
+}
+
+.showcase-drawer-panel__action--primary {
+    border-color: transparent;
+    background: var(--shadcn-primary);
+    color: var(--shadcn-primary-foreground);
+}
+
+[dir="rtl"] .showcase-drawer-dossier__summary,
+[dir="rtl"] .showcase-drawer-panel { text-align: start; }
+
+@media (min-width: 40rem) {
+    .showcase-drawer-panel[data-swipe-axis="y"] {
+        inline-size: min(100%, 38rem);
+        margin-inline: auto;
+    }
+
+    .showcase-drawer-panel .shadcn-drawer-footer {
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+    }
+
+    .showcase-drawer-panel__action {
+        inline-size: auto;
+    }
+}
+
+@media (forced-colors: active) {
+    .showcase-drawer-dossier__trigger,
+    .showcase-drawer-panel__action { border-color: ButtonText; }
+}
+
 .showcase-menubar-dossier {
     display: grid;
     inline-size: min(100%, 42rem);

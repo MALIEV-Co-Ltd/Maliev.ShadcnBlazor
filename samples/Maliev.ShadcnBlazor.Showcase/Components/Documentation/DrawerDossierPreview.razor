@@ -1,0 +1,49 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-drawer-dossier" data-testid="drawer-dossier-preview">
+    <div class="showcase-drawer-dossier__summary">
+        <span class="showcase-drawer-dossier__eyebrow">Dispatch review</span>
+        <strong>Order QT-4189</strong>
+        <span>Bangkok production hub · 3 packages ready</span>
+        <ShadcnDrawer @bind-Open="Open"
+                      SwipeDirection="Direction"
+                      ModalMode="ModalMode"
+                      ShowSwipeHandle="ShowSwipeHandle"
+                      SnapPoints="EffectiveSnapPoints"
+                      SnapPoint="EffectiveSnapPoint">
+            <ShadcnDrawerTrigger Class="showcase-drawer-dossier__trigger">Review dispatch</ShadcnDrawerTrigger>
+            <ShadcnDrawerContent Class="showcase-drawer-panel" data-testid="drawer-panel">
+                <ShadcnDrawerHeader>
+                    <ShadcnDrawerTitle>Confirm dispatch</ShadcnDrawerTitle>
+                    <ShadcnDrawerDescription>Check the destination and production handoff before releasing this order.</ShadcnDrawerDescription>
+                </ShadcnDrawerHeader>
+                <div class="showcase-drawer-panel__body">
+                    <dl>
+                        <div><dt>Destination</dt><dd>Samut Prakan, Thailand</dd></div>
+                        <div><dt>Carrier</dt><dd>Kerry Express · Next day</dd></div>
+                        <div><dt>Handoff</dt><dd>Bangkok production hub</dd></div>
+                    </dl>
+                    <p>All three packages passed final inspection at 14:20.</p>
+                </div>
+                <ShadcnDrawerFooter>
+                    <ShadcnDrawerClose Class="showcase-drawer-panel__action showcase-drawer-panel__action--primary">Confirm dispatch</ShadcnDrawerClose>
+                    <ShadcnDrawerClose Class="showcase-drawer-panel__action">Cancel</ShadcnDrawerClose>
+                </ShadcnDrawerFooter>
+            </ShadcnDrawerContent>
+        </ShadcnDrawer>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ShadcnDrawerSwipeDirection Direction { get; set; } = ShadcnDrawerSwipeDirection.Down;
+    [Parameter] public ShadcnDrawerModalMode ModalMode { get; set; } = ShadcnDrawerModalMode.Modal;
+    [Parameter] public bool ShowSwipeHandle { get; set; } = true;
+    [Parameter] public bool UseSnapPoints { get; set; } = true;
+
+    private bool Open { get; set; }
+    private static readonly IReadOnlyList<ShadcnDrawerSnapPoint> VerticalSnapPoints =
+        [ShadcnDrawerSnapPoint.Fraction(0.55), ShadcnDrawerSnapPoint.Fraction(0.9)];
+    private bool IsVertical => Direction is ShadcnDrawerSwipeDirection.Up or ShadcnDrawerSwipeDirection.Down;
+    private IReadOnlyList<ShadcnDrawerSnapPoint> EffectiveSnapPoints => UseSnapPoints && IsVertical ? VerticalSnapPoints : [];
+    private ShadcnDrawerSnapPoint? EffectiveSnapPoint => EffectiveSnapPoints.Count > 0 ? EffectiveSnapPoints[0] : null;
+}
