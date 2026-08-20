@@ -116,7 +116,11 @@ public sealed class MudInventoryBrowserTests(ShowcaseServerFixture server, Playw
 
         var material = page.GetByRole(AriaRole.Combobox, new() { Name = "Material", Exact = true }).Last;
         await material.ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "Aluminium", Exact = true }).First.ClickAsync();
+        var materialListboxId = await material.GetAttributeAsync("aria-controls");
+        Assert.False(string.IsNullOrWhiteSpace(materialListboxId));
+        var materialListbox = page.Locator($"#{materialListboxId}");
+        await Assertions.Expect(materialListbox).ToHaveAttributeAsync("role", "listbox");
+        await materialListbox.GetByRole(AriaRole.Option, new() { Name = "Aluminium", Exact = true }).ClickAsync();
         await Assertions.Expect(material).ToHaveTextAsync("Aluminium");
 
         Assert.True(await page.Locator(".mud-input-error").CountAsync() >= 1);
