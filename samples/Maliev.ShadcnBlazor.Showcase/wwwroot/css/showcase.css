@@ -3591,6 +3591,180 @@ a {
     box-shadow: none;
 }
 
+.showcase-scroll-area-dossier {
+    display: grid;
+    inline-size: min(100%, 34rem);
+    gap: 0.875rem;
+}
+
+.showcase-scroll-area-dossier > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.showcase-scroll-area-dossier h3,
+.showcase-scroll-area-dossier p {
+    margin: 0;
+}
+
+.showcase-scroll-area-dossier h3 {
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+}
+
+.showcase-scroll-area-dossier p {
+    margin-block-start: 0.2rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.showcase-scroll-area-mode {
+    flex: none;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+
+.showcase-scroll-area {
+    block-size: 15.5rem;
+    inline-size: 100%;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-card);
+}
+
+.showcase-scroll-area--horizontal {
+    block-size: 13rem;
+}
+
+.showcase-production-activity {
+    display: grid;
+    margin: 0;
+    padding: 0.35rem 1.125rem 0.75rem;
+    list-style: none;
+}
+
+.showcase-production-activity > li {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-block-size: 3.75rem;
+    border-block-end: 1px solid var(--shadcn-border);
+}
+
+.showcase-production-activity > li:last-child {
+    border-block-end: 0;
+}
+
+.showcase-production-activity time {
+    color: var(--shadcn-muted-foreground);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+}
+
+.showcase-production-activity li > div {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.1rem;
+}
+
+.showcase-production-activity strong {
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 620;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.showcase-production-activity li > div > span,
+.showcase-production-activity li > span {
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.showcase-production-activity li > span {
+    font-weight: 600;
+}
+
+.showcase-production-schedule {
+    inline-size: 48rem;
+    border-collapse: collapse;
+    color: var(--shadcn-foreground);
+    font-size: 0.75rem;
+    text-align: start;
+}
+
+.showcase-production-schedule th,
+.showcase-production-schedule td {
+    min-inline-size: 7.5rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding: 0.75rem 0.875rem;
+    text-align: start;
+    white-space: nowrap;
+}
+
+.showcase-production-schedule thead th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--shadcn-muted);
+    color: var(--shadcn-muted-foreground);
+    font-weight: 600;
+}
+
+.showcase-production-schedule tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    background: var(--shadcn-card);
+    font-weight: 650;
+}
+
+@media (max-width: 40rem) {
+    .showcase-scroll-area-dossier > header {
+        align-items: center;
+    }
+
+    .showcase-scroll-area {
+        block-size: 17rem;
+    }
+
+    .showcase-scroll-area--horizontal {
+        block-size: 13rem;
+    }
+
+    .showcase-production-activity {
+        padding-inline: 0.875rem;
+    }
+
+    .showcase-production-activity > li {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.2rem 0.75rem;
+        padding-block: 0.65rem;
+    }
+
+    .showcase-production-activity time {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (forced-colors: active) {
+    .showcase-scroll-area-mode,
+    .showcase-scroll-area {
+        border-color: CanvasText;
+    }
+}
+
 .component-code pre,
 .component-api__scroller,
 .component-evidence__matrix {

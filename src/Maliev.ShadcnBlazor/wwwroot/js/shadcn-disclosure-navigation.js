@@ -89,21 +89,99 @@ function detectRtlScrollType() {
 function normalizedScrollLeft(viewport, rtl, max) { if (!rtl) return viewport.scrollLeft; const type = detectRtlScrollType(); return type === 'negative' ? -viewport.scrollLeft : type === 'reverse' ? viewport.scrollLeft : max - viewport.scrollLeft; }
 function setNormalizedScrollLeft(viewport, rtl, max, value) { if (!rtl) { viewport.scrollLeft = value; return; } const type = detectRtlScrollType(); viewport.scrollLeft = type === 'negative' ? -value : type === 'reverse' ? value : max - value; }
 export function syncScrollArea(root, hideDelay) {
+    const active = scrollAreas.get(root);
+    if (active) {
+        active.hideDelay = hideDelay;
+        active.refreshBars();
+        active.sync(false);
+        return;
+    }
+
     const viewport = root.querySelector('[data-slot="scroll-area-viewport"]');
     if (!viewport) return;
-    const sync = () => {
+
+    const setThumbGeometry = (bar, axis, ratio, position, rtl = false) => {
+        if (!bar) return;
+        const styles = getComputedStyle(bar);
+        const horizontal = axis === 'x';
+        const startPadding = parseFloat(horizontal ? styles.paddingInlineStart : styles.paddingBlockStart) || 0;
+        const endPadding = parseFloat(horizontal ? styles.paddingInlineEnd : styles.paddingBlockEnd) || 0;
+        const barLength = horizontal ? bar.clientWidth : bar.clientHeight;
+        const trackLength = Math.max(0, barLength - startPadding - endPadding);
+        const thumbLength = Math.min(trackLength, Math.max(18, trackLength * Math.min(1, ratio)));
+        const offset = Math.max(0, trackLength - thumbLength) * Math.max(0, Math.min(1, position));
+        root.style.setProperty(`--shadcn-scroll-area-${axis}-thumb-size`, `${thumbLength}px`);
+        root.style.setProperty(`--shadcn-scroll-area-${axis}-thumb-offset`, `${horizontal && rtl ? -offset : offset}px`);
+    };
+
+    const state = { viewport, hideDelay, horizontalBar: null, verticalBar: null, refreshBars: null, sync: null, observer: null, mutations: null, pointerdown: null, onScroll: null, cancelDrag: null };
+    const refreshBars = () => {
+        state.horizontalBar = root.querySelector('[data-slot="scroll-area-scrollbar"][data-orientation="horizontal"]');
+        state.verticalBar = root.querySelector('[data-slot="scroll-area-scrollbar"][data-orientation="vertical"]');
+        root.setAttribute('data-scrollbar-x', state.horizontalBar ? 'true' : 'false');
+        root.setAttribute('data-scrollbar-y', state.verticalBar ? 'true' : 'false');
+    };
+    refreshBars();
+    const sync = (scrolling = false) => {
         const xRatio = viewport.clientWidth / Math.max(viewport.scrollWidth, 1), yRatio = viewport.clientHeight / Math.max(viewport.scrollHeight, 1);
         const maxX = Math.max(0, viewport.scrollWidth - viewport.clientWidth), maxY = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
         const rtl = getComputedStyle(viewport).direction === 'rtl'; const normalizedX = normalizedScrollLeft(viewport, rtl, maxX);
+        const xPosition = maxX ? normalizedX / maxX : 0, yPosition = maxY ? viewport.scrollTop / maxY : 0;
         root.style.setProperty('--shadcn-scroll-area-x-ratio', String(xRatio)); root.style.setProperty('--shadcn-scroll-area-y-ratio', String(yRatio));
-        root.style.setProperty('--shadcn-scroll-area-x-position', String(maxX ? normalizedX / maxX : 0)); root.style.setProperty('--shadcn-scroll-area-y-position', String(maxY ? viewport.scrollTop / maxY : 0));
+        root.style.setProperty('--shadcn-scroll-area-x-position', String(xPosition)); root.style.setProperty('--shadcn-scroll-area-y-position', String(yPosition));
+        setThumbGeometry(state.horizontalBar, 'x', xRatio, xPosition, rtl);
+        setThumbGeometry(state.verticalBar, 'y', yRatio, yPosition);
         root.setAttribute('data-overflow-x', viewport.scrollWidth > viewport.clientWidth ? 'true' : 'false'); root.setAttribute('data-overflow-y', viewport.scrollHeight > viewport.clientHeight ? 'true' : 'false');
-        root.dataset.scrolling = 'true'; clearTimeout(root.__shadcnScrollTimer); root.__shadcnScrollTimer = setTimeout(() => delete root.dataset.scrolling, hideDelay);
+        if (scrolling) {
+            root.dataset.scrolling = 'true';
+            clearTimeout(root.__shadcnScrollTimer);
+            root.__shadcnScrollTimer = setTimeout(() => delete root.dataset.scrolling, state.hideDelay);
+        }
     };
-    const pointerdown = event => { const bar = event.target.closest('[data-slot="scroll-area-scrollbar"]'); if (!bar) return; const horizontal = bar.dataset.orientation === 'horizontal', thumb = bar.querySelector('[data-slot="scroll-area-thumb"]'); const rect = bar.getBoundingClientRect(), thumbRect = thumb?.getBoundingClientRect(); const pointerStart = horizontal ? event.clientX : event.clientY, thumbStart = horizontal ? thumbRect?.left : thumbRect?.top; const grabOffset = event.target.closest('[data-slot="scroll-area-thumb"]') && thumbStart != null ? pointerStart - thumbStart : (horizontal ? thumbRect?.width : thumbRect?.height) / 2 || 0; const trackStart = horizontal ? rect.left : rect.top, trackLength = horizontal ? rect.width : rect.height, thumbLength = horizontal ? thumbRect?.width : thumbRect?.height; const update = pointer => { const coordinate = horizontal ? pointer.clientX : pointer.clientY, ratio = (coordinate - trackStart - grabOffset) / Math.max(1, trackLength - (thumbLength || 0)), clamped = Math.max(0, Math.min(1, ratio)); if (horizontal) { const max = viewport.scrollWidth - viewport.clientWidth; setNormalizedScrollLeft(viewport, getComputedStyle(viewport).direction === 'rtl', max, clamped * max); } else viewport.scrollTop = clamped * (viewport.scrollHeight - viewport.clientHeight); }; bar.setPointerCapture?.(event.pointerId); update(event); const move = e => { if (e.pointerId === event.pointerId) update(e); }; const up = e => { if (e.pointerId !== event.pointerId) return; bar.releasePointerCapture?.(e.pointerId); bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up); }; bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up); };
-    const content = viewport.querySelector('[data-slot="scroll-area-content"]'); root.addEventListener('pointerdown', pointerdown); viewport.addEventListener('scroll', sync, { passive: true }); const observer = new ResizeObserver(sync); observer.observe(viewport); if (content) observer.observe(content); const mutations = new MutationObserver(sync); if (content) mutations.observe(content, { childList: true, subtree: true, characterData: true }); sync(); scrollAreas.set(root, { viewport, sync, observer, mutations, pointerdown });
+    const pointerdown = event => {
+        if (event.button !== 0 || event.isPrimary === false) return;
+        const bar = event.target.closest('[data-slot="scroll-area-scrollbar"]');
+        if (!bar) return;
+        event.preventDefault();
+        const horizontal = bar.dataset.orientation === 'horizontal', thumb = bar.querySelector('[data-slot="scroll-area-thumb"]');
+        const rect = bar.getBoundingClientRect(), thumbRect = thumb?.getBoundingClientRect(), styles = getComputedStyle(bar);
+        const pointerStart = horizontal ? event.clientX : event.clientY, thumbStart = horizontal ? thumbRect?.left : thumbRect?.top;
+        const grabOffset = event.target.closest('[data-slot="scroll-area-thumb"]') && thumbStart != null ? pointerStart - thumbStart : (horizontal ? thumbRect?.width : thumbRect?.height) / 2 || 0;
+        const startPadding = parseFloat(horizontal ? styles.paddingInlineStart : styles.paddingBlockStart) || 0;
+        const endPadding = parseFloat(horizontal ? styles.paddingInlineEnd : styles.paddingBlockEnd) || 0;
+        const trackStart = (horizontal ? rect.left : rect.top) + startPadding;
+        const trackLength = Math.max(0, (horizontal ? rect.width : rect.height) - startPadding - endPadding), thumbLength = horizontal ? thumbRect?.width : thumbRect?.height;
+        const update = pointer => {
+            const coordinate = horizontal ? pointer.clientX : pointer.clientY;
+            const ratio = (coordinate - trackStart - grabOffset) / Math.max(1, trackLength - (thumbLength || 0)), clamped = Math.max(0, Math.min(1, ratio));
+            if (horizontal) { const max = viewport.scrollWidth - viewport.clientWidth, rtl = getComputedStyle(viewport).direction === 'rtl'; setNormalizedScrollLeft(viewport, rtl, max, (rtl ? 1 - clamped : clamped) * max); }
+            else viewport.scrollTop = clamped * (viewport.scrollHeight - viewport.clientHeight);
+        };
+        const move = e => { if (e.pointerId === event.pointerId) update(e); };
+        const finish = e => {
+            if (e?.pointerId != null && e.pointerId !== event.pointerId) return;
+            bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', finish); bar.removeEventListener('pointercancel', finish); bar.removeEventListener('lostpointercapture', finish);
+            if (bar.hasPointerCapture?.(event.pointerId)) bar.releasePointerCapture(event.pointerId);
+            root.removeAttribute('data-dragging');
+            if (state.cancelDrag === finish) state.cancelDrag = null;
+        };
+        state.cancelDrag?.();
+        state.cancelDrag = finish;
+        root.setAttribute('data-dragging', 'true');
+        bar.setPointerCapture?.(event.pointerId);
+        bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', finish); bar.addEventListener('pointercancel', finish); bar.addEventListener('lostpointercapture', finish);
+        update(event);
+    };
+    const content = viewport.querySelector('[data-slot="scroll-area-content"]');
+    const onScroll = () => sync(true);
+    root.addEventListener('pointerdown', pointerdown); viewport.addEventListener('scroll', onScroll, { passive: true });
+    const observer = new ResizeObserver(() => sync(false)); observer.observe(viewport); if (content) observer.observe(content);
+    const mutations = new MutationObserver(() => sync(false)); if (content) mutations.observe(content, { childList: true, subtree: true, characterData: true });
+    Object.assign(state, { refreshBars, sync, observer, mutations, pointerdown, onScroll });
+    scrollAreas.set(root, state);
+    sync(false);
 }
-export function detachScrollArea(root) { const value = scrollAreas.get(root); if (!value) return; root.removeEventListener('pointerdown', value.pointerdown); value.viewport.removeEventListener('scroll', value.sync); value.observer.disconnect(); value.mutations.disconnect(); clearTimeout(root.__shadcnScrollTimer); scrollAreas.delete(root); }
+export function detachScrollArea(root) { const value = scrollAreas.get(root); if (!value) return; value.cancelDrag?.(); root.removeEventListener('pointerdown', value.pointerdown); value.viewport.removeEventListener('scroll', value.onScroll); value.observer.disconnect(); value.mutations.disconnect(); clearTimeout(root.__shadcnScrollTimer); scrollAreas.delete(root); }
 
 const sidebarProviders = new WeakMap();
 export function attachSidebarProvider(root, dotnet, shortcut) {

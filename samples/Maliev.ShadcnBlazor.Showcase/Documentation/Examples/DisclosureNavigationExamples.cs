@@ -254,21 +254,97 @@ internal static class DisclosureNavigationExamples
     private static ComponentExampleDefinition ScrollArea()
     {
         var always = true; var horizontal = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnScrollArea>(0); b.AddAttribute(1, "Type", always ? ShadcnScrollAreaType.Always : ShadcnScrollAreaType.Auto); b.AddAttribute(2, "Style", "height:12rem;width:min(100%,24rem)"); b.AddAttribute(3, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnScrollAreaViewport>(0); c.AddAttribute(1, "Label", "Material catalog"); c.AddAttribute(2, "ChildContent", MaterialCatalog(horizontal)); c.CloseComponent(); c.OpenComponent<ShadcnScrollAreaScrollbar>(10); c.AddAttribute(11, "Orientation", horizontal ? ShadcnScrollAreaOrientation.Horizontal : ShadcnScrollAreaOrientation.Vertical); c.AddAttribute(12, "ChildContent", (RenderFragment)(s => Add<ShadcnScrollAreaThumb>(s, 0))); c.CloseComponent(); Add<ShadcnScrollAreaCorner>(c, 20); })); b.CloseComponent(); };
-        var source = """
-<ShadcnScrollArea Type="ShadcnScrollAreaType.Always" Style="height:12rem;width:min(100%,24rem)">
-    <ShadcnScrollAreaViewport Label="Material catalog">
-        <p>Aluminum 6061 · CNC-ready stock</p>
-        <p>Stainless 316L · Corrosion resistant</p>
-        <p>PEEK · High-temperature polymer</p>
-    </ShadcnScrollAreaViewport>
-    <ShadcnScrollAreaScrollbar Orientation="ShadcnScrollAreaOrientation.Vertical">
-        <ShadcnScrollAreaThumb />
-    </ShadcnScrollAreaScrollbar>
-    <ShadcnScrollAreaCorner />
-</ShadcnScrollArea>
+        RenderFragment preview = b =>
+        {
+            b.OpenElement(0, "section");
+            b.AddAttribute(1, "class", "showcase-scroll-area-dossier");
+            b.OpenElement(2, "header");
+            b.OpenElement(3, "div");
+            b.OpenElement(4, "h3"); b.AddContent(5, horizontal ? "Weekly machine schedule" : "Production activity"); b.CloseElement();
+            b.OpenElement(6, "p"); b.AddContent(7, horizontal ? "Compare scheduled work across machining cells." : "Follow recent quotation and production handoffs."); b.CloseElement();
+            b.CloseElement();
+            b.OpenElement(8, "span"); b.AddAttribute(9, "class", "showcase-scroll-area-mode"); b.AddContent(10, horizontal ? "Horizontal" : "Vertical"); b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnScrollArea>(20);
+            b.AddAttribute(21, "Type", always ? ShadcnScrollAreaType.Always : ShadcnScrollAreaType.Auto);
+            b.AddAttribute(22, "Class", horizontal ? "showcase-scroll-area showcase-scroll-area--horizontal" : "showcase-scroll-area");
+            b.AddAttribute(23, "ChildContent", (RenderFragment)(c =>
+            {
+                c.OpenComponent<ShadcnScrollAreaViewport>(0);
+                c.AddAttribute(1, "Label", horizontal ? "Weekly machine schedule" : "Production activity");
+                c.AddAttribute(2, "ChildContent", horizontal ? ProductionSchedule() : ProductionActivity());
+                c.CloseComponent();
+                c.OpenComponent<ShadcnScrollAreaScrollbar>(10);
+                c.AddAttribute(11, "Orientation", horizontal ? ShadcnScrollAreaOrientation.Horizontal : ShadcnScrollAreaOrientation.Vertical);
+                c.AddAttribute(12, "ChildContent", (RenderFragment)(s => Add<ShadcnScrollAreaThumb>(s, 0)));
+                c.CloseComponent();
+                Add<ShadcnScrollAreaCorner>(c, 20);
+            }));
+            b.CloseComponent();
+            b.CloseElement();
+        };
+
+        string Source()
+        {
+            var type = always ? "ShadcnScrollAreaType.Always" : "ShadcnScrollAreaType.Auto";
+            return horizontal
+                ? $$"""
+<section class="showcase-scroll-area-dossier">
+    <header>
+        <div>
+            <h3>Weekly machine schedule</h3>
+            <p>Compare scheduled work across machining cells.</p>
+        </div>
+        <span class="showcase-scroll-area-mode">Horizontal</span>
+    </header>
+    <ShadcnScrollArea Type="{{type}}" Class="showcase-scroll-area showcase-scroll-area--horizontal">
+        <ShadcnScrollAreaViewport Label="Weekly machine schedule">
+            <table class="showcase-production-schedule">
+                <thead><tr><th>Cell</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr></thead>
+                <tbody>
+                    <tr><th>Mill 01</th><td>Aluminum housing</td><td>Aluminum housing</td><td>Fixture setup</td><td>Stainless bracket</td><td>Stainless bracket</td></tr>
+                    <tr><th>Lathe 02</th><td>Drive shaft</td><td>Drive shaft</td><td>Inspection</td><td>Brass fitting</td><td>Brass fitting</td></tr>
+                    <tr><th>QC station</th><td>First article</td><td>Final inspection</td><td>Material review</td><td>First article</td><td>Shipment release</td></tr>
+                </tbody>
+            </table>
+        </ShadcnScrollAreaViewport>
+        <ShadcnScrollAreaScrollbar Orientation="ShadcnScrollAreaOrientation.Horizontal">
+            <ShadcnScrollAreaThumb />
+        </ShadcnScrollAreaScrollbar>
+        <ShadcnScrollAreaCorner />
+    </ShadcnScrollArea>
+</section>
+"""
+                : $$"""
+<section class="showcase-scroll-area-dossier">
+    <header>
+        <div>
+            <h3>Production activity</h3>
+            <p>Follow recent quotation and production handoffs.</p>
+        </div>
+        <span class="showcase-scroll-area-mode">Vertical</span>
+    </header>
+    <ShadcnScrollArea Type="{{type}}" Class="showcase-scroll-area">
+        <ShadcnScrollAreaViewport Label="Production activity">
+            <ol class="showcase-production-activity">
+                <li><time>09:42</time><div><strong>Aluminum housing</strong><span>Revision C approved for CNC milling</span></div><span>Approved</span></li>
+                <li><time>09:18</time><div><strong>Drive shaft</strong><span>Material certificate attached</span></div><span>Ready</span></li>
+                <li><time>08:54</time><div><strong>Stainless bracket</strong><span>First article inspection completed</span></div><span>Passed</span></li>
+                <li><time>08:21</time><div><strong>Brass fitting</strong><span>Toolpath review requested</span></div><span>Review</span></li>
+                <li><time>07:58</time><div><strong>Fixture plate</strong><span>Machine setup scheduled for Mill 01</span></div><span>Queued</span></li>
+            </ol>
+        </ShadcnScrollAreaViewport>
+        <ShadcnScrollAreaScrollbar Orientation="ShadcnScrollAreaOrientation.Vertical">
+            <ShadcnScrollAreaThumb />
+        </ShadcnScrollAreaScrollbar>
+        <ShadcnScrollAreaCorner />
+    </ShadcnScrollArea>
+</section>
 """;
-        return Example("scroll-area", "Native scroll area", "Native focusable scrolling with auto/always visibility, vertical/horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", source, preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
+        }
+
+        var example = Example("scroll-area", "Contained production activity", "Use native keyboard and wheel scrolling with auto/always visibility, contained vertical or horizontal thumbs, track click, drag grab offset, content observation, and RTL normalization.", Source(), preview, [Toggle("scroll-always", "Always visible", v => always = v, true), Toggle("scroll-horizontal", "Horizontal schedule", v => horizontal = v)], ["auto", "always", "vertical", "horizontal", "drag", "track", "rtl", "keyboard"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Sidebar()
@@ -386,14 +462,47 @@ internal static class DisclosureNavigationExamples
         })); b.CloseComponent();
     }
 
-    private static RenderFragment MaterialCatalog(bool horizontal) => builder =>
+    private static RenderFragment ProductionActivity() => builder =>
     {
-        builder.OpenElement(0, "div"); builder.AddAttribute(1, "class", horizontal ? "showcase-material-list showcase-material-list--wide" : "showcase-material-list");
-        foreach (var material in new[] { ("Aluminum 6061", "Lightweight · CNC"), ("Stainless 316L", "Corrosion resistant · CNC"), ("PEEK", "High temperature · Polymer"), ("ABS", "Impact resistant · Polymer"), ("Titanium Grade 5", "High strength · CNC"), ("Brass C360", "Machinable · CNC") })
+        builder.OpenElement(0, "ol"); builder.AddAttribute(1, "class", "showcase-production-activity");
+        foreach (var activity in new[]
         {
-            builder.OpenElement(10, "div"); builder.AddAttribute(11, "class", "showcase-material-row"); builder.OpenElement(12, "strong"); builder.AddContent(13, material.Item1); builder.CloseElement(); builder.OpenElement(14, "span"); builder.AddContent(15, material.Item2); builder.CloseElement(); builder.CloseElement();
+            ("09:42", "Aluminum housing", "Revision C approved for CNC milling", "Approved"),
+            ("09:18", "Drive shaft", "Material certificate attached", "Ready"),
+            ("08:54", "Stainless bracket", "First article inspection completed", "Passed"),
+            ("08:21", "Brass fitting", "Toolpath review requested", "Review"),
+            ("07:58", "Fixture plate", "Machine setup scheduled for Mill 01", "Queued")
+        })
+        {
+            builder.OpenElement(10, "li");
+            builder.OpenElement(11, "time"); builder.AddContent(12, activity.Item1); builder.CloseElement();
+            builder.OpenElement(13, "div"); builder.OpenElement(14, "strong"); builder.AddContent(15, activity.Item2); builder.CloseElement(); builder.OpenElement(16, "span"); builder.AddContent(17, activity.Item3); builder.CloseElement(); builder.CloseElement();
+            builder.OpenElement(18, "span"); builder.AddContent(19, activity.Item4); builder.CloseElement();
+            builder.CloseElement();
         }
         builder.CloseElement();
+    };
+
+    private static RenderFragment ProductionSchedule() => builder =>
+    {
+        var rows = new[]
+        {
+            new[] { "Mill 01", "Aluminum housing", "Aluminum housing", "Fixture setup", "Stainless bracket", "Stainless bracket" },
+            new[] { "Lathe 02", "Drive shaft", "Drive shaft", "Inspection", "Brass fitting", "Brass fitting" },
+            new[] { "QC station", "First article", "Final inspection", "Material review", "First article", "Shipment release" }
+        };
+        builder.OpenElement(0, "table"); builder.AddAttribute(1, "class", "showcase-production-schedule");
+        builder.OpenElement(2, "thead"); builder.OpenElement(3, "tr");
+        foreach (var heading in new[] { "Cell", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" }) { builder.OpenElement(4, "th"); builder.AddContent(5, heading); builder.CloseElement(); }
+        builder.CloseElement(); builder.CloseElement(); builder.OpenElement(6, "tbody");
+        foreach (var row in rows)
+        {
+            builder.OpenElement(7, "tr");
+            builder.OpenElement(8, "th"); builder.AddContent(9, row[0]); builder.CloseElement();
+            foreach (var value in row.Skip(1)) { builder.OpenElement(10, "td"); builder.AddContent(11, value); builder.CloseElement(); }
+            builder.CloseElement();
+        }
+        builder.CloseElement(); builder.CloseElement();
     };
 
     private static RenderFragment SidebarContent() => builder =>
