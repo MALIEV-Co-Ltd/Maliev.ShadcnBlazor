@@ -86,6 +86,7 @@ export function attachSlider(root, readOnly) {
     let activePointerId = null
 
     const activeTarget = () => activeIndex === null ? null : inputs()[activeIndex] ?? null
+    const isReadOnly = () => root.dataset.readonly === "true"
 
     const valueFromPointer = (event, target) => {
         event.preventDefault()
@@ -105,7 +106,7 @@ export function attachSlider(root, readOnly) {
     }
 
     const pointerDown = (event) => {
-        if (readOnly) {
+        if (isReadOnly()) {
             event.preventDefault()
             restoreReadOnlyValues()
             return
@@ -137,7 +138,7 @@ export function attachSlider(root, readOnly) {
     }
 
     const pointerMove = (event) => {
-        if (readOnly) {
+        if (isReadOnly()) {
             if (event.buttons !== 0) event.preventDefault()
             restoreReadOnlyValues()
             return
@@ -162,13 +163,13 @@ export function attachSlider(root, readOnly) {
     }
 
     const keyDown = (event) => {
-        if (!readOnly) return
+        if (!isReadOnly()) return
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key))
             event.preventDefault()
     }
 
     const input = (event) => {
-        if (!readOnly) return
+        if (!isReadOnly()) return
         event.preventDefault()
         restoreReadOnlyValues()
     }

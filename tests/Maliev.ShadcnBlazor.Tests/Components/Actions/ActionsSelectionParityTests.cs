@@ -193,7 +193,8 @@ public sealed class ActionsSelectionParityTests : BunitContext
         Assert.Contains("event.key === \"ArrowRight\"", script, StringComparison.Ordinal);
         Assert.Contains("getComputedStyle(root).direction === \"rtl\"", script, StringComparison.Ordinal);
         Assert.Contains("root.addEventListener(\"pointerdown\"", script, StringComparison.Ordinal);
-        Assert.Contains("if (readOnly", script, StringComparison.Ordinal);
+        Assert.Contains("const isReadOnly = () => root.dataset.readonly === \"true\"", script, StringComparison.Ordinal);
+        Assert.Equal(4, System.Text.RegularExpressions.Regex.Matches(script, @"if \(!?isReadOnly\(\)\)").Count);
         Assert.Contains("Math.abs(Number(input.value) - raw)", script, StringComparison.Ordinal);
         Assert.Contains("existing.snapshotValues()", script, StringComparison.Ordinal);
         Assert.Contains("root.addEventListener(\"lostpointercapture\"", script, StringComparison.Ordinal);
@@ -299,8 +300,8 @@ public sealed class ActionsSelectionParityTests : BunitContext
         var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-selection.js"));
         var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
 
-        Assert.Contains("if (readOnly) {", script, StringComparison.Ordinal);
-        Assert.Contains("event.preventDefault()", script[script.IndexOf("if (readOnly) {", StringComparison.Ordinal)..], StringComparison.Ordinal);
+        Assert.Contains("if (isReadOnly()) {", script, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault()", script[script.IndexOf("if (isReadOnly()) {", StringComparison.Ordinal)..], StringComparison.Ordinal);
         Assert.Contains("restoreReadOnlyValues", script, StringComparison.Ordinal);
         Assert.Contains("writing-mode: vertical-lr", css, StringComparison.Ordinal);
         Assert.Contains("direction: rtl", css, StringComparison.Ordinal);
