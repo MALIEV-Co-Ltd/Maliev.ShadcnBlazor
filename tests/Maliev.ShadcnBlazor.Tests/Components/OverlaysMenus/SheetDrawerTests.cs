@@ -241,4 +241,28 @@ public sealed class SheetDrawerTests : BunitContext
         Assert.Equal(edge, content.GetAttribute("data-edge"));
         Assert.Equal(axis, content.GetAttribute("data-swipe-axis"));
     }
+
+    [Fact]
+    public void DrawerAssetsPublishInteropReadinessAndOverrideDirectionalMotion()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+
+        Assert.Contains("content.removeAttribute('data-drawer-ready')", script, StringComparison.Ordinal);
+        Assert.Contains("content.dataset.drawerReady = 'true'", script, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-drawer-content[data-swipe-direction]", css, StringComparison.Ordinal);
+        Assert.Matches(
+            "(?s)@media \\(prefers-reduced-motion: reduce\\).*?\\.shadcn-drawer-content\\[data-swipe-direction\\]\\s*\\{[^}]*animation:\\s*none;[^}]*transition:\\s*none;",
+            css);
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root was not found.");
+    }
 }

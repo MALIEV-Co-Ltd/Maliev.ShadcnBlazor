@@ -99,6 +99,7 @@ export function isDialogAttached(content) { return dialogs.has(content); }
 
 const drawers = new WeakMap();
 export function attachDrawer(content, dotnet, direction, modalMode, disablePointerDismissal, snapPoints) {
+    content.removeAttribute('data-drawer-ready');
     const modal = modalMode === 'Modal';
     const trap = modal || modalMode === 'TrapFocus';
     attachDialog(content, dotnet, modal, true, trap);
@@ -173,8 +174,9 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
     if (!modal) document.addEventListener('pointerdown', outside);
     if (!trap) content.dataset.drawerFocusTrap = 'false';
     drawers.set(content, { down, move, up, cancel, resize, outside, modal, snapObserver });
+    content.dataset.drawerReady = 'true';
 }
-export function detachDrawer(content) { const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
+export function detachDrawer(content) { content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
 
 const positioned = new WeakMap();
 function placePositioned(content, trigger, preferredSide, align, sideOffset, alignOffset, padding) {
