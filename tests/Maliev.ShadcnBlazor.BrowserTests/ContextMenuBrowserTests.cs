@@ -21,7 +21,9 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         var trigger = page.Locator("#preview [data-slot='context-menu-trigger']");
         var menu = page.Locator("#preview [data-slot='context-menu-content']");
         await trigger.WaitForAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("data-context-menu-ready", "true");
         await trigger.ClickAsync(new() { Button = MouseButton.Right, Position = new() { X = 120, Y = 90 } });
+        await Assertions.Expect(menu).ToHaveAttributeAsync("data-positioned", "true");
         await Assertions.Expect(menu).ToBeVisibleAsync();
         var firstItem = menu.Locator("[role^='menuitem']").First;
         await Assertions.Expect(firstItem).ToBeFocusedAsync();
@@ -55,7 +57,9 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(menu).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).ToBeFocusedAsync();
 
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("data-context-menu-ready", "true");
         await trigger.PressAsync("Shift+F10");
+        await Assertions.Expect(menu).ToHaveAttributeAsync("data-positioned", "true");
         await Assertions.Expect(menu).ToBeVisibleAsync();
         bounds = await menu.BoundingBoxAsync();
         var triggerBounds = await trigger.BoundingBoxAsync();
@@ -63,8 +67,11 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.NotNull(triggerBounds);
         Assert.True(bounds!.X >= triggerBounds!.X - 1, "Keyboard invocation should anchor to the trigger, not the viewport origin.");
 
-        await page.Locator("#documentation-content h1").ClickAsync();
+        await page.Keyboard.PressAsync("ArrowDown");
+        await Assertions.Expect(menu.GetByRole(AriaRole.Menuitem, new() { Name = "Rename", Exact = true })).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(menu).ToHaveCountAsync(0);
+        await Assertions.Expect(trigger).ToBeFocusedAsync();
     }
 
     [Fact]
@@ -82,8 +89,10 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/context-menu").ToString());
 
         var trigger = page.Locator("#preview [data-slot='context-menu-trigger']");
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("data-context-menu-ready", "true");
         await trigger.PressAsync("Shift+F10");
         var menu = page.Locator("#preview [data-slot='context-menu-content']");
+        await Assertions.Expect(menu).ToHaveAttributeAsync("data-positioned", "true");
         await Assertions.Expect(menu).ToBeVisibleAsync();
         var styles = await menu.EvaluateAsync<ComputedStyles>("element => { const value = getComputedStyle(element); return { borderStyle: value.borderStyle, animationName: value.animationName }; }");
         Assert.Equal("solid", styles.BorderStyle);

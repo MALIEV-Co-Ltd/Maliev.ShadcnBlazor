@@ -13,6 +13,7 @@ public sealed class MenuTests : BunitContext
         module.SetupVoid("attachPositioned", _ => true);
         module.SetupVoid("detachPositioned", _ => true);
         module.SetupVoid("attachMenu", _ => true);
+        module.SetupVoid("attachContextMenu", _ => true);
         module.SetupVoid("detachMenu", _ => true);
         module.SetupVoid("attachContextMenuTrigger", _ => true);
         module.SetupVoid("detachContextMenuTrigger", _ => true);
@@ -73,6 +74,8 @@ public sealed class MenuTests : BunitContext
         var content = cut.Find("[data-slot='context-menu-content']");
         Assert.Equal("125", content.GetAttribute("data-anchor-x"));
         Assert.Equal("240", content.GetAttribute("data-anchor-y"));
+        Assert.DoesNotContain("left:", content.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.DoesNotContain("top:", content.GetAttribute("style"), StringComparison.Ordinal);
         Assert.Equal("destructive", cut.Find("[data-slot='context-menu-item']").GetAttribute("data-variant"));
 
         cut.Find("[data-slot='context-menu-trigger']").ContextMenu(new MouseEventArgs { ClientX = 520, ClientY = 360 });
@@ -80,6 +83,7 @@ public sealed class MenuTests : BunitContext
         Assert.Equal("520", content.GetAttribute("data-anchor-x"));
         Assert.Equal("360", content.GetAttribute("data-anchor-y"));
         Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachContextMenuTrigger", StringComparison.Ordinal));
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachContextMenu", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -175,6 +179,11 @@ public sealed class MenuTests : BunitContext
         var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
 
         Assert.Contains("attachContextMenuTrigger", script, StringComparison.Ordinal);
+        Assert.Contains("attachContextMenu(menu, triggerId, dotnet", script, StringComparison.Ordinal);
+        Assert.Contains("trigger.dataset.contextMenuReady = 'true'", script, StringComparison.Ordinal);
+        Assert.Contains("trigger.removeAttribute('data-context-menu-ready')", script, StringComparison.Ordinal);
+        Assert.Contains("menu.dataset.positioned = 'false'", script, StringComparison.Ordinal);
+        Assert.Contains("menu.dataset.positioned = 'true'", script, StringComparison.Ordinal);
         Assert.Contains("event.key !== 'ContextMenu'", script, StringComparison.Ordinal);
         Assert.Contains("event.shiftKey && event.key === 'F10'", script, StringComparison.Ordinal);
         Assert.Contains("attachContextMenuSubmenu", script, StringComparison.Ordinal);
@@ -182,6 +191,7 @@ public sealed class MenuTests : BunitContext
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-context-menu-content", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-context-menu-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
     }
 
     private static string FindRoot()

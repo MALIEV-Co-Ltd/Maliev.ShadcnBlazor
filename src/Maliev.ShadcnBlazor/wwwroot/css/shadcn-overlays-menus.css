@@ -215,6 +215,7 @@
 .shadcn-context-menu-trigger:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
 .shadcn-context-menu-content,
 .shadcn-context-menu-sub-content { box-sizing: border-box; min-inline-size: 12rem; max-inline-size: min(20rem, calc(100vw - 1rem)); transform-origin: var(--shadcn-transform-origin); animation: shadcn-context-menu-content-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+.shadcn-context-menu-content[data-positioned="false"] { visibility: hidden; }
 .shadcn-context-menu-item,
 .shadcn-context-menu-checkbox-item,
 .shadcn-context-menu-radio-item,

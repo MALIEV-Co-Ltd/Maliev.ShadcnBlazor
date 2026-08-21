@@ -287,8 +287,10 @@ export function attachContextMenuTrigger(trigger) {
     };
     trigger.addEventListener('keydown', keydown);
     contextMenuTriggers.set(trigger, { keydown });
+    trigger.dataset.contextMenuReady = 'true';
 }
 export function detachContextMenuTrigger(trigger) {
+    trigger.removeAttribute('data-context-menu-ready');
     const state = contextMenuTriggers.get(trigger);
     if (!state) return;
     trigger.removeEventListener('keydown', state.keydown);
@@ -300,6 +302,13 @@ export function placeContextMenu(menu, padding = 8) {
     const width = menu.getBoundingClientRect().width, height = menu.getBoundingClientRect().height;
     menu.style.left = `${Math.min(Math.max(padding, desiredX), Math.max(padding, innerWidth - padding - width))}px`;
     menu.style.top = `${Math.min(Math.max(padding, desiredY), Math.max(padding, innerHeight - padding - height))}px`;
+    menu.dataset.positioned = 'true';
+}
+
+export function attachContextMenu(menu, triggerId, dotnet, padding = 8) {
+    menu.dataset.positioned = 'false';
+    placeContextMenu(menu, padding);
+    attachMenu(menu, triggerId, dotnet);
 }
 
 const contextMenuSubmenus = new WeakMap();
