@@ -13,11 +13,14 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-form-control-proxy { position: absolute; width: 1px; height: 1px; opacity: .001; pointer-events: none; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper { position: relative; width: fit-content; max-inline-size: 100%; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select { appearance: none; padding-inline-end: calc(2rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select { appearance: none; padding-inline-end: calc(2.5rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-native-select, .shadcn-calendar-dropdowns select) option,
 :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-native-select, .shadcn-calendar-dropdowns select) optgroup { background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper[data-size="sm"] .shadcn-native-select { height: var(--shadcn-control-height-sm); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-icon { position: absolute; inset-inline-end: .625rem; top: 50%; width: 1rem; height: 1rem; translate: 0 -50%; color: var(--shadcn-muted-foreground); pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-icon { position: absolute; inset-inline-end: .75rem; top: 50%; width: 1rem; height: 1rem; translate: 0 -50%; color: var(--shadcn-muted-foreground); pointer-events: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper[data-readonly="true"] .shadcn-native-select { cursor: default; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper[data-disabled="true"] { opacity: .5; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-native-select-wrapper[data-disabled="true"] .shadcn-native-select { opacity: 1; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group { position: relative; display: flex; width: 100%; min-width: 0; height: var(--shadcn-control-height); align-items: center; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); background: transparent; box-shadow: var(--shadcn-shadow-xs); font-size: 1rem; outline: none; transition: border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-input-group { background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }

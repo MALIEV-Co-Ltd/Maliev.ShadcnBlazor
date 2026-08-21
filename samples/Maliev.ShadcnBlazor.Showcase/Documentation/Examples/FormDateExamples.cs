@@ -134,14 +134,58 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition NativeSelect()
     {
-        var invalid = false; var readOnly = false; var value = "standard";
-        RenderFragment preview = b => { b.OpenComponent<ShadcnNativeSelect<string>>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => value = next)); b.AddAttribute(3, "Invalid", invalid); b.AddAttribute(4, "ReadOnly", readOnly); b.AddAttribute(5, "AdditionalAttributes", Attr("forms-dossier-native-select", "Priority")); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddNativeOption(c, 0, "standard", "Standard"); AddNativeOption(c, 10, "urgent", "Urgent"); })); b.CloseComponent(); };
-        string Source() => $"<ShadcnNativeSelect TValue=\"string\" @bind-Value=\"Priority\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" ReadOnly=\"{readOnly.ToString().ToLowerInvariant()}\">\n    <ShadcnNativeSelectOption Value=\"standard\">Standard</ShadcnNativeSelectOption>\n    <ShadcnNativeSelectOption Value=\"urgent\">Urgent</ShadcnNativeSelectOption>\n</ShadcnNativeSelect>";
-        return Example("native-select", "Native select", "Compare compact size, real option semantics, and focusable read-only restoration.", Source(), preview,
+        var invalid = false; var readOnly = false; var compact = false;
+        ShadcnControlSize Size() => compact ? ShadcnControlSize.Small : ShadcnControlSize.Default;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<NativeSelectDossierPreview>(0);
+            b.AddAttribute(1, nameof(NativeSelectDossierPreview.Size), Size());
+            b.AddAttribute(2, nameof(NativeSelectDossierPreview.Invalid), invalid);
+            b.AddAttribute(3, nameof(NativeSelectDossierPreview.ReadOnly), readOnly);
+            b.CloseComponent();
+        };
+        string Source() => $$"""
+            <ShadcnCard>
+                <ShadcnCardHeader>
+                    <ShadcnCardTitle>Production priority</ShadcnCardTitle>
+                    <ShadcnCardDescription>Route quotation Q-4189 through the planning queue.</ShadcnCardDescription>
+                </ShadcnCardHeader>
+                <ShadcnCardContent>
+                    <ShadcnLabel For="production-priority">Priority and lead time</ShadcnLabel>
+                    <ShadcnNativeSelect TValue="string"
+                                        id="production-priority"
+                                        Name="priority"
+                                        @bind-Value="Priority"
+                                        Size="ShadcnControlSize.{{Size()}}"
+                                        Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                                        ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}"
+                                        aria-describedby="production-priority-summary">
+                        <ShadcnNativeSelectOptGroup Label="Production">
+                            <ShadcnNativeSelectOption Value="standard">Standard · 5–7 business days</ShadcnNativeSelectOption>
+                            <ShadcnNativeSelectOption Value="urgent">Urgent · 2–3 business days</ShadcnNativeSelectOption>
+                        </ShadcnNativeSelectOptGroup>
+                        <ShadcnNativeSelectOptGroup Label="Exceptions">
+                            <ShadcnNativeSelectOption Value="hold" Disabled="true">Engineering hold</ShadcnNativeSelectOption>
+                        </ShadcnNativeSelectOptGroup>
+                    </ShadcnNativeSelect>
+                    <p id="production-priority-summary" role="status">@LeadTime</p>
+                </ShadcnCardContent>
+                <ShadcnCardFooter>Native option groups remain available to keyboard and assistive technology.</ShadcnCardFooter>
+            </ShadcnCard>
+
+            @code {
+                private string Priority { get; set; } = "standard";
+                private string LeadTime => Priority == "urgent"
+                    ? "Urgent queue · 2–3 business days"
+                    : "Standard queue · 5–7 business days";
+            }
+            """;
+        return Example("native-select", "Production routing", "Choose a real production priority with native option groups, disabled exceptions, validation, and focusable read-only restoration.", Source(), preview,
             [
+                Toggle("native-select-compact", "Compact", v => compact = v),
                 Toggle("native-select-invalid", "Invalid", v => invalid = v),
                 Toggle("native-select-readonly", "Read only", v => readOnly = v)
-            ], ["selected", "read-only", "invalid"]) with
+            ], ["selected", "groups", "disabled", "read-only", "invalid", "sm"]) with
         { RazorSourceProvider = Source };
     }
     private static ComponentExampleDefinition InputGroup()
@@ -688,6 +732,123 @@ internal static class FormDateExamples
             icon.CloseElement();
             icon.CloseElement();
         };
+    }
+
+    private sealed class NativeSelectDossierPreview : ComponentBase
+    {
+        [Parameter] public ShadcnControlSize Size { get; set; } = ShadcnControlSize.Default;
+        [Parameter] public bool Invalid { get; set; }
+        [Parameter] public bool ReadOnly { get; set; }
+
+        private string Priority { get; set; } = "standard";
+        private string LeadTime => Priority == "urgent"
+            ? "Urgent queue · 2–3 business days"
+            : "Standard queue · 5–7 business days";
+
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-native-select-dossier");
+            builder.AddAttribute(2, "data-testid", "native-select-dossier-preview");
+            builder.OpenComponent<ShadcnCard>(3);
+            builder.AddAttribute(4, nameof(ShadcnCard.ChildContent), (RenderFragment)(card =>
+            {
+                card.OpenComponent<ShadcnCardHeader>(0);
+                card.AddAttribute(1, nameof(ShadcnCardHeader.ChildContent), (RenderFragment)(header =>
+                {
+                    header.OpenComponent<ShadcnCardTitle>(0);
+                    header.AddAttribute(1, nameof(ShadcnCardTitle.ChildContent), Text("Production priority"));
+                    header.CloseComponent();
+                    header.OpenComponent<ShadcnCardDescription>(2);
+                    header.AddAttribute(3, nameof(ShadcnCardDescription.ChildContent), Text("Route quotation Q-4189 through the planning queue."));
+                    header.CloseComponent();
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardContent>(2);
+                card.AddAttribute(3, nameof(ShadcnCardContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenElement(0, "div");
+                    content.AddAttribute(1, "class", "showcase-native-select-field");
+                    content.OpenComponent<ShadcnLabel>(2);
+                    content.AddAttribute(3, nameof(ShadcnLabel.For), "production-priority");
+                    content.AddAttribute(4, nameof(ShadcnLabel.ChildContent), Text("Priority and lead time"));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnNativeSelect<string>>(5);
+                    content.AddAttribute(6, nameof(ShadcnNativeSelect<string>.Value), Priority);
+                    content.AddAttribute(7, nameof(ShadcnNativeSelect<string>.ValueChanged), EventCallback.Factory.Create<string>(this, HandlePriorityChanged));
+                    content.AddAttribute(8, nameof(ShadcnNativeSelect<string>.Name), "priority");
+                    content.AddAttribute(9, nameof(ShadcnNativeSelect<string>.Size), Size);
+                    content.AddAttribute(10, nameof(ShadcnNativeSelect<string>.Invalid), Invalid);
+                    content.AddAttribute(11, nameof(ShadcnNativeSelect<string>.ReadOnly), ReadOnly);
+                    content.AddAttribute(12, nameof(ShadcnNativeSelect<string>.AdditionalAttributes), new Dictionary<string, object>
+                    {
+                        ["id"] = "production-priority",
+                        ["data-testid"] = "forms-dossier-native-select",
+                        ["aria-label"] = "Production priority",
+                        ["aria-describedby"] = "production-priority-summary"
+                    });
+                    content.AddAttribute(13, nameof(ShadcnNativeSelect<string>.ChildContent), (RenderFragment)(select =>
+                    {
+                        AddNativeGroup(select, 0, "Production",
+                        [
+                            ("standard", "Standard · 5–7 business days", false),
+                            ("urgent", "Urgent · 2–3 business days", false)
+                        ]);
+                        AddNativeGroup(select, 20, "Exceptions",
+                        [
+                            ("hold", "Engineering hold", true)
+                        ]);
+                    }));
+                    content.CloseComponent();
+                    content.OpenElement(14, "p");
+                    content.AddAttribute(15, "id", "production-priority-summary");
+                    content.AddAttribute(16, "class", "showcase-native-select-summary");
+                    content.AddAttribute(17, "role", "status");
+                    content.AddAttribute(18, "aria-live", "polite");
+                    content.AddAttribute(19, "data-testid", "native-select-lead-time");
+                    content.AddContent(20, LeadTime);
+                    content.CloseElement();
+                    content.CloseElement();
+                }));
+                card.CloseComponent();
+
+                card.OpenComponent<ShadcnCardFooter>(4);
+                card.AddAttribute(5, nameof(ShadcnCardFooter.ChildContent), Text("Native option groups remain available to keyboard and assistive technology."));
+                card.CloseComponent();
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        }
+
+        private Task HandlePriorityChanged(string value)
+        {
+            Priority = value;
+            return Task.CompletedTask;
+        }
+
+        private static void AddNativeGroup(
+            RenderTreeBuilder builder,
+            int sequence,
+            string label,
+            IReadOnlyList<(string Value, string Text, bool Disabled)> options)
+        {
+            builder.OpenComponent<ShadcnNativeSelectOptGroup>(sequence);
+            builder.AddAttribute(sequence + 1, nameof(ShadcnNativeSelectOptGroup.Label), label);
+            builder.AddAttribute(sequence + 2, nameof(ShadcnNativeSelectOptGroup.ChildContent), (RenderFragment)(group =>
+            {
+                var optionSequence = 0;
+                foreach (var option in options)
+                {
+                    group.OpenComponent<ShadcnNativeSelectOption<string>>(optionSequence++);
+                    group.AddAttribute(optionSequence++, nameof(ShadcnNativeSelectOption<string>.Value), option.Value);
+                    group.AddAttribute(optionSequence++, nameof(ShadcnNativeSelectOption<string>.Disabled), option.Disabled);
+                    group.AddAttribute(optionSequence++, nameof(ShadcnNativeSelectOption<string>.ChildContent), Text(option.Text));
+                    group.CloseComponent();
+                }
+            }));
+            builder.CloseComponent();
+        }
     }
 
     private sealed class CompactDatePickerDossierPreview : ComponentBase

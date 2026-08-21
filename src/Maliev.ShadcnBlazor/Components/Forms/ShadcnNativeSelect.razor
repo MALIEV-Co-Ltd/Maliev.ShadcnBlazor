@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 @inherits ShadcnFormComponentBase<TValue>
 
-<div class="@MergeClass("shadcn-native-select-wrapper")" style="@MergeStyle()" data-slot="native-select-wrapper" data-size="@SizeValue" data-readonly="@(ReadOnly ? "true" : null)">
+<div class="@MergeClass("shadcn-native-select-wrapper")" style="@MergeStyle()" data-slot="native-select-wrapper" data-size="@SizeValue" data-readonly="@(ReadOnly ? "true" : null)" data-disabled="@(EffectiveDisabled ? "true" : null)">
     <select @ref="SelectElement" @attributes="ForwardedAttributes"
             class="@MergeClass("shadcn-native-select", ControlClass)"
             style="@MergeStyle(ControlStyle)"
@@ -20,7 +20,7 @@
             @onchange="HandleChangeAsync">
         @ChildContent
     </select>
-    <svg class="shadcn-native-select-icon" data-slot="native-select-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg>
+    <svg class="shadcn-native-select-icon" data-slot="native-select-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
 </div>
 
 @code {
