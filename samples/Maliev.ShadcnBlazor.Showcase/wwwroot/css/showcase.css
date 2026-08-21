@@ -997,6 +997,60 @@ a {
     inline-size: min(100%, 32rem);
 }
 
+.component-preview__canvas > .showcase-accordion-dossier {
+    inline-size: min(100%, 42rem);
+}
+
+.showcase-accordion-dossier {
+    display: grid;
+    gap: 1.25rem;
+    min-inline-size: 0;
+}
+
+.showcase-accordion-dossier__header {
+    display: grid;
+    gap: 0.25rem;
+    padding-block-end: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+}
+
+.showcase-accordion-dossier__header h3,
+.showcase-accordion-dossier__header p,
+.showcase-accordion-dossier .shadcn-accordion-content p,
+.showcase-accordion-dossier .shadcn-accordion-content ul {
+    margin: 0;
+}
+
+.showcase-accordion-dossier__header h3 {
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.showcase-accordion-dossier__header p {
+    max-inline-size: 48ch;
+    color: var(--shadcn-muted-foreground);
+    font-size: 0.875rem;
+}
+
+.showcase-accordion-dossier .shadcn-accordion-content ul {
+    display: grid;
+    gap: 0.375rem;
+    padding-inline-start: 1.25rem;
+}
+
+.showcase-accordion-dossier .shadcn-accordion-content p + :is(p, ul) {
+    margin-block-start: 0.75rem;
+}
+
+.showcase-accordion-dossier .shadcn-accordion[data-orientation="horizontal"] {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+}
+
+.showcase-accordion-dossier .shadcn-accordion[data-orientation="horizontal"] > .shadcn-accordion-item {
+    min-inline-size: 13rem;
+}
+
 /* Calendar grids are intrinsically sized; do not let the generic preview
    child rule stretch the seven-column surface across the canvas. */
 .component-preview__canvas > .shadcn-calendar {

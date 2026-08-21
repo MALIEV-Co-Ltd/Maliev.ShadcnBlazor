@@ -30,53 +30,93 @@ internal static class DisclosureNavigationExamples
         var multiple = false; var horizontal = false; var disabled = false;
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnAccordion>(0);
-            b.AddAttribute(1, "Values", multiple ? new[] { "shipping", "returns" } : new[] { "shipping" });
-            b.AddAttribute(2, "Multiple", multiple);
-            b.AddAttribute(3, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
-            b.AddAttribute(4, "Disabled", disabled);
-            b.AddAttribute(5, "Label", "Quotation questions");
-            b.AddAttribute(6, "ChildContent", (RenderFragment)(c =>
+            b.OpenElement(0, "section");
+            b.AddAttribute(1, "class", "showcase-accordion-dossier");
+            b.AddAttribute(2, "aria-labelledby", "quotation-support-title");
+            b.OpenElement(3, "header");
+            b.AddAttribute(4, "class", "showcase-accordion-dossier__header");
+            b.OpenElement(5, "h3");
+            b.AddAttribute(6, "id", "quotation-support-title");
+            b.AddAttribute(7, "dir", "auto");
+            b.AddContent(8, "Quotation support");
+            b.CloseElement();
+            b.OpenElement(9, "p");
+            b.AddAttribute(10, "dir", "auto");
+            b.AddContent(11, "Answers for delivery, revisions, and production handoff.");
+            b.CloseElement();
+            b.CloseElement();
+            b.OpenComponent<ShadcnAccordion>(20);
+            b.AddAttribute(21, "Values", multiple ? new[] { "delivery", "returns" } : new[] { "delivery" });
+            b.AddAttribute(22, "Multiple", multiple);
+            b.AddAttribute(23, "Orientation", horizontal ? ShadcnAccordionOrientation.Horizontal : ShadcnAccordionOrientation.Vertical);
+            b.AddAttribute(24, "Disabled", disabled);
+            b.AddAttribute(25, "Label", "Quotation questions");
+            b.AddAttribute(26, "ChildContent", (RenderFragment)(c =>
             {
-                AddAccordionItem(c, 0, "shipping", "What are the delivery options?", ShippingAccordionContent());
+                AddAccordionItem(c, 0, "delivery", "What are the delivery options?", DeliveryAccordionContent());
                 AddAccordionItem(c, 10, "returns", "What is the return policy?", ReturnsAccordionContent());
-                AddAccordionItem(c, 20, "support", "How can I contact support?", SupportAccordionContent());
+                AddAccordionItem(c, 20, "changes", "How are production changes approved?", ChangesAccordionContent());
+                AddAccordionItem(c, 30, "support", "How can I contact support?", SupportAccordionContent());
             }));
             b.CloseComponent();
+            b.CloseElement();
         };
-        const string source = """
-<ShadcnAccordion Values='new[] { "shipping" }' Multiple="false" Label="Quotation questions">
-    <ShadcnAccordionItem Value="shipping">
-        <ShadcnAccordionTrigger>What are the delivery options?</ShadcnAccordionTrigger>
+        string Source()
+        {
+            var values = multiple ? "new[] { \"delivery\", \"returns\" }" : "new[] { \"delivery\" }";
+            var orientation = horizontal ? nameof(ShadcnAccordionOrientation.Horizontal) : nameof(ShadcnAccordionOrientation.Vertical);
+            return $"""
+<section class="showcase-accordion-dossier" aria-labelledby="quotation-support-title">
+    <header class="showcase-accordion-dossier__header">
+        <h3 id="quotation-support-title" dir="auto">Quotation support</h3>
+        <p dir="auto">Answers for delivery, revisions, and production handoff.</p>
+    </header>
+    <ShadcnAccordion Values='@({values})'
+                     Multiple="{multiple.ToString().ToLowerInvariant()}"
+                     Orientation="ShadcnAccordionOrientation.{orientation}"
+                     Disabled="{disabled.ToString().ToLowerInvariant()}"
+                     Label="Quotation questions">
+    <ShadcnAccordionItem Value="delivery">
+        <ShadcnAccordionTrigger><span dir="auto">What are the delivery options?</span></ShadcnAccordionTrigger>
         <ShadcnAccordionContent>
-            <p>Choose the handoff that fits your production deadline.</p>
+            <p dir="auto">Choose the handoff that fits your production deadline.</p>
             <ul>
-                <li>Standard delivery — dispatch estimate included before checkout.</li>
-                <li>Express delivery — priority workshop queue when available.</li>
+                <li dir="auto">Standard delivery — dispatch estimate included before checkout.</li>
+                <li dir="auto">Express delivery — priority workshop queue when available.</li>
             </ul>
         </ShadcnAccordionContent>
     </ShadcnAccordionItem>
     <ShadcnAccordionItem Value="returns">
-        <ShadcnAccordionTrigger>What is the return policy?</ShadcnAccordionTrigger>
+        <ShadcnAccordionTrigger><span dir="auto">What is the return policy?</span></ShadcnAccordionTrigger>
         <ShadcnAccordionContent>
-            <p>Returns are accepted within 30 days when the item is unused and in its original packaging.</p>
-            <p>Include the quotation number so the team can route the request quickly.</p>
-            <p>Revision notes help production review the requested change.</p>
+            <p dir="auto">Returns are accepted within 30 days when the item is unused and in its original packaging.</p>
+            <p dir="auto">Include the quotation number so the team can route the request quickly.</p>
+            <p dir="auto">Revision notes help production review the requested change.</p>
+        </ShadcnAccordionContent>
+    </ShadcnAccordionItem>
+    <ShadcnAccordionItem Value="changes">
+        <ShadcnAccordionTrigger><span dir="auto">How are production changes approved?</span></ShadcnAccordionTrigger>
+        <ShadcnAccordionContent>
+            <p dir="auto">Reply from the quotation workspace before production begins.</p>
+            <p dir="auto">The revised drawing and pricing remain attached to the same quotation.</p>
         </ShadcnAccordionContent>
     </ShadcnAccordionItem>
     <ShadcnAccordionItem Value="support">
-        <ShadcnAccordionTrigger>How can I contact support?</ShadcnAccordionTrigger>
+        <ShadcnAccordionTrigger><span dir="auto">How can I contact support?</span></ShadcnAccordionTrigger>
         <ShadcnAccordionContent>
-            <p>Send a message from the quotation workspace and the production team will reply with the next available step.</p>
+            <p dir="auto">Send a message from the quotation workspace and the production team will reply with the next available step.</p>
             <ul>
-                <li>Ask about materials, finishing, or delivery timing.</li>
-                <li>Attach a drawing when the requested revision needs review.</li>
+                <li dir="auto">Ask about materials, finishing, or delivery timing.</li>
+                <li dir="auto">Attach a drawing when the requested revision needs review.</li>
             </ul>
         </ShadcnAccordionContent>
     </ShadcnAccordionItem>
 </ShadcnAccordion>
+</section>
 """;
-        return Example("accordion", "Accordion states", "A realistic quotation FAQ with single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", source, preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        }
+        var example = Example("accordion", "Quotation FAQ", "Open production answers directly, then compare single or multiple disclosure, orientation, keyboard roving, RTL, and disabled state.", Source(), preview, [Toggle("accordion-multiple", "Multiple", v => multiple = v), Toggle("accordion-horizontal", "Horizontal", v => horizontal = v), Toggle("accordion-disabled", "Disabled", v => disabled = v)], ["single", "multiple", "horizontal", "vertical", "keyboard", "rtl", "disabled"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Breadcrumb()
@@ -391,16 +431,18 @@ internal static class DisclosureNavigationExamples
         b.AddAttribute(s + 1, "Value", value);
         b.AddAttribute(s + 2, "ChildContent", (RenderFragment)(c =>
         {
-            AddText<ShadcnAccordionTrigger>(c, 0, title);
+            c.OpenComponent<ShadcnAccordionTrigger>(0);
+            c.AddAttribute(1, "ChildContent", AutoText(title));
+            c.CloseComponent();
             c.OpenComponent<ShadcnAccordionContent>(10);
             c.AddAttribute(11, "ChildContent", content);
             c.CloseComponent();
         }));
         b.CloseComponent();
     }
-    private static RenderFragment ShippingAccordionContent() => builder =>
+    private static RenderFragment DeliveryAccordionContent() => builder =>
     {
-        builder.OpenElement(0, "p"); builder.AddContent(1, "Choose the handoff that fits your production deadline."); builder.CloseElement();
+        builder.OpenElement(0, "p"); builder.AddAttribute(1, "dir", "auto"); builder.AddContent(2, "Choose the handoff that fits your production deadline."); builder.CloseElement();
         builder.OpenElement(10, "ul");
         AddAccordionDetail(builder, 20, "Standard delivery", "dispatch estimate included before checkout");
         AddAccordionDetail(builder, 30, "Express delivery", "priority workshop queue when available");
@@ -408,13 +450,18 @@ internal static class DisclosureNavigationExamples
     };
     private static RenderFragment ReturnsAccordionContent() => builder =>
     {
-        builder.OpenElement(0, "p"); builder.AddContent(1, "Returns are accepted within 30 days when the item is unused and in its original packaging."); builder.CloseElement();
-        builder.OpenElement(10, "p"); builder.AddContent(11, "Include the quotation number so the team can route the request quickly."); builder.CloseElement();
-        builder.OpenElement(20, "p"); builder.AddContent(21, "Revision notes help production review the requested change."); builder.CloseElement();
+        builder.OpenElement(0, "p"); builder.AddAttribute(1, "dir", "auto"); builder.AddContent(2, "Returns are accepted within 30 days when the item is unused and in its original packaging."); builder.CloseElement();
+        builder.OpenElement(10, "p"); builder.AddAttribute(11, "dir", "auto"); builder.AddContent(12, "Include the quotation number so the team can route the request quickly."); builder.CloseElement();
+        builder.OpenElement(20, "p"); builder.AddAttribute(21, "dir", "auto"); builder.AddContent(22, "Revision notes help production review the requested change."); builder.CloseElement();
+    };
+    private static RenderFragment ChangesAccordionContent() => builder =>
+    {
+        builder.OpenElement(0, "p"); builder.AddAttribute(1, "dir", "auto"); builder.AddContent(2, "Reply from the quotation workspace before production begins."); builder.CloseElement();
+        builder.OpenElement(10, "p"); builder.AddAttribute(11, "dir", "auto"); builder.AddContent(12, "The revised drawing and pricing remain attached to the same quotation."); builder.CloseElement();
     };
     private static RenderFragment SupportAccordionContent() => builder =>
     {
-        builder.OpenElement(0, "p"); builder.AddContent(1, "Send a message from the quotation workspace and the production team will reply with the next available step."); builder.CloseElement();
+        builder.OpenElement(0, "p"); builder.AddAttribute(1, "dir", "auto"); builder.AddContent(2, "Send a message from the quotation workspace and the production team will reply with the next available step."); builder.CloseElement();
         builder.OpenElement(10, "ul");
         AddAccordionDetail(builder, 20, "Materials and finishing", "ask for a recommendation");
         AddAccordionDetail(builder, 30, "Drawing review", "attach the requested revision");
@@ -423,10 +470,18 @@ internal static class DisclosureNavigationExamples
     private static void AddAccordionDetail(RenderTreeBuilder builder, int sequence, string title, string detail)
     {
         builder.OpenElement(sequence, "li");
-        builder.OpenElement(sequence + 1, "strong"); builder.AddContent(sequence + 2, title); builder.CloseElement();
-        builder.AddContent(sequence + 3, $" — {detail}.");
+        builder.AddAttribute(sequence + 1, "dir", "auto");
+        builder.OpenElement(sequence + 2, "strong"); builder.AddContent(sequence + 3, title); builder.CloseElement();
+        builder.AddContent(sequence + 4, $" — {detail}.");
         builder.CloseElement();
     }
+    private static RenderFragment AutoText(string text) => builder =>
+    {
+        builder.OpenElement(0, "span");
+        builder.AddAttribute(1, "dir", "auto");
+        builder.AddContent(2, text);
+        builder.CloseElement();
+    };
     private static void AddBreadcrumbLink(RenderTreeBuilder b, int s, string text, string href) { b.OpenComponent<ShadcnBreadcrumbItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnBreadcrumbLink>(0); c.AddAttribute(1, "Href", href); c.AddAttribute(2, "ChildContent", Text(text)); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationItem<T>(RenderTreeBuilder b, int s, bool disabled) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.CloseComponent(); })); b.CloseComponent(); }
     private static void AddPaginationDirection<T>(RenderTreeBuilder b, int s, bool disabled, Action apply) where T : IComponent { b.OpenComponent<ShadcnPaginationItem>(s); b.AddAttribute(s + 1, "ChildContent", (RenderFragment)(c => { c.OpenComponent<T>(0); c.AddAttribute(1, "Disabled", disabled); c.AddAttribute(2, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(new object(), _ => { apply(); return Task.CompletedTask; })); c.CloseComponent(); })); b.CloseComponent(); }
