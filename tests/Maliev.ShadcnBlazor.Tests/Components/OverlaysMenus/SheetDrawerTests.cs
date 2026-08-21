@@ -173,4 +173,72 @@ public sealed class SheetDrawerTests : BunitContext
             .Add(x => x.SwipeDirection, ShadcnDrawerSwipeDirection.Left)
             .Add(x => x.SnapPoints, new[] { ShadcnDrawerSnapPoint.Fraction(0.5) })));
     }
+
+    [Fact]
+    public void UncontrolledDrawerTriggerAndCloseSupportRepeatedInteraction()
+    {
+        var cut = Render<ShadcnDrawer>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnDrawerTrigger>(0);
+            builder.AddAttribute(1, nameof(ShadcnDrawerTrigger.ChildContent), (RenderFragment)(content => content.AddContent(0, "Review dispatch")));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnDrawerContent>(10);
+            builder.AddAttribute(11, nameof(ShadcnDrawerContent.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnDrawerTitle>(0);
+                content.AddAttribute(1, nameof(ShadcnDrawerTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Dispatch summary")));
+                content.CloseComponent();
+                content.OpenComponent<ShadcnDrawerDescription>(2);
+                content.AddAttribute(3, nameof(ShadcnDrawerDescription.ChildContent), (RenderFragment)(description => description.AddContent(0, "Confirm the shipment.")));
+                content.CloseComponent();
+                content.OpenComponent<ShadcnDrawerClose>(4);
+                content.AddAttribute(5, nameof(ShadcnDrawerClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Cancel")));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var trigger = cut.Find("[data-slot='drawer-trigger']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+
+        trigger.Click();
+        Assert.Equal("true", cut.Find("[data-slot='drawer-trigger']").GetAttribute("aria-expanded"));
+        Assert.Equal("dialog", cut.Find("[data-slot='drawer-content']").GetAttribute("role"));
+
+        cut.Find("[data-slot='drawer-close']").Click();
+        Assert.Empty(cut.FindAll("[data-slot='drawer-content']"));
+        Assert.Equal("false", cut.Find("[data-slot='drawer-trigger']").GetAttribute("aria-expanded"));
+
+        cut.Find("[data-slot='drawer-trigger']").Click();
+        Assert.Single(cut.FindAll("[data-slot='drawer-content']"));
+    }
+
+    [Theory]
+    [InlineData(ShadcnDrawerSwipeDirection.Up, "block-start", "y")]
+    [InlineData(ShadcnDrawerSwipeDirection.Right, "right", "x")]
+    [InlineData(ShadcnDrawerSwipeDirection.Down, "block-end", "y")]
+    [InlineData(ShadcnDrawerSwipeDirection.Left, "left", "x")]
+    public void DrawerExposesLogicalEdgeForResponsiveRtlGeometry(ShadcnDrawerSwipeDirection direction, string edge, string axis)
+    {
+        var cut = Render<ShadcnDrawer>(parameters => parameters
+            .Add(component => component.Open, true)
+            .Add(component => component.SwipeDirection, direction)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDrawerContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnDrawerContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnDrawerTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnDrawerTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Drawer edge")));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var root = cut.Find("[data-slot='drawer']");
+        var content = cut.Find("[data-slot='drawer-content']");
+        Assert.Equal(edge, root.GetAttribute("data-edge"));
+        Assert.Equal(edge, content.GetAttribute("data-edge"));
+        Assert.Equal(axis, content.GetAttribute("data-swipe-axis"));
+    }
 }

@@ -218,9 +218,85 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Drawer()
     {
-        var open = false; var nonmodal = false; var up = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnDrawer>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ModalMode", nonmodal ? ShadcnDrawerModalMode.NonModal : ShadcnDrawerModalMode.Modal); b.AddAttribute(3, "SwipeDirection", up ? ShadcnDrawerSwipeDirection.Up : ShadcnDrawerSwipeDirection.Down); b.AddAttribute(4, "ShowSwipeHandle", true); b.AddAttribute(5, "SnapPoints", new[] { ShadcnDrawerSnapPoint.Fraction(.4), ShadcnDrawerSnapPoint.Fraction(1) }); b.AddAttribute(6, "ChildContent", (RenderFragment)(c => { AddText<ShadcnDrawerTrigger>(c, 0, "Open drawer"); c.OpenComponent<ShadcnDrawerContent>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnDrawerHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDrawerTitle>(header, 0, "Order #4189"); AddText<ShadcnDrawerDescription>(header, 10, "Review delivery details before confirming."); })); x.CloseComponent(); x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Status · Ready to ship"); x.AddContent(23, "Delivery · Friday, 4:30 PM"); x.CloseElement(); x.OpenComponent<ShadcnDrawerFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDrawerClose>(footer, 0, "Confirm order"))); x.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("drawer", "Gesture drawer", preview, [Toggle("drawer-open", "Open", v => open = v), Toggle("drawer-up", "Open from top", v => up = v), Toggle("drawer-nonmodal", "Non-modal", v => nonmodal = v)], ["swipe", "snap-points", "modal", "non-modal", "trap-focus", "safe-area"]);
+        var direction = ShadcnDrawerSwipeDirection.Down;
+        var modalMode = ShadcnDrawerModalMode.Modal;
+        var showHandle = true;
+        var useSnapPoints = true;
+
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<DrawerDossierPreview>(0);
+            builder.AddAttribute(1, nameof(DrawerDossierPreview.Direction), direction);
+            builder.AddAttribute(2, nameof(DrawerDossierPreview.ModalMode), modalMode);
+            builder.AddAttribute(3, nameof(DrawerDossierPreview.ShowSwipeHandle), showHandle);
+            builder.AddAttribute(4, nameof(DrawerDossierPreview.UseSnapPoints), useSnapPoints);
+            builder.CloseComponent();
+        };
+
+        string Source()
+        {
+            var vertical = direction is ShadcnDrawerSwipeDirection.Up or ShadcnDrawerSwipeDirection.Down;
+            var snapAttribute = useSnapPoints && vertical ? "\n              SnapPoints=\"SnapPoints\"\n              SnapPoint=\"SnapPoints[0]\"" : string.Empty;
+            var snapField = useSnapPoints && vertical
+                ? "\n    private static readonly IReadOnlyList<ShadcnDrawerSnapPoint> SnapPoints =\n        [ShadcnDrawerSnapPoint.Fraction(0.55), ShadcnDrawerSnapPoint.Fraction(0.9)];\n"
+                : string.Empty;
+
+            return $$"""
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-drawer-dossier">
+    <div class="showcase-drawer-dossier__summary">
+        <span class="showcase-drawer-dossier__eyebrow">Dispatch review</span>
+        <strong>Order QT-4189</strong>
+        <span>Bangkok production hub · 3 packages ready</span>
+        <ShadcnDrawer @bind-Open="Open"
+              SwipeDirection="ShadcnDrawerSwipeDirection.{{direction}}"
+              ModalMode="ShadcnDrawerModalMode.{{modalMode}}"
+              ShowSwipeHandle="{{showHandle.ToString().ToLowerInvariant()}}"{{snapAttribute}}>
+    <ShadcnDrawerTrigger Class="showcase-drawer-dossier__trigger">Review dispatch</ShadcnDrawerTrigger>
+    <ShadcnDrawerContent Class="showcase-drawer-panel">
+        <ShadcnDrawerHeader>
+            <ShadcnDrawerTitle>Confirm dispatch</ShadcnDrawerTitle>
+            <ShadcnDrawerDescription>
+                Check the destination and production handoff before releasing this order.
+            </ShadcnDrawerDescription>
+        </ShadcnDrawerHeader>
+        <div class="showcase-drawer-panel__body">
+            <dl>
+                <div><dt>Destination</dt><dd>Samut Prakan, Thailand</dd></div>
+                <div><dt>Carrier</dt><dd>Kerry Express · Next day</dd></div>
+                <div><dt>Handoff</dt><dd>Bangkok production hub</dd></div>
+            </dl>
+            <p>All three packages passed final inspection at 14:20.</p>
+        </div>
+        <ShadcnDrawerFooter>
+            <ShadcnDrawerClose Class="showcase-drawer-panel__action showcase-drawer-panel__action--primary">Confirm dispatch</ShadcnDrawerClose>
+            <ShadcnDrawerClose Class="showcase-drawer-panel__action">Cancel</ShadcnDrawerClose>
+        </ShadcnDrawerFooter>
+    </ShadcnDrawerContent>
+        </ShadcnDrawer>
+    </div>
+</div>
+
+@code {
+    private bool Open { get; set; }
+{{snapField}}}
+""";
+        }
+
+        var controls = new ComponentParameterControl[]
+        {
+            new("drawer-direction", "Edge", ComponentParameterControlKind.Select, direction.ToString(), Enum.GetNames<ShadcnDrawerSwipeDirection>(), value => direction = Enum.Parse<ShadcnDrawerSwipeDirection>(value)),
+            new("drawer-modal-mode", "Focus behavior", ComponentParameterControlKind.Select, modalMode.ToString(), Enum.GetNames<ShadcnDrawerModalMode>(), value => modalMode = Enum.Parse<ShadcnDrawerModalMode>(value)),
+            Toggle("drawer-handle", "Swipe handle", value => showHandle = value, true),
+            Toggle("drawer-snap-points", "Snap points", value => useSnapPoints = value, true)
+        };
+        var example = Example("drawer", "Dispatch drawer", preview, controls, ["trigger", "four-edges", "swipe", "snap-points", "focus", "escape", "outside-press", "rtl"], Source());
+        return example with
+        {
+            Description = "Review a production dispatch with direct trigger, dismissal, focus, and gesture behavior.",
+            RazorSourceProvider = Source
+        };
     }
 
     private static ComponentExampleDefinition Popover()

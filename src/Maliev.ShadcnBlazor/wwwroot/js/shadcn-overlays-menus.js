@@ -162,11 +162,19 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
     const up = event => finish(event);
     const cancel = event => finish(event, true);
     const resize = () => applyActiveSnap();
+    const outside = event => {
+        if (modal || disablePointerDismissal || !isTopLayer(content) || content.contains(event.target)) return;
+        const trigger = content.id ? document.querySelector(`[data-slot="drawer-trigger"][aria-controls="${CSS.escape(content.id)}"]`) : null;
+        if (trigger?.contains(event.target)) return;
+        event.preventDefault();
+        dotnet.invokeMethodAsync('RequestCloseAsync');
+    };
     content.addEventListener('pointerdown', down); content.addEventListener('pointermove', move); content.addEventListener('pointerup', up); content.addEventListener('pointercancel', cancel); addEventListener('resize', resize);
+    if (!modal) document.addEventListener('pointerdown', outside);
     if (!trap) content.dataset.drawerFocusTrap = 'false';
-    drawers.set(content, { down, move, up, cancel, resize, snapObserver });
+    drawers.set(content, { down, move, up, cancel, resize, outside, modal, snapObserver });
 }
-export function detachDrawer(content) { const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
+export function detachDrawer(content) { const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
 
 const positioned = new WeakMap();
 function placePositioned(content, trigger, preferredSide, align, sideOffset, alignOffset, padding) {

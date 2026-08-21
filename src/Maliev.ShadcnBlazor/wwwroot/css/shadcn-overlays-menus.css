@@ -92,22 +92,32 @@
 .shadcn-sheet-close-icon:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 .shadcn-sheet-close-icon svg { width: 1rem; height: 1rem; }
 .shadcn-drawer-viewport { position: fixed; inset: 0; display: flex; pointer-events: none; }
-.shadcn-drawer-content { --shadcn-drawer-drag: 0px; position: absolute; display: flex; flex-direction: column; max-height: calc(100dvh - 6rem); border: 1px solid var(--shadcn-border); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); outline: none; pointer-events: auto; touch-action: none; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
-.shadcn-drawer-content[data-swipe-direction="down"] { inset: auto 0 0; height: var(--shadcn-drawer-snap-size, auto); border-radius: var(--shadcn-radius-xl) var(--shadcn-radius-xl) 0 0; transform: translateY(var(--shadcn-drawer-drag)); }
-.shadcn-drawer-content[data-swipe-direction="up"] { inset: 0 0 auto; height: var(--shadcn-drawer-snap-size, auto); border-radius: 0 0 var(--shadcn-radius-xl) var(--shadcn-radius-xl); transform: translateY(calc(-1 * var(--shadcn-drawer-drag))); }
+.shadcn-drawer-content { --shadcn-drawer-drag: 0px; position: fixed; display: flex; min-height: 0; flex-direction: column; max-height: calc(100dvh - 6rem); border: 1px solid var(--shadcn-border); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); outline: none; overflow: hidden; overscroll-behavior: contain; pointer-events: auto; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+.shadcn-drawer-content[data-swipe-direction="down"] { inset: auto 0 0; height: var(--shadcn-drawer-snap-size, auto); border-radius: var(--shadcn-radius-xl) var(--shadcn-radius-xl) 0 0; touch-action: pan-x; transform: translateY(var(--shadcn-drawer-drag)); animation: shadcn-drawer-in-down var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+.shadcn-drawer-content[data-swipe-direction="up"] { inset: 0 0 auto; height: var(--shadcn-drawer-snap-size, auto); border-radius: 0 0 var(--shadcn-radius-xl) var(--shadcn-radius-xl); touch-action: pan-x; transform: translateY(calc(-1 * var(--shadcn-drawer-drag))); animation: shadcn-drawer-in-up var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 .shadcn-drawer-content[data-swipe-direction="down"],
 .shadcn-drawer-content[data-swipe-direction="up"] { inset-inline: 0; width: auto; }
-.shadcn-drawer-content[data-swipe-direction="right"] { inset: 0 auto 0 0; width: min(75vw, 24rem); transform: translateX(var(--shadcn-drawer-drag)); }
-.shadcn-drawer-content[data-swipe-direction="left"] { inset: 0 0 0 auto; width: min(75vw, 24rem); transform: translateX(calc(-1 * var(--shadcn-drawer-drag))); }
+.shadcn-drawer-content[data-swipe-direction="right"] { inset: 0 0 0 auto; width: min(calc(100vw - 1rem), 24rem); max-height: 100dvh; touch-action: pan-y; transform: translateX(var(--shadcn-drawer-drag)); animation: shadcn-drawer-in-right var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+.shadcn-drawer-content[data-swipe-direction="left"] { inset: 0 auto 0 0; width: min(calc(100vw - 1rem), 24rem); max-height: 100dvh; touch-action: pan-y; transform: translateX(calc(-1 * var(--shadcn-drawer-drag))); animation: shadcn-drawer-in-left var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 .shadcn-drawer-swipe-handle { position: relative; z-index: 1; display: flex; flex-shrink: 0; align-items: flex-end; justify-content: center; width: 100%; height: 0.75rem; background: transparent; }
 .shadcn-drawer-swipe-handle::after { display: block; width: 6.25rem; height: 0.375rem; flex-shrink: 0; border-radius: 999px; background: var(--shadcn-muted); content: ""; }
+.shadcn-drawer-content[data-swipe-axis="x"] .shadcn-drawer-swipe-handle { position: absolute; inset-block: 0; width: .75rem; height: 100%; align-items: center; }
+.shadcn-drawer-content[data-swipe-direction="right"] .shadcn-drawer-swipe-handle { left: 0; }
+.shadcn-drawer-content[data-swipe-direction="left"] .shadcn-drawer-swipe-handle { right: 0; }
+.shadcn-drawer-content[data-swipe-axis="x"] .shadcn-drawer-swipe-handle::after { width: .375rem; height: 6.25rem; }
 .shadcn-drawer-header { padding-block-end: 0; }
-@media (prefers-reduced-motion: reduce) { .shadcn-sheet-overlay, .shadcn-drawer-overlay, .shadcn-sheet-content, .shadcn-drawer-content { transition: none; } }
+.shadcn-drawer-content[data-swipe-axis="y"] .shadcn-drawer-header { text-align: center; }
+@media (prefers-reduced-motion: reduce) { .shadcn-sheet-overlay, .shadcn-drawer-overlay, .shadcn-sheet-content, .shadcn-drawer-content { transition: none; animation: none; } }
+@media (forced-colors: active) { .shadcn-drawer-content { border: 2px solid CanvasText; } .shadcn-drawer-overlay { background: Canvas; color: CanvasText; opacity: 0.5; } .shadcn-drawer-swipe-handle::after { background: CanvasText; } }
 @keyframes shadcn-sheet-from-top { from { opacity: 0; translate: 0 -1rem; } }
 @keyframes shadcn-sheet-from-right { from { opacity: 0; translate: 1rem 0; } }
 @keyframes shadcn-sheet-from-bottom { from { opacity: 0; translate: 0 1rem; } }
 @keyframes shadcn-sheet-from-left { from { opacity: 0; translate: -1rem 0; } }
 @supports (padding: max(0px)) { .shadcn-drawer-content[data-swipe-direction="down"] { padding-block-end: env(safe-area-inset-bottom); } }
+@keyframes shadcn-drawer-in-down { from { transform: translateY(calc(100% + 2px)); } }
+@keyframes shadcn-drawer-in-up { from { transform: translateY(calc(-100% - 2px)); } }
+@keyframes shadcn-drawer-in-right { from { transform: translateX(calc(100% + 2px)); } }
+@keyframes shadcn-drawer-in-left { from { transform: translateX(calc(-100% - 2px)); } }
 
 .shadcn-popover, .shadcn-hover-card, .shadcn-tooltip { display: contents; }
 .shadcn-popover-content, .shadcn-hover-card-content, .shadcn-tooltip-content { z-index: var(--shadcn-z-popover, 50); border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); outline: none; transform-origin: var(--shadcn-transform-origin); animation: shadcn-positioned-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
