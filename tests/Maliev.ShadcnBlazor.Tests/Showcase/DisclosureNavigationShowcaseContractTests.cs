@@ -198,6 +198,26 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void BreadcrumbDossierMatchesItsCollapsedAndExpandedPreviewSource()
+    {
+        var breadcrumb = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("breadcrumb"));
+
+        Assert.Contains("Aster Precision", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Quotation #4189", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnBreadcrumbItem><ShadcnBreadcrumbEllipsis", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("aria-current", Render(breadcrumb.Preview).Markup, StringComparison.Ordinal);
+        Assert.Single(Render(breadcrumb.Preview).FindAll("[data-slot='breadcrumb-ellipsis']"));
+
+        breadcrumb.Controls.Single(control => control.Id == "breadcrumb-ellipsis").Apply("false");
+
+        Assert.DoesNotContain("ShadcnBreadcrumbEllipsis", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("/projects/aster-precision", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("/projects/aster-precision/quotations", breadcrumb.RazorSource, StringComparison.Ordinal);
+        Assert.Empty(Render(breadcrumb.Preview).FindAll("[data-slot='breadcrumb-ellipsis']"));
+        Assert.Equal(5, Render(breadcrumb.Preview).FindAll("[data-slot='breadcrumb-item']").Count);
+    }
+
+    [Fact]
     public void EvidencePairSurfaceOwnsOneDeterministicNamedStatePerComponent()
     {
         var cut = Render<DisclosureNavigationEvidence>();
