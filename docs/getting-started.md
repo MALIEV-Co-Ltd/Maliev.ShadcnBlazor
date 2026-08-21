@@ -8,7 +8,7 @@
 ## Install and register
 
 ```bash
-dotnet add package Maliev.ShadcnBlazor --version 1.0.2
+dotnet add package Maliev.ShadcnBlazor --version 1.1.0
 ```
 
 ```csharp

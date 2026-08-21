@@ -6,6 +6,58 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-21
+
+### Added
+
+- Added reusable message composition and action APIs:
+  `ShadcnMessageBody`, `ShadcnMessageActions`, `ShadcnMessageCopyAction`,
+  `ShadcnMessageReplyAction`, `ShadcnMessageReplyQuote`, and
+  `ShadcnMessageStatus`.
+- Added `ShadcnPaginationPages`, the `ShadcnTabsListVariant` API, data-table
+  default-state support, table column-count validation, localized calendar
+  month/year labels, input-group button variants, and reduced-motion spinner
+  control.
+- Expanded menu composition with inset, disabled, close-on-select, alignment,
+  side, and offset parameters across Menubar, Context Menu, and Dropdown Menu.
+- Added stronger controlled/uncontrolled state coverage, exact dynamic Razor
+  source synchronization, and reviewed desktop/mobile visual proof across all
+  64 documented component families.
+
+### Changed
+
+- Reworked documentation controls to showcase package components consistently,
+  including compact `ShadcnSelect` controls instead of native selects outside
+  the Native Select dossier.
+- Completed parity and realistic interactive dossiers for Button, Button Group,
+  Checkbox, Slider, Switch, Toggle, Toggle Group, Radio Group, and Select.
+- Refined Calendar, Date Picker, Combobox, Input, Input Group, Input OTP,
+  Native Select, Textarea, Field, and Label behavior and documentation.
+- Refined Alert Dialog, Dialog, Command, Menubar, Popover, Sheet, Drawer,
+  Tooltip, Context Menu, Dropdown Menu, and Hover Card positioning, dismissal,
+  submenu, focus, and keyboard behavior.
+- Refined Accordion, Collapsible, Breadcrumb, Navigation Menu, Pagination,
+  Resizable, Scroll Area, Sidebar, and Tabs responsive navigation behavior.
+- Upgraded Avatar, Badge, Card, Carousel, Progress, Skeleton, Spinner, and Toast
+  examples and states, plus Table, Data Table, and Message workflows.
+- Improved Aspect Ratio, Direction, Empty, Item, Kbd, Separator, and Typography
+  semantics, layout, readable rhythm, RTL behavior, and documentation shell
+  contracts.
+
+### Fixed
+
+- Corrected selection and action state, slider dragging, connected button and
+  toggle geometry, table composition validation, progress synchronization,
+  carousel axis locking, avatar fallback, and responsive aspect-ratio behavior.
+- Corrected overlay collision geometry, pointer boundaries, repeatable trigger
+  attachment, nested-menu navigation, focus restoration, and non-modal hover
+  behavior in LTR and RTL layouts.
+- Preserved editor-style Razor/C# syntax colors, repeatable copy feedback,
+  square chart bars, responsive documentation rails, and release-scoped
+  stylesheet cache revisions.
+- Hardened browser interaction assertions, reduced-motion drawer readiness,
+  and hosted browser timeout budgeting for stable CI execution (#167-#169).
+
 ## [1.0.11] - 2026-08-17
 
 - Keep prose inside Razor/HTML markup in the code block foreground color while preserving syntax highlighting for actual code.
@@ -112,7 +164,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.11...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.11...v1.1.0
 [1.0.11]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.11
 [1.0.10]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.10
 [1.0.9]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.9
