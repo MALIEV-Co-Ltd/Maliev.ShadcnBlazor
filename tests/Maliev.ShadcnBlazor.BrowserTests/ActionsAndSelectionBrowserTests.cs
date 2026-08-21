@@ -986,7 +986,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("action-button-group").Locator("[data-slot=button]")).ToHaveCountAsync(3);
                 await page.GetByTestId("button-group-archive").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("button-group-last-action")).ToContainTextAsync("Quotation archived");
-                await page.GetByTestId("control-button-group-orientation").SelectOptionAsync("Vertical");
+                await page.ChooseOptionAsync("control-button-group-orientation", "Vertical");
                 await Assertions.Expect(page.GetByTestId("action-button-group")).ToHaveAttributeAsync("data-orientation", "vertical");
                 await Assertions.Expect(page.GetByTestId("action-button-group")).ToHaveCSSAsync("flex-direction", "column");
                 await Assertions.Expect(page.Locator("#preview .shadcn-code-block pre").First).ToContainTextAsync("ShadcnButtonGroupOrientation.Vertical");
@@ -1002,7 +1002,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("checkbox-invalid")).ToHaveAttributeAsync("aria-invalid", "true");
                 break;
             case "radio-group":
-                await page.GetByTestId("control-radio-orientation").SelectOptionAsync("Horizontal");
+                await page.ChooseOptionAsync("control-radio-orientation", "Horizontal");
                 await Assertions.Expect(page.GetByTestId("action-radio-group")).ToHaveCSSAsync("display", "flex");
                 var dossierRadios = page.GetByTestId("action-radio-group").Locator("input[type='radio']");
                 await dossierRadios.First.CheckAsync();
@@ -1037,7 +1037,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("action-radio-group").Locator("input:disabled")).ToHaveCountAsync(1);
                 break;
             case "slider":
-                await page.GetByTestId("control-slider-values").SelectOptionAsync("Single");
+                await page.ChooseOptionAsync("control-slider-values", "Single");
                 var actionSlider = page.GetByTestId("action-slider");
                 await Assertions.Expect(actionSlider.Locator("input[type=range]")).ToHaveCountAsync(1);
                 var trackBox = await actionSlider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
@@ -1047,9 +1047,9 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await page.Mouse.MoveAsync((float)(trackBox.X + trackBox.Width * .8), (float)(trackBox.Y + trackBox.Height / 2));
                 await page.Mouse.UpAsync();
                 Assert.InRange(int.Parse(await actionSlider.Locator("input[type=range]").First.GetAttributeAsync("aria-valuenow") ?? "0"), 75, 85);
-                await page.GetByTestId("control-slider-values").SelectOptionAsync("Multiple");
+                await page.ChooseOptionAsync("control-slider-values", "Multiple");
                 await Assertions.Expect(actionSlider.Locator("input[type=range]")).ToHaveCountAsync(3);
-                await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Vertical");
+                await page.ChooseOptionAsync("control-slider-orientation", "Vertical");
                 await Assertions.Expect(actionSlider).ToHaveCSSAsync("height", "160px");
                 await page.GetByTestId("control-slider-disabled").CheckAsync();
                 await Assertions.Expect(actionSlider.Locator("input").First).ToBeDisabledAsync();
@@ -1064,7 +1064,7 @@ public sealed class ActionsAndSelectionBrowserTests(
             case "switch":
                 await page.GetByTestId("control-switch-value").UncheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-switch")).ToHaveAttributeAsync("aria-checked", "false");
-                await page.GetByTestId("control-switch-size").SelectOptionAsync("Small");
+                await page.ChooseOptionAsync("control-switch-size", "Small");
                 await Assertions.Expect(page.GetByTestId("action-switch").Locator("xpath=..")).ToHaveCSSAsync("width", "24px");
                 await page.GetByTestId("control-switch-disabled").CheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-switch")).ToBeDisabledAsync();
@@ -1084,9 +1084,9 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold disabled");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "true");
-                await page.GetByTestId("control-toggle-variant").SelectOptionAsync("Default");
+                await page.ChooseOptionAsync("control-toggle-variant", "Default");
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("data-variant", "default");
-                await page.GetByTestId("control-toggle-size").SelectOptionAsync("Large");
+                await page.ChooseOptionAsync("control-toggle-size", "Large");
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveCSSAsync("height", "40px");
                 await page.GetByTestId("control-toggle-disabled").CheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToBeDisabledAsync();
@@ -1096,13 +1096,13 @@ public sealed class ActionsAndSelectionBrowserTests(
             case "toggle-group":
                 await page.GetByTestId("control-toggle-group-multiple").UncheckAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle-group")).ToHaveAttributeAsync("data-fixture-multiple", "false");
-                await page.GetByTestId("control-toggle-group-orientation").SelectOptionAsync("Vertical");
+                await page.ChooseOptionAsync("control-toggle-group-orientation", "Vertical");
                 await Assertions.Expect(page.GetByTestId("action-toggle-group")).ToHaveCSSAsync("flex-direction", "column");
-                await page.GetByTestId("control-toggle-group-spacing").SelectOptionAsync("0");
+                await page.ChooseOptionAsync("control-toggle-group-spacing", "0");
                 await Assertions.Expect(page.GetByTestId("action-toggle-group")).ToHaveCSSAsync("gap", "0px");
-                await page.GetByTestId("control-toggle-group-variant").SelectOptionAsync("Default");
+                await page.ChooseOptionAsync("control-toggle-group-variant", "Default");
                 await Assertions.Expect(page.GetByTestId("action-toggle-group")).ToHaveAttributeAsync("data-variant", "default");
-                await page.GetByTestId("control-toggle-group-size").SelectOptionAsync("Large");
+                await page.ChooseOptionAsync("control-toggle-group-size", "Large");
                 await Assertions.Expect(page.GetByTestId("action-toggle-group").Locator("button").First).ToHaveCSSAsync("height", "40px");
                 await Assertions.Expect(page.GetByTestId("action-toggle-group").Locator("button:disabled")).ToHaveCountAsync(1);
                 break;
@@ -1120,7 +1120,7 @@ public sealed class ActionsAndSelectionBrowserTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/slider").ToString());
         await page.GetByTestId("component-preview").WaitForAsync();
-        await page.GetByTestId("control-slider-values").SelectOptionAsync("Single");
+        await page.ChooseOptionAsync("control-slider-values", "Single");
 
         var slider = page.GetByTestId("action-slider");
         var thumb = slider.Locator("input[type=range]").First;
@@ -1145,7 +1145,7 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(thumb).ToHaveValueAsync("65");
 
         await page.GetByTestId("control-slider-readonly").UncheckAsync();
-        await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Vertical");
+        await page.ChooseOptionAsync("control-slider-orientation", "Vertical");
         trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
         Assert.NotNull(trackBox);
         await page.Mouse.MoveAsync((float)(trackBox!.X + trackBox.Width / 2), (float)(trackBox.Y + trackBox.Height * .2));
@@ -1154,7 +1154,7 @@ public sealed class ActionsAndSelectionBrowserTests(
         await page.Mouse.UpAsync();
         Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 15, 25);
 
-        await page.GetByTestId("control-slider-orientation").SelectOptionAsync("Horizontal");
+        await page.ChooseOptionAsync("control-slider-orientation", "Horizontal");
         await Assertions.Expect(slider).ToHaveAttributeAsync("data-orientation", "horizontal");
         await slider.EvaluateAsync("element => element.setAttribute('dir', 'rtl')");
         await Assertions.Expect(slider).ToHaveCSSAsync("direction", "rtl");
@@ -1183,7 +1183,7 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(page.GetByTestId("switch-dossier-preview").GetByRole(AriaRole.Status))
             .ToContainTextAsync("Production updates are paused.");
 
-        await page.GetByTestId("control-switch-size").SelectOptionAsync("Small");
+        await page.ChooseOptionAsync("control-switch-size", "Small");
         await Assertions.Expect(control.Locator("xpath=..")).ToHaveCSSAsync("width", "24px");
         await page.GetByTestId("control-switch-invalid").CheckAsync();
         var source = page.Locator("#preview .component-code pre").First;

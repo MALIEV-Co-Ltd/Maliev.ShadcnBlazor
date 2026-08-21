@@ -73,11 +73,11 @@
                             @if (HasAttachmentError) { <ShadcnFieldError Id="attachment-error" Errors="AttachmentErrors" /> }
                         </ShadcnField>
                         <div class="mock-field-row">
-                            <ShadcnField><ShadcnFieldLabel For="manufacturing-material">@Text("Material", "วัสดุ")</ShadcnFieldLabel><select id="manufacturing-material" value="@State.Manufacturing.Material" @onchange="MaterialChanged"><option>Aluminum 6061</option><option>Stainless 304</option><option>PA-CF</option></select></ShadcnField>
-                            <ShadcnField><ShadcnFieldLabel For="manufacturing-process">@Text("Process", "กระบวนการ")</ShadcnFieldLabel><select id="manufacturing-process" value="@State.Manufacturing.Process" @onchange="ProcessChanged"><option>CNC milling</option><option>CNC turning</option><option>FDM printing</option></select></ShadcnField>
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-material">@Text("Material", "วัสดุ")</ShadcnFieldLabel><ShadcnSelect TValue="string" id="manufacturing-material" aria-label="@Text("Material", "วัสดุ")" Value="@State.Manufacturing.Material" ValueChanged="State.SetManufacturingMaterial" Options="MaterialOptions" /></ShadcnField>
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-process">@Text("Process", "กระบวนการ")</ShadcnFieldLabel><ShadcnSelect TValue="string" id="manufacturing-process" aria-label="@Text("Process", "กระบวนการ")" Value="@State.Manufacturing.Process" ValueChanged="State.SetManufacturingProcess" Options="ProcessOptions" /></ShadcnField>
                         </div>
                         <div class="mock-field-row">
-                            <ShadcnField><ShadcnFieldLabel For="manufacturing-finish">@Text("Finish", "ผิวสำเร็จ")</ShadcnFieldLabel><select id="manufacturing-finish" value="@State.Manufacturing.Finish" @onchange="FinishChanged"><option>As machined</option><option>Bead blasted</option><option>Black anodized</option></select></ShadcnField>
+                            <ShadcnField><ShadcnFieldLabel For="manufacturing-finish">@Text("Finish", "ผิวสำเร็จ")</ShadcnFieldLabel><ShadcnSelect TValue="string" id="manufacturing-finish" aria-label="@Text("Finish", "ผิวสำเร็จ")" Value="@State.Manufacturing.Finish" ValueChanged="State.SetManufacturingFinish" Options="FinishOptions" /></ShadcnField>
                             <ShadcnField><ShadcnFieldLabel For="manufacturing-date">@Text("Required date", "วันที่ต้องการ")</ShadcnFieldLabel><input type="date" id="manufacturing-date" value="@State.Manufacturing.RequiredDate" @onchange="DateChanged" /></ShadcnField>
                         </div>
                         <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal">
@@ -148,12 +148,12 @@
     private IReadOnlyList<string?> ProjectErrors => HasProjectError ? [ValidationText(ManufacturingValidationError.ProjectRequired)] : [];
     private IReadOnlyList<string?> PartErrors => HasPartError ? [ValidationText(ManufacturingValidationError.PartRequired)] : [];
     private IReadOnlyList<string?> AttachmentErrors => HasAttachmentError ? [ValidationText(ManufacturingValidationError.AttachmentRequired)] : [];
+    private IReadOnlyList<ShadcnSelectOption<string>> MaterialOptions { get; } = [new("Aluminum 6061", "Aluminum 6061"), new("Stainless 304", "Stainless 304"), new("PA-CF", "PA-CF")];
+    private IReadOnlyList<ShadcnSelectOption<string>> ProcessOptions { get; } = [new("CNC milling", "CNC milling"), new("CNC turning", "CNC turning"), new("FDM printing", "FDM printing")];
+    private IReadOnlyList<ShadcnSelectOption<string>> FinishOptions { get; } = [new("As machined", "As machined"), new("Bead blasted", "Bead blasted"), new("Black anodized", "Black anodized")];
     private int Completeness => new[] { State.Manufacturing.Project, State.Manufacturing.Part, State.Manufacturing.Attachment }.Count(value => !string.IsNullOrWhiteSpace(value)) * 25 + 25;
     private void ProjectChanged(ChangeEventArgs args) => State.SetManufacturingProject(args.Value?.ToString());
     private void PartChanged(ChangeEventArgs args) => State.SetManufacturingPart(args.Value?.ToString());
-    private void MaterialChanged(ChangeEventArgs args) => State.SetManufacturingMaterial(args.Value?.ToString());
-    private void ProcessChanged(ChangeEventArgs args) => State.SetManufacturingProcess(args.Value?.ToString());
-    private void FinishChanged(ChangeEventArgs args) => State.SetManufacturingFinish(args.Value?.ToString());
     private void DateChanged(ChangeEventArgs args) => State.SetManufacturingRequiredDate(args.Value?.ToString());
     private void InspectionChanged(ChangeEventArgs args) => State.SetManufacturingInspectionReport(args.Value is true);
     private void Attach() => State.AttachManufacturingFile();

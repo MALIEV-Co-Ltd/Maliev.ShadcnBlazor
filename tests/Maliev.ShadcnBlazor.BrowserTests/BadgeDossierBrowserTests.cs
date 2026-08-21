@@ -36,7 +36,7 @@ public sealed class BadgeDossierBrowserTests(
             0,
             1);
 
-        await page.GetByTestId("control-badge-variant").SelectOptionAsync("Outline");
+        await page.ChooseOptionAsync("control-badge-variant", "Outline");
         await page.GetByTestId("control-badge-link").CheckAsync();
         await page.GetByTestId("control-badge-invalid").CheckAsync();
         var selected = preview.GetByTestId("badge-current").Locator("[data-slot='badge']");

@@ -24,7 +24,7 @@ public sealed class ButtonGroupShowcaseTests : BunitContext
         cut.Find("[data-testid='button-group-archive']").Click();
         Assert.Contains("Quotation archived", cut.Find("[data-testid='button-group-last-action']").TextContent, StringComparison.Ordinal);
 
-        cut.Find("[data-testid='control-button-group-orientation']").Change("Vertical");
+        cut.SelectControl("button-group-orientation", "Vertical");
         Assert.Equal("vertical", cut.Find("[data-testid='action-button-group']").GetAttribute("data-orientation"));
         Assert.Contains("Orientation=\"ShadcnButtonGroupOrientation.Vertical\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Orientation=\"ShadcnButtonGroupOrientation.Horizontal\"", example.RazorSource, StringComparison.Ordinal);

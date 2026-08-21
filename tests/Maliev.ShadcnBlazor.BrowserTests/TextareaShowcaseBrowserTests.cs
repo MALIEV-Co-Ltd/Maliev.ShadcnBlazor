@@ -27,7 +27,7 @@ public sealed class TextareaShowcaseBrowserTests(ShowcaseServerFixture server, P
         await textarea.FillAsync(note);
         await Assertions.Expect(dossier.Locator("[aria-live='polite']")).ToContainTextAsync(note.Length.ToString());
 
-        await page.GetByTestId("control-textarea-rows").SelectOptionAsync("5");
+        await page.ChooseOptionAsync("control-textarea-rows", "5");
         await Assertions.Expect(textarea).ToHaveAttributeAsync("rows", "5");
         Assert.True((await textarea.BoundingBoxAsync())!.Height > initialHeight + 10);
         var source = page.Locator("#preview [data-slot='code-block']").First;

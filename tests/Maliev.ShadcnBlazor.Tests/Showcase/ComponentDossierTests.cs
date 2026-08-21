@@ -209,7 +209,7 @@ public sealed class ComponentDossierTests : BunitContext
         var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug("aspect-ratio"));
         var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
 
-        cut.Find("[data-testid='control-aspect-ratio']").Change("1:1");
+        cut.SelectControl("aspect-ratio", "1:1");
 
         cut.WaitForAssertion(() =>
         {
@@ -232,7 +232,7 @@ public sealed class ComponentDossierTests : BunitContext
             cut.FindAll("[data-slot='kbd-group']")
                 .Select(group => group.QuerySelectorAll("[data-slot='kbd']").Length));
 
-        cut.Find("[data-testid='control-kbd-platform']").Change("macOS");
+        cut.SelectControl("kbd-platform", "macOS");
 
         cut.WaitForAssertion(() =>
         {
@@ -241,6 +241,41 @@ public sealed class ComponentDossierTests : BunitContext
             Assert.Contains("<ShadcnKbd>⌘</ShadcnKbd>", example.RazorSource, StringComparison.Ordinal);
             Assert.Equal("macOS", example.Controls.Single(control => control.Id == "kbd-platform").Value);
         });
+    }
+
+    [Fact]
+    public void CatalogSelectControlsUseThePackageSelectAndSynchronizePreviewAndSource()
+    {
+        var registry = new ComponentExampleRegistry(_documentation);
+        var examples = _documentation.All
+            .Where(entry => entry.Status == ComponentDocumentationStatus.Complete && entry.Slug != "native-select")
+            .SelectMany(entry => registry.GetBySlug(entry.Slug))
+            .Where(example => example.Controls.Any(control => control.Kind == ComponentParameterControlKind.Select))
+            .ToArray();
+
+        Assert.NotEmpty(examples);
+        foreach (var example in examples)
+        {
+            var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
+            var selectControls = example.Controls.Where(control => control.Kind == ComponentParameterControlKind.Select).ToArray();
+
+            Assert.Empty(cut.FindAll(".component-preview__controls select"));
+            Assert.Equal(selectControls.Length, cut.FindAll(".component-preview__controls [data-slot='select']").Count);
+            Assert.All(selectControls, control =>
+            {
+                var trigger = cut.Find($"[data-testid='control-{control.Id}']");
+                Assert.Equal("select-trigger", trigger.GetAttribute("data-slot"));
+                Assert.Equal(control.Label, trigger.GetAttribute("aria-label"));
+            });
+        }
+
+        var card = registry.GetBySlug("card").Single();
+        var cardCut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, card));
+        cardCut.Find("[data-testid='control-card-size']").Click();
+        cardCut.Find("[role='option'][data-value='Small']").Click();
+
+        Assert.Equal("sm", cardCut.Find("[data-slot='card']").GetAttribute("data-size"));
+        Assert.Contains("Size=\"ShadcnCardSize.Small\"", card.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -298,13 +333,13 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.Equal(["Inherited (RTL)", "Left to right (LTR)", "Right to left (RTL)"], OptionValues(cut, "control-direction"));
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("Left to right (LTR)");
+        cut.SelectControl("direction", "Left to right (LTR)");
         Assert.Equal("ltr", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("Right to left (RTL)");
+        cut.SelectControl("direction", "Right to left (RTL)");
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
 
-        cut.Find("[data-testid='control-direction']").Change("Inherited (RTL)");
+        cut.SelectControl("direction", "Inherited (RTL)");
         Assert.Equal("rtl", cut.Find("[data-testid='direction-example']").GetAttribute("dir"));
     }
 
@@ -355,10 +390,10 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.True(cut.Find("[data-slot='field-set']").HasAttribute("disabled"));
         Assert.Equal("true", cut.Find("#field-card-number").ParentElement?.GetAttribute("data-disabled"));
 
-        cut.Find("[data-testid='control-field-orientation']").Change("Horizontal");
-        Assert.Equal("horizontal", cut.Find("#field-card-number").ParentElement?.GetAttribute("data-orientation"));
+        cut.SelectControl("field-orientation", "Horizontal");
+        Assert.Equal("horizontal", cut.Find("[data-slot='field']").GetAttribute("data-orientation"));
 
-        cut.Find("[data-testid='control-field-legend-variant']").Change("Label");
+        cut.SelectControl("field-legend-variant", "Label");
         Assert.Equal("label", cut.Find("[data-slot='field-legend']").GetAttribute("data-variant"));
     }
 
@@ -378,9 +413,9 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.Equal(["Default", "Small"], OptionValues(cut, "control-item-size"));
         Assert.Equal(["Default", "Icon", "Image"], OptionValues(cut, "control-item-media-variant"));
 
-        cut.Find("[data-testid='control-item-variant']").Change("Muted");
-        cut.Find("[data-testid='control-item-size']").Change("Small");
-        cut.Find("[data-testid='control-item-media-variant']").Change("Image");
+        cut.SelectControl("item-variant", "Muted");
+        cut.SelectControl("item-size", "Small");
+        cut.SelectControl("item-media-variant", "Image");
         cut.Find("[data-testid='control-item-link']").Change(true);
 
         var item = cut.Find("a[data-slot='item']");
@@ -398,7 +433,7 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.Equal(2, cut.FindAll("[data-slot='empty-content'] button[type='button']").Count);
         Assert.Equal("icon", cut.Find("[data-slot='empty-icon']").GetAttribute("data-variant"));
 
-        cut.Find("[data-testid='control-empty-media-variant']").Change("Default");
+        cut.SelectControl("empty-media-variant", "Default");
 
         Assert.Equal("default", cut.Find("[data-slot='empty-icon']").GetAttribute("data-variant"));
     }
@@ -417,12 +452,12 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.Equal(["0.75rem", "1rem", "1.5rem"], OptionValues(cut, "control-typeset-flow"));
         Assert.Equal(["32rem", "48rem", "none"], OptionValues(cut, "control-typeset-max-width"));
 
-        cut.Find("[data-testid='control-typography-variant']").Change("H1");
-        cut.Find("[data-testid='control-typeset-tag']").Change("article");
-        cut.Find("[data-testid='control-typeset-size']").Change("1.125rem");
-        cut.Find("[data-testid='control-typeset-leading']").Change("1.8");
-        cut.Find("[data-testid='control-typeset-flow']").Change("1.5rem");
-        cut.Find("[data-testid='control-typeset-max-width']").Change("48rem");
+        cut.SelectControl("typography-variant", "H1");
+        cut.SelectControl("typeset-tag", "article");
+        cut.SelectControl("typeset-size", "1.125rem");
+        cut.SelectControl("typeset-leading", "1.8");
+        cut.SelectControl("typeset-flow", "1.5rem");
+        cut.SelectControl("typeset-max-width", "48rem");
 
         Assert.Equal(2, cut.FindAll("article[data-slot='typeset'] h1[data-slot='typography']").Count);
         var style = cut.Find("article[data-slot='typeset']").GetAttribute("style");
@@ -497,5 +532,5 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     private static string[] OptionValues(IRenderedComponent<ComponentPreview> cut, string testId) =>
-        cut.Find($"[data-testid='{testId}']").QuerySelectorAll("option").Select(option => option.GetAttribute("value")!).ToArray();
+        cut.SelectControlOptions(testId["control-".Length..]);
 }

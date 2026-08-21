@@ -32,9 +32,9 @@ public sealed class ToggleGroupShowcaseBrowserTests(ShowcaseServerFixture server
         await Assertions.Expect(dimensions).ToHaveAttributeAsync("aria-pressed", "false");
         await Assertions.Expect(notes).ToHaveAttributeAsync("aria-pressed", "true");
 
-        await page.GetByTestId("control-toggle-group-orientation").SelectOptionAsync("Vertical");
-        await page.GetByTestId("control-toggle-group-spacing").SelectOptionAsync("0");
-        await page.GetByTestId("control-toggle-group-size").SelectOptionAsync("Large");
+        await page.ChooseOptionAsync("control-toggle-group-orientation", "Vertical");
+        await page.ChooseOptionAsync("control-toggle-group-spacing", "0");
+        await page.ChooseOptionAsync("control-toggle-group-size", "Large");
         await page.GetByTestId("control-toggle-group-invalid").CheckAsync();
         var group = page.GetByTestId("action-toggle-group");
         await Assertions.Expect(group).ToHaveAttributeAsync("aria-orientation", "vertical");
@@ -70,7 +70,7 @@ public sealed class ToggleGroupShowcaseBrowserTests(ShowcaseServerFixture server
         await page.Keyboard.PressAsync("ArrowLeft");
         await Assertions.Expect(notes).ToBeFocusedAsync();
 
-        await page.GetByTestId("control-toggle-group-orientation").SelectOptionAsync("Vertical");
+        await page.ChooseOptionAsync("control-toggle-group-orientation", "Vertical");
         await dimensions.FocusAsync();
         await page.Keyboard.PressAsync("ArrowDown");
         await Assertions.Expect(notes).ToBeFocusedAsync();

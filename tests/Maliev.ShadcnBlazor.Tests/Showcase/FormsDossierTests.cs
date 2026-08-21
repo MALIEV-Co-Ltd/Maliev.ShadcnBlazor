@@ -36,7 +36,7 @@ public sealed class FormsDossierTests : BunitContext
             var control = example.Controls[0];
             var original = cut.Markup;
             object nextValue = control.Kind == ComponentParameterControlKind.Toggle ? !bool.Parse(control.Value) : control.Options.Last();
-            cut.Find($"[data-testid='control-{control.Id}']").Change(nextValue);
+            cut.ChangeControl(control.Id, nextValue);
             Assert.NotEqual(original, cut.Markup);
         }
     }
@@ -344,7 +344,7 @@ public sealed class FormsDossierTests : BunitContext
         Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, registry.GetBySlug(slug).Single()));
 
     private static void Change(IRenderedComponent<ComponentPreview> cut, string controlId, object value) =>
-        cut.Find($"[data-testid='control-{controlId}']").Change(value);
+        cut.ChangeControl(controlId, value);
 
     private static string FindRoot()
     {

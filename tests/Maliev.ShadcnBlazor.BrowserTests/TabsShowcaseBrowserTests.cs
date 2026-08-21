@@ -27,12 +27,11 @@ public sealed class TabsShowcaseBrowserTests(
         await Assertions.Expect(tabs.Nth(1)).ToHaveAttributeAsync("aria-selected", "true");
         await Assertions.Expect(preview).ToContainTextAsync("inspection-plan.pdf");
 
-        var valueControl = page.GetByTestId("control-tabs-value");
-        await valueControl.SelectOptionAsync("activity");
-        await valueControl.SelectOptionAsync("overview");
-        await page.GetByTestId("control-tabs-orientation").SelectOptionAsync("Vertical");
-        await page.GetByTestId("control-tabs-activation").SelectOptionAsync("Manual");
-        await page.GetByTestId("control-tabs-variant").SelectOptionAsync("Line");
+        await page.ChooseOptionAsync("control-tabs-value", "activity");
+        await page.ChooseOptionAsync("control-tabs-value", "overview");
+        await page.ChooseOptionAsync("control-tabs-orientation", "Vertical");
+        await page.ChooseOptionAsync("control-tabs-activation", "Manual");
+        await page.ChooseOptionAsync("control-tabs-variant", "Line");
         await page.GetByTestId("control-tabs-loop").UncheckAsync();
         await page.GetByTestId("control-tabs-force").UncheckAsync();
 
@@ -68,7 +67,7 @@ public sealed class TabsShowcaseBrowserTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/tabs?theme=dark&dir=rtl&locale=th").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
-        await page.GetByTestId("control-tabs-orientation").SelectOptionAsync("Vertical");
+        await page.ChooseOptionAsync("control-tabs-orientation", "Vertical");
 
         var canvas = page.GetByTestId("component-preview-canvas");
         var overflow = await canvas.EvaluateAsync<double>("element => element.scrollWidth - element.clientWidth");

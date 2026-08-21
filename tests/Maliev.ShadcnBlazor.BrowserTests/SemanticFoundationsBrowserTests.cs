@@ -137,7 +137,7 @@ public sealed class SemanticFoundationsBrowserTests(
         await Assertions.Expect(page.Locator("[data-shadcn-scope]").First).ToHaveAttributeAsync("dir", "rtl");
         await Assertions.Expect(groups.Nth(1)).ToHaveCSSAsync("direction", "ltr");
 
-        await page.GetByTestId("control-kbd-platform").SelectOptionAsync("macOS");
+        await page.ChooseOptionAsync("control-kbd-platform", "macOS");
         await Assertions.Expect(canvas).ToContainTextAsync("⌘");
         await Assertions.Expect(canvas).Not.ToContainTextAsync("Ctrl");
         await Assertions.Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-label", "Command K");
@@ -169,7 +169,7 @@ public sealed class SemanticFoundationsBrowserTests(
         Assert.NotNull(demoBox);
         Assert.InRange(Math.Abs((canvasBox!.X + (canvasBox.Width / 2)) - (demoBox!.X + (demoBox.Width / 2))), 0, 1);
 
-        await desktop.GetByTestId("control-separator-orientation").SelectOptionAsync("Vertical");
+        await desktop.ChooseOptionAsync("control-separator-orientation", "Vertical");
         await Assertions.Expect(separator).ToHaveAttributeAsync("data-orientation", "vertical");
         await Assertions.Expect(separator).ToHaveAttributeAsync("aria-orientation", "vertical");
         await Assertions.Expect(desktop.Locator("#preview .shadcn-code-block")).ToContainTextAsync("ShadcnSeparatorOrientation.Vertical");
@@ -189,9 +189,11 @@ public sealed class SemanticFoundationsBrowserTests(
         var mobile = await mobileContext.NewPageAsync();
         await mobile.GotoAsync(new Uri(server.BaseUri, "/docs/components/separator?theme=dark&dir=rtl&locale=th").ToString());
         await mobile.GetByTestId("component-dossier").WaitForAsync();
-        await mobile.GetByTestId("control-separator-orientation").SelectOptionAsync("Vertical");
+        await mobile.ChooseOptionAsync("control-separator-orientation", "Vertical");
 
         var mobileSeparator = mobile.Locator("#preview [data-slot='separator']");
+        await Assertions.Expect(mobileSeparator).ToHaveAttributeAsync("data-orientation", "vertical");
+        await Assertions.Expect(mobileSeparator).ToHaveCSSAsync("width", "1px");
         var mobileSeparatorBox = await mobileSeparator.BoundingBoxAsync();
         Assert.NotNull(mobileSeparatorBox);
         Assert.InRange(mobileSeparatorBox!.Width, 0.5, 1.5);

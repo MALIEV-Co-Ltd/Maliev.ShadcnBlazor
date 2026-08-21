@@ -9,6 +9,46 @@ public sealed class DocumentationWorkbenchBrowserTests(
     PlaywrightFixture playwright)
 {
     [Theory]
+    [InlineData(1440, 900, false, false)]
+    [InlineData(390, 844, true, false)]
+    [InlineData(800, 900, true, true)]
+    public async Task SharedDossierSelectUsesPackageKeyboardInteractionAndSynchronizesSource(int width, int height, bool darkRtl, bool forcedColors)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = width, Height = height },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = darkRtl ? ColorScheme.Dark : ColorScheme.Light,
+            ForcedColors = forcedColors ? ForcedColors.Active : ForcedColors.None
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/card").ToString());
+        var controls = page.Locator(".component-preview__controls");
+        await controls.WaitForAsync();
+
+        if (darkRtl)
+        {
+            await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+            await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        }
+
+        await Assertions.Expect(controls.Locator("select")).ToHaveCountAsync(0);
+        await Assertions.Expect(controls.Locator("[data-slot='select']")).ToHaveCountAsync(1);
+        var trigger = page.GetByTestId("control-card-size");
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-label", "Size");
+        await trigger.FocusAsync();
+        await trigger.PressAsync("ArrowDown");
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await trigger.PressAsync("End");
+        await trigger.PressAsync("Enter");
+
+        await Assertions.Expect(page.Locator("[data-slot='card']")).ToHaveAttributeAsync("data-size", "sm");
+        await Assertions.Expect(page.Locator("section.component-code").First).ToContainTextAsync("Size=\"ShadcnCardSize.Small\"");
+        Assert.InRange(await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
+        Assert.Equal("solid", await trigger.EvaluateAsync<string>("element => getComputedStyle(element).borderTopStyle"));
+    }
+
+    [Theory]
     [InlineData(1440, 900, false)]
     [InlineData(390, 844, true)]
     public async Task SelectDossierOpensFromTriggerAndKeepsClearActionInsideCompactField(int width, int height, bool darkRtl)

@@ -23,7 +23,7 @@ public sealed class CalendarParityBrowserTests(
         await page.GetByTestId("component-dossier").WaitForAsync();
 
         var calendar = page.Locator("#preview [data-slot='calendar']");
-        await page.GetByTestId("control-calendar-mode").SelectOptionAsync("Range");
+        await page.ChooseOptionAsync("control-calendar-mode", "Range");
         await calendar.Locator("[data-day='2026-08-18']").ClickAsync();
         await calendar.Locator("[data-day='2026-08-20']").ClickAsync();
 
@@ -34,7 +34,7 @@ public sealed class CalendarParityBrowserTests(
         await Assertions.Expect(page.GetByTestId("calendar-selection")).ToContainTextAsync("18");
         await Assertions.Expect(page.GetByTestId("calendar-selection")).ToContainTextAsync("20");
 
-        await page.GetByTestId("control-calendar-caption-layout").SelectOptionAsync("Dropdown");
+        await page.ChooseOptionAsync("control-calendar-caption-layout", "Dropdown");
         await Assertions.Expect(calendar.Locator("[data-slot='calendar-month-select']")).ToHaveAttributeAsync("aria-label", "เลือกเดือน");
         await Assertions.Expect(calendar.Locator("[data-slot='calendar-year-select']")).ToHaveAttributeAsync("aria-label", "เลือกปี");
         await calendar.Locator("[data-slot='calendar-next']").ClickAsync();

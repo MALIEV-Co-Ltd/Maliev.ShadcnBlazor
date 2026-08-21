@@ -59,8 +59,8 @@ public sealed class ToastShowcaseBrowserTests(ShowcaseServerFixture server, Play
         await page.GetByTestId("control-toast-limit").PressAsync("Tab");
         await page.GetByTestId("control-toast-start").CheckAsync();
         await page.GetByTestId("control-toast-reduced").CheckAsync();
-        await page.GetByTestId("control-toast-type").SelectOptionAsync("Error");
-        await page.GetByTestId("control-toast-priority").SelectOptionAsync("High");
+        await page.ChooseOptionAsync("control-toast-type", "Error");
+        await page.ChooseOptionAsync("control-toast-priority", "High");
 
         var preview = page.GetByTestId("toast-dossier-preview");
         await preview.GetByRole(AriaRole.Button, new() { Name = "บันทึกใบงาน — Save work order" }).ClickAsync();

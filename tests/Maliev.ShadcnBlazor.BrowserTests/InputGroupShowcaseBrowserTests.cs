@@ -42,7 +42,7 @@ public sealed class InputGroupShowcaseBrowserTests(ShowcaseServerFixture server,
 
         await page.GetByTestId("control-input-group-invalid").CheckAsync();
         await Assertions.Expect(group).ToHaveAttributeAsync("aria-invalid", "true");
-        await page.GetByTestId("control-input-group-alignment").SelectOptionAsync("BlockEnd");
+        await page.ChooseOptionAsync("control-input-group-alignment", "BlockEnd");
         await Assertions.Expect(addon).ToHaveAttributeAsync("data-align", "block-end");
         var source = page.Locator("#preview .component-code pre").First;
         await Assertions.Expect(source).ToContainTextAsync("ShadcnInputGroupAlignment.BlockEnd");

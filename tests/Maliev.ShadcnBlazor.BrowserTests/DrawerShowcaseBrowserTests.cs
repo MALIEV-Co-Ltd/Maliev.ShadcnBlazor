@@ -37,14 +37,9 @@ public sealed class DrawerShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await Assertions.Expect(content).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).ToBeFocusedAsync();
 
+        await page.ChooseOptionAsync("control-drawer-modal-mode", "NonModal");
         await trigger.ClickAsync();
         await Assertions.Expect(content).ToBeVisibleAsync();
-        await page.GetByTestId("control-drawer-modal-mode").EvaluateAsync("""
-            select => {
-                select.value = "NonModal";
-                select.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-            """);
         await Assertions.Expect(page.Locator("[data-slot='drawer-overlay']")).ToHaveCountAsync(0);
         await page.Locator("#overview").ClickAsync();
         await Assertions.Expect(content).ToHaveCountAsync(0);
@@ -73,7 +68,7 @@ public sealed class DrawerShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await page.GetByTestId("component-dossier").WaitForAsync();
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
-        await page.GetByTestId("control-drawer-direction").SelectOptionAsync("Right");
+        await page.ChooseOptionAsync("control-drawer-direction", "Right");
 
         var trigger = page.Locator("#preview [data-slot='drawer-trigger']");
         var content = page.Locator("[data-slot='drawer-content']");
