@@ -138,9 +138,82 @@ internal static class OverlayMenuExamples
 
     private static ComponentExampleDefinition Sheet()
     {
-        var open = false; var left = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnSheet>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { AddText<ShadcnSheetTrigger>(c, 0, "Open settings"); c.OpenComponent<ShadcnSheetContent>(10); c.AddAttribute(11, "Side", left ? ShadcnSheetSide.Left : ShadcnSheetSide.Right); c.AddAttribute(12, "ShowCloseButton", false); c.AddAttribute(13, "CloseLabel", "Close settings"); c.AddAttribute(14, "ChildContent", (RenderFragment)(x => { x.OpenComponent<ShadcnSheetHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnSheetTitle>(header, 0, "Workspace settings"); AddText<ShadcnSheetDescription>(header, 10, "Manage notifications and quotation defaults."); })); x.CloseComponent(); x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Email notifications · Enabled"); x.AddContent(23, "Default currency · THB"); x.CloseElement(); x.OpenComponent<ShadcnSheetFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnSheetClose>(footer, 0, "Done"))); x.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("sheet", "Edge sheet", preview, [Toggle("sheet-open", "Open", v => open = v), Toggle("sheet-left", "Left side", v => left = v)], ["top", "right", "bottom", "left", "modal", "localized-close"]);
+        var open = false;
+        var side = ShadcnSheetSide.Right;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<SheetDossierPreview>(0);
+            builder.AddAttribute(1, nameof(SheetDossierPreview.Open), open);
+            builder.AddAttribute(2, nameof(SheetDossierPreview.Side), side);
+            builder.CloseComponent();
+        };
+        string Source() => $$"""
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Maliev.ShadcnBlazor.Components.Overlays
+@using Maliev.ShadcnBlazor.Components.Selection
+
+<div class="showcase-sheet-dossier">
+    <ShadcnSheet @bind-Open="open">
+        <ShadcnSheetTrigger Class="showcase-sheet-dossier__trigger">Review delivery schedule</ShadcnSheetTrigger>
+        <ShadcnSheetContent Side="ShadcnSheetSide.{{side}}" CloseLabel="Close delivery schedule">
+        <ShadcnSheetHeader Class="showcase-sheet-dossier__header">
+            <ShadcnSheetTitle>Delivery schedule</ShadcnSheetTitle>
+            <ShadcnSheetDescription>
+                Confirm the production contact and release notifications for quotation Q-4189.
+            </ShadcnSheetDescription>
+        </ShadcnSheetHeader>
+
+        <div class="showcase-sheet-dossier__body">
+            <div class="showcase-sheet-dossier__summary" aria-label="Quotation summary">
+                <span>Quotation</span>
+                <strong>Q-4189 · CNC enclosure</strong>
+                <span>Target dispatch</span>
+                <strong>Friday, 21 Aug · 16:30</strong>
+            </div>
+
+            <ShadcnField>
+                <ShadcnFieldLabel For="sheet-contact">Production contact</ShadcnFieldLabel>
+                <ShadcnInput TValue="string" id="sheet-contact" @bind-Value="contact" AutoComplete="name" />
+                <ShadcnFieldDescription>Shown to the dispatch team.</ShadcnFieldDescription>
+            </ShadcnField>
+
+            <ShadcnField Orientation="ShadcnFieldOrientation.Horizontal">
+                <ShadcnFieldContent>
+                    <ShadcnFieldLabel For="sheet-notifications">Release notifications</ShadcnFieldLabel>
+                    <ShadcnFieldDescription>Email the project team when dispatch is confirmed.</ShadcnFieldDescription>
+                </ShadcnFieldContent>
+                <ShadcnSwitch id="sheet-notifications" @bind-Value="notificationsEnabled" Name="release-notifications" />
+            </ShadcnField>
+        </div>
+
+        <ShadcnSheetFooter Class="showcase-sheet-dossier__footer">
+            <ShadcnSheetClose Class="showcase-sheet-dossier__cancel" Label="Cancel delivery schedule">Cancel</ShadcnSheetClose>
+            <ShadcnButton OnClick="SaveAsync">Save schedule</ShadcnButton>
+        </ShadcnSheetFooter>
+        </ShadcnSheetContent>
+    </ShadcnSheet>
+    <p class="showcase-sheet-dossier__status" role="status" aria-live="polite" dir="auto">@status</p>
+</div>
+
+@code {
+    private bool open;
+    private string contact = "Narin S.";
+    private bool notificationsEnabled = true;
+    private string status = "Open the schedule to review delivery settings.";
+
+    private Task SaveAsync()
+    {
+        status = $"Schedule saved for {(string.IsNullOrWhiteSpace(contact) ? "the production team" : contact)}. Notifications {(notificationsEnabled ? "enabled" : "disabled")}.";
+        open = false;
+        return Task.CompletedTask;
+    }
+}
+""";
+        return Example("sheet", "Delivery schedule sheet", preview,
+            [Toggle("sheet-open", "Open", value => open = value), Select("sheet-side", "Edge", side, value => side = value)],
+            ["top", "right", "bottom", "left", "modal", "focus-trap", "outside-press", "escape", "responsive"]) with
+        { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Drawer()
@@ -529,6 +602,8 @@ internal static class OverlayMenuExamples
         new($"{slug}-primary", title, "Live package component with controlled state and the complete composition surface.", razorSource ?? $"<{Primary(slug)} />", preview, controls, tags);
     private static string Primary(string slug) => "Shadcn" + string.Concat(slug.Split('-').Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
     private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], value => apply(bool.Parse(value)));
+    private static ComponentParameterControl Select<T>(string id, string label, T initial, Action<T> apply) where T : struct, Enum =>
+        new(id, label, ComponentParameterControlKind.Select, initial.ToString(), Enum.GetNames<T>(), value => apply(Enum.Parse<T>(value)));
     private static RenderFragment Text(string value) => b => b.AddContent(0, value);
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", Text(text)); b.CloseComponent(); }
     private static void AddChecked<T>(RenderTreeBuilder b, int sequence, bool value, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "Checked", value); b.AddAttribute(sequence + 2, "ChildContent", Text(text)); b.CloseComponent(); }

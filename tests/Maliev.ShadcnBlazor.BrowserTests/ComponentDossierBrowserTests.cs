@@ -591,6 +591,67 @@ public sealed class ComponentDossierBrowserTests(
         Assert.Empty(errors);
     }
 
+    [Fact]
+    public async Task SheetDossierOpensFromItsTriggerAndKeepsEveryEdgeInsideTheViewport()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/sheet").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        var trigger = page.GetByRole(AriaRole.Button, new() { Name = "Review delivery schedule" });
+        await Assertions.Expect(page.Locator("[data-slot='sheet-content']")).ToHaveCountAsync(0);
+
+        await trigger.ClickAsync();
+        var sheet = page.Locator("[data-slot='sheet-content']");
+        await Assertions.Expect(sheet).ToBeVisibleAsync();
+        await Assertions.Expect(sheet).ToHaveAttributeAsync("data-side", "right");
+        await Assertions.Expect(sheet).ToHaveAttributeAsync("aria-modal", "true");
+        Assert.True(await sheet.EvaluateAsync<bool>("element => element.contains(document.activeElement)"));
+        await sheet.EvaluateAsync("element => Promise.all(element.getAnimations().map(animation => animation.finished))");
+        var right = await sheet.BoundingBoxAsync();
+        Assert.NotNull(right);
+        Assert.InRange(Math.Abs(1280 - (right!.X + right.Width)), 0, 1);
+        Assert.InRange(Math.Abs(right.Height - 900), 0, 1);
+
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(sheet).ToHaveCountAsync(0);
+        await Assertions.Expect(trigger).ToBeFocusedAsync();
+
+        var sideControl = page.GetByTestId("control-sheet-side");
+        foreach (var side in new[] { "Top", "Bottom", "Left" })
+        {
+            await sideControl.SelectOptionAsync(side);
+            await trigger.ClickAsync();
+            sheet = page.Locator("[data-slot='sheet-content']");
+            await Assertions.Expect(sheet).ToHaveAttributeAsync("data-side", side.ToLowerInvariant());
+            await sheet.EvaluateAsync("element => Promise.all(element.getAnimations().map(animation => animation.finished))");
+            var box = await sheet.BoundingBoxAsync();
+            Assert.NotNull(box);
+            Assert.True(box!.X >= 0 && box.X + box.Width <= 1281, $"{side} sheet horizontal bounds were x={box.X}, width={box.Width}.");
+            Assert.True(box.Y >= 0 && box.Y + box.Height <= 901, $"{side} sheet vertical bounds were y={box.Y}, height={box.Height}.");
+            await page.Locator("[data-slot='sheet-overlay']").DispatchEventAsync("click");
+            await Assertions.Expect(sheet).ToHaveCountAsync(0);
+        }
+
+        await page.SetViewportSizeAsync(390, 844);
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        await sideControl.SelectOptionAsync("Left");
+        await trigger.ClickAsync();
+        sheet = page.Locator("[data-slot='sheet-content']");
+        await sheet.EvaluateAsync("element => Promise.all(element.getAnimations().map(animation => animation.finished))");
+        var mobile = await sheet.BoundingBoxAsync();
+        Assert.NotNull(mobile);
+        Assert.InRange(mobile!.X, 0, 1);
+        Assert.InRange(mobile.Width, 300, 351);
+        Assert.InRange(await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)"), 0, 1);
+    }
+
     [Theory]
     [InlineData("input")]
     [InlineData("select")]
