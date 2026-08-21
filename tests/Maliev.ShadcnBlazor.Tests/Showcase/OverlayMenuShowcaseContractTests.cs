@@ -247,6 +247,32 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DropdownMenuDossierUsesTheCompleteInteractiveCompositionAndKeepsSourceInSync()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("dropdown-menu").Single();
+        var rendered = Render(example.Preview);
+        var markup = rendered.Markup;
+
+        Assert.Contains("data-testid=\"dropdown-menu-dossier-preview\"", markup, StringComparison.Ordinal);
+        Assert.Contains("Quotation QT-4189", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-state=\"open\"", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain(example.Controls, control => control.Id == "dropdown-menu-open");
+        Assert.Contains("@bind-Open=\"Open\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenuCheckboxItem", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenuRadioItem", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenuSubTrigger", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenuShortcut", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Variant=\"ShadcnMenuItemVariant.Destructive\"", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "dropdown-menu-loop").Apply("false");
+        example.Controls.Single(control => control.Id == "dropdown-menu-details").Apply("false");
+
+        Assert.Contains("Loop=\"false\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Checked=\"false\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Equal("false", Render(example.Preview).Find("[data-slot='dropdown-menu']").GetAttribute("data-loop"));
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();

@@ -246,7 +246,9 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
     const focusAt = (scope, index) => { const items = enabled(scope); if (!items.length)return;const target=loop?(index+items.length)%items.length:Math.max(0,Math.min(index,items.length-1));items[target].focus({ preventScroll: true }); };
     const keydown = event => {
         const scope = document.activeElement?.closest('[role="menu"]') || menu;
-        if (event.key === 'Escape' && scope !== menu) return;
+        const expandedSub = event.key === 'Escape' ? menu.querySelector('[data-slot$="sub-trigger"][aria-expanded="true"]') : null;
+        if (expandedSub) { event.preventDefault(); expandedSub.click(); expandedSub.focus({ preventScroll: true }); return; }
+        if (event.key === 'Escape' && scope !== menu) { event.preventDefault(); const sub = scope.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]'); if (sub?.getAttribute('aria-expanded') === 'true') sub.click(); sub?.focus({ preventScroll: true }); return; }
         const items = enabled(scope), current = items.indexOf(document.activeElement), rtl = getComputedStyle(scope).direction === 'rtl';
         if (event.key === 'ArrowDown') { event.preventDefault(); focusAt(scope, current + 1); }
         else if (event.key === 'ArrowUp') { event.preventDefault(); focusAt(scope, current - 1); }
@@ -261,7 +263,7 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
     };
     const outside = event => { if (isTopLayer(menu) && !menu.contains(event.target) && !document.getElementById(triggerId)?.contains(event.target)) dotnet?.invokeMethodAsync('RequestCloseAsync'); };
     let hoverTimer = 0;
-    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); };
+    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
     const out = event => { const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || trigger.parentElement?.contains(event.relatedTarget)) return; hoverTimer = setTimeout(() => { if (trigger.getAttribute('aria-expanded') === 'true') trigger.click(); }, 300); };
     menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
 }

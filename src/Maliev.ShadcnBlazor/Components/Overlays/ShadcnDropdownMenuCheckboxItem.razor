@@ -1,3 +1,16 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="Forwarded" class="@MergeClass("shadcn-dropdown-menu-checkbox-item")" style="@MergeStyle(null)" data-slot="dropdown-menu-checkbox-item" data-disabled="@(Disabled?"true":null)" role="menuitemcheckbox" aria-checked="@(Checked?"true":"false")" aria-disabled="@(Disabled?"true":null)" tabindex="-1" @onclick="ClickAsync"><span data-slot="dropdown-menu-checkbox-item-indicator" aria-hidden="true">@(Checked?"✓":null)</span>@ChildContent</div>
-@code { [Parameter]public bool Checked{get;set;}[Parameter]public EventCallback<bool> CheckedChanged{get;set;}[Parameter]public bool Disabled{get;set;}[Parameter]public RenderFragment? ChildContent{get;set;}private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","data-disabled","role","aria-checked","aria-disabled","tabindex");private async Task ClickAsync(){if(!Disabled)await CheckedChanged.InvokeAsync(!Checked);} }
+<div @attributes="Forwarded" class="@MergeClass("shadcn-dropdown-menu-checkbox-item")" style="@MergeStyle(null)" data-slot="dropdown-menu-checkbox-item" data-state="@(EffectiveChecked?"checked":"unchecked")" data-disabled="@(Disabled?"true":null)" data-inset="@(Inset?"true":null)" role="menuitemcheckbox" aria-checked="@(EffectiveChecked?"true":"false")" aria-disabled="@(Disabled?"true":null)" tabindex="-1" @onclick="SelectAsync"><span class="shadcn-dropdown-menu-item-indicator" data-slot="dropdown-menu-checkbox-item-indicator" aria-hidden="true">@if(EffectiveChecked){<svg data-slot="dropdown-menu-item-indicator" viewBox="0 0 24 24" focusable="false"><path d="m5 12 4 4L19 6" /></svg>}</span>@ChildContent</div>
+@code {
+    [CascadingParameter] private ShadcnMenuContext? Context { get; set; }
+    [Parameter] public bool Checked { get; set; }
+    [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Inset { get; set; }
+    [Parameter] public bool CloseOnSelect { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private bool _checked, _last, _initialized;
+    private bool EffectiveChecked => _checked;
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "data-state", "data-disabled", "data-inset", "role", "aria-checked", "aria-disabled", "tabindex");
+    protected override void OnParametersSet() { if (!_initialized || Checked != _last) _checked = Checked; _last = Checked; _initialized = true; }
+    private async Task SelectAsync() { if (Disabled) return; var value = !EffectiveChecked; if (CheckedChanged.HasDelegate) await CheckedChanged.InvokeAsync(value); else { _checked = value; await InvokeAsync(StateHasChanged); } if (CloseOnSelect && Context is not null) await Context.Owner.SetOpenAsync(false); }
+}
