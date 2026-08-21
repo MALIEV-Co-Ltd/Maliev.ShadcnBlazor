@@ -122,10 +122,51 @@ internal static class FormDateExamples
     }
     private static ComponentExampleDefinition Textarea()
     {
-        var invalid = false; var rows = 3; var value = "รายละเอียดการผลิต";
-        RenderFragment preview = b => { b.OpenComponent<ShadcnTextarea<string>>(0); b.AddAttribute(1, "Value", value); b.AddAttribute(2, "ValueChanged", EventCallback.Factory.Create<string>(new object(), next => value = next)); b.AddAttribute(3, "Rows", rows); b.AddAttribute(4, "Invalid", invalid); b.AddAttribute(5, "AdditionalAttributes", Attr("forms-dossier-textarea", "Manufacturing notes")); b.CloseComponent(); };
-        string Source() => $"<ShadcnTextarea TValue=\"string\" @bind-Value=\"Notes\" Rows=\"{rows}\" Invalid=\"{invalid.ToString().ToLowerInvariant()}\" />";
-        return Example("textarea", "Multiline typed input", "Resize a native multiline control while preserving validation and form binding.", Source(), preview,
+        var invalid = false; var rows = 3;
+        RenderFragment preview = b =>
+        {
+            b.OpenComponent<TextareaDossierPreview>(0);
+            b.AddAttribute(1, nameof(TextareaDossierPreview.Rows), rows);
+            b.AddAttribute(2, nameof(TextareaDossierPreview.Invalid), invalid);
+            b.CloseComponent();
+        };
+        string Source() => $$"""
+            <ShadcnCard Class="showcase-textarea-dossier">
+                <ShadcnCardHeader>
+                    <ShadcnCardTitle dir="auto">Manufacturing note</ShadcnCardTitle>
+                    <ShadcnCardDescription dir="auto">Bracket housing · Revision C</ShadcnCardDescription>
+                </ShadcnCardHeader>
+                <ShadcnCardContent>
+                    <ShadcnField Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                                 DescriptionId="manufacturing-notes-description"
+                                 ErrorId="manufacturing-notes-error">
+                        <ShadcnFieldLabel For="manufacturing-notes" dir="auto">Manufacturing instructions</ShadcnFieldLabel>
+                        <ShadcnTextarea TValue="string"
+                                        id="manufacturing-notes"
+                                        @bind-Value="Notes"
+                                        Rows="{{rows}}"
+                                        Invalid="{{invalid.ToString().ToLowerInvariant()}}"
+                                        Name="manufacturingNotes"
+                                        Placeholder="Add setup, finish, or inspection notes"
+                                        maxlength="500"
+                                        dir="auto" />
+                        <ShadcnFieldDescription Id="manufacturing-notes-description" dir="auto">
+                            Include drawing callouts that the production team must verify.
+                        </ShadcnFieldDescription>
+            {{(invalid ? "            <ShadcnFieldError Id=\"manufacturing-notes-error\" dir=\"auto\">Add the critical manufacturing instructions before continuing.</ShadcnFieldError>" : string.Empty)}}
+                    </ShadcnField>
+                </ShadcnCardContent>
+                <ShadcnCardFooter>
+                    <span aria-live="polite" dir="auto">@Notes.Length / 500 characters</span>
+                    <span dir="auto">Saved locally</span>
+                </ShadcnCardFooter>
+            </ShadcnCard>
+
+            @code {
+                private string Notes { get; set; } = "Deburr all edges and inspect the M6 thread before packing.";
+            }
+            """;
+        return Example("textarea", "Manufacturing instructions", "Write a production note, compare useful row counts, and inspect native validation in a complete labeled field.", Source(), preview,
             [
                 Toggle("textarea-invalid", "Invalid", v => invalid = v),
                 Select("textarea-rows", "Rows", rows.ToString(), ["3", "5"], v => rows = int.Parse(v, CultureInfo.InvariantCulture))

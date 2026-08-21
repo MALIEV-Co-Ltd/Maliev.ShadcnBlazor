@@ -4290,6 +4290,37 @@ a {
     .showcase-toggle-dossier__header { display: grid; }
     .showcase-toggle-dossier__state { text-align: start; }
 }
+.showcase-textarea-dossier {
+    inline-size: min(100%, 34rem);
+    max-inline-size: 100%;
+    margin-inline: auto;
+}
+
+.showcase-textarea-dossier .shadcn-card-content {
+    display: grid;
+}
+
+.showcase-textarea-dossier .shadcn-textarea {
+    min-block-size: 6.5rem;
+    max-block-size: 20rem;
+    line-height: 1.5;
+}
+
+.showcase-textarea-dossier .shadcn-card-footer {
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+@media (max-width: 30rem) {
+    .showcase-textarea-dossier .shadcn-card-footer {
+        align-items: start;
+        flex-direction: column;
+        gap: .25rem;
+    }
+}
+
 .showcase-input-dossier {
     inline-size: min(100%, 30rem);
     max-inline-size: 100%;

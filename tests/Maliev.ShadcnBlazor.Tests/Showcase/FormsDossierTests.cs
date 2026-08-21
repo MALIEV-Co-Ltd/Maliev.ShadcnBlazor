@@ -295,6 +295,31 @@ public sealed class FormsDossierTests : BunitContext
     }
 
     [Fact]
+    public void TextareaDossierKeepsRowsValidationAndCopyableSourceInSync()
+    {
+        var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
+        var definition = registry.GetBySlug("textarea").Single();
+        var cut = Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, definition));
+
+        var dossier = cut.Find("[data-testid='textarea-dossier-preview']");
+        Assert.Equal("manufacturing-notes", dossier.QuerySelector("[data-slot='field-label']")!.GetAttribute("for"));
+        Assert.Contains("drawing", dossier.QuerySelector("[data-slot='field-description']")!.TextContent, StringComparison.OrdinalIgnoreCase);
+
+        Change(cut, "textarea-rows", "5");
+        var textarea = dossier.QuerySelector("textarea[data-slot='textarea']")!;
+        Assert.Equal("5", textarea.GetAttribute("rows"));
+        Assert.Contains("Rows=\"5\"", definition.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnField", definition.RazorSource, StringComparison.Ordinal);
+
+        Change(cut, "textarea-invalid", true);
+        textarea = cut.Find("textarea[data-slot='textarea']");
+        Assert.Equal("true", textarea.GetAttribute("aria-invalid"));
+        Assert.Contains("manufacturing-notes-error", textarea.GetAttribute("aria-describedby"), StringComparison.Ordinal);
+        Assert.Contains("Add the critical", dossier.QuerySelector("[data-slot='field-error']")!.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Invalid=\"true\"", definition.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PlanFourCoveredStateTagsOnlyNameRenderedOrOperableDossierStates()
     {
         var registry = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
