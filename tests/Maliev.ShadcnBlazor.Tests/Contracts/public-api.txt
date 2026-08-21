@@ -950,6 +950,8 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsContent
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsList
   RenderFragment ChildContent
   String Label
+  ShadcnTabsListVariant Variant
+enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsListVariant: Default, Line
 enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsOrientation: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsTrigger
   RenderFragment ChildContent

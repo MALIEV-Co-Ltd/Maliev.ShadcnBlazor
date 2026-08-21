@@ -53,6 +53,7 @@ public sealed class TabsNavigationMenuTests : BunitContext
         var cut = RenderTabs("overview", activation: ShadcnTabsActivationMode.Manual, orientation: ShadcnTabsOrientation.Vertical);
         Assert.Equal("vertical", cut.Find("[role='tablist']").GetAttribute("aria-orientation"));
         Assert.Equal("manual", cut.Find("[data-slot='tabs']").GetAttribute("data-activation"));
+        Assert.Equal("true", cut.Find("[data-slot='tabs']").GetAttribute("data-loop"));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnTabs>(p => p.Add(x => x.Orientation, (ShadcnTabsOrientation)999)));
     }
 
@@ -81,6 +82,61 @@ public sealed class TabsNavigationMenuTests : BunitContext
         Assert.Equal("overview", cut.Find("[role='tab'][aria-selected='true']").GetAttribute("data-value"));
         cut.FindAll("[role='tab']")[1].Click();
         Assert.Equal("history", cut.Find("[role='tab'][aria-selected='true']").GetAttribute("data-value"));
+    }
+
+    [Fact]
+    public void ManualTabsMoveTheRovingTabStopWithoutActivatingTheFocusedTab()
+    {
+        var cut = RenderTabs(
+            "overview",
+            activation: ShadcnTabsActivationMode.Manual,
+            orientation: ShadcnTabsOrientation.Vertical,
+            forceMount: true);
+        var tabs = cut.FindAll("[role='tab']");
+
+        tabs[0].KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "ArrowDown" });
+        tabs = cut.FindAll("[role='tab']");
+
+        Assert.Equal("-1", tabs[0].GetAttribute("tabindex"));
+        Assert.Equal("0", tabs[1].GetAttribute("tabindex"));
+        Assert.Equal("true", tabs[0].GetAttribute("aria-selected"));
+        Assert.Equal("false", tabs[1].GetAttribute("aria-selected"));
+    }
+
+    [Fact]
+    public void TabsListExposesDefaultAndLineVariantsToConsumers()
+    {
+        var cut = Render<ShadcnTabs>(parameters => parameters
+            .Add(component => component.Value, "overview")
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnTabsList>(0);
+                builder.AddAttribute(1, nameof(ShadcnTabsList.Variant), ShadcnTabsListVariant.Line);
+                builder.AddAttribute(2, nameof(ShadcnTabsList.ChildContent), (RenderFragment)(content =>
+                    AddTabTrigger(content, 0, "overview", "Overview", false)));
+                builder.CloseComponent();
+                AddTabContent(builder, 10, "overview", "Overview panel");
+            }));
+
+        Assert.Equal("line", cut.Find("[data-slot='tabs-list']").GetAttribute("data-variant"));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnTabs>(parameters => parameters
+            .Add(component => component.Value, "overview")
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnTabsList>(0);
+                builder.AddAttribute(1, nameof(ShadcnTabsList.Variant), (ShadcnTabsListVariant)999);
+                builder.CloseComponent();
+            })));
+    }
+
+    [Fact]
+    public void TabsStylesPreservePinnedVerticalLineAndForcedColorTreatments()
+    {
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
+
+        Assert.Contains(".shadcn-tabs[data-orientation=\"vertical\"] .shadcn-tabs-list { flex-direction: column;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-tabs-list[data-variant=\"line\"]", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -50,7 +50,7 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
             ["resizable"] = ["resizable-vertical", "resizable-collapsible", "resizable-disabled"],
             ["scroll-area"] = ["scroll-always", "scroll-horizontal"],
             ["sidebar"] = ["sidebar-open", "sidebar-side", "sidebar-mode"],
-            ["tabs"] = ["tabs-history", "tabs-vertical", "tabs-manual", "tabs-force"],
+            ["tabs"] = ["tabs-value", "tabs-orientation", "tabs-activation", "tabs-variant", "tabs-loop", "tabs-force"],
         };
         var alternates = new Dictionary<ComponentParameterControlKind, string> { [ComponentParameterControlKind.Toggle] = "true", [ComponentParameterControlKind.Number] = "3" };
         foreach (var slug in Slugs)
@@ -112,6 +112,46 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         var tabs = Assert.Single(registry.GetBySlug("tabs"));
         Assert.Contains("Files", tabs.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Activity", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("CNC enclosure · Revision C", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnTabsListVariant.Default", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Loop=\"true\"", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ForceMount=\"true\"", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Project workspace views", Render(tabs.Preview).Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TabsDossierSourceTracksEveryMeaningfulControl()
+    {
+        var tabs = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("tabs"));
+
+        tabs.Controls.Single(control => control.Id == "tabs-value").Apply("files");
+        tabs.Controls.Single(control => control.Id == "tabs-orientation").Apply("Vertical");
+        tabs.Controls.Single(control => control.Id == "tabs-activation").Apply("Manual");
+        tabs.Controls.Single(control => control.Id == "tabs-variant").Apply("Line");
+        tabs.Controls.Single(control => control.Id == "tabs-loop").Apply("false");
+        tabs.Controls.Single(control => control.Id == "tabs-force").Apply("false");
+
+        Assert.Contains("private string value = \"files\"", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnTabsOrientation.Vertical", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnTabsActivationMode.Manual", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnTabsListVariant.Line", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Loop=\"false\"", tabs.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ForceMount=\"false\"", tabs.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TabsDossierSupportsDirectTabSelection()
+    {
+        var tabs = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("tabs"));
+        var cut = Render(tabs.Preview);
+
+        cut.Find("[role='tab'][data-value='files']").Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal("true", cut.Find("[role='tab'][data-value='files']").GetAttribute("aria-selected"));
+            Assert.Contains("inspection-plan.pdf", cut.Markup, StringComparison.Ordinal);
+        });
     }
 
     [Fact]

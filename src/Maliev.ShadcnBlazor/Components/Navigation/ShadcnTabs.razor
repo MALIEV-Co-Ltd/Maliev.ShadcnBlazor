@@ -3,7 +3,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<CascadingValue Value="Context" IsFixed="true"><div @ref="_root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs")" style="@MergeStyle(null)" data-slot="tabs" data-orientation="@OrientationValue" data-activation="@ActivationValue" data-disabled="@(Disabled ? "true" : null)">@ChildContent</div></CascadingValue>
+<CascadingValue Value="Context" IsFixed="true"><div @ref="_root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs")" style="@MergeStyle(null)" data-slot="tabs" data-orientation="@OrientationValue" data-activation="@ActivationValue" data-loop="@(Loop ? "true" : "false")" data-disabled="@(Disabled ? "true" : null)">@ChildContent</div></CascadingValue>
 
 @code {
     [CascadingParameter] private ShadcnContext? Shadcn { get; set; }
@@ -23,10 +23,11 @@
     private string? _guardSignature;
     private ShadcnTabsContext Context { get; set; } = default!;
     internal string EffectiveValue => _effectiveValue;
+    internal string FocusedValue { get; private set; } = string.Empty;
     internal bool IsRtl => Shadcn?.Direction == ShadcnDirection.RightToLeft;
     private string OrientationValue => Orientation == ShadcnTabsOrientation.Horizontal ? "horizontal" : "vertical";
     private string ActivationValue => ActivationMode == ShadcnTabsActivationMode.Automatic ? "automatic" : "manual";
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-activation", "data-disabled");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation", "data-activation", "data-loop", "data-disabled");
 
     protected override void OnInitialized() => Context = new(this);
     protected override void OnParametersSet()
@@ -34,7 +35,11 @@
         if (!Enum.IsDefined(Orientation)) throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown tabs orientation.");
         if (!Enum.IsDefined(ActivationMode)) throw new ArgumentOutOfRangeException(nameof(ActivationMode), ActivationMode, "Unknown tabs activation mode.");
         if (string.IsNullOrWhiteSpace(Value)) throw new ArgumentException("Tabs require a non-empty value.", nameof(Value));
-        if (!_initialized || !string.Equals(Value, _lastParameterValue, StringComparison.Ordinal)) _effectiveValue = Value;
+        if (!_initialized || !string.Equals(Value, _lastParameterValue, StringComparison.Ordinal))
+        {
+            _effectiveValue = Value;
+            FocusedValue = Value;
+        }
         _lastParameterValue = Value;
         _initialized = true;
     }
@@ -66,8 +71,16 @@
     internal async ValueTask ActivateAsync(string value, bool itemDisabled, bool force = false)
     {
         if (Disabled || itemDisabled || (!force && value == _effectiveValue)) return;
+        FocusedValue = value;
         if (ValueChanged.HasDelegate) await ValueChanged.InvokeAsync(value);
         else { _effectiveValue = value; await InvokeAsync(StateHasChanged); }
+    }
+
+    internal async ValueTask SetFocusedValueAsync(string value, bool itemDisabled)
+    {
+        if (Disabled || itemDisabled || string.Equals(FocusedValue, value, StringComparison.Ordinal)) return;
+        FocusedValue = value;
+        await InvokeAsync(StateHasChanged);
     }
 
     internal async ValueTask HandleKeyAsync(string value, bool itemDisabled, string key)
@@ -89,6 +102,7 @@
         if (current < 0 || delta == 0 || enabled.Length == 0) return;
         var target = delta == -int.MaxValue ? 0 : delta == int.MaxValue ? enabled.Length - 1 : current + delta;
         target = Loop ? (target + enabled.Length) % enabled.Length : Math.Clamp(target, 0, enabled.Length - 1);
+        await SetFocusedValueAsync(enabled[target].Value, false);
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
         await _module.InvokeVoidAsync("focusById", enabled[target].TriggerId);
         if (ActivationMode == ShadcnTabsActivationMode.Automatic) await ActivateAsync(enabled[target].Value, false);
