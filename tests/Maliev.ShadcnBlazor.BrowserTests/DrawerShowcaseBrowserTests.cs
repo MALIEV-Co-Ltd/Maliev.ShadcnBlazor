@@ -72,20 +72,21 @@ public sealed class DrawerShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/drawer").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
         await page.GetByTestId("control-drawer-direction").SelectOptionAsync("Right");
 
         var trigger = page.Locator("#preview [data-slot='drawer-trigger']");
         var content = page.Locator("[data-slot='drawer-content']");
         await trigger.ClickAsync();
+        await Assertions.Expect(content).ToHaveAttributeAsync("data-drawer-ready", "true");
         await Assertions.Expect(content).ToHaveAttributeAsync("data-edge", "right");
         await Assertions.Expect(content).ToHaveAttributeAsync("data-swipe-axis", "x");
+        Assert.Equal("none", await content.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
 
         var box = await content.BoundingBoxAsync();
         Assert.NotNull(box);
         Assert.InRange(box!.X, 0, 360 - box.Width + 1);
         Assert.InRange(box.X + box.Width, 359, 361);
-        await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
-
         var handleLocator = content.Locator("[data-slot='drawer-swipe-handle']");
         var handle = await handleLocator.BoundingBoxAsync();
         Assert.NotNull(handle);
