@@ -1,0 +1,202 @@
+@using Maliev.ShadcnBlazor.Components.Navigation.Sidebar
+
+<ShadcnSidebarProvider Class="showcase-sidebar-shell"
+                       Open="_open"
+                       OpenChanged="SetOpen"
+                       MobileOpen="_mobileOpen"
+                       MobileOpenChanged="SetMobileOpen"
+                       Width="15rem"
+                       MobileWidth="18rem"
+                       IconWidth="3.5rem"
+                       ToggleLabel="Toggle production navigation"
+                       CloseLabel="Close production navigation">
+    <ShadcnSidebar Id="production-navigation"
+                   Label="Production workspace"
+                   Side="Side"
+                   Variant="ShadcnSidebarVariant.Inset"
+                   Collapsible="Collapsible">
+        <ShadcnSidebarHeader>
+            <div class="showcase-sidebar-brand">
+                <span class="showcase-sidebar-brand__mark" aria-hidden="true">M</span>
+                <span class="showcase-sidebar-brand__copy">
+                    <strong>MALIEV</strong>
+                    <small>Production</small>
+                </span>
+            </div>
+        </ShadcnSidebarHeader>
+
+        <ShadcnSidebarContent>
+            <ShadcnSidebarGroup>
+                <ShadcnSidebarGroupLabel>Workspace</ShadcnSidebarGroupLabel>
+                <ShadcnSidebarGroupContent>
+                    <ShadcnSidebarMenu>
+                        @foreach (var item in WorkspaceItems)
+                        {
+                            <ShadcnSidebarMenuItem>
+                                <ShadcnSidebarMenuButton Active="@(_activePage == item.Key)"
+                                                         Tooltip="@item.Label"
+                                                         OnClick="@(_ => SelectPage(item.Key))">
+                                    @Icon(item.Icon)
+                                    <span>@item.Label</span>
+                                </ShadcnSidebarMenuButton>
+                                @if (item.Badge is not null)
+                                {
+                                    <ShadcnSidebarMenuBadge>@item.Badge</ShadcnSidebarMenuBadge>
+                                }
+                            </ShadcnSidebarMenuItem>
+                        }
+                    </ShadcnSidebarMenu>
+                </ShadcnSidebarGroupContent>
+            </ShadcnSidebarGroup>
+
+            <ShadcnSidebarGroup>
+                <ShadcnSidebarGroupLabel>Manage</ShadcnSidebarGroupLabel>
+                <ShadcnSidebarGroupContent>
+                    <ShadcnSidebarMenu>
+                        @foreach (var item in ManageItems)
+                        {
+                            <ShadcnSidebarMenuItem>
+                                <ShadcnSidebarMenuButton Active="@(_activePage == item.Key)"
+                                                         Tooltip="@item.Label"
+                                                         OnClick="@(_ => SelectPage(item.Key))">
+                                    @Icon(item.Icon)
+                                    <span>@item.Label</span>
+                                </ShadcnSidebarMenuButton>
+                            </ShadcnSidebarMenuItem>
+                        }
+                    </ShadcnSidebarMenu>
+                </ShadcnSidebarGroupContent>
+            </ShadcnSidebarGroup>
+        </ShadcnSidebarContent>
+
+        <ShadcnSidebarFooter>
+            <ShadcnSidebarMenu>
+                <ShadcnSidebarMenuItem>
+                    <ShadcnSidebarMenuButton Size="ShadcnSidebarMenuButtonSize.Large" Tooltip="Narin S. — Production planner">
+                        <span class="showcase-sidebar-avatar" data-sidebar-icon aria-hidden="true">NS</span>
+                        <span class="showcase-sidebar-user-copy">
+                            <strong>Narin S.</strong>
+                            <small>Production planner</small>
+                        </span>
+                    </ShadcnSidebarMenuButton>
+                </ShadcnSidebarMenuItem>
+            </ShadcnSidebarMenu>
+        </ShadcnSidebarFooter>
+        <ShadcnSidebarRail TargetId="production-navigation" />
+    </ShadcnSidebar>
+
+    <ShadcnSidebarInset>
+        <header class="showcase-sidebar-toolbar">
+            <ShadcnSidebarTrigger TargetId="production-navigation" />
+            <span>Factory workspace</span>
+            <span class="showcase-sidebar-shift">Shift A · Live</span>
+        </header>
+        <div class="showcase-sidebar-main">
+            <div class="showcase-sidebar-heading">
+                <div>
+                    <h3>@ActiveTitle</h3>
+                    <p>Track parts moving from quotation approval into production.</p>
+                </div>
+                <span class="showcase-sidebar-status">3 active jobs</span>
+            </div>
+            <div class="showcase-sidebar-metrics" aria-label="Queue summary">
+                <div><strong>12</strong><span>Parts ready</span></div>
+                <div><strong>3</strong><span>In machining</span></div>
+                <div><strong>98%</strong><span>On schedule</span></div>
+            </div>
+            <div class="showcase-sidebar-jobs" aria-label="Production queue">
+                <div><span><strong>Q-4189</strong><small>CNC enclosure · Aluminum 6061</small></span><span>Machining</span></div>
+                <div><span><strong>Q-4192</strong><small>Inspection fixture · Stainless 316L</small></span><span>Review</span></div>
+                <div><span><strong>Q-4198</strong><small>Protective cover · ABS</small></span><span>Queued</span></div>
+            </div>
+        </div>
+    </ShadcnSidebarInset>
+</ShadcnSidebarProvider>
+
+@code {
+    [Parameter] public bool Open { get; set; } = true;
+    [Parameter] public ShadcnSidebarSide Side { get; set; } = ShadcnSidebarSide.Left;
+    [Parameter] public ShadcnSidebarCollapsible Collapsible { get; set; } = ShadcnSidebarCollapsible.Icon;
+
+    private bool _open = true;
+    private bool _mobileOpen;
+    private string _activePage = "queue";
+    private bool _initialized;
+    private bool _lastOpen;
+
+    private static readonly (string Key, string Label, string Icon, string? Badge)[] WorkspaceItems =
+    [
+        ("queue", "Production queue", "queue", "3"),
+        ("quotations", "Quotations", "file", "8"),
+        ("quality", "Quality checks", "check", null),
+    ];
+
+    private static readonly (string Key, string Label, string Icon, string? Badge)[] ManageItems =
+    [
+        ("materials", "Materials", "box", null),
+        ("team", "Team members", "users", null),
+        ("settings", "Settings", "settings", null),
+    ];
+
+    private string ActiveTitle => _activePage switch
+    {
+        "queue" => "Production queue",
+        "quotations" => "Quotations",
+        "quality" => "Quality checks",
+        "materials" => "Materials",
+        "team" => "Team members",
+        "settings" => "Settings",
+        _ => "Production queue",
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized || Open != _lastOpen) _open = Open;
+        _lastOpen = Open;
+        _initialized = true;
+    }
+
+    private Task SetOpen(bool value)
+    {
+        _open = value;
+        return Task.CompletedTask;
+    }
+
+    private Task SetMobileOpen(bool value)
+    {
+        _mobileOpen = value;
+        return Task.CompletedTask;
+    }
+
+    private void SelectPage(string value) => _activePage = value;
+
+    private static RenderFragment Icon(string name) => builder =>
+    {
+        builder.OpenElement(0, "svg");
+        builder.AddAttribute(1, "class", "showcase-sidebar-icon");
+        builder.AddAttribute(2, "viewBox", "0 0 24 24");
+        builder.AddAttribute(3, "aria-hidden", "true");
+        builder.AddAttribute(4, "data-icon", name);
+        if (name is "settings")
+        {
+            builder.OpenElement(5, "circle");
+            builder.AddAttribute(6, "cx", "12");
+            builder.AddAttribute(7, "cy", "12");
+            builder.AddAttribute(8, "r", "3");
+            builder.CloseElement();
+        }
+        builder.OpenElement(9, "path");
+        builder.AddAttribute(10, "d", name switch
+        {
+            "queue" => "M4 6h16M4 12h16M4 18h10",
+            "file" => "M6 3h8l4 4v14H6zM14 3v5h5",
+            "check" => "M5 12l4 4L19 6",
+            "box" => "M4 7l8-4 8 4-8 4zM4 7v10l8 4 8-4V7M12 11v10",
+            "users" => "M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8M22 20v-2a4 4 0 0 0-3-3.87",
+            "settings" => "M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12",
+            _ => string.Empty,
+        });
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+}

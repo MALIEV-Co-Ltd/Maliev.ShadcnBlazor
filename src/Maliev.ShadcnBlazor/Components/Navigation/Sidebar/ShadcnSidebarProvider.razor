@@ -19,7 +19,7 @@
     [Parameter] public EventCallback<Exception> OnPersistenceError { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private bool _effectiveOpen; private bool _effectiveMobileOpen; private bool _initialized; private bool _loaded; private bool _lastOpen; private bool _lastMobileOpen; private ElementReference Root; private IJSObjectReference? _module; private DotNetObjectReference<ShadcnSidebarProvider>? _dotNet;
-    private readonly Dictionary<string, (object Owner, ShadcnSidebarCollapsible Value)> _sidebars = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, (object Owner, ShadcnSidebarCollapsible Value, string ElementId)> _sidebars = new(StringComparer.Ordinal);
     internal bool EffectiveOpen => _effectiveOpen; internal bool EffectiveMobileOpen => _effectiveMobileOpen; internal bool IsMobile { get; private set; } internal bool CanToggle => _sidebars.Count == 0 || _sidebars.Values.Any(entry => entry.Value != ShadcnSidebarCollapsible.None);
     internal ShadcnSidebarContext Context => new(this);
     private string ProviderStyle => $"--shadcn-sidebar-width: {Safe(Width, nameof(Width))}; --shadcn-sidebar-width-mobile: {Safe(MobileWidth, nameof(MobileWidth))}; --shadcn-sidebar-width-icon: {Safe(IconWidth, nameof(IconWidth))}";
@@ -39,8 +39,14 @@
         if (!_loaded && StateStore is not null && StateKey is not null) { _loaded = true; try { var loaded = await StateStore.LoadAsync(StateKey); if (loaded.HasValue) { if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(loaded.Value); else { _effectiveOpen = loaded.Value; await InvokeAsync(StateHasChanged); } } } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); } }
     }
     internal bool CanToggleTarget(string? id) => id is null ? CanToggle : _sidebars.TryGetValue(id, out var entry) && entry.Value != ShadcnSidebarCollapsible.None;
+    internal string? ControlsFor(string? id)
+    {
+        if (id is not null) return _sidebars.TryGetValue(id, out var entry) ? entry.ElementId : null;
+        var ids = _sidebars.Values.Where(entry => entry.Value != ShadcnSidebarCollapsible.None).Select(entry => entry.ElementId).ToArray();
+        return ids.Length == 0 ? null : string.Join(' ', ids);
+    }
     internal ValueTask ToggleAsync(string? id = null) => !CanToggleTarget(id) ? ValueTask.CompletedTask : IsMobile ? SetMobileOpenAsync(!_effectiveMobileOpen) : SetOpenAsync(!_effectiveOpen);
-    internal void RegisterSidebar(string id, object owner, ShadcnSidebarCollapsible value) { if (_sidebars.TryGetValue(id, out var existing) && !ReferenceEquals(existing.Owner, owner)) throw new InvalidOperationException($"Sidebar ID '{id}' is already registered."); _sidebars[id] = (owner, value); }
+    internal void RegisterSidebar(string id, object owner, ShadcnSidebarCollapsible value, string elementId) { if (_sidebars.TryGetValue(id, out var existing) && !ReferenceEquals(existing.Owner, owner)) throw new InvalidOperationException($"Sidebar ID '{id}' is already registered."); _sidebars[id] = (owner, value, elementId); }
     internal void UnregisterSidebar(string id, object owner) { if (_sidebars.TryGetValue(id, out var existing) && ReferenceEquals(existing.Owner, owner)) _sidebars.Remove(id); }
     internal async ValueTask SetOpenAsync(bool value) { if (value == _effectiveOpen) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _effectiveOpen = value; await InvokeAsync(StateHasChanged); } if (StateStore is not null && StateKey is not null) try { await StateStore.SaveAsync(StateKey, value); } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); } }
     internal async ValueTask SetMobileOpenAsync(bool value) { if (value == _effectiveMobileOpen) return; if (MobileOpenChanged.HasDelegate) await MobileOpenChanged.InvokeAsync(value); else { _effectiveMobileOpen = value; await InvokeAsync(StateHasChanged); } }

@@ -49,7 +49,7 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
             ["pagination"] = ["pagination-current", "pagination-visible", "pagination-disabled"],
             ["resizable"] = ["resizable-vertical", "resizable-collapsible", "resizable-disabled"],
             ["scroll-area"] = ["scroll-always", "scroll-horizontal"],
-            ["sidebar"] = ["sidebar-open", "sidebar-right", "sidebar-none"],
+            ["sidebar"] = ["sidebar-open", "sidebar-side", "sidebar-mode"],
             ["tabs"] = ["tabs-history", "tabs-vertical", "tabs-manual", "tabs-force"],
         };
         var alternates = new Dictionary<ComponentParameterControlKind, string> { [ComponentParameterControlKind.Toggle] = "true", [ComponentParameterControlKind.Number] = "3" };
@@ -215,6 +215,26 @@ public sealed class DisclosureNavigationShowcaseContractTests : BunitContext
         Assert.Contains("/projects/aster-precision/quotations", breadcrumb.RazorSource, StringComparison.Ordinal);
         Assert.Empty(Render(breadcrumb.Preview).FindAll("[data-slot='breadcrumb-ellipsis']"));
         Assert.Equal(5, Render(breadcrumb.Preview).FindAll("[data-slot='breadcrumb-item']").Count);
+    }
+
+    [Fact]
+    public void SidebarDossierUsesCompleteCompositionAndStateAwareSource()
+    {
+        var sidebar = Assert.Single(new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("sidebar"));
+        var rendered = Render(sidebar.Preview);
+
+        Assert.NotNull(rendered.Find(".showcase-sidebar-shell"));
+        Assert.NotNull(rendered.Find("[data-slot='sidebar-rail']"));
+        Assert.NotNull(rendered.Find("[data-slot='sidebar-menu-badge']"));
+        Assert.Contains("ShadcnSidebarMenuButton", sidebar.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShadcnSidebarRail", sidebar.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Production queue", sidebar.RazorSource, StringComparison.Ordinal);
+
+        sidebar.Controls.Single(control => control.Id == "sidebar-side").Apply(nameof(Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarSide.Right));
+        sidebar.Controls.Single(control => control.Id == "sidebar-mode").Apply(nameof(Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarCollapsible.None));
+
+        Assert.Contains("Side=\"ShadcnSidebarSide.Right\"", sidebar.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Collapsible=\"ShadcnSidebarCollapsible.None\"", sidebar.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

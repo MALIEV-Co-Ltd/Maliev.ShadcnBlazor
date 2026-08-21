@@ -3,14 +3,14 @@
 @implements IAsyncDisposable
 @implements IDisposable
 @inject IJSRuntime JS
-@if (!Context.IsMobile)
+@if (!Context.IsMobile || Collapsible == ShadcnSidebarCollapsible.None)
 {
-    <aside @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar")" style="@MergeStyle(null)" data-slot="sidebar" data-mobile="false" data-state="@(Context.Open ? "expanded" : "collapsed")" data-side="@SideValue" data-variant="@VariantValue" data-collapsible="@CollapsibleValue" aria-label="@Label">@ChildContent</aside>
+    <aside id="@ElementId" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar")" style="@MergeStyle(null)" data-slot="sidebar" data-mobile="false" data-state="@(Context.Open ? "expanded" : "collapsed")" data-side="@SideValue" data-variant="@VariantValue" data-collapsible="@CollapsibleValue" aria-label="@Label">@ChildContent</aside>
 }
 else if (Context.MobileOpen)
 {
     <button class="shadcn-sidebar-backdrop" data-slot="sidebar-backdrop" type="button" aria-label="@Context.Owner.CloseLabel" @onclick="CloseAsync"></button>
-    <aside @ref="MobileAside" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar shadcn-sidebar-mobile")" style="@MergeStyle(null)" data-slot="sidebar" data-mobile="true" data-state="open" data-side="@SideValue" data-variant="@VariantValue" data-collapsible="@CollapsibleValue" role="dialog" aria-modal="true" aria-label="@Label">@ChildContent</aside>
+    <aside id="@ElementId" @ref="MobileAside" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar shadcn-sidebar-mobile")" style="@MergeStyle(null)" data-slot="sidebar" data-mobile="true" data-state="open" data-side="@SideValue" data-variant="@VariantValue" data-collapsible="@CollapsibleValue" role="dialog" aria-modal="true" aria-label="@Label" tabindex="-1">@ChildContent</aside>
 }
 @code {
     [CascadingParameter] private ShadcnSidebarContext Context { get; set; } = default!;
@@ -24,9 +24,10 @@ else if (Context.MobileOpen)
     private string SideValue => Side switch { ShadcnSidebarSide.Left => "left", ShadcnSidebarSide.Right => "right", _ => throw new ArgumentOutOfRangeException(nameof(Side), Side, "Unknown sidebar side.") };
     private string VariantValue => Variant switch { ShadcnSidebarVariant.Sidebar => "sidebar", ShadcnSidebarVariant.Floating => "floating", ShadcnSidebarVariant.Inset => "inset", _ => throw new ArgumentOutOfRangeException(nameof(Variant), Variant, "Unknown sidebar variant.") };
     private string CollapsibleValue => Collapsible switch { ShadcnSidebarCollapsible.OffCanvas => "offcanvas", ShadcnSidebarCollapsible.Icon => "icon", ShadcnSidebarCollapsible.None => "none", _ => throw new ArgumentOutOfRangeException(nameof(Collapsible), Collapsible, "Unknown sidebar collapsible mode.") };
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-mobile", "data-state", "data-side", "data-variant", "data-collapsible", "role", "aria-modal", "aria-label");
+    private static long _nextId; private readonly string ElementId = $"shadcn-sidebar-{Interlocked.Increment(ref _nextId)}";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "data-slot", "data-mobile", "data-state", "data-side", "data-variant", "data-collapsible", "role", "aria-modal", "aria-label", "tabindex");
     private string? _registeredId;
-    protected override void OnParametersSet() { _ = SideValue; _ = VariantValue; _ = CollapsibleValue; if (string.IsNullOrWhiteSpace(Id)) throw new ArgumentException("Sidebar ID cannot be empty.", nameof(Id)); if (_registeredId is not null && _registeredId != Id) Context.Owner.UnregisterSidebar(_registeredId, this); Context.Owner.RegisterSidebar(Id, this, Collapsible); _registeredId = Id; }
+    protected override void OnParametersSet() { _ = SideValue; _ = VariantValue; _ = CollapsibleValue; if (string.IsNullOrWhiteSpace(Id)) throw new ArgumentException("Sidebar ID cannot be empty.", nameof(Id)); if (_registeredId is not null && _registeredId != Id) Context.Owner.UnregisterSidebar(_registeredId, this); Context.Owner.RegisterSidebar(Id, this, Collapsible, ElementId); _registeredId = Id; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (Context.IsMobile && Context.MobileOpen && !_attached) { _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); _dotNet ??= DotNetObjectReference.Create(Context.Owner); _attachedAside = MobileAside; await _module.InvokeVoidAsync("attachSidebarOverlay", _attachedAside, _dotNet); _attached = true; }

@@ -1571,6 +1571,231 @@ a {
     min-inline-size: 0;
 }
 
+/* Sidebar dossier: a contained application shell instead of a viewport-height
+   mock. The package still owns every navigation, collapse, modal and focus
+   behavior; these rules only compose the fictional production workspace. */
+.showcase-sidebar-shell {
+    min-block-size: 32rem;
+    block-size: min(36rem, 76dvh);
+    max-block-size: 38rem;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-xl);
+    background: var(--shadcn-sidebar);
+}
+
+.showcase-sidebar-shell > .shadcn-sidebar,
+.showcase-sidebar-shell > .shadcn-sidebar[data-variant="inset"] {
+    min-block-size: calc(100% - 1rem);
+}
+
+.showcase-sidebar-brand {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    gap: .625rem;
+    padding: .25rem;
+}
+
+.showcase-sidebar-brand__mark,
+.showcase-sidebar-avatar {
+    display: inline-flex;
+    inline-size: 2rem;
+    block-size: 2rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--shadcn-sidebar-primary);
+    color: var(--shadcn-sidebar-primary-foreground);
+    font-size: .6875rem;
+    font-weight: 700;
+}
+
+.showcase-sidebar-brand__copy,
+.showcase-sidebar-user-copy {
+    display: grid;
+    min-inline-size: 0;
+    line-height: 1.2;
+}
+
+.showcase-sidebar-brand__copy small,
+.showcase-sidebar-user-copy small {
+    overflow: hidden;
+    color: color-mix(in oklab, var(--shadcn-sidebar-foreground) 68%, transparent);
+    font-size: .6875rem;
+    text-overflow: ellipsis;
+}
+
+.showcase-sidebar-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.showcase-sidebar-shell .shadcn-sidebar[data-state="collapsed"][data-collapsible="icon"] .showcase-sidebar-brand {
+    justify-content: center;
+    padding-inline: 0;
+}
+
+.showcase-sidebar-shell .shadcn-sidebar[data-state="collapsed"][data-collapsible="icon"] .showcase-sidebar-brand__copy {
+    display: none;
+}
+
+.showcase-sidebar-toolbar {
+    display: flex;
+    min-block-size: 3rem;
+    align-items: center;
+    gap: .625rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding-inline: .75rem;
+    font-size: .8125rem;
+    font-weight: 500;
+}
+
+.showcase-sidebar-shift {
+    margin-inline-start: auto;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    font-weight: 400;
+}
+
+.showcase-sidebar-main {
+    display: grid;
+    min-inline-size: 0;
+    align-content: start;
+    gap: 1rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.showcase-sidebar-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.showcase-sidebar-heading h3,
+.showcase-sidebar-heading p {
+    margin: 0;
+}
+
+.showcase-sidebar-heading p {
+    max-inline-size: 48ch;
+    margin-block-start: .25rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+}
+
+.showcase-sidebar-status {
+    flex: 0 0 auto;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    padding: .25rem .625rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: .6875rem;
+}
+
+.showcase-sidebar-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-block: 1px solid var(--shadcn-border);
+}
+
+.showcase-sidebar-metrics > div {
+    display: grid;
+    gap: .125rem;
+    padding: .875rem;
+}
+
+.showcase-sidebar-metrics > div + div {
+    border-inline-start: 1px solid var(--shadcn-border);
+}
+
+.showcase-sidebar-metrics strong {
+    font-size: 1.125rem;
+}
+
+.showcase-sidebar-metrics span,
+.showcase-sidebar-jobs small {
+    color: var(--shadcn-muted-foreground);
+    font-size: .6875rem;
+}
+
+.showcase-sidebar-jobs {
+    display: grid;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    overflow: hidden;
+}
+
+.showcase-sidebar-jobs > div {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem;
+    font-size: .75rem;
+}
+
+.showcase-sidebar-jobs > div + div {
+    border-block-start: 1px solid var(--shadcn-border);
+}
+
+.showcase-sidebar-jobs > div > span:first-child {
+    display: grid;
+    min-inline-size: 0;
+    gap: .125rem;
+}
+
+.showcase-sidebar-jobs > div > span:last-child {
+    flex: 0 0 auto;
+    color: var(--shadcn-muted-foreground);
+}
+
+@media (max-width: 48rem) {
+    .showcase-sidebar-shell {
+        min-block-size: 30rem;
+        block-size: min(32rem, 70dvh);
+    }
+
+    .showcase-sidebar-shell > .shadcn-sidebar-inset {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .showcase-sidebar-main {
+        padding: 1rem;
+    }
+
+    .showcase-sidebar-heading {
+        display: grid;
+    }
+
+    .showcase-sidebar-status {
+        inline-size: fit-content;
+    }
+
+    .showcase-sidebar-metrics > div {
+        padding-inline: .5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .showcase-sidebar-shell *,
+    .showcase-sidebar-shell *::before,
+    .showcase-sidebar-shell *::after {
+        scroll-behavior: auto;
+    }
+}
+
 .showcase-questionnaire-card {
     width: min(100%, 34rem);
     margin-inline: auto;
