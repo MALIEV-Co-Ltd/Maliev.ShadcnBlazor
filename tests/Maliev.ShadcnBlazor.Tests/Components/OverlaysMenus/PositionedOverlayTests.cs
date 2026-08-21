@@ -282,6 +282,7 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("detachDelayedTrigger(trigger)", tooltipScript, StringComparison.Ordinal);
         Assert.Contains("focusTargetId", positionedScript, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync')", positionedScript, StringComparison.Ordinal);
     }
 
     private static string FindRoot()
