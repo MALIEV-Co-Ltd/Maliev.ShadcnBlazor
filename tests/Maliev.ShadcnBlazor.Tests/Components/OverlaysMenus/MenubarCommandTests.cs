@@ -188,6 +188,52 @@ public sealed class MenubarCommandTests : BunitContext
     }
 
     [Fact]
+    public void CommandProvidesAnInputNameAndKeepsDisabledMatchesVisible()
+    {
+        var cut = Render<ShadcnCommand>(parameters => parameters
+            .Add(component => component.Label, "Workspace commands")
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnCommandInput>(0);
+                builder.AddAttribute(1, nameof(ShadcnCommandInput.Placeholder), "Search commands...");
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnCommandList>(10);
+                builder.AddAttribute(11, nameof(ShadcnCommandList.ChildContent), (RenderFragment)(list =>
+                {
+                    list.OpenComponent<ShadcnCommandEmpty>(0);
+                    list.AddAttribute(1, nameof(ShadcnCommandEmpty.ChildContent), (RenderFragment)(content => content.AddContent(0, "No results")));
+                    list.CloseComponent();
+                    list.OpenComponent<ShadcnCommandGroup>(10);
+                    list.AddAttribute(11, nameof(ShadcnCommandGroup.Heading), "Workspace");
+                    list.AddAttribute(12, nameof(ShadcnCommandGroup.ChildContent), (RenderFragment)(group =>
+                    {
+                        group.OpenComponent<ShadcnCommandItem>(0);
+                        group.AddAttribute(1, nameof(ShadcnCommandItem.Value), "settings");
+                        group.AddAttribute(2, nameof(ShadcnCommandItem.Disabled), true);
+                        group.AddAttribute(3, nameof(ShadcnCommandItem.ChildContent), (RenderFragment)(content => content.AddContent(0, "Workspace settings")));
+                        group.CloseComponent();
+                    }));
+                    list.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        Assert.Equal("Workspace commands", cut.Find("[data-slot='command-input']").GetAttribute("aria-label"));
+        Assert.Equal("listbox", cut.Find("[data-slot='command-input']").GetAttribute("aria-haspopup"));
+        Assert.True(cut.Find("[data-slot='command-empty']").HasAttribute("hidden"));
+        Assert.False(cut.Find("[data-slot='command-item']").HasAttribute("hidden"));
+    }
+
+    [Fact]
+    public void CommandSeparatorIsDecorativeInsideTheListbox()
+    {
+        var cut = Render<ShadcnCommandSeparator>();
+
+        Assert.Equal("presentation", cut.Find("[data-slot='command-separator']").GetAttribute("role"));
+        Assert.Equal("true", cut.Find("[data-slot='command-separator']").GetAttribute("aria-hidden"));
+    }
+
+    [Fact]
     public void CommandRejectsDuplicateOrEmptyValues()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnCommandItem>(p => p.Add(x => x.Value, " ")));

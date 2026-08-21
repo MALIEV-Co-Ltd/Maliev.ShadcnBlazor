@@ -7,6 +7,7 @@ internal sealed class ShadcnCommandContext(Action changed)
 {
     private readonly Dictionary<object, (string Value, string SearchText, bool Disabled)> _items = [];
     internal string Search { get; private set; } = string.Empty;
+    internal string Label { get; set; } = string.Empty;
     internal bool ShouldFilter { get; set; } = true;
     internal event Action? StateChanged;
     internal string ListId { get; } = $"shadcn-command-list-{Guid.NewGuid():N}";
@@ -21,7 +22,7 @@ internal sealed class ShadcnCommandContext(Action changed)
     internal void Unregister(object key) { if (_items.Remove(key)) Notify(); }
     internal void SetSearch(string? value) { Search = value ?? string.Empty; Notify(); }
     internal bool Matches(string searchText) => !ShouldFilter || string.IsNullOrWhiteSpace(Search) || Normalize(searchText).Contains(Normalize(Search), StringComparison.Ordinal);
-    internal bool HasMatch => _items.Values.Any(item => !item.Disabled && Matches(item.SearchText));
+    internal bool HasMatch => _items.Values.Any(item => Matches(item.SearchText));
     private void Notify() { changed(); StateChanged?.Invoke(); }
     private static string Normalize(string value) => value.Normalize(NormalizationForm.FormKC).ToLower(CultureInfo.CurrentCulture);
 }

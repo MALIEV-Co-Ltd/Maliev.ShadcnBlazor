@@ -449,8 +449,80 @@ internal static class OverlayMenuExamples
     private static ComponentExampleDefinition Command()
     {
         var empty = false; var disabled = false;
-        RenderFragment preview = b => { b.OpenComponent<ShadcnCommand>(0); b.AddAttribute(1, "Label", "Quick commands"); b.AddAttribute(2, "ChildContent", (RenderFragment)(c => { c.OpenComponent<ShadcnCommandInput>(0); c.AddAttribute(1, "Placeholder", empty ? "No matching commands" : "Search commands..."); c.CloseComponent(); c.OpenComponent<ShadcnCommandList>(10); c.AddAttribute(11, "ChildContent", (RenderFragment)(x => { AddText<ShadcnCommandEmpty>(x, 0, "No results"); x.OpenComponent<ShadcnCommandGroup>(10); x.AddAttribute(11, "Heading", "Navigation"); x.AddAttribute(12, "ChildContent", (RenderFragment)(g => { AddCommandItem(g, 0, empty ? "hidden-orders" : "orders", "Orders", disabled); AddCommandItem(g, 10, empty ? "hidden-customers" : "customers", "Customers", false); })); x.CloseComponent(); })); c.CloseComponent(); })); b.CloseComponent(); };
-        return Example("command", "Searchable command palette", preview, [Toggle("command-empty", "Alternate values", v => empty = v), Toggle("command-disabled", "Disable first item", v => disabled = v)], ["filtering", "Thai-keywords", "groups", "empty", "disabled", "keyboard", "dialog"]);
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<CommandDossierPreview>(0);
+            builder.AddAttribute(1, nameof(CommandDossierPreview.EmptyState), empty);
+            builder.AddAttribute(2, nameof(CommandDossierPreview.DisableFirstAction), disabled);
+            builder.CloseComponent();
+        };
+        string Source()
+        {
+            var query = empty ? "no matching command" : string.Empty;
+            var disabledAttribute = disabled ? " Disabled=\"true\"" : string.Empty;
+            return $$"""
+                @using Maliev.ShadcnBlazor.Components.Overlays
+
+                <ShadcnCommand Label="Workspace commands" Class="workspace-command">
+                    <ShadcnCommandInput Value="{{query}}"
+                                        ValueChanged="SearchChanged"
+                                        Placeholder="Type a command or search..." />
+                    <ShadcnCommandList>
+                        <ShadcnCommandEmpty>No commands match the search.</ShadcnCommandEmpty>
+                        <ShadcnCommandGroup Heading="Workspace">
+                            <ShadcnCommandItem Value="overview" TextValue="Overview" OnSelect="SelectAsync">
+                                <span>Overview</span>
+                                <ShadcnCommandShortcut>G O</ShadcnCommandShortcut>
+                            </ShadcnCommandItem>
+                            <ShadcnCommandItem Value="orders" TextValue="Orders" OnSelect="SelectAsync">
+                                <span>Orders</span>
+                                <ShadcnCommandShortcut>G R</ShadcnCommandShortcut>
+                            </ShadcnCommandItem>
+                            <ShadcnCommandItem Value="customers" TextValue="Customers" OnSelect="SelectAsync">
+                                <span>Customers</span>
+                                <ShadcnCommandShortcut>G C</ShadcnCommandShortcut>
+                            </ShadcnCommandItem>
+                        </ShadcnCommandGroup>
+                        <ShadcnCommandSeparator />
+                        <ShadcnCommandGroup Heading="Actions">
+                            <ShadcnCommandItem Value="create-quotation" TextValue="Create quotation"{{disabledAttribute}} OnSelect="SelectAsync">
+                                <span>Create quotation</span>
+                                <ShadcnCommandShortcut>Q</ShadcnCommandShortcut>
+                            </ShadcnCommandItem>
+                            <ShadcnCommandItem Value="upload-drawing" TextValue="Upload drawing" OnSelect="SelectAsync">
+                                <span>Upload drawing</span>
+                                <ShadcnCommandShortcut>U</ShadcnCommandShortcut>
+                            </ShadcnCommandItem>
+                        </ShadcnCommandGroup>
+                    </ShadcnCommandList>
+                </ShadcnCommand>
+
+                @code {
+                    private string _query = "{{query}}";
+                    private string _selection = "None yet";
+
+                    private Task SearchChanged(string value)
+                    {
+                        _query = value;
+                        return Task.CompletedTask;
+                    }
+
+                    private Task SelectAsync(string value)
+                    {
+                        _selection = value;
+                        return Task.CompletedTask;
+                    }
+                }
+                """;
+        }
+
+        var example = Example(
+            "command",
+            "Workspace command palette",
+            preview,
+            [Toggle("command-empty", "Show empty state", value => empty = value), Toggle("command-disabled", "Disable create action", value => disabled = value)],
+            ["filtering", "Thai-keywords", "groups", "empty", "disabled", "keyboard", "pointer", "rtl"]);
+        return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags, string? razorSource = null) =>
@@ -561,5 +633,4 @@ internal static class OverlayMenuExamples
         builder.AddAttribute(sequence + 14, nameof(ShadcnInput<decimal>.AdditionalAttributes), new Dictionary<string, object> { ["id"] = id });
         builder.CloseComponent();
     }
-    private static void AddCommandItem(RenderTreeBuilder b, int sequence, string value, string text, bool disabled) { b.OpenComponent<ShadcnCommandItem>(sequence); b.AddAttribute(sequence + 1, "Value", value); b.AddAttribute(sequence + 2, "TextValue", text); b.AddAttribute(sequence + 3, "Disabled", disabled); b.AddAttribute(sequence + 4, "ChildContent", Text(text)); b.CloseComponent(); }
 }

@@ -303,7 +303,8 @@ export function detachMenubar(menubar) { const value = menubars.get(menubar); if
 
 const commands = new WeakMap();
 export function attachCommand(command, loop = true) {
-    const items = () => [...command.querySelectorAll('[data-slot="command-item"]:not([hidden])')].filter(item => item.getAttribute('aria-disabled') !== 'true');
+    const visibleItems = () => [...command.querySelectorAll('[data-slot="command-item"]:not([hidden])')];
+    const items = () => visibleItems().filter(item => item.getAttribute('aria-disabled') !== 'true');
     const allItems = () => [...command.querySelectorAll('[data-slot="command-item"]')];
     const input = command.querySelector('[data-slot="command-input"]');
     let selectedValue = null, composing = false;
@@ -324,12 +325,18 @@ export function attachCommand(command, loop = true) {
         const query = (input?.value || '').normalize('NFKC').toLocaleLowerCase();
         const shouldFilter=command.dataset.shouldFilter !== 'false';
         if(shouldFilter) allItems().forEach(item => item.hidden = query.length > 0 && !(item.dataset.searchText || '').normalize('NFKC').toLocaleLowerCase().includes(query));
-        const empty = command.querySelector('[data-slot="command-empty"]'); if (empty) empty.hidden = items().length > 0;
+        const empty = command.querySelector('[data-slot="command-empty"]'); if (empty) empty.hidden = visibleItems().length > 0;
         command.querySelectorAll('[data-slot="command-group"]').forEach(group=>group.hidden=!group.querySelector('[data-slot="command-item"]:not([hidden])'));
         const index=selectedIndex(); if(index>=0)selectAt(index);else if(items().length)selectAt(0);else{selectedValue=null;input?.removeAttribute('aria-activedescendant');}
     };
+    const pointermove = event => {
+        const target = event.target.closest?.('[data-slot="command-item"]:not([hidden])');
+        if (!target || !command.contains(target) || target.getAttribute('aria-disabled') === 'true') return;
+        const index = items().indexOf(target);
+        if (index >= 0 && index !== selectedIndex()) selectAt(index);
+    };
     const compositionstart=()=>composing=true,compositionend=()=>{composing=false;filter();};
-    command.addEventListener('keydown', keydown); input?.addEventListener('input', filter);input?.addEventListener('compositionstart',compositionstart);input?.addEventListener('compositionend',compositionend); filter(); commands.set(command, { keydown, input, filter,compositionstart,compositionend });
+    command.addEventListener('keydown', keydown); command.addEventListener('pointermove', pointermove); input?.addEventListener('input', filter);input?.addEventListener('compositionstart',compositionstart);input?.addEventListener('compositionend',compositionend); filter(); commands.set(command, { keydown, pointermove, input, filter,compositionstart,compositionend });
 }
 export function refreshCommand(command){commands.get(command)?.filter();}
-export function detachCommand(command) { const value = commands.get(command); if (!value) return; command.removeEventListener('keydown', value.keydown); value.input?.removeEventListener('input', value.filter);value.input?.removeEventListener('compositionstart',value.compositionstart);value.input?.removeEventListener('compositionend',value.compositionend); commands.delete(command); }
+export function detachCommand(command) { const value = commands.get(command); if (!value) return; command.removeEventListener('keydown', value.keydown); command.removeEventListener('pointermove', value.pointermove); value.input?.removeEventListener('input', value.filter);value.input?.removeEventListener('compositionstart',value.compositionstart);value.input?.removeEventListener('compositionend',value.compositionend); commands.delete(command); }

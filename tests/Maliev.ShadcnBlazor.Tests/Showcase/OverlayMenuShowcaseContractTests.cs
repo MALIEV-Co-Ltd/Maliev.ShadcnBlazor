@@ -139,6 +139,29 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void CommandDossierUsesACompleteStateAwareRealWorldComposition()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("command").Single();
+        var markup = Render(example.Preview).Markup;
+
+        Assert.Contains("showcase-command-dossier", markup, StringComparison.Ordinal);
+        Assert.Contains("Workspace command palette", markup, StringComparison.Ordinal);
+        Assert.Contains("Create quotation", markup, StringComparison.Ordinal);
+        Assert.Contains("Command selected", markup, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnCommandInput", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnCommandGroup Heading=\"Workspace\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnCommandShortcut>", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "command-disabled").Apply("true");
+        Assert.Contains("Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("data-disabled=\"true\"", Render(example.Preview).Markup, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "command-empty").Apply("true");
+        Assert.Contains("Value=\"no matching command\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("value=\"no matching command\"", Render(example.Preview).Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();
