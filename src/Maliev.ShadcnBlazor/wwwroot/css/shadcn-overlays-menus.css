@@ -5,7 +5,7 @@
 .shadcn-dialog-content,
 .shadcn-alert-dialog-content { position: fixed; inset-block-start: 50%; left: 50%; display: grid; max-height: calc(100dvh - 2rem); translate: -50% -50%; gap: calc(1.5rem * var(--shadcn-spacing-multiplier)); border: 0; border-radius: var(--shadcn-radius-xl); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); padding: calc(1.5rem * var(--shadcn-spacing-multiplier)); box-shadow: 0 0 0 1px color-mix(in oklch, var(--shadcn-foreground) 10%, transparent); outline: none; overflow: auto; pointer-events: auto; animation: shadcn-dialog-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 .shadcn-dialog-content { width: min(calc(100vw - 2rem), 28rem); }
-.shadcn-alert-dialog-content { width: min(calc(100vw - 2rem), 32rem); }
+.shadcn-alert-dialog-content { inset: auto; inset-block-start: 50%; left: 50%; width: min(calc(100vw - 2rem), 32rem); margin: 0; }
 .shadcn-dialog-header,
 .shadcn-alert-dialog-header { display: flex; flex-direction: column; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); text-align: start; }
 .shadcn-dialog-footer,
