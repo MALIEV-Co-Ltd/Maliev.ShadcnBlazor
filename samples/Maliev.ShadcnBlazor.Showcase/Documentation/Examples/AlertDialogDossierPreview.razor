@@ -1,0 +1,61 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Documentation.Examples
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-alert-dialog-dossier" data-layout="@(Compact ? "small" : "default")" data-testid="alert-dialog-dossier">
+    @if (_deleted)
+    {
+        <div class="showcase-alert-dialog-result" role="status">
+            <span class="showcase-alert-dialog-result__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="m5 12 4 4L19 6" /></svg>
+            </span>
+            <span>
+                <strong>Quotation deleted</strong>
+                <small>The saved draft was removed from this example.</small>
+            </span>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="ResetAsync">Reset example</ShadcnButton>
+        </div>
+    }
+    else
+    {
+        <div class="showcase-alert-dialog-record">
+            <span class="showcase-alert-dialog-record__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M6 3h9l3 3v15H6z" /><path d="M15 3v4h4M9 12h6M9 16h4" />
+                </svg>
+            </span>
+            <span class="showcase-alert-dialog-record__copy">
+                <small>Saved quotation</small>
+                <strong>Q-2847 · CNC enclosure</strong>
+                <small>Last edited 12 minutes ago</small>
+            </span>
+            <ShadcnAlertDialog Open="_open" OpenChanged="SetOpenAsync">
+                <ShadcnAlertDialogTrigger Class="showcase-alert-dialog-trigger">Delete saved quotation</ShadcnAlertDialogTrigger>
+                <ShadcnAlertDialogContent Size="@(Compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default)">
+                    <ShadcnAlertDialogMedia>
+                        <span class="showcase-alert-dialog-warning" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2.8 19h18.4z" /><path d="M12 9v4M12 17h.01" /></svg>
+                        </span>
+                    </ShadcnAlertDialogMedia>
+                    <ShadcnAlertDialogHeader>
+                        <ShadcnAlertDialogTitle>Delete quotation?</ShadcnAlertDialogTitle>
+                        <ShadcnAlertDialogDescription>This permanently removes Q-2847 and its saved pricing notes. This action cannot be undone.</ShadcnAlertDialogDescription>
+                    </ShadcnAlertDialogHeader>
+                    <ShadcnAlertDialogFooter>
+                        <ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel>
+                        <ShadcnAlertDialogAction Class="showcase-alert-dialog-action--destructive" OnClick="DeleteAsync">Delete quotation</ShadcnAlertDialogAction>
+                    </ShadcnAlertDialogFooter>
+                </ShadcnAlertDialogContent>
+            </ShadcnAlertDialog>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool Compact { get; set; }
+    private bool _open;
+    private bool _deleted;
+
+    private Task SetOpenAsync(bool value) { _open = value; return Task.CompletedTask; }
+    private Task DeleteAsync(MouseEventArgs _) { _deleted = true; _open = false; return Task.CompletedTask; }
+    private Task ResetAsync(MouseEventArgs _) { _deleted = false; return Task.CompletedTask; }
+}

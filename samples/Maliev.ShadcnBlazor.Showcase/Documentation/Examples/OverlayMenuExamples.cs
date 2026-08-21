@@ -26,38 +26,77 @@ internal static class OverlayMenuExamples
     private static ComponentExampleDefinition Dialog(bool alert)
     {
         var open = false; var compact = false;
+        if (alert)
+        {
+            RenderFragment alertPreview = builder =>
+            {
+                builder.OpenComponent<AlertDialogDossierPreview>(0);
+                builder.AddAttribute(1, nameof(AlertDialogDossierPreview.Compact), compact);
+                builder.CloseComponent();
+            };
+            string AlertSource() => $$"""
+                @using Maliev.ShadcnBlazor.Components.Overlays
+
+                <ShadcnAlertDialog Open="_open" OpenChanged="SetOpenAsync">
+                    <ShadcnAlertDialogTrigger>Delete saved quotation</ShadcnAlertDialogTrigger>
+                    <ShadcnAlertDialogContent Size="ShadcnAlertDialogSize.{{(compact ? "Small" : "Default")}}">
+                        <ShadcnAlertDialogMedia>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 3 2.8 19h18.4z" />
+                                <path d="M12 9v4M12 17h.01" />
+                            </svg>
+                        </ShadcnAlertDialogMedia>
+                        <ShadcnAlertDialogHeader>
+                            <ShadcnAlertDialogTitle>Delete quotation?</ShadcnAlertDialogTitle>
+                            <ShadcnAlertDialogDescription>
+                                This permanently removes Q-2847 and its saved pricing notes. This action cannot be undone.
+                            </ShadcnAlertDialogDescription>
+                        </ShadcnAlertDialogHeader>
+                        <ShadcnAlertDialogFooter>
+                            <ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel>
+                            <ShadcnAlertDialogAction OnClick="DeleteAsync">Delete quotation</ShadcnAlertDialogAction>
+                        </ShadcnAlertDialogFooter>
+                    </ShadcnAlertDialogContent>
+                </ShadcnAlertDialog>
+
+                @code {
+                    private bool _open;
+
+                    private Task SetOpenAsync(bool value)
+                    {
+                        _open = value;
+                        return Task.CompletedTask;
+                    }
+
+                    private Task DeleteAsync(MouseEventArgs _)
+                    {
+                        _open = false;
+                        return Task.CompletedTask;
+                    }
+                }
+                """;
+            return Example("alert-dialog", "Delete a saved quotation", alertPreview,
+                [Toggle("alert-dialog-variant", "Small layout", value => compact = value)],
+                ["closed-by-default", "cancel-focus", "destructive", "focus-trap", "restore-focus", "rtl", "reduced-motion"], AlertSource())
+                with
+            { RazorSourceProvider = AlertSource };
+        }
         RenderFragment preview = b =>
         {
-            if (alert)
+            b.OpenComponent<ShadcnDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Modal", !compact); b.AddAttribute(3, "ChildContent", (RenderFragment)(c =>
             {
-                b.OpenComponent<ShadcnAlertDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "ChildContent", (RenderFragment)(c =>
+                AddText<ShadcnDialogTrigger>(c, 0, "Edit profile");
+                c.OpenComponent<ShadcnDialogContent>(10); c.AddAttribute(11, "ShowCloseButton", false); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
                 {
-                    AddText<ShadcnAlertDialogTrigger>(c, 0, "Delete quotation");
-                    c.OpenComponent<ShadcnAlertDialogContent>(10); c.AddAttribute(11, "Size", compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
-                    {
-                        x.OpenComponent<ShadcnAlertDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnAlertDialogTitle>(header, 0, "Delete quotation?"); AddText<ShadcnAlertDialogDescription>(header, 10, "This action cannot be undone. The saved quotation will be permanently removed."); })); x.CloseComponent();
-                        x.OpenComponent<ShadcnAlertDialogFooter>(20); x.AddAttribute(21, "ChildContent", (RenderFragment)(footer => { AddText<ShadcnAlertDialogCancel>(footer, 0, "Cancel"); AddText<ShadcnAlertDialogAction>(footer, 10, "Delete quotation"); })); x.CloseComponent();
-                    })); c.CloseComponent();
-                })); b.CloseComponent();
-            }
-            else
-            {
-                b.OpenComponent<ShadcnDialog>(0); b.AddAttribute(1, "Open", open); b.AddAttribute(2, "Modal", !compact); b.AddAttribute(3, "ChildContent", (RenderFragment)(c =>
-                {
-                    AddText<ShadcnDialogTrigger>(c, 0, "Edit profile");
-                    c.OpenComponent<ShadcnDialogContent>(10); c.AddAttribute(11, "ShowCloseButton", false); c.AddAttribute(12, "ChildContent", (RenderFragment)(x =>
-                    {
-                        x.OpenComponent<ShadcnDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDialogTitle>(header, 0, "Edit profile"); AddText<ShadcnDialogDescription>(header, 10, "Update the customer details, then save when you are done."); })); x.CloseComponent();
-                        x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Name · Pedro Duarte"); x.AddContent(23, "Username · @peduarte"); x.CloseElement();
-                        x.OpenComponent<ShadcnDialogFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDialogClose>(footer, 0, "Save changes"))); x.CloseComponent();
-                    })); c.CloseComponent();
-                })); b.CloseComponent();
-            }
+                    x.OpenComponent<ShadcnDialogHeader>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(header => { AddText<ShadcnDialogTitle>(header, 0, "Edit profile"); AddText<ShadcnDialogDescription>(header, 10, "Update the customer details, then save when you are done."); })); x.CloseComponent();
+                    x.OpenElement(20, "div"); x.AddAttribute(21, "class", "shadcn-overlay-form-preview"); x.AddContent(22, "Name · Pedro Duarte"); x.AddContent(23, "Username · @peduarte"); x.CloseElement();
+                    x.OpenComponent<ShadcnDialogFooter>(30); x.AddAttribute(31, "ChildContent", (RenderFragment)(footer => AddText<ShadcnDialogClose>(footer, 0, "Save changes"))); x.CloseComponent();
+                })); c.CloseComponent();
+            })); b.CloseComponent();
         };
-        var slug = alert ? "alert-dialog" : "dialog";
-        return Example(slug, alert ? "Confirmation dialog" : "Modal and non-modal dialog", preview,
-            [Toggle($"{slug}-open", "Open", v => open = v), Toggle($"{slug}-variant", alert ? "Small layout" : "Non-modal", v => compact = v)],
-            alert ? ["open", "cancel-focus", "destructive", "small", "localized"] : ["open", "modal", "non-modal", "focus-trap", "restore-focus"]);
+        return Example("dialog", "Modal and non-modal dialog", preview,
+            [Toggle("dialog-open", "Open", v => open = v), Toggle("dialog-variant", "Non-modal", v => compact = v)],
+            ["open", "modal", "non-modal", "focus-trap", "restore-focus"]);
     }
 
     private static ComponentExampleDefinition Sheet()
