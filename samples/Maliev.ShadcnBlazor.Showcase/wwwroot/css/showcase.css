@@ -1802,6 +1802,72 @@ a {
     }
 }
 
+.showcase-hover-card-dossier {
+    width: min(100%, 36rem);
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-lg);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+}
+
+.showcase-hover-card-dossier__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem;
+}
+
+.showcase-hover-card-dossier__header h3,
+.showcase-hover-card-dossier__header p { margin: 0; }
+.showcase-hover-card-dossier__header h3 { font-size: 1rem; font-weight: 650; letter-spacing: -.0125em; }
+.showcase-hover-card-dossier__header p,
+.showcase-hover-card-dossier__header > span { margin-block-start: .25rem; color: var(--shadcn-muted-foreground); font-size: .75rem; }
+
+.showcase-hover-card-assignment {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .75rem;
+    border-block: 1px solid var(--shadcn-border);
+    padding: 1rem 1.25rem;
+}
+
+.showcase-hover-card-assignment > div { display: grid; min-inline-size: 0; gap: .125rem; }
+.showcase-hover-card-assignment .shadcn-hover-card-trigger { width: fit-content; color: var(--shadcn-foreground); font-weight: 650; text-decoration: underline; text-decoration-color: color-mix(in oklch, var(--shadcn-foreground) 35%, transparent); text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.showcase-hover-card-assignment .shadcn-hover-card-trigger:hover { text-decoration-color: currentColor; }
+.showcase-hover-card-assignment > div > span,
+.showcase-hover-card-assignment > span { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+
+.showcase-hover-card-profile { display: grid; gap: 1rem; }
+.showcase-hover-card-profile__identity { display: flex; align-items: center; gap: .75rem; }
+.showcase-hover-card-profile__identity > div { display: grid; gap: .125rem; }
+.showcase-hover-card-profile__identity strong { font-size: .875rem; }
+.showcase-hover-card-profile__identity span { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+.showcase-hover-card-profile > p { margin: 0; color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.55; }
+.showcase-hover-card-profile dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0; border-block-start: 1px solid var(--shadcn-border); padding-block-start: .875rem; }
+.showcase-hover-card-profile dl > div { display: grid; gap: .125rem; }
+.showcase-hover-card-profile dt { color: var(--shadcn-muted-foreground); font-size: .6875rem; }
+.showcase-hover-card-profile dd { margin: 0; font-size: .8125rem; font-weight: 600; }
+
+.showcase-hover-card-dossier__hint { margin: 0; padding: .75rem 1.25rem; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.45; }
+
+@media (max-width: 34rem) {
+    .showcase-hover-card-dossier__header { gap: .75rem; padding: 1rem; }
+    .showcase-hover-card-assignment { grid-template-columns: auto minmax(0, 1fr); padding-inline: 1rem; }
+    .showcase-hover-card-assignment > span { grid-column: 2; }
+    .showcase-hover-card-dossier__hint { padding-inline: 1rem; }
+}
+
+@media (forced-colors: active) {
+    .showcase-hover-card-dossier,
+    .showcase-hover-card-assignment,
+    .showcase-hover-card-profile dl { border-color: CanvasText; }
+    .showcase-hover-card-assignment .shadcn-hover-card-trigger { text-decoration-color: LinkText; }
+}
+
 .showcase-questionnaire-card {
     width: min(100%, 34rem);
     margin-inline: auto;

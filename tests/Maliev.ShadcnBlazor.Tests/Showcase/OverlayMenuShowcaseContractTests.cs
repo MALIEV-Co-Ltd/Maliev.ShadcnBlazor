@@ -273,6 +273,31 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void HoverCardDossierUsesARealReviewPreviewAndKeepsSourceInSync()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("hover-card").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.Contains("data-testid=\"hover-card-dossier-preview\"", rendered.Markup, StringComparison.Ordinal);
+        Assert.Contains("Quotation review", rendered.Markup, StringComparison.Ordinal);
+        Assert.Contains("Narin S.", rendered.Markup, StringComparison.Ordinal);
+        Assert.DoesNotContain(example.Controls, control => control.Id == "hover-card-open");
+        Assert.Contains("@bind-Open=\"Open\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("OpenDelay=\"@TimeSpan.FromMilliseconds(600)\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Side=\"ShadcnOverlaySide.Bottom\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private bool Open { get; set; }", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "hover-card-fast").Apply("true");
+        example.Controls.Single(control => control.Id == "hover-card-top").Apply("true");
+
+        Assert.Contains("OpenDelay=\"@TimeSpan.FromMilliseconds(100)\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Side=\"ShadcnOverlaySide.Top\"", example.RazorSource, StringComparison.Ordinal);
+        var changed = Render(example.Preview);
+        Assert.Equal("100", changed.Find("[data-slot='hover-card']").GetAttribute("data-open-delay"));
+        Assert.Equal("true", changed.Find("[data-testid='hover-card-dossier-preview']").GetAttribute("data-top"));
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();
