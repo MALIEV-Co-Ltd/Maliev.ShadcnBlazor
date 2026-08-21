@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-22
+
+### Fixed
+
+- Read slider read-only state from the live DOM after controlled rerenders so
+  changing orientation or read-only state does not leave stale interaction
+  behavior.
+- Recover NuGet publication with a new patch version. This release supersedes
+  the unshipped 1.1.0 NuGet package; the public v1.1.0 tag and GitHub release
+  remain unchanged after their validation run stopped before package assets or
+  NuGet publication.
+
 ## [1.1.0] - 2026-08-21
 
 ### Added
@@ -164,7 +176,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.11...v1.1.0
 [1.0.11]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.11
 [1.0.10]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.10
