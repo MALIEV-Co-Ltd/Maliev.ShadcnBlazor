@@ -218,7 +218,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
         Assert.Equal(2, cut.FindAll("[data-testid='message-copy']").Count);
         Assert.Equal(2, cut.FindAll("[data-testid='message-reply']").Count);
-        Assert.Single(cut.FindAll(".showcase-message-status"));
+        Assert.Equal(3, cut.FindAll("[data-slot='message-body']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-actions']").Count);
+        Assert.Single(cut.FindAll("[data-slot='message-status']"));
         Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
     }
 
@@ -245,7 +247,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("Copied", cut.Markup, StringComparison.Ordinal);
         reply[1].Click();
         var quote = cut.Find("[data-testid='message-reply-quote']");
-        Assert.Contains("พร้อมส่งแบบให้ตรวจ", quote.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Sure. I’ll keep the thread easy to scan.", quote.TextContent, StringComparison.Ordinal);
+        quote.QuerySelector("[data-slot='message-reply-dismiss']")!.Click();
+        Assert.Empty(cut.FindAll("[data-testid='message-reply-quote']"));
 
         var always = example.Controls.Single(control => control.Id == "message-footer-always");
         always.Apply("True");
@@ -264,8 +268,23 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessageGroup", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageAvatar", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageFooter", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-visibility=\"always\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageBody>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageActions>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageCopyAction", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageReplyAction", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageStatus>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageReplyQuote", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "message-footer-always").Apply("True");
         Assert.Contains("data-visibility=\"always\"", example.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("shadcn-message-reply-icon", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "message-avatar").Apply("False");
+        Assert.DoesNotContain("<ShadcnMessageAvatar", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "message-end").Apply("True");
+        Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.End\">", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "message-footer").Apply("False");
+        Assert.DoesNotContain("<ShadcnMessageFooter", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ShadcnMessageReplyQuote", example.RazorSource, StringComparison.Ordinal);
 
         var cssPath = Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
         var css = File.ReadAllText(cssPath);
@@ -279,21 +298,18 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
             .GetBySlug("message").Single();
         var cut = Render(example.Preview);
 
-        Assert.Equal(3, cut.FindAll(".showcase-message-body").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-body']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] > [data-slot='avatar']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] [data-slot='avatar-fallback']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
 
-        var cssPath = Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
-        var css = File.ReadAllText(cssPath);
-        Assert.Contains("grid-template-rows: auto auto", css, StringComparison.Ordinal);
-        Assert.Contains("align-self: end", css, StringComparison.Ordinal);
-        Assert.Contains("justify-content: flex-start !important", css, StringComparison.Ordinal);
-        Assert.Contains("margin-inline-start: auto", css, StringComparison.Ordinal);
-        Assert.Contains("aspect-ratio: 1", css, StringComparison.Ordinal);
-
         var conversationCss = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
-        Assert.Contains(".shadcn-message-footer button { min-width:0 !important", conversationCss, StringComparison.Ordinal);
+        Assert.Contains("grid-template-rows: auto auto", conversationCss, StringComparison.Ordinal);
+        Assert.Contains("align-self:end", conversationCss, StringComparison.Ordinal);
+        Assert.Contains("justify-content:flex-start", conversationCss, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-start:auto", conversationCss, StringComparison.Ordinal);
+        Assert.Contains("aspect-ratio:1", conversationCss, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message-action {", conversationCss, StringComparison.Ordinal);
         Assert.Contains(".shadcn-message-avatar > [data-slot=\"avatar\"]", conversationCss, StringComparison.Ordinal);
     }
 

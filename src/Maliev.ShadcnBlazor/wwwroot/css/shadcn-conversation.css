@@ -299,7 +299,16 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     content: none;
 }
 
-.shadcn-message { align-items: flex-start; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: stretch;
+}
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    flex-direction: initial;
+}
 .shadcn-message-avatar {
     width: 2.25rem;
     min-width: 2.25rem;
@@ -313,13 +322,19 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     font-size: .75rem;
     font-weight: 600;
 }
-.shadcn-message-avatar > :is(img, svg) { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.shadcn-message-avatar > :is(img, svg) { display:block; width:100%; height:100%; aspect-ratio:1; border-radius:inherit; object-fit:cover; }
 .shadcn-message-avatar > [data-slot="avatar"] { display:flex; width:100%; height:100%; min-width:0; min-height:0; align-items:stretch; justify-content:stretch; overflow:hidden; border-radius:inherit; }
-.shadcn-message-avatar > [data-slot="avatar"] > :is([data-slot="avatar-image"],[data-slot="avatar-fallback"]) { display:flex; width:100%; height:100%; min-width:0; min-height:0; align-items:center; justify-content:center; overflow:hidden; border-radius:inherit; object-fit:cover; }
+.shadcn-message-avatar > [data-slot="avatar"] > :is([data-slot="avatar-image"],[data-slot="avatar-fallback"]) { display:flex; width:100%; height:100%; min-width:0; min-height:0; aspect-ratio:1; align-items:center; justify-content:center; overflow:hidden; border-radius:inherit; object-fit:cover; }
 .shadcn-message-content { flex: 0 1 auto; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) > .shadcn-message-avatar { grid-column:1; grid-row:1; align-self:end; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] > .shadcn-message-avatar { grid-column:2; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) > .shadcn-message-content { display:contents; }
+.shadcn-message-body { display:flex; grid-column:2; grid-row:1; min-width:0; max-width:100%; flex-direction:column; align-items:flex-start; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-message[data-align="end"] .shadcn-message-body { grid-column:1; align-items:flex-end; }
 .shadcn-message-header { align-self: flex-start; color: var(--shadcn-muted-foreground); font-size: .75rem; font-weight: 600; line-height: 1.25; }
 .shadcn-message[data-align="end"] .shadcn-message-header { align-self: flex-end; }
 .shadcn-message-footer {
+    width:100%;
     color: var(--shadcn-muted-foreground);
     font-size: .6875rem;
     max-block-size: 0;
@@ -331,6 +346,8 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
         opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
         transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:2; grid-row:2; justify-content:flex-start; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] .shadcn-message-footer { grid-column:1; justify-content:flex-start; }
 .shadcn-message:hover .shadcn-message-footer,
 .shadcn-message:focus-within .shadcn-message-footer,
 .shadcn-message-footer[data-visibility="always"] {
@@ -340,25 +357,45 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     opacity: 1;
     transform: none;
 }
-.shadcn-message-action,
-.showcase-message-action {
-    min-width: 0 !important;
-    min-height: 1.75rem !important;
+.shadcn-message-actions { display:flex; width:fit-content; min-width:0; flex:none; align-items:center; gap:calc(.125rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-message-status { min-width:0; margin-inline-start:auto; white-space:nowrap; }
+.shadcn-message-action {
+    display:inline-flex;
+    width:1.75rem;
+    min-width:1.75rem !important;
+    height:1.75rem;
+    min-height:1.75rem !important;
+    align-items:center;
+    justify-content:center;
     border: 0 !important;
     border-radius: 999px !important;
     background: transparent !important;
-    padding-inline: calc(.375rem * var(--shadcn-spacing-multiplier)) !important;
+    padding:0 !important;
     color: var(--shadcn-muted-foreground) !important;
     font: inherit;
+    cursor:pointer;
+    transition:background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
-.shadcn-message-action--sent,
-.showcase-message-action--sent { pointer-events: none; }
+.shadcn-message-action:hover { background:var(--shadcn-accent) !important; color:var(--shadcn-accent-foreground) !important; }
+.shadcn-message-action:disabled { pointer-events:none; opacity:.5; }
+.shadcn-message-action-icon,.shadcn-message-copy-feedback > svg { display:block; width:1rem; height:1rem; flex:none; }
+.shadcn-message-copy-action[data-copy-state="copied"] { width:auto; padding-inline:calc(.5rem * var(--shadcn-spacing-multiplier)) !important; }
+.shadcn-message-copy-feedback { display:inline-flex; align-items:center; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); animation:shadcn-message-copy-success var(--shadcn-message-copy-feedback-duration) var(--shadcn-motion-easing-standard) both; }
+.shadcn-message-reply-quote { position:relative; display:grid; width:min(100%, 28rem); gap:calc(.125rem * var(--shadcn-spacing-multiplier)); margin-block-start:calc(.75rem * var(--shadcn-spacing-multiplier)); padding:calc(.625rem * var(--shadcn-spacing-multiplier)) calc(2.5rem * var(--shadcn-spacing-multiplier)) calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.75rem * var(--shadcn-spacing-multiplier)); border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); background:var(--shadcn-muted); color:var(--shadcn-foreground); }
+.shadcn-message-reply-quote-label { color:var(--shadcn-muted-foreground); font-size:.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+.shadcn-message-reply-quote q { min-width:0; overflow-wrap:anywhere; font-size:.8125rem; }
+.shadcn-message-reply-dismiss { position:absolute; inset-block-start:.375rem; inset-inline-end:.375rem; display:grid; width:1.75rem; height:1.75rem; place-items:center; border:0; border-radius:999px; background:transparent; color:var(--shadcn-muted-foreground); cursor:pointer; }
+.shadcn-message-reply-dismiss:hover { background:var(--shadcn-accent); color:var(--shadcn-accent-foreground); }
+.shadcn-message-reply-dismiss svg { width:1rem; height:1rem; }
+@keyframes shadcn-message-copy-success { 0% { opacity:0; transform:translateY(.125rem); } 12%,82% { opacity:1; transform:none; } 100% { opacity:0; transform:none; } }
 
 @media (prefers-reduced-motion: reduce) {
-    .shadcn-message-footer {
+    .shadcn-message-footer,
+    .shadcn-message-action {
         transition: none;
         transform: none;
     }
+    .shadcn-message-copy-feedback { animation:none; }
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-item { border: 0 !important; padding-block: calc(.4rem * var(--shadcn-spacing-multiplier)) !important; }
@@ -473,4 +510,6 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] { animation: none; }
     html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; background-image: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
     html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after { background: none; animation: none; }
+    .shadcn-message-action,.shadcn-message-reply-dismiss { color:ButtonText !important; }
+    .shadcn-message-reply-quote { border-color:Highlight; background:Canvas; color:CanvasText; }
 }

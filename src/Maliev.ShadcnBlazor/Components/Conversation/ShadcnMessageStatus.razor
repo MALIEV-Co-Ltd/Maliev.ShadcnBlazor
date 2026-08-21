@@ -1,0 +1,16 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-status")" style="@MergeStyle(null)" data-slot="message-status">@ChildContent</span>
+
+@code {
+    [CascadingParameter] private ShadcnMessageFooter? Owner { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null) throw new InvalidOperationException("ShadcnMessageStatus must be inside ShadcnMessageFooter.");
+        if (ChildContent is null) throw new InvalidOperationException("ShadcnMessageStatus requires content.");
+    }
+}

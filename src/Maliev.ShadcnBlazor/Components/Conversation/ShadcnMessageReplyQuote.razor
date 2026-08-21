@@ -1,0 +1,28 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<aside @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-reply-quote")" style="@MergeStyle(null)" data-slot="message-reply-quote" role="note">
+    <span class="shadcn-message-reply-quote-label">@Label</span>
+    <q>@Quote</q>
+    @if (OnDismiss.HasDelegate)
+    {
+        <button class="shadcn-message-reply-dismiss" data-slot="message-reply-dismiss" type="button" aria-label="@DismissLabel" title="@DismissLabel" @onclick="OnDismiss">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        </button>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public string Quote { get; set; } = string.Empty;
+    [Parameter] public string Label { get; set; } = "Replying to";
+    [Parameter] public string DismissLabel { get; set; } = "Cancel reply";
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "role");
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Quote)) throw new ArgumentException("Reply quote is required.", nameof(Quote));
+        if (string.IsNullOrWhiteSpace(Label)) throw new ArgumentException("Reply quote label is required.", nameof(Label));
+        if (OnDismiss.HasDelegate && string.IsNullOrWhiteSpace(DismissLabel)) throw new ArgumentException("Dismiss label is required when the reply quote can be dismissed.", nameof(DismissLabel));
+    }
+}

@@ -121,6 +121,125 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void MessageStructuredCompositionKeepsActionsAndStatusInSeparateSlots()
+    {
+        var cut = Render<ShadcnMessage>(parameters => parameters
+            .Add(component => component.Align, ShadcnLogicalAlign.End)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnMessageAvatar>(0);
+                builder.AddAttribute(1, nameof(ShadcnMessageAvatar.ChildContent), (RenderFragment)(avatar =>
+                {
+                    avatar.OpenElement(0, "img");
+                    avatar.AddAttribute(1, "src", "avatar.png");
+                    avatar.AddAttribute(2, "alt", "Operator");
+                    avatar.CloseElement();
+                }));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnMessageContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnMessageContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnMessageBody>(0);
+                    content.AddAttribute(1, nameof(ShadcnMessageBody.ChildContent), Text("Message body"));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnMessageFooter>(2);
+                    content.AddAttribute(3, nameof(ShadcnMessageFooter.ChildContent), (RenderFragment)(footer =>
+                    {
+                        footer.OpenComponent<ShadcnMessageActions>(0);
+                        footer.AddAttribute(1, nameof(ShadcnMessageActions.ChildContent), Text("Actions"));
+                        footer.CloseComponent();
+                        footer.OpenComponent<ShadcnMessageStatus>(2);
+                        footer.AddAttribute(3, nameof(ShadcnMessageStatus.ChildContent), Text("Sent"));
+                        footer.CloseComponent();
+                    }));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        Assert.Equal("Message body", cut.Find("[data-slot='message-body']").TextContent);
+        Assert.Equal("Actions", cut.Find("[data-slot='message-actions']").TextContent);
+        Assert.Equal("Sent", cut.Find("[data-slot='message-status']").TextContent);
+        Assert.Equal("Operator", cut.Find("[data-slot='message-avatar'] img").GetAttribute("alt"));
+    }
+
+    [Fact]
+    public void MessageCopyActionShowsSuccessOnlyAfterClipboardWriteAndCanCopyAgain()
+    {
+        JSInterop.SetupVoid("navigator.clipboard.writeText", "ตรวจสอบแล้ว").SetVoidResult();
+        var copied = 0;
+        var cut = RenderMessageFooter(builder =>
+        {
+            builder.OpenComponent<ShadcnMessageCopyAction>(0);
+            builder.AddAttribute(1, nameof(ShadcnMessageCopyAction.Text), "ตรวจสอบแล้ว");
+            builder.AddAttribute(2, nameof(ShadcnMessageCopyAction.FeedbackDuration), TimeSpan.FromMilliseconds(200));
+            builder.AddAttribute(3, nameof(ShadcnMessageCopyAction.OnCopied), EventCallback.Factory.Create(this, () => copied++));
+            builder.CloseComponent();
+        });
+
+        var action = cut.Find("button[data-slot='message-copy-action']");
+        Assert.Equal("idle", action.GetAttribute("data-copy-state"));
+        Assert.Contains("--shadcn-message-copy-feedback-duration:200ms", action.GetAttribute("style"), StringComparison.Ordinal);
+        action.Click();
+        cut.WaitForAssertion(() => Assert.Equal("copied", action.GetAttribute("data-copy-state")));
+        Assert.Equal("Copied", action.GetAttribute("aria-label"));
+        Assert.Equal(1, copied);
+
+        cut.WaitForAssertion(() => Assert.Equal("idle", action.GetAttribute("data-copy-state")), TimeSpan.FromSeconds(1));
+        action.Click();
+        cut.WaitForAssertion(() => Assert.Equal("copied", action.GetAttribute("data-copy-state")));
+        Assert.Equal(2, copied);
+        Assert.Equal(2, JSInterop.Invocations.Count(invocation => invocation.Identifier == "navigator.clipboard.writeText"));
+    }
+
+    [Fact]
+    public void MessageReplyActionReturnsQuoteAndReplyQuoteDismisses()
+    {
+        string? selectedQuote = null;
+        var action = RenderMessageFooter(builder =>
+        {
+            builder.OpenComponent<ShadcnMessageReplyAction>(0);
+            builder.AddAttribute(1, nameof(ShadcnMessageReplyAction.Quote), "Previous reply");
+            builder.AddAttribute(2, nameof(ShadcnMessageReplyAction.OnReply), EventCallback.Factory.Create<string>(this, quote => selectedQuote = quote));
+            builder.CloseComponent();
+        });
+
+        action.Find("button[data-slot='message-reply-action']").Click();
+        Assert.Equal("Previous reply", selectedQuote);
+
+        var dismissed = false;
+        var quote = Render<ShadcnMessageReplyQuote>(parameters => parameters
+            .Add(component => component.Quote, selectedQuote!)
+            .Add(component => component.OnDismiss, EventCallback.Factory.Create(this, () => dismissed = true)));
+        Assert.Equal("note", quote.Find("[data-slot='message-reply-quote']").GetAttribute("role"));
+        Assert.Contains("Previous reply", quote.Markup, StringComparison.Ordinal);
+        quote.Find("button[data-slot='message-reply-dismiss']").Click();
+        Assert.True(dismissed);
+    }
+
+    [Fact]
+    public void MessageCopyActionReportsClipboardFailureWithoutShowingSuccess()
+    {
+        JSInterop.SetupVoid("navigator.clipboard.writeText", "Restricted").SetException(new Microsoft.JSInterop.JSException("Clipboard denied."));
+        var copied = false;
+        var cut = RenderMessageFooter(builder =>
+        {
+            builder.OpenComponent<ShadcnMessageCopyAction>(0);
+            builder.AddAttribute(1, nameof(ShadcnMessageCopyAction.Text), "Restricted");
+            builder.AddAttribute(2, nameof(ShadcnMessageCopyAction.FeedbackDuration), TimeSpan.FromSeconds(1));
+            builder.AddAttribute(3, nameof(ShadcnMessageCopyAction.OnCopied), EventCallback.Factory.Create(this, () => copied = true));
+            builder.CloseComponent();
+        });
+
+        var action = cut.Find("button[data-slot='message-copy-action']");
+        action.Click();
+        cut.WaitForAssertion(() => Assert.Equal("error", action.GetAttribute("data-copy-state")));
+        Assert.Equal("Copy failed", action.GetAttribute("aria-label"));
+        Assert.DoesNotContain("Copied", cut.Markup, StringComparison.Ordinal);
+        Assert.False(copied);
+    }
+
+    [Fact]
     public void PresentationPartsRejectUnknownEnumsAndInvalidParents()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnBubble>());
@@ -128,6 +247,10 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnBubbleContent>(p => p.AddChildContent("orphan")));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnMarkerIcon>(p => p.AddChildContent("orphan")));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageFooter>(p => p.AddChildContent("orphan")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageBody>(p => p.AddChildContent("orphan")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageActions>(p => p.AddChildContent("orphan")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageStatus>(p => p.AddChildContent("orphan")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageReplyAction>(p => p.Add(c => c.Quote, "orphan")));
     }
 
     [Fact]
@@ -149,6 +272,8 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains(".shadcn-message:focus-within .shadcn-message-footer", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-message-footer[data-visibility=\"always\"]", css, StringComparison.Ordinal);
         Assert.Contains("pointer-events: none;", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-message-copy-feedback-duration", css, StringComparison.Ordinal);
+        Assert.Contains("82%", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -174,4 +299,25 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private IRenderedComponent<ShadcnMessage> RenderMessageFooter(RenderFragment footerContent)
+        => Render<ShadcnMessage>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnMessageContent>(0);
+            builder.AddAttribute(1, nameof(ShadcnMessageContent.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnMessageBody>(0);
+                content.AddAttribute(1, nameof(ShadcnMessageBody.ChildContent), Text("Message"));
+                content.CloseComponent();
+                content.OpenComponent<ShadcnMessageFooter>(2);
+                content.AddAttribute(3, nameof(ShadcnMessageFooter.ChildContent), (RenderFragment)(footer =>
+                {
+                    footer.OpenComponent<ShadcnMessageActions>(0);
+                    footer.AddAttribute(1, nameof(ShadcnMessageActions.ChildContent), footerContent);
+                    footer.CloseComponent();
+                }));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
 }
