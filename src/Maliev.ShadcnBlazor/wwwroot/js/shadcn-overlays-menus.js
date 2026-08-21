@@ -198,13 +198,14 @@ function placePositioned(content, trigger, preferredSide, align, sideOffset, ali
     content.style.setProperty('--shadcn-transform-origin', side === 'top' ? 'bottom' : side === 'bottom' ? 'top' : side === 'left' ? 'right' : 'left');
     content.dataset.positioned = 'true';
 }
-export function attachPositioned(content, triggerId, side, align, sideOffset, alignOffset, padding, dotnet, closeOnEscape, closeOnOutside, focusContent) {
+export function attachPositioned(content, triggerId, side, align, sideOffset, alignOffset, padding, dotnet, closeOnEscape, closeOnOutside, focusContent, focusTargetId = triggerId, restoreFocusOnDetach = true) {
     const trigger = document.getElementById(triggerId); if (!trigger) return;
-    const previous = trigger;
+    const focusTarget = document.getElementById(focusTargetId) || trigger;
+    const previous = restoreFocusOnDetach ? focusTarget : null;
     const sync = () => placePositioned(content, trigger, side, align, sideOffset, alignOffset, padding);
     acquireLayer(content);
-    const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); trigger.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
-    const outside = event => { if (isTopLayer(content) && closeOnOutside && !content.contains(event.target) && !trigger.contains(event.target)) { trigger.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
+    const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
+    const outside = event => { if (isTopLayer(content) && closeOnOutside && !content.contains(event.target) && !trigger.contains(event.target)) { focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
     const observer = new ResizeObserver(sync); observer.observe(content); observer.observe(trigger);
     const anchorObserver = new MutationObserver(() => { if (!content.isConnected) detachPositioned(content); else if (!trigger.isConnected) dotnet?.invokeMethodAsync('RequestCloseAsync'); });
     anchorObserver.observe(document.body, { childList: true, subtree: true });

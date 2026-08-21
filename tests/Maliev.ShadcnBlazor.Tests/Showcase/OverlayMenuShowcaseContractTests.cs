@@ -197,6 +197,32 @@ public sealed class OverlayMenuShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void TooltipDossierIsResponsiveAccessibleAndKeepsSourceInSync()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("tooltip").Single();
+        var rendered = Render(example.Preview);
+
+        Assert.NotNull(rendered.Find("[data-testid='tooltip-dossier-preview']"));
+        Assert.Equal("Save quotation draft", rendered.Find("[data-slot='tooltip-trigger']").TextContent.Trim());
+        Assert.Contains("Saved just now", rendered.Markup, StringComparison.Ordinal);
+        Assert.Contains("OpenDelay=\"@(TimeSpan.FromMilliseconds(200))\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Side=\"ShadcnOverlaySide.Top\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Save quotation draft", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "tooltip-bottom").Apply("true");
+        example.Controls.Single(control => control.Id == "tooltip-instant").Apply("true");
+        example.Controls.Single(control => control.Id == "tooltip-disabled").Apply("true");
+
+        var changed = Render(example.Preview);
+        Assert.Equal("bottom", changed.Find("[data-testid='tooltip-dossier-preview']").GetAttribute("data-side"));
+        Assert.Equal("true", changed.Find("[data-testid='tooltip-dossier-preview']").GetAttribute("data-disabled"));
+        Assert.Equal("0", changed.Find("[data-slot='tooltip']").GetAttribute("data-open-delay"));
+        Assert.Contains("OpenDelay=\"TimeSpan.Zero\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Side=\"ShadcnOverlaySide.Bottom\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DocumentationRouteLinksEveryPlanSevenPinnedAndCurrentReference()
     {
         var root = FindRoot();
