@@ -1145,14 +1145,22 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(thumb).ToHaveValueAsync("65");
 
         await page.GetByTestId("control-slider-readonly").UncheckAsync();
+        await Assertions.Expect(slider).Not.ToHaveAttributeAsync("data-readonly", "true");
+        await Assertions.Expect(thumb).Not.ToHaveAttributeAsync("aria-readonly", "true");
         await page.ChooseOptionAsync("control-slider-orientation", "Vertical");
+        await Assertions.Expect(slider).ToHaveAttributeAsync("data-orientation", "vertical");
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-orientation", "vertical");
         trackBox = await slider.Locator("[data-slot='slider-track']").BoundingBoxAsync();
         Assert.NotNull(trackBox);
+        Assert.True(trackBox!.Height > trackBox.Width, $"Expected vertical track geometry, got {trackBox.Width}x{trackBox.Height}.");
         await page.Mouse.MoveAsync((float)(trackBox!.X + trackBox.Width / 2), (float)(trackBox.Y + trackBox.Height * .2));
         await page.Mouse.DownAsync();
+        await Assertions.Expect(slider).ToHaveAttributeAsync("data-dragging", "true");
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-valuenow", new Regex("^(75|80|85)$"));
         await page.Mouse.MoveAsync((float)(trackBox.X + trackBox.Width / 2), (float)(trackBox.Y + trackBox.Height * .8), new() { Steps = 4 });
         await page.Mouse.UpAsync();
-        Assert.InRange(int.Parse(await thumb.GetAttributeAsync("aria-valuenow") ?? "0"), 15, 25);
+        await Assertions.Expect(slider).Not.ToHaveAttributeAsync("data-dragging", "true");
+        await Assertions.Expect(thumb).ToHaveAttributeAsync("aria-valuenow", new Regex("^(15|20|25)$"));
 
         await page.ChooseOptionAsync("control-slider-orientation", "Horizontal");
         await Assertions.Expect(slider).ToHaveAttributeAsync("data-orientation", "horizontal");
