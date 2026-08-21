@@ -1178,6 +1178,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogClose
   RenderFragment ChildContent
   Boolean Disabled
   String Label
+  ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogContent
   RenderFragment ChildContent
   String CloseLabel

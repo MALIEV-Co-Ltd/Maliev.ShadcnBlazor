@@ -1,0 +1,63 @@
+@using global::Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="showcase-dialog-dossier">
+    <ShadcnDialog Open="_effectiveOpen" OpenChanged="SetOpenAsync" Modal="Modal">
+        <ShadcnDialogTrigger>Edit profile</ShadcnDialogTrigger>
+        <ShadcnDialogContent ShowCloseButton="true" CloseLabel="Close profile editor">
+            <ShadcnDialogHeader>
+                <ShadcnDialogTitle>Edit profile</ShadcnDialogTitle>
+                <ShadcnDialogDescription>
+                    Keep the contact details your project team sees up to date.
+                </ShadcnDialogDescription>
+            </ShadcnDialogHeader>
+
+            <ShadcnFieldGroup>
+                <ShadcnField>
+                    <ShadcnFieldLabel For="dialog-profile-name">Name</ShadcnFieldLabel>
+                    <ShadcnInput TValue="string"
+                                 id="dialog-profile-name"
+                                 @bind-Value="_name"
+                                 AutoComplete="name" />
+                </ShadcnField>
+                <ShadcnField>
+                    <ShadcnFieldLabel For="dialog-profile-username">Username</ShadcnFieldLabel>
+                    <ShadcnInput TValue="string"
+                                 id="dialog-profile-username"
+                                 @bind-Value="_username"
+                                 AutoComplete="username" />
+                </ShadcnField>
+            </ShadcnFieldGroup>
+
+            <ShadcnDialogFooter>
+                <ShadcnDialogClose>Cancel</ShadcnDialogClose>
+                <ShadcnDialogClose Variant="ShadcnButtonVariant.Default">Save changes</ShadcnDialogClose>
+            </ShadcnDialogFooter>
+        </ShadcnDialogContent>
+    </ShadcnDialog>
+</div>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public bool Modal { get; set; } = true;
+
+    private bool _effectiveOpen;
+    private bool _lastOpen;
+    private bool _initialized;
+    private string _name = "Narin Chaiyasit";
+    private string _username = "narin.c";
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized || Open != _lastOpen)
+            _effectiveOpen = Open;
+
+        _lastOpen = Open;
+        _initialized = true;
+    }
+
+    private Task SetOpenAsync(bool value)
+    {
+        _effectiveOpen = value;
+        return InvokeAsync(StateHasChanged);
+    }
+}

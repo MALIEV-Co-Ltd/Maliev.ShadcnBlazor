@@ -34,12 +34,23 @@ function releaseDialog(content, restore = true) {
     if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
     if (state.modal && --modalCount === 0) document.documentElement.style.overflow = documentOverflow;
     if (content.matches(':popover-open')) content.hidePopover();
-    if (restore && wasTopmost) state.previous?.focus?.({ preventScroll: true });
+    if (restore && wasTopmost) {
+        const restoreFocus = () => {
+            const target = state.previous?.isConnected
+                ? state.previous
+                : state.focusOwner?.querySelector?.('[data-slot="dialog-trigger"]');
+            target?.focus?.({ preventScroll: true });
+        };
+        restoreFocus();
+        requestAnimationFrame(restoreFocus);
+    }
     dialogs.delete(content);
 }
 
 export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = modal) {
+    if (dialogs.has(content)) return;
     const previous = document.activeElement;
+    const focusOwner = previous?.closest?.('[data-slot="dialog"]');
     const portal = content.closest('[data-slot$="-portal"]');
     if (content.showPopover) { content.setAttribute('popover', 'manual'); content.showPopover(); }
     const inerted = new Set();
@@ -61,7 +72,7 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (modalCount++ === 0) documentOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
     }
-    const state = { content, previous, inerted: [...inerted], modal, keydown: null, observer: null };
+    const state = { content, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
     const keydown = event => {
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
         if (event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); releaseDialog(content); dotnet.invokeMethodAsync('RequestCloseAsync'); return; }
