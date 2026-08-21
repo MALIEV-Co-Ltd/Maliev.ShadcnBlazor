@@ -1,4 +1,32 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements IAsyncDisposable
 @inject IJSRuntime JavaScript
-@if(Sub.Open){<div @ref="_element" @attributes="Forwarded" id="@Sub.ContentId" class="@MergeClass("shadcn-context-menu-sub-content")" style="@MergeStyle(null)" data-slot="context-menu-sub-content" data-state="open" role="menu" @onkeydown="KeyDownAsync" @onkeydown:stopPropagation>@ChildContent</div>}
-@code { [CascadingParameter]private ShadcnContextMenuSub Sub{get;set;}=default!;[Parameter]public RenderFragment? ChildContent{get;set;}private ElementReference _element;private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("id","data-slot","data-state","role");private async Task KeyDownAsync(KeyboardEventArgs args){if(args.Key!="Escape")return;var module=await JavaScript.InvokeAsync<IJSObjectReference>("import","./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");await module.InvokeVoidAsync("focusSubTrigger",_element);await module.DisposeAsync();await Sub.SetOpenAsync(false);} }
+@if(Sub.Open){<div @ref="_element" @attributes="Forwarded" id="@Sub.ContentId" class="@MergeClass("shadcn-context-menu-sub-content")" style="@MergeStyle(null)" data-slot="context-menu-sub-content" data-state="open" role="menu" tabindex="-1" @onkeydown="KeyDownAsync" @onkeydown:stopPropagation>@ChildContent</div>}
+@code {
+    [CascadingParameter] private ShadcnContextMenuSub Sub { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private ElementReference _element;
+    private IJSObjectReference? _module;
+    private bool _attached;
+    private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("id", "data-slot", "data-state", "role", "tabindex");
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if (!Sub.Open || _attached) return;
+        _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
+        await _module.InvokeVoidAsync("attachContextMenuSubmenu", _element, Sub.TriggerId, 8);
+        await _module.InvokeVoidAsync("focusFirstMenuItem", _element);
+        _attached = true;
+    }
+    private async Task KeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key != "Escape") return;
+        if (_module is not null) await _module.InvokeVoidAsync("focusSubTrigger", _element);
+        await Sub.SetOpenAsync(false);
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { if (_attached) await _module.InvokeVoidAsync("detachContextMenuSubmenu", _element); await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

@@ -7436,6 +7436,90 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     .showcase-tooltip-dossier__action:disabled { opacity: 1; }
 }
 
+/* Context menu: a file workspace gives pointer and keyboard invocation a
+   credible target without turning the preview into decorative card chrome. */
+.showcase-context-menu-dossier {
+    display: grid;
+    inline-size: min(100%, 42rem);
+    min-block-size: 22rem;
+    margin-inline: auto;
+    gap: 1rem;
+    align-content: center;
+}
+
+.showcase-context-menu-workspace {
+    display: grid;
+    inline-size: 100%;
+    min-inline-size: 0;
+    overflow: hidden;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius);
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    box-shadow: var(--shadcn-shadow-sm);
+}
+
+.showcase-context-menu-workspace__header {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-block-end: 1px solid var(--shadcn-border);
+    padding: .875rem 1rem;
+}
+
+.showcase-context-menu-workspace__header > div {
+    display: grid;
+    min-inline-size: 0;
+    gap: .125rem;
+}
+
+.showcase-context-menu-workspace__header strong,
+.showcase-context-menu-workspace__header span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.showcase-context-menu-workspace__header strong { font-size: .875rem; font-weight: 600; }
+.showcase-context-menu-workspace__header span { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+
+.showcase-context-menu-workspace__files {
+    display: grid;
+    padding: .5rem;
+}
+
+.showcase-context-menu-workspace__files > div {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .75rem;
+    min-block-size: 3rem;
+    border-radius: var(--shadcn-radius-sm);
+    padding-inline: .5rem;
+}
+
+.showcase-context-menu-workspace__files[data-density="compact"] > div { min-block-size: 2.25rem; }
+.showcase-context-menu-workspace__files > div:hover { background: var(--shadcn-muted); }
+.showcase-context-menu-workspace__files span { color: var(--shadcn-muted-foreground); font-size: .6875rem; font-weight: 600; }
+.showcase-context-menu-workspace__files strong { overflow: hidden; font-size: .8125rem; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.showcase-context-menu-workspace__files small { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+.showcase-context-menu-workspace > p { margin: 0; border-block-start: 1px solid var(--shadcn-border); padding: .625rem 1rem; color: var(--shadcn-muted-foreground); direction: ltr; font-size: .75rem; text-align: start; }
+.showcase-context-menu-dossier__status { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; text-align: center; }
+
+@media (max-width: 32rem) {
+    .showcase-context-menu-dossier { min-block-size: 18rem; }
+    .showcase-context-menu-workspace__header { align-items: flex-start; flex-direction: column; gap: .375rem; }
+    .showcase-context-menu-workspace__files > div { grid-template-columns: 2.75rem minmax(0, 1fr); }
+    .showcase-context-menu-workspace__files small { display: none; }
+}
+
+@media (forced-colors: active) {
+    .showcase-context-menu-workspace { border-color: CanvasText; }
+    .showcase-context-menu-workspace__files > div:hover { background: Highlight; color: HighlightText; }
+}
+
 /* Menubar: a compact, real editor shell keeps the primitive in context while
    preserving enough room for collision-aware menus at narrow widths. */
 .showcase-drawer-dossier {

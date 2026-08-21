@@ -268,11 +268,78 @@ export function isMenuAttached(menu) { return menus.has(menu); }
 export function focusFirstMenuItem(menu) { requestAnimationFrame(() => menu.querySelector('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')?.focus({ preventScroll: true })); }
 export function focusSubTrigger(menu) { menu.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]')?.focus({ preventScroll: true }); }
 
+const contextMenuTriggers = new WeakMap();
+export function attachContextMenuTrigger(trigger) {
+    detachContextMenuTrigger(trigger);
+    const keydown = event => {
+        if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const bounds = trigger.getBoundingClientRect();
+        const rtl = getComputedStyle(trigger).direction === 'rtl';
+        trigger.dispatchEvent(new MouseEvent('contextmenu', {
+            bubbles: true,
+            cancelable: true,
+            button: 2,
+            clientX: rtl ? bounds.right - 8 : bounds.left + 8,
+            clientY: bounds.top + Math.min(bounds.height, 24)
+        }));
+    };
+    trigger.addEventListener('keydown', keydown);
+    contextMenuTriggers.set(trigger, { keydown });
+    trigger.dataset.contextMenuReady = 'true';
+}
+export function detachContextMenuTrigger(trigger) {
+    trigger.removeAttribute('data-context-menu-ready');
+    const state = contextMenuTriggers.get(trigger);
+    if (!state) return;
+    trigger.removeEventListener('keydown', state.keydown);
+    contextMenuTriggers.delete(trigger);
+}
+
 export function placeContextMenu(menu, padding = 8) {
     const desiredX = Number(menu.dataset.anchorX) || 0, desiredY = Number(menu.dataset.anchorY) || 0;
     const width = menu.getBoundingClientRect().width, height = menu.getBoundingClientRect().height;
     menu.style.left = `${Math.min(Math.max(padding, desiredX), Math.max(padding, innerWidth - padding - width))}px`;
     menu.style.top = `${Math.min(Math.max(padding, desiredY), Math.max(padding, innerHeight - padding - height))}px`;
+    menu.dataset.positioned = 'true';
+}
+
+export function attachContextMenu(menu, triggerId, dotnet, padding = 8) {
+    menu.dataset.positioned = 'false';
+    placeContextMenu(menu, padding);
+    attachMenu(menu, triggerId, dotnet);
+}
+
+const contextMenuSubmenus = new WeakMap();
+export function attachContextMenuSubmenu(content, triggerId, padding = 8) {
+    detachContextMenuSubmenu(content);
+    const trigger = document.getElementById(triggerId);
+    if (!trigger) return;
+    const sync = () => {
+        const rtl = getComputedStyle(trigger).direction === 'rtl';
+        placePositioned(content, trigger, rtl ? 'left' : 'right', 'start', 4, -4, padding);
+    };
+    const observer = new ResizeObserver(sync);
+    observer.observe(content);
+    observer.observe(trigger);
+    const anchorObserver = new MutationObserver(() => {
+        if (!content.isConnected || !trigger.isConnected) detachContextMenuSubmenu(content);
+    });
+    anchorObserver.observe(document.body, { childList: true, subtree: true });
+    addEventListener('resize', sync);
+    addEventListener('scroll', sync, true);
+    queueMicrotask(sync);
+    contextMenuSubmenus.set(content, { sync, observer, anchorObserver });
+}
+export function detachContextMenuSubmenu(content) {
+    const state = contextMenuSubmenus.get(content);
+    if (!state) return;
+    state.observer.disconnect();
+    state.anchorObserver.disconnect();
+    removeEventListener('resize', state.sync);
+    removeEventListener('scroll', state.sync, true);
+    contextMenuSubmenus.delete(content);
 }
 
 const menubars = new WeakMap();
