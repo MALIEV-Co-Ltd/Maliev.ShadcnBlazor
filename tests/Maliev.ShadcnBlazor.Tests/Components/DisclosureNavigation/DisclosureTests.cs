@@ -137,6 +137,36 @@ public sealed class DisclosureTests : BunitContext
         Assert.Single(calls);
     }
 
+    [Fact]
+    public void CollapsibleDirectActivationUpdatesEveryUncontrolledStateSurface()
+    {
+        var cut = Render<ShadcnCollapsible>(parameters => parameters
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnCollapsibleTrigger>(0);
+                builder.AddAttribute(1, nameof(ShadcnCollapsibleTrigger.ChildContent), (RenderFragment)(content => content.AddContent(0, "Order #4189")));
+                builder.CloseComponent();
+                builder.OpenComponent<ShadcnCollapsibleContent>(2);
+                builder.AddAttribute(3, nameof(ShadcnCollapsibleContent.ChildContent), (RenderFragment)(content => content.AddContent(0, "Shipping address")));
+                builder.CloseComponent();
+            }));
+
+        var root = cut.Find("[data-slot='collapsible']");
+        var trigger = cut.Find("[data-slot='collapsible-trigger']");
+        var content = cut.Find("[data-slot='collapsible-content']");
+        Assert.Equal("closed", root.GetAttribute("data-state"));
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.True(content.HasAttribute("hidden"));
+
+        trigger.Click();
+
+        Assert.Equal("open", root.GetAttribute("data-state"));
+        Assert.Equal("open", trigger.GetAttribute("data-state"));
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal("open", content.GetAttribute("data-state"));
+        Assert.False(content.HasAttribute("hidden"));
+    }
+
     private IRenderedComponent<ShadcnAccordion> RenderAccordion(
         IReadOnlyCollection<string> values,
         bool multiple = false,

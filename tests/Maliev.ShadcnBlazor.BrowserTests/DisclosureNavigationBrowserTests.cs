@@ -243,6 +243,36 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task CollapsibleDossierOpensDirectlyAndKeepsOrderContextResponsive()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ColorScheme = ColorScheme.Dark,
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/collapsible?theme=dark&dir=rtl").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        await page.EvaluateAsync("document.documentElement.dir='rtl'; document.querySelector('.shadcn-scope')?.setAttribute('dir','rtl')");
+
+        var dossier = page.Locator("#preview .showcase-collapsible-dossier");
+        var trigger = dossier.Locator("[data-slot='collapsible-trigger']");
+        var content = dossier.Locator("[data-slot='collapsible-content']");
+        await Assertions.Expect(dossier).ToContainTextAsync("Order #4189");
+        await Assertions.Expect(content).ToBeHiddenAsync();
+        await trigger.FocusAsync();
+        await page.Keyboard.PressAsync("Enter");
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(content).ToBeVisibleAsync();
+        await Assertions.Expect(content).ToContainTextAsync("100 Market Street");
+        Assert.True(
+            await dossier.EvaluateAsync<double>("element => element.scrollWidth") <= await dossier.EvaluateAsync<double>("element => element.clientWidth") + 1,
+            "The mobile collapsible dossier must not overflow horizontally.");
+        await AssertAxeCleanAsync(dossier, "collapsible dark RTL reduced-motion mobile open state");
+    }
+
+    [Fact]
     public async Task DisclosureTabsAndNavigationMenuHaveRealKeyboardFocusAndState()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 900, Height = 800 } });
