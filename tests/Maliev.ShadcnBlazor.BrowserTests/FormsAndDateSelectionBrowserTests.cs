@@ -122,7 +122,12 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
     [Fact]
     public async Task NativeFieldsInputGroupMultipleComboboxCalendarAndDatePickerOperateInRealBrowser()
     {
-        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 1280, Height = 1000 }, ReducedMotion = ReducedMotion.Reduce });
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 1000 },
+            ReducedMotion = ReducedMotion.Reduce,
+            Locale = "en-US"
+        });
         var page = await context.NewPageAsync();
         await page.GotoAsync(Url("light", "ltr"));
         await page.GetByTestId("forms-date-fixture").WaitForAsync();

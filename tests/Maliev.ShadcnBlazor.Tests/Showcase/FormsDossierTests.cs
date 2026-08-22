@@ -350,6 +350,21 @@ public sealed class FormsDossierTests : BunitContext
             Assert.Equal(tags, registry.GetBySlug(slug).Single().StateTags);
     }
 
+    [Fact]
+    public void ShowcaseLoadsGlobalizationDataForExplicitComponentCultures()
+    {
+        var project = File.ReadAllText(Path.Combine(
+            FindRoot(),
+            "samples",
+            "Maliev.ShadcnBlazor.Showcase",
+            "Maliev.ShadcnBlazor.Showcase.csproj"));
+
+        Assert.Contains(
+            "<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>",
+            project,
+            StringComparison.Ordinal);
+    }
+
     private IRenderedComponent<ComponentPreview> RenderExample(ComponentExampleRegistry registry, string slug) =>
         Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, registry.GetBySlug(slug).Single()));
 
