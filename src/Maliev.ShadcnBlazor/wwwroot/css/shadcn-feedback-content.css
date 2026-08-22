@@ -141,7 +141,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel { position: relative; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content { overflow: hidden; touch-action: pan-y pinch-zoom; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] { touch-action: pan-x pinch-zoom; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] { block-size: var(--shadcn-carousel-viewport-block-size); touch-action: pan-x pinch-zoom; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { display: flex; margin-inline-start: calc(-1rem * var(--shadcn-spacing-multiplier)); transition: translate var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="horizontal"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-x"] { transform: translateX(var(--shadcn-carousel-drag-x)); transition: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="vertical"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-y"] { transform: translateY(var(--shadcn-carousel-drag-y)); transition: none; }
@@ -151,7 +151,7 @@
 }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] > [data-slot="carousel-track"] { flex-direction: column; margin-block-start: calc(-1rem * var(--shadcn-spacing-multiplier)); margin-inline-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-item { min-width: 0; flex: 0 0 var(--shadcn-carousel-basis, 100%); padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] .shadcn-carousel-item { padding-block-start: calc(1rem * var(--shadcn-spacing-multiplier)); padding-inline-start: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] .shadcn-carousel-item { block-size: var(--shadcn-carousel-viewport-block-size); min-block-size: 0; flex-basis: var(--shadcn-carousel-viewport-block-size); padding-block-start: calc(1rem * var(--shadcn-spacing-multiplier)); padding-inline-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-previous,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-next { appearance: none; position: absolute; inset-block: 0; margin-block: auto; display: inline-flex; width: var(--shadcn-control-height-sm); height: var(--shadcn-control-height-sm); padding: 0; align-items: center; justify-content: center; border: 1px solid var(--shadcn-border); border-radius: 9999px; background: var(--shadcn-background); color: var(--shadcn-foreground); box-shadow: var(--shadcn-shadow-xs); touch-action: manipulation; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-previous { inset-inline-start: -3rem; }

@@ -110,6 +110,7 @@ enum Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAlign: Start, Center, 
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAutoplayPlugin
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselContent
   RenderFragment ChildContent
+  Nullable<Double> ViewportBlockSize
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselItem
   Double BasisPercent
   RenderFragment ChildContent

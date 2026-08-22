@@ -133,6 +133,46 @@ public sealed class CarouselTests : BunitContext
     }
 
     [Fact]
+    public void VerticalViewportBlockSizeDefinesOneItemPerSnapGeometry()
+    {
+        var cut = Render<ShadcnCarousel>(parameters => parameters
+            .Add(component => component.Orientation, ShadcnCarouselOrientation.Vertical)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnCarouselContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnCarouselContent.ViewportBlockSize), 240d);
+                builder.AddAttribute(2, nameof(ShadcnCarouselContent.ChildContent), (RenderFragment)(items =>
+                {
+                    items.OpenComponent<ShadcnCarouselItem>(0);
+                    items.AddAttribute(1, nameof(ShadcnCarouselItem.Index), 0);
+                    items.AddAttribute(2, nameof(ShadcnCarouselItem.ChildContent), Text("One"));
+                    items.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        Assert.Contains("--shadcn-carousel-viewport-block-size: 240px", cut.Find("[data-slot='carousel-content']").GetAttribute("style"), StringComparison.Ordinal);
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+        Assert.Contains("block-size: var(--shadcn-carousel-viewport-block-size)", css, StringComparison.Ordinal);
+        Assert.Contains("flex-basis: var(--shadcn-carousel-viewport-block-size)", css, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(double.PositiveInfinity)]
+    public void InvalidViewportBlockSizeFailsClosed(double value)
+    {
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnCarousel>(parameters => parameters
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnCarouselContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnCarouselContent.ViewportBlockSize), value);
+                builder.CloseComponent();
+            })));
+    }
+
+    [Fact]
     public void UnboundSelectionMovesTrackAndSelectedSlideImmediately()
     {
         var cut = RenderCarousel(new ShadcnCarouselOptions(), 0);

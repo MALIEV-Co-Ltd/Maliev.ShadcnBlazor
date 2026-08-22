@@ -8,7 +8,7 @@
                     Label="Production queue"
                     PreviousLabel="Previous production queue slide"
                     NextLabel="Next production queue slide">
-        <ShadcnCarouselContent>
+        <ShadcnCarouselContent ViewportBlockSize="@(Vertical ? 256 : null)">
             @foreach (var slide in Slides)
             {
                 <ShadcnCarouselItem @key="slide.Index" Index="slide.Index" Label="slide.AccessibleLabel">

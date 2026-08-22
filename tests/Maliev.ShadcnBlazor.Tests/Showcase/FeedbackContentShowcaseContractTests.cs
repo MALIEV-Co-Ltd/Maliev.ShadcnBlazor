@@ -163,6 +163,8 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("Loop = true", carousel.RazorSource, StringComparison.Ordinal);
         Assert.Contains("RightToLeft = true", carousel.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ReducedMotion = true", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ViewportBlockSize=\"256\"", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-carousel-viewport-block-size: 256px", Render(carousel.Preview).Find("[data-slot='carousel-content']").GetAttribute("style"), StringComparison.Ordinal);
         Assert.Contains("GoToAsync(slide.Index)", carousel.RazorSource, StringComparison.Ordinal);
 
         var toast = registry.GetBySlug("toast").Single();
