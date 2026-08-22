@@ -279,6 +279,40 @@ public sealed class ChartTests : BunitContext
     }
 
     [Fact]
+    public void CartesianAxesAndMajorMinorGridLinesAreIndependentlyConfigurableAndLogical()
+    {
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Id, "axes")
+            .Add(component => component.Config, Config)
+            .Add(component => component.Categories, new[] { "Jan", "Feb", "Mar" })
+            .Add(component => component.Series, Series)
+            .Add(component => component.Title, "Axes")
+            .Add(component => component.ShowAxis, false)
+            .Add(component => component.ShowPrimaryYAxis, true)
+            .Add(component => component.ShowSecondaryYAxis, false)
+            .Add(component => component.ShowMajorGrid, true)
+            .Add(component => component.ShowMinorGrid, true));
+
+        Assert.Single(cut.FindAll("[data-slot='chart-axis'][data-axis='primary']"));
+        Assert.Empty(cut.FindAll("[data-slot='chart-axis'][data-axis='secondary']"));
+        Assert.Equal(5, cut.FindAll("[data-slot='chart-grid-line'][data-grid-level='major']").Count);
+        Assert.Equal(4, cut.FindAll("[data-slot='chart-grid-line'][data-grid-level='minor']").Count);
+        Assert.Equal("start", cut.Find("[data-axis='primary']").GetAttribute("data-side"));
+
+        cut.Render(parameters => parameters
+            .Add(component => component.Direction, ShadcnDirection.RightToLeft)
+            .Add(component => component.ShowPrimaryYAxis, false)
+            .Add(component => component.ShowSecondaryYAxis, true)
+            .Add(component => component.ShowMajorGrid, false)
+            .Add(component => component.ShowMinorGrid, true));
+
+        Assert.Empty(cut.FindAll("[data-grid-level='major']"));
+        Assert.Equal(4, cut.FindAll("[data-grid-level='minor']").Count);
+        Assert.Equal("end", cut.Find("[data-axis='secondary']").GetAttribute("data-side"));
+        Assert.Equal("36", cut.Find("[data-axis='secondary']").GetAttribute("x1"));
+    }
+
+    [Fact]
     public void LabelKeyAndTemplatesOwnTooltipAndLegendPresentation()
     {
         var config = new ShadcnChartConfig { ["desktop"] = Config["desktop"], ["mobile"] = Config["mobile"], ["visitors"] = new("ผู้เข้าชม") { Color = "red" } };

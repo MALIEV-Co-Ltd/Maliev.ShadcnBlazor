@@ -185,9 +185,9 @@ __STATE_ATTRIBUTES__
 
     private static ComponentExampleDefinition Chart()
     {
-        var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false;
+        var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false; var primaryAxis = true; var secondaryAxis = false; var majorGrid = true; var minorGrid = false;
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowGrid", true); b.AddAttribute(12, "BarRadius", 0d); b.AddAttribute(13, "InitialHeight", 260d); b.AddAttribute(14, "Stacked", stacked); b.AddAttribute(15, "LegendInteractive", true); b.AddAttribute(16, "Animated", true); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", majorGrid); b.AddAttribute(14, "ShowMinorGrid", minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
         const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
@@ -201,7 +201,10 @@ __STATE_ATTRIBUTES__
              Config="@Config"
              Loading="__LOADING__"
              ShowLegend="__SHOW_LEGEND__"
-             ShowGrid="true"
+             ShowPrimaryYAxis="__PRIMARY_AXIS__"
+             ShowSecondaryYAxis="__SECONDARY_AXIS__"
+             ShowMajorGrid="__MAJOR_GRID__"
+             ShowMinorGrid="__MINOR_GRID__"
              BarRadius="0"
              InitialHeight="260"
              Stacked="__STACKED__"
@@ -225,8 +228,12 @@ __STATE_ATTRIBUTES__
             .Replace("__TYPE__", area ? "Area" : line ? "Line" : "Bar", StringComparison.Ordinal)
             .Replace("__LOADING__", loading ? "true" : "false", StringComparison.Ordinal)
             .Replace("__SHOW_LEGEND__", hideLegend ? "false" : "true", StringComparison.Ordinal)
+            .Replace("__PRIMARY_AXIS__", primaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__SECONDARY_AXIS__", secondaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MAJOR_GRID__", majorGrid ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MINOR_GRID__", minorGrid ? "true" : "false", StringComparison.Ordinal)
             .Replace("__STACKED__", stacked ? "true" : "false", StringComparison.Ordinal);
-        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with a real tooltip, legend, loading state, and responsive SVG surface.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v)], ["bar", "line", "area", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
+        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with independently configurable axes and grid levels.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v), Toggle("chart-primary-axis", "Primary axis", v => primaryAxis = v, true), Toggle("chart-secondary-axis", "Secondary axis", v => secondaryAxis = v), Toggle("chart-major-grid", "Major grid", v => majorGrid = v, true), Toggle("chart-minor-grid", "Minor grid", v => minorGrid = v)], ["bar", "line", "area", "axes", "major-grid", "minor-grid", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
         return example with { RazorSourceProvider = Source };
     }
 

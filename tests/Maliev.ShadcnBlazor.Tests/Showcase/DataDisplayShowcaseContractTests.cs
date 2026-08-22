@@ -147,6 +147,27 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("ShowLegend=\"false\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("BarRadius=\"0\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowMajorGrid=\"true\"", chart.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ChartDossierControlsAxesAndGridLevelsIndependentlyWithExactSource()
+    {
+        var chart = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("chart").Single();
+        chart.Controls.Single(control => control.Id == "chart-primary-axis").Apply("false");
+        chart.Controls.Single(control => control.Id == "chart-secondary-axis").Apply("true");
+        chart.Controls.Single(control => control.Id == "chart-major-grid").Apply("false");
+        chart.Controls.Single(control => control.Id == "chart-minor-grid").Apply("true");
+
+        var rendered = Render(chart.Preview);
+        Assert.Empty(rendered.FindAll("[data-axis='primary']"));
+        Assert.Single(rendered.FindAll("[data-axis='secondary']"));
+        Assert.Empty(rendered.FindAll("[data-grid-level='major']"));
+        Assert.NotEmpty(rendered.FindAll("[data-grid-level='minor']"));
+        Assert.Contains("ShowPrimaryYAxis=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowSecondaryYAxis=\"true\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowMajorGrid=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowMinorGrid=\"true\"", chart.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
