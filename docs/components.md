@@ -1,6 +1,6 @@
 # Component catalog
 
-The 1.1.1 package contains 65 reviewed component families. The machine-readable
+The library contains 66 reviewed component families. The machine-readable
 catalog is available in [`component-catalog.json`](component-catalog.json), and
 the Showcase provides a live dossier for each family.
 

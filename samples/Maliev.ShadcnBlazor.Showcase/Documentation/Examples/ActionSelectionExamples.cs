@@ -514,6 +514,14 @@ internal static class ActionSelectionExamples
     <article aria-label="Final inspection note">
         <h4>Final inspection note</h4>
         <p>WI-2418 · CNC enclosure · Revision C</p>
+        @if (VisibleLayers.Contains("dimensions"))
+        {
+            <p><strong>Overall dimensions:</strong> 126 × 84 × 32 mm · ±0.10 mm</p>
+        }
+        @if (VisibleLayers.Contains("notes"))
+        {
+            <p><strong>Machining note N4:</strong> Deburr all edges 0.2–0.5 mm before anodizing.</p>
+        }
         <p><strong>Visible:</strong> @string.Join(", ", VisibleLayers)</p>
     </article>
     {{(invalid ? "<p id=\"overlay-error\">Select at least one editable review layer.</p>" : string.Empty)}}

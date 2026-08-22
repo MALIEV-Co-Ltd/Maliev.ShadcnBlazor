@@ -1,0 +1,97 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-dropzone")"
+     style="@MergeStyle(null)"
+     data-slot="dropzone"
+     data-state="@State"
+     role="group"
+     aria-busy="@(Loading ? "true" : null)"
+     aria-labelledby="@InstructionsId"
+     aria-describedby="@DescriptionIds"
+     @ondragenter="HandleDragEnter"
+     @ondragleave="HandleDragLeave"
+     @ondragover:preventDefault
+     @ondrop="HandleDrop">
+    <InputFile class="shadcn-dropzone-input"
+               data-slot="dropzone-input"
+               accept="@Accept"
+               multiple="@Multiple"
+               disabled="@EffectiveDisabled"
+               aria-labelledby="@InstructionsId"
+               aria-describedby="@DescriptionIds"
+               OnChange="HandleSelectionAsync" />
+    <span class="shadcn-dropzone-icon" data-slot="dropzone-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4" /><path d="m7 9 5-5 5 5" /><path d="M5 13v6h14v-6" /></svg>
+    </span>
+    <span id="@InstructionsId" class="shadcn-dropzone-instructions" data-slot="dropzone-instructions">@Instructions</span>
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <span id="@DescriptionId" class="shadcn-dropzone-description" data-slot="dropzone-description">@Description</span>
+    }
+    <span id="@StatusId" class="shadcn-dropzone-status" data-slot="dropzone-status" role="status" aria-live="polite">@Status</span>
+    @if (_selection?.Errors.Count > 0)
+    {
+        <ul class="shadcn-dropzone-errors" data-slot="dropzone-errors" role="alert">
+            @foreach (var error in _selection.Errors)
+            {
+                <li>@error.Message</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private readonly string _id = $"shadcn-dropzone-{Guid.NewGuid():N}";
+    private ShadcnDropzoneSelection? _selection;
+    private bool _dragging;
+
+    /// <summary>Gets or sets the native file accept list.</summary>
+    [Parameter] public string? Accept { get; set; }
+    /// <summary>Gets or sets whether more than one file may be selected.</summary>
+    [Parameter] public bool Multiple { get; set; }
+    /// <summary>Gets or sets the maximum number of selected files.</summary>
+    [Parameter] public int MaxFiles { get; set; } = 1;
+    /// <summary>Gets or sets the maximum size of each file in bytes.</summary>
+    [Parameter] public long MaxFileSize { get; set; } = 10 * 1024 * 1024;
+    /// <summary>Gets or sets whether file selection is disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+    /// <summary>Gets or sets whether caller-owned processing is in progress.</summary>
+    [Parameter] public bool Loading { get; set; }
+    /// <summary>Gets or sets the primary accessible instruction.</summary>
+    [Parameter] public string Instructions { get; set; } = "Drop files here or choose files";
+    /// <summary>Gets or sets supporting constraints shown to every user.</summary>
+    [Parameter] public string? Description { get; set; }
+    /// <summary>Runs after a selection is validated. The component never uploads files.</summary>
+    [Parameter] public EventCallback<ShadcnDropzoneSelection> SelectionChanged { get; set; }
+
+    private bool EffectiveDisabled => Disabled || Loading;
+    private string State => Loading ? "loading" : Disabled ? "disabled" : _selection?.Errors.Count > 0 ? "invalid" : _dragging ? "dragging" : "idle";
+    private string InstructionsId => $"{_id}-instructions";
+    private string DescriptionId => $"{_id}-description";
+    private string StatusId => $"{_id}-status";
+    private string DescriptionIds => string.IsNullOrWhiteSpace(Description) ? $"{InstructionsId} {StatusId}" : $"{InstructionsId} {DescriptionId} {StatusId}";
+    private string Status => Loading ? "Processing selected files" : _selection is null ? string.Empty : _selection.IsValid ? $"{_selection.Files.Count} file{(_selection.Files.Count == 1 ? string.Empty : "s")} selected" : $"{_selection.Errors.Count} file validation error{(_selection.Errors.Count == 1 ? string.Empty : "s")}";
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "role", "aria-busy", "aria-labelledby", "aria-describedby");
+
+    protected override void OnParametersSet()
+    {
+        if (MaxFiles <= 0) throw new ArgumentOutOfRangeException(nameof(MaxFiles));
+        if (MaxFileSize <= 0) throw new ArgumentOutOfRangeException(nameof(MaxFileSize));
+        if (string.IsNullOrWhiteSpace(Instructions)) throw new ArgumentException("Instructions cannot be empty.", nameof(Instructions));
+    }
+
+    private void HandleDragEnter() { if (!EffectiveDisabled) _dragging = true; }
+    private void HandleDragLeave() => _dragging = false;
+    private void HandleDrop() => _dragging = false;
+
+    private async Task HandleSelectionAsync(InputFileChangeEventArgs args)
+    {
+        _dragging = false;
+        var files = args.GetMultipleFiles(int.MaxValue);
+        _selection = ShadcnDropzoneValidation.Validate(files, Accept, Multiple, MaxFiles, MaxFileSize);
+        await SelectionChanged.InvokeAsync(_selection);
+    }
+}

@@ -8,8 +8,8 @@ namespace Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 public static partial class ThemeScenarioCatalog
 {
     public const int SchemaVersion = 1;
-    public const int ScenarioCount = 195;
-    public const int ComponentCount = 65;
+    public const int ScenarioCount = 198;
+    public const int ComponentCount = 66;
     private const string ResourceSuffix = ".ThemeScenarios.ThemeScenarioCatalog.json";
     private static readonly Lazy<IReadOnlyList<ThemeScenarioDefinition>> Embedded = new(LoadCore);
 

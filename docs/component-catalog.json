@@ -462,6 +462,23 @@
       "deviations": []
     },
     {
+      "name": "Dropzone",
+      "slug": "dropzone",
+      "plan": 4,
+      "classification": "custom",
+      "status": "complete",
+      "evidence": {
+        "api": true,
+        "componentTests": true,
+        "accessibility": true,
+        "interaction": true,
+        "computedStyle": true,
+        "visual": true,
+        "integration": true
+      },
+      "deviations": []
+    },
+    {
       "name": "Empty",
       "slug": "empty",
       "plan": 2,

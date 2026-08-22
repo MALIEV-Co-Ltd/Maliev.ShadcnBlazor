@@ -24,11 +24,15 @@ public sealed class ToggleGroupShowcaseTests : BunitContext
         Assert.NotNull(cut.Find("[data-testid='toggle-group-dossier']"));
         Assert.Equal("Drawing review layers", cut.Find("[data-slot='toggle-group']").GetAttribute("aria-label"));
         Assert.Contains("Dimensions", cut.Find("[data-testid='toggle-group-selection']").TextContent, StringComparison.Ordinal);
+        Assert.Contains("126 × 84 × 32 mm", cut.Find("[data-testid='toggle-group-layer-dimensions']").TextContent, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll("[data-testid='toggle-group-layer-notes']"));
+        Assert.DoesNotContain("showcase-toggle-group-dossier__drawing", cut.Markup, StringComparison.Ordinal);
 
         cut.Find("[data-testid='toggle-group-notes']").Click();
 
         Assert.Equal("true", cut.Find("[data-testid='toggle-group-notes']").GetAttribute("aria-pressed"));
         Assert.Contains("Notes", cut.Find("[data-testid='toggle-group-selection']").TextContent, StringComparison.Ordinal);
+        Assert.Contains("Deburr all edges", cut.Find("[data-testid='toggle-group-layer-notes']").TextContent, StringComparison.Ordinal);
 
         cut.Find("[data-testid='control-toggle-group-multiple']").Change(false);
         cut.Find("[data-testid='toggle-group-notes']").Click();

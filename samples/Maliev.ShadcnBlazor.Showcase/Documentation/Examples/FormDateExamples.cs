@@ -28,8 +28,66 @@ internal static class FormDateExamples
         "combobox" => [Combobox()],
         "calendar" => [Calendar()],
         "date-picker" => [DatePicker()],
+        "dropzone" => [Dropzone()],
         _ => []
     };
+
+    private static ComponentExampleDefinition Dropzone()
+    {
+        var multiple = true; var loading = false;
+        RenderFragment preview = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-dropzone-dossier");
+            builder.OpenElement(2, "div");
+            builder.AddAttribute(3, "class", "showcase-dropzone-dossier__heading");
+            builder.OpenElement(4, "strong");
+            builder.AddContent(5, "Production drawing package");
+            builder.CloseElement();
+            builder.OpenElement(6, "span");
+            builder.AddContent(7, "Quotation Q-4218 · Revision C");
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.OpenComponent<ShadcnDropzone>(8);
+            builder.AddAttribute(9, nameof(ShadcnDropzone.Class), "showcase-dropzone-dossier__control");
+            builder.AddAttribute(10, nameof(ShadcnDropzone.Accept), ".step,.stp,.pdf");
+            builder.AddAttribute(11, nameof(ShadcnDropzone.Multiple), multiple);
+            builder.AddAttribute(12, nameof(ShadcnDropzone.MaxFiles), multiple ? 5 : 1);
+            builder.AddAttribute(13, nameof(ShadcnDropzone.MaxFileSize), 20 * 1024 * 1024L);
+            builder.AddAttribute(14, nameof(ShadcnDropzone.Loading), loading);
+            builder.AddAttribute(15, nameof(ShadcnDropzone.Instructions), "Drop STEP or PDF drawings here, or choose files");
+            builder.AddAttribute(16, nameof(ShadcnDropzone.Description), "Up to 20 MB per file. Files remain caller-owned until you upload them.");
+            builder.CloseComponent();
+            builder.CloseElement();
+        };
+        string Source() => $$"""
+            @using Maliev.ShadcnBlazor.Components.Forms
+            @using Microsoft.AspNetCore.Components.Forms
+
+            <ShadcnDropzone Accept=".step,.stp,.pdf"
+                            Multiple="{{multiple.ToString().ToLowerInvariant()}}"
+                            MaxFiles="{{(multiple ? 5 : 1)}}"
+                            MaxFileSize="@(20 * 1024 * 1024)"
+                            Loading="{{loading.ToString().ToLowerInvariant()}}"
+                            Instructions="Drop STEP or PDF drawings here, or choose files"
+                            Description="Up to 20 MB per file. Files remain caller-owned until you upload them."
+                            SelectionChanged="HandleSelection" />
+
+            @code {
+                private Task HandleSelection(ShadcnDropzoneSelection selection)
+                {
+                    // Read or upload selection.Files in caller-owned application code.
+                    return Task.CompletedTask;
+                }
+            }
+            """;
+        return Example("dropzone", "Drawing package intake", "Select or drop production files through one accessible browser boundary, validate them locally, and keep upload behavior caller-owned.", Source(), preview,
+            [
+                Toggle("dropzone-multiple", "Multiple files", value => multiple = value, true),
+                Toggle("dropzone-loading", "Processing", value => loading = value)
+            ], ["click", "keyboard", "drop", "validation", "invalid", "multiple", "disabled", "loading", "rtl"]) with
+        { RazorSourceProvider = Source };
+    }
 
     private static ComponentExampleDefinition Input()
     {

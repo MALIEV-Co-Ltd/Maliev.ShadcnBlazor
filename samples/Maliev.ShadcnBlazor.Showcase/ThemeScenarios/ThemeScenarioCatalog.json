@@ -1581,6 +1581,51 @@
       ]
     },
     {
+      "id": "dropzone-default",
+      "componentSlug": "dropzone",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Production drawing intake",
+        "description": "Choose or drop a STEP or PDF drawing package for quotation Q-4218 while upload behavior remains caller-owned."
+      },
+      "thai": {
+        "title": "รับแบบงานเพื่อการผลิต",
+        "description": "เลือกหรือลากไฟล์ STEP หรือ PDF สำหรับใบเสนอราคา Q-4218 โดยให้แอปพลิเคชันเป็นผู้จัดการการอัปโหลด"
+      },
+      "tags": ["workflow", "production", "dropzone"]
+    },
+    {
+      "id": "dropzone-stress",
+      "componentSlug": "dropzone",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Multi-file drawing validation",
+        "description": "Validate a dense drawing package with count, size, and file-type constraints before any upload begins."
+      },
+      "thai": {
+        "title": "ตรวจสอบชุดแบบหลายไฟล์",
+        "description": "ตรวจสอบจำนวน ขนาด และชนิดไฟล์ของชุดแบบก่อนเริ่มการอัปโหลด"
+      },
+      "tags": ["stress", "multiple", "validation", "dropzone"]
+    },
+    {
+      "id": "dropzone-accessible",
+      "componentSlug": "dropzone",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing intake by keyboard",
+        "description": "Choose production files by keyboard with persistent instructions, status announcements, and visible validation errors."
+      },
+      "thai": {
+        "title": "รับแบบงานด้วยแป้นพิมพ์",
+        "description": "เลือกไฟล์งานด้วยแป้นพิมพ์พร้อมคำแนะนำถาวร การประกาศสถานะ และข้อผิดพลาดที่มองเห็นได้"
+      },
+      "tags": ["accessible", "keyboard", "live-region", "dropzone"]
+    },
+    {
       "id": "empty-default",
       "componentSlug": "empty",
       "family": "SemanticFoundation",

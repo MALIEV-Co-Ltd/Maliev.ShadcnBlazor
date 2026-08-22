@@ -9,7 +9,7 @@
     @foreach (var presentation in PresentedItems)
     {
         var item = presentation.Item;
-        <div @key="item.Id" class="shadcn-toast" style="@SwipeStyle(item.Id)" data-slot="toast" data-type="@TypeValue(item.Type)" data-priority="@item.Priority.ToString().ToLowerInvariant()" data-state="@item.State" data-swipe="@SwipeState(item.Id)" data-limited="@(presentation.Limited ? "true" : null)" inert="@(presentation.Limited ? "" : null)" aria-hidden="@(presentation.Limited ? "true" : null)" role="@(item.Live == "assertive" ? "alert" : "status")" aria-live="@item.Live" @onmouseenter="() => PausePointer(item.Id)" @onmouseleave="() => ResumePointer(item.Id)" @onfocusin="() => PauseFocus(item.Id)" @onfocusout="() => ResumeFocus(item.Id)" @onpointerdown="args => PointerDown(item.Id, args)" @onpointermove="args => PointerMove(item.Id, args)" @onpointerup="args => PointerUp(item.Id, args)" @onpointercancel="() => CancelPointer(item.Id)">
+        <div @key="item.Id" class="shadcn-toast" style="@ToastStyle(presentation)" data-slot="toast" data-type="@TypeValue(item.Type)" data-priority="@item.Priority.ToString().ToLowerInvariant()" data-state="@item.State" data-swipe="@SwipeState(item.Id)" data-stack-index="@presentation.StackIndex" data-limited="@(presentation.Limited ? "true" : null)" inert="@(presentation.Limited ? "" : null)" aria-hidden="@(presentation.Limited ? "true" : null)" role="@(item.Live == "assertive" ? "alert" : "status")" aria-live="@item.Live" @onmouseenter="() => PausePointer(item.Id)" @onmouseleave="() => ResumePointer(item.Id)" @onfocusin="() => PauseFocus(item.Id)" @onfocusout="() => ResumeFocus(item.Id)" @onpointerdown="args => PointerDown(item.Id, args)" @onpointermove="args => PointerMove(item.Id, args)" @onpointerup="args => PointerUp(item.Id, args)" @onpointercancel="() => CancelPointer(item.Id)">
             <div class="shadcn-toast-content" data-slot="toast-content">
                 @if (item.Icon is not null)
                 {
@@ -72,10 +72,10 @@
         .Take(MaximumVisible)
         .OrderBy(item => long.TryParse(item.Id, out var sequence) ? sequence : long.MaxValue)
         .ToArray();
-    private IReadOnlyList<ToastPresentation> PresentedItems => VisibleItems.Select(item => new ToastPresentation(item, false))
-        .Concat(Toasts.Items.Except(VisibleItems).Select(item => new ToastPresentation(item with { Live = "off" }, true)))
+    private IReadOnlyList<ToastPresentation> PresentedItems => VisibleItems.Select((item, index) => new ToastPresentation(item, false, index))
+        .Concat(Toasts.Items.Except(VisibleItems).Select(item => new ToastPresentation(item with { Live = "off" }, true, null)))
         .ToArray();
-    private sealed record ToastPresentation(ShadcnToastItem Item, bool Limited);
+    private sealed record ToastPresentation(ShadcnToastItem Item, bool Limited, int? StackIndex);
     private string PlacementValue => Placement switch { ShadcnToastPlacement.BottomEnd => "bottom-end", ShadcnToastPlacement.BottomStart => "bottom-start", ShadcnToastPlacement.TopEnd => "top-end", ShadcnToastPlacement.TopStart => "top-start", _ => throw new ArgumentOutOfRangeException(nameof(Placement), Placement, "Unknown toast placement.") };
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-placement", "data-maximum-visible", "data-reduced-motion", "aria-label", "tabindex");
     protected override void OnInitialized() => Toasts.Changed += HandleChanged;
@@ -112,6 +112,11 @@
     private void CancelPointer(string id) { _pointerStarts.Remove(id); _pointerOffsets.Remove(id); }
     private string? SwipeState(string id) => _pointerOffsets.ContainsKey(id) ? "move" : null;
     private string? SwipeStyle(string id) => _pointerOffsets.TryGetValue(id, out var value) ? FormattableString.Invariant($"--shadcn-toast-swipe-x: {value.X:0.###}px; --shadcn-toast-swipe-y: {value.Y:0.###}px") : null;
+    private string ToastStyle(ToastPresentation presentation)
+    {
+        var stack = presentation.StackIndex is { } index ? FormattableString.Invariant($"--shadcn-toast-stack-index: {index}") : null;
+        return string.Join("; ", new[] { stack, SwipeStyle(presentation.Item.Id) }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    }
     private void SetExpanded(bool value) => _expanded = value;
     private bool PausePointer(string id) => Toasts.Pause(id, "pointer");
     private bool ResumePointer(string id) => Toasts.Resume(id, "pointer");

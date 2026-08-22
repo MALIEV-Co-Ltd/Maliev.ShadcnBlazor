@@ -181,11 +181,18 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-state="closing"] { opacity: 0; transform: translateY(0.75rem) scale(0.96); pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-limited="true"] { position: absolute; visibility: hidden; pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-reduced-motion="true"] .shadcn-toast { transition: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport:not([data-expanded="true"]) .shadcn-toast:not(:last-child) { margin-block-end: -3rem; transform: scale(0.96); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport:not([data-expanded="true"]) .shadcn-toast:not(:last-child) { margin-block-end: -3rem; transform: translateY(calc(var(--shadcn-toast-stack-index, 0) * 0.125rem)) scale(0.96); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-expanded="true"] .shadcn-toast { margin-block-end: 0; transform: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-content { display: flex; min-height: 4rem; box-sizing: border-box; align-items: center; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-icon { display: inline-flex; width: 1rem; height: 1rem; flex: 0 0 auto; align-items: center; justify-content: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-icon, .shadcn-toast-close) svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="error"] .shadcn-toast-icon { color: var(--shadcn-destructive); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="success"] { --shadcn-toast-accent: var(--shadcn-success, var(--shadcn-chart-2)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="info"] { --shadcn-toast-accent: var(--shadcn-chart-3); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="warning"] { --shadcn-toast-accent: var(--shadcn-chart-4); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="error"] { --shadcn-toast-accent: var(--shadcn-destructive); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="loading"] { --shadcn-toast-accent: var(--shadcn-muted-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type]:not([data-type="default"]) { border-color: color-mix(in oklch, var(--shadcn-toast-accent) 40%, var(--shadcn-border)); background: color-mix(in oklch, var(--shadcn-toast-accent) 8%, var(--shadcn-popover)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type]:not([data-type="default"]) .shadcn-toast-icon { color: var(--shadcn-toast-accent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="loading"] .shadcn-toast-icon { animation: shadcn-spinner-rotate var(--shadcn-motion-duration-slow) linear infinite; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-reduced-motion="true"] .shadcn-toast-icon { animation: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); }

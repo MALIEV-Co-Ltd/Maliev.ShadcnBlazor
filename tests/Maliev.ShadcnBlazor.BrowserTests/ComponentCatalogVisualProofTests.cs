@@ -15,7 +15,7 @@ public sealed class ComponentCatalogVisualProofTests(
         var slugs = ComponentCatalogProof.LoadCompleted(root);
         var baselineDirectory = VisualProof.BaselineDirectory(root);
 
-        Assert.Equal(65, slugs.Count);
+        Assert.Equal(66, slugs.Count);
         if (VisualProof.UpdateEnabled)
             return;
 

@@ -52,6 +52,11 @@
             <li>Associate the native control with a visible label, merge every description ID, and keep validation messages attached through the active <code>EditContext</code>.</li>
             <li>For read-only <code>native-select</code>, keep focus available and restore the controlled DOM value after attempted changes.</li>
         }
+        else if (Entry.Slug == "dropzone")
+        {
+            <li>Expose one native file input for pointer, keyboard, and drag-and-drop selection; keep visible constraints referenced by its accessible description.</li>
+            <li>Announce selection results without starting an upload, and render count, size, and file-type failures as visible alerts.</li>
+        }
         else if (Entry.Slug == "input-otp")
         {
             <li>Expose one native input for focus, paste, autocomplete, and validation; visual slots remain presentational and follow grapheme-aware caret position.</li>
