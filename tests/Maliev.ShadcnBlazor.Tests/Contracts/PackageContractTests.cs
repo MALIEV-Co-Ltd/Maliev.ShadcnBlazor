@@ -46,6 +46,7 @@ public sealed class PackageContractTests
             Assert.Contains("licenses/shadcn-ui-LICENSE.md", names);
             Assert.Contains("licenses/MudBlazor-LICENSE.txt", names);
             Assert.Contains("reference/shadcn-reference.json", names);
+            Assert.Contains("schemas/shadcn-theme-document-v2.schema.json", names);
             Assert.Single(names, x => string.Equals(x, "staticwebassets/css/shadcn-base.css", StringComparison.Ordinal));
             Assert.Single(names, x => string.Equals(x, "staticwebassets/css/shadcn-mudblazor.css", StringComparison.Ordinal));
             Assert.Contains("lib/net10.0/Maliev.ShadcnBlazor.dll", names);

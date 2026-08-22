@@ -40,6 +40,9 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
+        await page.GetByTestId("mode-dark").ClickAsync();
+        await page.GetByTestId("direction-rtl").ClickAsync();
+        await page.GetByTestId("locale-thai").ClickAsync();
         var primary = page.Locator("input[data-testid='theme-token-light-primary']");
         await primary.FillAsync("#123456");
         await primary.PressAsync("Tab");
@@ -53,7 +56,7 @@ public sealed class ThemeImportExportBrowserTests(
 
         var download = await page.RunAndWaitForDownloadAsync(
             () => page.GetByTestId("theme-download").ClickAsync());
-        Assert.Equal("maliev-shadcn-theme-base-vega-neutral-1.zip", download.SuggestedFilename);
+        Assert.Equal("maliev-shadcn-theme-base-vega-neutral-2.zip", download.SuggestedFilename);
         var downloadPath = await download.PathAsync();
         Assert.NotNull(downloadPath);
 
@@ -72,12 +75,24 @@ public sealed class ThemeImportExportBrowserTests(
             }
 
             themeJson = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.json")!));
+            using var themeDocument = JsonDocument.Parse(themeJson);
+            Assert.Equal(2, themeDocument.RootElement.GetProperty("schemaVersion").GetInt32());
+            Assert.True(themeDocument.RootElement.TryGetProperty("application", out _));
+            Assert.True(themeDocument.RootElement.TryGetProperty("palette", out _));
+            Assert.True(themeDocument.RootElement.TryGetProperty("typography", out _));
+            Assert.True(themeDocument.RootElement.GetProperty("application").GetProperty("defaultDarkMode").GetBoolean());
+            Assert.Equal("rightToLeft", themeDocument.RootElement.GetProperty("application").GetProperty("defaultDirection").GetString());
+            Assert.Equal("th", themeDocument.RootElement.GetProperty("application").GetProperty("defaultLocale").GetString());
+            Assert.Equal(0UL, themeDocument.RootElement.GetProperty("palette").GetProperty("seed").GetUInt64());
             Assert.Contains("#123456", themeJson, StringComparison.Ordinal);
             Assert.Contains("#123456", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.css")!)), StringComparison.Ordinal);
             Assert.Contains("#123456", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("MalievShadcnTheme.cs")!)), StringComparison.Ordinal);
         }
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Close theme export" }).ClickAsync();
+        await page.GetByTestId("mode-light").ClickAsync();
+        await page.GetByTestId("direction-ltr").ClickAsync();
+        await page.GetByTestId("locale-english").ClickAsync();
         await primary.FillAsync("#654321");
         await primary.PressAsync("Tab");
         await Assertions.Expect(primary).ToHaveValueAsync("#654321");
@@ -91,6 +106,15 @@ public sealed class ThemeImportExportBrowserTests(
 
         await Assertions.Expect(page.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
         await Assertions.Expect(primary).ToHaveValueAsync("#123456");
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
+        await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
+        await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2')?.includes('\\\"schemaVersion\\\": 2')");
+        await page.ReloadAsync();
+        await page.GetByTestId("theme-studio").WaitForAsync();
+        await Assertions.Expect(page.Locator("input[data-testid='theme-token-light-primary']")).ToHaveValueAsync("#123456");
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
         Assert.Empty(errors);
     }
 

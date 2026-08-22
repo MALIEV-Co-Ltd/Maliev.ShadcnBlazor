@@ -10,6 +10,13 @@ namespace Maliev.ShadcnBlazor.Showcase.Export;
 
 public static class ThemeBundleBuilder
 {
+    public static ThemeBundle Build(ShadcnTheme theme, ThemeBundleOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
+        var document = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
+        return Build(document, options);
+    }
+
     private static readonly DateTimeOffset FixedTimestamp = new(1980, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly UTF8Encoding Utf8 = new(false, true);
     private static readonly JsonSerializerOptions ManifestJsonOptions = new()
@@ -20,13 +27,17 @@ public static class ThemeBundleBuilder
         DefaultIgnoreCondition = JsonIgnoreCondition.Never
     };
 
-    public static ThemeBundle Build(ShadcnTheme theme, ThemeBundleOptions options)
+    public static ThemeBundle Build(ShadcnThemeDocument document, ThemeBundleOptions options)
     {
-        ArgumentNullException.ThrowIfNull(theme);
+        ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.PresetAncestry);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.PackageVersion);
 
+        var documentValidation = ShadcnThemeDocumentValidator.Validate(document);
+        if (!documentValidation.IsValid)
+            throw new ArgumentException("Only a valid applied theme document can be exported.", nameof(document));
+        var theme = document.Theme;
         var validation = ShadcnThemeValidator.Validate(theme);
         if (!validation.IsValid)
             throw new ArgumentException("Only a valid applied theme can be exported.", nameof(theme));
@@ -35,18 +46,18 @@ public static class ThemeBundleBuilder
         {
             CreateFile("theme.css", ShadcnThemeCssWriter.Write(theme)),
             CreateFile("MalievShadcnTheme.cs", ThemeBundleTemplates.WriteThemeClass(theme)),
-            CreateFile("theme.json", ShadcnThemeSerializer.Serialize(theme)),
+            CreateFile("theme.json", ShadcnThemeDocumentSerializer.Serialize(document)),
             CreateFile("README.md", ThemeBundleTemplates.WriteReadme(theme, options, validation)),
             CreateFile("Examples/Program.cs.txt", ThemeBundleTemplates.ProgramExample(options.PackageVersion)),
             CreateFile("Examples/AppShell.razor.txt", ThemeBundleTemplates.AppShellExample()),
             CreateFile("Examples/FormExample.razor.txt", ThemeBundleTemplates.FormExample()),
             CreateFile("Examples/OverlayExample.razor.txt", ThemeBundleTemplates.OverlayExample())
         };
-        files.Add(CreateFile("manifest.json", WriteManifest(theme, options, files)));
+        files.Add(CreateFile("manifest.json", WriteManifest(document, options, files)));
 
         var zipBytes = WriteZip(files);
         return new ThemeBundle(
-            $"maliev-shadcn-theme-{SafeName(theme.Name)}-{theme.SchemaVersion}.zip",
+            $"maliev-shadcn-theme-{SafeName(theme.Name)}-{document.SchemaVersion}.zip",
             validation,
             files.AsReadOnly(),
             zipBytes);
@@ -61,11 +72,11 @@ public static class ThemeBundleBuilder
         return new ThemeBundleFile(path, bytes, Hash(bytes));
     }
 
-    private static string WriteManifest(ShadcnTheme theme, ThemeBundleOptions options, IReadOnlyList<ThemeBundleFile> files)
+    private static string WriteManifest(ShadcnThemeDocument document, ThemeBundleOptions options, IReadOnlyList<ThemeBundleFile> files)
     {
         var manifest = new ThemeBundleManifest(
-            theme.SchemaVersion,
-            theme.Name,
+            document.SchemaVersion,
+            document.Name,
             options.PresetAncestry,
             options.PackageVersion,
             files.Select(file => new ThemeBundleManifestFile(file.Path, file.Size, file.Sha256)).ToArray());

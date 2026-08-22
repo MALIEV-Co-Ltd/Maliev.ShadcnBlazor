@@ -122,6 +122,11 @@ public sealed class ThemeStudioState
     private ThemeStudioMenuColor _baselineMenuColor = ThemeStudioMenuColor.Default;
     private string? _pointerMutationKey;
     private bool _pointerSnapshotCaptured;
+    private bool _suppressWorkbenchChanged;
+    private ShadcnThemeDocument _documentTemplate = ShadcnThemeDocumentSerializer.Deserialize(
+        ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
+    private ShadcnThemeDocument _baselineDocumentTemplate = ShadcnThemeDocumentSerializer.Deserialize(
+        ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
 
     public ThemeStudioState(IThemeStudioStorage storage)
         : this(storage, new ThemeStudioWorkbenchState())
@@ -136,6 +141,7 @@ public sealed class ThemeStudioState
     }
 
     public ThemeStudioWorkbenchState Workbench { get; }
+    public ShadcnThemeDocument Document => CreateDocument();
     public ShadcnTheme Draft { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public ShadcnTheme Applied { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public ThemeStudioMode Mode => Workbench.Mode;
@@ -167,14 +173,12 @@ public sealed class ThemeStudioState
     {
         var result = await storage.LoadAsync();
         StorageDiagnostic = result.Diagnostic;
-        if (result.Succeeded && result.Theme is not null)
+        if (result.Succeeded && result.Document is not null)
         {
-            var validation = ShadcnThemeValidator.Validate(result.Theme);
+            var validation = ShadcnThemeDocumentValidator.Validate(result.Document);
             if (validation.IsValid)
             {
-                Draft = Clone(result.Theme);
-                Applied = Clone(result.Theme);
-                Validation = validation;
+                ApplyDocument(result.Document, captureHistory: false);
             }
             else
             {
@@ -189,7 +193,7 @@ public sealed class ThemeStudioState
     {
         if (!Validation.IsValid || _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0)
             return;
-        var result = await storage.SaveAsync(Applied);
+        var result = await storage.SaveAsync(CreateDocument());
         StorageDiagnostic = result.Diagnostic;
     }
 
@@ -276,6 +280,8 @@ public sealed class ThemeStudioState
             ?? throw new ArgumentException($"Unknown theme preset '{presetId}'.", nameof(presetId));
         CaptureHistory("preset");
         var theme = preset.CreateTheme();
+        _documentTemplate = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
+        _baselineDocumentTemplate = _documentTemplate;
         Draft = Clone(theme);
         Applied = Clone(theme);
         _baseline = Clone(theme);
@@ -335,6 +341,7 @@ public sealed class ThemeStudioState
             return;
         CaptureHistory("reset.all");
         Draft = Clone(_baseline);
+        _documentTemplate = _baselineDocumentTemplate;
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
         StyleId = _baselineStyleId;
@@ -366,22 +373,141 @@ public sealed class ThemeStudioState
     public bool Import(ShadcnTheme theme)
     {
         ArgumentNullException.ThrowIfNull(theme);
-        var validation = ShadcnThemeValidator.Validate(theme);
+        try
+        {
+            var document = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
+            return ImportDocument(document);
+        }
+        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
+        {
+            ImportDiagnostic = $"Imported theme was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+    }
+
+    public ShadcnThemeDocument CreateDocument()
+    {
+        var theme = Clone(Applied);
+        var migrated = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
+        return migrated with
+        {
+            Name = theme.Name,
+            Theme = theme,
+            Application = new ShadcnThemeApplication(
+                SelectedPresetId,
+                StyleId,
+                BaseColorId,
+                IconLibrary.ToString().ToLowerInvariant(),
+                MenuAccent.ToString().ToLowerInvariant(),
+                MenuColor.ToString().ToLowerInvariant(),
+                Mode == ThemeStudioMode.Dark,
+                Direction,
+                Locale == ThemeStudioLocale.Thai ? "th" : "en",
+                theme.Metrics.ReducedMotionBehavior),
+            Palette = _documentTemplate.Palette with { BaseColor = BaseColorId },
+            Typography = _documentTemplate.Typography with
+            {
+                Body = _documentTemplate.Typography.Body with { Family = theme.Metrics.FontFamily },
+                Code = _documentTemplate.Typography.Code with { Family = theme.Metrics.MonospaceFontFamily }
+            }
+        };
+    }
+
+    public string SerializeDocument() => ShadcnThemeDocumentSerializer.Serialize(CreateDocument());
+
+    public bool ImportDocument(ShadcnThemeDocument document) => ApplyDocument(document, captureHistory: true);
+
+    public bool ImportDocument(string json)
+    {
+        try
+        {
+            return ImportDocument(ShadcnThemeDocumentSerializer.Deserialize(json));
+        }
+        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
+        {
+            ImportDiagnostic = $"Theme document was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+    }
+
+    private bool ApplyDocument(ShadcnThemeDocument document, bool captureHistory)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
         if (!validation.IsValid)
         {
-            ImportDiagnostic = "Imported theme failed validation; the current theme was not changed.";
+            ImportDiagnostic = "Theme document failed validation; the current theme was not changed.";
             RaiseChanged();
             return false;
         }
 
-        CaptureHistory("import");
-        Draft = Clone(theme);
+        ThemeStudioIconLibrary iconLibrary;
+        ThemeStudioMenuAccent menuAccent;
+        ThemeStudioMenuColor menuColor;
+        if (!ThemeStudioGeneratorCatalog.IsKnownStyle(document.Application.Style) ||
+            !ThemeStudioGeneratorCatalog.IsKnownBaseColor(document.Application.BaseColor))
+        {
+            ImportDiagnostic = "Theme document was not applied: application style or base color is unsupported.";
+            RaiseChanged();
+            return false;
+        }
+        try
+        {
+            iconLibrary = ParseOption<ThemeStudioIconLibrary>(document.Application.IconLibrary);
+            menuAccent = ParseOption<ThemeStudioMenuAccent>(document.Application.MenuAccent);
+            menuColor = ParseOption<ThemeStudioMenuColor>(document.Application.MenuColor);
+        }
+        catch (JsonException exception)
+        {
+            ImportDiagnostic = $"Theme document was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+
+        if (captureHistory)
+            CaptureHistory("document.import");
+        _documentTemplate = document;
+        _baselineDocumentTemplate = document;
+        Draft = Clone(document.Theme);
+        Applied = Clone(document.Theme);
+        _baseline = Clone(document.Theme);
+        SelectedPresetId = document.Application.Preset;
+        StyleId = document.Application.Style;
+        BaseColorId = document.Application.BaseColor;
+        IconLibrary = iconLibrary;
+        MenuAccent = menuAccent;
+        MenuColor = menuColor;
+        _suppressWorkbenchChanged = true;
+        try
+        {
+            Workbench.SetDirection(document.Application.DefaultDirection);
+            Workbench.SetLocale(string.Equals(document.Application.DefaultLocale, "th", StringComparison.OrdinalIgnoreCase)
+                ? ThemeStudioLocale.Thai
+                : ThemeStudioLocale.English);
+            Workbench.SetMode(document.Application.DefaultDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
+        }
+        finally
+        {
+            _suppressWorkbenchChanged = false;
+        }
+        _baselineStyleId = StyleId;
+        _baselineBaseColorId = BaseColorId;
+        _baselineIconLibrary = IconLibrary;
+        _baselineMenuAccent = MenuAccent;
+        _baselineMenuColor = MenuColor;
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
         ImportDiagnostic = null;
         RevalidateAndApply();
         return true;
     }
+
+    private static T ParseOption<T>(string value) where T : struct, Enum =>
+        Enum.TryParse<T>(value, true, out var parsed) && Enum.IsDefined(parsed)
+            ? parsed
+            : throw new JsonException($"Unsupported Theme Studio option '{value}'.");
 
     public void BeginPointerInteraction(string mutationKey)
     {
@@ -471,76 +597,6 @@ public sealed class ThemeStudioState
         SetMetric("radiusRem", ThemeStudioGeneratorCatalog.RadiusRem(radiusPreset).ToString("G17", CultureInfo.InvariantCulture));
     }
 
-    public ThemeStudioGeneratorConfig CreateGeneratorConfig()
-    {
-        var theme = Clone(Applied);
-        return new ThemeStudioGeneratorConfig
-        {
-            Preset = SelectedPresetId,
-            Style = StyleId,
-            BaseColor = BaseColorId,
-            IconLibrary = IconLibrary,
-            MenuAccent = MenuAccent,
-            MenuColor = MenuColor,
-            RadiusPreset = ThemeStudioGeneratorCatalog.RadiusPreset(theme.Metrics.RadiusRem),
-            FontFamily = theme.Metrics.FontFamily,
-            MonospaceFontFamily = theme.Metrics.MonospaceFontFamily,
-            Theme = theme
-        };
-    }
-
-    public string SerializeGeneratorConfig() => ThemeStudioGeneratorConfigSerializer.Serialize(CreateGeneratorConfig());
-
-    public bool ImportGeneratorConfig(ThemeStudioGeneratorConfig config)
-    {
-        ArgumentNullException.ThrowIfNull(config);
-        try
-        {
-            ThemeStudioGeneratorConfigSerializer.Validate(config);
-        }
-        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
-        {
-            ImportDiagnostic = $"Generator configuration was not applied: {exception.Message}";
-            RaiseChanged();
-            return false;
-        }
-
-        CaptureHistory("generator.import");
-        Draft = Clone(config.Theme);
-        Applied = Clone(config.Theme);
-        _baseline = Clone(config.Theme);
-        SelectedPresetId = config.Preset;
-        StyleId = config.Style;
-        BaseColorId = config.BaseColor;
-        IconLibrary = config.IconLibrary;
-        MenuAccent = config.MenuAccent;
-        MenuColor = config.MenuColor;
-        _baselineStyleId = StyleId;
-        _baselineBaseColorId = BaseColorId;
-        _baselineIconLibrary = IconLibrary;
-        _baselineMenuAccent = MenuAccent;
-        _baselineMenuColor = MenuColor;
-        _tokenEditorValues.Clear();
-        _metricEditorValues.Clear();
-        ImportDiagnostic = null;
-        RevalidateAndApply();
-        return true;
-    }
-
-    public bool ImportGeneratorConfig(string json)
-    {
-        try
-        {
-            return ImportGeneratorConfig(ThemeStudioGeneratorConfigSerializer.Deserialize(json));
-        }
-        catch (Exception exception) when (exception is ArgumentException or JsonException or NotSupportedException)
-        {
-            ImportDiagnostic = $"Generator configuration was not applied: {exception.Message}";
-            RaiseChanged();
-            return false;
-        }
-    }
-
     public void SetViewport(ThemeStudioViewport viewport)
         => Workbench.SetViewport(viewport);
 
@@ -586,6 +642,8 @@ public sealed class ThemeStudioState
         Clone(Draft),
         Clone(Applied),
         Clone(_baseline),
+        _documentTemplate,
+        _baselineDocumentTemplate,
         new Dictionary<string, string>(_tokenEditorValues, StringComparer.Ordinal),
         new Dictionary<string, string>(_metricEditorValues, StringComparer.Ordinal),
         SelectedPresetId,
@@ -605,6 +663,8 @@ public sealed class ThemeStudioState
         Draft = Clone(snapshot.Draft);
         Applied = Clone(snapshot.Applied);
         _baseline = Clone(snapshot.Baseline);
+        _documentTemplate = snapshot.DocumentTemplate;
+        _baselineDocumentTemplate = snapshot.BaselineDocumentTemplate;
         SelectedPresetId = snapshot.SelectedPresetId;
         StyleId = snapshot.StyleId;
         BaseColorId = snapshot.BaseColorId;
@@ -754,6 +814,10 @@ public sealed class ThemeStudioState
         Metrics = theme.Metrics with { }
     };
 
-    private void OnWorkbenchChanged(object? sender, EventArgs args) => RaiseChanged();
+    private void OnWorkbenchChanged(object? sender, EventArgs args)
+    {
+        if (!_suppressWorkbenchChanged)
+            RaiseChanged();
+    }
     private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
 }

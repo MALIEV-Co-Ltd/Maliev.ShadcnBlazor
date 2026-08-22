@@ -1,5 +1,6 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 @using Maliev.ShadcnBlazor.Showcase.Export
+@using Maliev.ShadcnBlazor.Theming
 @inject IJSRuntime JavaScript
 @implements IAsyncDisposable
 
@@ -11,7 +12,7 @@
     <form method="dialog">
         <div class="theme-transfer-dialog__heading">
             <div>
-                <span class="theme-inspector__eyebrow">Portable generator output</span>
+                <span class="theme-inspector__eyebrow">Portable theme document</span>
                 <h2 id="theme-code-title">Get code</h2>
             </div>
             <button type="button" class="theme-transfer-dialog__close" aria-label="Close generated code" @onclick="CloseAsync">×</button>
@@ -28,7 +29,7 @@
             <button type="button" data-testid="theme-json-download" @onclick="DownloadJsonAsync">Download JSON</button>
         </div>
         <div class="theme-code-dialog__import">
-            <label for="theme-generator-import-file">Import a generator JSON</label>
+            <label for="theme-generator-import-file">Import a portable theme JSON</label>
             <InputFile id="theme-generator-import-file"
                        data-testid="theme-generator-import-file"
                        accept="application/json,.json"
@@ -51,12 +52,12 @@
     private DotNetObjectReference<ThemeCodeDialog>? _selfReference;
     private bool _shown;
     private bool _disposed;
-    private const long MaxImportBytes = 512 * 1024;
+    private const long MaxImportBytes = ShadcnThemeDocumentLoader.MaxDocumentBytes;
 
     private string _activeTabLabel => _activeTab == ThemeCodeTab.CSharp ? "C#" : "JSON";
     private string CurrentContent => _activeTab == ThemeCodeTab.CSharp
-        ? ThemeStudioCodeGenerator.WriteCSharp(State.CreateGeneratorConfig())
-        : ThemeStudioCodeGenerator.WriteJson(State.CreateGeneratorConfig());
+        ? ThemeStudioCodeGenerator.WriteCSharp(State.CreateDocument())
+        : ThemeStudioCodeGenerator.WriteJson(State.CreateDocument());
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -93,9 +94,9 @@
         }
     }
 
-    private async Task DownloadCodeAsync() => await DownloadAsync("MalievShadcnTheme.cs", "text/plain", ThemeStudioCodeGenerator.WriteCSharp(State.CreateGeneratorConfig()));
+    private async Task DownloadCodeAsync() => await DownloadAsync("MalievShadcnTheme.cs", "text/plain", ThemeStudioCodeGenerator.WriteCSharp(State.CreateDocument()));
 
-    private async Task DownloadJsonAsync() => await DownloadAsync("maliev-shadcn-theme.json", "application/json", ThemeStudioCodeGenerator.WriteJson(State.CreateGeneratorConfig()));
+    private async Task DownloadJsonAsync() => await DownloadAsync("maliev-shadcn-theme.json", "application/json", ThemeStudioCodeGenerator.WriteJson(State.CreateDocument()));
 
     private async Task DownloadAsync(string fileName, string mimeType, string content)
     {
@@ -116,7 +117,7 @@
         var file = args.File;
         if (file.Size > MaxImportBytes)
         {
-            _status = $"Generator JSON exceeds the {MaxImportBytes} byte limit.";
+            _status = $"Theme document exceeds the {MaxImportBytes} byte limit.";
             return;
         }
 
@@ -125,14 +126,14 @@
             await using var stream = file.OpenReadStream(MaxImportBytes);
             using var memory = new MemoryStream();
             await stream.CopyToAsync(memory);
-            if (State.ImportGeneratorConfig(System.Text.Encoding.UTF8.GetString(memory.ToArray())))
+            if (State.ImportDocument(System.Text.Encoding.UTF8.GetString(memory.ToArray())))
                 _status = $"Imported {file.Name} successfully.";
             else
-                _status = State.ImportDiagnostic ?? "Generator JSON was not applied.";
+                _status = State.ImportDiagnostic ?? "Theme document was not applied.";
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or System.Text.Json.JsonException or NotSupportedException)
         {
-            _status = $"Generator JSON was not applied: {exception.Message}";
+            _status = $"Theme document was not applied: {exception.Message}";
         }
     }
 

@@ -17,9 +17,11 @@ public sealed record ThemeBundle(
 
 public sealed record ThemeImportResult(
     bool Succeeded,
-    ShadcnTheme? Theme,
+    ShadcnThemeDocument? Document,
     IReadOnlyList<string> Diagnostics)
 {
+    public ShadcnTheme? Theme => Document?.Theme;
+
     public static ThemeImportResult Failure(params string[] diagnostics) => new(false, null, diagnostics);
-    public static ThemeImportResult Success(ShadcnTheme theme, params string[] diagnostics) => new(true, theme, diagnostics);
+    public static ThemeImportResult Success(ShadcnThemeDocument document, params string[] diagnostics) => new(true, document, diagnostics);
 }

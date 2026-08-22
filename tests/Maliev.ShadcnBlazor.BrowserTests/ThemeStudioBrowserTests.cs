@@ -208,7 +208,8 @@ public sealed class ThemeStudioBrowserTests(
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
             ViewportSize = new() { Width = 1280, Height = 900 },
-            ReducedMotion = ReducedMotion.Reduce
+            ReducedMotion = ReducedMotion.Reduce,
+            Permissions = ["clipboard-read", "clipboard-write"]
         });
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
@@ -231,6 +232,17 @@ public sealed class ThemeStudioBrowserTests(
         await page.GetByTestId("theme-code-tab-json").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-code-content")).ToContainTextAsync("\"iconLibrary\": \"tabler\"");
         await Assertions.Expect(page.GetByTestId("theme-json-download")).ToBeVisibleAsync();
+        var canonicalJson = await page.GetByTestId("theme-code-content").TextContentAsync();
+        await page.GetByTestId("theme-code-copy").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-status")).ToContainTextAsync("Copied JSON output");
+        var clipboardJson = await page.EvaluateAsync<string>("navigator.clipboard.readText()");
+        Assert.Equal(
+            canonicalJson?.Replace("\r\n", "\n", StringComparison.Ordinal),
+            clipboardJson.Replace("\r\n", "\n", StringComparison.Ordinal));
+
+        await page.EvaluateAsync("Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true })");
+        await page.GetByTestId("theme-code-copy").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-status")).ToContainTextAsync("Copied JSON output");
     }
 
     [Theory]

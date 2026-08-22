@@ -32,6 +32,8 @@
   <ItemGroup>
     <Content Remove="Reference\shadcn-reference.json" />
     <None Remove="Reference\shadcn-reference.json" />
+    <Content Remove="Schemas\shadcn-theme-document-v2.schema.json" />
+    <None Remove="Schemas\shadcn-theme-document-v2.schema.json" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" Link="LICENSE" />
     <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" Link="THIRD-PARTY-NOTICES.md" />
@@ -41,5 +43,6 @@
     <None Update="licenses\shadcn-ui-LICENSE.md" Pack="true" PackagePath="licenses\shadcn-ui-LICENSE.md" />
     <None Update="licenses\MudBlazor-LICENSE.txt" Pack="true" PackagePath="licenses\MudBlazor-LICENSE.txt" />
     <None Include="Reference\shadcn-reference.json" Pack="true" PackagePath="reference\shadcn-reference.json" />
+    <None Include="Schemas\shadcn-theme-document-v2.schema.json" Pack="true" PackagePath="schemas\shadcn-theme-document-v2.schema.json" />
   </ItemGroup>
 </Project>

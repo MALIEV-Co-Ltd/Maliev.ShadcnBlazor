@@ -36,6 +36,7 @@ public sealed class PackageArchiveTests
             Assert.Contains("licenses/MudBlazor-LICENSE.txt", entries);
             Assert.Contains("licenses/shadcn-ui-LICENSE.md", entries);
             Assert.Contains("lib/net10.0/Maliev.ShadcnBlazor.dll", entries);
+            Assert.Contains("schemas/shadcn-theme-document-v2.schema.json", entries);
             Assert.Contains("staticwebassets/css/shadcn-base.css", entries);
             Assert.Contains("staticwebassets/js/shadcn-selection.js", entries);
             Assert.DoesNotContain(entries, entry => entry.Contains("/bin/", StringComparison.OrdinalIgnoreCase));
