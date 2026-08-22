@@ -19,7 +19,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-instructions { font-size: .875rem; font-weight: 600; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-dropzone-description, .shadcn-dropzone-status) { color: var(--shadcn-muted-foreground); font-size: .8125rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-status:empty { display: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-errors { z-index: 2; margin: .25rem 0 0; padding-inline-start: 1rem; color: var(--shadcn-destructive); font-size: .8125rem; pointer-events: none; text-align: start; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-errors { z-index: 2; margin: calc(.25rem * var(--shadcn-spacing-multiplier)) 0 0; padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-destructive); font-size: .8125rem; pointer-events: none; text-align: start; }
 
 @media (prefers-reduced-motion: reduce) {
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone { transition: none; }
