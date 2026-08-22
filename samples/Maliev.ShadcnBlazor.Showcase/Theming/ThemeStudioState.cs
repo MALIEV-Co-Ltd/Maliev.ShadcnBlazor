@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Text.Json;
+using System.Security.Cryptography;
 using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
@@ -160,8 +161,9 @@ public sealed class ThemeStudioState
     public bool CanRedo => _redo.Count > 0;
     public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline ||
         StyleId != _baselineStyleId || BaseColorId != _baselineBaseColorId || IconLibrary != _baselineIconLibrary ||
-        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor;
+        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || !PaletteEquals(_documentTemplate.Palette, _baselineDocumentTemplate.Palette);
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+    public IReadOnlyList<ShadcnThemeValidationMessage> PaletteDiagnostics { get; private set; } = [];
     public string? StorageDiagnostic { get; private set; }
     public string? ImportDiagnostic { get; private set; }
     public bool SystemDarkMode => Workbench.SystemDarkMode;
@@ -416,6 +418,89 @@ public sealed class ThemeStudioState
 
     public string SerializeDocument() => ShadcnThemeDocumentSerializer.Serialize(CreateDocument());
 
+    public bool GeneratePalette(ulong seed)
+    {
+        var recipe = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            seed,
+            BaseColorId,
+            _documentTemplate.Palette.LockedTokens);
+        var result = ShadcnPaletteGenerator.Generate(Applied, recipe);
+        PaletteDiagnostics = result.Errors.Concat(result.Warnings).ToArray();
+        if (!result.IsValid)
+        {
+            RaiseChanged();
+            return false;
+        }
+
+        CaptureHistory("palette.generate");
+        Draft = Clone(result.Theme);
+        Applied = Clone(result.Theme);
+        _documentTemplate = _documentTemplate with { Theme = Clone(result.Theme), Palette = recipe };
+        _tokenEditorValues.Clear();
+        PaletteDiagnostics = result.Warnings;
+        Validation = ShadcnThemeValidator.Validate(Draft);
+        RaiseChanged();
+        return true;
+    }
+
+    public bool GeneratePalette(string seedText)
+    {
+        if (ulong.TryParse(seedText, NumberStyles.None, CultureInfo.InvariantCulture, out var seed))
+            return GeneratePalette(seed);
+        PaletteDiagnostics = [new("palette-invalid-seed", "palette.seed", "Seed must be an unsigned 64-bit decimal number.")];
+        RaiseChanged();
+        return false;
+    }
+
+    public ulong GenerateNewPalette()
+    {
+        Span<byte> bytes = stackalloc byte[sizeof(ulong)];
+        RandomNumberGenerator.Fill(bytes);
+        var seed = BitConverter.ToUInt64(bytes);
+        GeneratePalette(seed);
+        return seed;
+    }
+
+    public bool IsPaletteLocked(ThemeStudioScheme scheme, string token) =>
+        _documentTemplate.Palette.LockedTokens.Contains(TokenEditorKey(scheme, token), StringComparer.Ordinal);
+
+    public void SetPaletteLock(ThemeStudioScheme scheme, string token, bool locked)
+    {
+        _ = FindToken(token);
+        var path = TokenEditorKey(scheme, token);
+        var locks = _documentTemplate.Palette.LockedTokens.ToHashSet(StringComparer.Ordinal);
+        if (locked ? !locks.Add(path) : !locks.Remove(path))
+            return;
+        CaptureHistory($"palette.lock.{path}");
+        _documentTemplate = _documentTemplate with
+        {
+            Palette = new ShadcnPaletteRecipe(
+                _documentTemplate.Palette.AlgorithmVersion,
+                _documentTemplate.Palette.Seed,
+                BaseColorId,
+                locks.Order(StringComparer.Ordinal).ToArray())
+        };
+        PaletteDiagnostics = [];
+        RaiseChanged();
+    }
+
+    public string CreatePaletteShare() => ThemeStudioPaletteShareCodec.Encode(CreateDocument());
+
+    public bool ImportPaletteShare(string value)
+    {
+        try
+        {
+            return ImportDocument(ThemeStudioPaletteShareCodec.Decode(value));
+        }
+        catch (Exception exception) when (exception is ArgumentException or FormatException or JsonException or NotSupportedException)
+        {
+            ImportDiagnostic = $"Palette share was not applied: {exception.Message}";
+            RaiseChanged();
+            return false;
+        }
+    }
+
     public bool ImportDocument(ShadcnThemeDocument document) => ApplyDocument(document, captureHistory: true);
 
     public bool ImportDocument(string json)
@@ -500,6 +585,7 @@ public sealed class ThemeStudioState
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
         ImportDiagnostic = null;
+        PaletteDiagnostics = [];
         RevalidateAndApply();
         return true;
     }
@@ -682,6 +768,7 @@ public sealed class ThemeStudioState
         _metricEditorValues.Clear();
         foreach (var pair in snapshot.MetricEditorValues)
             _metricEditorValues[pair.Key] = pair.Value;
+        PaletteDiagnostics = [];
         RevalidateAndApply(applyWhenValid: false);
     }
 
@@ -798,6 +885,11 @@ public sealed class ThemeStudioState
         if (history.Count > HistoryLimit)
             history.RemoveAt(0);
     }
+
+    private static bool PaletteEquals(ShadcnPaletteRecipe first, ShadcnPaletteRecipe second) =>
+        first.AlgorithmVersion == second.AlgorithmVersion && first.Seed == second.Seed &&
+        string.Equals(first.BaseColor, second.BaseColor, StringComparison.Ordinal) &&
+        first.LockedTokens.SequenceEqual(second.LockedTokens, StringComparer.Ordinal);
 
     private static ThemeStudioSnapshot Pop(List<ThemeStudioSnapshot> history)
     {

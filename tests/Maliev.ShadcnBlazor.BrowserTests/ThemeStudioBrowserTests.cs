@@ -1,6 +1,7 @@
 using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
 
@@ -243,6 +244,48 @@ public sealed class ThemeStudioBrowserTests(
         await page.EvaluateAsync("Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true })");
         await page.GetByTestId("theme-code-copy").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-code-status")).ToContainTextAsync("Copied JSON output");
+    }
+
+    [Fact]
+    public async Task PaletteRecipeRegeneratesLocksAndReportsLinkedErrorsTransactionally()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        var seed = page.GetByTestId("theme-palette-seed");
+        await seed.FillAsync("23");
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        var firstPrimary = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        await Assertions.Expect(page.GetByTestId("theme-palette-share")).ToHaveValueAsync(new Regex("^palette-v1:"));
+
+        var lockButton = page.GetByTestId("theme-token-light-primary-lock");
+        await lockButton.ClickAsync();
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await seed.FillAsync("24");
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        var lockedPrimary = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        Assert.Equal(firstPrimary, lockedPrimary);
+
+        await seed.FillAsync("not-a-seed");
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        var diagnostic = page.GetByTestId("theme-validation-summary").GetByRole(AriaRole.Link, new() { NameRegex = new Regex("palette.seed") });
+        await Assertions.Expect(diagnostic).ToHaveAttributeAsync("href", "#theme-generator-options-title");
+        await Assertions.Expect(seed).ToHaveValueAsync("not-a-seed");
+
+        await page.GetByTestId("theme-undo").ClickAsync();
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await page.GetByTestId("theme-undo").ClickAsync();
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "false");
+        var axe = await page.GetByTestId("theme-studio").RunAxe();
+        Assert.DoesNotContain(axe.Violations, violation => violation.Impact is "serious" or "critical");
     }
 
     [Theory]

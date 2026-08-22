@@ -33,6 +33,7 @@ public sealed class SelectComboboxTests : BunitContext
             .Add(component => component.Placeholder, "Choose priority"));
 
         var trigger = cut.Find("button[data-slot='select-trigger']");
+        Assert.Equal("combobox", trigger.GetAttribute("role"));
         Assert.Equal("listbox", trigger.GetAttribute("aria-haspopup"));
         Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
         Assert.Equal("High", cut.Find("[data-slot='select-value']").TextContent);

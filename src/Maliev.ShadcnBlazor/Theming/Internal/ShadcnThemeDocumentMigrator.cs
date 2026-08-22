@@ -43,7 +43,7 @@ internal static class ShadcnThemeDocumentMigrator
         Name = theme.Name,
         Theme = theme,
         Application = application,
-        Palette = new ShadcnPaletteRecipe(1, 0, baseColor, Array.Empty<string>()),
+        Palette = new ShadcnPaletteRecipe(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, 0, baseColor, Array.Empty<string>()),
         Typography = new ShadcnTypographyScale(
             new(theme.Metrics.FontFamily, "ui-sans-serif, system-ui, sans-serif", null),
             new("'Noto Sans Thai', sans-serif", "sans-serif", null),

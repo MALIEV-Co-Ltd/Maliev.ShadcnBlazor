@@ -322,6 +322,7 @@ public sealed class ShadcnThemeDomainTests
             .Where(measurement => measurement.Kind is ShadcnContrastKind.FocusRing or
                 ShadcnContrastKind.Boundary or ShadcnContrastKind.DestructiveAdjacency or
                 ShadcnContrastKind.DisabledState)
+            .Where(measurement => measurement.BackgroundToken != "sidebar")
             .ToArray();
 
         Assert.Equal(10, dedicated.Length);
@@ -343,11 +344,51 @@ public sealed class ShadcnThemeDomainTests
     }
 
     [Fact]
+    public void ValidationMeasuresChartsAndSidebarChromeAgainstTheirSurfaces()
+    {
+        var source = CreateTheme();
+        var theme = source with
+        {
+            Light = source.Light with
+            {
+                Chart1 = source.Light.Background,
+                SidebarBorder = source.Light.Sidebar,
+                SidebarRing = source.Light.Sidebar
+            }
+        };
+
+        var result = ShadcnThemeValidator.Validate(theme);
+
+        Assert.Contains(result.ContrastResults, measurement =>
+            measurement.Kind == ShadcnContrastKind.Chart &&
+            measurement.Scheme == "light" &&
+            measurement.ForegroundToken == "chart1" &&
+            measurement.BackgroundToken == "background" &&
+            !measurement.Passes);
+        Assert.Contains(result.ContrastResults, measurement =>
+            measurement.Kind == ShadcnContrastKind.Boundary &&
+            measurement.Scheme == "light" &&
+            measurement.ForegroundToken == "sidebarBorder" &&
+            measurement.BackgroundToken == "sidebar" &&
+            !measurement.Passes);
+        Assert.Contains(result.ContrastResults, measurement =>
+            measurement.Kind == ShadcnContrastKind.FocusRing &&
+            measurement.Scheme == "light" &&
+            measurement.ForegroundToken == "sidebarRing" &&
+            measurement.BackgroundToken == "sidebar" &&
+            !measurement.Passes);
+        Assert.Contains(result.Warnings, warning => warning.Code == "low-chart-contrast" && warning.Path == "light.chart1");
+        Assert.Contains(result.Warnings, warning => warning.Code == "low-boundary-contrast" && warning.Path == "light.sidebarBorder");
+        Assert.Contains(result.Warnings, warning => warning.Code == "low-focus-ring-contrast" && warning.Path == "light.sidebarRing");
+    }
+
+    [Fact]
     public void DefaultDarkTranslucentBoundariesCompositeAgainstTheirActualBackground()
     {
         var result = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
         var boundaries = result.ContrastResults
-            .Where(measurement => measurement.Kind == ShadcnContrastKind.Boundary && measurement.Scheme == "dark")
+            .Where(measurement => measurement.Kind == ShadcnContrastKind.Boundary &&
+                measurement.Scheme == "dark" && measurement.BackgroundToken == "background")
             .ToArray();
 
         Assert.Collection(boundaries,
@@ -378,7 +419,8 @@ public sealed class ShadcnThemeDomainTests
 
         var result = ShadcnThemeValidator.Validate(CreateTheme() with { Light = scheme });
         var focus = Assert.Single(result.ContrastResults,
-            measurement => measurement.Kind == ShadcnContrastKind.FocusRing && measurement.Scheme == "light");
+            measurement => measurement.Kind == ShadcnContrastKind.FocusRing &&
+                measurement.Scheme == "light" && measurement.ForegroundToken == "ring");
 
         Assert.Equal(1.92, focus.Ratio, 2);
         Assert.False(focus.Passes);

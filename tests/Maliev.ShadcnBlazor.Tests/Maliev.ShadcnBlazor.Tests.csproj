@@ -19,4 +19,7 @@
     <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor\Maliev.ShadcnBlazor.csproj" />
     <ProjectReference Include="..\..\samples\Maliev.ShadcnBlazor.Showcase\Maliev.ShadcnBlazor.Showcase.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Theming\TestData\PaletteGeneratorV1Golden.json" />
+  </ItemGroup>
 </Project>

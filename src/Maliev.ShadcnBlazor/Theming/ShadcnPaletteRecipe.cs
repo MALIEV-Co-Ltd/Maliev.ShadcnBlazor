@@ -5,6 +5,12 @@ namespace Maliev.ShadcnBlazor.Theming;
 /// <summary>Describes how a materialized palette can be reproduced.</summary>
 public sealed record ShadcnPaletteRecipe
 {
+    /// <summary>Identifies a materialized or migrated palette without a reproducible generator recipe.</summary>
+    public const int MaterializedAlgorithmVersion = 0;
+
+    /// <summary>Identifies the current deterministic palette generation algorithm.</summary>
+    public const int CurrentAlgorithmVersion = 1;
+
     /// <summary>Creates a portable palette recipe with a defensive token snapshot.</summary>
     /// <param name="algorithmVersion">The deterministic palette algorithm version.</param>
     /// <param name="seed">The deterministic palette seed.</param>

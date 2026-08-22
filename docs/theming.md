@@ -44,7 +44,26 @@ code** produces two equivalent artifacts:
 - `MalievShadcnTheme.cs` is a ready-to-paste typed factory. It includes the
   semantic `ShadcnTheme`, the generated `ShadcnOptions` defaults, and the
   application metadata (style, base color, icon library, radius, and menu
-  treatment) that a Blazor app must wire into its own icon/menu adapters.
+treatment) that a Blazor app must wire into its own icon/menu adapters.
+
+### Reproduce a palette
+
+Theme documents always contain the complete light and dark token values. A
+palette recipe records how those values were produced:
+
+- algorithm version `0` identifies migrated or manually materialized themes;
+- algorithm version `1` combines a 64-bit seed with the `neutral`, `stone`,
+  `zinc`, or `slate` base to deterministically generate every semantic color;
+- locked paths such as `light.primary` preserve their exact materialized value
+  when the recipe is regenerated.
+
+Algorithm 1 uses a fixed SplitMix64 stream, OKLCH tone relationships, bounded
+sRGB gamut reduction, and invariant rounding. Its output is therefore stable
+across cultures and processes. Generation is transactional: invalid recipes or
+an impossible contrast relationship between two locked tokens return
+path-specific diagnostics without changing the active theme. The Theme Studio
+links each diagnostic to its corresponding token editor and exposes a portable
+share value containing both the recipe and locked materialized values.
 
 The generated C# is intentionally application-owned: the library does not
 silently install an icon package or impose a navigation implementation. Register

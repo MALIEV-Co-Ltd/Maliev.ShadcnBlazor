@@ -78,6 +78,7 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal(ShadcnTheme.CurrentSchemaVersion, document.Theme.SchemaVersion);
         Assert.Equal(theme, document.Theme);
         Assert.Equal("custom", document.Application.Preset);
+        Assert.Equal(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, document.Palette.AlgorithmVersion);
         Assert.Empty(document.Palette.LockedTokens);
     }
 
@@ -90,6 +91,7 @@ public sealed class ShadcnThemeDocumentTests
 
         Assert.Equal(theme, document.Theme);
         Assert.Equal(theme.Name, document.Name);
+        Assert.Equal(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, document.Palette.AlgorithmVersion);
         Assert.Equal(theme.Metrics.FontFamily, document.Typography.Body.Family);
         Assert.Equal(theme.Metrics.MonospaceFontFamily, document.Typography.Code.Family);
     }
@@ -122,6 +124,7 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal("tabler", document.Application.IconLibrary);
         Assert.Equal("bold", document.Application.MenuAccent);
         Assert.Equal("translucent", document.Application.MenuColor);
+        Assert.Equal(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, document.Palette.AlgorithmVersion);
     }
 
     [Theory]

@@ -241,6 +241,15 @@ public static partial class ShadcnThemeValidator
             NonTextContrastRatio, "low-boundary-contrast", tokens, errors, warnings, results);
         MeasurePair(ShadcnContrastKind.DestructiveAdjacency, schemeName, "destructive", "background",
             NonTextContrastRatio, "low-destructive-adjacency-contrast", tokens, errors, warnings, results);
+        foreach (var chart in new[] { "chart1", "chart2", "chart3", "chart4", "chart5" })
+        {
+            MeasurePair(ShadcnContrastKind.Chart, schemeName, chart, "background",
+                NonTextContrastRatio, "low-chart-contrast", tokens, errors, warnings, results);
+        }
+        MeasurePair(ShadcnContrastKind.Boundary, schemeName, "sidebarBorder", "sidebar",
+            NonTextContrastRatio, "low-boundary-contrast", tokens, errors, warnings, results);
+        MeasurePair(ShadcnContrastKind.FocusRing, schemeName, "sidebarRing", "sidebar",
+            NonTextContrastRatio, "low-focus-ring-contrast", tokens, errors, warnings, results);
         MeasureDisabledControl(schemeName, tokens, errors, warnings, results);
     }
 

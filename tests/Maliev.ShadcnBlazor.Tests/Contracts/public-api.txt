@@ -1601,7 +1601,7 @@ type Maliev.ShadcnBlazor.Theming.ShadcnColorScheme
 type Maliev.ShadcnBlazor.Theming.ShadcnContext
   ShadcnDirection Direction
   Boolean IsDarkMode
-enum Maliev.ShadcnBlazor.Theming.ShadcnContrastKind: Text, FocusRing, Boundary, DestructiveAdjacency, DisabledState
+enum Maliev.ShadcnBlazor.Theming.ShadcnContrastKind: Text, FocusRing, Boundary, Chart, DestructiveAdjacency, DisabledState
 type Maliev.ShadcnBlazor.Theming.ShadcnContrastResult
   String BackgroundToken
   String ForegroundToken
@@ -1625,7 +1625,17 @@ type Maliev.ShadcnBlazor.Theming.ShadcnOptions
   String FontFamily
   TimeSpan ToastDuration
   TimeSpan ToastExitDuration
+type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
+  IReadOnlyList<ShadcnThemeValidationMessage> Errors
+  Boolean IsValid
+  ShadcnTheme Theme
+  IReadOnlyList<ShadcnThemeValidationMessage> Warnings
+type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerator
+  const Int32 CurrentAlgorithmVersion
+  method ShadcnPaletteGenerationResult Generate(ShadcnTheme source, ShadcnPaletteRecipe recipe)
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe
+  const Int32 CurrentAlgorithmVersion
+  const Int32 MaterializedAlgorithmVersion
   Int32 AlgorithmVersion
   String BaseColor
   IReadOnlyList<String> LockedTokens
