@@ -58,7 +58,7 @@ public sealed class WorkflowSecurityTests
         Assert.Contains("Verify-PublicSurface.ps1", ci, StringComparison.Ordinal);
         Assert.Contains("dotnet format", ci, StringComparison.Ordinal);
         Assert.Contains("playwright.ps1 install chromium", ci, StringComparison.Ordinal);
-        Assert.Contains("browser:\n    name: Browser tests\n    runs-on: windows-2022\n    timeout-minutes: 40", ci.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Contains("browser:\n    name: Browser tests\n    runs-on: windows-2022\n    timeout-minutes: 60", ci.ReplaceLineEndings("\n"), StringComparison.Ordinal);
     }
 
     [Fact]
