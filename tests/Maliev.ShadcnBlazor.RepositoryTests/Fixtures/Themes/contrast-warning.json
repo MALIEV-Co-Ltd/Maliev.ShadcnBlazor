@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 2,
+  "name": "Weak contrast",
+  "theme": {
+    "schemaVersion": 1,
+    "name": "Weak contrast",
+    "light": {
+      "background": "oklch(1 0 0)",
+      "foreground": "oklch(1 0 0)"
+    },
+    "dark": {},
+    "metrics": {}
+  },
+  "application": {},
+  "palette": {},
+  "typography": {}
+}

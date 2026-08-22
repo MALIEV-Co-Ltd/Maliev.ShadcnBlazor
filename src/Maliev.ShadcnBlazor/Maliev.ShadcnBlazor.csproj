@@ -25,6 +25,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Maliev.ShadcnBlazor.Build\Maliev.ShadcnBlazor.Build.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.3" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
     <PackageReference Include="MudBlazor" Version="9.7.0" />
@@ -44,5 +45,9 @@
     <None Update="licenses\MudBlazor-LICENSE.txt" Pack="true" PackagePath="licenses\MudBlazor-LICENSE.txt" />
     <None Include="Reference\shadcn-reference.json" Pack="true" PackagePath="reference\shadcn-reference.json" />
     <None Include="Schemas\shadcn-theme-document-v2.schema.json" Pack="true" PackagePath="schemas\shadcn-theme-document-v2.schema.json" />
+    <None Include="buildTransitive\Maliev.ShadcnBlazor.Theme.props" Pack="true" PackagePath="buildTransitive\Maliev.ShadcnBlazor.Theme.props" />
+    <None Include="buildTransitive\Maliev.ShadcnBlazor.targets" Pack="true" PackagePath="buildTransitive\Maliev.ShadcnBlazor.targets" />
+    <None Include="..\Maliev.ShadcnBlazor.Build\bin\$(Configuration)\net10.0\Maliev.ShadcnBlazor.Build.dll"
+          Pack="true" PackagePath="tools\net10.0\Maliev.ShadcnBlazor.Build.dll" Visible="false" />
   </ItemGroup>
 </Project>

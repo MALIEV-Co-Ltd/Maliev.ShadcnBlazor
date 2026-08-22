@@ -36,6 +36,10 @@ public sealed class PackageArchiveTests
             Assert.Contains("licenses/MudBlazor-LICENSE.txt", entries);
             Assert.Contains("licenses/shadcn-ui-LICENSE.md", entries);
             Assert.Contains("lib/net10.0/Maliev.ShadcnBlazor.dll", entries);
+            Assert.Contains("tools/net10.0/Maliev.ShadcnBlazor.Build.dll", entries);
+            Assert.Contains("buildTransitive/Maliev.ShadcnBlazor.props", entries);
+            Assert.Contains("buildTransitive/Maliev.ShadcnBlazor.Theme.props", entries);
+            Assert.Contains("buildTransitive/Maliev.ShadcnBlazor.targets", entries);
             Assert.Contains("schemas/shadcn-theme-document-v2.schema.json", entries);
             Assert.Contains("staticwebassets/css/shadcn-base.css", entries);
             Assert.Contains("staticwebassets/js/shadcn-selection.js", entries);
@@ -54,6 +58,12 @@ public sealed class PackageArchiveTests
             Assert.Equal(
                 "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor",
                 metadata.Element(ns + "repository")!.Attribute("url")!.Value);
+            var dependencyIds = metadata
+                .Descendants(ns + "dependency")
+                .Select(dependency => dependency.Attribute("id")?.Value)
+                .Where(id => id is not null)
+                .ToArray();
+            Assert.DoesNotContain("Maliev.ShadcnBlazor.Build", dependencyIds);
 
             var guard = Run(
                 "pwsh",
