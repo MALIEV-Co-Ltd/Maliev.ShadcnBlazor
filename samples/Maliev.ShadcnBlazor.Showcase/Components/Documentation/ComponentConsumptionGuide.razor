@@ -42,7 +42,7 @@
 
     [Parameter] public ComponentExampleDefinition? Example { get; set; }
 
-    private string UsageSource => $"@using {Entry.Namespace}{Environment.NewLine}{Environment.NewLine}{Example?.RazorSource ?? $"<{Entry.PrimaryType} />"}";
+    private string UsageSource => RazorSourceComposer.Compose(Entry.Namespace ?? throw new InvalidOperationException("A component namespace is required."), Example?.RazorSource ?? $"<{Entry.PrimaryType} />");
 
     private IReadOnlyDictionary<string, string> InstallationSources => new Dictionary<string, string>
     {

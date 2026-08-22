@@ -172,6 +172,7 @@ public sealed class ComponentApiCatalog
                 "Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroupSeparator",
                 "Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroupText"),
             ["checkbox"] = Types("Maliev.ShadcnBlazor.Components.Selection.ShadcnCheckbox"),
+            ["code-block"] = Types("Maliev.ShadcnBlazor.Components.Typography.ShadcnCodeBlock"),
             ["radio-group"] = Types(
                 "Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1",
                 "Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupItem`1"),

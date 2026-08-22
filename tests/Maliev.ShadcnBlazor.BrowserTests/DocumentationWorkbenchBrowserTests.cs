@@ -235,18 +235,32 @@ public sealed class DocumentationWorkbenchBrowserTests(
         {
             var catalogTrigger = page.GetByTestId("catalog-trigger");
             var outlineTrigger = page.GetByTestId("outline-trigger");
-            await Assertions.Expect(page.Locator(".documentation-brand")).ToBeVisibleAsync();
+            var brand = page.Locator(".documentation-brand");
+            await Assertions.Expect(brand).ToBeVisibleAsync();
             await Assertions.Expect(page.Locator(".documentation-brand > span:last-child")).ToBeHiddenAsync();
             await Assertions.Expect(catalogTrigger).ToHaveAccessibleNameAsync("Open component catalog");
             await Assertions.Expect(outlineTrigger).ToHaveAccessibleNameAsync("On This Page");
-            Assert.InRange((await catalogTrigger.BoundingBoxAsync())!.Width, 39, 48);
-            Assert.InRange((await outlineTrigger.BoundingBoxAsync())!.Width, 39, 48);
+            Assert.InRange((await catalogTrigger.BoundingBoxAsync())!.Width, 44, 48);
+            Assert.InRange((await outlineTrigger.BoundingBoxAsync())!.Width, 44, 48);
+            Assert.InRange((await brand.BoundingBoxAsync())!.Height, 44, 48);
+            Assert.InRange((await page.GetByTestId("documentation-theme-toggle").BoundingBoxAsync())!.Width, 44, 48);
+            Assert.InRange((await page.GetByTestId("documentation-direction-toggle").BoundingBoxAsync())!.Width, 44, 48);
+            var order = await header.Locator("a.documentation-brand, button").EvaluateAllAsync<string[]>("elements => elements.map(element => element.matches('.documentation-brand') ? 'brand' : element.dataset.testid || '')");
+            Assert.Equal(["brand", "catalog-trigger", "outline-trigger", "documentation-theme-toggle", "documentation-direction-toggle"], order);
         }
 
         var article = page.Locator(".component-dossier");
         var articleBox = await article.BoundingBoxAsync();
         Assert.NotNull(articleBox);
         Assert.True(articleBox.Width <= 928.5, $"The readable article measure expanded to {articleBox.Width}px.");
+
+        var brandLink = page.Locator(".documentation-brand");
+        await brandLink.FocusAsync();
+        await Assertions.Expect(brandLink).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Shift+Tab");
+        await page.Keyboard.PressAsync("Tab");
+        await Assertions.Expect(brandLink).ToBeFocusedAsync();
+        Assert.NotEqual("none", await brandLink.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
 
         var themeToggle = page.GetByTestId("documentation-theme-toggle");
         await themeToggle.FocusAsync();
@@ -326,6 +340,8 @@ public sealed class DocumentationWorkbenchBrowserTests(
         Assert.Contains("0, 0, 0, 0", activeStyleParts[1], StringComparison.Ordinal);
         Assert.Contains("0, 0, 0, 0", activeStyleParts[2], StringComparison.Ordinal);
         await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("@using Maliev.ShadcnBlazor");
+        var usageSource = await content.Locator("#usage pre").InnerTextAsync();
+        Assert.Equal(1, usageSource.Split("@using Maliev.ShadcnBlazor.Components.Content", StringSplitOptions.None).Length - 1);
         if (width > 1280)
         {
             var catalogBox = await catalog.BoundingBoxAsync();
@@ -347,9 +363,9 @@ public sealed class DocumentationWorkbenchBrowserTests(
 
         var search = page.GetByLabel("Search components");
         await search.FillAsync("keyboard");
-        await Assertions.Expect(page.GetByTestId("documentation-result-count")).ToHaveTextAsync("11 components found");
+        await Assertions.Expect(page.GetByTestId("documentation-result-count")).ToHaveTextAsync("12 components found");
         Assert.Equal(
-            ["accordion", "calendar", "combobox", "command", "context-menu", "dropdown-menu", "kbd", "navigation-menu", "resizable", "select", "toast"],
+            ["accordion", "calendar", "code-block", "combobox", "command", "context-menu", "dropdown-menu", "kbd", "navigation-menu", "resizable", "select", "toast"],
             (await page.Locator(".documentation-component-list a").EvaluateAllAsync<string[]>("links => links.map(link => new URL(link.href).pathname.split('/').pop())")).Order());
         await Assertions.Expect(page.Locator("a[href='docs/components/kbd']")).ToHaveAttributeAsync("aria-current", "page");
 
@@ -428,7 +444,22 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await Assertions.Expect(page.GetByTestId("catalog-trigger")).ToBeFocusedAsync();
 
         await page.GetByTestId("outline-trigger").ClickAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Close page outline" }).ClickAsync();
+        var outline = page.Locator("#documentation-outline");
+        await Assertions.Expect(outline).ToHaveAttributeAsync("role", "dialog");
+        await Assertions.Expect(outline).ToHaveAttributeAsync("aria-modal", "true");
+        await Assertions.Expect(outline).ToHaveAttributeAsync("data-drawer-ready", "true");
+        await Assertions.Expect(outline).ToHaveAttributeAsync("data-drawer-focus-ready", "true");
+        var outlineClose = page.GetByTestId("outline-close");
+        var outlineCloseBox = await outlineClose.BoundingBoxAsync();
+        Assert.NotNull(outlineCloseBox);
+        Assert.InRange(outlineCloseBox.Width, 44, 48);
+        Assert.InRange(outlineCloseBox.Height, 44, 48);
+        await Assertions.Expect(outlineClose).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Shift+Tab");
+        await Assertions.Expect(outline.Locator("a").Last).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Tab");
+        await Assertions.Expect(outlineClose).ToBeFocusedAsync();
+        await outlineClose.ClickAsync();
         await Assertions.Expect(page.GetByTestId("outline-trigger")).ToBeFocusedAsync();
 
         await page.GetByTestId("outline-trigger").ClickAsync();

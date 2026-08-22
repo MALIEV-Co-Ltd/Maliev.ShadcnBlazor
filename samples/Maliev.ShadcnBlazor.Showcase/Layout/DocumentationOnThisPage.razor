@@ -7,7 +7,10 @@
 @if (State.Sections.Count > 0)
 {
     <nav class="documentation-on-this-page" aria-labelledby="documentation-outline-title">
-        <h2 id="documentation-outline-title">On This Page</h2>
+        @if (ShowHeading)
+        {
+            <h2 id="documentation-outline-title">On This Page</h2>
+        }
         <ul>
             @foreach (var item in State.Sections)
             {
@@ -20,6 +23,9 @@
 @code {
     [Parameter, EditorRequired]
     public DocumentationPageState State { get; set; } = null!;
+
+    [Parameter]
+    public bool ShowHeading { get; set; } = true;
 
     private IJSObjectReference? _module;
 

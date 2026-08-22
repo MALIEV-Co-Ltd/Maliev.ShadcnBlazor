@@ -12,13 +12,28 @@ public sealed class DocumentationCatalogTests
         var ledger = ReadLedger();
         var catalog = new ComponentDocumentationCatalog();
 
-        Assert.Equal(64, catalog.All.Count);
+        Assert.Equal(65, catalog.All.Count);
         Assert.Empty(catalog.All.GroupBy(x => x.Slug).Where(x => x.Count() > 1));
         Assert.Equal(ledger.Keys.Order(), catalog.All.Select(x => x.Slug).Order());
         Assert.All(catalog.All, entry => Assert.Equal(ledger[entry.Slug].Status, entry.Status.ToString().ToLowerInvariant()));
         Assert.All(catalog.All, entry => Assert.Equal($"docs/components/{entry.Slug}", entry.DocumentationUrl));
-        Assert.Equal(64, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(65, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(catalog.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
+    }
+
+    [Fact]
+    public void CodeBlockIsAFirstClassCatalogEntryWithPackageApiAndThreeScenarios()
+    {
+        var catalog = new ComponentDocumentationCatalog();
+        var entry = Assert.IsType<ComponentDocumentationEntry>(catalog.FindBySlug("code-block"));
+        var examples = new Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleRegistry(catalog).GetBySlug(entry.Slug);
+
+        Assert.Equal("Maliev.ShadcnBlazor.Components.Typography", entry.Namespace);
+        Assert.Equal("ShadcnCodeBlock", entry.PrimaryType);
+        var example = Assert.Single(examples);
+        Assert.Equal(3, example.RazorSource.Split("<ShadcnCodeBlock", StringSplitOptions.None).Length - 1);
+        Assert.Contains("private Project project = new(\"Bangkok line\")", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private readonly IReadOnlyDictionary<string, string> sources", example.RazorSource, StringComparison.Ordinal);
     }
 #pragma warning restore xUnit2029
 

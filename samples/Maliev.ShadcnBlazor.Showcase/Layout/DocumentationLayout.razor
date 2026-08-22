@@ -2,7 +2,9 @@
 @inherits LayoutComponentBase
 @inject ShowcaseState ThemeState
 @inject DocumentationPageState PageState
+@inject IJSRuntime JavaScript
 @implements IDisposable
+@implements IAsyncDisposable
 
 <ShadcnThemeProvider IsDarkMode="@ThemeState.IsDarkMode" Direction="@ThemeState.Direction" Class="documentation-root">
     <div class="documentation-shell" data-testid="documentation-workbench" @onkeydown="HandleKeyDown">
@@ -34,13 +36,21 @@
                 @Body
             </main>
 
-            <aside id="documentation-outline"
+            <aside @ref="_outlineNavigation"
+                   id="documentation-outline"
                    class="documentation-outline"
-                   aria-label="Page outline"
+                   role="@(NavigationState.OutlineOpen ? "dialog" : null)"
+                   aria-modal="@(NavigationState.OutlineOpen ? "true" : null)"
+                   aria-labelledby="documentation-outline-title"
                    data-open="@NavigationState.OutlineOpen.ToString().ToLowerInvariant()"
                    tabindex="-1">
-                <button type="button" class="documentation-panel-close" aria-label="Close page outline" @onclick="CloseOutlineDrawerAsync">Close</button>
-                <DocumentationOnThisPage State="@PageState" />
+                <div class="documentation-panel-header">
+                    <h2 id="documentation-outline-title">On This Page</h2>
+                    <button type="button" class="documentation-panel-close" data-testid="outline-close" aria-label="Close page outline" @onclick="CloseOutlineDrawerAsync">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                    </button>
+                </div>
+                <DocumentationOnThisPage State="@PageState" ShowHeading="false" />
             </aside>
         </div>
     </div>
@@ -49,7 +59,10 @@
 @code {
     private DocumentationHeader? _header;
     private ElementReference _catalogNavigation;
+    private ElementReference _outlineNavigation;
     private bool _focusCatalogAfterRender;
+    private bool _outlineAttached;
+    private IJSObjectReference? _drawerModule;
     private bool AnyDrawerOpen => NavigationState.CatalogOpen || NavigationState.OutlineOpen;
 
     public DocumentationNavigationState NavigationState { get; } = new();
@@ -84,11 +97,34 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_focusCatalogAfterRender)
-            return;
+        if (_focusCatalogAfterRender)
+        {
+            _focusCatalogAfterRender = false;
+            await _catalogNavigation.FocusAsync();
+        }
 
-        _focusCatalogAfterRender = false;
-        await _catalogNavigation.FocusAsync();
+        try
+        {
+            if (NavigationState.OutlineOpen && !_outlineAttached)
+            {
+                _drawerModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/documentation-drawer.js");
+                await _drawerModule.InvokeVoidAsync("attach", _outlineNavigation);
+                _outlineAttached = true;
+            }
+            else if (!NavigationState.OutlineOpen && _outlineAttached && _drawerModule is not null)
+            {
+                await _drawerModule.InvokeVoidAsync("detach", _outlineNavigation);
+                _outlineAttached = false;
+            }
+        }
+        catch (JSException)
+        {
+            // Static rendering and bUnit do not provide a browser focus surface.
+        }
+        catch (InvalidOperationException)
+        {
+            // The layout can be disposed during a route transition.
+        }
     }
 
     private async Task CloseCatalogDrawerAsync()
@@ -117,5 +153,22 @@
     {
         NavigationState.Changed -= OnChanged;
         ThemeState.Changed -= OnChanged;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (_drawerModule is null)
+            return;
+        try
+        {
+            if (_outlineAttached)
+                await _drawerModule.InvokeVoidAsync("detach", _outlineNavigation);
+            await _drawerModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The browser can disconnect while the documentation route changes.
+        }
     }
 }
