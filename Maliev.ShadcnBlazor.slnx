@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="samples/Maliev.ShadcnBlazor.Showcase/Maliev.ShadcnBlazor.Showcase.csproj" />
+  <Project Path="samples/Maliev.ShadcnBlazor.ThemeConsumer/Maliev.ShadcnBlazor.ThemeConsumer.csproj" />
   <Project Path="src/Maliev.ShadcnBlazor.Build/Maliev.ShadcnBlazor.Build.csproj" />
   <Project Path="src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj" />
   <Project Path="tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj" />

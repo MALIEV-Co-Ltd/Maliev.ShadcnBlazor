@@ -57,6 +57,8 @@ jobs:
         run: dotnet restore Maliev.ShadcnBlazor.slnx --locked-mode
       - name: Build
         run: dotnet build Maliev.ShadcnBlazor.slnx -c Release --no-restore
+      - name: Build checked theme consumer
+        run: dotnet build samples/Maliev.ShadcnBlazor.ThemeConsumer/Maliev.ShadcnBlazor.ThemeConsumer.csproj -c Release --no-restore
       - name: Run repository tests
         run: dotnet test tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj -c Release --no-build --no-restore
       - name: Run component tests
@@ -71,6 +73,9 @@ jobs:
       - name: Verify public package
         shell: pwsh
         run: ./eng/Verify-PublicSurface.ps1 -Root . -Package artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg
+      - name: Validate clean installed theme consumer
+        shell: pwsh
+        run: ./eng/Validate-ThemeConsumerPackage.ps1 -Root . -Package artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg
       - name: Attest packages
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v2.2.0
         with:
