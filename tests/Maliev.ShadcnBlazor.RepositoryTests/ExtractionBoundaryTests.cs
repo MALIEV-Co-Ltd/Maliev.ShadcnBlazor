@@ -17,6 +17,7 @@ public sealed class ExtractionBoundaryTests
         Assert.Equal(
         [
             "samples/Maliev.ShadcnBlazor.Showcase/Maliev.ShadcnBlazor.Showcase.csproj",
+            "src/Maliev.ShadcnBlazor.Build/Maliev.ShadcnBlazor.Build.csproj",
             "src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj",
             "tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj",
             "tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj",
