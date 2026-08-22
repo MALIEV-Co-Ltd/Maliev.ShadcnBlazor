@@ -1,95 +1,41 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using System.Globalization
 
 <section class="theme-generator-options" aria-labelledby="theme-generator-options-title" data-testid="theme-generator-options">
-    <div class="theme-inspector-group__heading">
-        <div>
-            <span class="theme-inspector__eyebrow">Generated app settings</span>
-            <h3 id="theme-generator-options-title">Generator options</h3>
-            <p>These choices are included in the portable JSON and C# output.</p>
-        </div>
-    </div>
+    <div class="theme-inspector-group__heading"><div><span class="theme-inspector__eyebrow">Deterministic palette · algorithm v1</span><h3 id="theme-generator-options-title">Generator options</h3><p>Use the same recipe to reproduce all semantic colors. Locked tokens keep their exact materialized value.</p></div></div>
     <div class="theme-generator-options__grid">
-        <MudSelect T="string"
-                   Value="@State.StyleId"
-                   ValueChanged="State.SetStyle"
-                   Label="Style"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated component style"
-                   data-testid="theme-style-select">
-            @foreach (var option in ThemeStudioGeneratorCatalog.Styles)
-            {
-                <MudSelectItem T="string" Value="@option.Id">@option.DisplayName</MudSelectItem>
-            }
-        </MudSelect>
-        <MudSelect T="string"
-                   Value="@State.BaseColorId"
-                   ValueChanged="State.SetBaseColor"
-                   Label="Base color"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated base color"
-                   data-testid="theme-base-color-select">
-            @foreach (var option in ThemeStudioGeneratorCatalog.BaseColors)
-            {
-                <MudSelectItem T="string" Value="@option.Id">@option.DisplayName</MudSelectItem>
-            }
-        </MudSelect>
-        <MudSelect T="ThemeStudioIconLibrary"
-                   Value="@State.IconLibrary"
-                   ValueChanged="State.SetIconLibrary"
-                   Label="Icon library"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated icon library"
-                   data-testid="theme-icon-library-select">
-            @foreach (var library in Enum.GetValues<ThemeStudioIconLibrary>())
-            {
-                <MudSelectItem T="ThemeStudioIconLibrary" Value="@library">@library</MudSelectItem>
-            }
-        </MudSelect>
-        <MudSelect T="ThemeStudioRadiusPreset"
-                   Value="@State.RadiusPreset"
-                   ValueChanged="State.SetRadiusPreset"
-                   Label="Radius"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated radius"
-                   data-testid="theme-radius-select">
-            @foreach (var radius in ThemeStudioGeneratorCatalog.Radii)
-            {
-                <MudSelectItem T="ThemeStudioRadiusPreset" Value="@radius.Preset">@radius.DisplayName</MudSelectItem>
-            }
-        </MudSelect>
-        <MudSelect T="ThemeStudioMenuAccent"
-                   Value="@State.MenuAccent"
-                   ValueChanged="State.SetMenuAccent"
-                   Label="Menu accent"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated menu accent"
-                   data-testid="theme-menu-accent-select">
-            @foreach (var accent in Enum.GetValues<ThemeStudioMenuAccent>())
-            {
-                <MudSelectItem T="ThemeStudioMenuAccent" Value="@accent">@accent</MudSelectItem>
-            }
-        </MudSelect>
-        <MudSelect T="ThemeStudioMenuColor"
-                   Value="@State.MenuColor"
-                   ValueChanged="State.SetMenuColor"
-                   Label="Menu color"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Generated menu color"
-                   data-testid="theme-menu-color-select">
-            @foreach (var color in Enum.GetValues<ThemeStudioMenuColor>())
-            {
-                <MudSelectItem T="ThemeStudioMenuColor" Value="@color">@color</MudSelectItem>
-            }
-        </MudSelect>
+        <label><span>Style</span><ShadcnSelect TValue="string" Value="State.StyleId" ValueChanged="State.SetStyle" Options="StyleOptions" Size="ShadcnControlSize.Small" aria-label="Generated component style" data-testid="theme-style-select" /></label>
+        <label><span>Base color</span><ShadcnSelect TValue="string" Value="State.BaseColorId" ValueChanged="State.SetBaseColor" Options="BaseColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated base color" data-testid="theme-base-color-select" /></label>
+        <label><span>Icon library</span><ShadcnSelect TValue="ThemeStudioIconLibrary" Value="State.IconLibrary" ValueChanged="State.SetIconLibrary" Options="IconOptions" Size="ShadcnControlSize.Small" aria-label="Generated icon library" data-testid="theme-icon-library-select" /></label>
+        <label><span>Radius</span><ShadcnSelect TValue="ThemeStudioRadiusPreset" Value="State.RadiusPreset" ValueChanged="State.SetRadiusPreset" Options="RadiusOptions" Size="ShadcnControlSize.Small" aria-label="Generated radius" data-testid="theme-radius-select" /></label>
+        <label><span>Menu accent</span><ShadcnSelect TValue="ThemeStudioMenuAccent" Value="State.MenuAccent" ValueChanged="State.SetMenuAccent" Options="MenuAccentOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu accent" data-testid="theme-menu-accent-select" /></label>
+        <label><span>Menu color</span><ShadcnSelect TValue="ThemeStudioMenuColor" Value="State.MenuColor" ValueChanged="State.SetMenuColor" Options="MenuColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu color" data-testid="theme-menu-color-select" /></label>
+    </div>
+    <div class="theme-palette-recipe" aria-labelledby="theme-palette-recipe-title">
+        <div class="theme-palette-recipe__heading"><strong id="theme-palette-recipe-title">Palette seed</strong><span>@State.Document.Palette.LockedTokens.Count locked tokens</span></div>
+        <label class="theme-palette-seed"><span class="sr-only">Palette seed</span><ShadcnInput TValue="string" Value="@_seed" ValueChanged="value => _seed = value ?? string.Empty" InputMode="numeric" aria-describedby="theme-palette-seed-help" data-testid="theme-palette-seed" /></label>
+        <div class="theme-palette-actions">
+            <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Generate" data-testid="theme-palette-generate">Generate</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="NewSeed" data-testid="theme-palette-new-seed">New seed</ShadcnButton>
+        </div>
+        <p id="theme-palette-seed-help">Decimal seeds are portable. Regenerating the same recipe is byte-identical.</p>
+        <label class="theme-palette-share"><span>Share value</span><ShadcnInput TValue="string" Value="@State.CreatePaletteShare()" ReadOnly="true" aria-label="Portable palette share value" data-testid="theme-palette-share" /></label>
     </div>
 </section>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    private string _seed = "0";
+
+    protected override void OnParametersSet() => _seed = State.Document.Palette.Seed.ToString(CultureInfo.InvariantCulture);
+
+    private void Generate() => State.GeneratePalette(_seed);
+    private void NewSeed() { var seed = State.GenerateNewPalette(); _seed = seed.ToString(CultureInfo.InvariantCulture); }
+
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> StyleOptions = ThemeStudioGeneratorCatalog.Styles.Select(option => new ShadcnSelectOption<string>(option.Id, option.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> BaseColorOptions = ThemeStudioGeneratorCatalog.BaseColors.Select(option => new ShadcnSelectOption<string>(option.Id, option.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioIconLibrary>> IconOptions = Enum.GetValues<ThemeStudioIconLibrary>().Select(value => new ShadcnSelectOption<ThemeStudioIconLibrary>(value, value.ToString())).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioRadiusPreset>> RadiusOptions = ThemeStudioGeneratorCatalog.Radii.Select(value => new ShadcnSelectOption<ThemeStudioRadiusPreset>(value.Preset, value.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioMenuAccent>> MenuAccentOptions = Enum.GetValues<ThemeStudioMenuAccent>().Select(value => new ShadcnSelectOption<ThemeStudioMenuAccent>(value, value.ToString())).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioMenuColor>> MenuColorOptions = Enum.GetValues<ThemeStudioMenuColor>().Select(value => new ShadcnSelectOption<ThemeStudioMenuColor>(value, value.ToString())).ToArray();
 }

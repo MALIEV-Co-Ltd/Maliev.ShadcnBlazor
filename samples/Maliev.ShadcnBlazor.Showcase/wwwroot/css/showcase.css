@@ -3154,6 +3154,43 @@ a {
     gap: .625rem;
 }
 
+.theme-generator-options__grid > label,
+.theme-palette-share {
+    display: grid;
+    gap: .35rem;
+    min-width: 0;
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.theme-palette-recipe {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .625rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--shadcn-border);
+}
+
+.theme-palette-recipe__heading,
+.theme-palette-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.theme-palette-recipe__heading span,
+.theme-palette-recipe > p {
+    color: var(--shadcn-muted-foreground);
+    font-size: .75rem;
+}
+
+.theme-palette-seed { min-width: 0; }
+.theme-palette-actions { justify-content: flex-start; }
+.theme-palette-recipe > p,
+.theme-palette-share { grid-column: 1 / -1; margin: 0; }
+
 .theme-preview-scope[data-theme-menu-accent="subtle"] .mock-sidebar [data-slot="item"][data-variant="muted"],
 .theme-preview-scope[data-theme-menu-accent="subtle"] .mock-sidebar [data-testid="operations-nav-overview"] {
     background: color-mix(in srgb, var(--shadcn-muted) 72%, transparent);
@@ -3205,10 +3242,15 @@ a {
 
 .theme-token-control {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem;
+    grid-template-columns: minmax(0, 1fr) repeat(3, 2.5rem);
     align-items: center;
     gap: 0.375rem;
     min-width: 0;
+}
+
+.theme-token-control:target {
+    outline: max(2px, var(--shadcn-focus-ring-width)) solid var(--shadcn-ring);
+    outline-offset: var(--shadcn-focus-ring-offset);
 }
 
 .theme-color-picker {
@@ -3339,6 +3381,16 @@ a {
     .theme-preview-card {
         min-height: 24rem;
     }
+
+    .theme-generator-options__grid,
+    .theme-palette-recipe {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-palette-recipe > *,
+    .theme-palette-share {
+        grid-column: 1;
+    }
 }
 
 @media (max-width: 22rem) {
@@ -3349,7 +3401,7 @@ a {
     }
 
     .theme-token-control {
-        grid-template-columns: minmax(0, 1fr) 2.75rem;
+        grid-template-columns: repeat(3, 2.5rem);
     }
 
     .theme-token-control .mud-input-control {
@@ -3370,6 +3422,11 @@ a {
     .theme-inspector,
     .theme-preview-toolbar,
     .theme-color-picker {
+        border-color: CanvasText;
+    }
+
+    .theme-generator-options,
+    .theme-palette-recipe {
         border-color: CanvasText;
     }
 

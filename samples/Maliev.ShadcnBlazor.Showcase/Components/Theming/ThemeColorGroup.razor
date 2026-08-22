@@ -18,7 +18,7 @@
             var testId = $"theme-token-{SchemeId}-{token.Name}";
             var label = $"{SchemeName} {token.Label}";
             var mutationKey = $"{SchemeId}.{token.Name}";
-            <div class="theme-token-control">
+            <div class="theme-token-control" id="@($"theme-editor-{SchemeId}-{token.Name}")">
                 <MudTextField T="string"
                               Value="@State.GetTokenValue(Scheme, token.Name)"
                               ValueChanged="value => State.SetToken(Scheme, token.Name, value ?? string.Empty)"
@@ -41,11 +41,18 @@
                            @onpointercancel="State.EndPointerInteraction"
                            @oninput="args => SetPickerValue(token.Name, args.Value?.ToString())" />
                 }
-                <MudIconButton Icon="@Icons.Material.Outlined.RestartAlt"
-                               Size="Size.Small"
-                               aria-label="@($"Reset {label}")"
-                               data-testid="@($"{testId}-reset")"
-                               OnClick="() => State.ResetToken(Scheme, token.Name)" />
+                @if (token.Group == ThemeStudioGroup.Colors)
+                {
+                    <ShadcnButton Variant="@(State.IsPaletteLocked(Scheme, token.Name) ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)"
+                                  Size="ShadcnButtonSize.IconSmall"
+                                  aria-label="@($"{(State.IsPaletteLocked(Scheme, token.Name) ? "Unlock" : "Lock")} {label}")"
+                                  aria-pressed="@(State.IsPaletteLocked(Scheme, token.Name) ? "true" : "false")"
+                                  data-testid="@($"{testId}-lock")"
+                                  OnClick="() => State.SetPaletteLock(Scheme, token.Name, !State.IsPaletteLocked(Scheme, token.Name))">⌑</ShadcnButton>
+                }
+                <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Size="ShadcnButtonSize.IconSmall"
+                              aria-label="@($"Reset {label}")" data-testid="@($"{testId}-reset")"
+                              OnClick="() => State.ResetToken(Scheme, token.Name)">↺</ShadcnButton>
             </div>
         }
     </div>

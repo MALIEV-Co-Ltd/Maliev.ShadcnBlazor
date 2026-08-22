@@ -558,7 +558,84 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-accent-select']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-color-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-seed']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-generate']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-new-seed']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-share']"));
+        Assert.Empty(inspector.FindAll("[data-testid='theme-generator-options'] .mud-select"));
+        Assert.Equal(64, inspector.FindAll("[data-testid$='-lock']").Count);
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
+
+        inspector.Find("[data-testid='theme-palette-seed']").Input("23");
+        inspector.Find("[data-testid='theme-palette-generate']").Click();
+        Assert.Equal(23UL, state.Document.Palette.Seed);
+
+        inspector.Find("[data-testid='theme-token-light-primary-lock']").Click();
+        Assert.True(state.IsPaletteLocked(ThemeStudioScheme.Light, "primary"));
+    }
+
+    [Fact]
+    public void PaletteGenerationIsOneTransactionalUndoableMutation()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var before = state.CreateDocument();
+        var changes = 0;
+        state.Changed += (_, _) => changes++;
+
+        Assert.True(state.GeneratePalette(42));
+
+        Assert.Equal(1, changes);
+        Assert.Equal(ShadcnPaletteRecipe.CurrentAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(42UL, state.Document.Palette.Seed);
+        Assert.NotEqual(before.Theme.Light.Primary, state.Applied.Light.Primary);
+        Assert.True(state.CanUndo);
+        Assert.True(state.Undo());
+        Assert.Equal(before.Theme, state.Applied);
+        Assert.Equal(before.Palette, state.Document.Palette);
+        Assert.False(state.CanUndo);
+    }
+
+    [Fact]
+    public void PaletteLocksAndShareRoundTripPreserveExactMaterializedValues()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.GeneratePalette(7));
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primary", true);
+        var locked = state.Applied.Light.Primary;
+
+        Assert.True(state.GeneratePalette(99));
+        Assert.Equal(locked, state.Applied.Light.Primary);
+        Assert.Contains("light.primary", state.Document.Palette.LockedTokens);
+
+        var share = ThemeStudioPaletteShareCodec.Encode(state.Document);
+        var restored = new ThemeStudioState(new NoOpStorage());
+        Assert.True(restored.ImportPaletteShare(share));
+        Assert.Equal(state.Document.Palette.AlgorithmVersion, restored.Document.Palette.AlgorithmVersion);
+        Assert.Equal(state.Document.Palette.Seed, restored.Document.Palette.Seed);
+        Assert.Equal(state.Document.Palette.BaseColor, restored.Document.Palette.BaseColor);
+        Assert.Equal(state.Document.Palette.LockedTokens, restored.Document.Palette.LockedTokens);
+        Assert.Equal(locked, restored.Applied.Light.Primary);
+    }
+
+    [Fact]
+    public void InvalidPaletteShareAndImpossibleLocksFailWithoutChangingThemeOrHistory()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var before = state.CreateDocument();
+
+        Assert.False(state.ImportPaletteShare("not-a-palette"));
+        Assert.Equal(before, state.CreateDocument());
+        Assert.False(state.CanUndo);
+
+        state.SetToken(ThemeStudioScheme.Light, "primary", state.Applied.Light.Background);
+        state.SetToken(ThemeStudioScheme.Light, "primaryForeground", state.Applied.Light.Background);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primary", true);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primaryForeground", true);
+        var impossible = state.CreateDocument();
+
+        Assert.False(state.GeneratePalette(101));
+        Assert.Equal(impossible, state.CreateDocument());
+        Assert.Contains(state.PaletteDiagnostics, message => message.Code == "palette-locked-constraint");
     }
 
     [Fact]
