@@ -191,8 +191,8 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("@keyframes shadcn-marker-dots", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes shadcn-marker-wave", css, StringComparison.Ordinal);
         Assert.Contains("background-size:200% 100%", css, StringComparison.Ordinal);
-        Assert.Contains("background-position:-200% 0", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position:-200% 0; } to { background-position:200% 0; } }", css, StringComparison.Ordinal);
+        Assert.Contains("background-position-x:200%", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position-x:200%; } to { background-position-x:0%; } }", css, StringComparison.Ordinal);
         Assert.Contains("background-repeat:no-repeat", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
