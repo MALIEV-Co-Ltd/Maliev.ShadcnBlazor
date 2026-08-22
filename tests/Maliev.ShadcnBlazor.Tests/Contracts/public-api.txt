@@ -1663,6 +1663,8 @@ type Maliev.ShadcnBlazor.Theming.ShadcnThemeCSharpWriter
   method String Write(ShadcnTheme theme)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeCssWriter
   method String Write(ShadcnTheme theme)
+  method String Write(ShadcnThemeDocument document)
+  method String WriteProperties(ShadcnThemeDocument document, Boolean darkMode)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocument
   const Int32 CurrentSchemaVersion
   ShadcnThemeApplication Application

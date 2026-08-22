@@ -46,6 +46,11 @@ public sealed class ThemeImportExportBrowserTests(
         var primary = page.Locator("input[data-testid='theme-token-light-primary']");
         await primary.FillAsync("#123456");
         await primary.PressAsync("Tab");
+        await page.GetByTestId("font-family-select").ClickAsync();
+        await page.GetByText("DM Sans", new() { Exact = true }).ClickAsync();
+        var headingScale = page.GetByTestId("theme-role-heading-1-scale");
+        await headingScale.FillAsync("2.5");
+        await headingScale.PressAsync("Tab");
         await page.GetByTestId("theme-export-open").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-export-dialog")).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator("[data-bundle-path]")).ToHaveCountAsync(ExpectedPaths.Length);
@@ -80,12 +85,17 @@ public sealed class ThemeImportExportBrowserTests(
             Assert.True(themeDocument.RootElement.TryGetProperty("application", out _));
             Assert.True(themeDocument.RootElement.TryGetProperty("palette", out _));
             Assert.True(themeDocument.RootElement.TryGetProperty("typography", out _));
+            Assert.Equal("dm-sans", themeDocument.RootElement.GetProperty("typography").GetProperty("body").GetProperty("googleFontsId").GetString());
+            Assert.Equal(2.5, themeDocument.RootElement.GetProperty("typography").GetProperty("roles").GetProperty("heading1").GetProperty("scale").GetDouble());
             Assert.True(themeDocument.RootElement.GetProperty("application").GetProperty("defaultDarkMode").GetBoolean());
             Assert.Equal("rightToLeft", themeDocument.RootElement.GetProperty("application").GetProperty("defaultDirection").GetString());
             Assert.Equal("th", themeDocument.RootElement.GetProperty("application").GetProperty("defaultLocale").GetString());
             Assert.Equal(0UL, themeDocument.RootElement.GetProperty("palette").GetProperty("seed").GetUInt64());
             Assert.Contains("#123456", themeJson, StringComparison.Ordinal);
-            Assert.Contains("#123456", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.css")!)), StringComparison.Ordinal);
+            var css = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.css")!));
+            Assert.Contains("#123456", css, StringComparison.Ordinal);
+            Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", css, StringComparison.Ordinal);
+            Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", css, StringComparison.Ordinal);
             Assert.Contains("#123456", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("MalievShadcnTheme.cs")!)), StringComparison.Ordinal);
         }
 
@@ -115,6 +125,9 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.Locator("input[data-testid='theme-token-light-primary']")).ToHaveValueAsync("#123456");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
+        var restoredTypography = await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style");
+        Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", restoredTypography, StringComparison.Ordinal);
         Assert.Empty(errors);
     }
 

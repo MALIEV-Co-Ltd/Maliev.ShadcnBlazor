@@ -15,11 +15,40 @@ public static class ShadcnThemeCssWriter
         return builder.ToString();
     }
 
+    /// <summary>Writes deterministic CSS variables for a complete portable theme document.</summary>
+    public static string Write(ShadcnThemeDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+        if (!validation.IsValid)
+            throw new ArgumentException(
+                "Theme document is invalid: " + string.Join("; ", validation.Errors.Select(error => $"{error.Path}: {error.Message}")),
+                nameof(document));
+
+        var builder = new StringBuilder();
+        AppendDocumentBlock(builder, "light", document.Theme.Light, document.Theme.Metrics, document.Typography);
+        builder.Append('\n');
+        AppendDocumentBlock(builder, "dark", document.Theme.Dark, document.Theme.Metrics, document.Typography);
+        return builder.ToString();
+    }
+
     internal static string WriteProperties(ShadcnTheme theme, bool darkMode)
     {
         EnsureValid(theme);
         var scheme = darkMode ? theme.Dark : theme.Light;
         return string.Join("; ", GetDeclarations(scheme, theme.Metrics)
+            .Select(declaration => $"{declaration.Name}: {declaration.Value}"));
+    }
+
+    /// <summary>Writes inline-safe CSS custom properties for a complete portable theme document.</summary>
+    public static string WriteProperties(ShadcnThemeDocument document, bool darkMode)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+        if (!validation.IsValid)
+            throw new ArgumentException("A valid theme document is required.", nameof(document));
+        var scheme = darkMode ? document.Theme.Dark : document.Theme.Light;
+        return string.Join("; ", GetDocumentDeclarations(scheme, document.Theme.Metrics, document.Typography)
             .Select(declaration => $"{declaration.Name}: {declaration.Value}"));
     }
 
@@ -50,6 +79,56 @@ public static class ShadcnThemeCssWriter
             builder.Append("  ").Append(declaration.Name).Append(": ").Append(declaration.Value).Append(";\n");
         builder.Append("}\n");
     }
+
+    private static void AppendDocumentBlock(
+        StringBuilder builder,
+        string schemeName,
+        ShadcnColorScheme scheme,
+        ShadcnThemeMetrics metrics,
+        ShadcnTypographyScale typography)
+    {
+        builder.Append(".shadcn-scope[data-shadcn-theme=\"")
+            .Append(schemeName)
+            .Append("\"],\n.shadcn-overlay-scope[data-shadcn-theme=\"")
+            .Append(schemeName)
+            .Append("\"] {\n");
+        foreach (var declaration in GetDocumentDeclarations(scheme, metrics, typography))
+            builder.Append("  ").Append(declaration.Name).Append(": ").Append(declaration.Value).Append(";\n");
+        builder.Append("}\n");
+    }
+
+    private static IEnumerable<(string Name, string Value)> GetDocumentDeclarations(
+        ShadcnColorScheme scheme,
+        ShadcnThemeMetrics metrics,
+        ShadcnTypographyScale typography)
+    {
+        foreach (var declaration in GetDeclarations(scheme, metrics))
+            yield return declaration;
+        yield return ("--shadcn-font-thai", typography.ThaiFallback.Family);
+        foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
+        {
+            var style = typography.Roles[role];
+            var name = RoleName(role);
+            yield return ($"--shadcn-typography-{name}-weight", style.Weight.ToString(CultureInfo.InvariantCulture));
+            yield return ($"--shadcn-typography-{name}-scale", Format(style.Scale));
+            yield return ($"--shadcn-typography-{name}-line-height", Format(style.LineHeight));
+            yield return ($"--shadcn-typography-{name}-letter-spacing", $"{Format(style.LetterSpacingEm)}em");
+        }
+    }
+
+    private static string RoleName(ShadcnTypographyRole role) => role switch
+    {
+        ShadcnTypographyRole.Body => "body",
+        ShadcnTypographyRole.Heading1 => "heading-1",
+        ShadcnTypographyRole.Heading2 => "heading-2",
+        ShadcnTypographyRole.Heading3 => "heading-3",
+        ShadcnTypographyRole.Heading4To6 => "heading-4-to-6",
+        ShadcnTypographyRole.Label => "label",
+        ShadcnTypographyRole.Button => "button",
+        ShadcnTypographyRole.Caption => "caption",
+        ShadcnTypographyRole.Code => "code",
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown typography role.")
+    };
 
     private static IReadOnlyList<(string Name, string Value)> GetDeclarations(
         ShadcnColorScheme scheme,

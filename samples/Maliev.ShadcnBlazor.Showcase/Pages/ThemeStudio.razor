@@ -9,16 +9,6 @@
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 
-@if (GoogleFontsStylesheet is { Length: > 0 } googleFontsStylesheet)
-{
-    <HeadContent>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-        <link rel="preload" as="style" href="@googleFontsStylesheet" />
-        <link rel="stylesheet" href="@googleFontsStylesheet" />
-    </HeadContent>
-}
-
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
@@ -27,6 +17,7 @@
      data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
      lang="@LocaleCode"
      @onkeydown="HandleWorkbenchKeyDownAsync">
+    <ThemeFontLoader State="State" />
     <ThemeStudioAppBar State="State" ToggleSettings="ToggleSettingsAsync" />
 
     <button type="button"
@@ -50,7 +41,7 @@
                     <span><strong>Menu</strong> @State.MenuAccent / @State.MenuColor</span>
                     <span><strong>Radius</strong> @State.RadiusPreset</span>
                 </div>
-                <div class="theme-preview-scope">
+                <div class="theme-preview-scope" style="@TypographyStyle">
                     <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
                 </div>
             </div>
@@ -66,25 +57,7 @@
     private Task _persistenceTask = Task.CompletedTask;
     private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
-    private string? GoogleFontsStylesheet
-    {
-        get
-        {
-            var selected = ThemeStudioFontPreset.All
-                .Concat(ThemeStudioFontPreset.MonospaceAll)
-                .Where(font => string.Equals(font.CssStack, State.Draft.Metrics.FontFamily, StringComparison.Ordinal)
-                    || string.Equals(font.CssStack, State.Draft.Metrics.MonospaceFontFamily, StringComparison.Ordinal))
-                .Where(font => !font.IsBundled)
-                .Select(font => font.GoogleFontsFamily)
-                .Distinct(StringComparer.Ordinal)
-                .ToArray();
-
-            return selected.Length == 0
-                ? null
-                : $"https://fonts.googleapis.com/css2?family={string.Join("&family=", selected)}&display=swap";
-        }
-    }
-
+    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;

@@ -75,7 +75,7 @@ public sealed class ThemeStudioBrowserTests(
     }
 
     [Fact]
-    public async Task ThemeStudioPreloadsAndAppliesASelectableGoogleFontPreset()
+    public async Task TypographyCatalogAppliesOfflineSafeFontsAndSemanticRolesWithoutAKey()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -83,6 +83,7 @@ public sealed class ThemeStudioBrowserTests(
             ReducedMotion = ReducedMotion.Reduce
         });
         var page = await context.NewPageAsync();
+        await page.RouteAsync("https://fonts.googleapis.com/**", route => route.AbortAsync());
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
@@ -95,20 +96,37 @@ public sealed class ThemeStudioBrowserTests(
         var defaultFontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("Geist", defaultFontVariable, StringComparison.Ordinal);
-        await page.GetByTestId("font-family-select").ClickAsync();
-        await page.GetByText("DM Sans", new() { Exact = true }).ClickAsync();
+        await page.GetByTestId("theme-typography-editor").WaitForAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
+        await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
 
         await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='DM+Sans']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("theme-font-load-status")).ToContainTextAsync("fallback");
 
         var fontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("DM Sans", fontVariable, StringComparison.Ordinal);
 
-        await page.GetByTestId("monospace-font-family-select").ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "JetBrains Mono", Exact = true }).ClickAsync();
+        var headingScale = page.GetByTestId("theme-role-heading-1-scale");
+        await headingScale.FillAsync("2.5");
+        await headingScale.PressAsync("Tab");
+        var scaleVariable = await page.GetByTestId("theme-typography-specimen").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-typography-heading-1-scale').trim()");
+        Assert.Equal("2.5", scaleVariable);
+
+        await page.GetByTestId("theme-font-slot-code").ClickAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("JetBrains Mono");
+        await page.GetByTestId("theme-font-result-jetbrains-mono").ClickAsync();
         var monoVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-mono')");
         Assert.Contains("JetBrains Mono", monoVariable, StringComparison.Ordinal);
+
+        await page.GetByTestId("theme-code-open").ClickAsync();
+        await page.GetByTestId("theme-code-tab-json").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-code-content")).ToContainTextAsync("\"googleFontsId\": \"dm-sans\"");
+        await Assertions.Expect(page.GetByTestId("theme-code-content")).ToContainTextAsync("\"scale\": 2.5");
+        var axe = await page.GetByTestId("theme-typography-editor").RunAxe();
+        Assert.DoesNotContain(axe.Violations, violation => violation.Impact is "serious" or "critical");
     }
 
     [Fact]

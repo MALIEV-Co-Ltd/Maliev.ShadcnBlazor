@@ -3,6 +3,7 @@ using Maliev.ShadcnBlazor.Showcase.Components.Theming;
 using Maliev.ShadcnBlazor.Showcase.Pages;
 using Maliev.ShadcnBlazor.Showcase.MockSites;
 using Maliev.ShadcnBlazor.Showcase.Theming;
+using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -271,6 +272,72 @@ public sealed class ThemeStudioStateTests
     }
 
     [Fact]
+    public void TypographySelectionsAndSemanticRolesRoundTripThroughHistoryAndReset()
+    {
+        var state = CreateState();
+        var original = state.CreateDocument().Typography;
+        var body = new ShadcnFontSelection(
+            "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            "ibm-plex-sans");
+        var thai = new ShadcnFontSelection(
+            "'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "ibm-plex-sans-thai");
+        var code = new ShadcnFontSelection(
+            "'Fira Code', ui-monospace, monospace",
+            "ui-monospace, monospace",
+            "fira-code");
+        var heading = new ShadcnTypographyRoleStyle(800, 2.5, 1.2, -0.04);
+
+        state.SetTypographyFont(ThemeStudioFontSlot.Body, body);
+        state.SetTypographyFont(ThemeStudioFontSlot.ThaiFallback, thai);
+        state.SetTypographyFont(ThemeStudioFontSlot.Code, code);
+        state.SetTypographyRole(ShadcnTypographyRole.Heading1, heading);
+
+        var document = state.CreateDocument();
+        Assert.Equal(body, document.Typography.Body);
+        Assert.Equal(thai, document.Typography.ThaiFallback);
+        Assert.Equal(code, document.Typography.Code);
+        Assert.Equal(heading, document.Typography.Roles[ShadcnTypographyRole.Heading1]);
+        Assert.Equal(body.Family, document.Theme.Metrics.FontFamily);
+        Assert.Equal(code.Family, document.Theme.Metrics.MonospaceFontFamily);
+        Assert.True(state.IsDirty);
+
+        Assert.True(state.Undo());
+        Assert.NotEqual(heading, state.CreateDocument().Typography.Roles[ShadcnTypographyRole.Heading1]);
+        Assert.True(state.Redo());
+        Assert.Equal(heading, state.CreateDocument().Typography.Roles[ShadcnTypographyRole.Heading1]);
+
+        state.ResetGroup(ThemeStudioGroup.Typography);
+        var reset = state.CreateDocument().Typography;
+        Assert.Equal(original.Body, reset.Body);
+        Assert.Equal(original.ThaiFallback, reset.ThaiFallback);
+        Assert.Equal(original.Code, reset.Code);
+        Assert.Equal(original.Roles.OrderBy(item => item.Key), reset.Roles.OrderBy(item => item.Key));
+    }
+
+    [Fact]
+    public void FontLoadCompletionSuppressesStaleRequestsAndRetainsFallbackDiagnostics()
+    {
+        var state = CreateState();
+
+        var stale = state.BeginFontLoad("https://fonts.googleapis.com/css2?family=Inter");
+        var current = state.BeginFontLoad("https://fonts.googleapis.com/css2?family=Roboto");
+
+        Assert.False(state.CompleteFontLoad(stale, ThemeStudioFontLoadState.Loaded));
+        Assert.Equal(ThemeStudioFontLoadState.Loading, state.FontLoadState);
+        Assert.True(state.CompleteFontLoad(current, ThemeStudioFontLoadState.Failed));
+        Assert.Equal(ThemeStudioFontLoadState.Failed, state.FontLoadState);
+        Assert.Contains("fallback", state.FontLoadDiagnostic, StringComparison.OrdinalIgnoreCase);
+
+        state.UseBundledFonts();
+        Assert.Equal(ThemeStudioFontLoadState.Bundled, state.FontLoadState);
+        Assert.Null(state.FontLoadDiagnostic);
+        Assert.False(state.CanUndo);
+    }
+
+    [Fact]
     public void CanonicalDocumentRejectsUnknownStudioMetadataWithoutChangingTheCurrentTheme()
     {
         var state = CreateState();
@@ -492,6 +559,11 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Services.AddSingleton<IThemeStudioStorage>(new NoOpStorage());
         Services.AddSingleton<ThemeStudioState>();
         Services.AddSingleton<MockSiteState>();
+        Services.AddSingleton(new HttpClient(new MissingCatalogHandler())
+        {
+            BaseAddress = new Uri("https://showcase.invalid/"),
+        });
+        Services.AddSingleton<GoogleFontCatalogService>();
     }
 
     [Fact]
@@ -501,15 +573,36 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
         Assert.Equal(70, cut.FindAll("[data-theme-token]").Count);
-        Assert.Equal(19, cut.FindAll("[data-theme-metric]")
+        Assert.Equal(17, cut.FindAll("[data-theme-metric]")
             .Select(element => element.GetAttribute("data-theme-metric"))
             .Distinct(StringComparer.Ordinal)
             .Count());
+        Assert.Equal(3, cut.FindAll("[data-testid^='theme-font-slot-']").Count);
+        Assert.Equal(9, cut.FindAll("fieldset[data-testid^='theme-role-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-undo']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-reset-all']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-validation-summary']"));
         Assert.All(cut.FindAll("[data-theme-token], [data-theme-metric]"), element =>
             Assert.False(string.IsNullOrWhiteSpace(element.GetAttribute("aria-label"))));
+    }
+
+    [Fact]
+    public void TypographyEditorSelectsCatalogFamiliesAndMutatesSemanticRolesThroughPackageControls()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+        cut.WaitForElement("[data-testid='theme-font-result-dm-sans']");
+
+        cut.Find("[data-testid='theme-font-result-dm-sans']").Click();
+        cut.Find("[data-testid='theme-role-heading-1-scale']").Change("2.5");
+
+        Assert.Equal("dm-sans", state.Typography.Body.GoogleFontsId);
+        Assert.Equal("'DM Sans', ui-sans-serif, system-ui, sans-serif", state.Typography.Body.Family);
+        Assert.Equal(2.5, state.Typography.Roles[ShadcnTypographyRole.Heading1].Scale);
+        Assert.Equal("true", cut.Find("[data-testid='theme-font-result-dm-sans']").GetAttribute("data-selected"));
+        Assert.Equal("INPUT", cut.Find("[data-testid='theme-font-search']").TagName);
+        Assert.Equal(2, cut.FindAll(".theme-font-filters [data-slot='checkbox']").Count);
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-font-result-dm-sans']"));
     }
 
     [Fact]
@@ -827,6 +920,25 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     {
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
         public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) => ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
+    }
+
+    private sealed class MissingCatalogHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent("""
+                    {
+                      "schemaVersion": 1,
+                      "source": "google-webfonts-developer-api",
+                      "sourceTimestamp": "2026-08-22T00:00:00Z",
+                      "families": [
+                        { "id": "dm-sans", "family": "DM Sans", "category": "sans-serif", "subsets": ["latin"], "weights": [400, 700], "axes": [], "css2FamilyQuery": "DM+Sans:wght@400;700" }
+                      ]
+                    }
+                    """)
+            });
     }
 
     private sealed class DelayedStorage(bool releaseFirstImmediately = false) : IThemeStudioStorage

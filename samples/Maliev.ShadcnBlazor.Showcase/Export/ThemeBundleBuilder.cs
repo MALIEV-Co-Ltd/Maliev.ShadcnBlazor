@@ -44,7 +44,7 @@ public static class ThemeBundleBuilder
 
         var files = new List<ThemeBundleFile>
         {
-            CreateFile("theme.css", ShadcnThemeCssWriter.Write(theme)),
+            CreateFile("theme.css", ShadcnThemeCssWriter.Write(document)),
             CreateFile("MalievShadcnTheme.cs", ThemeBundleTemplates.WriteThemeClass(theme)),
             CreateFile("theme.json", ShadcnThemeDocumentSerializer.Serialize(document)),
             CreateFile("README.md", ThemeBundleTemplates.WriteReadme(theme, options, validation)),

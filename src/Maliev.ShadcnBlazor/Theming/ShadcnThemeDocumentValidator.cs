@@ -109,15 +109,32 @@ public static class ShadcnThemeDocumentValidator
             return;
         }
 
+        foreach (var requiredRole in Enum.GetValues<ShadcnTypographyRole>())
+        {
+            if (!document.Typography.Roles.ContainsKey(requiredRole))
+            {
+                errors.Add(new(
+                    "required-typography-role",
+                    RolePath(requiredRole),
+                    $"Typography role {requiredRole} is required."));
+            }
+        }
+
         foreach (var (role, style) in document.Typography.Roles)
         {
-            var path = $"typography.roles.{char.ToLowerInvariant(role.ToString()[0])}{role.ToString()[1..]}";
+            var path = RolePath(role);
             if (!Enum.IsDefined(role) || style is null || style.Weight is < 100 or > 900 || style.Weight % 100 != 0 ||
-                !double.IsFinite(style.Scale) || style.Scale is < 0.5 or > 8 ||
-                !double.IsFinite(style.LineHeight) || style.LineHeight is < 1 or > 3 ||
-                !double.IsFinite(style.LetterSpacingEm) || style.LetterSpacingEm is < -0.1 or > 0.5)
+                !double.IsFinite(style.Scale) || style.Scale is < 0.625 or > 4 ||
+                !double.IsFinite(style.LineHeight) || style.LineHeight is < 1 or > 2.5 ||
+                !double.IsFinite(style.LetterSpacingEm) || style.LetterSpacingEm is < -0.1 or > 0.2)
                 errors.Add(new("invalid-typography-role", path, "Typography role values are outside supported bounds."));
         }
+    }
+
+    private static string RolePath(ShadcnTypographyRole role)
+    {
+        var name = role.ToString();
+        return $"typography.roles.{char.ToLowerInvariant(name[0])}{name[1..]}";
     }
 
     private static void ValidateFont(ShadcnFontSelection? font, string path, ICollection<ShadcnThemeValidationMessage> errors)

@@ -12,6 +12,8 @@ public enum ThemeStudioMode { Light, Dark, System }
 public enum ThemeStudioLocale { English, Thai }
 public enum ThemeStudioMockup { OperationsDashboard, ManufacturingRequest, CustomerWorkspace }
 public enum ThemeStudioGroup { Colors, Typography, Geometry, Shadows, Focus, Motion }
+public enum ThemeStudioFontSlot { Body, ThaiFallback, Code }
+public enum ThemeStudioFontLoadState { Bundled, Loading, Loaded, Failed, TimedOut }
 
 public sealed record ThemeStudioViewport(string Id, string DisplayName, int Width)
 {
@@ -124,6 +126,7 @@ public sealed class ThemeStudioState
     private string? _pointerMutationKey;
     private bool _pointerSnapshotCaptured;
     private bool _suppressWorkbenchChanged;
+    private long _fontLoadRequest;
     private ShadcnThemeDocument _documentTemplate = ShadcnThemeDocumentSerializer.Deserialize(
         ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
     private ShadcnThemeDocument _baselineDocumentTemplate = ShadcnThemeDocumentSerializer.Deserialize(
@@ -143,6 +146,7 @@ public sealed class ThemeStudioState
 
     public ThemeStudioWorkbenchState Workbench { get; }
     public ShadcnThemeDocument Document => CreateDocument();
+    public ShadcnTypographyScale Typography => _documentTemplate.Typography;
     public ShadcnTheme Draft { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public ShadcnTheme Applied { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public ThemeStudioMode Mode => Workbench.Mode;
@@ -161,13 +165,16 @@ public sealed class ThemeStudioState
     public bool CanRedo => _redo.Count > 0;
     public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline ||
         StyleId != _baselineStyleId || BaseColorId != _baselineBaseColorId || IconLibrary != _baselineIconLibrary ||
-        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || !PaletteEquals(_documentTemplate.Palette, _baselineDocumentTemplate.Palette);
+        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || !PaletteEquals(_documentTemplate.Palette, _baselineDocumentTemplate.Palette) ||
+        !TypographyEquals(_documentTemplate.Typography, _baselineDocumentTemplate.Typography);
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public IReadOnlyList<ShadcnThemeValidationMessage> PaletteDiagnostics { get; private set; } = [];
     public string? StorageDiagnostic { get; private set; }
     public string? ImportDiagnostic { get; private set; }
     public bool SystemDarkMode => Workbench.SystemDarkMode;
     public bool EffectiveDarkMode => Workbench.EffectiveDarkMode;
+    public ThemeStudioFontLoadState FontLoadState { get; private set; } = ThemeStudioFontLoadState.Bundled;
+    public string? FontLoadDiagnostic { get; private set; }
 
     public event EventHandler? Changed;
 
@@ -333,6 +340,8 @@ public sealed class ThemeStudioState
                 _metricEditorValues.Remove(descriptor.Name);
             }
             Draft = Draft with { Metrics = target };
+            if (group == ThemeStudioGroup.Typography)
+                _documentTemplate = _documentTemplate with { Typography = _baselineDocumentTemplate.Typography };
         }
         RevalidateAndApply();
     }
@@ -693,7 +702,12 @@ public sealed class ThemeStudioState
                 string.Equals(item.Id, presetOrCssStack, StringComparison.Ordinal) ||
                 string.Equals(item.CssStack, presetOrCssStack, StringComparison.Ordinal))
             ?? throw new ArgumentOutOfRangeException(nameof(presetOrCssStack), presetOrCssStack, "Unknown Theme Studio font preset.");
-        SetMetric("fontFamily", preset.CssStack);
+        SetTypographyFont(
+            ThemeStudioFontSlot.Body,
+            new ShadcnFontSelection(
+                preset.CssStack,
+                _documentTemplate.Typography.Body.Fallback,
+                preset.IsBundled ? null : preset.Id));
     }
 
     public void SetMonospaceFontFamily(string presetOrCssStack)
@@ -703,7 +717,105 @@ public sealed class ThemeStudioState
                 string.Equals(item.Id, presetOrCssStack, StringComparison.Ordinal) ||
                 string.Equals(item.CssStack, presetOrCssStack, StringComparison.Ordinal))
             ?? throw new ArgumentOutOfRangeException(nameof(presetOrCssStack), presetOrCssStack, "Unknown Theme Studio monospace font preset.");
-        SetMetric("monospaceFontFamily", preset.CssStack);
+        SetTypographyFont(
+            ThemeStudioFontSlot.Code,
+            new ShadcnFontSelection(
+                preset.CssStack,
+                _documentTemplate.Typography.Code.Fallback,
+                preset.IsBundled ? null : preset.Id));
+    }
+
+    public void SetTypographyFont(ThemeStudioFontSlot slot, ShadcnFontSelection selection)
+    {
+        ValidateWorkspaceValue(slot, nameof(slot));
+        ArgumentNullException.ThrowIfNull(selection);
+        var current = slot switch
+        {
+            ThemeStudioFontSlot.Body => _documentTemplate.Typography.Body,
+            ThemeStudioFontSlot.ThaiFallback => _documentTemplate.Typography.ThaiFallback,
+            ThemeStudioFontSlot.Code => _documentTemplate.Typography.Code,
+            _ => throw new ArgumentOutOfRangeException(nameof(slot), slot, "Unknown typography font slot.")
+        };
+        if (current == selection)
+            return;
+
+        var typography = slot switch
+        {
+            ThemeStudioFontSlot.Body => _documentTemplate.Typography with { Body = selection },
+            ThemeStudioFontSlot.ThaiFallback => _documentTemplate.Typography with { ThaiFallback = selection },
+            ThemeStudioFontSlot.Code => _documentTemplate.Typography with { Code = selection },
+            _ => throw new ArgumentOutOfRangeException(nameof(slot), slot, "Unknown typography font slot.")
+        };
+        var metrics = Draft.Metrics with
+        {
+            FontFamily = slot == ThemeStudioFontSlot.Body ? selection.Family : Draft.Metrics.FontFamily,
+            MonospaceFontFamily = slot == ThemeStudioFontSlot.Code ? selection.Family : Draft.Metrics.MonospaceFontFamily
+        };
+        var theme = Draft with { Metrics = metrics };
+        EnsureTypographyValid(theme, typography);
+
+        CaptureHistory($"typography.font.{slot.ToString().ToLowerInvariant()}");
+        _documentTemplate = _documentTemplate with { Typography = typography };
+        Draft = theme;
+        Applied = Clone(theme);
+        if (slot == ThemeStudioFontSlot.Body)
+            _metricEditorValues.Remove("fontFamily");
+        else if (slot == ThemeStudioFontSlot.Code)
+            _metricEditorValues.Remove("monospaceFontFamily");
+        RevalidateAndApply();
+    }
+
+    public void SetTypographyRole(ShadcnTypographyRole role, ShadcnTypographyRoleStyle style)
+    {
+        ValidateWorkspaceValue(role, nameof(role));
+        ArgumentNullException.ThrowIfNull(style);
+        if (_documentTemplate.Typography.Roles.TryGetValue(role, out var current) && current == style)
+            return;
+
+        var roles = _documentTemplate.Typography.Roles.ToDictionary();
+        roles[role] = style;
+        var typography = new ShadcnTypographyScale(
+            _documentTemplate.Typography.Body,
+            _documentTemplate.Typography.ThaiFallback,
+            _documentTemplate.Typography.Code,
+            roles);
+        EnsureTypographyValid(Draft, typography);
+        CaptureHistory($"typography.role.{role.ToString().ToLowerInvariant()}");
+        _documentTemplate = _documentTemplate with { Typography = typography };
+        RaiseChanged();
+    }
+
+    public long BeginFontLoad(string stylesheet)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(stylesheet);
+        var request = ++_fontLoadRequest;
+        FontLoadState = ThemeStudioFontLoadState.Loading;
+        FontLoadDiagnostic = null;
+        RaiseChanged();
+        return request;
+    }
+
+    public bool CompleteFontLoad(long request, ThemeStudioFontLoadState state)
+    {
+        if (request != _fontLoadRequest || state is ThemeStudioFontLoadState.Bundled or ThemeStudioFontLoadState.Loading)
+            return false;
+        FontLoadState = state;
+        FontLoadDiagnostic = state switch
+        {
+            ThemeStudioFontLoadState.Failed => "The selected web font could not be loaded; the configured fallback remains active.",
+            ThemeStudioFontLoadState.TimedOut => "The selected web font timed out; the configured fallback remains active.",
+            _ => null
+        };
+        RaiseChanged();
+        return true;
+    }
+
+    public void UseBundledFonts()
+    {
+        _fontLoadRequest++;
+        FontLoadState = ThemeStudioFontLoadState.Bundled;
+        FontLoadDiagnostic = null;
+        RaiseChanged();
     }
 
     private static void ValidateWorkspaceValue<T>(T value, string parameterName) where T : struct, Enum
@@ -890,6 +1002,20 @@ public sealed class ThemeStudioState
         first.AlgorithmVersion == second.AlgorithmVersion && first.Seed == second.Seed &&
         string.Equals(first.BaseColor, second.BaseColor, StringComparison.Ordinal) &&
         first.LockedTokens.SequenceEqual(second.LockedTokens, StringComparer.Ordinal);
+
+    private static bool TypographyEquals(ShadcnTypographyScale first, ShadcnTypographyScale second) =>
+        first.Body == second.Body && first.ThaiFallback == second.ThaiFallback && first.Code == second.Code &&
+        first.Roles.Count == second.Roles.Count && first.Roles.All(item =>
+            second.Roles.TryGetValue(item.Key, out var value) && value == item.Value);
+
+    private void EnsureTypographyValid(ShadcnTheme theme, ShadcnTypographyScale typography)
+    {
+        var candidate = CreateDocument() with { Theme = theme, Typography = typography };
+        var validation = ShadcnThemeDocumentValidator.Validate(candidate);
+        if (!validation.IsValid)
+            throw new ArgumentException("Typography selection is invalid: " +
+                string.Join("; ", validation.Errors.Select(error => $"{error.Path}: {error.Message}")));
+    }
 
     private static ThemeStudioSnapshot Pop(List<ThemeStudioSnapshot> history)
     {
