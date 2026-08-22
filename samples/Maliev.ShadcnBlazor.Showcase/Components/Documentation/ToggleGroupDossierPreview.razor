@@ -40,8 +40,24 @@
                 </div>
                 <span>Page 1 of 1</span>
             </div>
-            <div class="showcase-toggle-group-dossier__drawing" aria-hidden="true">
-                <span></span><span></span><span></span>
+            <div class="showcase-toggle-group-dossier__review">
+                <svg class="showcase-toggle-group-dossier__part" viewBox="0 0 240 136" role="img" aria-label="CNC enclosure front plate drawing">
+                    <path d="M28 22h184v92H28z" />
+                    <circle cx="56" cy="48" r="8" /><circle cx="184" cy="48" r="8" />
+                    <circle cx="56" cy="88" r="8" /><circle cx="184" cy="88" r="8" />
+                    <path d="M92 46h56v44H92zM108 22V10m24 12V10M28 122h184" />
+                </svg>
+                <ul class="showcase-toggle-group-dossier__layers" aria-live="polite">
+                    @if (CurrentValues.Contains("dimensions", StringComparer.Ordinal))
+                    {
+                        <li data-testid="toggle-group-layer-dimensions"><strong>Overall dimensions</strong><span>126 × 84 × 32 mm · ±0.10 mm</span></li>
+                    }
+                    @if (CurrentValues.Contains("notes", StringComparer.Ordinal))
+                    {
+                        <li data-testid="toggle-group-layer-notes"><strong>Machining note N4</strong><span>Deburr all edges 0.2–0.5 mm before anodizing.</span></li>
+                    }
+                    <li data-disabled="true"><strong>Inspection overlay</strong><span>Locked until the dimensional review is approved.</span></li>
+                </ul>
             </div>
             <p class="showcase-toggle-group-dossier__selection" data-testid="toggle-group-selection">
                 <strong>Visible:</strong> @SelectionSummary
