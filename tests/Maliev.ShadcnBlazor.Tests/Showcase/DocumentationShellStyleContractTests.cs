@@ -26,6 +26,22 @@ public sealed class DocumentationShellStyleContractTests
         Assert.Contains("margin-inline-start: 1rem", css, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void DocumentationHeaderUsesViewportGuttersWithoutConstrainingTheReadingColumn()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+
+        Assert.Contains("--documentation-shell-gutter: clamp(0.75rem, 2vw, 1.5rem)", css, StringComparison.Ordinal);
+        Assert.Contains("padding-inline-start: max(var(--documentation-shell-gutter), var(--documentation-safe-inline-start))", css, StringComparison.Ordinal);
+        Assert.Contains("padding-inline-end: max(var(--documentation-shell-gutter), var(--documentation-safe-inline-end))", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)", css, StringComparison.Ordinal);
+        Assert.Contains(".documentation-header:dir(rtl)", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("calc((100vw - 96rem) / 2)", css, StringComparison.Ordinal);
+        Assert.Contains(".documentation-content > :where(.component-dossier, .documentation-landing)", css, StringComparison.Ordinal);
+        Assert.Contains("inline-size: min(100%, 58rem)", css, StringComparison.Ordinal);
+    }
+
     private static string FindRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

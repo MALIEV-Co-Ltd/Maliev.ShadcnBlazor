@@ -8,6 +8,7 @@
                 type="button"
                 class="documentation-trigger documentation-trigger--catalog"
                 data-testid="catalog-trigger"
+                aria-label="Open component catalog"
                 aria-controls="documentation-catalog"
                 aria-expanded="@State.CatalogOpen.ToString().ToLowerInvariant()"
                 @onclick="ToggleCatalog">
@@ -32,10 +33,12 @@
                 type="button"
                 class="documentation-trigger documentation-trigger--outline"
                 data-testid="outline-trigger"
+                aria-label="On This Page"
                 aria-controls="documentation-outline"
                 aria-expanded="@State.OutlineOpen.ToString().ToLowerInvariant()"
                 @onclick="ToggleOutline">
-            On This Page
+            <svg class="documentation-trigger__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none" /><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none" /></svg>
+            <span>On This Page</span>
         </button>
         <button type="button" class="documentation-icon-action" data-testid="documentation-theme-toggle" aria-label="@(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")" title="@(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")" @onclick="ThemeState.ToggleTheme">
             @if (ThemeState.IsDarkMode)

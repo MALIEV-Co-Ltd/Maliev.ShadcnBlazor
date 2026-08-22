@@ -160,6 +160,141 @@ public sealed class DocumentationWorkbenchBrowserTests(
         { 320, 568 }
     };
 
+    public static TheoryData<int, int, bool, bool> HeaderViewports => new()
+    {
+        { 1440, 900, false, false },
+        { 1440, 900, true, false },
+        { 1024, 768, false, true },
+        { 1024, 768, true, true },
+        { 390, 844, false, false },
+        { 390, 844, true, false }
+    };
+
+    [Theory]
+    [MemberData(nameof(HeaderViewports))]
+    public async Task HeaderSpansViewportAndKeepsShellControlsAtLogicalEdges(
+        int width,
+        int height,
+        bool rtl,
+        bool forcedColors)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = width, Height = height },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = forcedColors ? ForcedColors.Active : ForcedColors.None
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/kbd").ToString());
+        await page.GetByTestId("documentation-workbench").WaitForAsync();
+
+        if (rtl)
+        {
+            await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+            await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
+        }
+
+        var header = page.Locator(".documentation-header");
+        var leading = page.Locator(".documentation-header__leading");
+        var actions = page.Locator(".documentation-header__actions");
+        var headerBox = await header.BoundingBoxAsync();
+        var leadingBox = await leading.BoundingBoxAsync();
+        var actionsBox = await actions.BoundingBoxAsync();
+        Assert.NotNull(headerBox);
+        Assert.NotNull(leadingBox);
+        Assert.NotNull(actionsBox);
+        Assert.InRange(headerBox.X, -0.5, 0.5);
+        Assert.InRange(headerBox.Width, width - 1, width + 1);
+
+        var edgeMetrics = await header.EvaluateAsync<double[]>("""
+            element => {
+                const style = getComputedStyle(element);
+                return [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)];
+            }
+            """);
+        Assert.All(edgeMetrics, gutter => Assert.InRange(gutter, 12, 32));
+        var logicalStartBox = rtl ? actionsBox : leadingBox;
+        var logicalEndBox = rtl ? leadingBox : actionsBox;
+        Assert.InRange(logicalStartBox.X - edgeMetrics[0], -1, 1);
+        Assert.InRange(width - edgeMetrics[1] - (logicalEndBox.X + logicalEndBox.Width), -1, 1);
+
+        var topnav = page.Locator(".documentation-topnav");
+        if (width > 1216)
+        {
+            var navBox = await topnav.BoundingBoxAsync();
+            Assert.NotNull(navBox);
+            Assert.InRange((navBox.X + navBox.Width / 2) - width / 2d, -1, 1);
+        }
+        else
+        {
+            await Assertions.Expect(topnav).ToBeHiddenAsync();
+        }
+
+        if (width <= 640)
+        {
+            var catalogTrigger = page.GetByTestId("catalog-trigger");
+            var outlineTrigger = page.GetByTestId("outline-trigger");
+            await Assertions.Expect(page.Locator(".documentation-brand")).ToBeVisibleAsync();
+            await Assertions.Expect(page.Locator(".documentation-brand > span:last-child")).ToBeHiddenAsync();
+            await Assertions.Expect(catalogTrigger).ToHaveAccessibleNameAsync("Open component catalog");
+            await Assertions.Expect(outlineTrigger).ToHaveAccessibleNameAsync("On This Page");
+            Assert.InRange((await catalogTrigger.BoundingBoxAsync())!.Width, 39, 48);
+            Assert.InRange((await outlineTrigger.BoundingBoxAsync())!.Width, 39, 48);
+        }
+
+        var article = page.Locator(".component-dossier");
+        var articleBox = await article.BoundingBoxAsync();
+        Assert.NotNull(articleBox);
+        Assert.True(articleBox.Width <= 928.5, $"The readable article measure expanded to {articleBox.Width}px.");
+
+        var themeToggle = page.GetByTestId("documentation-theme-toggle");
+        await themeToggle.FocusAsync();
+        await Assertions.Expect(themeToggle).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Tab");
+        var directionToggle = page.GetByTestId("documentation-direction-toggle");
+        await Assertions.Expect(directionToggle).ToBeFocusedAsync();
+        Assert.NotEqual("none", await directionToggle.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+        var reducedTransitionSeconds = await page.Locator("#documentation-catalog").EvaluateAsync<double>(
+            "element => parseFloat(getComputedStyle(element).transitionDuration)");
+        Assert.InRange(reducedTransitionSeconds, 0, 0.001);
+
+        var overflow = await page.EvaluateAsync<double>(
+            "Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)");
+        Assert.InRange(overflow, 0, 1);
+    }
+
+    [Fact]
+    public async Task DocumentationShellMatchesReviewedVisualProof()
+    {
+        foreach (var mode in new[] { VisualProofMode.DesktopLight, VisualProofMode.MobileDarkRtl })
+        {
+            await using var context = await playwright.Browser.NewContextAsync(new()
+            {
+                ViewportSize = mode.Viewport,
+                DeviceScaleFactor = 1,
+                Locale = "th-TH",
+                TimezoneId = "Asia/Bangkok",
+                ReducedMotion = ReducedMotion.Reduce,
+                ColorScheme = mode.Dark ? ColorScheme.Dark : ColorScheme.Light
+            });
+            var page = await context.NewPageAsync();
+            await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/kbd").ToString());
+            await page.GetByTestId("documentation-workbench").WaitForAsync();
+
+            if (mode.Dark)
+            {
+                await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+                await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+                await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
+            }
+
+            await page.EvaluateAsync("document.fonts.ready");
+            var actual = await page.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });
+            await VisualProof.CompareOrUpdateAsync(page, "documentation-shell", mode.Name, actual);
+        }
+    }
+
     [Theory]
     [MemberData(nameof(Viewports))]
     public async Task WorkbenchSearchNavigationAndResponsiveDrawersStayHealthy(int width, int height)
