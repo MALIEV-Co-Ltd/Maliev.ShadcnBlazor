@@ -946,6 +946,51 @@
       ]
     },
     {
+      "id": "code-block-default",
+      "componentSlug": "code-block",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Production source example",
+        "description": "Review a readable Razor source example with a language toolbar and exact copy action."
+      },
+      "thai": {
+        "title": "ตัวอย่างซอร์สงานผลิต",
+        "description": "ตรวจสอบตัวอย่างซอร์ส Razor ที่อ่านง่าย พร้อมแถบเลือกภาษาและปุ่มคัดลอกที่แม่นยำ"
+      },
+      "tags": ["workflow", "production", "code-block"]
+    },
+    {
+      "id": "code-block-stress",
+      "componentSlug": "code-block",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Long mixed-language source",
+        "description": "Inspect long Razor and C# lines, Thai content, and responsive overflow without toolbar collisions."
+      },
+      "thai": {
+        "title": "ซอร์สหลายภาษาบรรทัดยาว",
+        "description": "ตรวจสอบบรรทัด Razor และ C# ที่ยาว เนื้อหาภาษาไทย และการเลื่อนแบบตอบสนองโดยแถบเครื่องมือไม่ชนกัน"
+      },
+      "tags": ["stress", "dense", "edge-case", "code-block"]
+    },
+    {
+      "id": "code-block-accessible",
+      "componentSlug": "code-block",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Keyboard source review",
+        "description": "Switch languages and copy source by keyboard with visible focus and polite success feedback."
+      },
+      "thai": {
+        "title": "ตรวจสอบซอร์สด้วยแป้นพิมพ์",
+        "description": "สลับภาษาและคัดลอกซอร์สด้วยแป้นพิมพ์ พร้อมโฟกัสที่มองเห็นและข้อความแจ้งผลอย่างสุภาพ"
+      },
+      "tags": ["accessible", "keyboard", "assistive-technology", "code-block"]
+    },
+    {
       "id": "collapsible-default",
       "componentSlug": "collapsible",
       "family": "DisclosureNavigation",

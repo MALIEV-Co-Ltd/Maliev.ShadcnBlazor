@@ -59,7 +59,7 @@ else
             <section id="theming" class="component-token-guidance" aria-labelledby="component-token-guidance-title" data-testid="component-token-guidance">
                 <h2 id="component-token-guidance-title">Customization tokens</h2>
                 <p>Customize this component through the scoped semantic token contract; no component CSS fork is required.</p>
-                <ul>
+                <ul class="documentation-prose-list">
                     @foreach (var group in Entry.TokenGroups)
                     {
                         <li><code>@group</code></li>
@@ -73,7 +73,7 @@ else
                 <section id="references" class="component-reference" aria-labelledby="component-reference-title" data-testid="component-reference">
                     <h2 id="component-reference-title">Official reference</h2>
                     <p>Audited against the pinned Shadcn Base/Vega source and the current official component documentation.</p>
-                    <ul>
+                    <ul class="documentation-prose-list">
                         @foreach (var upstreamPath in UpstreamPaths)
                         {
                             <li><a href="@PinnedSourceUrl(upstreamPath)">Pinned source <code>@upstreamPath.Split('/').Last()</code> at @PinnedCommit[..12]</a></li>

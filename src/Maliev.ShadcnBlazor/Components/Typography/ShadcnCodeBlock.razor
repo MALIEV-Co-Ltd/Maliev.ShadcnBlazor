@@ -348,17 +348,56 @@
                 }
                 if (index < value.Length && value[index] is '"' or '\'')
                 {
-                    var quote = value[index]; var stringStart = index++;
-                    while (index < value.Length)
-                    {
-                        if (value[index] == '\\') { index += Math.Min(2, value.Length - index); continue; }
-                        if (value[index] == quote) { index++; break; }
-                        index++;
-                    }
-                    AppendToken(output, "string", value[stringStart..index]);
+                    index = AppendMarkupAttributeValue(output, value, index);
                 }
             }
         }
+    }
+
+    private static int AppendMarkupAttributeValue(System.Text.StringBuilder output, string value, int index)
+    {
+        var quote = value[index++];
+        AppendToken(output, "string", quote.ToString());
+        var plainStart = index;
+        while (index < value.Length && value[index] != quote)
+        {
+            if (value[index] != '@')
+            {
+                index++;
+                continue;
+            }
+
+            if (index > plainStart) AppendToken(output, "string", value[plainStart..index]);
+            AppendToken(output, "directive", "@");
+            index++;
+            while (index < value.Length && value[index] != quote && !char.IsWhiteSpace(value[index]))
+            {
+                if (IsIdentifierStart(value[index]))
+                {
+                    var identifierStart = index++;
+                    while (index < value.Length && IsIdentifierPart(value[index])) index++;
+                    var identifier = value[identifierStart..index];
+                    var kind = identifierStart > 0 && value[identifierStart - 1] == '.' ? "property" : ResolveIdentifierKind(identifier, value, identifierStart, index);
+                    if (kind.Length == 0) output.Append(System.Net.WebUtility.HtmlEncode(identifier));
+                    else AppendToken(output, kind, identifier);
+                    continue;
+                }
+
+                if (IsPunctuation(value[index])) AppendToken(output, "punctuation", value[index].ToString());
+                else if (IsOperator(value[index])) AppendToken(output, "operator", value[index].ToString());
+                else output.Append(System.Net.WebUtility.HtmlEncode(value[index].ToString()));
+                index++;
+            }
+            plainStart = index;
+        }
+
+        if (index > plainStart) AppendToken(output, "string", value[plainStart..index]);
+        if (index < value.Length && value[index] == quote)
+        {
+            AppendToken(output, "string", quote.ToString());
+            index++;
+        }
+        return index;
     }
 
     private static string ResolveIdentifierKind(string token, string source, int start, int end)

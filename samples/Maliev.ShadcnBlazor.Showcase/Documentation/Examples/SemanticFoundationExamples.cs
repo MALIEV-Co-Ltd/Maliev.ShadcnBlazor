@@ -18,6 +18,7 @@ internal static class SemanticFoundationExamples
     {
         "direction" => [Direction()],
         "aspect-ratio" => [AspectRatio()],
+        "code-block" => CodeBlock(),
         "typography" => [Typography()],
         "label" => [Label()],
         "field" => [Field()],
@@ -27,6 +28,93 @@ internal static class SemanticFoundationExamples
         "empty" => [Empty()],
         _ => []
     };
+
+    private static IReadOnlyList<ComponentExampleDefinition> CodeBlock()
+    {
+        const string razor = """
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<ShadcnButton Disabled="@isSaving" aria-label="บันทึก @project.Name">
+    บันทึกงาน
+</ShadcnButton>
+
+@code {
+    private bool isSaving;
+    private Project project = new("Bangkok line");
+}
+""";
+        const string csharp = """
+public async Task SaveAsync(CancellationToken cancellationToken)
+{
+    var completed = await repository.SaveAsync(project, cancellationToken);
+    status = completed ? "Saved" : "Retry";
+}
+""";
+        var sources = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["razor"] = razor,
+            ["csharp"] = csharp
+        };
+        RenderFragment preview = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-code-block-dossier");
+            builder.OpenComponent<ShadcnCodeBlock>(2);
+            builder.AddAttribute(3, nameof(ShadcnCodeBlock.Source), razor);
+            builder.AddAttribute(4, nameof(ShadcnCodeBlock.Language), "razor");
+            builder.AddAttribute(5, nameof(ShadcnCodeBlock.Sources), sources);
+            builder.AddAttribute(6, nameof(ShadcnCodeBlock.AdditionalAttributes), new Dictionary<string, object> { ["aria-label"] = "Razor and C# production example" });
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnCodeBlock>(7);
+            builder.AddAttribute(8, nameof(ShadcnCodeBlock.Source), csharp);
+            builder.AddAttribute(9, nameof(ShadcnCodeBlock.Language), "csharp");
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnCodeBlock>(10);
+            builder.AddAttribute(11, nameof(ShadcnCodeBlock.Source), "<ShadcnButton aria-describedby=\"production-work-order-with-a-long-accessible-description\">เปิดใบสั่งผลิตหมายเลข MALIEV-BKK-2026-000184</ShadcnButton>");
+            builder.AddAttribute(12, nameof(ShadcnCodeBlock.Language), "razor");
+            builder.CloseComponent();
+            builder.CloseElement();
+        };
+
+        return
+        [
+            Example("code-block", "Razor and C# workspace", "Compare three realistic source scenarios, switch languages, inspect semantic editor tokens, and copy the exact source.", """"
+<ShadcnCodeBlock Source="@razorSource"
+                 Language="razor"
+                 Sources="@sources" />
+<ShadcnCodeBlock Source="@csharpSource" Language="csharp" />
+<ShadcnCodeBlock Source="@longRazorSource" Language="razor" />
+
+@code {
+    private const string razorSource = """
+@using Maliev.ShadcnBlazor.Components.Actions
+
+<ShadcnButton Disabled="@isSaving" aria-label="บันทึก @project.Name">
+    บันทึกงาน
+</ShadcnButton>
+
+@code {
+    private bool isSaving;
+    private Project project = new("Bangkok line");
+}
+""";
+    private const string csharpSource = """
+public async Task SaveAsync(CancellationToken cancellationToken)
+{
+    var completed = await repository.SaveAsync(project, cancellationToken);
+    status = completed ? "Saved" : "Retry";
+}
+""";
+    private const string longRazorSource = "<ShadcnButton aria-describedby=\"production-work-order-with-a-long-accessible-description\">เปิดใบสั่งผลิตหมายเลข MALIEV-BKK-2026-000184</ShadcnButton>";
+    private readonly IReadOnlyDictionary<string, string> sources = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["razor"] = razorSource,
+        ["csharp"] = csharpSource
+    };
+}
+"""", preview, [], ["razor", "csharp", "language", "copy", "overflow", "mobile", "RTL", "Thai"])
+        ];
+    }
 
     private static ComponentExampleDefinition Direction()
     {

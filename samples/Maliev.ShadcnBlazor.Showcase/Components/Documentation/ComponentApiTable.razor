@@ -33,14 +33,14 @@
                                     ["data-parameter"] = parameter.Name
                                 })">
                                     <ShadcnTableHead Scope="ShadcnTableHeadScope.Row">
-                                        <code>@parameter.Name</code>
+                                        <code class="component-api__identifier">@parameter.Name</code>
                                         @if (parameter.Required)
                                         {
                                             <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary" Class="component-api__required">required</ShadcnBadge>
                                         }
                                     </ShadcnTableHead>
-                                    <ShadcnTableCell><code>@parameter.FriendlyType</code></ShadcnTableCell>
-                                    <ShadcnTableCell><code>@parameter.DefaultValue</code></ShadcnTableCell>
+                                    <ShadcnTableCell><code class="component-api__value">@parameter.FriendlyType</code></ShadcnTableCell>
+                                    <ShadcnTableCell><code class="component-api__value">@parameter.DefaultValue</code></ShadcnTableCell>
                                     <ShadcnTableCell>
                                         @if (parameter.BindingPair is null)
                                         {
@@ -48,7 +48,7 @@
                                         }
                                         else
                                         {
-                                            <code>@parameter.BindingPair</code>
+                                            <code class="component-api__value">@parameter.BindingPair</code>
                                         }
                                     </ShadcnTableCell>
                                     <ShadcnTableCell>

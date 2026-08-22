@@ -61,6 +61,17 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
+    public void CopyModuleFallsBackWhenClipboardPermissionIsUnavailable()
+    {
+        var root = FindRoot();
+        var module = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-code-block.js"));
+
+        Assert.Contains("navigator.clipboard?.writeText", module, StringComparison.Ordinal);
+        Assert.Contains("document.execCommand(\"copy\")", module, StringComparison.Ordinal);
+        Assert.Contains("activeElement.focus({ preventScroll: true })", module, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HighlightsCSharpAndRazorSyntaxWithEditorTokens()
     {
         const string source = "@using Maliev.ShadcnBlazor.Components.Feedback\n<ShadcnAttachment State=\"ShadcnAttachmentState.Done\" />\nvar progress = 64;\nvar ready = true;";
@@ -167,11 +178,27 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
+    public void HighlightsRazorExpressionsInsideMarkupAttributesWithoutLosingThaiContent()
+    {
+        const string source = "<ShadcnButton Disabled=\"@isBusy\" aria-label=\"บันทึก @item.Name\">บันทึกงาน</ShadcnButton>";
+
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, source)
+            .Add(component => component.Language, "razor"));
+
+        Assert.Contains(cut.FindAll(".shadcn-code-token-directive"), token => token.TextContent == "@");
+        Assert.Contains(cut.FindAll(".shadcn-code-token-property"), token => token.TextContent == "Name");
+        Assert.Contains("บันทึกงาน", cut.Find("code").TextContent, StringComparison.Ordinal);
+        Assert.Contains("บันทึก ", cut.Find("code").TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void UsesOneEditorPaletteAcrossPackageAndShowcaseStyles()
     {
         var root = FindRoot();
         var baseCss = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-base.css"));
-        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"))
+            .Replace("\r\n", "\n", StringComparison.Ordinal);
         var darkStart = baseCss.IndexOf("\n[data-shadcn-theme=\"dark\"],", StringComparison.Ordinal);
         if (darkStart >= 0) darkStart++;
 
@@ -181,15 +208,14 @@ public sealed class CodeBlockTests : BunitContext
             var declaration = $"--shadcn-code-token-{token}:";
             Assert.Contains(declaration, baseCss[..darkStart], StringComparison.Ordinal);
             Assert.Contains(declaration, baseCss[darkStart..], StringComparison.Ordinal);
-            Assert.Contains($"var(--shadcn-code-token-{token})", showcaseCss, StringComparison.Ordinal);
+            Assert.DoesNotContain($"--shadcn-code-token-{token}:", showcaseCss, StringComparison.Ordinal);
         }
 
-        // The RCL emits the canonical shadcn-code-token-* classes. The
-        // Showcase also keeps legacy aliases for compatibility, but must not
-        // rely on those aliases for its editor palette.
+        // The RCL emits and styles the canonical token classes. The Showcase
+        // must not redefine package-owned editor internals.
         foreach (var token in new[] { "comment", "tag", "string", "keyword", "type", "number", "literal", "attribute", "method", "property", "directive", "operator", "punctuation" })
         {
-            Assert.Contains($".component-code pre code .shadcn-code-token-{token}", showcaseCss, StringComparison.Ordinal);
+            Assert.DoesNotContain($".component-code pre code .shadcn-code-token-{token}", showcaseCss, StringComparison.Ordinal);
         }
 
         Assert.DoesNotContain("#8250df", showcaseCss, StringComparison.OrdinalIgnoreCase);
@@ -202,17 +228,20 @@ public sealed class CodeBlockTests : BunitContext
     {
         var root = FindRoot();
         var baseCss = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-base.css"));
-        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        var showcaseCss = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"))
+            .Replace("\r\n", "\n", StringComparison.Ordinal);
 
         Assert.Contains(".shadcn-code-block-copy {", baseCss, StringComparison.Ordinal);
-        Assert.Contains("opacity: 0", baseCss, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-code-block-copy { display: inline-flex", baseCss, StringComparison.Ordinal);
+        Assert.Contains("opacity: 1", baseCss, StringComparison.Ordinal);
         Assert.Contains(".shadcn-code-block-copy[data-copied=\"true\"]", baseCss, StringComparison.Ordinal);
         Assert.Contains("@keyframes shadcn-code-block-copy-feedback", baseCss, StringComparison.Ordinal);
         Assert.DoesNotContain("shadcn-code-block-copy-fade", baseCss, StringComparison.Ordinal);
 
-        Assert.Contains(".component-code__surface .shadcn-code-block-copy-feedback", showcaseCss, StringComparison.Ordinal);
-        Assert.Contains("@keyframes component-code-copied-feedback", showcaseCss, StringComparison.Ordinal);
-        Assert.DoesNotContain("component-code-copied-fade", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains("margin-inline-start: auto", baseCss, StringComparison.Ordinal);
+        Assert.Contains("direction: ltr", baseCss, StringComparison.Ordinal);
+        Assert.DoesNotContain(".component-code__surface .shadcn-code-block-copy {\n    position: absolute", showcaseCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("@keyframes component-code-copied-feedback", showcaseCss, StringComparison.Ordinal);
     }
 
     [Fact]
