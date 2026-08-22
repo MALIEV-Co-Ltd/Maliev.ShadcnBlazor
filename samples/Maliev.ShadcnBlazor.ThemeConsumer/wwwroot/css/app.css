@@ -282,8 +282,17 @@ code {
 }
 
 @media (forced-colors: active) {
+  .consumer-root .shadcn-button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
   .consumer-brand__mark,
   .consumer-swatches span {
+    forced-color-adjust: none;
     border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
   }
 }
