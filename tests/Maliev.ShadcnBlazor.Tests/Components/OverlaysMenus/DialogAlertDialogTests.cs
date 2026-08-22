@@ -163,6 +163,11 @@ public sealed class DialogAlertDialogTests : BunitContext
         cut.Find("[data-slot='alert-dialog-action']").Click();
         Assert.Equal(1, cancelCalls);
         Assert.Equal(1, actionCalls);
+
+        var css = File.ReadAllText(Path.Combine(FindRepositoryRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
+        Assert.Contains(".shadcn-alert-dialog-header {", css, StringComparison.Ordinal);
+        Assert.Contains("place-items: start", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".shadcn-alert-dialog-content[data-size=\"sm\"] { width: min(calc(100vw - 2rem), 24rem); text-align: center; }", css, StringComparison.Ordinal);
     }
 
     [Fact]

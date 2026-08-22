@@ -615,6 +615,16 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(sheet).ToHaveAttributeAsync("data-side", "right");
         await Assertions.Expect(sheet).ToHaveAttributeAsync("aria-modal", "true");
         Assert.True(await sheet.EvaluateAsync<bool>("element => element.contains(document.activeElement)"));
+        var closeButton = sheet.GetByRole(AriaRole.Button, new() { Name = "Close delivery schedule" });
+        var title = sheet.GetByText("Delivery schedule", new() { Exact = true });
+        var closeBox = await closeButton.BoundingBoxAsync();
+        var titleBox = await title.BoundingBoxAsync();
+        Assert.NotNull(closeBox);
+        Assert.NotNull(titleBox);
+        Assert.True(
+            closeBox!.X >= titleBox!.X + titleBox.Width || titleBox.X >= closeBox.X + closeBox.Width ||
+            closeBox.Y >= titleBox.Y + titleBox.Height || titleBox.Y >= closeBox.Y + closeBox.Height,
+            $"The sheet close control ({closeBox.X},{closeBox.Y},{closeBox.Width},{closeBox.Height}) must not overlap its title ({titleBox.X},{titleBox.Y},{titleBox.Width},{titleBox.Height}).");
         await sheet.EvaluateAsync("element => Promise.all(element.getAnimations().map(animation => animation.finished))");
         var right = await sheet.BoundingBoxAsync();
         Assert.NotNull(right);

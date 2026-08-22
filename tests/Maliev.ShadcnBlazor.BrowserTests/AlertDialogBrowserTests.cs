@@ -28,6 +28,7 @@ public sealed class AlertDialogBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(dialog).ToBeVisibleAsync();
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Cancel" })).ToBeFocusedAsync();
         await Assertions.Expect(dialog).ToHaveAttributeAsync("aria-modal", "true");
+        await Assertions.Expect(dialog.Locator("[data-slot='alert-dialog-header']")).ToHaveCSSAsync("text-align", "start");
         await page.Keyboard.PressAsync("Shift+Tab");
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Delete quotation" })).ToBeFocusedAsync();
         await page.Keyboard.PressAsync("Tab");

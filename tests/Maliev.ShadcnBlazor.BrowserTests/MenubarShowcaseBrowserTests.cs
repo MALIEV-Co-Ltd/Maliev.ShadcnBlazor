@@ -24,8 +24,14 @@ public sealed class MenubarShowcaseBrowserTests(ShowcaseServerFixture server, Pl
 
         var file = triggers.Filter(new() { HasText = "File" });
         var edit = triggers.Filter(new() { HasText = "Edit" });
+        var menubarBeforeOpen = await dossier.Locator("[data-slot='menubar']").BoundingBoxAsync();
         await file.ClickAsync();
         await Assertions.Expect(file).ToHaveAttributeAsync("data-state", "open");
+        var menubarAfterOpen = await dossier.Locator("[data-slot='menubar']").BoundingBoxAsync();
+        Assert.NotNull(menubarBeforeOpen);
+        Assert.NotNull(menubarAfterOpen);
+        Assert.InRange(Math.Abs(menubarAfterOpen!.X - menubarBeforeOpen!.X), 0, 1);
+        Assert.InRange(Math.Abs(menubarAfterOpen.Y - menubarBeforeOpen.Y), 0, 1);
 
         await edit.HoverAsync();
         await Assertions.Expect(edit).ToHaveAttributeAsync("data-state", "open");

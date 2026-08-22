@@ -212,6 +212,12 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         await page.GetByTestId("control-accordion-multiple").CheckAsync();
         await Assertions.Expect(contents.First).ToBeVisibleAsync();
         await Assertions.Expect(contents.Nth(1)).ToBeVisibleAsync();
+
+        await page.GetByTestId("control-accordion-horizontal").CheckAsync();
+        await Assertions.Expect(accordion).ToHaveAttributeAsync("data-orientation", "horizontal");
+        var openItemWidth = await accordion.Locator("[data-slot='accordion-item'][data-state='open']").First.EvaluateAsync<double>("element => element.getBoundingClientRect().width");
+        var closedItemWidth = await accordion.Locator("[data-slot='accordion-item'][data-state='closed']").First.EvaluateAsync<double>("element => element.getBoundingClientRect().width");
+        Assert.True(openItemWidth > closedItemWidth, $"The open horizontal panel should own the reading width ({openItemWidth} <= {closedItemWidth}).");
     }
 
     [Fact]
@@ -400,6 +406,8 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         var shellBox = await shell.BoundingBoxAsync();
         Assert.NotNull(shellBox);
         Assert.InRange(shellBox.Height, 480, 620);
+        Assert.True(shellBox.Width >= 540, $"The resizable sidebar workspace was only {shellBox.Width}px wide.");
+        await Assertions.Expect(canvas.Locator("[data-slot='sidebar-content']")).ToHaveCSSAsync("text-align", "start");
 
         var trigger = canvas.Locator("[data-slot='sidebar-trigger']");
         await trigger.ClickAsync();

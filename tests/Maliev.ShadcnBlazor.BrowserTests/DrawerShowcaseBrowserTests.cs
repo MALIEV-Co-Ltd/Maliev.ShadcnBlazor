@@ -48,7 +48,12 @@ public sealed class DrawerShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await trigger.ClickAsync();
         await Assertions.Expect(content).ToBeVisibleAsync();
         await Assertions.Expect(content.GetByText("Confirm dispatch", new() { Exact = true }).Last).ToBeFocusedAsync();
-        await page.Keyboard.PressAsync("Escape");
+        await content.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true }).ClickAsync();
+        await Assertions.Expect(content).ToHaveCountAsync(0);
+        await Assertions.Expect(trigger).ToBeFocusedAsync();
+
+        await trigger.ClickAsync();
+        await content.GetByRole(AriaRole.Button, new() { Name = "Confirm dispatch", Exact = true }).ClickAsync();
         await Assertions.Expect(content).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).ToBeFocusedAsync();
     }

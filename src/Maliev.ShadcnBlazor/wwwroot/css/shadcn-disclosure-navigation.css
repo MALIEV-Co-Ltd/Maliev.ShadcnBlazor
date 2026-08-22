@@ -1,6 +1,9 @@
 .shadcn-accordion { width: 100%; }
 .shadcn-accordion[data-orientation="horizontal"] { display: flex; align-items: stretch; }
-.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item { flex: 1 1 0; border-block-end: 0; }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item { min-inline-size: 10rem; flex: 0 0 10rem; border-block-end: 0; }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item[data-state="open"] { min-inline-size: min(24rem, calc(100vw - 4rem)); flex: 1 0 min(24rem, calc(100vw - 4rem)); }
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-trigger,
+.shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-content [data-slot="accordion-content-inner"] { padding-inline: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item:not(:last-child) { border-inline-end: 1px solid var(--shadcn-border); }
 .shadcn-accordion[data-orientation="horizontal"] .shadcn-accordion-item:last-child { border-inline-end: 0; }
 .shadcn-accordion-item:not(:last-child) { border-block-end: 1px solid var(--shadcn-border); }
@@ -176,6 +179,9 @@
 .shadcn-sidebar-inset { min-inline-size: 0; flex: 1 1 auto; background: var(--shadcn-background); color: var(--shadcn-foreground); }
 .shadcn-sidebar-header, .shadcn-sidebar-footer { display: flex; flex-direction: column; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); padding: calc(.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-sidebar-content { display: flex; min-block-size: 0; flex: 1 1 auto; flex-direction: column; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); overflow: auto; scrollbar-width: thin; }
+.shadcn-sidebar-content,
+.shadcn-sidebar-group,
+.shadcn-sidebar-group-content { text-align: start; }
 .shadcn-sidebar-separator { block-size: 1px; margin-inline: calc(.5rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-sidebar-border); }
 .shadcn-sidebar-input { block-size: 2rem; border: 1px solid var(--shadcn-sidebar-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-background); color: inherit; padding-inline: calc(.5rem * var(--shadcn-spacing-multiplier)); font: inherit; }
 .shadcn-sidebar-group { position: relative; display: flex; inline-size: 100%; min-inline-size: 0; flex-direction: column; padding: calc(.5rem * var(--shadcn-spacing-multiplier)); }
