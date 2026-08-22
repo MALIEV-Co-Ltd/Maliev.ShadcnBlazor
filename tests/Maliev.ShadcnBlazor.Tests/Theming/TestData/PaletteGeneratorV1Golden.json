@@ -1,0 +1,35 @@
+[
+  {
+    "baseColor": "neutral",
+    "seed": 0,
+    "lightBackground": "oklch(0.9850 0.0060 317.99)",
+    "lightPrimary": "oklch(0.4500 0.1106 317.99)",
+    "lightSecondary": "oklch(0.9250 0.0387 74.20)",
+    "lightAccent": "oklch(0.9100 0.0940 201.76)",
+    "lightDestructive": "oklch(0.4800 0.1900 23.62)",
+    "lightChart1": "oklch(0.5000 0.1106 314.73)",
+    "darkPrimary": "oklch(0.7200 0.1106 317.99)"
+  },
+  {
+    "baseColor": "slate",
+    "seed": 1,
+    "lightBackground": "oklch(0.9850 0.0060 250.80)",
+    "lightPrimary": "oklch(0.4500 0.1301 250.80)",
+    "lightSecondary": "oklch(0.9250 0.0409 44.57)",
+    "lightAccent": "oklch(0.9100 0.1190 100.35)",
+    "lightDestructive": "oklch(0.4800 0.1900 27.10)",
+    "lightChart1": "oklch(0.5000 0.1400 254.57)",
+    "darkPrimary": "oklch(0.7200 0.1400 250.80)"
+  },
+  {
+    "baseColor": "stone",
+    "seed": 81985529216486895,
+    "lightBackground": "oklch(0.9850 0.0060 50.01)",
+    "lightPrimary": "oklch(0.4500 0.1189 50.01)",
+    "lightSecondary": "oklch(0.9250 0.0490 197.49)",
+    "lightAccent": "oklch(0.9100 0.0433 261.10)",
+    "lightDestructive": "oklch(0.4800 0.1900 21.65)",
+    "lightChart1": "oklch(0.5000 0.1281 52.23)",
+    "darkPrimary": "oklch(0.7200 0.1400 50.01)"
+  }
+]

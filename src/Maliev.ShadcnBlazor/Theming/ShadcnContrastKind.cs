@@ -5,6 +5,7 @@ public enum ShadcnContrastKind
     Text,
     FocusRing,
     Boundary,
+    Chart,
     DestructiveAdjacency,
     DisabledState
 }

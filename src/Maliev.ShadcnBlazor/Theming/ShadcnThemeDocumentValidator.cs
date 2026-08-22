@@ -66,8 +66,8 @@ public static class ShadcnThemeDocumentValidator
             return;
         }
 
-        if (palette.AlgorithmVersion < 1)
-            errors.Add(new("invalid-palette-algorithm", "palette.algorithmVersion", "Palette algorithm version must be positive."));
+        if (palette.AlgorithmVersion is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and not ShadcnPaletteRecipe.CurrentAlgorithmVersion)
+            errors.Add(new("invalid-palette-algorithm", "palette.algorithmVersion", "Palette algorithm version must identify materialized values or a supported deterministic algorithm."));
         ValidateIdentifier(palette.BaseColor, "palette.baseColor", errors);
         if (palette.LockedTokens is null)
             errors.Add(new("required-locked-tokens", "palette.lockedTokens", "Locked token list is required."));
@@ -79,7 +79,8 @@ public static class ShadcnThemeDocumentValidator
             foreach (var token in palette.LockedTokens)
             {
                 if (string.IsNullOrWhiteSpace(token) || token.Length > 100 || !seen.Add(token) ||
-                    token.Any(character => !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-')))
+                    token.Any(character => !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-')) ||
+                    !ShadcnPaletteGenerator.SupportsLock(token))
                     errors.Add(new("invalid-locked-token", "palette.lockedTokens", "Locked tokens must be unique semantic token paths."));
             }
         }
