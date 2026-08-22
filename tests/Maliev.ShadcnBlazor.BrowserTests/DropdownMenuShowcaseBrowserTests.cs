@@ -22,11 +22,17 @@ public sealed class DropdownMenuShowcaseBrowserTests(ShowcaseServerFixture serve
         var trigger = dossier.Locator("[data-slot='dropdown-menu-trigger']");
         await dossier.WaitForAsync();
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        var triggerBeforeOpen = await trigger.BoundingBoxAsync();
 
         await trigger.ClickAsync();
         var content = page.Locator("[data-slot='dropdown-menu-content']");
         await Assertions.Expect(content).ToBeVisibleAsync();
         await Assertions.Expect(content).ToHaveAttributeAsync("data-positioned", "true");
+        var triggerAfterOpen = await trigger.BoundingBoxAsync();
+        Assert.NotNull(triggerBeforeOpen);
+        Assert.NotNull(triggerAfterOpen);
+        Assert.InRange(Math.Abs(triggerAfterOpen!.X - triggerBeforeOpen!.X), 0, 1);
+        Assert.InRange(Math.Abs(triggerAfterOpen.Y - triggerBeforeOpen.Y), 0, 1);
         await Assertions.Expect(content.Locator("[role='menuitem']")).ToHaveCountAsync(5);
         await Assertions.Expect(content.GetByText("Request approval", new() { Exact = true })).ToHaveAttributeAsync("aria-disabled", "true");
 

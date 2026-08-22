@@ -297,6 +297,9 @@ public sealed class MenuTests : BunitContext
         Assert.Contains(":dir(rtl) [data-slot=\"dropdown-menu-sub-trigger-icon\"]", css, StringComparison.Ordinal);
         Assert.Contains("max-inline-size: min(22rem, calc(100vw - 1rem))", css, StringComparison.Ordinal);
         Assert.Contains("overflow-wrap: anywhere", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-dropdown-menu-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-menubar-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-context-menu-item:hover", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);

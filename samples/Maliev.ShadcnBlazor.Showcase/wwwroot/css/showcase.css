@@ -1056,7 +1056,12 @@ a {
 }
 
 .showcase-accordion-dossier .shadcn-accordion[data-orientation="horizontal"] > .shadcn-accordion-item {
-    min-inline-size: 13rem;
+    min-inline-size: 10rem;
+}
+
+.showcase-accordion-dossier .shadcn-accordion[data-orientation="horizontal"] > .shadcn-accordion-item[data-state="open"] {
+    min-inline-size: min(24rem, calc(100vw - 4rem));
+    flex: 1 0 min(24rem, calc(100vw - 4rem));
 }
 
 .component-preview__canvas > .showcase-collapsible-dossier {
@@ -1643,6 +1648,7 @@ a {
    mock. The package still owns every navigation, collapse, modal and focus
    behavior; these rules only compose the fictional production workspace. */
 .showcase-sidebar-shell {
+    inline-size: min(100%, 60rem);
     min-block-size: 32rem;
     block-size: min(36rem, 76dvh);
     max-block-size: 38rem;
@@ -1650,6 +1656,11 @@ a {
     border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-xl);
     background: var(--shadcn-sidebar);
+    text-align: start;
+}
+
+.component-preview__canvas > .showcase-sidebar-shell {
+    inline-size: min(100%, 60rem);
 }
 
 .showcase-sidebar-shell > .shadcn-sidebar,

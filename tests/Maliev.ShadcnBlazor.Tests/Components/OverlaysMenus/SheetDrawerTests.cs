@@ -251,6 +251,7 @@ public sealed class SheetDrawerTests : BunitContext
 
         Assert.Contains("content.removeAttribute('data-drawer-ready')", script, StringComparison.Ordinal);
         Assert.Contains("content.dataset.drawerReady = 'true'", script, StringComparison.Ordinal);
+        Assert.Contains("button,a,input,textarea,select,[data-no-drag]", script, StringComparison.Ordinal);
         Assert.Contains(".shadcn-drawer-content[data-swipe-direction]", css, StringComparison.Ordinal);
         Assert.Matches(
             "(?s)@media \\(prefers-reduced-motion: reduce\\).*?\\.shadcn-drawer-content\\[data-swipe-direction\\]\\s*\\{[^}]*animation:\\s*none;[^}]*transition:\\s*none;",

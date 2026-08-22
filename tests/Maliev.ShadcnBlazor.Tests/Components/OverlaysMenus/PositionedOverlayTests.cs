@@ -158,6 +158,7 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Contains("focusout", script, StringComparison.Ordinal);
         Assert.Contains("calc(100vw - 1rem)", styles, StringComparison.Ordinal);
         Assert.Contains(".shadcn-hover-card-content[data-positioned=\"false\"]", styles, StringComparison.Ordinal);
+        Assert.Contains("position: fixed", styles, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", styles, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", styles, StringComparison.Ordinal);
     }

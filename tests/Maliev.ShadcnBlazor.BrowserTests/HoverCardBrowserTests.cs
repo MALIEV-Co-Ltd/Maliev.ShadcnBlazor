@@ -23,6 +23,7 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         var content = page.Locator("#preview [data-slot='hover-card-content']");
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(content).ToHaveCountAsync(0);
+        var triggerBeforeOpen = await trigger.BoundingBoxAsync();
 
         await trigger.FocusAsync();
         await Assertions.Expect(content).ToBeVisibleAsync();
@@ -32,6 +33,11 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         Assert.False(string.IsNullOrWhiteSpace(contentId));
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-controls", contentId!);
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-describedby", contentId!);
+        var triggerAfterOpen = await trigger.BoundingBoxAsync();
+        Assert.NotNull(triggerBeforeOpen);
+        Assert.NotNull(triggerAfterOpen);
+        Assert.InRange(Math.Abs(triggerAfterOpen!.X - triggerBeforeOpen!.X), 0, 1);
+        Assert.InRange(Math.Abs(triggerAfterOpen.Y - triggerBeforeOpen.Y), 0, 1);
 
         await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(content).ToHaveCountAsync(0);

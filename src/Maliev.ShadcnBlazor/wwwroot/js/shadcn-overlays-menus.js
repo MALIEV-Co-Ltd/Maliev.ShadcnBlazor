@@ -128,7 +128,7 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
     const snapObserver = new MutationObserver(applyActiveSnap);
     snapObserver.observe(content, { attributes: true, attributeFilter: ['data-snap-point'] });
     const down = event => {
-        if (event.button !== 0 || event.target.closest('input,textarea,select,[data-no-drag]')) return;
+        if (event.button !== 0 || event.target.closest('button,a,input,textarea,select,[data-no-drag]')) return;
         drag = { id: event.pointerId, start: axis === 'y' ? event.clientY : event.clientX, time: performance.now() };
         try { content.setPointerCapture?.(event.pointerId); } catch (error) { if (error?.name !== 'NotFoundError') throw error; }
         content.setAttribute('data-swiping', '');

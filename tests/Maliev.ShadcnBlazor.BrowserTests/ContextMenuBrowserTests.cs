@@ -27,6 +27,11 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(menu).ToBeVisibleAsync();
         var firstItem = menu.Locator("[role^='menuitem']").First;
         await Assertions.Expect(firstItem).ToBeFocusedAsync();
+        var renameItem = menu.GetByRole(AriaRole.Menuitem, new() { Name = "Rename", Exact = true });
+        await renameItem.HoverAsync();
+        var hoverColor = await renameItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual("rgba(0, 0, 0, 0)", hoverColor);
+        Assert.NotEqual("transparent", hoverColor);
 
         var bounds = await menu.BoundingBoxAsync();
         Assert.NotNull(bounds);
