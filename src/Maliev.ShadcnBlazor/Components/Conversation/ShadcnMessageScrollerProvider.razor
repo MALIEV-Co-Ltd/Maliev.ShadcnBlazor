@@ -19,6 +19,7 @@
     private readonly List<PendingCommand> _pending = [];
     private bool _optionsChanged;
     private long _lastSequence;
+    private long _lastUserSequence;
     public string? AttachError { get; private set; }
     public ShadcnMessageScrollerState CurrentState => State;
     internal ShadcnMessageScrollerState State => _controller?.State ?? new(new(false,false), null, Array.Empty<string>(), AutoScroll, false);
@@ -65,6 +66,23 @@
 
     [JSInvokable]
     public Task OnScrollerUserIntentAsync() { _controller!.OnUserIntent(); return StateChanged.InvokeAsync(_controller.State); }
+
+    [JSInvokable]
+    public async Task OnScrollerUserScrollAsync(double scrollTop, double viewportHeight, double contentHeight, long sequence)
+    {
+        if (sequence > 0 && sequence <= _lastUserSequence) return;
+        if (sequence > 0) _lastUserSequence = sequence;
+        await ApplyUserScrollAsync(scrollTop, viewportHeight, contentHeight);
+    }
+
+    public Task OnScrollerUserScrollAsync(double scrollTop, double viewportHeight, double contentHeight) => ApplyUserScrollAsync(scrollTop, viewportHeight, contentHeight);
+
+    private async Task ApplyUserScrollAsync(double scrollTop, double viewportHeight, double contentHeight)
+    {
+        _controller!.OnUserScroll(new(scrollTop, viewportHeight, contentHeight));
+        await StateChanged.InvokeAsync(_controller.State);
+        await InvokeAsync(StateHasChanged);
+    }
 
     public Task<bool> ScrollToStartAsync(ShadcnMessageScrollBehavior behavior = ShadcnMessageScrollBehavior.Auto, bool focusViewport = false) => QueueOrRunAsync(() => ScrollDirectionCoreAsync(ShadcnMessageScrollDirection.Start, behavior, focusViewport));
     public Task<bool> ScrollToEndAsync(ShadcnMessageScrollBehavior behavior = ShadcnMessageScrollBehavior.Auto, bool focusViewport = false) => QueueOrRunAsync(() => ScrollDirectionCoreAsync(ShadcnMessageScrollDirection.End, behavior, focusViewport));

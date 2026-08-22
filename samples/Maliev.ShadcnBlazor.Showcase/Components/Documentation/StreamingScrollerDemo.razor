@@ -14,13 +14,15 @@
                                     <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
                                 </ShadcnMessageAvatar>
                                 <ShadcnMessageContent>
-                                    <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
-                                    <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
-                                        <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
-                                            {
-                                                <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
-                                            }</ShadcnBubbleContent>
-                                    </ShadcnBubble>
+                                    <ShadcnMessageBody>
+                                        <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
+                                        <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
+                                            <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
+                                                {
+                                                    <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
+                                                }</ShadcnBubbleContent>
+                                        </ShadcnBubble>
+                                    </ShadcnMessageBody>
                                 </ShadcnMessageContent>
                             </ShadcnMessage>
                         </ShadcnMessageScrollerItem>

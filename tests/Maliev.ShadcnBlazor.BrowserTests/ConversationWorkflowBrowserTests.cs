@@ -332,6 +332,85 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task ScrollerFollowsStreamingUntilMeasuredDepartureAndResumesAtTheNativeEdge()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = ColorScheme.Dark
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+
+        var scroller = page.Locator("#preview [data-slot='message-scroller']");
+        var viewport = scroller.Locator("[data-slot='message-scroller-viewport']");
+        await Assertions.Expect(page.GetByTestId("control-scroller-auto")).ToBeCheckedAsync();
+        await Assertions.Expect(page.GetByTestId("scroller-demo")).ToHaveAttributeAsync("data-preview-auto", "true");
+        await page.GetByTestId("scroller-send").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("scroller-streaming")).ToBeVisibleAsync();
+        await page.WaitForFunctionAsync("element => element.scrollHeight - element.clientHeight > 80", await viewport.ElementHandleAsync());
+        await page.WaitForFunctionAsync("element => element.scrollHeight - element.clientHeight - element.scrollTop <= 8", await viewport.ElementHandleAsync());
+
+        var last = scroller.Locator("[data-slot='message-scroller-item']").Last;
+        var assistant = last.Locator("[data-slot='message']");
+        var aligned = await assistant.EvaluateAsync<double[]>("element => { const body = element.querySelector('[data-slot=message-body]').getBoundingClientRect(); const avatar = element.querySelector('[data-slot=message-avatar]').getBoundingClientRect(); return [body.bottom, avatar.bottom]; }");
+        Assert.InRange(Math.Abs(aligned[0] - aligned[1]), 0, 1);
+
+        await Assertions.Expect(scroller).Not.ToHaveAttributeAsync("data-autoscrolling", "", new() { Timeout = 2000 });
+        await viewport.EvaluateAsync("element => { element.scrollTop = 0; element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); }");
+        await Assertions.Expect(scroller).ToHaveAttributeAsync("data-unread", "true");
+        await page.WaitForTimeoutAsync(180);
+        Assert.InRange(await viewport.EvaluateAsync<double>("element => element.scrollTop"), 0, 8);
+
+        await viewport.EvaluateAsync("element => { element.scrollTop = element.scrollHeight; element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); }");
+        await Assertions.Expect(scroller).ToHaveAttributeAsync("data-scrollable-end", "false");
+        await Assertions.Expect(scroller).ToHaveAttributeAsync("data-following", "true");
+        await Assertions.Expect(page.GetByTestId("scroller-streaming")).ToHaveCountAsync(0, new() { Timeout = 5000 });
+        await page.WaitForFunctionAsync("element => element.scrollHeight - element.clientHeight - element.scrollTop <= 8", await viewport.ElementHandleAsync());
+
+        var safeGeometry = await scroller.EvaluateAsync<double[]>("element => { const last = element.querySelector('[data-slot=message-scroller-item]:last-child').getBoundingClientRect(); const composer = element.querySelector('.showcase-scroller-composer').getBoundingClientRect(); const fade = getComputedStyle(element, '::after'); return [last.bottom, composer.top, fade.pointerEvents === 'none' ? 1 : 0, fade.backgroundImage.includes('gradient') ? 1 : 0]; }");
+        Assert.True(safeGeometry[0] < safeGeometry[1]);
+        Assert.Equal(1, safeGeometry[2]);
+        Assert.Equal(1, safeGeometry[3]);
+    }
+
+    [Fact]
+    public async Task QuestionnaireDossierSupportsBilingualKeyboardCustomAnswersAndExactSource()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/questionnaire").ToString());
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+
+        var other = page.Locator("#preview input[value='other']");
+        await other.FocusAsync();
+        await page.Keyboard.PressAsync("3");
+        await Assertions.Expect(other).ToBeCheckedAsync();
+        await Assertions.Expect(other).ToHaveAttributeAsync("aria-expanded", "true");
+        var custom = page.Locator("#preview [data-slot='questionnaire-input'][data-custom='true']");
+        await Assertions.Expect(custom).ToBeVisibleAsync();
+        Assert.Equal(await custom.GetAttributeAsync("id"), await other.GetAttributeAsync("aria-controls"));
+
+        await page.Locator("#preview [data-slot='questionnaire-next']").ClickAsync();
+        await Assertions.Expect(page.Locator("#preview [data-slot='questionnaire-error']:visible")).ToContainTextAsync("A custom answer is required.");
+        await custom.FillAsync("ชิ้นงานเฉพาะ · Custom part");
+        await page.Locator("#preview [data-slot='questionnaire-next']").ClickAsync();
+        await Assertions.Expect(page.Locator("#preview fieldset[name='notes']")).ToBeVisibleAsync();
+
+        var source = page.Locator("#preview .component-code");
+        await Assertions.Expect(source).ToContainTextAsync("Custom: true");
+        await Assertions.Expect(source).ToContainTextAsync("อื่น ๆ · Other");
+        await Assertions.Expect(source).ToContainTextAsync("ShadcnQuestionnaireInput");
+    }
+
+    [Fact]
     public async Task QuestionnaireValidatesBranchesResumesAndSubmitsThaiState()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 375, Height = 667 }, ForcedColors = ForcedColors.Active });

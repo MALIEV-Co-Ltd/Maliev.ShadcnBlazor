@@ -39,6 +39,83 @@ public sealed class QuestionnaireControllerTests
     }
 
     [Fact]
+    public void CustomChoiceOwnsItsInputAndSelectingAStandardChoiceClearsIt()
+    {
+        var items = new[]
+        {
+            new ShadcnQuestionnaireItemDefinition("scope", Required: true, AllowsFreeform: true,
+                Choices: [new("component"), new("other", Custom: true)])
+        };
+        var controller = new ShadcnQuestionnaireController(items);
+
+        Assert.Throws<InvalidOperationException>(() => controller.SetInput("scope", "ชิ้นงานเฉพาะ"));
+        controller.SetChoice("scope", "other", true);
+        controller.SetInput("scope", "ชิ้นงานเฉพาะ · Custom part");
+
+        Assert.Equal(["other"], controller.State.Answers["scope"].SelectedValues);
+        Assert.Equal("ชิ้นงานเฉพาะ · Custom part", controller.State.Answers["scope"].InputValue);
+
+        controller.SetChoice("scope", "component", true);
+
+        Assert.Equal(["component"], controller.State.Answers["scope"].SelectedValues);
+        Assert.Null(controller.State.Answers["scope"].InputValue);
+    }
+
+    [Fact]
+    public void CustomChoiceDefinitionsAndControlledAnswersRejectAmbiguousInput()
+    {
+        Assert.Throws<InvalidOperationException>(() => new ShadcnQuestionnaireController(
+            [new("scope", Choices: [new("other", Custom: true)])]));
+        Assert.Throws<InvalidOperationException>(() => new ShadcnQuestionnaireController(
+            [new("scope", AllowsFreeform: true, Choices: [new("other", Custom: true), new("custom", Custom: true)])]));
+
+        var items = new[]
+        {
+            new ShadcnQuestionnaireItemDefinition("scope", AllowsFreeform: true,
+                Choices: [new("component"), new("other", Custom: true)])
+        };
+
+        Assert.Throws<InvalidOperationException>(() => new ShadcnQuestionnaireController(items,
+            initialAnswers: new Dictionary<string, ShadcnQuestionnaireAnswer>
+            {
+                ["scope"] = new(ShadcnQuestionnaireItemStatus.Answered, ["component"], "ambiguous")
+            }));
+    }
+
+    [Fact]
+    public async Task CustomChoiceRequiresUserProvidedTextBeforeNavigation()
+    {
+        var items = new[]
+        {
+            new ShadcnQuestionnaireItemDefinition("scope", Required: true, AllowsFreeform: true,
+                Choices: [new("component"), new("other", Custom: true)])
+        };
+        var controller = new ShadcnQuestionnaireController(items);
+        controller.SetChoice("scope", "other", true);
+
+        var missing = await controller.NextAsync();
+
+        Assert.False(missing.Succeeded);
+        Assert.Equal("A custom answer is required.", missing.Error);
+        Assert.Equal("scope", missing.FocusItemName);
+    }
+
+    [Fact]
+    public void ExistingChoiceAndFreeformCompositionRemainsBackwardCompatibleWithoutCustomMetadata()
+    {
+        var items = new[]
+        {
+            new ShadcnQuestionnaireItemDefinition("scope", AllowsFreeform: true, Choices: [new("component")])
+        };
+        var controller = new ShadcnQuestionnaireController(items);
+
+        controller.SetChoice("scope", "component", true);
+        controller.SetInput("scope", "optional detail");
+
+        Assert.Equal("optional detail", controller.State.Answers["scope"].InputValue);
+    }
+
+    [Fact]
     public async Task NavigationValidatesRequiredAndCustomRulesAndFocusesInvalidItem()
     {
         var controller = new ShadcnQuestionnaireController(Items, validate: (item, answer, _) =>

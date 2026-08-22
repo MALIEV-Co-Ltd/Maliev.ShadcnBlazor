@@ -1,0 +1,30 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+<ShadcnQuestionnaire Items="Items" AccessibleName="bilingual custom answer" StateChanged="Changed">
+    <ShadcnQuestionnaireItem Name="scope">
+        <ShadcnQuestionnaireTitle>ประเภทงาน · Work type</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireChoices>
+            <ShadcnQuestionnaireChoice Value="component">คอมโพเนนต์ · Component</ShadcnQuestionnaireChoice>
+            <ShadcnQuestionnaireChoice Value="other">อื่น ๆ · Other</ShadcnQuestionnaireChoice>
+        </ShadcnQuestionnaireChoices>
+        <ShadcnQuestionnaireInput AccessibleName="ระบุประเภทงาน · Describe the work" placeholder="พิมพ์คำตอบ · Type your answer" />
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+    <ShadcnQuestionnaireActions>
+        <ShadcnQuestionnaireSubmit data-testid="custom-submit">ส่งคำตอบ · Submit</ShadcnQuestionnaireSubmit>
+    </ShadcnQuestionnaireActions>
+</ShadcnQuestionnaire>
+<output data-testid="custom-answer">@_answer</output>
+@code {
+    private string? _answer;
+    private static readonly ShadcnQuestionnaireItemDefinition[] Items =
+    [
+        new("scope", Required: true, AllowsFreeform: true,
+            Choices: [new("component"), new("other", Custom: true)])
+    ];
+
+    private Task Changed(ShadcnQuestionnaireState state)
+    {
+        _answer = state.Answers["scope"].InputValue;
+        return Task.CompletedTask;
+    }
+}

@@ -49,25 +49,15 @@ public sealed class ShadcnMessageScrollerController
                 : items.FirstOrDefault(item => string.Equals(item.MessageId, previousFirst.MessageId, StringComparison.Ordinal));
             var prepended = !string.IsNullOrEmpty(shiftedFirst.MessageId) &&
                 !string.Equals(items.FirstOrDefault().MessageId, previousFirst.MessageId, StringComparison.Ordinal);
-            var previousIds = _previousItems.Select(item => item.MessageId).ToHashSet(StringComparer.Ordinal);
-            var newAnchor = items.FirstOrDefault(item => item.ScrollAnchor && !previousIds.Contains(item.MessageId));
             if (prepended && preserveScrollOnPrepend)
             {
                 target = ShadcnMessageScrollerGeometry.PreservePrependScrollTop(measurement.ScrollTop, previousFirst.Top, shiftedFirst.Top);
             }
-            else if (_following && !string.IsNullOrEmpty(newAnchor.MessageId))
-            {
-                _heldAnchorId = newAnchor.MessageId;
-                target = Math.Clamp(newAnchor.Top - _options.ScrollPreviousItemPeek - _options.ScrollMargin, 0, Bottom(measurement));
-            }
+            else if (_following) target = Bottom(measurement);
             else if (_heldAnchorId is not null)
             {
                 var held = items.FirstOrDefault(item => string.Equals(item.MessageId, _heldAnchorId, StringComparison.Ordinal));
                 if (!string.IsNullOrEmpty(held.MessageId)) target = Math.Clamp(held.Top - _options.ScrollPreviousItemPeek - _options.ScrollMargin, 0, Bottom(measurement));
-            }
-            else if (_following)
-            {
-                target = Bottom(measurement);
             }
         }
         _previousItems = items.ToArray();
@@ -80,6 +70,18 @@ public sealed class ShadcnMessageScrollerController
         _following = false;
         _heldAnchorId = null;
         State = State with { Following = false };
+    }
+
+    public void OnUserScroll(ShadcnMessageScrollerMeasurement measurement)
+    {
+        var scrollable = ShadcnMessageScrollerGeometry.GetScrollable(
+            measurement.ScrollTop,
+            measurement.ViewportHeight,
+            measurement.ContentHeight,
+            _options.ScrollEdgeThreshold);
+        _following = _options.AutoScroll && !scrollable.End;
+        _heldAnchorId = null;
+        State = State with { Following = _following, Unread = scrollable.End && !_following };
     }
 
     public ShadcnMessageScrollResult ScrollToEnd(ShadcnMessageScrollerMeasurement measurement)

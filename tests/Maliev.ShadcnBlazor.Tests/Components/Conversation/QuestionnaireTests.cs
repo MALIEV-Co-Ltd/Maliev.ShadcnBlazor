@@ -20,6 +20,7 @@ public sealed class QuestionnaireTests : BunitContext
         var form = cut.Find("form[data-slot='questionnaire']");
         Assert.Equal("workflow", form.GetAttribute("aria-label"));
         var progress = cut.Find("[data-slot='questionnaire-progress']");
+        Assert.Equal("ltr", progress.QuerySelector("[data-slot='questionnaire-progress-value']")!.GetAttribute("dir"));
         Assert.Equal("progressbar", progress.GetAttribute("role"));
         Assert.Equal("1", progress.GetAttribute("aria-valuenow"));
         var active = cut.Find("fieldset[data-slot='questionnaire-item']:not([hidden])");
@@ -60,6 +61,39 @@ public sealed class QuestionnaireTests : BunitContext
         cut.Find("button[data-slot='questionnaire-next']").Click();
 
         Assert.Equal("checks", cut.Find("fieldset:not([hidden])").GetAttribute("name"));
+    }
+
+    [Fact]
+    public void CustomChoiceRevealsAssociatedInputAndClearsItWhenStandardChoiceWins()
+    {
+        var cut = Render<Fixtures.QuestionnaireCustomChoiceFixture>();
+        var other = cut.Find("input[value='other']");
+
+        Assert.Equal("false", other.GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='questionnaire-input']"));
+
+        other.Change(true);
+        var input = cut.Find("[data-slot='questionnaire-input']");
+        Assert.Equal("true", cut.Find("input[value='other']").GetAttribute("aria-expanded"));
+        Assert.Equal(input.Id, cut.Find("input[value='other']").GetAttribute("aria-controls"));
+        input.Input("ชิ้นงานเฉพาะ · Custom part");
+        Assert.Equal("ชิ้นงานเฉพาะ · Custom part", cut.Find("[data-testid='custom-answer']").TextContent);
+
+        cut.Find("input[value='component']").Change(true);
+        Assert.Empty(cut.FindAll("[data-slot='questionnaire-input']"));
+        Assert.Equal(string.Empty, cut.Find("[data-testid='custom-answer']").TextContent);
+    }
+
+    [Fact]
+    public void CustomChoiceValidationKeepsFocusContractOnTheOwningQuestion()
+    {
+        var cut = Render<Fixtures.QuestionnaireCustomChoiceFixture>();
+        cut.Find("input[value='other']").Change(true);
+        cut.Find("[data-testid='custom-submit']").Click();
+
+        Assert.Equal("true", cut.Find("fieldset[name='scope']").GetAttribute("aria-invalid"));
+        Assert.Equal("A custom answer is required.", cut.Find("[data-slot='questionnaire-error']").TextContent);
+        Assert.NotNull(cut.Find("[data-slot='questionnaire-input']").GetAttribute("aria-describedby"));
     }
 
     [Fact]

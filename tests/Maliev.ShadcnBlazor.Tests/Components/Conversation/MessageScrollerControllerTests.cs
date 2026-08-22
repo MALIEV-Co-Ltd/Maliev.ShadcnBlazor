@@ -110,16 +110,32 @@ public sealed class MessageScrollerControllerTests
     }
 
     [Fact]
-    public void NewAnchorUsesPreviousPeekAndStreamingGrowthHoldsReadingLine()
+    public void AutoFollowTracksTheBottomAcrossNewAnchorsAndStreamingGrowth()
     {
         var controller = new ShadcnMessageScrollerController(new(AutoScroll: true, ScrollPreviousItemPeek: 64));
         _ = controller.OnContentChanged(new(0, 300, 300), [new("old", 0, 300, false)]);
         var anchored = controller.OnContentChanged(new(0, 300, 700), [new("old", 0, 300, false), new("turn", 400, 100, true), new("reply", 500, 200, false)]);
         var streamed = controller.OnContentChanged(new(anchored.TargetScrollTop!.Value, 300, 900), [new("old", 0, 300, false), new("turn", 400, 100, true), new("reply", 500, 400, false)]);
 
-        Assert.Equal(336, anchored.TargetScrollTop);
-        Assert.Equal(336, streamed.TargetScrollTop);
-        Assert.Equal("turn", controller.State.CurrentAnchorId);
+        Assert.Equal(400, anchored.TargetScrollTop);
+        Assert.Equal(600, streamed.TargetScrollTop);
+        Assert.True(controller.State.Following);
+    }
+
+    [Fact]
+    public void MeasuredUserScrollPausesAwayFromTheEndAndResumesAtTheEdge()
+    {
+        var controller = new ShadcnMessageScrollerController(new(AutoScroll: true, ScrollEdgeThreshold: 8));
+        _ = controller.OnContentChanged(new(400, 200, 600), [new("row", 0, 600, false)]);
+
+        controller.OnUserScroll(new(250, 200, 600));
+        var paused = controller.OnContentChanged(new(250, 200, 700), [new("row", 0, 700, false)]);
+        controller.OnUserScroll(new(500, 200, 700));
+        var resumed = controller.OnContentChanged(new(500, 200, 760), [new("row", 0, 760, false)]);
+
+        Assert.Null(paused.TargetScrollTop);
+        Assert.Equal(560, resumed.TargetScrollTop);
+        Assert.True(controller.State.Following);
     }
 
     [Fact]
