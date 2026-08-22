@@ -35,10 +35,12 @@ public sealed class CalendarParityBrowserTests(
         await Assertions.Expect(page.GetByTestId("calendar-selection")).ToContainTextAsync("20");
 
         await page.ChooseOptionAsync("control-calendar-caption-layout", "Dropdown");
-        await Assertions.Expect(calendar.Locator("[data-slot='calendar-month-select']")).ToHaveAttributeAsync("aria-label", "เลือกเดือน");
-        await Assertions.Expect(calendar.Locator("[data-slot='calendar-year-select']")).ToHaveAttributeAsync("aria-label", "เลือกปี");
+        var monthSelect = calendar.Locator("[data-slot='calendar-month-select']");
+        var yearSelect = calendar.Locator("[data-slot='calendar-year-select']");
+        await Assertions.Expect(monthSelect.Locator("[data-slot='select-trigger']")).ToHaveAttributeAsync("aria-label", "เลือกเดือน");
+        await Assertions.Expect(yearSelect.Locator("[data-slot='select-trigger']")).ToHaveAttributeAsync("aria-label", "เลือกปี");
         await calendar.Locator("[data-slot='calendar-next']").ClickAsync();
-        await Assertions.Expect(calendar.Locator("[data-slot='calendar-month-select']")).ToHaveValueAsync("9");
+        await Assertions.Expect(monthSelect.Locator("[data-slot='select-value']")).ToHaveTextAsync("กันยายน");
 
         await page.GetByTestId("control-calendar-week-numbers").CheckAsync();
         await Assertions.Expect(calendar.Locator("[data-slot='calendar-week-number-header']")).ToBeVisibleAsync();

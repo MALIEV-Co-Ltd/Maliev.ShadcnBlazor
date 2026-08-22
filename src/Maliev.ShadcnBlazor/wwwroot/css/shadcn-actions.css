@@ -167,6 +167,13 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group { display: grid; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group[data-orientation="horizontal"] { display: flex; flex-wrap: wrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root { gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group[data-presentation="card"] { inline-size: min(100%, 36rem); gap: calc(.625rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"] { inline-size: 100%; min-inline-size: 0; align-items: flex-start; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-lg); background: var(--shadcn-card); padding: calc(.75rem * var(--shadcn-spacing-multiplier)); transition: border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"]:hover { border-color: color-mix(in oklch, var(--shadcn-foreground) 28%, var(--shadcn-border)); background: color-mix(in oklch, var(--shadcn-accent) 48%, var(--shadcn-card)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"]:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 35%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"][data-state="checked"] { border-color: var(--shadcn-primary); background: color-mix(in oklch, var(--shadcn-primary) 9%, var(--shadcn-card)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group[aria-invalid="true"] .shadcn-radio-item-root[data-presentation="card"] { border-color: var(--shadcn-destructive); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"]:has(input:disabled) { cursor: not-allowed; opacity: .5; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-control { position: relative; display: inline-grid; flex: 0 0 1rem; width: 1rem; height: 1rem; place-items: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-radio-group-item, .shadcn-radio-indicator) { grid-area: 1 / 1; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-group-item { border-radius: 50%; }
@@ -221,6 +228,8 @@
 }
 
 @media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"] { border-color: ButtonText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"][data-state="checked"] { border-color: Highlight; outline: 2px solid Highlight; outline-offset: 2px; }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item, .shadcn-slider-thumb) {
         border-color: ButtonText;
     }

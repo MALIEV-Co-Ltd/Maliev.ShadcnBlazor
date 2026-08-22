@@ -1,0 +1,35 @@
+@inherits ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-state-transition")"
+     style="@MergeStyle(null)"
+     data-slot="state-transition"
+     data-state="@(Active ? "active" : "inactive")"
+     data-motion="@(Enabled ? "true" : "false")"
+     data-reduced-motion="@(ReducedMotion ? "true" : null)">
+    <div class="shadcn-state-transition-pane"
+         data-slot="state-transition-active"
+         data-visible="@(Active ? "true" : "false")"
+         aria-hidden="@((!Active).ToString().ToLowerInvariant())"
+         inert="@(!Active ? string.Empty : null)">
+        @ActiveContent
+    </div>
+    <div class="shadcn-state-transition-pane"
+         data-slot="state-transition-inactive"
+         data-visible="@(!Active ? "true" : "false")"
+         aria-hidden="@(Active.ToString().ToLowerInvariant())"
+         inert="@(Active ? string.Empty : null)">
+        @InactiveContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+    [Parameter] public bool ReducedMotion { get; set; }
+    [Parameter] public RenderFragment? ActiveContent { get; set; }
+    [Parameter] public RenderFragment? InactiveContent { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot", "data-state", "data-motion", "data-reduced-motion");
+}

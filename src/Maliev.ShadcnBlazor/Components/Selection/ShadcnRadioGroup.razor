@@ -17,7 +17,8 @@
          aria-describedby="@FieldContext?.AriaDescribedBy"
          aria-orientation="@OrientationValue"
          data-slot="radio-group"
-         data-orientation="@OrientationValue">
+         data-orientation="@OrientationValue"
+         data-presentation="@PresentationValue">
         @ChildContent
     </div>
 </CascadingValue>
@@ -30,6 +31,7 @@
     [Parameter] public Expression<Func<TValue>>? ValueExpression { get; set; }
     [Parameter] public string? Name { get; set; }
     [Parameter] public ShadcnRadioGroupOrientation Orientation { get; set; } = ShadcnRadioGroupOrientation.Vertical;
+    [Parameter] public ShadcnRadioGroupPresentation Presentation { get; set; } = ShadcnRadioGroupPresentation.Default;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public bool Invalid { get; set; }
@@ -53,13 +55,15 @@
         ShadcnRadioGroupOrientation.Horizontal => "horizontal",
         _ => throw new ArgumentOutOfRangeException(nameof(Orientation), Orientation, "Unknown Shadcn radio group orientation.")
     };
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "aria-invalid", "aria-describedby", "aria-orientation", "data-slot", "data-orientation");
+    private string PresentationValue => Presentation switch { ShadcnRadioGroupPresentation.Default => "default", ShadcnRadioGroupPresentation.Card => "card", _ => throw new ArgumentOutOfRangeException(nameof(Presentation), Presentation, "Unknown Shadcn radio group presentation.") };
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "aria-invalid", "aria-describedby", "aria-orientation", "data-slot", "data-orientation", "data-presentation");
 
     protected override void OnInitialized() => _context = new(SelectAsync);
 
     protected override void OnParametersSet()
     {
         _ = OrientationValue;
+        _ = PresentationValue;
         if (!HasParameterValue || !EqualityComparer<TValue>.Default.Equals(Value, LastParameterValue))
         {
             UncontrolledValue = Value;
@@ -67,7 +71,7 @@
             HasParameterValue = true;
         }
 
-        _context.Update(EffectiveValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
+        _context.Update(EffectiveValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy, Presentation);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -88,7 +92,7 @@
         if (!ValueChanged.HasDelegate)
         {
             UncontrolledValue = value;
-            _context.Update(UncontrolledValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy);
+            _context.Update(UncontrolledValue, EffectiveName, EffectiveDisabled, ReadOnly, EffectiveInvalid, FieldContext?.AriaDescribedBy, Presentation);
         }
 
         await ValueChanged.InvokeAsync(value);

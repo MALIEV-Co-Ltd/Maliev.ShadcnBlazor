@@ -4892,7 +4892,6 @@ a {
 .showcase-radio-dossier__header p { max-inline-size: 34ch; margin: .25rem 0 0; color: var(--shadcn-muted-foreground); font-size: .8125rem; line-height: 1.5; }
 .showcase-radio-dossier__header > span { flex: 0 0 auto; color: var(--shadcn-muted-foreground); font-size: .75rem; }
 .showcase-radio-dossier .shadcn-radio-group { inline-size: 100%; }
-.showcase-radio-dossier .shadcn-radio-item-root { align-items: start; min-inline-size: 0; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-lg); padding: .75rem; }
 .showcase-radio-dossier .shadcn-radio-control { margin-block-start: .125rem; }
 .showcase-radio-dossier__option { display: grid; min-inline-size: 0; gap: .125rem; }
 .showcase-radio-dossier__option strong { font-weight: 500; }
@@ -5495,6 +5494,23 @@ a {
     min-block-size: 3rem;
     padding-block: .85rem;
     border-block: 1px solid var(--shadcn-border);
+}
+
+.showcase-spinner-export__status > .shadcn-state-transition {
+    inline-size: 100%;
+}
+
+.showcase-spinner-export__status .shadcn-state-transition-pane {
+    display: flex;
+    min-inline-size: 0;
+    align-items: center;
+    gap: .75rem;
+}
+
+.showcase-spinner-export__status .shadcn-state-transition-pane > span:last-child {
+    display: grid;
+    min-inline-size: 0;
+    gap: .15rem;
 }
 
 .showcase-spinner-export > .shadcn-button {
