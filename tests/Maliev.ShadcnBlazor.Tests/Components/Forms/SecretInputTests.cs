@@ -31,6 +31,26 @@ public sealed class SecretInputTests : BunitContext
     }
 
     [Fact]
+    public void HidesAnnouncementsAndKeepsSecretValuesLeftToRightByDefault()
+    {
+        var cut = Render<ShadcnSecretInput>(parameters => parameters
+            .Add(component => component.Value, "sk-abcdef")
+            .Add(component => component.MaskStart, 3));
+
+        Assert.Equal("ltr", cut.Find("[data-slot='input-group-control']").GetAttribute("dir"));
+        Assert.Contains("shadcn-sr-only", cut.Find("[data-slot='secret-input-status']").ClassList);
+    }
+
+    [Fact]
+    public void AllowsCallersToOverrideSecretValueDirection()
+    {
+        var cut = Render<ShadcnSecretInput>(parameters => parameters
+            .Add(component => component.AdditionalAttributes, new Dictionary<string, object> { ["dir"] = "rtl" }));
+
+        Assert.Equal("rtl", cut.Find("[data-slot='input-group-control']").GetAttribute("dir"));
+    }
+
+    [Fact]
     public void UncontrolledEditingPreservesTheNewSecretWithoutAnnouncingIt()
     {
         var cut = Render<ShadcnSecretInput>(parameters => parameters

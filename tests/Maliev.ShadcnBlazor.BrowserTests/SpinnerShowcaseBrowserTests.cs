@@ -30,7 +30,13 @@ public sealed class SpinnerShowcaseBrowserTests(ShowcaseServerFixture server, Pl
         await export.GetByRole(AriaRole.Button, new() { Name = "Cancel export" }).ClickAsync();
         await Assertions.Expect(export).ToHaveAttributeAsync("aria-busy", "false");
         await Assertions.Expect(export).ToContainTextAsync("Export paused");
-        await Assertions.Expect(spinner).ToHaveCountAsync(0);
+        var activePane = export.Locator("[data-slot='state-transition-active']");
+        var inactivePane = export.Locator("[data-slot='state-transition-inactive']");
+        await Assertions.Expect(activePane).ToHaveAttributeAsync("aria-hidden", "true");
+        await Assertions.Expect(activePane).ToHaveAttributeAsync("inert", "");
+        await Assertions.Expect(spinner).ToBeHiddenAsync();
+        await Assertions.Expect(inactivePane).ToHaveAttributeAsync("aria-hidden", "false");
+        await Assertions.Expect(inactivePane).ToBeVisibleAsync();
         await export.GetByRole(AriaRole.Button, new() { Name = "Resume export" }).ClickAsync();
         await Assertions.Expect(export).ToHaveAttributeAsync("aria-busy", "true");
 
