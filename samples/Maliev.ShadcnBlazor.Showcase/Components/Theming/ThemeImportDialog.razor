@@ -6,6 +6,7 @@
 <dialog class="theme-transfer-dialog"
         id="theme-import-dialog"
         data-testid="theme-import-dialog"
+        @onkeydown:stopPropagation="true"
         aria-labelledby="theme-import-title">
     <form method="dialog">
         <div class="theme-transfer-dialog__heading">

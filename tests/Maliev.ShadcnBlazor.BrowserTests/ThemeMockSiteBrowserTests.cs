@@ -120,9 +120,11 @@ public sealed class ThemeMockSiteBrowserTests(
         await page.GetByTestId("direction-rtl").ClickAsync();
         await page.GetByTestId("locale-thai").ClickAsync();
         await page.GetByTestId("viewport-mobile").ClickAsync();
+        await page.GetByTestId("theme-controls-toggle").ClickAsync();
         var chart = page.Locator("input[data-testid='theme-token-dark-chart1']");
         await chart.FillAsync("#7c3aed");
         await chart.PressAsync("Tab");
+        await page.GetByTestId("theme-settings-close").ClickAsync();
         await page.GetByTestId("operations-query").FocusAsync();
         await page.Keyboard.TypeAsync("อลูมิเนียม");
 
@@ -293,9 +295,11 @@ public sealed class ThemeMockSiteBrowserTests(
         await page.GetByTestId("mode-dark").ClickAsync();
         await page.GetByTestId("direction-rtl").ClickAsync();
         await page.GetByTestId("locale-thai").ClickAsync();
+        await page.GetByTestId("theme-controls-toggle").ClickAsync();
         var primary = page.Locator("input[data-testid='theme-token-dark-primary']");
         await primary.FillAsync("#c026d3");
         await primary.PressAsync("Tab");
+        await page.GetByTestId("theme-settings-close").ClickAsync();
 
         await SelectMockupAsync(page, "Manufacturing request");
         var manufacturing = page.GetByTestId("manufacturing-request-mock");
@@ -342,8 +346,10 @@ public sealed class ThemeMockSiteBrowserTests(
 
     private static async Task SelectMockupAsync(IPage page, string label)
     {
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Preview composition" }).ClickAsync();
+        await page.GetByTestId("mockup-select").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = label, Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByTestId("mockup-select")).ToContainTextAsync(label);
+        await Assertions.Expect(page.GetByTestId("mockup-select")).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(page.Locator("[role='option']:visible")).ToHaveCountAsync(0);
     }
 

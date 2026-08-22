@@ -1,58 +1,69 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 
-<aside class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
+<div class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
     <div class="theme-inspector__sticky-heading">
-        <div>
-            <span class="theme-inspector__eyebrow">Live configuration</span>
-            <h2 id="theme-inspector-title">Theme controls</h2>
-        </div>
+        <h2 id="theme-inspector-title">Theme controls</h2>
         <span class="theme-dirty-indicator" data-dirty="@(State.IsDirty ? "true" : "false")">@(State.IsDirty ? "Edited" : "Preset")</span>
     </div>
 
+    <nav class="theme-inspector-nav" aria-label="Theme settings sections">
+        <a href="#theme-settings-colors" aria-current="@(State.Workbench.ActiveSection == "colors" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("colors")'>Colors</a>
+        <a href="#theme-settings-typography" aria-current="@(State.Workbench.ActiveSection == "typography" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("typography")'>Typography</a>
+        <a href="#theme-settings-generation" aria-current="@(State.Workbench.ActiveSection == "generation" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("generation")'>Generation</a>
+        <a href="#theme-settings-transfer" aria-current="@(State.Workbench.ActiveSection == "transfer" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("transfer")'>Import / export</a>
+    </nav>
+
     <div class="theme-inspector-actions">
-        <MudSelect T="string"
-                   Value="@State.SelectedPresetId"
-                   ValueChanged="value => State.ApplyPreset(value ?? ShadcnThemePresets.BaseVegaNeutral.Id)"
-                   Label="Theme preset"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   aria-label="Theme preset"
-                   data-testid="theme-preset">
-            @foreach (var preset in ShadcnThemePresets.All)
-            {
-                <MudSelectItem T="string" Value="@preset.Id">@preset.DisplayName</MudSelectItem>
-            }
-        </MudSelect>
+        <label class="theme-inspector-select">
+            <span>Theme preset</span>
+            <ShadcnSelect TValue="string"
+                          Value="State.SelectedPresetId"
+                          ValueChanged="State.ApplyPreset"
+                          Options="PresetOptions"
+                          Size="ShadcnControlSize.Small"
+                          aria-label="Theme preset"
+                          data-testid="theme-preset" />
+        </label>
         <div class="theme-history-actions">
-            <MudButton Variant="Variant.Outlined" Disabled="@(!State.CanUndo)" aria-label="Undo theme change" data-testid="theme-undo" OnClick="() => State.Undo()">Undo</MudButton>
-            <MudButton Variant="Variant.Outlined" Disabled="@(!State.CanRedo)" aria-label="Redo theme change" data-testid="theme-redo" OnClick="() => State.Redo()">Redo</MudButton>
-            <MudButton Variant="Variant.Outlined" Disabled="@(!State.IsDirty)" aria-label="Reset entire theme" data-testid="theme-reset-all" OnClick="State.ResetAll">Reset all</MudButton>
-        </div>
-        <div class="theme-transfer-actions">
-            <button type="button" data-testid="theme-import-open" aria-haspopup="dialog" @onclick="() => _importOpen = true">Import JSON</button>
-            <button type="button" data-testid="theme-code-open" aria-haspopup="dialog" @onclick="() => _codeOpen = true">Get code</button>
-            <button type="button" data-testid="theme-export-open" aria-haspopup="dialog" @onclick="() => _exportOpen = true">Export bundle</button>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" aria-label="Undo theme change" data-testid="theme-undo" OnClick="() => State.Undo()">Undo</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" aria-label="Redo theme change" data-testid="theme-redo" OnClick="() => State.Redo()">Redo</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.IsDirty)" aria-label="Reset entire theme" data-testid="theme-reset-all" OnClick="State.ResetAll">Reset all</ShadcnButton>
         </div>
     </div>
 
     <ThemeValidationSummary State="State" />
+    <span class="theme-settings-anchor" id="theme-settings-generation" aria-hidden="true"></span>
     <ThemeGeneratorOptions State="State" />
+    <span class="theme-settings-anchor" id="theme-settings-colors" aria-hidden="true"></span>
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Light" Group="ThemeStudioGroup.Colors" />
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Dark" Group="ThemeStudioGroup.Colors" />
+    <span class="theme-settings-anchor" id="theme-settings-typography" aria-hidden="true"></span>
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Typography" />
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Geometry" />
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Light" Group="ThemeStudioGroup.Shadows" />
     <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Dark" Group="ThemeStudioGroup.Shadows" />
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Focus" />
     <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Motion" />
+    <section class="theme-transfer-section" id="theme-settings-transfer" aria-labelledby="theme-transfer-title">
+        <h3 id="theme-transfer-title">Import and export</h3>
+        <p>Move this theme between projects or copy the generated package setup.</p>
+        <div class="theme-transfer-actions">
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-import-open" aria-haspopup="dialog" OnClick="@(() => _importOpen = true)">Import JSON</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-code-open" aria-haspopup="dialog" OnClick="@(() => _codeOpen = true)">Get code</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export bundle</ShadcnButton>
+        </div>
+    </section>
     <ThemeImportDialog State="State" @bind-Open="_importOpen" />
     <ThemeCodeDialog State="State" @bind-Open="_codeOpen" />
     <ThemeExportDialog State="State" @bind-Open="_exportOpen" />
-</aside>
+</div>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen;
     private bool _codeOpen;
     private bool _exportOpen;
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = ShadcnThemePresets.All
+        .Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName))
+        .ToArray();
 }

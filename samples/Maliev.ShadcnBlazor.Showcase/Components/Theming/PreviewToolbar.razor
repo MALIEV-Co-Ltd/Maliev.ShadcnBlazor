@@ -1,76 +1,108 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 
 <div class="theme-preview-toolbar" role="toolbar" aria-label="Theme preview controls" data-testid="theme-preview-toolbar">
-    <div class="theme-toolbar-group" aria-label="Preview viewport">
+    <div class="theme-toolbar-group" role="group" aria-label="Preview viewport">
         @foreach (var viewport in ThemeStudioViewport.All)
         {
-            var viewportTestId = $"viewport-{viewport.Id}";
-            <MudButton Variant="@(State.Viewport == viewport ? Variant.Filled : Variant.Outlined)"
-                       aria-label="@($"Preview {viewport.DisplayName} at {viewport.Width} pixels")"
-                       aria-pressed="@(State.Viewport == viewport ? "true" : "false")"
-                       data-testid="@viewportTestId"
-                       OnClick="() => State.SetViewport(viewport)">@viewport.DisplayName <span aria-hidden="true">@viewport.Width</span></MudButton>
+            <ShadcnButton Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)"
+                          Size="ShadcnButtonSize.Small"
+                          aria-label="@($"Preview {viewport.DisplayName} at {viewport.Width} pixels")"
+                          aria-pressed="@(State.Viewport == viewport ? "true" : "false")"
+                          data-testid="@($"viewport-{viewport.Id}")"
+                          OnClick="@(() => State.SetViewport(viewport))">
+                @viewport.DisplayName <span aria-hidden="true">@viewport.Width</span>
+            </ShadcnButton>
         }
     </div>
-    <div class="theme-toolbar-group" aria-label="Preview color mode">
+    <div class="theme-toolbar-group" role="group" aria-label="Preview color mode">
         @foreach (var mode in Enum.GetValues<ThemeStudioMode>())
         {
-            var modeTestId = $"mode-{mode.ToString().ToLowerInvariant()}";
-            <MudButton Variant="@(State.Mode == mode ? Variant.Filled : Variant.Outlined)"
-                       aria-label="@($"Use {mode} preview mode")"
-                       aria-pressed="@(State.Mode == mode ? "true" : "false")"
-                       data-testid="@modeTestId"
-                       OnClick="() => State.SetMode(mode)">@mode</MudButton>
+            <ShadcnButton Variant="@(State.Mode == mode ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)"
+                          Size="ShadcnButtonSize.Small"
+                          aria-label="@($"Use {mode} preview mode")"
+                          aria-pressed="@(State.Mode == mode ? "true" : "false")"
+                          data-testid="@($"mode-{mode.ToString().ToLowerInvariant()}")"
+                          OnClick="@(() => State.SetMode(mode))">@mode</ShadcnButton>
         }
     </div>
-    <div class="theme-toolbar-group" aria-label="Preview direction">
-        <MudButton Variant="@(State.Direction == ShadcnDirection.LeftToRight ? Variant.Filled : Variant.Outlined)" aria-label="Use left-to-right direction" data-testid="direction-ltr" OnClick="() => State.SetDirection(ShadcnDirection.LeftToRight)">LTR</MudButton>
-        <MudButton Variant="@(State.Direction == ShadcnDirection.RightToLeft ? Variant.Filled : Variant.Outlined)" aria-label="Use right-to-left direction" data-testid="direction-rtl" OnClick="() => State.SetDirection(ShadcnDirection.RightToLeft)">RTL</MudButton>
+    <div class="theme-toolbar-group" role="group" aria-label="Preview direction">
+        <ShadcnButton Variant="@(State.Direction == ShadcnDirection.LeftToRight ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" aria-label="Use left-to-right direction" aria-pressed="@(State.Direction == ShadcnDirection.LeftToRight ? "true" : "false")" data-testid="direction-ltr" OnClick="@(() => State.SetDirection(ShadcnDirection.LeftToRight))">LTR</ShadcnButton>
+        <ShadcnButton Variant="@(State.Direction == ShadcnDirection.RightToLeft ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" aria-label="Use right-to-left direction" aria-pressed="@(State.Direction == ShadcnDirection.RightToLeft ? "true" : "false")" data-testid="direction-rtl" OnClick="@(() => State.SetDirection(ShadcnDirection.RightToLeft))">RTL</ShadcnButton>
     </div>
-    <div class="theme-toolbar-group" aria-label="Preview locale">
-        <MudButton Variant="@(State.Locale == ThemeStudioLocale.English ? Variant.Filled : Variant.Outlined)" aria-label="Use English locale" data-testid="locale-english" OnClick="() => State.SetLocale(ThemeStudioLocale.English)">English</MudButton>
-        <MudButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? Variant.Filled : Variant.Outlined)" aria-label="Use Thai locale" data-testid="locale-thai" OnClick="() => State.SetLocale(ThemeStudioLocale.Thai)">ไทย</MudButton>
+    <div class="theme-toolbar-group" role="group" aria-label="Preview locale">
+        <ShadcnButton Variant="@(State.Locale == ThemeStudioLocale.English ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" aria-label="Use English locale" aria-pressed="@(State.Locale == ThemeStudioLocale.English ? "true" : "false")" data-testid="locale-english" OnClick="@(() => State.SetLocale(ThemeStudioLocale.English))">English</ShadcnButton>
+        <ShadcnButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" aria-label="Use Thai locale" aria-pressed="@(State.Locale == ThemeStudioLocale.Thai ? "true" : "false")" data-testid="locale-thai" OnClick="@(() => State.SetLocale(ThemeStudioLocale.Thai))">ไทย</ShadcnButton>
     </div>
-    <MudSelect T="string"
-               Value='@State.GetMetricEditorValue("fontFamily")'
-               ValueChanged="State.SetFontFamily"
-               Label="Font family"
-               Variant="Variant.Outlined"
-               Margin="Margin.Dense"
-               aria-label="Font family"
-               data-testid="font-family-select">
-        @foreach (var font in ThemeStudioFontPreset.All)
-        {
-            <MudSelectItem Value="@font.CssStack"><span data-testid='@($"font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
-        }
-    </MudSelect>
-    <MudSelect T="string"
-               Value='@State.GetMetricEditorValue("monospaceFontFamily")'
-               ValueChanged="State.SetMonospaceFontFamily"
-               Label="Code font"
-               Variant="Variant.Outlined"
-               Margin="Margin.Dense"
-               aria-label="Code font"
-               data-testid="monospace-font-family-select">
-        @foreach (var font in ThemeStudioFontPreset.MonospaceAll)
-        {
-            <MudSelectItem Value="@font.CssStack"><span data-testid='@($"monospace-font-option-{font.Id}")'>@font.DisplayName</span></MudSelectItem>
-        }
-    </MudSelect>
-    <MudSelect T="ThemeStudioMockup"
-               Value="@State.SelectedMockup"
-               ValueChanged="State.SetSelectedMockup"
-               Label="Preview composition"
-               Variant="Variant.Outlined"
-               Margin="Margin.Dense"
-               aria-label="Preview composition"
-               data-testid="mockup-select">
-        <MudSelectItem Value="ThemeStudioMockup.OperationsDashboard">Operations dashboard</MudSelectItem>
-        <MudSelectItem Value="ThemeStudioMockup.ManufacturingRequest">Manufacturing request</MudSelectItem>
-        <MudSelectItem Value="ThemeStudioMockup.CustomerWorkspace">Customer workspace</MudSelectItem>
-    </MudSelect>
+    <div class="theme-toolbar-group theme-toolbar-group--accessibility" role="group" aria-label="Preview accessibility">
+        <ShadcnToggle Pressed="State.Workbench.ReducedMotion"
+                      PressedChanged="State.Workbench.SetReducedMotion"
+                      Variant="ShadcnToggleVariant.Outline"
+                      Size="ShadcnToggleSize.Small"
+                      aria-label="Reduce preview motion"
+                      data-testid="preview-reduced-motion">Reduce motion</ShadcnToggle>
+        <ShadcnToggle Pressed="State.Workbench.HighContrastPreview"
+                      PressedChanged="State.Workbench.SetHighContrastPreview"
+                      Variant="ShadcnToggleVariant.Outline"
+                      Size="ShadcnToggleSize.Small"
+                      aria-label="Use high contrast preview"
+                      data-testid="preview-high-contrast">High contrast</ShadcnToggle>
+    </div>
+    <label class="theme-toolbar-select">
+        <span>Font family</span>
+        <ShadcnSelect TValue="string" Value='@State.GetMetricEditorValue("fontFamily")' ValueChanged="SetFontFamily" Options="FontOptions" @bind-Open="_fontOpen" Size="ShadcnControlSize.Small" Placeholder="Choose font" aria-label="Font family" data-testid="font-family-select" />
+    </label>
+    <label class="theme-toolbar-select">
+        <span>Code font</span>
+        <ShadcnSelect TValue="string" Value='@State.GetMetricEditorValue("monospaceFontFamily")' ValueChanged="SetMonospaceFontFamily" Options="MonospaceOptions" @bind-Open="_monospaceOpen" Size="ShadcnControlSize.Small" Placeholder="Choose code font" aria-label="Code font" data-testid="monospace-font-family-select" />
+    </label>
+    <label class="theme-toolbar-select theme-toolbar-select--composition">
+        <span>Preview composition</span>
+        <ShadcnSelect TValue="ThemeStudioMockup" Value="State.SelectedMockup" ValueChanged="SetSelectedMockup" Options="MockupOptions" @bind-Open="_mockupOpen" Size="ShadcnControlSize.Small" Placeholder="Choose composition" aria-label="Preview composition" data-testid="mockup-select" />
+    </label>
 </div>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    private bool _fontOpen;
+    private bool _monospaceOpen;
+    private bool _mockupOpen;
+
+    private async Task SetFontFamily(string value)
+    {
+        _fontOpen = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        State.SetFontFamily(value);
+    }
+
+    private async Task SetMonospaceFontFamily(string value)
+    {
+        _monospaceOpen = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        State.SetMonospaceFontFamily(value);
+    }
+
+    private async Task SetSelectedMockup(ThemeStudioMockup value)
+    {
+        _mockupOpen = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        State.SetSelectedMockup(value);
+    }
+
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> FontOptions = ThemeStudioFontPreset.All
+        .Select(font => new ShadcnSelectOption<string>(font.CssStack, font.DisplayName))
+        .ToArray();
+
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> MonospaceOptions = ThemeStudioFontPreset.MonospaceAll
+        .Select(font => new ShadcnSelectOption<string>(font.CssStack, font.DisplayName))
+        .ToArray();
+
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioMockup>> MockupOptions =
+    [
+        new(ThemeStudioMockup.OperationsDashboard, "Operations dashboard"),
+        new(ThemeStudioMockup.ManufacturingRequest, "Manufacturing request"),
+        new(ThemeStudioMockup.CustomerWorkspace, "Customer workspace")
+    ];
 }

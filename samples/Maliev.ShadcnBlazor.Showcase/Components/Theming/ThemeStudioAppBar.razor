@@ -1,0 +1,38 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<header class="theme-studio-appbar" aria-label="Theme Studio" data-testid="theme-studio-appbar">
+    <div class="theme-studio-appbar__primary">
+        <a class="theme-studio-appbar__brand" href="theme" aria-label="Theme Studio home">
+            <span class="theme-studio-appbar__logo" aria-hidden="true">
+                <img src="images/brand/MALIEV_BLACK.svg" alt="" width="32" height="32" />
+            </span>
+            <span class="theme-studio-appbar__title">
+                <strong>Theme Studio</strong>
+                <span>@Text("Build and inspect a portable Blazor theme", "สร้างและตรวจสอบธีม Blazor ที่นำไปใช้ได้")</span>
+            </span>
+        </a>
+        <div class="theme-studio-appbar__actions">
+            <ShadcnButton Href="docs" Variant="ShadcnButtonVariant.Ghost" Size="ShadcnButtonSize.Small" Class="theme-studio-docs-link">Component docs</ShadcnButton>
+            <ShadcnButton id="theme-settings-toggle"
+                          Variant="ShadcnButtonVariant.Outline"
+                          Size="ShadcnButtonSize.Small"
+                          aria-label="Toggle theme settings"
+                          aria-controls="theme-studio-sidebar"
+                          aria-expanded="@(State.Workbench.SidebarOpen ? "true" : "false")"
+                          data-testid="theme-controls-toggle"
+                          OnClick="ToggleSettings">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                <span>@(State.Workbench.SidebarOpen ? Text("Hide settings", "ซ่อนการตั้งค่า") : Text("Show settings", "แสดงการตั้งค่า"))</span>
+            </ShadcnButton>
+        </div>
+    </div>
+    <PreviewToolbar State="State" />
+</header>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter] public EventCallback ToggleSettings { get; set; }
+
+    private string Text(string english, string thai) =>
+        State.Locale == ThemeStudioLocale.Thai ? thai : english;
+}

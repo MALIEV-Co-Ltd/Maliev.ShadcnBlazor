@@ -1,0 +1,26 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<aside id="theme-studio-sidebar"
+       class="theme-studio-sidebar"
+       aria-label="Theme settings"
+       aria-hidden="@(State.Workbench.SidebarOpen ? "false" : "true")"
+       inert="@(!State.Workbench.SidebarOpen)"
+       data-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
+       data-testid="theme-studio-sidebar">
+    <div class="theme-studio-sidebar__mobile-heading">
+        <strong>Theme settings</strong>
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                      Size="ShadcnButtonSize.IconSmall"
+                      aria-label="Close theme settings"
+                      data-testid="theme-settings-close"
+                      OnClick="CloseRequested">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </ShadcnButton>
+    </div>
+    <ThemeInspector State="State" />
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter] public EventCallback CloseRequested { get; set; }
+}

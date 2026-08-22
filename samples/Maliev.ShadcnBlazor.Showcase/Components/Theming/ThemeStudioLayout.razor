@@ -8,14 +8,16 @@
                      ObserveSystemDarkModeChange="@(State.Mode == ThemeStudioMode.System)"
                      SystemDarkModeChanged="State.SetSystemDarkMode"
                      Direction="State.Direction"
-                     Class="showcase-root theme-studio-provider"
+                     Class="@ProviderClass"
                      data-testid="theme-preview-scope"
                      data-preview-mode="@State.Mode.ToString().ToLowerInvariant()"
                      data-theme-style="@State.StyleId"
                      data-theme-base-color="@State.BaseColorId"
                      data-theme-icon-library="@State.IconLibrary.ToString().ToLowerInvariant()"
                      data-theme-menu-accent="@State.MenuAccent.ToString().ToLowerInvariant()"
-                     data-theme-menu-color="@State.MenuColor.ToString().ToLowerInvariant()">
+                     data-theme-menu-color="@State.MenuColor.ToString().ToLowerInvariant()"
+                     data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
+                     data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
     <div class="showcase-shell">
         <main class="showcase-main theme-studio-main">@Body</main>
         <footer class="showcase-footer">Maliev.ShadcnBlazor Theme Studio · local and deterministic</footer>
@@ -26,5 +28,8 @@
     protected override void OnInitialized() => State.Changed += OnChanged;
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    private string ProviderClass => State.Workbench.ReducedMotion
+        ? "showcase-root theme-studio-provider shadcn-reduce-motion"
+        : "showcase-root theme-studio-provider";
     public void Dispose() => State.Changed -= OnChanged;
 }

@@ -106,9 +106,10 @@ public static partial class ThemeStudioMetadata
     private static partial Regex WordBoundary();
 }
 
-public sealed class ThemeStudioState(IThemeStudioStorage storage)
+public sealed class ThemeStudioState
 {
     private const int HistoryLimit = 50;
+    private readonly IThemeStudioStorage storage;
     private readonly List<ThemeStudioSnapshot> _undo = [];
     private readonly List<ThemeStudioSnapshot> _redo = [];
     private readonly Dictionary<string, string> _tokenEditorValues = new(StringComparer.Ordinal);
@@ -122,12 +123,25 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     private string? _pointerMutationKey;
     private bool _pointerSnapshotCaptured;
 
+    public ThemeStudioState(IThemeStudioStorage storage)
+        : this(storage, new ThemeStudioWorkbenchState())
+    {
+    }
+
+    public ThemeStudioState(IThemeStudioStorage storage, ThemeStudioWorkbenchState workbench)
+    {
+        this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
+        Workbench = workbench ?? throw new ArgumentNullException(nameof(workbench));
+        Workbench.Changed += OnWorkbenchChanged;
+    }
+
+    public ThemeStudioWorkbenchState Workbench { get; }
     public ShadcnTheme Draft { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public ShadcnTheme Applied { get; private set; } = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
-    public ThemeStudioMode Mode { get; private set; } = ThemeStudioMode.Light;
-    public ShadcnDirection Direction { get; private set; } = ShadcnDirection.LeftToRight;
-    public ThemeStudioLocale Locale { get; private set; } = ThemeStudioLocale.English;
-    public ThemeStudioViewport Viewport { get; private set; } = ThemeStudioViewport.Desktop;
+    public ThemeStudioMode Mode => Workbench.Mode;
+    public ShadcnDirection Direction => Workbench.Direction;
+    public ThemeStudioLocale Locale => Workbench.Locale;
+    public ThemeStudioViewport Viewport => Workbench.Viewport;
     public ThemeStudioMockup SelectedMockup { get; private set; } = ThemeStudioMockup.OperationsDashboard;
     public string SelectedPresetId { get; private set; } = ShadcnThemePresets.BaseVegaNeutral.Id;
     public string StyleId { get; private set; } = "vega";
@@ -144,8 +158,8 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public string? StorageDiagnostic { get; private set; }
     public string? ImportDiagnostic { get; private set; }
-    public bool SystemDarkMode { get; private set; }
-    public bool EffectiveDarkMode => Mode == ThemeStudioMode.Dark || Mode == ThemeStudioMode.System && SystemDarkMode;
+    public bool SystemDarkMode => Workbench.SystemDarkMode;
+    public bool EffectiveDarkMode => Workbench.EffectiveDarkMode;
 
     public event EventHandler? Changed;
 
@@ -383,36 +397,16 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     }
 
     public void SetMode(ThemeStudioMode mode)
-    {
-        ValidateWorkspaceValue(mode, nameof(mode));
-        if (Mode == mode) return;
-        Mode = mode;
-        RaiseChanged();
-    }
+        => Workbench.SetMode(mode);
 
     public void SetSystemDarkMode(bool isDarkMode)
-    {
-        if (SystemDarkMode == isDarkMode) return;
-        SystemDarkMode = isDarkMode;
-        if (Mode == ThemeStudioMode.System)
-            RaiseChanged();
-    }
+        => Workbench.SetSystemDarkMode(isDarkMode);
 
     public void SetDirection(ShadcnDirection direction)
-    {
-        ValidateWorkspaceValue(direction, nameof(direction));
-        if (Direction == direction) return;
-        Direction = direction;
-        RaiseChanged();
-    }
+        => Workbench.SetDirection(direction);
 
     public void SetLocale(ThemeStudioLocale locale)
-    {
-        ValidateWorkspaceValue(locale, nameof(locale));
-        if (Locale == locale) return;
-        Locale = locale;
-        RaiseChanged();
-    }
+        => Workbench.SetLocale(locale);
 
     public void SetSelectedMockup(ThemeStudioMockup mockup)
     {
@@ -548,15 +542,7 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
     }
 
     public void SetViewport(ThemeStudioViewport viewport)
-    {
-        ArgumentNullException.ThrowIfNull(viewport);
-        if (!ThemeStudioViewport.All.Contains(viewport))
-            throw new ArgumentOutOfRangeException(nameof(viewport), viewport, "Unknown Theme Studio viewport.");
-        if (Viewport == viewport)
-            return;
-        Viewport = viewport;
-        RaiseChanged();
-    }
+        => Workbench.SetViewport(viewport);
 
     public void SetFontFamily(string presetOrCssStack)
     {
@@ -768,5 +754,6 @@ public sealed class ThemeStudioState(IThemeStudioStorage storage)
         Metrics = theme.Metrics with { }
     };
 
+    private void OnWorkbenchChanged(object? sender, EventArgs args) => RaiseChanged();
     private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
 }

@@ -64,6 +64,38 @@ public sealed class ComponentCatalogVisualProofTests(
         }
     }
 
+    [Fact]
+    public async Task ThemeStudioWorkbenchMatchesReviewedVisualProof()
+    {
+        await CaptureThemeStudioAsync(
+            "desktop-light",
+            new BrowserNewContextOptions
+            {
+                ViewportSize = new() { Width = 1440, Height = 900 },
+                DeviceScaleFactor = 1,
+                ReducedMotion = ReducedMotion.Reduce,
+                ColorScheme = ColorScheme.Light
+            });
+        await CaptureThemeStudioAsync(
+            "tablet-dark-rtl",
+            new BrowserNewContextOptions
+            {
+                ViewportSize = new() { Width = 768, Height = 1024 },
+                DeviceScaleFactor = 1,
+                ReducedMotion = ReducedMotion.Reduce,
+                ColorScheme = ColorScheme.Dark
+            }, darkRtl: true, openSettings: true);
+        await CaptureThemeStudioAsync(
+            "mobile-forced-colors",
+            new BrowserNewContextOptions
+            {
+                ViewportSize = new() { Width = 390, Height = 844 },
+                DeviceScaleFactor = 1,
+                ReducedMotion = ReducedMotion.Reduce,
+                ForcedColors = ForcedColors.Active
+            }, openSettings: true);
+    }
+
     private async Task CaptureModeAsync(
         IReadOnlyList<string> slugs,
         VisualProofMode mode,
@@ -118,6 +150,36 @@ public sealed class ComponentCatalogVisualProofTests(
             var actual = await canvas.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });
             await VisualProof.CompareOrUpdateAsync(page, slug, mode.Name, actual);
         }
+    }
+
+    private async Task CaptureThemeStudioAsync(
+        string mode,
+        BrowserNewContextOptions options,
+        bool darkRtl = false,
+        bool openSettings = false)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(options);
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+        if (darkRtl)
+        {
+            await page.GetByTestId("mode-dark").ClickAsync();
+            await page.GetByTestId("direction-rtl").ClickAsync();
+        }
+        if (openSettings)
+        {
+            var toggle = page.GetByTestId("theme-controls-toggle");
+            if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+                await toggle.ClickAsync();
+        }
+        await page.EvaluateAsync("document.fonts.ready");
+        var actual = await page.ScreenshotAsync(new()
+        {
+            Animations = ScreenshotAnimations.Disabled,
+            FullPage = false
+        });
+        await VisualProof.CompareOrUpdateAsync(page, "theme-studio", mode, actual);
     }
 
     private static string PrimaryPreviewSlot(string slug) => slug switch
