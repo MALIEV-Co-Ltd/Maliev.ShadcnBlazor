@@ -4,6 +4,7 @@ using System.Xml.Linq;
 
 namespace Maliev.ShadcnBlazor.RepositoryTests;
 
+[Collection("Package validation")]
 public sealed class PackageArchiveTests
 {
     [Fact]

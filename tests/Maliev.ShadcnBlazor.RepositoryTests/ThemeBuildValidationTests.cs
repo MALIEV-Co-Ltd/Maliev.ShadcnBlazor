@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Maliev.ShadcnBlazor.RepositoryTests;
 
+[Collection("Package validation")]
 public sealed class ThemeBuildValidationTests : IClassFixture<ThemePackageFixture>
 {
     private readonly ThemePackageFixture _package;
@@ -226,4 +227,9 @@ public sealed class ThemePackageFixture : IDisposable
 
     public void Dispose() => Directory.Delete(Output, recursive: true);
 
+}
+
+[CollectionDefinition("Package validation", DisableParallelization = true)]
+public sealed class PackageValidationCollection
+{
 }
