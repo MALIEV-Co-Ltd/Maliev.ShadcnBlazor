@@ -31,7 +31,7 @@
     {
         <span id="@DescriptionId" class="shadcn-dropzone-description" data-slot="dropzone-description">@Description</span>
     }
-    <span id="@StatusId" class="shadcn-dropzone-status" data-slot="dropzone-status" aria-live="polite">@Status</span>
+    <span id="@StatusId" class="shadcn-dropzone-status" data-slot="dropzone-status" role="status" aria-live="polite">@Status</span>
     @if (_selection?.Errors.Count > 0)
     {
         <ul class="shadcn-dropzone-errors" data-slot="dropzone-errors" role="alert">

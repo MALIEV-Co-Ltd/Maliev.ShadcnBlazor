@@ -363,9 +363,9 @@ public sealed class DocumentationWorkbenchBrowserTests(
 
         var search = page.GetByLabel("Search components");
         await search.FillAsync("keyboard");
-        await Assertions.Expect(page.GetByTestId("documentation-result-count")).ToHaveTextAsync("12 components found");
+        await Assertions.Expect(page.GetByTestId("documentation-result-count")).ToHaveTextAsync("13 components found");
         Assert.Equal(
-            ["accordion", "calendar", "code-block", "combobox", "command", "context-menu", "dropdown-menu", "kbd", "navigation-menu", "resizable", "select", "toast"],
+            ["accordion", "calendar", "code-block", "combobox", "command", "context-menu", "dropdown-menu", "dropzone", "kbd", "navigation-menu", "resizable", "select", "toast"],
             (await page.Locator(".documentation-component-list a").EvaluateAllAsync<string[]>("links => links.map(link => new URL(link.href).pathname.split('/').pop())")).Order());
         await Assertions.Expect(page.Locator("a[href='docs/components/kbd']")).ToHaveAttributeAsync("aria-current", "page");
 

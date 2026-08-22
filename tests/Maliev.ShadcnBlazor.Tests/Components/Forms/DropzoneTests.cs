@@ -24,7 +24,7 @@ public sealed class DropzoneTests : BunitContext
         var instructionsId = cut.Find("[data-slot='dropzone-instructions']").Id;
         Assert.False(string.IsNullOrWhiteSpace(instructionsId));
         Assert.Contains(instructionsId!, input.GetAttribute("aria-describedby"), StringComparison.Ordinal);
-        Assert.NotNull(cut.Find("[data-slot='dropzone-status'][aria-live='polite']"));
+        Assert.NotNull(cut.Find("[data-slot='dropzone-status'][role='status'][aria-live='polite']"));
     }
 
     [Fact]
