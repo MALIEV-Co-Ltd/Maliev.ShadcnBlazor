@@ -97,7 +97,7 @@ public sealed class ThemeBundleTests
         var extracted = archive.Entries.ToDictionary(entry => entry.FullName, ReadEntry, StringComparer.Ordinal);
         var document = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
         Assert.Equal(ShadcnThemeDocumentSerializer.Serialize(document), extracted["theme.json"]);
-        Assert.Equal(ShadcnThemeCssWriter.Write(theme), extracted["theme.css"]);
+        Assert.Equal(ShadcnThemeCssWriter.Write(document), extracted["theme.css"]);
         Assert.Contains("#123456", extracted["theme.css"], StringComparison.Ordinal);
         Assert.Contains("#123456", extracted["theme.json"], StringComparison.Ordinal);
         Assert.Contains("#123456", extracted["MalievShadcnTheme.cs"], StringComparison.Ordinal);
@@ -122,6 +122,46 @@ public sealed class ThemeBundleTests
             Assert.Equal(memory.Length, item.GetProperty("size").GetInt64());
             Assert.Equal(Convert.ToHexString(SHA256.HashData(memory.ToArray())).ToLowerInvariant(), item.GetProperty("sha256").GetString());
         }
+    }
+
+    [Fact]
+    public void DocumentBundleCssPreservesFontSelectionsAndEverySemanticRole()
+    {
+        var state = new ThemeStudioState(new NullStorage());
+        var roles = state.Document.Typography.Roles.ToDictionary();
+        roles[ShadcnTypographyRole.Heading1] = new(800, 2.5, 1.2, -0.04);
+        var typography = new ShadcnTypographyScale(
+            new("'IBM Plex Sans', ui-sans-serif, sans-serif", "ui-sans-serif, sans-serif", "ibm-plex-sans"),
+            new("'Noto Sans Thai', sans-serif", "sans-serif", "noto-sans-thai"),
+            new("'Fira Code', ui-monospace, monospace", "ui-monospace, monospace", "fira-code"),
+            roles);
+        var document = state.Document with
+        {
+            Theme = state.Document.Theme with
+            {
+                Metrics = state.Document.Theme.Metrics with
+                {
+                    FontFamily = typography.Body.Family,
+                    MonospaceFontFamily = typography.Code.Family
+                }
+            },
+            Typography = typography
+        };
+
+        var bundle = ThemeBundleBuilder.Build(document, new("Custom", "1.0.0"));
+        var css = Encoding.UTF8.GetString(bundle.Files.Single(file => file.Path == "theme.css").Bytes);
+        var restored = ShadcnThemeDocumentSerializer.Deserialize(
+            Encoding.UTF8.GetString(bundle.Files.Single(file => file.Path == "theme.json").Bytes));
+
+        Assert.Equal(
+            ShadcnThemeDocumentSerializer.Serialize(document),
+            ShadcnThemeDocumentSerializer.Serialize(restored));
+        Assert.Contains("--shadcn-font-thai: 'Noto Sans Thai', sans-serif", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typography-heading-1-weight: 800", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-typography-code-line-height: 1.5", css, StringComparison.Ordinal);
+        Assert.Equal(Enum.GetValues<ShadcnTypographyRole>().Length * 4 * 2,
+            css.Split('\n').Count(line => line.Contains("--shadcn-typography-", StringComparison.Ordinal)));
     }
 
     [Fact]

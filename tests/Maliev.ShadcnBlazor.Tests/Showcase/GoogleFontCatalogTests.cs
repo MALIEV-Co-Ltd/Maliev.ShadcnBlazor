@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
+using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
@@ -122,6 +123,59 @@ public sealed class GoogleFontCatalogTests
             GoogleFontCatalog.LoadAsync(client, source.Token).AsTask());
     }
 
+    [Fact]
+    public async Task CatalogServiceCachesTheSnapshotAndBuildsOnlyAValidatedSelectedCss2Request()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "source": "google-webfonts-developer-api",
+          "sourceTimestamp": "2026-08-22T00:00:00Z",
+          "families": [
+            { "id": "dm-sans", "family": "DM Sans", "category": "sans-serif", "subsets": ["latin"], "weights": [400, 700], "axes": [], "css2FamilyQuery": "DM+Sans:wght@400;700" },
+            { "id": "noto-sans-thai", "family": "Noto Sans Thai", "category": "sans-serif", "subsets": ["thai"], "weights": [400, 700], "axes": [], "css2FamilyQuery": "Noto+Sans+Thai:wght@400;700" }
+          ]
+        }
+        """;
+        var handler = new StaticHandler(json);
+        using var client = new HttpClient(handler) { BaseAddress = new Uri("https://showcase.invalid/") };
+        var service = new GoogleFontCatalogService(client);
+        var document = ShadcnThemeDocumentSerializer.Deserialize(
+            ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
+        var typography = document.Typography with
+        {
+            Body = new ShadcnFontSelection("'DM Sans', sans-serif", "sans-serif", "dm-sans"),
+            ThaiFallback = new ShadcnFontSelection("'Noto Sans Thai', sans-serif", "sans-serif", "noto-sans-thai"),
+        };
+
+        var first = await service.CreateStylesheetAsync(typography);
+        var second = await service.CreateStylesheetAsync(typography);
+
+        Assert.Equal(first, second);
+        Assert.Equal("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap", first);
+        Assert.Equal(1, handler.RequestCount);
+        Assert.DoesNotContain("key", first, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void FontLoaderAllowsOnlyCss2GoogleStylesheetsAndBoundsFailureTime()
+    {
+        var script = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "samples",
+            "Maliev.ShadcnBlazor.Showcase",
+            "wwwroot",
+            "js",
+            "theme-studio.js"));
+
+        Assert.Contains("url.protocol !== \"https:\"", script, StringComparison.Ordinal);
+        Assert.Contains("url.hostname !== \"fonts.googleapis.com\"", script, StringComparison.Ordinal);
+        Assert.Contains("url.pathname !== \"/css2\"", script, StringComparison.Ordinal);
+        Assert.Contains("Math.max(1000, Math.min(Number(timeoutMs) || 5000, 10000))", script, StringComparison.Ordinal);
+        Assert.Contains("existing?.remove()", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("api_key", script, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static HttpClient ClientReturning(string json) => new(new StaticHandler(json))
     {
         BaseAddress = new Uri("https://showcase.invalid/")
@@ -137,11 +191,19 @@ public sealed class GoogleFontCatalogTests
 
     private sealed class StaticHandler(string content) : HttpMessageHandler
     {
+        public int RequestCount { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            Task.FromResult(CreateResponse());
+
+        private HttpResponseMessage CreateResponse()
+        {
+            RequestCount++;
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(content, Encoding.UTF8, "application/json")
-            });
+            };
+        }
     }
 
     private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler

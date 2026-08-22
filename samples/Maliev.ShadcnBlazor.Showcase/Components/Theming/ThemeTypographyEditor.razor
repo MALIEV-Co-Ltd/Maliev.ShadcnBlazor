@@ -1,0 +1,162 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.Theming.Fonts
+@inject GoogleFontCatalogService CatalogService
+
+<section class="theme-inspector-group theme-typography-editor" style="@TypographyStyle" aria-labelledby="theme-typography-title" data-testid="theme-typography-editor">
+    <div class="theme-inspector-group__heading">
+        <div>
+            <h3 id="theme-typography-title">Typography</h3>
+            <p>Choose body, Thai fallback, and code families, then tune nine semantic roles.</p>
+        </div>
+        <MudButton Variant="Variant.Text" Size="Size.Small" aria-label="Reset Typography" data-testid="theme-reset-metrics-typography" OnClick="() => State.ResetGroup(ThemeStudioGroup.Typography)">Reset group</MudButton>
+    </div>
+
+    <div class="theme-font-current" aria-label="Selected font families">
+        @foreach (var slot in Enum.GetValues<ThemeStudioFontSlot>())
+        {
+            <button type="button" class="theme-font-slot" data-active="@(_slot == slot ? "true" : "false")" aria-pressed="@(_slot == slot ? "true" : "false")" data-testid="theme-font-slot-@SlotId(slot)" @onclick="() => _slot = slot">
+                <span>@SlotLabel(slot)</span><strong>@Selection(slot).Family.Split(',')[0].Trim(' ', '\'')</strong>
+            </button>
+        }
+    </div>
+
+    <label class="theme-font-search">
+        <span>Search checked-in catalog</span>
+        <ShadcnInput TValue="string" Value="@_query" ValueChanged="Search" Placeholder="Search 1,800+ families" aria-label="Search font catalog" data-testid="theme-font-search" />
+    </label>
+    <div class="theme-font-filters">
+        <label><ShadcnCheckbox Value="@_thaiOnly" ValueChanged="value => _thaiOnly = value ?? false" aria-label="Only fonts with Thai support" /> Thai support</label>
+        <label><ShadcnCheckbox Value="@_variableOnly" ValueChanged="value => _variableOnly = value ?? false" aria-label="Only variable fonts" /> Variable only</label>
+    </div>
+
+    <p class="theme-font-status" role="status" aria-live="polite" data-testid="theme-font-catalog-status">@CatalogStatus</p>
+    @if (_catalog is not null)
+    {
+        <ul class="theme-font-results" aria-label="Font search results">
+            @foreach (var entry in Results)
+            {
+                <li>
+                    <button type="button" aria-pressed="@IsSelected(entry)" data-selected="@(IsSelected(entry) ? "true" : "false")" data-testid="theme-font-result-@entry.Id" @onclick="() => Select(entry)">
+                        <span>@entry.Family</span><small>@entry.Category · @string.Join(", ", entry.Subsets.Take(3))</small>
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+    <p class="theme-font-load-status" role="status" aria-live="polite" data-state="@State.FontLoadState.ToString().ToLowerInvariant()" data-testid="theme-font-load-status">@FontLoadStatus</p>
+
+    <div class="theme-typography-specimen" data-testid="theme-typography-specimen">
+        <h1>Precision manufacturing</h1>
+        <h2>Production-ready type</h2>
+        <h3>Clear operational hierarchy</h3>
+        <h4>Detailed process guidance</h4>
+        <p>Readable body copy for production teams.</p>
+        <p lang="th">การผลิตที่แม่นยำสำหรับทุกโครงการ</p>
+        <span class="theme-typography-specimen__label">Inspection label</span>
+        <button type="button">Review drawing</button>
+        <small>Updated moments ago</small>
+        <code>tolerance = ±0.02 mm</code>
+    </div>
+
+    <div class="theme-role-list" aria-label="Semantic typography roles">
+        @foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
+        {
+            var style = State.Typography.Roles[role];
+            <fieldset class="theme-role-card" data-testid="theme-role-@RoleId(role)">
+                <legend>@RoleLabel(role)</legend>
+                <label><span>Weight</span><input type="number" min="100" max="900" step="100" value="@style.Weight" aria-label="@($"{RoleLabel(role)} weight")" data-testid="theme-role-@RoleId(role)-weight" @onchange="args => ChangeRole(role, nameof(style.Weight), args)" /></label>
+                <label><span>Scale</span><input type="number" min="0.625" max="4" step="0.025" value="@Format(style.Scale)" aria-label="@($"{RoleLabel(role)} scale")" data-testid="theme-role-@RoleId(role)-scale" @onchange="args => ChangeRole(role, nameof(style.Scale), args)" /></label>
+                <label><span>Line</span><input type="number" min="1" max="2.5" step="0.05" value="@Format(style.LineHeight)" aria-label="@($"{RoleLabel(role)} line height")" data-testid="theme-role-@RoleId(role)-line-height" @onchange="args => ChangeRole(role, nameof(style.LineHeight), args)" /></label>
+                <label><span>Tracking</span><input type="number" min="-0.1" max="0.2" step="0.005" value="@Format(style.LetterSpacingEm)" aria-label="@($"{RoleLabel(role)} letter spacing")" data-testid="theme-role-@RoleId(role)-letter-spacing" @onchange="args => ChangeRole(role, nameof(style.LetterSpacingEm), args)" /></label>
+            </fieldset>
+        }
+    </div>
+    @if (_roleDiagnostic is not null)
+    {
+        <p class="theme-font-status" role="alert">@_roleDiagnostic</p>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    private GoogleFontCatalog? _catalog;
+    private ThemeStudioFontSlot _slot;
+    private string _query = string.Empty;
+    private bool _thaiOnly;
+    private bool _variableOnly;
+    private string? _roleDiagnostic;
+    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
+
+    protected override async Task OnInitializedAsync() => _catalog = await CatalogService.GetAsync();
+
+    private IReadOnlyList<GoogleFontCatalogEntry> Results => _catalog?.Search(
+        _query,
+        _thaiOnly || _slot == ThemeStudioFontSlot.ThaiFallback ? "thai" : null,
+        _variableOnly).Take(24).ToArray() ?? [];
+
+    private string CatalogStatus => _catalog switch
+    {
+        null => "Loading local font catalog…",
+        { Source: GoogleFontCatalogSource.BundledFallback } => "Local catalog unavailable. Three bundled, offline-safe families remain available.",
+        _ => $"{Results.Count} of {_catalog.Entries.Count} local families shown."
+    };
+
+    private string FontLoadStatus => State.FontLoadState switch
+    {
+        ThemeStudioFontLoadState.Bundled => "Bundled fonts are ready offline.",
+        ThemeStudioFontLoadState.Loading => "Loading the selected web font…",
+        ThemeStudioFontLoadState.Loaded => "Selected web font loaded.",
+        _ => State.FontLoadDiagnostic ?? "The fallback font remains active."
+    };
+
+    private void Search(string? value) => _query = value ?? string.Empty;
+    private void Select(GoogleFontCatalogEntry entry) => State.SetTypographyFont(_slot, entry.ToSelection(_slot));
+    private bool IsSelected(GoogleFontCatalogEntry entry) => string.Equals(Selection(_slot).GoogleFontsId, entry.Id, StringComparison.Ordinal) ||
+        entry.IsBundled && Selection(_slot).Family.Contains(entry.Family, StringComparison.Ordinal);
+    private ShadcnFontSelection Selection(ThemeStudioFontSlot slot) => slot switch
+    {
+        ThemeStudioFontSlot.Body => State.Typography.Body,
+        ThemeStudioFontSlot.ThaiFallback => State.Typography.ThaiFallback,
+        ThemeStudioFontSlot.Code => State.Typography.Code,
+        _ => throw new ArgumentOutOfRangeException(nameof(slot), slot, null)
+    };
+
+    private void ChangeRole(ShadcnTypographyRole role, string property, ChangeEventArgs args)
+    {
+        var current = State.Typography.Roles[role];
+        if (!double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        {
+            _roleDiagnostic = $"{RoleLabel(role)} {property} must be numeric.";
+            return;
+        }
+        var next = property switch
+        {
+            nameof(current.Weight) when value is >= 100 and <= 900 && value % 100 == 0 => current with { Weight = (int)value },
+            nameof(current.Scale) when value is >= 0.625 and <= 4 => current with { Scale = value },
+            nameof(current.LineHeight) when value is >= 1 and <= 2.5 => current with { LineHeight = value },
+            nameof(current.LetterSpacingEm) when value is >= -0.1 and <= 0.2 => current with { LetterSpacingEm = value },
+            _ => null
+        };
+        if (next is null)
+        {
+            _roleDiagnostic = $"{RoleLabel(role)} {property} is outside the supported range.";
+            return;
+        }
+        _roleDiagnostic = null;
+        State.SetTypographyRole(role, next);
+    }
+
+    private static string Format(double value) => value.ToString("G17", CultureInfo.InvariantCulture);
+    private static string SlotId(ThemeStudioFontSlot slot) => slot.ToString().ToLowerInvariant();
+    private static string SlotLabel(ThemeStudioFontSlot slot) => slot switch { ThemeStudioFontSlot.ThaiFallback => "Thai fallback", _ => slot.ToString() };
+    private static string RoleId(ShadcnTypographyRole role) => role switch
+    {
+        ShadcnTypographyRole.Heading1 => "heading-1",
+        ShadcnTypographyRole.Heading2 => "heading-2",
+        ShadcnTypographyRole.Heading3 => "heading-3",
+        ShadcnTypographyRole.Heading4To6 => "heading-4-to-6",
+        _ => role.ToString().ToLowerInvariant()
+    };
+    private static string RoleLabel(ShadcnTypographyRole role) => role switch { ShadcnTypographyRole.Heading4To6 => "Heading 4–6", _ => role.ToString().Replace("Heading", "Heading ", StringComparison.Ordinal) };
+}
