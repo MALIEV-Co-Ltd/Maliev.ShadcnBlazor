@@ -13,6 +13,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Documentation\ComponentDocumentationCatalog.json" />
     <EmbeddedResource Include="..\..\docs\component-catalog.json" Link="Documentation\component-catalog.json" />
+    <EmbeddedResource Include="ThemeScenarios\ThemeScenarioCatalog.json" />
     <Content Include="..\..\docs\component-catalog.json" Link="docs\component-catalog.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

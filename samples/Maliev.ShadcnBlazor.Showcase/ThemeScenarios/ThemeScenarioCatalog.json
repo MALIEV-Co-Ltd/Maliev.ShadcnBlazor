@@ -1,0 +1,3781 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {
+      "id": "accordion-default",
+      "componentSlug": "accordion",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Maintenance FAQ",
+        "description": "Complete maintenance faq with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คำถามงานบำรุงรักษา",
+        "description": "ใช้งานคำถามงานบำรุงรักษาด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "accordion"
+      ]
+    },
+    {
+      "id": "accordion-stress",
+      "componentSlug": "accordion",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Maintenance FAQ with edge cases",
+        "description": "Keep the maintenance faq usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คำถามงานบำรุงรักษาในกรณีซับซ้อน",
+        "description": "ตรวจสอบคำถามงานบำรุงรักษาเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "accordion"
+      ]
+    },
+    {
+      "id": "accordion-accessible",
+      "componentSlug": "accordion",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Maintenance FAQ by keyboard",
+        "description": "Operate the maintenance faq with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คำถามงานบำรุงรักษาด้วยแป้นพิมพ์",
+        "description": "ใช้งานคำถามงานบำรุงรักษาด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "accordion"
+      ]
+    },
+    {
+      "id": "alert-default",
+      "componentSlug": "alert",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Quality hold notice",
+        "description": "Complete quality hold notice with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ประกาศพักงานคุณภาพ",
+        "description": "ใช้งานประกาศพักงานคุณภาพด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "alert"
+      ]
+    },
+    {
+      "id": "alert-stress",
+      "componentSlug": "alert",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Quality hold notice with edge cases",
+        "description": "Keep the quality hold notice usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ประกาศพักงานคุณภาพในกรณีซับซ้อน",
+        "description": "ตรวจสอบประกาศพักงานคุณภาพเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "alert"
+      ]
+    },
+    {
+      "id": "alert-accessible",
+      "componentSlug": "alert",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Quality hold notice by keyboard",
+        "description": "Operate the quality hold notice with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ประกาศพักงานคุณภาพด้วยแป้นพิมพ์",
+        "description": "ใช้งานประกาศพักงานคุณภาพด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "alert"
+      ]
+    },
+    {
+      "id": "alert-dialog-default",
+      "componentSlug": "alert-dialog",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Delete drawing confirmation",
+        "description": "Complete delete drawing confirmation with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ยืนยันการลบแบบงาน",
+        "description": "ใช้งานยืนยันการลบแบบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "alert-dialog"
+      ]
+    },
+    {
+      "id": "alert-dialog-stress",
+      "componentSlug": "alert-dialog",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Delete drawing confirmation with edge cases",
+        "description": "Keep the delete drawing confirmation usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ยืนยันการลบแบบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบยืนยันการลบแบบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "alert-dialog"
+      ]
+    },
+    {
+      "id": "alert-dialog-accessible",
+      "componentSlug": "alert-dialog",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Delete drawing confirmation by keyboard",
+        "description": "Operate the delete drawing confirmation with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ยืนยันการลบแบบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานยืนยันการลบแบบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "alert-dialog"
+      ]
+    },
+    {
+      "id": "aspect-ratio-default",
+      "componentSlug": "aspect-ratio",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Inspection image frame",
+        "description": "Complete inspection image frame with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "กรอบภาพตรวจสอบ",
+        "description": "ใช้งานกรอบภาพตรวจสอบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "aspect-ratio"
+      ]
+    },
+    {
+      "id": "aspect-ratio-stress",
+      "componentSlug": "aspect-ratio",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Inspection image frame with edge cases",
+        "description": "Keep the inspection image frame usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "กรอบภาพตรวจสอบในกรณีซับซ้อน",
+        "description": "ตรวจสอบกรอบภาพตรวจสอบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "aspect-ratio"
+      ]
+    },
+    {
+      "id": "aspect-ratio-accessible",
+      "componentSlug": "aspect-ratio",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Inspection image frame by keyboard",
+        "description": "Operate the inspection image frame with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "กรอบภาพตรวจสอบด้วยแป้นพิมพ์",
+        "description": "ใช้งานกรอบภาพตรวจสอบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "aspect-ratio"
+      ]
+    },
+    {
+      "id": "attachment-default",
+      "componentSlug": "attachment",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing upload queue",
+        "description": "Complete drawing upload queue with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คิวอัปโหลดแบบงาน",
+        "description": "ใช้งานคิวอัปโหลดแบบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "attachment"
+      ]
+    },
+    {
+      "id": "attachment-stress",
+      "componentSlug": "attachment",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing upload queue with edge cases",
+        "description": "Keep the drawing upload queue usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คิวอัปโหลดแบบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบคิวอัปโหลดแบบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "attachment"
+      ]
+    },
+    {
+      "id": "attachment-accessible",
+      "componentSlug": "attachment",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing upload queue by keyboard",
+        "description": "Operate the drawing upload queue with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คิวอัปโหลดแบบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานคิวอัปโหลดแบบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "attachment"
+      ]
+    },
+    {
+      "id": "avatar-default",
+      "componentSlug": "avatar",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Project team roster",
+        "description": "Complete project team roster with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "รายชื่อทีมโครงการ",
+        "description": "ใช้งานรายชื่อทีมโครงการด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "avatar"
+      ]
+    },
+    {
+      "id": "avatar-stress",
+      "componentSlug": "avatar",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Project team roster with edge cases",
+        "description": "Keep the project team roster usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "รายชื่อทีมโครงการในกรณีซับซ้อน",
+        "description": "ตรวจสอบรายชื่อทีมโครงการเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "avatar"
+      ]
+    },
+    {
+      "id": "avatar-accessible",
+      "componentSlug": "avatar",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Project team roster by keyboard",
+        "description": "Operate the project team roster with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "รายชื่อทีมโครงการด้วยแป้นพิมพ์",
+        "description": "ใช้งานรายชื่อทีมโครงการด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "avatar"
+      ]
+    },
+    {
+      "id": "badge-default",
+      "componentSlug": "badge",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Production status board",
+        "description": "Complete production status board with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "บอร์ดสถานะการผลิต",
+        "description": "ใช้งานบอร์ดสถานะการผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "badge"
+      ]
+    },
+    {
+      "id": "badge-stress",
+      "componentSlug": "badge",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Production status board with edge cases",
+        "description": "Keep the production status board usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "บอร์ดสถานะการผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบบอร์ดสถานะการผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "badge"
+      ]
+    },
+    {
+      "id": "badge-accessible",
+      "componentSlug": "badge",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Production status board by keyboard",
+        "description": "Operate the production status board with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "บอร์ดสถานะการผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานบอร์ดสถานะการผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "badge"
+      ]
+    },
+    {
+      "id": "breadcrumb-default",
+      "componentSlug": "breadcrumb",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing revision path",
+        "description": "Complete drawing revision path with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เส้นทางรุ่นแบบงาน",
+        "description": "ใช้งานเส้นทางรุ่นแบบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "breadcrumb"
+      ]
+    },
+    {
+      "id": "breadcrumb-stress",
+      "componentSlug": "breadcrumb",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing revision path with edge cases",
+        "description": "Keep the drawing revision path usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เส้นทางรุ่นแบบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบเส้นทางรุ่นแบบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "breadcrumb"
+      ]
+    },
+    {
+      "id": "breadcrumb-accessible",
+      "componentSlug": "breadcrumb",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing revision path by keyboard",
+        "description": "Operate the drawing revision path with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เส้นทางรุ่นแบบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานเส้นทางรุ่นแบบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "breadcrumb"
+      ]
+    },
+    {
+      "id": "bubble-default",
+      "componentSlug": "bubble",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Engineering conversation",
+        "description": "Complete engineering conversation with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "บทสนทนาวิศวกรรม",
+        "description": "ใช้งานบทสนทนาวิศวกรรมด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "bubble"
+      ]
+    },
+    {
+      "id": "bubble-stress",
+      "componentSlug": "bubble",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Engineering conversation with edge cases",
+        "description": "Keep the engineering conversation usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "บทสนทนาวิศวกรรมในกรณีซับซ้อน",
+        "description": "ตรวจสอบบทสนทนาวิศวกรรมเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "bubble"
+      ]
+    },
+    {
+      "id": "bubble-accessible",
+      "componentSlug": "bubble",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Engineering conversation by keyboard",
+        "description": "Operate the engineering conversation with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "บทสนทนาวิศวกรรมด้วยแป้นพิมพ์",
+        "description": "ใช้งานบทสนทนาวิศวกรรมด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "bubble"
+      ]
+    },
+    {
+      "id": "button-default",
+      "componentSlug": "button",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Submit inspection action",
+        "description": "Complete submit inspection action with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ปุ่มส่งผลตรวจ",
+        "description": "ใช้งานปุ่มส่งผลตรวจด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "button"
+      ]
+    },
+    {
+      "id": "button-stress",
+      "componentSlug": "button",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Submit inspection action with edge cases",
+        "description": "Keep the submit inspection action usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ปุ่มส่งผลตรวจในกรณีซับซ้อน",
+        "description": "ตรวจสอบปุ่มส่งผลตรวจเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "button"
+      ]
+    },
+    {
+      "id": "button-accessible",
+      "componentSlug": "button",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Submit inspection action by keyboard",
+        "description": "Operate the submit inspection action with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ปุ่มส่งผลตรวจด้วยแป้นพิมพ์",
+        "description": "ใช้งานปุ่มส่งผลตรวจด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "button"
+      ]
+    },
+    {
+      "id": "button-group-default",
+      "componentSlug": "button-group",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing review actions",
+        "description": "Complete drawing review actions with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ชุดปุ่มตรวจแบบ",
+        "description": "ใช้งานชุดปุ่มตรวจแบบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "button-group"
+      ]
+    },
+    {
+      "id": "button-group-stress",
+      "componentSlug": "button-group",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing review actions with edge cases",
+        "description": "Keep the drawing review actions usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ชุดปุ่มตรวจแบบในกรณีซับซ้อน",
+        "description": "ตรวจสอบชุดปุ่มตรวจแบบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "button-group"
+      ]
+    },
+    {
+      "id": "button-group-accessible",
+      "componentSlug": "button-group",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing review actions by keyboard",
+        "description": "Operate the drawing review actions with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ชุดปุ่มตรวจแบบด้วยแป้นพิมพ์",
+        "description": "ใช้งานชุดปุ่มตรวจแบบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "button-group"
+      ]
+    },
+    {
+      "id": "calendar-default",
+      "componentSlug": "calendar",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Delivery schedule",
+        "description": "Complete delivery schedule with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตารางส่งมอบ",
+        "description": "ใช้งานตารางส่งมอบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "calendar"
+      ]
+    },
+    {
+      "id": "calendar-stress",
+      "componentSlug": "calendar",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Delivery schedule with edge cases",
+        "description": "Keep the delivery schedule usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตารางส่งมอบในกรณีซับซ้อน",
+        "description": "ตรวจสอบตารางส่งมอบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "calendar"
+      ]
+    },
+    {
+      "id": "calendar-accessible",
+      "componentSlug": "calendar",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Delivery schedule by keyboard",
+        "description": "Operate the delivery schedule with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตารางส่งมอบด้วยแป้นพิมพ์",
+        "description": "ใช้งานตารางส่งมอบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "calendar"
+      ]
+    },
+    {
+      "id": "card-default",
+      "componentSlug": "card",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Machine work order",
+        "description": "Complete machine work order with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ใบงานเครื่องจักร",
+        "description": "ใช้งานใบงานเครื่องจักรด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "card"
+      ]
+    },
+    {
+      "id": "card-stress",
+      "componentSlug": "card",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Machine work order with edge cases",
+        "description": "Keep the machine work order usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ใบงานเครื่องจักรในกรณีซับซ้อน",
+        "description": "ตรวจสอบใบงานเครื่องจักรเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "card"
+      ]
+    },
+    {
+      "id": "card-accessible",
+      "componentSlug": "card",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Machine work order by keyboard",
+        "description": "Operate the machine work order with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ใบงานเครื่องจักรด้วยแป้นพิมพ์",
+        "description": "ใช้งานใบงานเครื่องจักรด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "card"
+      ]
+    },
+    {
+      "id": "carousel-default",
+      "componentSlug": "carousel",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Production cell queue",
+        "description": "Complete production cell queue with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คิวเซลล์การผลิต",
+        "description": "ใช้งานคิวเซลล์การผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "carousel"
+      ]
+    },
+    {
+      "id": "carousel-stress",
+      "componentSlug": "carousel",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Production cell queue with edge cases",
+        "description": "Keep the production cell queue usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คิวเซลล์การผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบคิวเซลล์การผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "carousel"
+      ]
+    },
+    {
+      "id": "carousel-accessible",
+      "componentSlug": "carousel",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Production cell queue by keyboard",
+        "description": "Operate the production cell queue with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คิวเซลล์การผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานคิวเซลล์การผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "carousel"
+      ]
+    },
+    {
+      "id": "chart-default",
+      "componentSlug": "chart",
+      "family": "DataDisplay",
+      "kind": "Default",
+      "english": {
+        "title": "Monthly capacity chart",
+        "description": "Complete monthly capacity chart with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แผนภูมิกำลังผลิตรายเดือน",
+        "description": "ใช้งานแผนภูมิกำลังผลิตรายเดือนด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "chart"
+      ]
+    },
+    {
+      "id": "chart-stress",
+      "componentSlug": "chart",
+      "family": "DataDisplay",
+      "kind": "Stress",
+      "english": {
+        "title": "Monthly capacity chart with edge cases",
+        "description": "Keep the monthly capacity chart usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แผนภูมิกำลังผลิตรายเดือนในกรณีซับซ้อน",
+        "description": "ตรวจสอบแผนภูมิกำลังผลิตรายเดือนเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "chart"
+      ]
+    },
+    {
+      "id": "chart-accessible",
+      "componentSlug": "chart",
+      "family": "DataDisplay",
+      "kind": "Accessible",
+      "english": {
+        "title": "Monthly capacity chart by keyboard",
+        "description": "Operate the monthly capacity chart with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แผนภูมิกำลังผลิตรายเดือนด้วยแป้นพิมพ์",
+        "description": "ใช้งานแผนภูมิกำลังผลิตรายเดือนด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "chart"
+      ]
+    },
+    {
+      "id": "checkbox-default",
+      "componentSlug": "checkbox",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Inspection checklist",
+        "description": "Complete inspection checklist with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "รายการตรวจสอบชิ้นงาน",
+        "description": "ใช้งานรายการตรวจสอบชิ้นงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "checkbox"
+      ]
+    },
+    {
+      "id": "checkbox-stress",
+      "componentSlug": "checkbox",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Inspection checklist with edge cases",
+        "description": "Keep the inspection checklist usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "รายการตรวจสอบชิ้นงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบรายการตรวจสอบชิ้นงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "checkbox"
+      ]
+    },
+    {
+      "id": "checkbox-accessible",
+      "componentSlug": "checkbox",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Inspection checklist by keyboard",
+        "description": "Operate the inspection checklist with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "รายการตรวจสอบชิ้นงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานรายการตรวจสอบชิ้นงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "checkbox"
+      ]
+    },
+    {
+      "id": "collapsible-default",
+      "componentSlug": "collapsible",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Process instruction details",
+        "description": "Complete process instruction details with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "รายละเอียดคำสั่งกระบวนการ",
+        "description": "ใช้งานรายละเอียดคำสั่งกระบวนการด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "collapsible"
+      ]
+    },
+    {
+      "id": "collapsible-stress",
+      "componentSlug": "collapsible",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Process instruction details with edge cases",
+        "description": "Keep the process instruction details usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "รายละเอียดคำสั่งกระบวนการในกรณีซับซ้อน",
+        "description": "ตรวจสอบรายละเอียดคำสั่งกระบวนการเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "collapsible"
+      ]
+    },
+    {
+      "id": "collapsible-accessible",
+      "componentSlug": "collapsible",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Process instruction details by keyboard",
+        "description": "Operate the process instruction details with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "รายละเอียดคำสั่งกระบวนการด้วยแป้นพิมพ์",
+        "description": "ใช้งานรายละเอียดคำสั่งกระบวนการด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "collapsible"
+      ]
+    },
+    {
+      "id": "combobox-default",
+      "componentSlug": "combobox",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Material grade search",
+        "description": "Complete material grade search with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ค้นหาเกรดวัสดุ",
+        "description": "ใช้งานค้นหาเกรดวัสดุด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "combobox"
+      ]
+    },
+    {
+      "id": "combobox-stress",
+      "componentSlug": "combobox",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Material grade search with edge cases",
+        "description": "Keep the material grade search usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ค้นหาเกรดวัสดุในกรณีซับซ้อน",
+        "description": "ตรวจสอบค้นหาเกรดวัสดุเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "combobox"
+      ]
+    },
+    {
+      "id": "combobox-accessible",
+      "componentSlug": "combobox",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Material grade search by keyboard",
+        "description": "Operate the material grade search with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ค้นหาเกรดวัสดุด้วยแป้นพิมพ์",
+        "description": "ใช้งานค้นหาเกรดวัสดุด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "combobox"
+      ]
+    },
+    {
+      "id": "command-default",
+      "componentSlug": "command",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Workshop command palette",
+        "description": "Complete workshop command palette with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เมนูคำสั่งโรงงาน",
+        "description": "ใช้งานเมนูคำสั่งโรงงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "command"
+      ]
+    },
+    {
+      "id": "command-stress",
+      "componentSlug": "command",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Workshop command palette with edge cases",
+        "description": "Keep the workshop command palette usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เมนูคำสั่งโรงงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบเมนูคำสั่งโรงงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "command"
+      ]
+    },
+    {
+      "id": "command-accessible",
+      "componentSlug": "command",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Workshop command palette by keyboard",
+        "description": "Operate the workshop command palette with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เมนูคำสั่งโรงงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานเมนูคำสั่งโรงงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "command"
+      ]
+    },
+    {
+      "id": "context-menu-default",
+      "componentSlug": "context-menu",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing context actions",
+        "description": "Complete drawing context actions with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คำสั่งคลิกขวาบนแบบงาน",
+        "description": "ใช้งานคำสั่งคลิกขวาบนแบบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "context-menu"
+      ]
+    },
+    {
+      "id": "context-menu-stress",
+      "componentSlug": "context-menu",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing context actions with edge cases",
+        "description": "Keep the drawing context actions usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คำสั่งคลิกขวาบนแบบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบคำสั่งคลิกขวาบนแบบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "context-menu"
+      ]
+    },
+    {
+      "id": "context-menu-accessible",
+      "componentSlug": "context-menu",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing context actions by keyboard",
+        "description": "Operate the drawing context actions with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คำสั่งคลิกขวาบนแบบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานคำสั่งคลิกขวาบนแบบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "context-menu"
+      ]
+    },
+    {
+      "id": "data-table-default",
+      "componentSlug": "data-table",
+      "family": "DataDisplay",
+      "kind": "Default",
+      "english": {
+        "title": "Supplier payment register",
+        "description": "Complete supplier payment register with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ทะเบียนชำระเงินผู้ขาย",
+        "description": "ใช้งานทะเบียนชำระเงินผู้ขายด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "data-table"
+      ]
+    },
+    {
+      "id": "data-table-stress",
+      "componentSlug": "data-table",
+      "family": "DataDisplay",
+      "kind": "Stress",
+      "english": {
+        "title": "Supplier payment register with edge cases",
+        "description": "Keep the supplier payment register usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ทะเบียนชำระเงินผู้ขายในกรณีซับซ้อน",
+        "description": "ตรวจสอบทะเบียนชำระเงินผู้ขายเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "data-table"
+      ]
+    },
+    {
+      "id": "data-table-accessible",
+      "componentSlug": "data-table",
+      "family": "DataDisplay",
+      "kind": "Accessible",
+      "english": {
+        "title": "Supplier payment register by keyboard",
+        "description": "Operate the supplier payment register with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ทะเบียนชำระเงินผู้ขายด้วยแป้นพิมพ์",
+        "description": "ใช้งานทะเบียนชำระเงินผู้ขายด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "data-table"
+      ]
+    },
+    {
+      "id": "date-picker-default",
+      "componentSlug": "date-picker",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Required delivery date",
+        "description": "Complete required delivery date with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "วันที่ต้องการส่งมอบ",
+        "description": "ใช้งานวันที่ต้องการส่งมอบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "date-picker"
+      ]
+    },
+    {
+      "id": "date-picker-stress",
+      "componentSlug": "date-picker",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Required delivery date with edge cases",
+        "description": "Keep the required delivery date usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "วันที่ต้องการส่งมอบในกรณีซับซ้อน",
+        "description": "ตรวจสอบวันที่ต้องการส่งมอบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "date-picker"
+      ]
+    },
+    {
+      "id": "date-picker-accessible",
+      "componentSlug": "date-picker",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Required delivery date by keyboard",
+        "description": "Operate the required delivery date with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "วันที่ต้องการส่งมอบด้วยแป้นพิมพ์",
+        "description": "ใช้งานวันที่ต้องการส่งมอบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "date-picker"
+      ]
+    },
+    {
+      "id": "dialog-default",
+      "componentSlug": "dialog",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Work order editor",
+        "description": "Complete work order editor with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "หน้าต่างแก้ไขใบงาน",
+        "description": "ใช้งานหน้าต่างแก้ไขใบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "dialog"
+      ]
+    },
+    {
+      "id": "dialog-stress",
+      "componentSlug": "dialog",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Work order editor with edge cases",
+        "description": "Keep the work order editor usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "หน้าต่างแก้ไขใบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบหน้าต่างแก้ไขใบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "dialog"
+      ]
+    },
+    {
+      "id": "dialog-accessible",
+      "componentSlug": "dialog",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Work order editor by keyboard",
+        "description": "Operate the work order editor with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "หน้าต่างแก้ไขใบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานหน้าต่างแก้ไขใบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "dialog"
+      ]
+    },
+    {
+      "id": "direction-default",
+      "componentSlug": "direction",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Bilingual work instruction",
+        "description": "Complete bilingual work instruction with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คำสั่งงานสองภาษา",
+        "description": "ใช้งานคำสั่งงานสองภาษาด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "direction"
+      ]
+    },
+    {
+      "id": "direction-stress",
+      "componentSlug": "direction",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Bilingual work instruction with edge cases",
+        "description": "Keep the bilingual work instruction usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คำสั่งงานสองภาษาในกรณีซับซ้อน",
+        "description": "ตรวจสอบคำสั่งงานสองภาษาเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "direction"
+      ]
+    },
+    {
+      "id": "direction-accessible",
+      "componentSlug": "direction",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Bilingual work instruction by keyboard",
+        "description": "Operate the bilingual work instruction with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คำสั่งงานสองภาษาด้วยแป้นพิมพ์",
+        "description": "ใช้งานคำสั่งงานสองภาษาด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "direction"
+      ]
+    },
+    {
+      "id": "drawer-default",
+      "componentSlug": "drawer",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Mobile inspection panel",
+        "description": "Complete mobile inspection panel with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แผงตรวจสอบบนมือถือ",
+        "description": "ใช้งานแผงตรวจสอบบนมือถือด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "drawer"
+      ]
+    },
+    {
+      "id": "drawer-stress",
+      "componentSlug": "drawer",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Mobile inspection panel with edge cases",
+        "description": "Keep the mobile inspection panel usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แผงตรวจสอบบนมือถือในกรณีซับซ้อน",
+        "description": "ตรวจสอบแผงตรวจสอบบนมือถือเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "drawer"
+      ]
+    },
+    {
+      "id": "drawer-accessible",
+      "componentSlug": "drawer",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Mobile inspection panel by keyboard",
+        "description": "Operate the mobile inspection panel with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แผงตรวจสอบบนมือถือด้วยแป้นพิมพ์",
+        "description": "ใช้งานแผงตรวจสอบบนมือถือด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "drawer"
+      ]
+    },
+    {
+      "id": "dropdown-menu-default",
+      "componentSlug": "dropdown-menu",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Export format menu",
+        "description": "Complete export format menu with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เมนูรูปแบบส่งออก",
+        "description": "ใช้งานเมนูรูปแบบส่งออกด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "dropdown-menu"
+      ]
+    },
+    {
+      "id": "dropdown-menu-stress",
+      "componentSlug": "dropdown-menu",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Export format menu with edge cases",
+        "description": "Keep the export format menu usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เมนูรูปแบบส่งออกในกรณีซับซ้อน",
+        "description": "ตรวจสอบเมนูรูปแบบส่งออกเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "dropdown-menu"
+      ]
+    },
+    {
+      "id": "dropdown-menu-accessible",
+      "componentSlug": "dropdown-menu",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Export format menu by keyboard",
+        "description": "Operate the export format menu with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เมนูรูปแบบส่งออกด้วยแป้นพิมพ์",
+        "description": "ใช้งานเมนูรูปแบบส่งออกด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "dropdown-menu"
+      ]
+    },
+    {
+      "id": "empty-default",
+      "componentSlug": "empty",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Empty project queue",
+        "description": "Complete empty project queue with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คิวโครงการว่าง",
+        "description": "ใช้งานคิวโครงการว่างด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "empty"
+      ]
+    },
+    {
+      "id": "empty-stress",
+      "componentSlug": "empty",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Empty project queue with edge cases",
+        "description": "Keep the empty project queue usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คิวโครงการว่างในกรณีซับซ้อน",
+        "description": "ตรวจสอบคิวโครงการว่างเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "empty"
+      ]
+    },
+    {
+      "id": "empty-accessible",
+      "componentSlug": "empty",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Empty project queue by keyboard",
+        "description": "Operate the empty project queue with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คิวโครงการว่างด้วยแป้นพิมพ์",
+        "description": "ใช้งานคิวโครงการว่างด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "empty"
+      ]
+    },
+    {
+      "id": "field-default",
+      "componentSlug": "field",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing reference field",
+        "description": "Complete drawing reference field with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ช่องอ้างอิงแบบงาน",
+        "description": "ใช้งานช่องอ้างอิงแบบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "field"
+      ]
+    },
+    {
+      "id": "field-stress",
+      "componentSlug": "field",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing reference field with edge cases",
+        "description": "Keep the drawing reference field usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ช่องอ้างอิงแบบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบช่องอ้างอิงแบบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "field"
+      ]
+    },
+    {
+      "id": "field-accessible",
+      "componentSlug": "field",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing reference field by keyboard",
+        "description": "Operate the drawing reference field with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ช่องอ้างอิงแบบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานช่องอ้างอิงแบบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "field"
+      ]
+    },
+    {
+      "id": "hover-card-default",
+      "componentSlug": "hover-card",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Technician profile summary",
+        "description": "Complete technician profile summary with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "สรุปข้อมูลช่างเทคนิค",
+        "description": "ใช้งานสรุปข้อมูลช่างเทคนิคด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "hover-card"
+      ]
+    },
+    {
+      "id": "hover-card-stress",
+      "componentSlug": "hover-card",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Technician profile summary with edge cases",
+        "description": "Keep the technician profile summary usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "สรุปข้อมูลช่างเทคนิคในกรณีซับซ้อน",
+        "description": "ตรวจสอบสรุปข้อมูลช่างเทคนิคเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "hover-card"
+      ]
+    },
+    {
+      "id": "hover-card-accessible",
+      "componentSlug": "hover-card",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Technician profile summary by keyboard",
+        "description": "Operate the technician profile summary with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "สรุปข้อมูลช่างเทคนิคด้วยแป้นพิมพ์",
+        "description": "ใช้งานสรุปข้อมูลช่างเทคนิคด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "hover-card"
+      ]
+    },
+    {
+      "id": "input-default",
+      "componentSlug": "input",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Purchase order reference",
+        "description": "Complete purchase order reference with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เลขอ้างอิงใบสั่งซื้อ",
+        "description": "ใช้งานเลขอ้างอิงใบสั่งซื้อด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "input"
+      ]
+    },
+    {
+      "id": "input-stress",
+      "componentSlug": "input",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Purchase order reference with edge cases",
+        "description": "Keep the purchase order reference usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เลขอ้างอิงใบสั่งซื้อในกรณีซับซ้อน",
+        "description": "ตรวจสอบเลขอ้างอิงใบสั่งซื้อเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "input"
+      ]
+    },
+    {
+      "id": "input-accessible",
+      "componentSlug": "input",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Purchase order reference by keyboard",
+        "description": "Operate the purchase order reference with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เลขอ้างอิงใบสั่งซื้อด้วยแป้นพิมพ์",
+        "description": "ใช้งานเลขอ้างอิงใบสั่งซื้อด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "input"
+      ]
+    },
+    {
+      "id": "input-group-default",
+      "componentSlug": "input-group",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Quoted amount entry",
+        "description": "Complete quoted amount entry with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ช่องกรอกยอดเสนอราคา",
+        "description": "ใช้งานช่องกรอกยอดเสนอราคาด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "input-group"
+      ]
+    },
+    {
+      "id": "input-group-stress",
+      "componentSlug": "input-group",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Quoted amount entry with edge cases",
+        "description": "Keep the quoted amount entry usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ช่องกรอกยอดเสนอราคาในกรณีซับซ้อน",
+        "description": "ตรวจสอบช่องกรอกยอดเสนอราคาเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "input-group"
+      ]
+    },
+    {
+      "id": "input-group-accessible",
+      "componentSlug": "input-group",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Quoted amount entry by keyboard",
+        "description": "Operate the quoted amount entry with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ช่องกรอกยอดเสนอราคาด้วยแป้นพิมพ์",
+        "description": "ใช้งานช่องกรอกยอดเสนอราคาด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "input-group"
+      ]
+    },
+    {
+      "id": "input-otp-default",
+      "componentSlug": "input-otp",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Secure approval code",
+        "description": "Complete secure approval code with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "รหัสอนุมัติที่ปลอดภัย",
+        "description": "ใช้งานรหัสอนุมัติที่ปลอดภัยด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "input-otp"
+      ]
+    },
+    {
+      "id": "input-otp-stress",
+      "componentSlug": "input-otp",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Secure approval code with edge cases",
+        "description": "Keep the secure approval code usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "รหัสอนุมัติที่ปลอดภัยในกรณีซับซ้อน",
+        "description": "ตรวจสอบรหัสอนุมัติที่ปลอดภัยเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "input-otp"
+      ]
+    },
+    {
+      "id": "input-otp-accessible",
+      "componentSlug": "input-otp",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Secure approval code by keyboard",
+        "description": "Operate the secure approval code with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "รหัสอนุมัติที่ปลอดภัยด้วยแป้นพิมพ์",
+        "description": "ใช้งานรหัสอนุมัติที่ปลอดภัยด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "input-otp"
+      ]
+    },
+    {
+      "id": "item-default",
+      "componentSlug": "item",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Manufacturing workspace item",
+        "description": "Complete manufacturing workspace item with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "รายการพื้นที่งานผลิต",
+        "description": "ใช้งานรายการพื้นที่งานผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "item"
+      ]
+    },
+    {
+      "id": "item-stress",
+      "componentSlug": "item",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Manufacturing workspace item with edge cases",
+        "description": "Keep the manufacturing workspace item usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "รายการพื้นที่งานผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบรายการพื้นที่งานผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "item"
+      ]
+    },
+    {
+      "id": "item-accessible",
+      "componentSlug": "item",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Manufacturing workspace item by keyboard",
+        "description": "Operate the manufacturing workspace item with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "รายการพื้นที่งานผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานรายการพื้นที่งานผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "item"
+      ]
+    },
+    {
+      "id": "kbd-default",
+      "componentSlug": "kbd",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Keyboard shortcut guide",
+        "description": "Complete keyboard shortcut guide with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คู่มือปุ่มลัด",
+        "description": "ใช้งานคู่มือปุ่มลัดด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "kbd"
+      ]
+    },
+    {
+      "id": "kbd-stress",
+      "componentSlug": "kbd",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Keyboard shortcut guide with edge cases",
+        "description": "Keep the keyboard shortcut guide usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คู่มือปุ่มลัดในกรณีซับซ้อน",
+        "description": "ตรวจสอบคู่มือปุ่มลัดเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "kbd"
+      ]
+    },
+    {
+      "id": "kbd-accessible",
+      "componentSlug": "kbd",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Keyboard shortcut guide by keyboard",
+        "description": "Operate the keyboard shortcut guide with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คู่มือปุ่มลัดด้วยแป้นพิมพ์",
+        "description": "ใช้งานคู่มือปุ่มลัดด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "kbd"
+      ]
+    },
+    {
+      "id": "label-default",
+      "componentSlug": "label",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Machine identifier label",
+        "description": "Complete machine identifier label with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ป้ายรหัสเครื่องจักร",
+        "description": "ใช้งานป้ายรหัสเครื่องจักรด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "label"
+      ]
+    },
+    {
+      "id": "label-stress",
+      "componentSlug": "label",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Machine identifier label with edge cases",
+        "description": "Keep the machine identifier label usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ป้ายรหัสเครื่องจักรในกรณีซับซ้อน",
+        "description": "ตรวจสอบป้ายรหัสเครื่องจักรเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "label"
+      ]
+    },
+    {
+      "id": "label-accessible",
+      "componentSlug": "label",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Machine identifier label by keyboard",
+        "description": "Operate the machine identifier label with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ป้ายรหัสเครื่องจักรด้วยแป้นพิมพ์",
+        "description": "ใช้งานป้ายรหัสเครื่องจักรด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "label"
+      ]
+    },
+    {
+      "id": "marker-default",
+      "componentSlug": "marker",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Streaming review status",
+        "description": "Complete streaming review status with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "สถานะตรวจสอบแบบสตรีม",
+        "description": "ใช้งานสถานะตรวจสอบแบบสตรีมด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "marker"
+      ]
+    },
+    {
+      "id": "marker-stress",
+      "componentSlug": "marker",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Streaming review status with edge cases",
+        "description": "Keep the streaming review status usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "สถานะตรวจสอบแบบสตรีมในกรณีซับซ้อน",
+        "description": "ตรวจสอบสถานะตรวจสอบแบบสตรีมเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "marker"
+      ]
+    },
+    {
+      "id": "marker-accessible",
+      "componentSlug": "marker",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Streaming review status by keyboard",
+        "description": "Operate the streaming review status with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "สถานะตรวจสอบแบบสตรีมด้วยแป้นพิมพ์",
+        "description": "ใช้งานสถานะตรวจสอบแบบสตรีมด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "marker"
+      ]
+    },
+    {
+      "id": "menubar-default",
+      "componentSlug": "menubar",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Engineering application menu",
+        "description": "Complete engineering application menu with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เมนูแอปวิศวกรรม",
+        "description": "ใช้งานเมนูแอปวิศวกรรมด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "menubar"
+      ]
+    },
+    {
+      "id": "menubar-stress",
+      "componentSlug": "menubar",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Engineering application menu with edge cases",
+        "description": "Keep the engineering application menu usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เมนูแอปวิศวกรรมในกรณีซับซ้อน",
+        "description": "ตรวจสอบเมนูแอปวิศวกรรมเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "menubar"
+      ]
+    },
+    {
+      "id": "menubar-accessible",
+      "componentSlug": "menubar",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Engineering application menu by keyboard",
+        "description": "Operate the engineering application menu with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เมนูแอปวิศวกรรมด้วยแป้นพิมพ์",
+        "description": "ใช้งานเมนูแอปวิศวกรรมด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "menubar"
+      ]
+    },
+    {
+      "id": "message-default",
+      "componentSlug": "message",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Project update message",
+        "description": "Complete project update message with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ข้อความอัปเดตโครงการ",
+        "description": "ใช้งานข้อความอัปเดตโครงการด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "message"
+      ]
+    },
+    {
+      "id": "message-stress",
+      "componentSlug": "message",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Project update message with edge cases",
+        "description": "Keep the project update message usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ข้อความอัปเดตโครงการในกรณีซับซ้อน",
+        "description": "ตรวจสอบข้อความอัปเดตโครงการเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "message"
+      ]
+    },
+    {
+      "id": "message-accessible",
+      "componentSlug": "message",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Project update message by keyboard",
+        "description": "Operate the project update message with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ข้อความอัปเดตโครงการด้วยแป้นพิมพ์",
+        "description": "ใช้งานข้อความอัปเดตโครงการด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "message"
+      ]
+    },
+    {
+      "id": "message-scroller-default",
+      "componentSlug": "message-scroller",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Live support transcript",
+        "description": "Complete live support transcript with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "บทสนทนาสนับสนุนสด",
+        "description": "ใช้งานบทสนทนาสนับสนุนสดด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "message-scroller"
+      ]
+    },
+    {
+      "id": "message-scroller-stress",
+      "componentSlug": "message-scroller",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Live support transcript with edge cases",
+        "description": "Keep the live support transcript usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "บทสนทนาสนับสนุนสดในกรณีซับซ้อน",
+        "description": "ตรวจสอบบทสนทนาสนับสนุนสดเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "message-scroller"
+      ]
+    },
+    {
+      "id": "message-scroller-accessible",
+      "componentSlug": "message-scroller",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Live support transcript by keyboard",
+        "description": "Operate the live support transcript with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "บทสนทนาสนับสนุนสดด้วยแป้นพิมพ์",
+        "description": "ใช้งานบทสนทนาสนับสนุนสดด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "message-scroller"
+      ]
+    },
+    {
+      "id": "native-select-default",
+      "componentSlug": "native-select",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Shipping method selector",
+        "description": "Complete shipping method selector with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตัวเลือกวิธีขนส่ง",
+        "description": "ใช้งานตัวเลือกวิธีขนส่งด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "native-select"
+      ]
+    },
+    {
+      "id": "native-select-stress",
+      "componentSlug": "native-select",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Shipping method selector with edge cases",
+        "description": "Keep the shipping method selector usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตัวเลือกวิธีขนส่งในกรณีซับซ้อน",
+        "description": "ตรวจสอบตัวเลือกวิธีขนส่งเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "native-select"
+      ]
+    },
+    {
+      "id": "native-select-accessible",
+      "componentSlug": "native-select",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Shipping method selector by keyboard",
+        "description": "Operate the shipping method selector with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตัวเลือกวิธีขนส่งด้วยแป้นพิมพ์",
+        "description": "ใช้งานตัวเลือกวิธีขนส่งด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "native-select"
+      ]
+    },
+    {
+      "id": "navigation-menu-default",
+      "componentSlug": "navigation-menu",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Operations navigation",
+        "description": "Complete operations navigation with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เมนูงานปฏิบัติการ",
+        "description": "ใช้งานเมนูงานปฏิบัติการด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "navigation-menu"
+      ]
+    },
+    {
+      "id": "navigation-menu-stress",
+      "componentSlug": "navigation-menu",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Operations navigation with edge cases",
+        "description": "Keep the operations navigation usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เมนูงานปฏิบัติการในกรณีซับซ้อน",
+        "description": "ตรวจสอบเมนูงานปฏิบัติการเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "navigation-menu"
+      ]
+    },
+    {
+      "id": "navigation-menu-accessible",
+      "componentSlug": "navigation-menu",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Operations navigation by keyboard",
+        "description": "Operate the operations navigation with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เมนูงานปฏิบัติการด้วยแป้นพิมพ์",
+        "description": "ใช้งานเมนูงานปฏิบัติการด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "navigation-menu"
+      ]
+    },
+    {
+      "id": "pagination-default",
+      "componentSlug": "pagination",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Inspection result pages",
+        "description": "Complete inspection result pages with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "หน้าผลการตรวจสอบ",
+        "description": "ใช้งานหน้าผลการตรวจสอบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "pagination"
+      ]
+    },
+    {
+      "id": "pagination-stress",
+      "componentSlug": "pagination",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Inspection result pages with edge cases",
+        "description": "Keep the inspection result pages usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "หน้าผลการตรวจสอบในกรณีซับซ้อน",
+        "description": "ตรวจสอบหน้าผลการตรวจสอบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "pagination"
+      ]
+    },
+    {
+      "id": "pagination-accessible",
+      "componentSlug": "pagination",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Inspection result pages by keyboard",
+        "description": "Operate the inspection result pages with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "หน้าผลการตรวจสอบด้วยแป้นพิมพ์",
+        "description": "ใช้งานหน้าผลการตรวจสอบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "pagination"
+      ]
+    },
+    {
+      "id": "popover-default",
+      "componentSlug": "popover",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Tolerance note editor",
+        "description": "Complete tolerance note editor with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตัวแก้ไขหมายเหตุพิกัดเผื่อ",
+        "description": "ใช้งานตัวแก้ไขหมายเหตุพิกัดเผื่อด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "popover"
+      ]
+    },
+    {
+      "id": "popover-stress",
+      "componentSlug": "popover",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Tolerance note editor with edge cases",
+        "description": "Keep the tolerance note editor usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตัวแก้ไขหมายเหตุพิกัดเผื่อในกรณีซับซ้อน",
+        "description": "ตรวจสอบตัวแก้ไขหมายเหตุพิกัดเผื่อเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "popover"
+      ]
+    },
+    {
+      "id": "popover-accessible",
+      "componentSlug": "popover",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Tolerance note editor by keyboard",
+        "description": "Operate the tolerance note editor with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตัวแก้ไขหมายเหตุพิกัดเผื่อด้วยแป้นพิมพ์",
+        "description": "ใช้งานตัวแก้ไขหมายเหตุพิกัดเผื่อด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "popover"
+      ]
+    },
+    {
+      "id": "progress-default",
+      "componentSlug": "progress",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing upload progress",
+        "description": "Complete drawing upload progress with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ความคืบหน้าอัปโหลดแบบ",
+        "description": "ใช้งานความคืบหน้าอัปโหลดแบบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "progress"
+      ]
+    },
+    {
+      "id": "progress-stress",
+      "componentSlug": "progress",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing upload progress with edge cases",
+        "description": "Keep the drawing upload progress usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ความคืบหน้าอัปโหลดแบบในกรณีซับซ้อน",
+        "description": "ตรวจสอบความคืบหน้าอัปโหลดแบบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "progress"
+      ]
+    },
+    {
+      "id": "progress-accessible",
+      "componentSlug": "progress",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing upload progress by keyboard",
+        "description": "Operate the drawing upload progress with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ความคืบหน้าอัปโหลดแบบด้วยแป้นพิมพ์",
+        "description": "ใช้งานความคืบหน้าอัปโหลดแบบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "progress"
+      ]
+    },
+    {
+      "id": "questionnaire-default",
+      "componentSlug": "questionnaire",
+      "family": "ConversationWorkflow",
+      "kind": "Default",
+      "english": {
+        "title": "Manufacturing intake form",
+        "description": "Complete manufacturing intake form with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แบบสอบถามรับงานผลิต",
+        "description": "ใช้งานแบบสอบถามรับงานผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "questionnaire"
+      ]
+    },
+    {
+      "id": "questionnaire-stress",
+      "componentSlug": "questionnaire",
+      "family": "ConversationWorkflow",
+      "kind": "Stress",
+      "english": {
+        "title": "Manufacturing intake form with edge cases",
+        "description": "Keep the manufacturing intake form usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แบบสอบถามรับงานผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบแบบสอบถามรับงานผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "questionnaire"
+      ]
+    },
+    {
+      "id": "questionnaire-accessible",
+      "componentSlug": "questionnaire",
+      "family": "ConversationWorkflow",
+      "kind": "Accessible",
+      "english": {
+        "title": "Manufacturing intake form by keyboard",
+        "description": "Operate the manufacturing intake form with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แบบสอบถามรับงานผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานแบบสอบถามรับงานผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "questionnaire"
+      ]
+    },
+    {
+      "id": "radio-group-default",
+      "componentSlug": "radio-group",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Production density choice",
+        "description": "Complete production density choice with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตัวเลือกความหนาแน่นหน้าผลิต",
+        "description": "ใช้งานตัวเลือกความหนาแน่นหน้าผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "radio-group"
+      ]
+    },
+    {
+      "id": "radio-group-stress",
+      "componentSlug": "radio-group",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Production density choice with edge cases",
+        "description": "Keep the production density choice usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตัวเลือกความหนาแน่นหน้าผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบตัวเลือกความหนาแน่นหน้าผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "radio-group"
+      ]
+    },
+    {
+      "id": "radio-group-accessible",
+      "componentSlug": "radio-group",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Production density choice by keyboard",
+        "description": "Operate the production density choice with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตัวเลือกความหนาแน่นหน้าผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานตัวเลือกความหนาแน่นหน้าผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "radio-group"
+      ]
+    },
+    {
+      "id": "resizable-default",
+      "componentSlug": "resizable",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing comparison workspace",
+        "description": "Complete drawing comparison workspace with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "พื้นที่เปรียบเทียบแบบ",
+        "description": "ใช้งานพื้นที่เปรียบเทียบแบบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "resizable"
+      ]
+    },
+    {
+      "id": "resizable-stress",
+      "componentSlug": "resizable",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing comparison workspace with edge cases",
+        "description": "Keep the drawing comparison workspace usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "พื้นที่เปรียบเทียบแบบในกรณีซับซ้อน",
+        "description": "ตรวจสอบพื้นที่เปรียบเทียบแบบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "resizable"
+      ]
+    },
+    {
+      "id": "resizable-accessible",
+      "componentSlug": "resizable",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing comparison workspace by keyboard",
+        "description": "Operate the drawing comparison workspace with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "พื้นที่เปรียบเทียบแบบด้วยแป้นพิมพ์",
+        "description": "ใช้งานพื้นที่เปรียบเทียบแบบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "resizable"
+      ]
+    },
+    {
+      "id": "scroll-area-default",
+      "componentSlug": "scroll-area",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Long activity ledger",
+        "description": "Complete long activity ledger with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "บันทึกกิจกรรมแบบยาว",
+        "description": "ใช้งานบันทึกกิจกรรมแบบยาวด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "scroll-area"
+      ]
+    },
+    {
+      "id": "scroll-area-stress",
+      "componentSlug": "scroll-area",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Long activity ledger with edge cases",
+        "description": "Keep the long activity ledger usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "บันทึกกิจกรรมแบบยาวในกรณีซับซ้อน",
+        "description": "ตรวจสอบบันทึกกิจกรรมแบบยาวเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "scroll-area"
+      ]
+    },
+    {
+      "id": "scroll-area-accessible",
+      "componentSlug": "scroll-area",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Long activity ledger by keyboard",
+        "description": "Operate the long activity ledger with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "บันทึกกิจกรรมแบบยาวด้วยแป้นพิมพ์",
+        "description": "ใช้งานบันทึกกิจกรรมแบบยาวด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "scroll-area"
+      ]
+    },
+    {
+      "id": "select-default",
+      "componentSlug": "select",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Machining process selector",
+        "description": "Complete machining process selector with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตัวเลือกกระบวนการตัดเฉือน",
+        "description": "ใช้งานตัวเลือกกระบวนการตัดเฉือนด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "select"
+      ]
+    },
+    {
+      "id": "select-stress",
+      "componentSlug": "select",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Machining process selector with edge cases",
+        "description": "Keep the machining process selector usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตัวเลือกกระบวนการตัดเฉือนในกรณีซับซ้อน",
+        "description": "ตรวจสอบตัวเลือกกระบวนการตัดเฉือนเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "select"
+      ]
+    },
+    {
+      "id": "select-accessible",
+      "componentSlug": "select",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Machining process selector by keyboard",
+        "description": "Operate the machining process selector with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตัวเลือกกระบวนการตัดเฉือนด้วยแป้นพิมพ์",
+        "description": "ใช้งานตัวเลือกกระบวนการตัดเฉือนด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "select"
+      ]
+    },
+    {
+      "id": "separator-default",
+      "componentSlug": "separator",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Work order section divider",
+        "description": "Complete work order section divider with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "เส้นคั่นส่วนใบงาน",
+        "description": "ใช้งานเส้นคั่นส่วนใบงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "separator"
+      ]
+    },
+    {
+      "id": "separator-stress",
+      "componentSlug": "separator",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Work order section divider with edge cases",
+        "description": "Keep the work order section divider usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "เส้นคั่นส่วนใบงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบเส้นคั่นส่วนใบงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "separator"
+      ]
+    },
+    {
+      "id": "separator-accessible",
+      "componentSlug": "separator",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Work order section divider by keyboard",
+        "description": "Operate the work order section divider with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "เส้นคั่นส่วนใบงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานเส้นคั่นส่วนใบงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "separator"
+      ]
+    },
+    {
+      "id": "sheet-default",
+      "componentSlug": "sheet",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Part filter panel",
+        "description": "Complete part filter panel with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แผงกรองชิ้นส่วน",
+        "description": "ใช้งานแผงกรองชิ้นส่วนด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "sheet"
+      ]
+    },
+    {
+      "id": "sheet-stress",
+      "componentSlug": "sheet",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Part filter panel with edge cases",
+        "description": "Keep the part filter panel usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แผงกรองชิ้นส่วนในกรณีซับซ้อน",
+        "description": "ตรวจสอบแผงกรองชิ้นส่วนเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "sheet"
+      ]
+    },
+    {
+      "id": "sheet-accessible",
+      "componentSlug": "sheet",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Part filter panel by keyboard",
+        "description": "Operate the part filter panel with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แผงกรองชิ้นส่วนด้วยแป้นพิมพ์",
+        "description": "ใช้งานแผงกรองชิ้นส่วนด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "sheet"
+      ]
+    },
+    {
+      "id": "sidebar-default",
+      "componentSlug": "sidebar",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Documentation component catalog",
+        "description": "Complete documentation component catalog with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แค็ตตาล็อกคอมโพเนนต์",
+        "description": "ใช้งานแค็ตตาล็อกคอมโพเนนต์ด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "sidebar"
+      ]
+    },
+    {
+      "id": "sidebar-stress",
+      "componentSlug": "sidebar",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Documentation component catalog with edge cases",
+        "description": "Keep the documentation component catalog usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แค็ตตาล็อกคอมโพเนนต์ในกรณีซับซ้อน",
+        "description": "ตรวจสอบแค็ตตาล็อกคอมโพเนนต์เมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "sidebar"
+      ]
+    },
+    {
+      "id": "sidebar-accessible",
+      "componentSlug": "sidebar",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Documentation component catalog by keyboard",
+        "description": "Operate the documentation component catalog with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แค็ตตาล็อกคอมโพเนนต์ด้วยแป้นพิมพ์",
+        "description": "ใช้งานแค็ตตาล็อกคอมโพเนนต์ด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "sidebar"
+      ]
+    },
+    {
+      "id": "skeleton-default",
+      "componentSlug": "skeleton",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Loading order summary",
+        "description": "Complete loading order summary with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "โครงร่างโหลดสรุปคำสั่งซื้อ",
+        "description": "ใช้งานโครงร่างโหลดสรุปคำสั่งซื้อด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "skeleton-stress",
+      "componentSlug": "skeleton",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Loading order summary with edge cases",
+        "description": "Keep the loading order summary usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "โครงร่างโหลดสรุปคำสั่งซื้อในกรณีซับซ้อน",
+        "description": "ตรวจสอบโครงร่างโหลดสรุปคำสั่งซื้อเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "skeleton-accessible",
+      "componentSlug": "skeleton",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Loading order summary by keyboard",
+        "description": "Operate the loading order summary with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "โครงร่างโหลดสรุปคำสั่งซื้อด้วยแป้นพิมพ์",
+        "description": "ใช้งานโครงร่างโหลดสรุปคำสั่งซื้อด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "slider-default",
+      "componentSlug": "slider",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Tolerance range control",
+        "description": "Complete tolerance range control with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตัวควบคุมช่วงพิกัดเผื่อ",
+        "description": "ใช้งานตัวควบคุมช่วงพิกัดเผื่อด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "slider"
+      ]
+    },
+    {
+      "id": "slider-stress",
+      "componentSlug": "slider",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Tolerance range control with edge cases",
+        "description": "Keep the tolerance range control usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตัวควบคุมช่วงพิกัดเผื่อในกรณีซับซ้อน",
+        "description": "ตรวจสอบตัวควบคุมช่วงพิกัดเผื่อเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "slider"
+      ]
+    },
+    {
+      "id": "slider-accessible",
+      "componentSlug": "slider",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Tolerance range control by keyboard",
+        "description": "Operate the tolerance range control with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตัวควบคุมช่วงพิกัดเผื่อด้วยแป้นพิมพ์",
+        "description": "ใช้งานตัวควบคุมช่วงพิกัดเผื่อด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "slider"
+      ]
+    },
+    {
+      "id": "spinner-default",
+      "componentSlug": "spinner",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Background export status",
+        "description": "Complete background export status with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "สถานะส่งออกเบื้องหลัง",
+        "description": "ใช้งานสถานะส่งออกเบื้องหลังด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "spinner"
+      ]
+    },
+    {
+      "id": "spinner-stress",
+      "componentSlug": "spinner",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Background export status with edge cases",
+        "description": "Keep the background export status usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "สถานะส่งออกเบื้องหลังในกรณีซับซ้อน",
+        "description": "ตรวจสอบสถานะส่งออกเบื้องหลังเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "spinner"
+      ]
+    },
+    {
+      "id": "spinner-accessible",
+      "componentSlug": "spinner",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Background export status by keyboard",
+        "description": "Operate the background export status with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "สถานะส่งออกเบื้องหลังด้วยแป้นพิมพ์",
+        "description": "ใช้งานสถานะส่งออกเบื้องหลังด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "spinner"
+      ]
+    },
+    {
+      "id": "switch-default",
+      "componentSlug": "switch",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Notification preference",
+        "description": "Complete notification preference with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "การตั้งค่าแจ้งเตือน",
+        "description": "ใช้งานการตั้งค่าแจ้งเตือนด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "switch"
+      ]
+    },
+    {
+      "id": "switch-stress",
+      "componentSlug": "switch",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Notification preference with edge cases",
+        "description": "Keep the notification preference usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "การตั้งค่าแจ้งเตือนในกรณีซับซ้อน",
+        "description": "ตรวจสอบการตั้งค่าแจ้งเตือนเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "switch"
+      ]
+    },
+    {
+      "id": "switch-accessible",
+      "componentSlug": "switch",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Notification preference by keyboard",
+        "description": "Operate the notification preference with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "การตั้งค่าแจ้งเตือนด้วยแป้นพิมพ์",
+        "description": "ใช้งานการตั้งค่าแจ้งเตือนด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "switch"
+      ]
+    },
+    {
+      "id": "table-default",
+      "componentSlug": "table",
+      "family": "DataDisplay",
+      "kind": "Default",
+      "english": {
+        "title": "Invoice reconciliation table",
+        "description": "Complete invoice reconciliation table with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ตารางกระทบยอดใบแจ้งหนี้",
+        "description": "ใช้งานตารางกระทบยอดใบแจ้งหนี้ด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "table"
+      ]
+    },
+    {
+      "id": "table-stress",
+      "componentSlug": "table",
+      "family": "DataDisplay",
+      "kind": "Stress",
+      "english": {
+        "title": "Invoice reconciliation table with edge cases",
+        "description": "Keep the invoice reconciliation table usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ตารางกระทบยอดใบแจ้งหนี้ในกรณีซับซ้อน",
+        "description": "ตรวจสอบตารางกระทบยอดใบแจ้งหนี้เมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "table"
+      ]
+    },
+    {
+      "id": "table-accessible",
+      "componentSlug": "table",
+      "family": "DataDisplay",
+      "kind": "Accessible",
+      "english": {
+        "title": "Invoice reconciliation table by keyboard",
+        "description": "Operate the invoice reconciliation table with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ตารางกระทบยอดใบแจ้งหนี้ด้วยแป้นพิมพ์",
+        "description": "ใช้งานตารางกระทบยอดใบแจ้งหนี้ด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "table"
+      ]
+    },
+    {
+      "id": "tabs-default",
+      "componentSlug": "tabs",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Project workspace tabs",
+        "description": "Complete project workspace tabs with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แท็บพื้นที่งานโครงการ",
+        "description": "ใช้งานแท็บพื้นที่งานโครงการด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "tabs"
+      ]
+    },
+    {
+      "id": "tabs-stress",
+      "componentSlug": "tabs",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Project workspace tabs with edge cases",
+        "description": "Keep the project workspace tabs usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แท็บพื้นที่งานโครงการในกรณีซับซ้อน",
+        "description": "ตรวจสอบแท็บพื้นที่งานโครงการเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "tabs"
+      ]
+    },
+    {
+      "id": "tabs-accessible",
+      "componentSlug": "tabs",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Project workspace tabs by keyboard",
+        "description": "Operate the project workspace tabs with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แท็บพื้นที่งานโครงการด้วยแป้นพิมพ์",
+        "description": "ใช้งานแท็บพื้นที่งานโครงการด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "tabs"
+      ]
+    },
+    {
+      "id": "textarea-default",
+      "componentSlug": "textarea",
+      "family": "Forms",
+      "kind": "Default",
+      "english": {
+        "title": "Production requirement notes",
+        "description": "Complete production requirement notes with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "หมายเหตุข้อกำหนดการผลิต",
+        "description": "ใช้งานหมายเหตุข้อกำหนดการผลิตด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "textarea"
+      ]
+    },
+    {
+      "id": "textarea-stress",
+      "componentSlug": "textarea",
+      "family": "Forms",
+      "kind": "Stress",
+      "english": {
+        "title": "Production requirement notes with edge cases",
+        "description": "Keep the production requirement notes usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "หมายเหตุข้อกำหนดการผลิตในกรณีซับซ้อน",
+        "description": "ตรวจสอบหมายเหตุข้อกำหนดการผลิตเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "textarea"
+      ]
+    },
+    {
+      "id": "textarea-accessible",
+      "componentSlug": "textarea",
+      "family": "Forms",
+      "kind": "Accessible",
+      "english": {
+        "title": "Production requirement notes by keyboard",
+        "description": "Operate the production requirement notes with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "หมายเหตุข้อกำหนดการผลิตด้วยแป้นพิมพ์",
+        "description": "ใช้งานหมายเหตุข้อกำหนดการผลิตด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "textarea"
+      ]
+    },
+    {
+      "id": "toast-default",
+      "componentSlug": "toast",
+      "family": "FeedbackContent",
+      "kind": "Default",
+      "english": {
+        "title": "Saved revision notification",
+        "description": "Complete saved revision notification with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "แจ้งเตือนบันทึกรุ่นงาน",
+        "description": "ใช้งานแจ้งเตือนบันทึกรุ่นงานด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "toast"
+      ]
+    },
+    {
+      "id": "toast-stress",
+      "componentSlug": "toast",
+      "family": "FeedbackContent",
+      "kind": "Stress",
+      "english": {
+        "title": "Saved revision notification with edge cases",
+        "description": "Keep the saved revision notification usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "แจ้งเตือนบันทึกรุ่นงานในกรณีซับซ้อน",
+        "description": "ตรวจสอบแจ้งเตือนบันทึกรุ่นงานเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "toast"
+      ]
+    },
+    {
+      "id": "toast-accessible",
+      "componentSlug": "toast",
+      "family": "FeedbackContent",
+      "kind": "Accessible",
+      "english": {
+        "title": "Saved revision notification by keyboard",
+        "description": "Operate the saved revision notification with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "แจ้งเตือนบันทึกรุ่นงานด้วยแป้นพิมพ์",
+        "description": "ใช้งานแจ้งเตือนบันทึกรุ่นงานด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "toast"
+      ]
+    },
+    {
+      "id": "toggle-default",
+      "componentSlug": "toggle",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing annotation mode",
+        "description": "Complete drawing annotation mode with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "โหมดทำหมายเหตุบนแบบ",
+        "description": "ใช้งานโหมดทำหมายเหตุบนแบบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "toggle"
+      ]
+    },
+    {
+      "id": "toggle-stress",
+      "componentSlug": "toggle",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing annotation mode with edge cases",
+        "description": "Keep the drawing annotation mode usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "โหมดทำหมายเหตุบนแบบในกรณีซับซ้อน",
+        "description": "ตรวจสอบโหมดทำหมายเหตุบนแบบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "toggle"
+      ]
+    },
+    {
+      "id": "toggle-accessible",
+      "componentSlug": "toggle",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing annotation mode by keyboard",
+        "description": "Operate the drawing annotation mode with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "โหมดทำหมายเหตุบนแบบด้วยแป้นพิมพ์",
+        "description": "ใช้งานโหมดทำหมายเหตุบนแบบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "toggle"
+      ]
+    },
+    {
+      "id": "toggle-group-default",
+      "componentSlug": "toggle-group",
+      "family": "ActionsAndSelection",
+      "kind": "Default",
+      "english": {
+        "title": "View alignment controls",
+        "description": "Complete view alignment controls with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ชุดควบคุมการจัดมุมมอง",
+        "description": "ใช้งานชุดควบคุมการจัดมุมมองด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "toggle-group"
+      ]
+    },
+    {
+      "id": "toggle-group-stress",
+      "componentSlug": "toggle-group",
+      "family": "ActionsAndSelection",
+      "kind": "Stress",
+      "english": {
+        "title": "View alignment controls with edge cases",
+        "description": "Keep the view alignment controls usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ชุดควบคุมการจัดมุมมองในกรณีซับซ้อน",
+        "description": "ตรวจสอบชุดควบคุมการจัดมุมมองเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "toggle-group"
+      ]
+    },
+    {
+      "id": "toggle-group-accessible",
+      "componentSlug": "toggle-group",
+      "family": "ActionsAndSelection",
+      "kind": "Accessible",
+      "english": {
+        "title": "View alignment controls by keyboard",
+        "description": "Operate the view alignment controls with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ชุดควบคุมการจัดมุมมองด้วยแป้นพิมพ์",
+        "description": "ใช้งานชุดควบคุมการจัดมุมมองด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "toggle-group"
+      ]
+    },
+    {
+      "id": "tooltip-default",
+      "componentSlug": "tooltip",
+      "family": "OverlayMenu",
+      "kind": "Default",
+      "english": {
+        "title": "Drawing tool explanation",
+        "description": "Complete drawing tool explanation with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "คำอธิบายเครื่องมือเขียนแบบ",
+        "description": "ใช้งานคำอธิบายเครื่องมือเขียนแบบด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "tooltip"
+      ]
+    },
+    {
+      "id": "tooltip-stress",
+      "componentSlug": "tooltip",
+      "family": "OverlayMenu",
+      "kind": "Stress",
+      "english": {
+        "title": "Drawing tool explanation with edge cases",
+        "description": "Keep the drawing tool explanation usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "คำอธิบายเครื่องมือเขียนแบบในกรณีซับซ้อน",
+        "description": "ตรวจสอบคำอธิบายเครื่องมือเขียนแบบเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "tooltip"
+      ]
+    },
+    {
+      "id": "tooltip-accessible",
+      "componentSlug": "tooltip",
+      "family": "OverlayMenu",
+      "kind": "Accessible",
+      "english": {
+        "title": "Drawing tool explanation by keyboard",
+        "description": "Operate the drawing tool explanation with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "คำอธิบายเครื่องมือเขียนแบบด้วยแป้นพิมพ์",
+        "description": "ใช้งานคำอธิบายเครื่องมือเขียนแบบด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "tooltip"
+      ]
+    },
+    {
+      "id": "typography-default",
+      "componentSlug": "typography",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Bilingual specification copy",
+        "description": "Complete bilingual specification copy with representative production data and the component's normal workflow."
+      },
+      "thai": {
+        "title": "ข้อความข้อกำหนดสองภาษา",
+        "description": "ใช้งานข้อความข้อกำหนดสองภาษาด้วยข้อมูลการผลิตตัวอย่างและขั้นตอนปกติ"
+      },
+      "tags": [
+        "workflow",
+        "production",
+        "typography"
+      ]
+    },
+    {
+      "id": "typography-stress",
+      "componentSlug": "typography",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Bilingual specification copy with edge cases",
+        "description": "Keep the bilingual specification copy usable with dense content, long labels, loading, empty, or error states appropriate to the component."
+      },
+      "thai": {
+        "title": "ข้อความข้อกำหนดสองภาษาในกรณีซับซ้อน",
+        "description": "ตรวจสอบข้อความข้อกำหนดสองภาษาเมื่อมีข้อมูลหนาแน่น ข้อความยาว หรือสถานะโหลด ว่าง และผิดพลาดตามลักษณะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "edge-case",
+        "typography"
+      ]
+    },
+    {
+      "id": "typography-accessible",
+      "componentSlug": "typography",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Bilingual specification copy by keyboard",
+        "description": "Operate the bilingual specification copy with keyboard and assistive technology, including disabled, read-only, invalid, focus, or live-region behavior where relevant."
+      },
+      "thai": {
+        "title": "ข้อความข้อกำหนดสองภาษาด้วยแป้นพิมพ์",
+        "description": "ใช้งานข้อความข้อกำหนดสองภาษาด้วยแป้นพิมพ์และเทคโนโลยีช่วยเหลือ พร้อมสถานะปิดใช้งาน อ่านอย่างเดียว ไม่ถูกต้อง โฟกัส หรือประกาศสดตามความเหมาะสม"
+      },
+      "tags": [
+        "accessible",
+        "keyboard",
+        "assistive-technology",
+        "typography"
+      ]
+    }
+  ]
+}

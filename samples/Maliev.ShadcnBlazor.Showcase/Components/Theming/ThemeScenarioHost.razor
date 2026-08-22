@@ -1,0 +1,61 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Examples
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
+@inject IThemeScenarioRegistry Registry
+@inject IComponentExampleRegistry Examples
+
+<section @key="Scenario.Id"
+         @ref="Root"
+         class="theme-scenario-host"
+         data-theme-scenario-host="@Scenario.Id"
+         data-testid="theme-scenario-host"
+         tabindex="-1"
+         aria-labelledby="@TitleId">
+    <header class="theme-scenario-host__heading">
+        <div>
+            <h2 id="@TitleId">@Copy.Title</h2>
+            <p>@Copy.Description</p>
+        </div>
+        <span class="theme-scenario-host__kind">@KindLabel</span>
+    </header>
+    <div class="theme-scenario-host__surface">
+        @Preview
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeScenarioDefinition Scenario { get; set; } = null!;
+    [Parameter, EditorRequired] public CultureInfo Culture { get; set; } = CultureInfo.GetCultureInfo("en-US");
+
+    private RenderFragment Preview { get; set; } = _ => { };
+    private ElementReference Root;
+    private string? _focusedScenarioId;
+    private ThemeScenarioCopy Copy => Scenario.GetCopy(Culture);
+    private string TitleId => $"theme-scenario-{Scenario.Id}-title";
+    private string KindLabel => Scenario.Kind switch
+    {
+        ThemeScenarioKind.Default => Text("Default", "ปกติ"),
+        ThemeScenarioKind.Stress => Text("Stress", "กรณีซับซ้อน"),
+        ThemeScenarioKind.Accessible => Text("Accessible", "การเข้าถึง"),
+        _ => throw new ArgumentOutOfRangeException(nameof(Scenario.Kind))
+    };
+
+    protected override void OnParametersSet()
+    {
+        var descriptor = Registry.GetFactory(Scenario.Id);
+        var factory = (IThemeScenarioFactory)(Activator.CreateInstance(descriptor.FactoryType, descriptor.PackageComponentType)
+            ?? throw new InvalidOperationException($"Scenario factory '{descriptor.FactoryType}' could not be created."));
+        Preview = factory.Create(new(Scenario, Culture, ThemeScenarioPreviewFactory.Create(Examples, Scenario)));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (string.Equals(_focusedScenarioId, Scenario.Id, StringComparison.Ordinal)) return;
+        _focusedScenarioId = Scenario.Id;
+        await Root.FocusAsync(preventScroll: true);
+    }
+
+    private string Text(string english, string thai) =>
+        string.Equals(Culture.TwoLetterISOLanguageName, "th", StringComparison.OrdinalIgnoreCase) ? thai : english;
+}
