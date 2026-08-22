@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using Microsoft.AspNetCore.Components;
 
 namespace Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 
@@ -58,4 +59,6 @@ public sealed record ThemeScenarioDefinition
         string.Equals(culture.TwoLetterISOLanguageName, "th", StringComparison.OrdinalIgnoreCase) ? Thai : English;
 }
 
-public sealed record ThemeScenarioRenderContext(ThemeScenarioDefinition Scenario, CultureInfo Culture);
+public sealed record ThemeScenarioRenderContext(ThemeScenarioDefinition Scenario, CultureInfo Culture, RenderFragment Preview);
+
+public sealed record ThemeScenarioSelection(string ComponentSlug, string ScenarioId);

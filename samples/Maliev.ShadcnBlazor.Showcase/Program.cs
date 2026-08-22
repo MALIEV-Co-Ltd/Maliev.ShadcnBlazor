@@ -6,6 +6,7 @@ using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 using Maliev.ShadcnBlazor.Showcase.MockSites;
 using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
+using Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -17,6 +18,12 @@ builder.Services.AddMalievShadcn();
 builder.Services.AddScoped<ShowcaseState>();
 builder.Services.AddScoped<DocumentationPageState>();
 builder.Services.AddSingleton<IComponentDocumentationCatalog, ComponentDocumentationCatalog>();
+builder.Services.AddSingleton<IThemeScenarioRegistry>(services =>
+{
+    var catalog = services.GetRequiredService<IComponentDocumentationCatalog>();
+    var scenarios = ThemeScenarioCatalog.Load(catalog);
+    return ThemeScenarioRegistry.Create(scenarios, ThemeScenarioFactoryCatalog.Create(catalog, scenarios));
+});
 builder.Services.AddSingleton<ComponentApiCatalog>();
 builder.Services.AddTransient<IComponentExampleRegistry, ComponentExampleRegistry>();
 builder.Services.AddScoped<ThemeStudioStorage>();

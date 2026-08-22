@@ -1,6 +1,8 @@
 using System.Globalization;
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming.Scenarios;
+using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 using Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +11,7 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 public sealed class ThemeScenarioRenderTests : BunitContext
 {
     private static readonly ThemeScenarioRegistry Registry = ThemeScenarioCatalogTests.CreateRegistry();
+    private static readonly IComponentExampleRegistry Examples = new ComponentExampleRegistry(new ComponentDocumentationCatalog());
 
     public ThemeScenarioRenderTests()
     {
@@ -19,13 +22,29 @@ public sealed class ThemeScenarioRenderTests : BunitContext
     public static IEnumerable<object[]> ScenarioIds() => Registry.All.Select(value => new object[] { value.Id });
 
     [Theory]
+    [InlineData("accordion-default", "accordion-item")]
+    [InlineData("alert-default", "alert-title")]
+    [InlineData("card-default", "card-header")]
+    [InlineData("message-default", "message-content")]
+    public void RepresentativeScenariosRenderComposedPackageWorkflows(string scenarioId, string requiredSlot)
+    {
+        var scenario = Registry.All.Single(value => value.Id == scenarioId);
+        var descriptor = Registry.GetFactory(scenarioId);
+        var factory = (IThemeScenarioFactory)Activator.CreateInstance(descriptor.FactoryType, descriptor.PackageComponentType)!;
+
+        using var cut = Render(factory.Create(new(scenario, CultureInfo.GetCultureInfo("en-US"), ThemeScenarioPreviewFactory.Create(Examples, scenario))));
+
+        Assert.NotEmpty(cut.FindAll($"[data-slot='{requiredSlot}']"));
+    }
+
+    [Theory]
     [MemberData(nameof(ScenarioIds))]
     public void EveryScenarioOwnsIndependentStateAndDisposesCleanly(string scenarioId)
     {
         var scenario = Registry.All.Single(value => value.Id == scenarioId);
         var descriptor = Registry.GetFactory(scenarioId);
         var factory = (IThemeScenarioFactory)Activator.CreateInstance(descriptor.FactoryType, descriptor.PackageComponentType)!;
-        var context = new ThemeScenarioRenderContext(scenario, CultureInfo.GetCultureInfo("th-TH"));
+        var context = new ThemeScenarioRenderContext(scenario, CultureInfo.GetCultureInfo("th-TH"), ThemeScenarioPreviewFactory.Create(Examples, scenario));
 
         var first = Render(factory.Create(context));
         var second = Render(factory.Create(context));
@@ -63,6 +82,7 @@ public sealed class ThemeScenarioRenderTests : BunitContext
         Assert.Equal(1, firstInstance.ActivationCount);
         Assert.Equal(1, secondInstance.ActivationCount);
         Assert.False(string.IsNullOrWhiteSpace(firstRoot.InnerHtml));
+        Assert.NotEmpty(firstRoot.QuerySelectorAll("[data-slot]"));
 
         firstInstance.Dispose();
         secondInstance.Dispose();

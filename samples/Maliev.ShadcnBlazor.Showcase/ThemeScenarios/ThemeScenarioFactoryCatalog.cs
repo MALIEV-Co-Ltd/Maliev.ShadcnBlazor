@@ -51,6 +51,7 @@ public sealed class ThemeScenarioFactory<TRoot> : IThemeScenarioFactory where TR
         builder.AddAttribute(1, nameof(ThemeScenarioFamilyRootBase.Scenario), context.Scenario);
         builder.AddAttribute(2, nameof(ThemeScenarioFamilyRootBase.PackageComponentType), packageComponentType);
         builder.AddAttribute(3, nameof(ThemeScenarioFamilyRootBase.Culture), context.Culture);
+        builder.AddAttribute(4, nameof(ThemeScenarioFamilyRootBase.Preview), context.Preview);
         builder.CloseComponent();
     };
 }

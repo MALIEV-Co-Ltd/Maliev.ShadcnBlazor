@@ -6,6 +6,9 @@
 @inject MockSiteState MockSites
 @inject ILogger<ThemeStudio> Logger
 @inject IJSRuntime JavaScript
+@inject NavigationManager Navigation
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 
@@ -40,9 +43,23 @@
                     <span><strong>Icons</strong> @State.IconLibrary</span>
                     <span><strong>Menu</strong> @State.MenuAccent / @State.MenuColor</span>
                     <span><strong>Radius</strong> @State.RadiusPreset</span>
+                    <span class="theme-preview-settings__mode">
+                        <ShadcnButton Variant="@(!ScenarioMode ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" data-testid="theme-preview-sites" OnClick="ShowMockSites">Sites</ShadcnButton>
+                        <ShadcnButton Variant="@(ScenarioMode ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" data-testid="theme-preview-components" OnClick="ShowComponents">Components</ShadcnButton>
+                    </span>
                 </div>
                 <div class="theme-preview-scope" style="@TypographyStyle">
-                    <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
+                    @if (ScenarioMode)
+                    {
+                        <ThemeScenarioBrowser ComponentSlug="@ComponentSlug"
+                                              ScenarioId="@ScenarioId"
+                                              Culture="ScenarioCulture"
+                                              SelectionChanged="NavigateScenario" />
+                    }
+                    else
+                    {
+                        <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
+                    }
                 </div>
             </div>
         </main>
@@ -58,6 +75,11 @@
     private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
     private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
+    private bool ScenarioMode => !string.IsNullOrWhiteSpace(ComponentSlug) || !string.IsNullOrWhiteSpace(ScenarioId);
+    private CultureInfo ScenarioCulture => CultureInfo.GetCultureInfo(State.Locale == ThemeStudioLocale.Thai ? "th-TH" : "en-US");
+
+    [SupplyParameterFromQuery(Name = "component")] public string? ComponentSlug { get; set; }
+    [SupplyParameterFromQuery(Name = "scenario")] public string? ScenarioId { get; set; }
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
@@ -169,6 +191,25 @@
     {
         if (args.Key == "Escape" && State.Workbench.SidebarOpen)
             await CloseSettingsAsync();
+    }
+
+    private void ShowMockSites() => Navigation.NavigateTo("theme");
+
+    private void ShowComponents()
+    {
+        var component = ComponentSlug ?? "accordion";
+        var scenario = ScenarioId ?? $"{component}-default";
+        NavigateScenario(new(component, scenario));
+    }
+
+    private void NavigateScenario(ThemeScenarioSelection selection)
+    {
+        var uri = Navigation.GetUriWithQueryParameters(new Dictionary<string, object?>
+        {
+            ["component"] = selection.ComponentSlug,
+            ["scenario"] = selection.ScenarioId
+        });
+        Navigation.NavigateTo(uri);
     }
 
     public void Dispose()
