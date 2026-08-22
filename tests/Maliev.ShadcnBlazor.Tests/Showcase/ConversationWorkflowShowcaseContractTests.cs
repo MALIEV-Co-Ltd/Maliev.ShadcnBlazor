@@ -324,6 +324,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='message-scroller-item'][data-scroll-anchor='true']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message-body']").Count);
         Assert.Single(cut.FindAll("form.showcase-scroller-composer"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller'] form.showcase-scroller-composer"));
         Assert.Empty(cut.FindAll("[data-testid='scroller-demo'] > form.showcase-scroller-composer"));
@@ -347,8 +348,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"user-1\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageScrollerItem MessageId=\"assistant-1\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("AutoScroll=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Equal("True", example.Controls.Single(control => control.Id == "scroller-auto").Value);
         Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.End\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageBody>", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("showcase-scroller-composer", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("@bind=\"message\"", example.RazorSource, StringComparison.Ordinal);
         Assert.True(example.RazorSource.IndexOf("showcase-scroller-composer", StringComparison.Ordinal) < example.RazorSource.LastIndexOf("</ShadcnMessageScroller>", StringComparison.Ordinal));
@@ -358,6 +361,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("padding: 1rem 1.25rem 5rem", css, StringComparison.Ordinal);
         Assert.Contains(".showcase-scroller-frame {", css, StringComparison.Ordinal);
         Assert.Contains("position: relative", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-scroller-frame::after", css, StringComparison.Ordinal);
+        Assert.Contains("linear-gradient(to bottom", css, StringComparison.Ordinal);
+        Assert.Contains("pointer-events: none", css, StringComparison.Ordinal);
+        Assert.Contains("env(safe-area-inset-bottom)", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -370,11 +377,37 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Single(cut.FindAll("form[data-slot='questionnaire']"));
         Assert.Single(cut.FindAll("[data-slot='questionnaire-progress']"));
         Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-item']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-choice']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-choice-description']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='questionnaire-choice']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='questionnaire-choice-description']").Count);
         Assert.Equal(2, cut.FindAll("[data-slot='questionnaire-description']").Count);
         Assert.Single(cut.FindAll("[data-slot='questionnaire-actions']"));
         Assert.Contains("เลือกประเภทการตรวจ", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("อื่น ๆ · Other", cut.Markup, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll("fieldset[name='scope'] [data-slot='questionnaire-input']"));
+
+        cut.Find("input[value='other']").Change(true);
+        var custom = cut.Find("fieldset[name='scope'] [data-slot='questionnaire-input'][data-custom='true']");
+        Assert.Equal("ระบุประเภทงาน · Describe the work", custom.GetAttribute("aria-label"));
+        Assert.Equal("พิมพ์คำตอบ · Type your answer", custom.GetAttribute("placeholder"));
+    }
+
+    [Fact]
+    public void QuestionnaireDossierSourceIsCompleteBilingualAndTracksControls()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
+            .GetBySlug("questionnaire").Single();
+
+        Assert.Contains("new(\"other\", Custom: true)", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("อื่น ๆ · Other", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnQuestionnaireInput", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("DefaultItem=\"scope\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Name=\"notes\"", example.RazorSource, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "questionnaire-start").Apply("notes");
+        Assert.Contains("DefaultItem=\"notes\"", example.RazorSource, StringComparison.Ordinal);
+        example.Controls.Single(control => control.Id == "questionnaire-branch").Apply("False");
+        Assert.DoesNotContain("Name=\"notes\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("DefaultItem=\"scope\"", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -75,9 +75,17 @@ public sealed class MessageScrollerTests : BunitContext
         Assert.Contains("preserveScrollOnPrepend", script, StringComparison.Ordinal);
         Assert.Contains("dispose", script, StringComparison.Ordinal);
         Assert.Contains("data-autoscrolling", script, StringComparison.Ordinal);
+        Assert.Contains("const scroll = () => report()", script, StringComparison.Ordinal);
+        Assert.Contains("addEventListener('pointerup', intent", script, StringComparison.Ordinal);
+        Assert.Contains("addEventListener('touchend', intent", script, StringComparison.Ordinal);
         Assert.Contains("selection?.anchorNode", script, StringComparison.Ordinal);
         Assert.Contains("sequence", script, StringComparison.Ordinal);
         Assert.Contains("root.setAttribute('data-autoscrolling'", script, StringComparison.Ordinal);
+        Assert.Contains("OnScrollerUserScrollAsync", script, StringComparison.Ordinal);
+        Assert.Contains("if (userScroll) pendingUserMeasurement = snapshot()", script, StringComparison.Ordinal);
+        Assert.Contains("new ResizeObserver(() => report())", script, StringComparison.Ordinal);
+        Assert.Contains("new IntersectionObserver(() => report()", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("invokeMethodAsync('OnScrollerUserIntentAsync'", script, StringComparison.Ordinal);
         Assert.DoesNotContain("viewport.scrollTop +=", script, StringComparison.Ordinal);
     }
 
@@ -93,6 +101,25 @@ public sealed class MessageScrollerTests : BunitContext
         cut.Render(p => p.Add(c => c.AutoScroll, true).Add(c => c.ChildContent, Text("content")));
         await cut.InvokeAsync(() => cut.Instance.OnScrollerMeasurementAsync(new(0, 200, 500, [new("row", 0, 500, false)], Sequence: 3)));
         Assert.False(cut.Instance.CurrentState.Following);
+    }
+
+    [Fact]
+    public async Task ProviderUsesMeasuredUserScrollToPauseAndResumeFollowing()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<ShadcnMessageScrollerProvider>(p => p.Add(c => c.AutoScroll, true).Add(c => c.ChildContent, Text("content")));
+        await cut.InvokeAsync(() => cut.Instance.OnScrollerMeasurementAsync(new(400, 200, 600, [new("row", 0, 600, false)], Sequence: 1)));
+
+        await cut.InvokeAsync(() => cut.Instance.OnScrollerUserScrollAsync(250, 200, 600, 2));
+        Assert.False(cut.Instance.CurrentState.Following);
+
+        await cut.InvokeAsync(() => cut.Instance.OnScrollerUserScrollAsync(400, 200, 600));
+        Assert.True(cut.Instance.CurrentState.Following);
+
+        await cut.InvokeAsync(() => cut.Instance.OnScrollerUserScrollAsync(400, 200, 600, 3));
+
+        await cut.InvokeAsync(() => cut.Instance.OnScrollerUserScrollAsync(250, 200, 600, 2));
+        Assert.True(cut.Instance.CurrentState.Following);
     }
 
     [Fact]

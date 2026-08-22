@@ -3,7 +3,7 @@ namespace Maliev.ShadcnBlazor.Components.Conversation;
 public enum ShadcnQuestionnaireItemStatus { Unanswered, Answered, Skipped }
 public enum ShadcnQuestionnaireShortcutMode { None, Letters, Numbers }
 
-public sealed record ShadcnQuestionnaireChoiceDefinition(string Value, bool Disabled = false);
+public sealed record ShadcnQuestionnaireChoiceDefinition(string Value, bool Disabled = false, bool Custom = false);
 
 public sealed record ShadcnQuestionnaireItemDefinition(
     string Name,

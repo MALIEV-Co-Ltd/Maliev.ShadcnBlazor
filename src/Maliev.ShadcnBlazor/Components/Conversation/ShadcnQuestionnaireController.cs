@@ -35,7 +35,8 @@ public sealed class ShadcnQuestionnaireController
         var values = item.Multiple ? answer.SelectedValues.ToList() : [];
         values.RemoveAll(current => string.Equals(current, value, StringComparison.Ordinal));
         if (selected) values.Add(value);
-        _answers[itemName] = Answer(values, answer.InputValue);
+        var customSelected = item.Choices?.Any(candidate => candidate.Custom && values.Contains(candidate.Value, StringComparer.Ordinal)) == true;
+        _answers[itemName] = Answer(values, customSelected ? answer.InputValue : null);
         _errors.Remove(itemName);
         Publish();
     }
@@ -45,6 +46,9 @@ public sealed class ShadcnQuestionnaireController
         var item = GetItem(itemName);
         if (!item.AllowsFreeform) throw new InvalidOperationException($"Item '{itemName}' does not accept freeform input.");
         var answer = _answers[itemName];
+        var choices = item.Choices ?? Array.Empty<ShadcnQuestionnaireChoiceDefinition>();
+        if (choices.Any(choice => choice.Custom) && !choices.Any(choice => choice.Custom && answer.SelectedValues.Contains(choice.Value, StringComparer.Ordinal)))
+            throw new InvalidOperationException($"Item '{itemName}' accepts freeform input only when its custom choice is selected.");
         _answers[itemName] = Answer(answer.SelectedValues, string.IsNullOrWhiteSpace(value) ? null : value);
         _errors.Remove(itemName);
         Publish();
@@ -64,6 +68,9 @@ public sealed class ShadcnQuestionnaireController
         var item = GetItem(_active);
         var answer = _answers[_active];
         string? error = _validate is null ? null : await _validate(item, answer, cancellationToken);
+        error ??= item.Choices?.Any(choice => choice.Custom && answer.SelectedValues.Contains(choice.Value, StringComparer.Ordinal)) == true && string.IsNullOrWhiteSpace(answer.InputValue)
+            ? "A custom answer is required."
+            : null;
         error ??= item.Required && answer.Status is not ShadcnQuestionnaireItemStatus.Answered ? "An answer is required." : null;
         if (error is not null)
         {
@@ -152,6 +159,8 @@ public sealed class ShadcnQuestionnaireController
         {
             var choices = item.Choices ?? Array.Empty<ShadcnQuestionnaireChoiceDefinition>();
             if (choices.Any(choice => string.IsNullOrWhiteSpace(choice.Value)) || choices.Select(choice => choice.Value).Distinct(StringComparer.Ordinal).Count() != choices.Count) throw new InvalidOperationException($"Questionnaire choices for '{item.Name}' must have unique non-empty values.");
+            if (choices.Count(choice => choice.Custom) > 1) throw new InvalidOperationException($"Questionnaire item '{item.Name}' can define at most one custom choice.");
+            if (choices.Any(choice => choice.Custom) && !item.AllowsFreeform) throw new InvalidOperationException($"Questionnaire item '{item.Name}' must allow freeform input when it defines a custom choice.");
         }
     }
 
@@ -169,6 +178,9 @@ public sealed class ShadcnQuestionnaireController
             if ((pair.Value.Status is ShadcnQuestionnaireItemStatus.Answered) != answered) throw new InvalidOperationException($"Answer '{pair.Key}' status does not match its value.");
             if (pair.Value.Status is ShadcnQuestionnaireItemStatus.Skipped && answered) throw new InvalidOperationException($"Skipped answer '{pair.Key}' cannot contain a value.");
             if (!item.AllowsFreeform && !string.IsNullOrWhiteSpace(pair.Value.InputValue)) throw new InvalidOperationException($"Answer '{pair.Key}' does not allow freeform input.");
+            var choices = item.Choices ?? Array.Empty<ShadcnQuestionnaireChoiceDefinition>();
+            if (!string.IsNullOrWhiteSpace(pair.Value.InputValue) && choices.Any(choice => choice.Custom) && !choices.Any(choice => choice.Custom && pair.Value.SelectedValues.Contains(choice.Value, StringComparer.Ordinal)))
+                throw new InvalidOperationException($"Answer '{pair.Key}' contains freeform input without selecting its custom choice.");
         }
     }
 }

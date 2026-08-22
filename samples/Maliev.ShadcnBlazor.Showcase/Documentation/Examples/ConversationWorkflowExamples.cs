@@ -335,7 +335,7 @@ internal static class ConversationWorkflowExamples
             b.AddAttribute(3, nameof(StreamingScrollerDemo.OpeningPosition), position);
             b.CloseComponent();
         };
-        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"], MessageScrollerRazorSource);
+        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v, true), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"], MessageScrollerRazorSource);
     }
 
     private static ComponentExampleDefinition Questionnaire()
@@ -344,8 +344,8 @@ internal static class ConversationWorkflowExamples
         RenderFragment preview = b =>
         {
             var items = branch
-                ? new[] { new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")]), new ShadcnQuestionnaireItemDefinition("notes", AllowsFreeform: true) }
-                : [new ShadcnQuestionnaireItemDefinition("scope", Required: true, Choices: [new("component"), new("feature")])];
+                ? new[] { new ShadcnQuestionnaireItemDefinition("scope", Required: true, AllowsFreeform: true, Choices: [new("component"), new("feature"), new("other", Custom: true)]), new ShadcnQuestionnaireItemDefinition("notes", AllowsFreeform: true) }
+                : [new ShadcnQuestionnaireItemDefinition("scope", Required: true, AllowsFreeform: true, Choices: [new("component"), new("feature"), new("other", Custom: true)])];
             b.OpenComponent<ShadcnQuestionnaire>(0);
             b.SetKey($"{branch}-{start}");
             b.AddAttribute(1, nameof(ShadcnQuestionnaire.Items), items);
@@ -373,7 +373,9 @@ internal static class ConversationWorkflowExamples
             }));
             b.CloseComponent();
         };
-        return Example("questionnaire", "Guided questionnaire", preview, [Toggle("questionnaire-branch", "Conditional notes", v => branch = v, true), Select("questionnaire-start", "Resume item", "scope", ["scope", "notes"], v => start = v)], ["single", "multiple", "freeform", "skipped", "required", "invalid", "controlled", "resume", "branching", "submit", "thai", "rtl"]);
+        return Example("questionnaire", "Guided questionnaire", preview, [Toggle("questionnaire-branch", "Conditional notes", v => branch = v, true), Select("questionnaire-start", "Resume item", "scope", ["scope", "notes"], v => start = v)], ["single", "multiple", "freeform", "custom", "skipped", "required", "invalid", "controlled", "resume", "branching", "submit", "thai", "english", "rtl"])
+            with
+        { RazorSourceProvider = () => QuestionnaireRazorSource(branch, start) };
     }
 
     private static void AddQuestion(RenderTreeBuilder b, int s, string name, string title, string description, bool input)
@@ -398,7 +400,12 @@ internal static class ConversationWorkflowExamples
                 {
                     AddChoice(choices, 0, "component", "Component", "ตัวอย่างองค์ประกอบ UI");
                     AddChoice(choices, 3, "feature", "Feature", "workflow หรือฟีเจอร์ใหม่");
+                    AddChoice(choices, 6, "other", "อื่น ๆ · Other", "ระบุประเภทงานด้วยตนเอง · Describe it yourself");
                 }));
+                x.CloseComponent();
+                x.OpenComponent<ShadcnQuestionnaireInput>(9);
+                x.AddAttribute(10, nameof(ShadcnQuestionnaireInput.AccessibleName), "ระบุประเภทงาน · Describe the work");
+                x.AddAttribute(11, "placeholder", "พิมพ์คำตอบ · Type your answer");
                 x.CloseComponent();
             }
             x.OpenComponent<ShadcnQuestionnaireError>(12);
@@ -554,6 +561,54 @@ internal static class ConversationWorkflowExamples
     private static string ReplyIconMarkup() => "<svg class=\"shadcn-message-reply-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m9 7-5 5 5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M4 12h10a5 5 0 0 1 5 5v1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>";
     private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags, string? razorSource = null) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", razorSource ?? $"<Shadcn{string.Concat(slug.Split('-').Select(w => char.ToUpperInvariant(w[0]) + w[1..]))} />", preview, controls, tags);
 
+    private static string QuestionnaireRazorSource(bool includeNotes, string requestedStart)
+    {
+        var start = includeNotes && requestedStart == "notes" ? "notes" : "scope";
+        var notesDefinition = includeNotes ? ",\n    new(\"notes\", AllowsFreeform: true)" : string.Empty;
+        var notesMarkup = includeNotes ? """
+
+    <ShadcnQuestionnaireItem Name="notes">
+        <ShadcnQuestionnaireTitle>รายละเอียดเพิ่มเติม · Additional details</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireDescription>อธิบายสิ่งที่ต้องการให้ทีมตรวจสอบ · Describe what the team should review</ShadcnQuestionnaireDescription>
+        <ShadcnQuestionnaireInput AccessibleName="รายละเอียดเพิ่มเติม · Additional details" placeholder="พิมพ์คำตอบของคุณ · Type your answer" />
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>
+""" : string.Empty;
+
+        return $$"""
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<ShadcnQuestionnaire Items="Items" DefaultItem="{{start}}" AccessibleName="ขอบเขตงาน · Work scope" Shortcuts="ShadcnQuestionnaireShortcutMode.Numbers">
+    <ShadcnQuestionnaireProgress AccessibleName="ความคืบหน้า · Progress" />
+    <ShadcnQuestionnaireItem Name="scope">
+        <ShadcnQuestionnaireTitle>เลือกประเภทการตรวจ · Choose a review type</ShadcnQuestionnaireTitle>
+        <ShadcnQuestionnaireDescription>เลือก workflow ที่ต้องการสาธิต · Choose the workflow to demonstrate</ShadcnQuestionnaireDescription>
+        <ShadcnQuestionnaireChoices>
+            <ShadcnQuestionnaireChoice Value="component">Component</ShadcnQuestionnaireChoice>
+            <ShadcnQuestionnaireChoice Value="feature">Feature</ShadcnQuestionnaireChoice>
+            <ShadcnQuestionnaireChoice Value="other">อื่น ๆ · Other</ShadcnQuestionnaireChoice>
+        </ShadcnQuestionnaireChoices>
+        <ShadcnQuestionnaireInput AccessibleName="ระบุประเภทงาน · Describe the work" placeholder="พิมพ์คำตอบ · Type your answer" />
+        <ShadcnQuestionnaireError />
+    </ShadcnQuestionnaireItem>{{notesMarkup}}
+    <ShadcnQuestionnaireActions>
+        <ShadcnQuestionnairePrevious>ก่อนหน้า</ShadcnQuestionnairePrevious>
+        <ShadcnQuestionnaireSkip>ข้าม</ShadcnQuestionnaireSkip>
+        <ShadcnQuestionnaireNext>ถัดไป</ShadcnQuestionnaireNext>
+        <ShadcnQuestionnaireSubmit>ส่งคำตอบ</ShadcnQuestionnaireSubmit>
+    </ShadcnQuestionnaireActions>
+</ShadcnQuestionnaire>
+
+@code {
+    private static readonly ShadcnQuestionnaireItemDefinition[] Items =
+    [
+        new("scope", Required: true, AllowsFreeform: true,
+            Choices: [new("component"), new("feature"), new("other", Custom: true)]){{notesDefinition}}
+    ];
+}
+""";
+    }
+
     private const string MessageScrollerRazorSource = """
 @using Maliev.ShadcnBlazor.Components.Conversation
 
@@ -565,10 +620,12 @@ internal static class ConversationWorkflowExamples
                     <ShadcnMessage Align="ShadcnLogicalAlign.End">
                         <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
                         <ShadcnMessageContent>
-                            <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
-                            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Muted">
-                                <ShadcnBubbleContent>เริ่มตรวจสอบชิ้นงานแล้ว</ShadcnBubbleContent>
-                            </ShadcnBubble>
+                            <ShadcnMessageBody>
+                                <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
+                                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Muted">
+                                    <ShadcnBubbleContent>เริ่มตรวจสอบชิ้นงานแล้ว</ShadcnBubbleContent>
+                                </ShadcnBubble>
+                            </ShadcnMessageBody>
                         </ShadcnMessageContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
@@ -576,10 +633,12 @@ internal static class ConversationWorkflowExamples
                     <ShadcnMessage Align="ShadcnLogicalAlign.Start">
                         <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
                         <ShadcnMessageContent>
-                            <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
-                            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
-                                <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
-                            </ShadcnBubble>
+                            <ShadcnMessageBody>
+                                <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
+                                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
+                                    <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
+                                </ShadcnBubble>
+                            </ShadcnMessageBody>
                         </ShadcnMessageContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>

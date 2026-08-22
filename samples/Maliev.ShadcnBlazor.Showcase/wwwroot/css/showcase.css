@@ -1476,6 +1476,17 @@ a {
     box-shadow: var(--shadcn-shadow-sm);
 }
 
+.showcase-scroller-frame::after {
+    position: absolute;
+    z-index: 7;
+    inset-inline: 0;
+    inset-block-end: calc(3.75rem + env(safe-area-inset-bottom));
+    block-size: 2.5rem;
+    background: linear-gradient(to bottom, transparent, var(--shadcn-card));
+    content: "";
+    pointer-events: none;
+}
+
 .showcase-scroller-frame .shadcn-message-scroller-viewport {
     scrollbar-color: var(--shadcn-muted-foreground) transparent;
 }
@@ -1483,6 +1494,7 @@ a {
 .showcase-scroller-frame .shadcn-message-scroller-content {
     gap: 0.25rem;
     padding: 1rem 1.25rem 5rem;
+    padding-block-end: calc(5rem + env(safe-area-inset-bottom));
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-item {
@@ -1514,7 +1526,7 @@ a {
 .showcase-scroller-frame .showcase-scroller-composer {
     position: absolute;
     inset-inline: .75rem;
-    inset-block-end: .75rem;
+    inset-block-end: calc(.75rem + env(safe-area-inset-bottom));
     z-index: 8;
     display: flex;
     min-inline-size: 0;
