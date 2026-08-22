@@ -66,6 +66,9 @@ every component family.
   deterministic offline default; see [theming](docs/theming.md).
 - A Blazor-first Theme Studio with live generator options plus portable JSON
   and ready-to-paste C# output.
+- A checked [package-only theme consumer](samples/Maliev.ShadcnBlazor.ThemeConsumer/README.md)
+  that demonstrates the exact export, add, register, load, build, and verify
+  journey for canonical `theme.json` and `theme.css` artifacts.
 - A standalone Showcase project with all component dossiers.
 
 ## Compatibility

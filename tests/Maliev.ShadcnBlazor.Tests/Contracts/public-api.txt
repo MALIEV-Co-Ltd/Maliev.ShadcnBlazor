@@ -1623,6 +1623,7 @@ type Maliev.ShadcnBlazor.Theming.ShadcnOptions
   Boolean DefaultDarkMode
   ShadcnDirection DefaultDirection
   String FontFamily
+  ShadcnTheme Theme
   TimeSpan ToastDuration
   TimeSpan ToastExitDuration
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult

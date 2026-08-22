@@ -45,6 +45,72 @@ The theming namespace exposes built-in presets, validation, JSON
 serialization, and CSS/C# writers. The Showcase Theme Studio can edit a theme,
 preview it in multiple layouts, and export an integration bundle.
 
+## Consume a portable Theme Studio export
+
+Theme Studio exports one canonical version 2 document, `theme.json`, and its
+deterministic stylesheet, `theme.css`. Keep both files together under
+`wwwroot`; the document drives runtime components while the CSS makes the same
+tokens available before Blazor starts.
+
+1. Export the integration bundle from Theme Studio and copy `theme.json` and
+   `theme.css` into the consuming app's `wwwroot` directory.
+2. Add the package with `dotnet add package Maliev.ShadcnBlazor`.
+3. Load the document before registering the package:
+
+   ```csharp
+   using Maliev.ShadcnBlazor;
+   using Maliev.ShadcnBlazor.Theming;
+
+   using var bootstrapClient = new HttpClient
+   {
+       BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+   };
+   await using var themeStream = await bootstrapClient.GetStreamAsync("theme.json");
+   var themeDocument = await ShadcnThemeDocumentLoader.LoadAsync(themeStream);
+
+   builder.Services.AddSingleton(themeDocument);
+   builder.Services.AddMalievShadcn(options => options.Theme = themeDocument.Theme);
+   ```
+
+4. Link `theme.css` after the package component styles and wrap the application
+   once with `<ShadcnThemeProvider>`. An explicit provider `Theme` parameter
+   still wins when a nested subtree needs a different theme; otherwise the
+   provider uses `options.Theme`.
+5. Build the application. The package automatically validates
+   `wwwroot/theme.json`. Use an explicit item when the document lives elsewhere:
+
+   ```xml
+   <ItemGroup>
+     <MalievShadcnTheme Include="DesignSystem/theme.json" />
+   </ItemGroup>
+   ```
+
+6. Verify a clean package-only consumer with the checked example at
+   `samples/Maliev.ShadcnBlazor.ThemeConsumer`. Repository CI packs the NuGet
+   artifact, restores a physical copy of this sample against that package, and
+   builds it without a project reference.
+
+Validation is enabled by default. Set
+`<MalievShadcnValidateThemes>false</MalievShadcnValidateThemes>` only when a
+different build owns validation. Set
+`<MalievShadcnThemeWarningsAsErrors>true</MalievShadcnThemeWarningsAsErrors>`
+to escalate advisory diagnostics. Stable diagnostics are grouped as follows:
+
+- `MSHCN001` reports unreadable, oversized, non-UTF-8, or malformed JSON.
+- `MSHCN002` reports a missing or unsupported schema version.
+- `MSHCN003` reports a missing required theme value.
+- `MSHCN004` reports an unsafe or unsupported token value.
+- `MSHCN101` warns when foreground/background contrast is below WCAG AA.
+- `MSHCN102` warns that a remote Google Fonts identifier needs a local fallback.
+- `MSHCN103` warns that a legacy document must be migrated to canonical v2.
+
+The runtime loader enforces the same 1 MiB, strict UTF-8, depth, schema, and
+semantic validation boundary without network access. Existing schema 0 or 1
+documents can still be imported into Theme Studio, which materializes and
+exports canonical v2. The default bundled fonts remain fully offline; a
+`googleFontsId` is metadata, not an instruction for the loader to contact a
+remote service.
+
 ## Generate a portable Blazor configuration
 
 Open `/theme` and use **Generator options** to choose the component style, base

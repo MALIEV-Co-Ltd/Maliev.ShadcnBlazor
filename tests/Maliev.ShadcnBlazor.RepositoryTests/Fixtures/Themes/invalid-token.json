@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "name": "Broken",
+  "theme": {
+    "schemaVersion": 1,
+    "name": "Broken",
+    "light": {
+      "background": "oklch(1 0 0)"
+    },
+    "dark": {},
+    "metrics": {}
+  },
+  "application": {},
+  "palette": {},
+  "typography": {}
+}

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseMalievShadcnPackage Condition="'$(UseMalievShadcnPackage)' == ''">false</UseMalievShadcnPackage>
+    <MalievShadcnPackageVersion Condition="'$(MalievShadcnPackageVersion)' == ''">1.1.1</MalievShadcnPackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
+    <PackageReference Include="Maliev.ShadcnBlazor" Version="$(MalievShadcnPackageVersion)" Condition="'$(UseMalievShadcnPackage)' == 'true'" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseMalievShadcnPackage)' != 'true'">
+    <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor\Maliev.ShadcnBlazor.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <MalievShadcnTheme Include="wwwroot\theme.json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+
+<ShadcnThemeProvider Class="consumer-root">
+    <a class="consumer-skip-link" href="#consumer-main">Skip to themed example</a>
+    <div class="consumer-shell" data-testid="theme-consumer-shell">
+        <header class="consumer-header">
+            <a class="consumer-brand" href="./" aria-label="MALIEV portable theme consumer home">
+                <span class="consumer-brand__mark" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" focusable="false">
+                        <path d="M5 24V8h4.2l6.8 9.2L22.8 8H27v16h-4V14.8l-6.3 8.1h-1.4L9 14.8V24H5Z" fill="currentColor" />
+                    </svg>
+                </span>
+                <span>
+                    <strong>MALIEV</strong>
+                    <small>Portable theme consumer</small>
+                </span>
+            </a>
+            <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Canonical v2</ShadcnBadge>
+        </header>
+
+        <main id="consumer-main" class="consumer-main">@Body</main>
+
+        <footer class="consumer-footer">
+            Loaded from <code>theme.json</code>; styled by <code>theme.css</code>.
+        </footer>
+    </div>
+</ShadcnThemeProvider>

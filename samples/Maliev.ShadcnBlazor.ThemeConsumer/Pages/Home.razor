@@ -1,0 +1,47 @@
+@page "/"
+
+<PageTitle>Portable theme consumer</PageTitle>
+
+<section class="consumer-intro" aria-labelledby="consumer-title">
+    <div class="consumer-intro__copy">
+        <ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Installed package proof</ShadcnBadge>
+        <h1 id="consumer-title">One portable theme, loaded before the first component renders.</h1>
+        <p>
+            This checked consumer uses the same canonical document and generated CSS exported by Theme Studio.
+            The provider receives its theme through <code>ShadcnOptions</code>, so application shells do not repeat configuration.
+        </p>
+        <div class="consumer-actions">
+            <ShadcnButton OnClick="ConfirmTheme" data-testid="confirm-theme">Verify loaded theme</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Href="https://github.com/maliev-co-ltd/Maliev.ShadcnBlazor/blob/main/docs/theming.md">
+                Read the integration guide
+            </ShadcnButton>
+        </div>
+        <p class="consumer-status" role="status" aria-live="polite" data-testid="theme-consumer-status">@Status</p>
+    </div>
+
+    <ShadcnCard Class="consumer-proof" data-testid="theme-consumer-proof">
+        <ShadcnCardHeader>
+            <ShadcnCardTitle>MALIEV Portable Neutral</ShadcnCardTitle>
+            <ShadcnCardDescription>Runtime document and static CSS agree on every semantic token.</ShadcnCardDescription>
+        </ShadcnCardHeader>
+        <ShadcnCardContent>
+            <dl class="consumer-facts">
+                <div><dt>Schema</dt><dd>v2</dd></div>
+                <div><dt>Direction</dt><dd>LTR</dd></div>
+                <div><dt>Motion</dt><dd>System preference</dd></div>
+            </dl>
+            <div class="consumer-swatches" aria-label="Portable semantic color sample">
+                <span data-token="primary">Primary</span>
+                <span data-token="secondary">Secondary</span>
+                <span data-token="destructive">Destructive</span>
+            </div>
+        </ShadcnCardContent>
+        <ShadcnCardFooter>Validated at build time and again at startup.</ShadcnCardFooter>
+    </ShadcnCard>
+</section>
+
+@code {
+    private string Status { get; set; } = "Ready to verify the package-owned theme.";
+
+    private void ConfirmTheme() => Status = "Theme loaded and component interaction confirmed.";
+}

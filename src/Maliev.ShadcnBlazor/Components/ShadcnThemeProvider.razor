@@ -42,14 +42,15 @@
 
     private bool EffectiveDarkMode => IsDarkMode ?? _options.DefaultDarkMode;
     private ShadcnDirection EffectiveDirection => Direction ?? _options.DefaultDirection;
+    private ShadcnTheme? EffectiveTheme => Theme ?? _options.Theme;
     private ShadcnContext Context => new(EffectiveDarkMode, EffectiveDirection);
     private string RootClass => JoinValues(ShadcnCss.ScopeClass, Class, GetAdditionalAttribute("class"));
     private string OverlayClass => JoinValues(
         ShadcnCss.OverlayScopeClass,
-        Theme?.Metrics.ReducedMotionBehavior == ShadcnReducedMotionBehavior.AlwaysReduce
+        EffectiveTheme?.Metrics.ReducedMotionBehavior == ShadcnReducedMotionBehavior.AlwaysReduce
             ? "shadcn-reduce-motion"
             : null);
-    private string? ReducedMotionPolicy => Theme?.Metrics.ReducedMotionBehavior switch
+    private string? ReducedMotionPolicy => EffectiveTheme?.Metrics.ReducedMotionBehavior switch
     {
         ShadcnReducedMotionBehavior.RespectSystemPreference => "system",
         ShadcnReducedMotionBehavior.AlwaysReduce => "always",
@@ -58,9 +59,9 @@
     private string RootStyle => JoinStyles(
         Style,
         GetAdditionalAttribute("style"),
-        Theme is null
+        EffectiveTheme is null
             ? $"--shadcn-font-sans: {_options.FontFamily}"
-            : ShadcnThemeCssWriter.WriteProperties(Theme, EffectiveDarkMode));
+            : ShadcnThemeCssWriter.WriteProperties(EffectiveTheme, EffectiveDarkMode));
 
     protected override void OnInitialized()
     {
@@ -76,9 +77,9 @@
             throw new ArgumentOutOfRangeException(nameof(Direction), EffectiveDirection,
                 "Shadcn direction must be LeftToRight or RightToLeft.");
 
-        _theme = Theme is null
+        _theme = EffectiveTheme is null
             ? ShadcnThemeFactory.Create(_options)
-            : ShadcnThemeFactory.Create(Theme);
+            : ShadcnThemeFactory.Create(EffectiveTheme);
     }
 
     private string? GetAdditionalAttribute(string name) => AdditionalAttributes?

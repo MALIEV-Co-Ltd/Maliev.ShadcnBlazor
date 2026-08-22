@@ -153,6 +153,51 @@ public sealed class ShadcnThemeProviderTests : BunitContext
     }
 
     [Fact]
+    public void ConfiguredThemeIsUsedWhenTheThemeParameterIsOmitted()
+    {
+        var configuredTheme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with
+        {
+            Light = ShadcnThemePresets.BaseVegaNeutral.Theme.Light with
+            {
+                Primary = "oklch(0.51 0.12 244)"
+            }
+        };
+        Services.Configure<ShadcnOptions>(options => options.Theme = configuredTheme);
+
+        var cut = Render<ShadcnThemeProvider>();
+
+        Assert.Contains("--shadcn-primary: oklch(0.51 0.12 244)",
+            cut.Find("[data-shadcn-scope]").GetAttribute("style"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExplicitThemeParameterWinsOverTheConfiguredTheme()
+    {
+        var configuredTheme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with
+        {
+            Light = ShadcnThemePresets.BaseVegaNeutral.Theme.Light with
+            {
+                Primary = "oklch(0.51 0.12 244)"
+            }
+        };
+        var explicitTheme = configuredTheme with
+        {
+            Light = configuredTheme.Light with
+            {
+                Primary = "oklch(0.43 0.16 32)"
+            }
+        };
+        Services.Configure<ShadcnOptions>(options => options.Theme = configuredTheme);
+
+        var cut = Render<ShadcnThemeProvider>(parameters => parameters
+            .Add(component => component.Theme, explicitTheme));
+
+        var style = cut.Find("[data-shadcn-scope]").GetAttribute("style");
+        Assert.Contains("--shadcn-primary: oklch(0.43 0.16 32)", style, StringComparison.Ordinal);
+        Assert.DoesNotContain("--shadcn-primary: oklch(0.51 0.12 244)", style, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PreservesConsumerClassAndStyleWhileContractAttributesWin()
     {
         var cut = Render<ShadcnThemeProvider>(parameters => parameters

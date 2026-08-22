@@ -10,5 +10,6 @@
   <ItemGroup><Using Include="Xunit" /></ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\samples\Maliev.ShadcnBlazor.Showcase\Maliev.ShadcnBlazor.Showcase.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\Maliev.ShadcnBlazor.ThemeConsumer\Maliev.ShadcnBlazor.ThemeConsumer.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

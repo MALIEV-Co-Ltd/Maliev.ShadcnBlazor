@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <MalievShadcnValidateThemes Condition="'$(MalievShadcnValidateThemes)' == ''">true</MalievShadcnValidateThemes>
+    <MalievShadcnThemeWarningsAsErrors Condition="'$(MalievShadcnThemeWarningsAsErrors)' == ''">false</MalievShadcnThemeWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup Condition="'@(MalievShadcnTheme)' == '' and Exists('$(MSBuildProjectDirectory)\wwwroot\theme.json')">
+    <MalievShadcnTheme Include="$(MSBuildProjectDirectory)\wwwroot\theme.json" />
+  </ItemGroup>
+</Project>

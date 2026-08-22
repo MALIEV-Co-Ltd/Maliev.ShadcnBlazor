@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Maliev.ShadcnBlazor.Theme.props" />
+  <UsingTask TaskName="Maliev.ShadcnBlazor.Build.ValidateShadcnThemeTask"
+             AssemblyFile="$(MSBuildThisFileDirectory)..\tools\net10.0\Maliev.ShadcnBlazor.Build.dll" />
+  <Target Name="ValidateMalievShadcnThemes"
+          BeforeTargets="CoreCompile"
+          Condition="'$(MalievShadcnValidateThemes)' == 'true' and '@(MalievShadcnTheme)' != ''">
+    <ValidateShadcnThemeTask ThemeFiles="@(MalievShadcnTheme)"
+                             WarningsAsErrors="$(MalievShadcnThemeWarningsAsErrors)" />
+  </Target>
+</Project>

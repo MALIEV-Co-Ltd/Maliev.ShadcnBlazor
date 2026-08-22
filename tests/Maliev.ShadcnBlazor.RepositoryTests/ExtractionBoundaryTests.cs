@@ -17,6 +17,8 @@ public sealed class ExtractionBoundaryTests
         Assert.Equal(
         [
             "samples/Maliev.ShadcnBlazor.Showcase/Maliev.ShadcnBlazor.Showcase.csproj",
+            "samples/Maliev.ShadcnBlazor.ThemeConsumer/Maliev.ShadcnBlazor.ThemeConsumer.csproj",
+            "src/Maliev.ShadcnBlazor.Build/Maliev.ShadcnBlazor.Build.csproj",
             "src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj",
             "tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj",
             "tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj",
@@ -48,7 +50,7 @@ public sealed class ExtractionBoundaryTests
     }
 
     [Fact]
-    public void BrowserTestsDependOnlyOnTheStandaloneShowcase()
+    public void BrowserTestsDependOnlyOnTheStandaloneSamples()
     {
         var root = RepositoryRoot.Find();
         var project = XDocument.Load(Path.Combine(
@@ -63,7 +65,9 @@ public sealed class ExtractionBoundaryTests
             .OfType<string>()
             .ToArray();
 
-        Assert.Equal(["Maliev.ShadcnBlazor.Showcase.csproj"], references);
+        Assert.Equal(
+            ["Maliev.ShadcnBlazor.Showcase.csproj", "Maliev.ShadcnBlazor.ThemeConsumer.csproj"],
+            references.Order(StringComparer.Ordinal));
     }
 }
 
