@@ -190,10 +190,10 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var css = File.ReadAllText(cssPath);
         Assert.Contains("@keyframes shadcn-marker-dots", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes shadcn-marker-wave", css, StringComparison.Ordinal);
-        Assert.Contains("background-size:200% 100%", css, StringComparison.Ordinal);
-        Assert.Contains("background-position-x:200%", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position-x:200%; } to { background-position-x:0%; } }", css, StringComparison.Ordinal);
-        Assert.Contains("background-repeat:no-repeat", css, StringComparison.Ordinal);
+        Assert.Contains("mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("-webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { mask-position:right; -webkit-mask-position:right; } to { mask-position:left; -webkit-mask-position:left; } }", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("background-clip:text", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-marker-content[data-streaming=\"true\"]", css, StringComparison.Ordinal);

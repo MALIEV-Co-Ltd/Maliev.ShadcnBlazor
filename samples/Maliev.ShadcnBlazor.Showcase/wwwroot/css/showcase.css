@@ -1369,9 +1369,8 @@ a {
 }
 
 .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] {
-    background-position-x: 200%;
-    background-repeat: no-repeat;
-    background-color: transparent;
+    color: var(--shadcn-muted-foreground);
+    -webkit-text-fill-color: currentColor;
 }
 
 .showcase-message-thread {
