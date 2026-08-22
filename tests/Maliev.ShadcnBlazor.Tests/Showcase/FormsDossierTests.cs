@@ -154,7 +154,8 @@ public sealed class FormsDossierTests : BunitContext
 
         var input = RenderExample(registry, "input");
         Assert.Single(input.FindAll("[data-slot='card']"));
-        Assert.Equal(2, input.FindAll("input[data-slot='input']").Count);
+        Assert.Single(input.FindAll("input[data-slot='input']"));
+        Assert.Single(input.FindAll("[data-slot='input-group'].shadcn-secret-input"));
         Assert.Equal("integration-key", input.Find("[data-slot='field-label']").GetAttribute("for"));
         Assert.Equal("integration-key-help", input.Find("[data-testid='forms-dossier-input']").GetAttribute("aria-describedby"));
         Assert.Contains("<ShadcnCard>", input.Instance.Example.RazorSource, StringComparison.Ordinal);
@@ -166,8 +167,12 @@ public sealed class FormsDossierTests : BunitContext
         Assert.Single(input.FindAll("[data-slot='field-error'][role='alert']"));
         Assert.Contains("Invalid=\"true\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
         Change(input, "input-masked", false);
+        Assert.Equal("password", input.Find("[data-testid='forms-dossier-input']").GetAttribute("type"));
+        Assert.Contains("<ShadcnSecretInput", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("MaskStart=\"0\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("api_live_demo", input.Instance.Example.RazorSource, StringComparison.Ordinal);
+        input.Find("[data-secret-input-toggle]").Click();
         Assert.Equal("text", input.Find("[data-testid='forms-dossier-input']").GetAttribute("type"));
-        Assert.Contains("Type=\"text\"", input.Instance.Example.RazorSource, StringComparison.Ordinal);
         Change(input, "input-readonly", true);
         Assert.True(input.Find("[data-testid='forms-dossier-input']").HasAttribute("readonly"));
         Change(input, "input-disabled", true);
@@ -245,6 +250,9 @@ public sealed class FormsDossierTests : BunitContext
         var calendar = RenderExample(registry, "calendar");
         Change(calendar, "calendar-invalid", true);
         Assert.Equal("true", calendar.Find("[data-testid='forms-dossier-calendar']").GetAttribute("aria-invalid"));
+        Assert.Equal("calendar-inspection-error", calendar.Find("[data-testid='forms-dossier-calendar']").GetAttribute("aria-describedby"));
+        Assert.Contains("เลือกวันที่ตรวจรับ", calendar.Find("#calendar-inspection-error").TextContent, StringComparison.Ordinal);
+        Assert.Contains("aria-describedby=\"calendar-inspection-error\"", calendar.Instance.Example.RazorSource, StringComparison.Ordinal);
         Change(calendar, "calendar-mode", "Range");
         Assert.NotEmpty(calendar.FindAll("[data-range-start='true']"));
         Assert.NotEmpty(calendar.FindAll("[data-range-end='true']"));

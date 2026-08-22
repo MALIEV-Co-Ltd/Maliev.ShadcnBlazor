@@ -249,7 +249,7 @@ internal static class ActionSelectionExamples
     <h3 id="review-speed-title">Inspection turnaround</h3>
     <p>Choose how quickly the production drawing should be reviewed.</p>
 
-    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
+    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Presentation="ShadcnRadioGroupPresentation.Card" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
         <ShadcnRadioGroupItem Value="standard">Standard review · Within 2 business days</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="priority">Priority review · By the next business day</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="same-day" Disabled="true">Same-day review · Unavailable after 2:00 PM</ShadcnRadioGroupItem>

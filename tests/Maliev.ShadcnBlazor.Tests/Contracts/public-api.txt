@@ -839,6 +839,24 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnNativeSelect`1
   String ControlClass
   String ControlStyle
   ShadcnControlSize Size
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnSecretInput
+  String AutoComplete
+  Boolean Disabled
+  String HiddenStatus
+  String HideLabel
+  Boolean Invalid
+  String MaskCharacter
+  Int32 MaskStart
+  String Name
+  String Placeholder
+  Boolean ReadOnly
+  Boolean Required
+  Boolean Revealed
+  EventCallback<Boolean> RevealedChanged
+  String RevealedStatus
+  String ShowLabel
+  String Value
+  EventCallback<String> ValueChanged
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelectOption`1
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelect`1
   String ClearLabel
@@ -1496,6 +1514,12 @@ type Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
   IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]
   String Class
   String Style
+type Maliev.ShadcnBlazor.Components.Primitives.ShadcnStateTransition
+  Boolean Active
+  RenderFragment ActiveContent
+  Boolean Enabled
+  RenderFragment InactiveContent
+  Boolean ReducedMotion
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnCheckbox
   Boolean Disabled
   String FormValue
@@ -1510,12 +1534,14 @@ type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupItem`1
   Boolean Disabled
   TValue Value
 enum Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupOrientation: Vertical, Horizontal
+enum Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupPresentation: Default, Card
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1
   RenderFragment ChildContent
   Boolean Disabled
   Boolean Invalid
   String Name
   ShadcnRadioGroupOrientation Orientation
+  ShadcnRadioGroupPresentation Presentation
   Boolean ReadOnly
   TValue Value
   EventCallback<TValue> ValueChanged

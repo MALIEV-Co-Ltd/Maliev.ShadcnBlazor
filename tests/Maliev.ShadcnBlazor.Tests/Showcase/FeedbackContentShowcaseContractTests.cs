@@ -18,6 +18,16 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void SpinnerDossierUsesThePackageStateTransitionForStableStateChanges()
+    {
+        var source = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Documentation", "SpinnerDossierPreview.razor"));
+
+        Assert.Contains("<ShadcnStateTransition", source, StringComparison.Ordinal);
+        Assert.Contains("Active=\"_processing\"", source, StringComparison.Ordinal);
+        Assert.Contains("ReducedMotion=\"ReducedMotion\"", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void IndependentlyAcceptedPlanFiveComponentsHaveOneCertifiedInteractiveDossier()
     {
         var catalog = new ComponentDocumentationCatalog();

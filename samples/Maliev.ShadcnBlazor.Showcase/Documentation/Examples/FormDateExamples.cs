@@ -91,28 +91,28 @@ internal static class FormDateExamples
 
     private static ComponentExampleDefinition Input()
     {
-        var invalid = false; var masked = true; var disabled = false; var readOnly = false;
+        var invalid = false; var preservePrefix = true; var disabled = false; var readOnly = false;
         RenderFragment preview = b =>
         {
             b.OpenComponent<InputDossierPreview>(0);
             b.AddAttribute(1, nameof(InputDossierPreview.Invalid), invalid);
-            b.AddAttribute(2, nameof(InputDossierPreview.Masked), masked);
+            b.AddAttribute(2, nameof(InputDossierPreview.PreservePrefix), preservePrefix);
             b.AddAttribute(3, nameof(InputDossierPreview.Disabled), disabled);
             b.AddAttribute(4, nameof(InputDossierPreview.ReadOnly), readOnly);
             b.CloseComponent();
         };
-        string Source() => InputSource(invalid, masked, disabled, readOnly);
+        string Source() => InputSource(invalid, preservePrefix, disabled, readOnly);
         return Example("input", "Production credentials", "Edit and upload integration credentials in a realistic, accessible form.", Source(), preview,
             [
                 Toggle("input-invalid", "Invalid", v => invalid = v),
-                Toggle("input-masked", "Mask key", v => masked = v, true),
+                Toggle("input-masked", "Preserve prefix", v => preservePrefix = v, true),
                 Toggle("input-disabled", "Disabled", v => disabled = v),
                 Toggle("input-readonly", "Read only", v => readOnly = v)
             ], ["typed-binding", "required", "file", "invalid", "disabled", "read-only"]) with
         { RazorSourceProvider = Source };
     }
 
-    private static string InputSource(bool invalid, bool masked, bool disabled, bool readOnly)
+    private static string InputSource(bool invalid, bool preservePrefix, bool disabled, bool readOnly)
     {
         var invalidText = invalid.ToString().ToLowerInvariant();
         var disabledText = disabled.ToString().ToLowerInvariant();
@@ -136,12 +136,11 @@ internal static class FormDateExamples
                 <ShadcnCardContent>
                     <ShadcnField Invalid="{{invalidText}}" Disabled="{{disabledText}}" DescriptionId="integration-key-help"{{errorId}}>
                         <ShadcnFieldLabel For="integration-key">Integration key</ShadcnFieldLabel>
-                        <ShadcnInput TValue="string"
+                        <ShadcnSecretInput
                                      id="integration-key"
                                      @bind-Value="ApiKey"
-                                     Type="{{(masked ? "password" : "text")}}"
-                                     Placeholder="api_live_demo_7hK2"
-                                     InputMode="text"
+                                     MaskStart="{{(preservePrefix ? 3 : 0)}}"
+                                     Placeholder="sk-••••••••"
                                      AutoComplete="off"
                                      Required="true"
                                      ReadOnly="{{readOnlyText}}" />
@@ -165,7 +164,7 @@ internal static class FormDateExamples
             </ShadcnCard>
 
             @code {
-                private string ApiKey { get; set; } = "api_live_demo_7hK2";
+                private string ApiKey { get; set; } = string.Empty;
                 private string Status { get; set; } = "Ready to save";
 
                 private Task HandleCredentialFile(InputFileChangeEventArgs args)
@@ -498,7 +497,9 @@ internal static class FormDateExamples
             var summary = mode == ShadcnCalendarSelectionMode.Range
                 ? "    private string SelectionSummary => InspectionWindow switch\n    {\n        null => \"เลือกช่วงวันที่ตรวจรับ\",\n        { End: null } => $\"เริ่ม {InspectionWindow.Start.ToString(\"d MMM yyyy\", ThaiCulture)} · เลือกวันสิ้นสุด\",\n        _ => $\"{InspectionWindow.Start.ToString(\"d MMM\", ThaiCulture)} — {InspectionWindow.End!.Value.ToString(\"d MMM yyyy\", ThaiCulture)}\"\n    };"
                 : "    private string SelectionSummary => InspectionDate is null\n        ? \"ยังไม่ได้เลือกวันที่\"\n        : $\"เลือกแล้ว · {InspectionDate.Value.ToString(\"d MMMM yyyy\", ThaiCulture)}\";";
-            return $"@using System.Globalization\n@using Maliev.ShadcnBlazor.Components.Content\n@using Maliev.ShadcnBlazor.Components.Forms\n\n<ShadcnCard>\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>กำหนดวันตรวจรับ</ShadcnCardTitle>\n        <ShadcnCardDescription>เลือกวันที่หรือช่วงเวลาสำหรับตรวจรับชิ้นงาน</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnCalendar Mode=\"ShadcnCalendarSelectionMode.{mode}\"\n                        CaptionLayout=\"ShadcnCalendarCaptionLayout.{captionLayout}\"\n                        {binding}\n                        @bind-VisibleMonth=\"VisibleMonth\"\n                        Today=\"Today\"\n                        Culture=\"ThaiCulture\"\n                        ShowWeekNumbers=\"{showWeekNumbers.ToString().ToLowerInvariant()}\"\n                        Invalid=\"{invalid.ToString().ToLowerInvariant()}\"\n                        PreviousLabel=\"เดือนก่อนหน้า\"\n                        NextLabel=\"เดือนถัดไป\"\n                        WeekLabel=\"สัปดาห์\"\n                        MonthSelectLabel=\"เลือกเดือน\"\n                        YearSelectLabel=\"เลือกปี\"\n                        aria-label=\"ปฏิทินตรวจรับชิ้นงาน\" />\n    </ShadcnCardContent>\n    <ShadcnCardFooter>\n        <output aria-live=\"polite\">@SelectionSummary</output>\n    </ShadcnCardFooter>\n</ShadcnCard>\n\n@code {{\n    private CultureInfo ThaiCulture {{ get; }} = CultureInfo.GetCultureInfo(\"th-TH\");\n    private DateOnly Today {{ get; }} = new(2026, 8, 13);\n    private DateOnly VisibleMonth {{ get; set; }} = new(2026, 8, 1);\n    private DateOnly? InspectionDate {{ get; set; }} = new(2026, 8, 13);\n    private ShadcnDateRange? InspectionWindow {{ get; set; }} = new(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13));\n{summary}\n}}";
+            var describedBy = invalid ? "\n                        aria-describedby=\"calendar-inspection-error\"" : string.Empty;
+            var error = invalid ? "\n        <ShadcnFieldError Id=\"calendar-inspection-error\">เลือกวันที่ตรวจรับก่อนดำเนินการต่อ</ShadcnFieldError>" : string.Empty;
+            return $"@using System.Globalization\n@using Maliev.ShadcnBlazor.Components.Content\n@using Maliev.ShadcnBlazor.Components.Forms\n\n<ShadcnCard>\n    <ShadcnCardHeader>\n        <ShadcnCardTitle>กำหนดวันตรวจรับ</ShadcnCardTitle>\n        <ShadcnCardDescription>เลือกวันที่หรือช่วงเวลาสำหรับตรวจรับชิ้นงาน</ShadcnCardDescription>\n    </ShadcnCardHeader>\n    <ShadcnCardContent>\n        <ShadcnCalendar Mode=\"ShadcnCalendarSelectionMode.{mode}\"\n                        CaptionLayout=\"ShadcnCalendarCaptionLayout.{captionLayout}\"\n                        {binding}\n                        @bind-VisibleMonth=\"VisibleMonth\"\n                        Today=\"Today\"\n                        Culture=\"ThaiCulture\"\n                        ShowWeekNumbers=\"{showWeekNumbers.ToString().ToLowerInvariant()}\"\n                        Invalid=\"{invalid.ToString().ToLowerInvariant()}\"\n                        PreviousLabel=\"เดือนก่อนหน้า\"\n                        NextLabel=\"เดือนถัดไป\"\n                        WeekLabel=\"สัปดาห์\"\n                        MonthSelectLabel=\"เลือกเดือน\"\n                        YearSelectLabel=\"เลือกปี\"\n                        aria-label=\"ปฏิทินตรวจรับชิ้นงาน\"{describedBy} />{error}\n    </ShadcnCardContent>\n    <ShadcnCardFooter>\n        <output aria-live=\"polite\">@SelectionSummary</output>\n    </ShadcnCardFooter>\n</ShadcnCard>\n\n@code {{\n    private CultureInfo ThaiCulture {{ get; }} = CultureInfo.GetCultureInfo(\"th-TH\");\n    private DateOnly Today {{ get; }} = new(2026, 8, 13);\n    private DateOnly VisibleMonth {{ get; set; }} = new(2026, 8, 1);\n    private DateOnly? InspectionDate {{ get; set; }} = new(2026, 8, 13);\n    private ShadcnDateRange? InspectionWindow {{ get; set; }} = new(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13));\n{summary}\n}}";
         }
         return Example("calendar", "Inspection calendar", "Select a Thai-localized inspection date or connected date range with keyboard navigation and optional week numbers.", Source(), preview,
             [
@@ -564,11 +565,11 @@ internal static class FormDateExamples
     private sealed class InputDossierPreview : ComponentBase
     {
         [Parameter] public bool Invalid { get; set; }
-        [Parameter] public bool Masked { get; set; } = true;
+        [Parameter] public bool PreservePrefix { get; set; } = true;
         [Parameter] public bool Disabled { get; set; }
         [Parameter] public bool ReadOnly { get; set; }
 
-        private string ApiKey { get; set; } = "api_live_demo_7hK2";
+        private string ApiKey { get; set; } = string.Empty;
         private string Status { get; set; } = "Ready to save";
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -633,16 +634,15 @@ internal static class FormDateExamples
                 field.AddAttribute(1, nameof(ShadcnFieldLabel.For), "integration-key");
                 field.AddAttribute(2, nameof(ShadcnFieldLabel.ChildContent), Text("Integration key"));
                 field.CloseComponent();
-                field.OpenComponent<ShadcnInput<string>>(3);
-                field.AddAttribute(4, nameof(ShadcnInput<string>.Value), ApiKey);
-                field.AddAttribute(5, nameof(ShadcnInput<string>.ValueChanged), EventCallback.Factory.Create<string>(this, HandleKeyChanged));
-                field.AddAttribute(6, nameof(ShadcnInput<string>.Type), Masked ? "password" : "text");
-                field.AddAttribute(7, nameof(ShadcnInput<string>.Placeholder), "api_live_demo_7hK2");
-                field.AddAttribute(8, nameof(ShadcnInput<string>.InputMode), "text");
-                field.AddAttribute(9, nameof(ShadcnInput<string>.AutoComplete), "off");
-                field.AddAttribute(10, nameof(ShadcnInput<string>.Required), true);
-                field.AddAttribute(11, nameof(ShadcnInput<string>.ReadOnly), ReadOnly);
-                field.AddAttribute(12, nameof(ShadcnInput<string>.AdditionalAttributes), new Dictionary<string, object>
+                field.OpenComponent<ShadcnSecretInput>(3);
+                field.AddAttribute(4, nameof(ShadcnSecretInput.Value), ApiKey);
+                field.AddAttribute(5, nameof(ShadcnSecretInput.ValueChanged), EventCallback.Factory.Create<string?>(this, HandleKeyChanged));
+                field.AddAttribute(6, nameof(ShadcnSecretInput.MaskStart), PreservePrefix ? 3 : 0);
+                field.AddAttribute(7, nameof(ShadcnSecretInput.Placeholder), "sk-••••••••");
+                field.AddAttribute(8, nameof(ShadcnSecretInput.AutoComplete), "off");
+                field.AddAttribute(9, nameof(ShadcnSecretInput.Required), true);
+                field.AddAttribute(10, nameof(ShadcnSecretInput.ReadOnly), ReadOnly);
+                field.AddAttribute(11, nameof(ShadcnSecretInput.AdditionalAttributes), new Dictionary<string, object>
                 {
                     ["id"] = "integration-key",
                     ["data-testid"] = "forms-dossier-input"
@@ -689,9 +689,9 @@ internal static class FormDateExamples
             builder.CloseComponent();
         }
 
-        private Task HandleKeyChanged(string value)
+        private Task HandleKeyChanged(string? value)
         {
-            ApiKey = value;
+            ApiKey = value ?? string.Empty;
             Status = "Unsaved changes";
             return Task.CompletedTask;
         }

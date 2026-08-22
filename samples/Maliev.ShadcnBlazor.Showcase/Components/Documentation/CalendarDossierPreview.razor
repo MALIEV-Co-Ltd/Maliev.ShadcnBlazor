@@ -27,6 +27,10 @@
                             MonthSelectLabel="เลือกเดือน"
                             YearSelectLabel="เลือกปี"
                             AdditionalAttributes="Attributes" />
+            @if (Invalid)
+            {
+                <ShadcnFieldError Id="calendar-inspection-error">เลือกวันที่ตรวจรับก่อนดำเนินการต่อ</ShadcnFieldError>
+            }
         </ShadcnCardContent>
         <ShadcnCardFooter>
             <output class="showcase-calendar-selection" data-testid="calendar-selection" aria-live="polite">@SelectionSummary</output>
@@ -45,13 +49,22 @@
     private DateOnly VisibleMonth { get; set; } = new(2026, 8, 1);
     private DateOnly Today { get; } = new(2026, 8, 13);
     private CultureInfo ThaiCulture { get; } = CultureInfo.GetCultureInfo("th-TH");
-    private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
+    private IReadOnlyDictionary<string, object> Attributes
     {
-        ["data-testid"] = "forms-dossier-calendar",
-        ["aria-label"] = "ปฏิทินตรวจรับชิ้นงาน",
-        ["data-selection-mode"] = Mode.ToString().ToLowerInvariant(),
-        ["data-selected-date"] = Selected?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty
-    };
+        get
+        {
+            var attributes = new Dictionary<string, object>
+            {
+                ["data-testid"] = "forms-dossier-calendar",
+                ["aria-label"] = "ปฏิทินตรวจรับชิ้นงาน",
+                ["data-selection-mode"] = Mode.ToString().ToLowerInvariant(),
+                ["data-selected-date"] = Selected?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty
+            };
+            if (Invalid)
+                attributes["aria-describedby"] = "calendar-inspection-error";
+            return attributes;
+        }
+    }
     private string SelectionSummary => Mode == ShadcnCalendarSelectionMode.Range
         ? SelectedRange switch
         {

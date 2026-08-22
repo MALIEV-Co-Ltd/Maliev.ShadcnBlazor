@@ -245,6 +245,32 @@
     box-sizing: border-box;
 }
 
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition {
+    display: grid;
+    min-inline-size: 0;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition-pane {
+    grid-area: 1 / 1;
+    min-inline-size: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+        visibility 0s linear var(--shadcn-motion-duration);
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition-pane[data-visible="true"] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition[data-motion="false"] .shadcn-state-transition-pane,
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition[data-reduced-motion="true"] .shadcn-state-transition-pane {
+    transition: none;
+}
+
 @media (pointer: coarse) {
     .shadcn-scope,
     .shadcn-overlay-scope {

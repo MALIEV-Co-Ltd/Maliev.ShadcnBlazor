@@ -13,9 +13,10 @@ internal sealed class ShadcnRadioGroupContext<TValue>
     internal bool ReadOnly { get; private set; }
     internal bool Invalid { get; private set; }
     internal string? AriaDescribedBy { get; private set; }
+    internal ShadcnRadioGroupPresentation Presentation { get; private set; }
     internal int RegistrationVersion { get; private set; }
 
-    internal void Update(TValue value, string name, bool disabled, bool readOnly, bool invalid, string? ariaDescribedBy)
+    internal void Update(TValue value, string name, bool disabled, bool readOnly, bool invalid, string? ariaDescribedBy, ShadcnRadioGroupPresentation presentation)
     {
         Value = value;
         Name = name;
@@ -23,6 +24,7 @@ internal sealed class ShadcnRadioGroupContext<TValue>
         ReadOnly = readOnly;
         Invalid = invalid;
         AriaDescribedBy = ariaDescribedBy;
+        Presentation = presentation;
     }
 
     internal Guid Register(TValue value, Func<bool> disabled)
