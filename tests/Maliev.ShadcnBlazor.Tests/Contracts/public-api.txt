@@ -427,6 +427,10 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChart
   Boolean ShowAxis
   Boolean ShowGrid
   Boolean ShowLegend
+  Boolean ShowMajorGrid
+  Boolean ShowMinorGrid
+  Boolean ShowPrimaryYAxis
+  Boolean ShowSecondaryYAxis
   Boolean ShowTicks
   Boolean Stacked
   Double StrokeWidth
