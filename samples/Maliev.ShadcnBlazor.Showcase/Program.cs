@@ -19,6 +19,7 @@ builder.Services.AddSingleton<ComponentApiCatalog>();
 builder.Services.AddTransient<IComponentExampleRegistry, ComponentExampleRegistry>();
 builder.Services.AddScoped<ThemeStudioStorage>();
 builder.Services.AddScoped<IThemeStudioStorage>(services => services.GetRequiredService<ThemeStudioStorage>());
+builder.Services.AddScoped<ThemeStudioWorkbenchState>();
 builder.Services.AddScoped<ThemeStudioState>();
 builder.Services.AddScoped<MockSiteState>();
 await builder.Build().RunAsync();

@@ -12,6 +12,60 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 public sealed class ThemeStudioStateTests
 {
     [Fact]
+    public void WorkbenchStateOwnsShellPreferencesWithoutCreatingThemeHistory()
+    {
+        var workbench = new ThemeStudioWorkbenchState();
+        var changes = 0;
+        workbench.Changed += (_, _) => changes++;
+
+        Assert.False(workbench.SidebarOpen);
+        Assert.Equal("colors", workbench.ActiveSection);
+        Assert.Equal(ThemeStudioViewport.Desktop, workbench.Viewport);
+        Assert.Equal(ThemeStudioMode.Light, workbench.Mode);
+        Assert.Equal(ShadcnDirection.LeftToRight, workbench.Direction);
+        Assert.Equal(ThemeStudioLocale.English, workbench.Locale);
+        Assert.False(workbench.ReducedMotion);
+        Assert.False(workbench.HighContrastPreview);
+
+        workbench.SetViewport(ThemeStudioViewport.Mobile);
+        workbench.SetMode(ThemeStudioMode.Dark);
+        workbench.SetDirection(ShadcnDirection.RightToLeft);
+        workbench.SetLocale(ThemeStudioLocale.Thai);
+        workbench.SetReducedMotion(true);
+        workbench.SetHighContrastPreview(true);
+        workbench.SetActiveSection("typography");
+        workbench.OpenSidebar();
+        workbench.CloseSidebar();
+
+        Assert.Equal(9, changes);
+        Assert.False(workbench.SidebarOpen);
+        Assert.Equal("typography", workbench.ActiveSection);
+        Assert.Throws<ArgumentOutOfRangeException>(() => workbench.SetMode((ThemeStudioMode)999));
+        Assert.Throws<ArgumentOutOfRangeException>(() => workbench.SetViewport(new("unknown", "Unknown", 1)));
+    }
+
+    [Fact]
+    public void ThemeStateForwardsWorkbenchChangesWithoutPollutingThemeHistory()
+    {
+        var workbench = new ThemeStudioWorkbenchState();
+        var state = new ThemeStudioState(new RecordingStorage(), workbench);
+        var changes = 0;
+        state.Changed += (_, _) => changes++;
+
+        state.SetViewport(ThemeStudioViewport.Tablet);
+        state.SetMode(ThemeStudioMode.Dark);
+        state.SetDirection(ShadcnDirection.RightToLeft);
+        state.SetLocale(ThemeStudioLocale.Thai);
+        workbench.SetReducedMotion(true);
+
+        Assert.Same(workbench, state.Workbench);
+        Assert.Equal(5, changes);
+        Assert.Equal(768, state.Viewport.Width);
+        Assert.True(state.EffectiveDarkMode);
+        Assert.False(state.CanUndo);
+    }
+
+    [Fact]
     public void InvalidTokenEditorTextStaysLocalWhileTypedThemesRemainValid()
     {
         var state = CreateState();

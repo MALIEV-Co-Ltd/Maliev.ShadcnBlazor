@@ -1,3 +1,4 @@
+using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
 
@@ -93,7 +94,7 @@ public sealed class ThemeStudioBrowserTests(
         var defaultFontVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("Geist", defaultFontVariable, StringComparison.Ordinal);
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Font family" }).ClickAsync();
+        await page.GetByTestId("font-family-select").ClickAsync();
         await page.GetByText("DM Sans", new() { Exact = true }).ClickAsync();
 
         await Assertions.Expect(page.Locator("link[rel='stylesheet'][href*='DM+Sans']")).ToHaveCountAsync(1);
@@ -102,7 +103,7 @@ public sealed class ThemeStudioBrowserTests(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans')");
         Assert.Contains("DM Sans", fontVariable, StringComparison.Ordinal);
 
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Code font" }).ClickAsync();
+        await page.GetByTestId("monospace-font-family-select").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "JetBrains Mono", Exact = true }).ClickAsync();
         var monoVariable = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--shadcn-font-mono')");
@@ -135,6 +136,70 @@ public sealed class ThemeStudioBrowserTests(
         await toggle.ClickAsync();
         await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "true");
         await Assertions.Expect(page.GetByTestId("theme-inspector")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task MobileSettingsDrawerClosesByButtonBackdropAndEscapeThenRestoresFocus()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        var sidebar = page.GetByTestId("theme-studio-sidebar");
+        var toggle = page.GetByTestId("theme-controls-toggle");
+        await Assertions.Expect(sidebar).ToBeHiddenAsync();
+        await toggle.ClickAsync();
+        await Assertions.Expect(sidebar).ToBeVisibleAsync();
+        await page.GetByTestId("theme-settings-close").ClickAsync();
+        await Assertions.Expect(sidebar).ToBeHiddenAsync();
+        await Assertions.Expect(toggle).ToBeFocusedAsync();
+
+        await toggle.ClickAsync();
+        await page.GetByTestId("theme-settings-backdrop").ClickAsync(new() { Position = new() { X = 380, Y = 420 } });
+        await Assertions.Expect(sidebar).ToBeHiddenAsync();
+        await Assertions.Expect(toggle).ToBeFocusedAsync();
+
+        await toggle.ClickAsync();
+        await page.GetByTestId("theme-settings-close").FocusAsync();
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(sidebar).ToBeHiddenAsync();
+        await Assertions.Expect(toggle).ToBeFocusedAsync();
+
+        var overflow = await page.EvaluateAsync<double>(
+            "Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.body.clientWidth)");
+        Assert.InRange(overflow, 0, 1);
+        var axe = await page.GetByTestId("theme-studio-appbar").RunAxe();
+        Assert.DoesNotContain(axe.Violations, violation => violation.Impact is "serious" or "critical");
+    }
+
+    [Fact]
+    public async Task AccessibilityPreviewControlsApplyWithoutCreatingThemeHistory()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1024, Height = 768 },
+            ReducedMotion = ReducedMotion.NoPreference
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        await page.GetByTestId("preview-reduced-motion").ClickAsync();
+        await page.GetByTestId("preview-high-contrast").ClickAsync();
+
+        var scope = page.GetByTestId("theme-preview-scope");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-preview-reduced-motion", "true");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-preview-high-contrast", "true");
+        await Assertions.Expect(page.GetByTestId("theme-undo")).ToBeDisabledAsync();
+        var duration = await page.Locator(".mock-progress-track span").First.EvaluateAsync<double>(
+            "element => parseFloat(getComputedStyle(element).transitionDuration)");
+        Assert.InRange(duration, 0, 0.00001);
     }
 
     [Fact]
@@ -206,6 +271,7 @@ public sealed class ThemeStudioBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
+        await page.GetByTestId("theme-controls-toggle").ClickAsync();
         await page.Locator("input[data-testid='theme-token-light-primary']").FocusAsync();
         await page.Keyboard.PressAsync("Control+A");
         await page.Keyboard.TypeAsync("#654321");

@@ -105,6 +105,7 @@ public sealed class ThemeImportExportBrowserTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
+        await OpenSettingsIfClosedAsync(page);
         var primary = page.Locator("input[data-testid='theme-token-light-primary']");
         await primary.FillAsync("#123456");
         await primary.PressAsync("Tab");
@@ -141,6 +142,7 @@ public sealed class ThemeImportExportBrowserTests(
         CapturePageErrors(page, errors);
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
+        await OpenSettingsIfClosedAsync(page);
         var opener = page.GetByTestId(openerTestId);
 
         await opener.ClickAsync();
@@ -170,6 +172,7 @@ public sealed class ThemeImportExportBrowserTests(
         CapturePageErrors(page, errors);
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
+        await OpenSettingsIfClosedAsync(page);
 
         await page.GetByTestId("theme-import-open").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-import-dialog")).ToBeVisibleAsync();
@@ -191,6 +194,13 @@ public sealed class ThemeImportExportBrowserTests(
             errors.Add($"{message.Text}{location}");
         };
         page.PageError += (_, error) => errors.Add(error);
+    }
+
+    private static async Task OpenSettingsIfClosedAsync(IPage page)
+    {
+        var toggle = page.GetByTestId("theme-controls-toggle");
+        if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+            await toggle.ClickAsync();
     }
 
     private static bool IsOptionalGoogleFontFailure(IConsoleMessage message)

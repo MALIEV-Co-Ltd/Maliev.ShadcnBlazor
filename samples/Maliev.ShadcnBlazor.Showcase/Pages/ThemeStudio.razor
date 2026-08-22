@@ -1,9 +1,11 @@
 @page "/theme"
 @layout ThemeStudioLayout
 @implements IDisposable
+@implements IAsyncDisposable
 @inject ThemeStudioState State
 @inject MockSiteState MockSites
 @inject ILogger<ThemeStudio> Logger
+@inject IJSRuntime JavaScript
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 
@@ -20,38 +22,23 @@
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
-<div class="theme-studio" data-testid="theme-studio" lang="@LocaleCode">
-    <header class="theme-studio-appbar">
-        <div class="theme-studio-appbar__brand">
-            <span class="theme-studio-appbar__mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 14.2 9.8 21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3Z" /></svg>
-            </span>
-            <div>
-                <strong>Theme Studio</strong>
-                <span>@Text("Maliev.ShadcnBlazor theme builder", "ตัวสร้างธีม Maliev.ShadcnBlazor")</span>
-            </div>
-        </div>
-        <div class="theme-studio-appbar__actions">
-            <a class="theme-studio-docs-link" href="docs">Component docs</a>
-            <button type="button"
-                    class="theme-studio-controls-toggle"
-                    data-testid="theme-controls-toggle"
-                    aria-controls="theme-controls"
-                    aria-expanded="@ControlsExpanded"
-                    @onclick="ToggleControls">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-                <span>@(_controlsOpen ? "Hide controls" : "Show controls")</span>
-            </button>
-        </div>
-    </header>
+<div class="theme-studio"
+     data-testid="theme-studio"
+     data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
+     lang="@LocaleCode"
+     @onkeydown="HandleWorkbenchKeyDownAsync">
+    <ThemeStudioAppBar State="State" ToggleSettings="ToggleSettingsAsync" />
 
-    <PreviewToolbar State="State" />
+    <button type="button"
+            class="theme-studio-sidebar-backdrop"
+            aria-label="Close theme settings"
+            tabindex="-1"
+            data-testid="theme-settings-backdrop"
+            @onclick="CloseSettingsAsync"></button>
 
-    <div class="theme-studio-workbench" data-controls-open="@ControlsExpanded">
-        <div class="theme-inspector-drawer" aria-hidden="@ControlsHidden">
-            <ThemeInspector State="State" />
-        </div>
-        <main class="theme-preview-region" id="theme-preview" tabindex="-1">
+    <div class="theme-studio-workbench" data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
+        <ThemeStudioSidebar State="State" CloseRequested="CloseSettingsAsync" />
+        <main class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
             <div class="theme-preview-stage"
                  data-testid="theme-preview-stage"
                  data-preview-width="@State.Viewport.Width"
@@ -73,11 +60,11 @@
 
 @code {
     private bool _initialized;
-    private bool _controlsOpen = true;
     private bool _persisting;
     private bool _persistRequested;
     private bool _disposed;
     private Task _persistenceTask = Task.CompletedTask;
+    private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
     private string? GoogleFontsStylesheet
     {
@@ -179,17 +166,55 @@
         }
     }
 
-    private string Text(string english, string thai) => State.Locale == ThemeStudioLocale.Thai ? thai : english;
-    private string ControlsExpanded => _controlsOpen ? "true" : "false";
-    private string ControlsHidden => _controlsOpen ? "false" : "true";
     private ThemeStudioMockup _selectedMockup;
 
-    private void ToggleControls() => _controlsOpen = !_controlsOpen;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+        if (await _module.InvokeAsync<bool>("isDesktopWorkbench"))
+            State.Workbench.OpenSidebar();
+    }
+
+    private async Task ToggleSettingsAsync()
+    {
+        if (State.Workbench.SidebarOpen)
+            await CloseSettingsAsync();
+        else
+            State.Workbench.OpenSidebar();
+    }
+
+    private async Task CloseSettingsAsync()
+    {
+        if (!State.Workbench.SidebarOpen) return;
+        State.Workbench.CloseSidebar();
+        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+        await _module.InvokeVoidAsync("focusElementById", "theme-settings-toggle");
+    }
+
+    private async Task HandleWorkbenchKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape" && State.Workbench.SidebarOpen)
+            await CloseSettingsAsync();
+    }
 
     public void Dispose()
     {
         _disposed = true;
         _persistRequested = false;
         State.Changed -= OnStateChanged;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (_module is null) return;
+        try
+        {
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
     }
 }
