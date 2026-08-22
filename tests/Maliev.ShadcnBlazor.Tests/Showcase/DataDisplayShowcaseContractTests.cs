@@ -151,6 +151,27 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void TableExpansionUsesAnAccessibleRowTriggerAndRevealsUsefulDetail()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("table").Single();
+        var rendered = Render(example.Preview);
+        var trigger = rendered.Find("button[aria-controls='invoice-INV001-details']");
+
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Empty(rendered.FindAll("#invoice-INV001-details"));
+        trigger.Click();
+
+        var details = rendered.Find("#invoice-INV001-details");
+        Assert.Equal("true", rendered.Find("button[aria-controls='invoice-INV001-details']").GetAttribute("aria-expanded"));
+        Assert.Equal("4", details.QuerySelector("[data-slot='table-cell']")!.GetAttribute("colspan"));
+        Assert.Contains("Payment reference", details.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Inspection", details.TextContent, StringComparison.Ordinal);
+        Assert.Contains("aria-expanded=\"@expanded\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("invoice-INV001-details", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ColSpan=\"4\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ChartDossierControlsAxesAndGridLevelsIndependentlyWithExactSource()
     {
         var chart = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("chart").Single();

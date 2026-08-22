@@ -5812,6 +5812,32 @@ a {
     table-layout: auto;
 }
 
+.showcase-table__expand-trigger {
+    justify-content: flex-start;
+    min-inline-size: 0;
+    padding-inline: .5rem;
+}
+
+.showcase-table__detail-row > .shadcn-table-cell {
+    background: color-mix(in srgb, var(--shadcn-muted) 55%, transparent);
+}
+
+.showcase-table__detail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem 1.5rem;
+    white-space: normal;
+}
+
+.showcase-table__detail span {
+    display: grid;
+    gap: .125rem;
+}
+
+@media (max-width: 36rem) {
+    .showcase-table__detail { grid-template-columns: 1fr; }
+}
+
 .showcase-field-dossier {
     display: grid;
     inline-size: min(100%, 38rem);
