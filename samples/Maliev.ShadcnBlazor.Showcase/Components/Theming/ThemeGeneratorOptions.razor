@@ -4,16 +4,16 @@
 <section class="theme-generator-options" aria-labelledby="theme-generator-options-title" data-testid="theme-generator-options">
     <div class="theme-inspector-group__heading"><div><span class="theme-inspector__eyebrow">Deterministic palette · algorithm v1</span><h3 id="theme-generator-options-title">Generator options</h3><p>Use the same recipe to reproduce all semantic colors. Locked tokens keep their exact materialized value.</p></div></div>
     <div class="theme-generator-options__grid">
-        <label><span>Style</span><ShadcnSelect TValue="string" Value="State.StyleId" ValueChanged="State.SetStyle" Options="StyleOptions" Size="ShadcnControlSize.Small" aria-label="Generated component style" data-testid="theme-style-select" /></label>
-        <label><span>Base color</span><ShadcnSelect TValue="string" Value="State.BaseColorId" ValueChanged="State.SetBaseColor" Options="BaseColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated base color" data-testid="theme-base-color-select" /></label>
-        <label><span>Icon library</span><ShadcnSelect TValue="ThemeStudioIconLibrary" Value="State.IconLibrary" ValueChanged="State.SetIconLibrary" Options="IconOptions" Size="ShadcnControlSize.Small" aria-label="Generated icon library" data-testid="theme-icon-library-select" /></label>
-        <label><span>Radius</span><ShadcnSelect TValue="ThemeStudioRadiusPreset" Value="State.RadiusPreset" ValueChanged="State.SetRadiusPreset" Options="RadiusOptions" Size="ShadcnControlSize.Small" aria-label="Generated radius" data-testid="theme-radius-select" /></label>
-        <label><span>Menu accent</span><ShadcnSelect TValue="ThemeStudioMenuAccent" Value="State.MenuAccent" ValueChanged="State.SetMenuAccent" Options="MenuAccentOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu accent" data-testid="theme-menu-accent-select" /></label>
-        <label><span>Menu color</span><ShadcnSelect TValue="ThemeStudioMenuColor" Value="State.MenuColor" ValueChanged="State.SetMenuColor" Options="MenuColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu color" data-testid="theme-menu-color-select" /></label>
+        <div class="theme-generator-field"><span>Style</span><ShadcnSelect TValue="string" Value="State.StyleId" ValueChanged="State.SetStyle" Options="StyleOptions" Size="ShadcnControlSize.Small" aria-label="Generated component style" data-testid="theme-style-select" /></div>
+        <div class="theme-generator-field"><span>Base color</span><ShadcnSelect TValue="string" Value="State.BaseColorId" ValueChanged="State.SetBaseColor" Options="BaseColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated base color" data-testid="theme-base-color-select" /></div>
+        <div class="theme-generator-field"><span>Icon library</span><ShadcnSelect TValue="ThemeStudioIconLibrary" Value="State.IconLibrary" ValueChanged="State.SetIconLibrary" Options="IconOptions" Size="ShadcnControlSize.Small" aria-label="Generated icon library" data-testid="theme-icon-library-select" /></div>
+        <div class="theme-generator-field"><span>Radius</span><ShadcnSelect TValue="ThemeStudioRadiusPreset" Value="State.RadiusPreset" ValueChanged="State.SetRadiusPreset" Options="RadiusOptions" Size="ShadcnControlSize.Small" aria-label="Generated radius" data-testid="theme-radius-select" /></div>
+        <div class="theme-generator-field"><span>Menu accent</span><ShadcnSelect TValue="ThemeStudioMenuAccent" Value="State.MenuAccent" ValueChanged="State.SetMenuAccent" Options="MenuAccentOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu accent" data-testid="theme-menu-accent-select" /></div>
+        <div class="theme-generator-field"><span>Menu color</span><ShadcnSelect TValue="ThemeStudioMenuColor" Value="State.MenuColor" ValueChanged="State.SetMenuColor" Options="MenuColorOptions" Size="ShadcnControlSize.Small" aria-label="Generated menu color" data-testid="theme-menu-color-select" /></div>
     </div>
     <div class="theme-palette-recipe" aria-labelledby="theme-palette-recipe-title">
         <div class="theme-palette-recipe__heading"><strong id="theme-palette-recipe-title">Palette seed</strong><span>@State.Document.Palette.LockedTokens.Count locked tokens</span></div>
-        <label class="theme-palette-seed"><span class="sr-only">Palette seed</span><ShadcnInput TValue="string" Value="@_seed" ValueChanged="value => _seed = value ?? string.Empty" InputMode="numeric" aria-describedby="theme-palette-seed-help" data-testid="theme-palette-seed" /></label>
+        <label class="theme-palette-seed"><span class="sr-only">Palette seed</span><ShadcnInput TValue="string" Value="@_seed" ValueChanged="value => _seed = value ?? string.Empty" InputMode="numeric" aria-label="Palette seed" aria-describedby="theme-palette-seed-help" data-testid="theme-palette-seed" /></label>
         <div class="theme-palette-actions">
             <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Generate" data-testid="theme-palette-generate">Generate</ShadcnButton>
             <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="NewSeed" data-testid="theme-palette-new-seed">New seed</ShadcnButton>
@@ -26,8 +26,17 @@
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private string _seed = "0";
+    private string? _renderedSeed;
 
-    protected override void OnParametersSet() => _seed = State.Document.Palette.Seed.ToString(CultureInfo.InvariantCulture);
+    protected override void OnParametersSet()
+    {
+        var seed = State.Document.Palette.Seed.ToString(CultureInfo.InvariantCulture);
+        if (!string.Equals(_renderedSeed, seed, StringComparison.Ordinal))
+        {
+            _seed = seed;
+            _renderedSeed = seed;
+        }
+    }
 
     private void Generate() => State.GeneratePalette(_seed);
     private void NewSeed() { var seed = State.GenerateNewPalette(); _seed = seed.ToString(CultureInfo.InvariantCulture); }

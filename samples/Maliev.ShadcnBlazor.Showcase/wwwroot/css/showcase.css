@@ -3154,7 +3154,7 @@ a {
     gap: .625rem;
 }
 
-.theme-generator-options__grid > label,
+.theme-generator-field,
 .theme-palette-share {
     display: grid;
     gap: .35rem;
