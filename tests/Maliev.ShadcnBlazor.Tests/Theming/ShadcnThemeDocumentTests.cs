@@ -180,6 +180,69 @@ public sealed class ShadcnThemeDocumentTests
     }
 
     [Fact]
+    public void ValidatorRequiresEverySemanticTypographyRole()
+    {
+        var source = CreateDocument();
+        var roles = source.Typography.Roles
+            .Where(item => item.Key is ShadcnTypographyRole.Body or ShadcnTypographyRole.Code)
+            .ToDictionary();
+        var incomplete = source with
+        {
+            Typography = new ShadcnTypographyScale(
+                source.Typography.Body,
+                source.Typography.ThaiFallback,
+                source.Typography.Code,
+                roles)
+        };
+
+        var result = ShadcnThemeDocumentValidator.Validate(incomplete);
+
+        Assert.Contains(result.Errors, item =>
+            item.Code == "required-typography-role" &&
+            item.Path == "typography.roles.heading1");
+        Assert.Contains(result.Errors, item =>
+            item.Code == "required-typography-role" &&
+            item.Path == "typography.roles.label");
+        Assert.Contains(result.Errors, item =>
+            item.Code == "required-typography-role" &&
+            item.Path == "typography.roles.button");
+    }
+
+    [Theory]
+    [InlineData(99, 1, 1.5, 0)]
+    [InlineData(950, 1, 1.5, 0)]
+    [InlineData(400, 0.624, 1.5, 0)]
+    [InlineData(400, 4.001, 1.5, 0)]
+    [InlineData(400, 1, 0.999, 0)]
+    [InlineData(400, 1, 2.501, 0)]
+    [InlineData(400, 1, 1.5, -0.101)]
+    [InlineData(400, 1, 1.5, 0.201)]
+    public void ValidatorRejectsTypographyRoleValuesOutsideSafeEditorBounds(
+        int weight,
+        double scale,
+        double lineHeight,
+        double letterSpacing)
+    {
+        var source = CompleteTypographyRoles(CreateDocument());
+        var roles = source.Typography.Roles.ToDictionary();
+        roles[ShadcnTypographyRole.Body] = new(weight, scale, lineHeight, letterSpacing);
+        var invalid = source with
+        {
+            Typography = new ShadcnTypographyScale(
+                source.Typography.Body,
+                source.Typography.ThaiFallback,
+                source.Typography.Code,
+                roles)
+        };
+
+        var result = ShadcnThemeDocumentValidator.Validate(invalid);
+
+        Assert.Contains(result.Errors, item =>
+            item.Code == "invalid-typography-role" &&
+            item.Path == "typography.roles.body");
+    }
+
+    [Fact]
     public async Task LoaderBoundsInputAndSupportsSyncAndAsyncStreams()
     {
         var bytes = Encoding.UTF8.GetBytes(ShadcnThemeDocumentSerializer.Serialize(CreateDocument()));
@@ -277,8 +340,32 @@ public sealed class ShadcnThemeDocumentTests
                 new Dictionary<ShadcnTypographyRole, ShadcnTypographyRoleStyle>
                 {
                     [ShadcnTypographyRole.Body] = new(400, 1, 1.5, 0),
+                    [ShadcnTypographyRole.Heading1] = new(700, 2.25, 1.1, -0.03),
+                    [ShadcnTypographyRole.Heading2] = new(700, 1.875, 1.15, -0.025),
+                    [ShadcnTypographyRole.Heading3] = new(600, 1.5, 1.2, -0.02),
+                    [ShadcnTypographyRole.Heading4To6] = new(600, 1.125, 1.3, -0.01),
+                    [ShadcnTypographyRole.Label] = new(500, 0.875, 1.4, 0),
+                    [ShadcnTypographyRole.Button] = new(500, 0.875, 1, 0),
+                    [ShadcnTypographyRole.Caption] = new(400, 0.75, 1.4, 0),
                     [ShadcnTypographyRole.Code] = new(400, 0.875, 1.5, 0)
                 })
+        };
+    }
+
+    private static ShadcnThemeDocument CompleteTypographyRoles(ShadcnThemeDocument document)
+    {
+        var roles = Enum.GetValues<ShadcnTypographyRole>().ToDictionary(
+            role => role,
+            role => document.Typography.Roles.TryGetValue(role, out var style)
+                ? style
+                : new ShadcnTypographyRoleStyle(400, 1, 1.5, 0));
+        return document with
+        {
+            Typography = new ShadcnTypographyScale(
+                document.Typography.Body,
+                document.Typography.ThaiFallback,
+                document.Typography.Code,
+                roles)
         };
     }
 

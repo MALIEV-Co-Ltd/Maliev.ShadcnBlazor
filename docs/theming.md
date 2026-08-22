@@ -11,6 +11,19 @@ Because the font files ship as static package assets, this default remains
 deterministic in offline and self-hosted deployments. Applications can replace
 either stack with a validated theme metric or `ShadcnOptions.FontFamily` value.
 
+The Theme Studio reads its broad, checked-in Google Fonts catalog from a local
+snapshot. There is no runtime network request and no browser API key; when the
+snapshot cannot be loaded, the bundled Geist, Noto Sans Thai, and JetBrains Mono
+choices remain available. The initial checked-in data was projected from
+Google Fonts' public metadata; subsequent maintainer refreshes use the supported
+Developer API. Maintainers can refresh the reviewed snapshot with
+`GOOGLE_FONTS_API_KEY` set in the process environment and then run
+`pwsh eng/Refresh-GoogleFontsCatalog.ps1`. The tool consumes the official
+[Google Web Fonts Developer API](https://developers.google.com/fonts/docs/developer_api),
+while generated font-family queries follow the official
+[Google Fonts CSS2 API](https://developers.google.com/fonts/docs/css2). Never
+commit the key or expose it to Showcase clients.
+
 ## Configure defaults
 
 ```csharp
