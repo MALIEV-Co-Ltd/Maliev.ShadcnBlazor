@@ -58,12 +58,23 @@
     [Parameter] public bool Borders { get; set; } = true;
 
     private bool _expanded;
+    private bool _lastExpandedParameter;
+    private bool _expandedParameterInitialized;
     private static readonly Invoice[] Invoices = [
         new("INV001", "Paid", "Credit Card", "฿8,500"), new("INV002", "Pending", "PayPal", "฿3,250"), new("INV003", "Unpaid", "Bank Transfer", "฿12,400"),
         new("INV004", "Paid", "Credit Card", "฿5,900"), new("INV005", "Paid", "PayPal", "฿7,750")
     ];
 
-    protected override void OnInitialized() => _expanded = Expanded;
+    protected override void OnParametersSet()
+    {
+        if (!_expandedParameterInitialized || Expanded != _lastExpandedParameter)
+        {
+            _expanded = Expanded;
+            _lastExpandedParameter = Expanded;
+            _expandedParameterInitialized = true;
+        }
+    }
+
     private void ToggleDetails() => _expanded = !_expanded;
     private sealed record Invoice(string Id, string Status, string Method, string Amount);
 }

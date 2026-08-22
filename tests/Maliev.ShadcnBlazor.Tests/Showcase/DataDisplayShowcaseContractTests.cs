@@ -2,7 +2,9 @@ using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Maliev.ShadcnBlazor.Components.DataDisplay;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
@@ -169,6 +171,23 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("aria-expanded=\"@expanded\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("invoice-INV001-details", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ColSpan=\"4\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TableExpansionTracksDossierControlParameterChanges()
+    {
+        var rendered = Render<TableDossierPreview>(parameters => parameters.Add(component => component.Expanded, false));
+
+        Assert.Null(rendered.Find("tbody [data-slot='table-row']").GetAttribute("data-expanded"));
+
+        await rendered.InvokeAsync(() => rendered.Instance.SetParametersAsync(ParameterView.FromDictionary(new Dictionary<string, object?>
+        {
+            [nameof(TableDossierPreview.Expanded)] = true
+        })));
+
+        Assert.Equal("true", rendered.Find("tbody [data-slot='table-row']").GetAttribute("data-expanded"));
+        Assert.Equal("true", rendered.Find("button[aria-controls='invoice-INV001-details']").GetAttribute("aria-expanded"));
+        Assert.Single(rendered.FindAll("#invoice-INV001-details"));
     }
 
     [Fact]
