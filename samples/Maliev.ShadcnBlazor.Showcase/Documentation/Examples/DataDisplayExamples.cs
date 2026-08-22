@@ -1,5 +1,7 @@
 using Maliev.ShadcnBlazor.Components.DataDisplay;
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Overlays;
+using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -29,24 +31,7 @@ internal static class DataDisplayExamples
     private static ComponentExampleDefinition Table()
     {
         var selected = false; var expanded = false; var disabled = false; var footer = true; var borders = true;
-        RenderFragment preview = b =>
-        {
-            b.OpenComponent<ShadcnTable>(0); b.AddAttribute(1, "Class", "showcase-table"); b.AddAttribute(2, "Borders", borders); b.AddAttribute(3, "ExpectedColumnCount", 4); b.AddAttribute(4, "ChildContent", (RenderFragment)(t =>
-            {
-                AddText<ShadcnTableCaption>(t, 0, "รายการใบแจ้งหนี้ล่าสุด");
-                t.OpenComponent<ShadcnTableHeader>(10); t.AddAttribute(11, "ChildContent", (RenderFragment)(h => { h.OpenComponent<ShadcnTableRow>(0); h.AddAttribute(1, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableHead>(r, 0, "Invoice"); AddText<ShadcnTableHead>(r, 10, "Status"); AddText<ShadcnTableHead>(r, 20, "Method"); AddText<ShadcnTableHead>(r, 30, "Amount"); })); h.CloseComponent(); })); t.CloseComponent();
-                t.OpenComponent<ShadcnTableBody>(20); t.AddAttribute(21, "ChildContent", (RenderFragment)(body =>
-                {
-                    for (var index = 0; index < Invoices.Length; index++)
-                    {
-                        var invoice = Invoices[index];
-                        var rowSequence = index * 10;
-                        body.OpenComponent<ShadcnTableRow>(rowSequence); body.AddAttribute(rowSequence + 1, "Selected", selected && index == 0); body.AddAttribute(rowSequence + 2, "Expanded", expanded && index == 0); body.AddAttribute(rowSequence + 3, "Disabled", disabled && index == 0); body.AddAttribute(rowSequence + 4, "ChildContent", (RenderFragment)(r => { AddText<ShadcnTableCell>(r, 0, invoice.Id); AddText<ShadcnTableCell>(r, 10, invoice.Status); AddText<ShadcnTableCell>(r, 20, invoice.Method); AddText<ShadcnTableCell>(r, 30, invoice.Amount); })); body.CloseComponent();
-                    }
-                })); t.CloseComponent();
-                if (footer) { t.OpenComponent<ShadcnTableFooter>(30); t.AddAttribute(31, "ChildContent", (RenderFragment)(f => { f.OpenComponent<ShadcnTableRow>(0); f.AddAttribute(1, "ChildContent", (RenderFragment)(r => { r.OpenComponent<ShadcnTableCell>(0); r.AddAttribute(1, "ColSpan", 3); r.AddAttribute(2, "ChildContent", (RenderFragment)(c => c.AddContent(0, "Total"))); r.CloseComponent(); AddText<ShadcnTableCell>(r, 10, "฿37,800"); })); f.CloseComponent(); })); t.CloseComponent(); }
-            })); b.CloseComponent();
-        };
+        RenderFragment preview = b => { b.OpenComponent<TableDossierPreview>(0); b.AddAttribute(1, "Selected", selected); b.AddAttribute(2, "Expanded", expanded); b.AddAttribute(3, "Disabled", disabled); b.AddAttribute(4, "Footer", footer); b.AddAttribute(5, "Borders", borders); b.CloseComponent(); };
         string Source()
         {
             var firstRowState = string.Join(" ", new[]
@@ -55,12 +40,20 @@ internal static class DataDisplayExamples
                 expanded ? "Expanded=\"true\"" : string.Empty,
                 disabled ? "Disabled=\"true\"" : string.Empty
             }.Where(value => value.Length > 0));
-            var rows = string.Join(Environment.NewLine, Invoices.Select((invoice, index) =>
-                $"        <ShadcnTableRow{(index == 0 && firstRowState.Length > 0 ? $" {firstRowState}" : string.Empty)}><ShadcnTableCell>{invoice.Id}</ShadcnTableCell><ShadcnTableCell>{invoice.Status}</ShadcnTableCell><ShadcnTableCell>{invoice.Method}</ShadcnTableCell><ShadcnTableCell>{invoice.Amount}</ShadcnTableCell></ShadcnTableRow>"));
+            var first = Invoices[0];
+            var firstRow = $"        <ShadcnTableRow{(firstRowState.Length > 0 ? $" {firstRowState}" : string.Empty)}><ShadcnTableCell><ShadcnButton Variant=\"ShadcnButtonVariant.Ghost\" Size=\"ShadcnButtonSize.Small\" aria-expanded=\"@expanded\" aria-controls=\"invoice-INV001-details\" OnClick=\"ToggleDetails\">{first.Id}</ShadcnButton></ShadcnTableCell><ShadcnTableCell>{first.Status}</ShadcnTableCell><ShadcnTableCell>{first.Method}</ShadcnTableCell><ShadcnTableCell>{first.Amount}</ShadcnTableCell></ShadcnTableRow>" + Environment.NewLine
+                + "        @if (expanded)" + Environment.NewLine
+                + "        {" + Environment.NewLine
+                + "            <ShadcnTableRow id=\"invoice-INV001-details\"><ShadcnTableCell ColSpan=\"4\"><strong>Payment reference</strong> CC-8851-TH · <strong>Inspection</strong> Reconciled and ready for archive</ShadcnTableCell></ShadcnTableRow>" + Environment.NewLine
+                + "        }";
+            var rows = string.Join(Environment.NewLine, new[] { firstRow }.Concat(Invoices.Skip(1).Select(invoice =>
+                $"        <ShadcnTableRow><ShadcnTableCell>{invoice.Id}</ShadcnTableCell><ShadcnTableCell>{invoice.Status}</ShadcnTableCell><ShadcnTableCell>{invoice.Method}</ShadcnTableCell><ShadcnTableCell>{invoice.Amount}</ShadcnTableCell></ShadcnTableRow>")));
             var footerMarkup = footer
                 ? "    <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan=\"3\">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>"
                 : string.Empty;
             return $"""
+@using Maliev.ShadcnBlazor.Components.Actions
+
 <ShadcnTable Class="showcase-table" Borders="{borders.ToString().ToLowerInvariant()}" ExpectedColumnCount="4">
     <ShadcnTableCaption>รายการใบแจ้งหนี้ล่าสุด</ShadcnTableCaption>
     <ShadcnTableHeader>
@@ -76,7 +69,11 @@ internal static class DataDisplayExamples
     </ShadcnTableBody>
 {footerMarkup}
 </ShadcnTable>
-""";
+""" + Environment.NewLine + Environment.NewLine
+                + "@code {" + Environment.NewLine
+                + $"    private bool expanded = {expanded.ToString().ToLowerInvariant()};" + Environment.NewLine
+                + "    private void ToggleDetails() => expanded = !expanded;" + Environment.NewLine
+                + "}";
         }
         var example = Example("table", "Responsive semantic table", "Show a realistic invoice list with caption, status, payment method, selection, and a total footer.", Source(), preview, [Toggle("table-selected", "Selected row", v => selected = v), Toggle("table-expanded", "Expanded row", v => expanded = v), Toggle("table-disabled", "Disabled row", v => disabled = v), Toggle("table-footer", "Footer", v => footer = v, true), Toggle("table-borders", "Borders", v => borders = v, true)], ["caption", "footer", "selected", "expanded", "disabled", "actions", "responsive-overflow", "rtl"]);
         return example with { RazorSourceProvider = Source };
@@ -185,9 +182,9 @@ __STATE_ATTRIBUTES__
 
     private static ComponentExampleDefinition Chart()
     {
-        var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false;
+        var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false; var primaryAxis = true; var secondaryAxis = false; var majorGrid = true; var minorGrid = false;
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowGrid", true); b.AddAttribute(12, "BarRadius", 0d); b.AddAttribute(13, "InitialHeight", 260d); b.AddAttribute(14, "Stacked", stacked); b.AddAttribute(15, "LegendInteractive", true); b.AddAttribute(16, "Animated", true); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", majorGrid); b.AddAttribute(14, "ShowMinorGrid", minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
         const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
@@ -201,7 +198,10 @@ __STATE_ATTRIBUTES__
              Config="@Config"
              Loading="__LOADING__"
              ShowLegend="__SHOW_LEGEND__"
-             ShowGrid="true"
+             ShowPrimaryYAxis="__PRIMARY_AXIS__"
+             ShowSecondaryYAxis="__SECONDARY_AXIS__"
+             ShowMajorGrid="__MAJOR_GRID__"
+             ShowMinorGrid="__MINOR_GRID__"
              BarRadius="0"
              InitialHeight="260"
              Stacked="__STACKED__"
@@ -225,8 +225,12 @@ __STATE_ATTRIBUTES__
             .Replace("__TYPE__", area ? "Area" : line ? "Line" : "Bar", StringComparison.Ordinal)
             .Replace("__LOADING__", loading ? "true" : "false", StringComparison.Ordinal)
             .Replace("__SHOW_LEGEND__", hideLegend ? "false" : "true", StringComparison.Ordinal)
+            .Replace("__PRIMARY_AXIS__", primaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__SECONDARY_AXIS__", secondaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MAJOR_GRID__", majorGrid ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MINOR_GRID__", minorGrid ? "true" : "false", StringComparison.Ordinal)
             .Replace("__STACKED__", stacked ? "true" : "false", StringComparison.Ordinal);
-        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with a real tooltip, legend, loading state, and responsive SVG surface.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v)], ["bar", "line", "area", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
+        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with independently configurable axes and grid levels.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v), Toggle("chart-primary-axis", "Primary axis", v => primaryAxis = v, true), Toggle("chart-secondary-axis", "Secondary axis", v => secondaryAxis = v), Toggle("chart-major-grid", "Major grid", v => majorGrid = v, true), Toggle("chart-minor-grid", "Minor grid", v => minorGrid = v)], ["bar", "line", "area", "axes", "major-grid", "minor-grid", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
         return example with { RazorSourceProvider = Source };
     }
 

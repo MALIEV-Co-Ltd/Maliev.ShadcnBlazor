@@ -110,6 +110,7 @@ enum Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAlign: Start, Center, 
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselAutoplayPlugin
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselContent
   RenderFragment ChildContent
+  Nullable<Double> ViewportBlockSize
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselItem
   Double BasisPercent
   RenderFragment ChildContent
@@ -426,6 +427,10 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChart
   Boolean ShowAxis
   Boolean ShowGrid
   Boolean ShowLegend
+  Boolean ShowMajorGrid
+  Boolean ShowMinorGrid
+  Boolean ShowPrimaryYAxis
+  Boolean ShowSecondaryYAxis
   Boolean ShowTicks
   Boolean Stacked
   Double StrokeWidth

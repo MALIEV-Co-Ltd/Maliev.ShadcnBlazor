@@ -5358,7 +5358,7 @@ a {
 }
 
 .showcase-badge-dossier__header > div,
-.showcase-badge-dossier__current > span {
+.showcase-badge-dossier__summary {
     display: grid;
     min-inline-size: 0;
     gap: .125rem;
@@ -5371,7 +5371,7 @@ a {
 }
 
 .showcase-badge-dossier__header span,
-.showcase-badge-dossier__current > span > span,
+.showcase-badge-dossier__summary > span,
 .showcase-badge-dossier__gallery li > span {
     color: var(--shadcn-muted-foreground);
     font-size: .75rem;
@@ -5810,6 +5810,32 @@ a {
     inline-size: max-content;
     min-inline-size: 36rem;
     table-layout: auto;
+}
+
+.showcase-table__expand-trigger {
+    justify-content: flex-start;
+    min-inline-size: 0;
+    padding-inline: .5rem;
+}
+
+.showcase-table__detail-row > .shadcn-table-cell {
+    background: color-mix(in srgb, var(--shadcn-muted) 55%, transparent);
+}
+
+.showcase-table__detail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem 1.5rem;
+    white-space: normal;
+}
+
+.showcase-table__detail span {
+    display: grid;
+    gap: .125rem;
+}
+
+@media (max-width: 36rem) {
+    .showcase-table__detail { grid-template-columns: 1fr; }
 }
 
 .showcase-field-dossier {

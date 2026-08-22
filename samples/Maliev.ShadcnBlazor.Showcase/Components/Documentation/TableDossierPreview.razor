@@ -1,0 +1,80 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.DataDisplay
+
+<ShadcnTable Class="showcase-table" Borders="Borders" ExpectedColumnCount="4">
+    <ShadcnTableCaption>รายการใบแจ้งหนี้ล่าสุด</ShadcnTableCaption>
+    <ShadcnTableHeader>
+        <ShadcnTableRow>
+            <ShadcnTableHead>Invoice</ShadcnTableHead>
+            <ShadcnTableHead>Status</ShadcnTableHead>
+            <ShadcnTableHead>Method</ShadcnTableHead>
+            <ShadcnTableHead>Amount</ShadcnTableHead>
+        </ShadcnTableRow>
+    </ShadcnTableHeader>
+    <ShadcnTableBody>
+        @for (var index = 0; index < Invoices.Length; index++)
+        {
+            var invoice = Invoices[index];
+            var isFirst = index == 0;
+            <ShadcnTableRow Selected="@(Selected && isFirst)" Expanded="@(_expanded && isFirst)" Disabled="@(Disabled && isFirst)">
+                <ShadcnTableCell>
+                    @if (isFirst)
+                    {
+                        <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Size="ShadcnButtonSize.Small" Class="showcase-table__expand-trigger" aria-expanded="@_expanded.ToString().ToLowerInvariant()" aria-controls="invoice-INV001-details" OnClick="ToggleDetails">@invoice.Id</ShadcnButton>
+                    }
+                    else
+                    {
+                        @invoice.Id
+                    }
+                </ShadcnTableCell>
+                <ShadcnTableCell>@invoice.Status</ShadcnTableCell>
+                <ShadcnTableCell>@invoice.Method</ShadcnTableCell>
+                <ShadcnTableCell>@invoice.Amount</ShadcnTableCell>
+            </ShadcnTableRow>
+            @if (isFirst && _expanded)
+            {
+                <ShadcnTableRow id="invoice-INV001-details" Class="showcase-table__detail-row">
+                    <ShadcnTableCell ColSpan="4">
+                        <div class="showcase-table__detail">
+                            <span><strong>Payment reference</strong> CC-8851-TH</span>
+                            <span><strong>Inspection</strong> Reconciled and ready for archive</span>
+                        </div>
+                    </ShadcnTableCell>
+                </ShadcnTableRow>
+            }
+        }
+    </ShadcnTableBody>
+    @if (Footer)
+    {
+        <ShadcnTableFooter><ShadcnTableRow><ShadcnTableCell ColSpan="3">Total</ShadcnTableCell><ShadcnTableCell>฿37,800</ShadcnTableCell></ShadcnTableRow></ShadcnTableFooter>
+    }
+</ShadcnTable>
+
+@code {
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Footer { get; set; } = true;
+    [Parameter] public bool Borders { get; set; } = true;
+
+    private bool _expanded;
+    private bool _lastExpandedParameter;
+    private bool _expandedParameterInitialized;
+    private static readonly Invoice[] Invoices = [
+        new("INV001", "Paid", "Credit Card", "฿8,500"), new("INV002", "Pending", "PayPal", "฿3,250"), new("INV003", "Unpaid", "Bank Transfer", "฿12,400"),
+        new("INV004", "Paid", "Credit Card", "฿5,900"), new("INV005", "Paid", "PayPal", "฿7,750")
+    ];
+
+    protected override void OnParametersSet()
+    {
+        if (!_expandedParameterInitialized || Expanded != _lastExpandedParameter)
+        {
+            _expanded = Expanded;
+            _lastExpandedParameter = Expanded;
+            _expandedParameterInitialized = true;
+        }
+    }
+
+    private void ToggleDetails() => _expanded = !_expanded;
+    private sealed record Invoice(string Id, string Status, string Method, string Amount);
+}

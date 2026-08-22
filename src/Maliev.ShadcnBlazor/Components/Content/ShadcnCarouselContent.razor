@@ -1,14 +1,22 @@
 @using Microsoft.AspNetCore.Components.Web
+@using System.Globalization
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-content")" style="@MergeStyle(null)" data-slot="carousel-content" data-orientation="@OrientationValue" @onpointerdown="HandlePointerDownAsync" @onpointermove="HandlePointerMoveAsync" @onpointerup="HandlePointerUpAsync" @onpointercancel="HandlePointerCancelAsync" @onlostpointercapture="HandlePointerCancelAsync"><div data-slot="carousel-track" style="@TrackStyle">@ChildContent</div></div>
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-content")" style="@ContentStyle" data-slot="carousel-content" data-orientation="@OrientationValue" @onpointerdown="HandlePointerDownAsync" @onpointermove="HandlePointerMoveAsync" @onpointerup="HandlePointerUpAsync" @onpointercancel="HandlePointerCancelAsync" @onlostpointercapture="HandlePointerCancelAsync"><div data-slot="carousel-track" style="@TrackStyle">@ChildContent</div></div>
 @code {
     [CascadingParameter] private ShadcnCarouselContext? Context { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public double? ViewportBlockSize { get; set; }
     private string OrientationValue => Context?.Orientation == ShadcnCarouselOrientation.Vertical ? "vertical" : "horizontal";
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-orientation");
+    private string? ContentStyle => MergeStyle(ViewportBlockSize is null ? null : $"--shadcn-carousel-viewport-block-size: {ViewportBlockSize.Value.ToString("0.###", CultureInfo.InvariantCulture)}px");
     private Task HandlePointerDownAsync(PointerEventArgs args) => Context?.PointerDownAsync(args.ClientX, args.ClientY, args.PointerId).AsTask() ?? Task.CompletedTask;
     private Task HandlePointerUpAsync(PointerEventArgs args) => Context?.PointerUpAsync(args.ClientX, args.ClientY, args.PointerId).AsTask() ?? Task.CompletedTask;
     private Task HandlePointerMoveAsync(PointerEventArgs args) => Context?.PointerMoveAsync(args.ClientX, args.ClientY, args.PointerId).AsTask() ?? Task.CompletedTask;
     private Task HandlePointerCancelAsync() => Context?.PointerCancelAsync().AsTask() ?? Task.CompletedTask;
     private string? TrackStyle => string.Join("; ", new[] { Context?.TrackStyle, Context?.DragStyle }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    protected override void OnParametersSet()
+    {
+        if (ViewportBlockSize is not null && (!double.IsFinite(ViewportBlockSize.Value) || ViewportBlockSize.Value <= 0))
+            throw new ArgumentOutOfRangeException(nameof(ViewportBlockSize));
+    }
 }

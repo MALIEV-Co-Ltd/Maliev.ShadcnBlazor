@@ -15,9 +15,21 @@
     else
     {
         <svg data-slot="chart-surface" viewBox="0 0 @F(_width) @F(_height)" preserveAspectRatio="none" role="group" aria-label="@Title" tabindex="0" @onkeydown="OnKeyDown">
-            @if (ShowGrid && !IsRadial)
+            @if ((ShowGrid || ShowMajorGrid) && !IsRadial)
             {
-                @for (var grid = 0; grid <= 4; grid++) { <line data-slot="chart-grid-line" x1="36" y1="@F(12 + grid * Math.Max(1, _height - 40) / 4)" x2="@F(_width - 12)" y2="@F(12 + grid * Math.Max(1, _height - 40) / 4)" /> }
+                @for (var grid = 0; grid <= 4; grid++) { <line data-slot="chart-grid-line" data-grid-level="major" x1="36" y1="@F(12 + grid * Math.Max(1, _height - 40) / 4)" x2="@F(_width - 12)" y2="@F(12 + grid * Math.Max(1, _height - 40) / 4)" /> }
+            }
+            @if (ShowMinorGrid && !IsRadial)
+            {
+                @for (var grid = 0; grid < 4; grid++) { <line data-slot="chart-grid-line" data-grid-level="minor" x1="36" y1="@F(12 + (grid + .5) * Math.Max(1, _height - 40) / 4)" x2="@F(_width - 12)" y2="@F(12 + (grid + .5) * Math.Max(1, _height - 40) / 4)" /> }
+            }
+            @if (ShowPrimaryYAxis && !IsRadial)
+            {
+                <line data-slot="chart-axis" data-axis="primary" data-side="start" x1="@F(PrimaryAxisX)" y1="12" x2="@F(PrimaryAxisX)" y2="@F(_height - 28)" aria-hidden="true" />
+            }
+            @if (ShowSecondaryYAxis && !IsRadial)
+            {
+                <line data-slot="chart-axis" data-axis="secondary" data-side="end" x1="@F(SecondaryAxisX)" y1="12" x2="@F(SecondaryAxisX)" y2="@F(_height - 28)" aria-hidden="true" />
             }
             @if (_activeIndex >= 0 && Type == ShadcnChartType.Bar)
             {
@@ -69,6 +81,10 @@
     [Parameter] public bool Stacked { get; set; }
     [Parameter] public bool ShowAxis { get; set; } = true;
     [Parameter] public bool ShowGrid { get; set; }
+    [Parameter] public bool ShowPrimaryYAxis { get; set; } = true;
+    [Parameter] public bool ShowSecondaryYAxis { get; set; }
+    [Parameter] public bool ShowMajorGrid { get; set; }
+    [Parameter] public bool ShowMinorGrid { get; set; }
     [Parameter] public bool ShowTicks { get; set; } = true;
     [Parameter] public bool ShowLegend { get; set; } = true;
     [Parameter] public bool HideLegendIcon { get; set; }
@@ -100,6 +116,8 @@
     private string TitleId => $"{ChartId}-title"; private string DescriptionId => $"{ChartId}-description";
     private IReadOnlyList<ShadcnChartSeries> VisibleSeries => Series.Where(item => item.Visible && !_hiddenSeries.Contains(item.Key)).ToList();
     private bool IsRadial => Type is ShadcnChartType.Pie or ShadcnChartType.Donut;
+    private double PrimaryAxisX => Direction == ShadcnDirection.RightToLeft ? _width - 12 : 36;
+    private double SecondaryAxisX => Direction == ShadcnDirection.RightToLeft ? 36 : _width - 12;
     private bool HasData => Series.Any(item => item.Visible && item.Values.Any(value => value.HasValue));
     private ShadcnChartGeometry Geometry => VisibleSeries.Count == 0 ? new(_width, _height, [], 0, 1) : ShadcnChartGeometry.Create(Type, Categories, VisibleSeries, _width, _height, Stacked);
     private string ChartStyle => MergeStyle($"--shadcn-chart-initial-width: {F(InitialWidth)}px; --shadcn-chart-initial-height: {F(InitialHeight)}px")!;

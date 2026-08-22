@@ -294,7 +294,7 @@ internal static class FeedbackContentExamples
                 @bind-SelectedIndex="selectedIndex"
                 @ref="carousel"
                 Options="@Options">
-    <ShadcnCarouselContent>
+    <ShadcnCarouselContent{{(vertical ? " ViewportBlockSize=\"256\"" : string.Empty)}}>
         @foreach (var slide in Slides)
         {
             <ShadcnCarouselItem Index="slide.Index" Label="@slide.Label">

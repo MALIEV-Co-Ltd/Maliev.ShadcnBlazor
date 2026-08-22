@@ -163,6 +163,8 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Contains("Loop = true", carousel.RazorSource, StringComparison.Ordinal);
         Assert.Contains("RightToLeft = true", carousel.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ReducedMotion = true", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ViewportBlockSize=\"256\"", carousel.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-carousel-viewport-block-size: 256px", Render(carousel.Preview).Find("[data-slot='carousel-content']").GetAttribute("style"), StringComparison.Ordinal);
         Assert.Contains("GoToAsync(slide.Index)", carousel.RazorSource, StringComparison.Ordinal);
 
         var toast = registry.GetBySlug("toast").Single();
@@ -330,6 +332,24 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         Assert.Equal("true", selected.GetAttribute("aria-invalid"));
         Assert.Contains("<ShadcnBadge Variant=\"ShadcnBadgeVariant.Outline\" Href=\"docs/components/badge\" aria-invalid=\"true\">", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("aria-invalid=\"true\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BadgeDossierKeepsTheSameVisibleLabelForSpanAndLinkRenderModes()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("badge").Single();
+        var span = Render(example.Preview).Find("[data-testid='badge-current'] [data-slot='badge']");
+        Assert.Equal("span", span.NodeName.ToLowerInvariant());
+        Assert.Contains("Ready for inspection", span.TextContent, StringComparison.Ordinal);
+
+        example.Controls.Single(control => control.Id == "badge-link").Apply("true");
+        var link = Render(example.Preview).Find("[data-testid='badge-current'] [data-slot='badge']");
+        Assert.Equal("a", link.NodeName.ToLowerInvariant());
+        Assert.Equal(span.TextContent.Trim(), link.TextContent.Trim());
+
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.DoesNotContain(".showcase-badge-dossier__current > span {", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-badge-dossier__summary {", css, StringComparison.Ordinal);
     }
 
     [Fact]
