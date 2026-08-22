@@ -14,7 +14,9 @@ public sealed class ThemeConsumerContractTests
         var css = await File.ReadAllTextAsync(Path.Combine(sample, "wwwroot", "theme.css"));
 
         Assert.Equal(ShadcnThemeDocument.CurrentSchemaVersion, document.SchemaVersion);
-        Assert.Equal(ShadcnThemeCssWriter.Write(document), css);
+        Assert.Equal(
+            ShadcnThemeCssWriter.Write(document).ReplaceLineEndings("\n"),
+            css.ReplaceLineEndings("\n"));
     }
 
     [Fact]
