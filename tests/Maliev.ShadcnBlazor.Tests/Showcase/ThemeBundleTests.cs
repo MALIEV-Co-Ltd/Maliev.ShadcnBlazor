@@ -17,24 +17,32 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 public sealed class ThemeBundleTests
 {
     [Fact]
+    public void CanonicalJsonBytesMatchStateCodeBundleAndImportSurfaces()
+    {
+        var state = new ThemeStudioState(new NullStorage());
+        state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
+        state.SetDirection(ShadcnDirection.RightToLeft);
+        state.SetLocale(ThemeStudioLocale.Thai);
+        var document = state.CreateDocument();
+        var expected = state.SerializeDocument();
+
+        var codeJson = ThemeStudioCodeGenerator.WriteJson(document);
+        var bundle = ThemeBundleBuilder.Build(document, new ThemeBundleOptions(state.SelectedPresetId, "1.0.0"));
+        var bundleJson = Encoding.UTF8.GetString(bundle.Files.Single(file => file.Path == "theme.json").Bytes);
+        var imported = new ThemeImportService().Import(Encoding.UTF8.GetBytes(expected), "theme.json", "application/json");
+
+        Assert.Equal(expected, codeJson);
+        Assert.Equal(expected, bundleJson);
+        Assert.True(imported.Succeeded);
+        Assert.Equal(expected, ShadcnThemeDocumentSerializer.Serialize(imported.Document!));
+    }
+
+    [Fact]
     public void GeneratedCSharpContainsThePortableMetadataAndTypedThemeFactory()
     {
-        var theme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
-        var config = new ThemeStudioGeneratorConfig
-        {
-            Preset = "base-vega-neutral",
-            Style = "vega",
-            BaseColor = "neutral",
-            IconLibrary = ThemeStudioIconLibrary.Lucide,
-            MenuAccent = ThemeStudioMenuAccent.Default,
-            MenuColor = ThemeStudioMenuColor.Default,
-            RadiusPreset = ThemeStudioRadiusPreset.Default,
-            FontFamily = theme.Metrics.FontFamily,
-            MonospaceFontFamily = theme.Metrics.MonospaceFontFamily,
-            Theme = theme
-        };
+        var document = new ThemeStudioState(new NullStorage()).CreateDocument();
 
-        var code = ThemeStudioCodeGenerator.WriteCSharp(config);
+        var code = ThemeStudioCodeGenerator.WriteCSharp(document);
 
         Assert.Contains("public static ShadcnTheme Create()", code, StringComparison.Ordinal);
         Assert.Contains("public const string IconLibrary = \"lucide\"", code, StringComparison.Ordinal);
@@ -69,7 +77,7 @@ public sealed class ThemeBundleTests
         var first = ThemeBundleBuilder.Build(theme, options);
         var second = ThemeBundleBuilder.Build(theme, options);
 
-        Assert.Equal("maliev-shadcn-theme-maliev-factory-night-1.zip", first.FileName);
+        Assert.Equal("maliev-shadcn-theme-maliev-factory-night-2.zip", first.FileName);
         Assert.Equal(first.ZipBytes, second.ZipBytes);
         Assert.Equal(ExpectedPaths, first.Files.Select(file => file.Path));
         Assert.True(first.Validation.IsValid);
@@ -87,7 +95,8 @@ public sealed class ThemeBundleTests
         });
 
         var extracted = archive.Entries.ToDictionary(entry => entry.FullName, ReadEntry, StringComparer.Ordinal);
-        Assert.Equal(ShadcnThemeSerializer.Serialize(theme), extracted["theme.json"]);
+        var document = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
+        Assert.Equal(ShadcnThemeDocumentSerializer.Serialize(document), extracted["theme.json"]);
         Assert.Equal(ShadcnThemeCssWriter.Write(theme), extracted["theme.css"]);
         Assert.Contains("#123456", extracted["theme.css"], StringComparison.Ordinal);
         Assert.Contains("#123456", extracted["theme.json"], StringComparison.Ordinal);
@@ -99,7 +108,7 @@ public sealed class ThemeBundleTests
         });
 
         using var manifest = JsonDocument.Parse(extracted["manifest.json"]);
-        Assert.Equal(ShadcnTheme.CurrentSchemaVersion, manifest.RootElement.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(ShadcnThemeDocument.CurrentSchemaVersion, manifest.RootElement.GetProperty("schemaVersion").GetInt32());
         Assert.Equal(theme.Name, manifest.RootElement.GetProperty("themeName").GetString());
         Assert.Equal(options.PresetAncestry, manifest.RootElement.GetProperty("presetAncestry").GetString());
         var manifestFiles = manifest.RootElement.GetProperty("files").EnumerateArray().ToArray();
@@ -148,11 +157,11 @@ public sealed class ThemeBundleTests
     }
 
     [Theory]
-    [InlineData("../escape", "maliev-shadcn-theme-escape-1.zip")]
-    [InlineData("CON", "maliev-shadcn-theme-theme-1.zip")]
-    [InlineData(" สวัสดี โลก ", "maliev-shadcn-theme-theme-1.zip")]
-    [InlineData("Name<>:\"/\\|?* Value", "maliev-shadcn-theme-name-value-1.zip")]
-    [InlineData("---", "maliev-shadcn-theme-theme-1.zip")]
+    [InlineData("../escape", "maliev-shadcn-theme-escape-2.zip")]
+    [InlineData("CON", "maliev-shadcn-theme-theme-2.zip")]
+    [InlineData(" สวัสดี โลก ", "maliev-shadcn-theme-theme-2.zip")]
+    [InlineData("Name<>:\"/\\|?* Value", "maliev-shadcn-theme-name-value-2.zip")]
+    [InlineData("---", "maliev-shadcn-theme-theme-2.zip")]
     public void BuildNormalizesUntrustedThemeNamesToSafePortableFileNames(string name, string expected)
     {
         var theme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with { Name = name.Replace("<", string.Empty).Replace(">", string.Empty).Replace(";", string.Empty) };
@@ -331,7 +340,8 @@ public sealed class ThemeBundleTests
 
         Assert.True(result.Succeeded);
         Assert.Equal(ShadcnTheme.CurrentSchemaVersion, result.Theme!.SchemaVersion);
-        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Contains("migrated", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(ShadcnThemeDocument.CurrentSchemaVersion, result.Document!.SchemaVersion);
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Contains("schema 2", StringComparison.OrdinalIgnoreCase));
     }
 
     private static string ReadEntry(ZipArchiveEntry entry)
@@ -343,7 +353,7 @@ public sealed class ThemeBundleTests
     private sealed class NullStorage : IThemeStudioStorage
     {
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
-        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme) => ValueTask.FromResult(ThemeStudioStorageResult.Success(theme));
+        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) => ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
     }
 }
 
@@ -442,7 +452,7 @@ public sealed class ThemeImportExportComponentTests : BunitContext
     private sealed class NullStorage : IThemeStudioStorage
     {
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
-        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme) => ValueTask.FromResult(ThemeStudioStorageResult.Success(theme));
+        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) => ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
     }
 
     private static readonly string[] ExpectedPaths =

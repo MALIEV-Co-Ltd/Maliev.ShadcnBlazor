@@ -1615,12 +1615,21 @@ type Maliev.ShadcnBlazor.Theming.ShadcnCss
   const String ScopeClass
   const String StylesheetPath
 enum Maliev.ShadcnBlazor.Theming.ShadcnDirection: LeftToRight, RightToLeft
+type Maliev.ShadcnBlazor.Theming.ShadcnFontSelection
+  String Fallback
+  String Family
+  String GoogleFontsId
 type Maliev.ShadcnBlazor.Theming.ShadcnOptions
   Boolean DefaultDarkMode
   ShadcnDirection DefaultDirection
   String FontFamily
   TimeSpan ToastDuration
   TimeSpan ToastExitDuration
+type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe
+  Int32 AlgorithmVersion
+  String BaseColor
+  IReadOnlyList<String> LockedTokens
+  UInt64 Seed
 enum Maliev.ShadcnBlazor.Theming.ShadcnReducedMotionBehavior: RespectSystemPreference, AlwaysReduce
 type Maliev.ShadcnBlazor.Theming.ShadcnTheme
   const Int32 CurrentSchemaVersion
@@ -1629,10 +1638,39 @@ type Maliev.ShadcnBlazor.Theming.ShadcnTheme
   ShadcnThemeMetrics Metrics
   String Name
   Int32 SchemaVersion
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeApplication
+  String BaseColor
+  Boolean DefaultDarkMode
+  ShadcnDirection DefaultDirection
+  String DefaultLocale
+  String IconLibrary
+  String MenuAccent
+  String MenuColor
+  String Preset
+  ShadcnReducedMotionBehavior ReducedMotionBehavior
+  String Style
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeCSharpWriter
   method String Write(ShadcnTheme theme)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeCssWriter
   method String Write(ShadcnTheme theme)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocument
+  const Int32 CurrentSchemaVersion
+  ShadcnThemeApplication Application
+  String Name
+  ShadcnPaletteRecipe Palette
+  Int32 SchemaVersion
+  ShadcnTheme Theme
+  ShadcnTypographyScale Typography
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocumentLoader
+  const Int32 MaxDocumentBytes
+  method ShadcnThemeDocument Load(Stream stream)
+  method ValueTask<ShadcnThemeDocument> LoadAsync(Stream stream, CancellationToken cancellationToken)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocumentSerializer
+  method ShadcnThemeDocument Deserialize(ReadOnlySpan<Byte> utf8Json)
+  method ShadcnThemeDocument Deserialize(String json)
+  method String Serialize(ShadcnThemeDocument document)
+type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocumentValidator
+  method ShadcnThemeValidationResult Validate(ShadcnThemeDocument document)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeFactory
   method MudTheme Create(ShadcnOptions options)
   method MudTheme Create(ShadcnTheme theme)
@@ -1680,3 +1718,14 @@ type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidator
   const Double NonTextContrastRatio
   const Double TextContrastRatio
   method ShadcnThemeValidationResult Validate(ShadcnTheme theme)
+enum Maliev.ShadcnBlazor.Theming.ShadcnTypographyRole: Body, Heading1, Heading2, Heading3, Heading4To6, Label, Button, Caption, Code
+type Maliev.ShadcnBlazor.Theming.ShadcnTypographyRoleStyle
+  Double LetterSpacingEm
+  Double LineHeight
+  Double Scale
+  Int32 Weight
+type Maliev.ShadcnBlazor.Theming.ShadcnTypographyScale
+  ShadcnFontSelection Body
+  ShadcnFontSelection Code
+  IReadOnlyDictionary<ShadcnTypographyRole, ShadcnTypographyRoleStyle> Roles
+  ShadcnFontSelection ThaiFallback

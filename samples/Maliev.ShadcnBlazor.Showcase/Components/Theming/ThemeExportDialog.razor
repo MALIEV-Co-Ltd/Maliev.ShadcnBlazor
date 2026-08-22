@@ -78,7 +78,7 @@
         {
             // State.Applied is intentionally the only source. Editor-local invalid text cannot enter a bundle.
             _bundle = ThemeBundleBuilder.Build(
-                State.Applied,
+                State.CreateDocument(),
                 new ThemeBundleOptions(State.SelectedPresetId, typeof(ShadcnThemeProvider).Assembly.GetName().Version?.ToString(3) ?? "1.0.0"));
             _warningsAcknowledged = _bundle.Validation.Warnings.Count == 0;
             _status = $"Bundle preview ready: {_bundle.Files.Count} files, {_bundle.ZipBytes.Length} bytes.";

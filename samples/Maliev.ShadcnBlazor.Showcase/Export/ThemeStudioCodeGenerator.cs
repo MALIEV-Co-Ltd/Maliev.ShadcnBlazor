@@ -1,20 +1,21 @@
 using System.Text;
-using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Export;
 
 public static class ThemeStudioCodeGenerator
 {
-    public static string WriteJson(ThemeStudioGeneratorConfig config) =>
-        ThemeStudioGeneratorConfigSerializer.Serialize(config);
+    public static string WriteJson(ShadcnThemeDocument document) =>
+        ShadcnThemeDocumentSerializer.Serialize(document);
 
-    public static string WriteCSharp(ThemeStudioGeneratorConfig config)
+    public static string WriteCSharp(ShadcnThemeDocument document)
     {
-        ArgumentNullException.ThrowIfNull(config);
-        ThemeStudioGeneratorConfigSerializer.Validate(config);
+        ArgumentNullException.ThrowIfNull(document);
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+        if (!validation.IsValid)
+            throw new ArgumentException("A valid theme document is required.", nameof(document));
 
-        var themeExpression = ShadcnThemeCSharpWriter.Write(config.Theme).TrimEnd();
+        var themeExpression = ShadcnThemeCSharpWriter.Write(document.Theme).TrimEnd();
         if (themeExpression.EndsWith(';'))
             themeExpression = themeExpression[..^1];
 
@@ -30,13 +31,13 @@ public static class ThemeStudioCodeGenerator
         builder.AppendLine();
         builder.AppendLine("public static class MalievShadcnTheme");
         builder.AppendLine("{");
-        builder.Append("    public const string Preset = ").Append(ToLiteral(config.Preset)).AppendLine(";");
-        builder.Append("    public const string Style = ").Append(ToLiteral(config.Style)).AppendLine(";");
-        builder.Append("    public const string BaseColor = ").Append(ToLiteral(config.BaseColor)).AppendLine(";");
-        builder.Append("    public const string IconLibrary = ").Append(ToLiteral(ToKebabCase(config.IconLibrary))).AppendLine(";");
-        builder.Append("    public const string MenuAccent = ").Append(ToLiteral(ToKebabCase(config.MenuAccent))).AppendLine(";");
-        builder.Append("    public const string MenuColor = ").Append(ToLiteral(ToKebabCase(config.MenuColor))).AppendLine(";");
-        builder.Append("    public const string MonospaceFontFamily = ").Append(ToLiteral(config.MonospaceFontFamily)).AppendLine(";");
+        builder.Append("    public const string Preset = ").Append(ToLiteral(document.Application.Preset)).AppendLine(";");
+        builder.Append("    public const string Style = ").Append(ToLiteral(document.Application.Style)).AppendLine(";");
+        builder.Append("    public const string BaseColor = ").Append(ToLiteral(document.Application.BaseColor)).AppendLine(";");
+        builder.Append("    public const string IconLibrary = ").Append(ToLiteral(document.Application.IconLibrary)).AppendLine(";");
+        builder.Append("    public const string MenuAccent = ").Append(ToLiteral(document.Application.MenuAccent)).AppendLine(";");
+        builder.Append("    public const string MenuColor = ").Append(ToLiteral(document.Application.MenuColor)).AppendLine(";");
+        builder.Append("    public const string MonospaceFontFamily = ").Append(ToLiteral(document.Theme.Metrics.MonospaceFontFamily)).AppendLine(";");
         builder.AppendLine();
         builder.AppendLine("    public static ShadcnTheme Create()");
         builder.AppendLine("    {");
@@ -46,9 +47,9 @@ public static class ThemeStudioCodeGenerator
         builder.AppendLine("    public static void Configure(ShadcnOptions options)");
         builder.AppendLine("    {");
         builder.AppendLine("        ArgumentNullException.ThrowIfNull(options);");
-        builder.Append("        options.FontFamily = ").Append(ToLiteral(config.FontFamily)).AppendLine(";");
-        builder.AppendLine("        options.DefaultDarkMode = false;");
-        builder.AppendLine("        options.DefaultDirection = ShadcnDirection.LeftToRight;");
+        builder.Append("        options.FontFamily = ").Append(ToLiteral(document.Theme.Metrics.FontFamily)).AppendLine(";");
+        builder.Append("        options.DefaultDarkMode = ").Append(document.Application.DefaultDarkMode ? "true" : "false").AppendLine(";");
+        builder.Append("        options.DefaultDirection = ShadcnDirection.").Append(document.Application.DefaultDirection).AppendLine(";");
         builder.AppendLine("    }");
         builder.AppendLine("}");
         return builder.ToString();
@@ -65,6 +66,4 @@ public static class ThemeStudioCodeGenerator
             .ToString()
             .TrimEnd();
 
-    private static string ToKebabCase<T>(T value) where T : struct, Enum =>
-        value.ToString().ToLowerInvariant();
 }

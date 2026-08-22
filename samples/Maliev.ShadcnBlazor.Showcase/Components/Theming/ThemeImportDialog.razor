@@ -83,13 +83,13 @@
             using var memory = new MemoryStream();
             await stream.CopyToAsync(memory);
             var result = _importer.Import(memory.ToArray(), file.Name, file.ContentType);
-            if (!result.Succeeded || result.Theme is null)
+            if (!result.Succeeded || result.Document is null)
             {
                 _diagnostics = result.Diagnostics.Concat(["The current theme was not changed."]).ToArray();
                 return;
             }
 
-            if (!State.Import(result.Theme))
+            if (!State.ImportDocument(result.Document))
             {
                 _diagnostics = [State.ImportDiagnostic ?? "The imported theme was not applied."];
                 return;

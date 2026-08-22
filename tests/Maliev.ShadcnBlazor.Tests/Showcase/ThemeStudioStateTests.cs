@@ -237,7 +237,7 @@ public sealed class ThemeStudioStateTests
     }
 
     [Fact]
-    public void GeneratorConfigRoundTripsThemeAndApplicationMetadata()
+    public void CanonicalDocumentRoundTripsThemeAndApplicationMetadata()
     {
         var state = CreateState();
         state.SetStyle("base");
@@ -248,37 +248,39 @@ public sealed class ThemeStudioStateTests
         state.SetRadiusPreset(ThemeStudioRadiusPreset.Relaxed);
         state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
 
-        var json = state.SerializeGeneratorConfig();
-        var config = ThemeStudioGeneratorConfigSerializer.Deserialize(json);
+        var json = state.SerializeDocument();
+        var document = ShadcnThemeDocumentSerializer.Deserialize(json);
 
-        Assert.Equal("base", config.Style);
-        Assert.Equal("stone", config.BaseColor);
-        Assert.Equal(ThemeStudioIconLibrary.Tabler, config.IconLibrary);
-        Assert.Equal(ThemeStudioMenuAccent.Bold, config.MenuAccent);
-        Assert.Equal(ThemeStudioMenuColor.Translucent, config.MenuColor);
-        Assert.Equal(ThemeStudioRadiusPreset.Relaxed, config.RadiusPreset);
-        Assert.Equal("#123456", config.Theme.Light.Primary);
+        Assert.Equal("base", document.Application.Style);
+        Assert.Equal("stone", document.Application.BaseColor);
+        Assert.Equal("tabler", document.Application.IconLibrary);
+        Assert.Equal("bold", document.Application.MenuAccent);
+        Assert.Equal("translucent", document.Application.MenuColor);
+        Assert.Equal("#123456", document.Theme.Light.Primary);
 
         var restored = CreateState();
-        Assert.True(restored.ImportGeneratorConfig(json));
-        Assert.Equal(config.Theme, restored.Applied);
-        Assert.Equal(config.Style, restored.StyleId);
-        Assert.Equal(config.BaseColor, restored.BaseColorId);
-        Assert.Equal(config.IconLibrary, restored.IconLibrary);
-        Assert.Equal(config.MenuAccent, restored.MenuAccent);
-        Assert.Equal(config.MenuColor, restored.MenuColor);
-        Assert.Equal(config.RadiusPreset, restored.RadiusPreset);
+        Assert.True(restored.ImportDocument(json));
+        Assert.Equal(document.Theme, restored.Applied);
+        Assert.Equal(document.Application.Style, restored.StyleId);
+        Assert.Equal(document.Application.BaseColor, restored.BaseColorId);
+        Assert.Equal(ThemeStudioIconLibrary.Tabler, restored.IconLibrary);
+        Assert.Equal(ThemeStudioMenuAccent.Bold, restored.MenuAccent);
+        Assert.Equal(ThemeStudioMenuColor.Translucent, restored.MenuColor);
+        Assert.Equal(ThemeStudioRadiusPreset.Relaxed, restored.RadiusPreset);
         Assert.False(restored.IsDirty);
     }
 
     [Fact]
-    public void GeneratorConfigRejectsUnknownMetadataWithoutChangingTheCurrentTheme()
+    public void CanonicalDocumentRejectsUnknownStudioMetadataWithoutChangingTheCurrentTheme()
     {
         var state = CreateState();
         var before = state.Applied;
 
-        Assert.False(state.ImportGeneratorConfig(
-            "{\"schemaVersion\":1,\"preset\":\"base-vega-neutral\",\"style\":\"not-a-style\",\"baseColor\":\"neutral\",\"iconLibrary\":\"lucide\",\"menuAccent\":\"default\",\"menuColor\":\"default\",\"radiusPreset\":\"default\",\"fontFamily\":\"Geist\",\"monospaceFontFamily\":\"JetBrains Mono\",\"theme\":{}}"));
+        var document = state.CreateDocument() with
+        {
+            Application = state.CreateDocument().Application with { Style = "not-a-style" }
+        };
+        Assert.False(state.ImportDocument(document));
 
         Assert.Equal(before, state.Applied);
         Assert.False(string.IsNullOrWhiteSpace(state.ImportDiagnostic));
@@ -301,6 +303,42 @@ public sealed class ThemeStudioStateTests
         Assert.True(state.Undo());
         Assert.Equal(before, state.Draft);
         Assert.False(state.CanUndo);
+    }
+
+    [Fact]
+    public void DocumentImportIsTransactionalAndPreservesPortableMetadata()
+    {
+        var state = CreateState();
+        var before = state.SerializeDocument();
+        var source = state.CreateDocument();
+        var invalid = source with
+        {
+            Application = source.Application with { IconLibrary = "unknown-icons" }
+        };
+
+        Assert.False(state.ImportDocument(invalid));
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.False(state.CanUndo);
+
+        var imported = source with
+        {
+            Application = source.Application with
+            {
+                IconLibrary = "tabler",
+                DefaultDirection = ShadcnDirection.RightToLeft,
+                DefaultLocale = "th"
+            },
+            Palette = source.Palette with { Seed = 991 }
+        };
+        Assert.True(state.ImportDocument(imported));
+        Assert.Equal(991UL, state.CreateDocument().Palette.Seed);
+        Assert.Equal(ThemeStudioIconLibrary.Tabler, state.IconLibrary);
+        Assert.Equal(ShadcnDirection.RightToLeft, state.Direction);
+        Assert.Equal(ThemeStudioLocale.Thai, state.Locale);
+        Assert.True(state.CanUndo);
+        Assert.True(state.Undo());
+        Assert.Equal(source.Palette.Seed, state.CreateDocument().Palette.Seed);
+        Assert.Equal(ThemeStudioIconLibrary.Lucide, state.IconLibrary);
     }
 
     [Fact]
@@ -347,8 +385,34 @@ public sealed class ThemeStudioStateTests
         var result = await storage.LoadAsync();
 
         Assert.False(result.Succeeded);
-        Assert.Null(result.Theme);
+        Assert.Null(result.Document);
         Assert.Contains(diagnostic, result.Diagnostic, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task BrowserStorageMigratesLegacyOnlyAfterCanonicalWriteSucceeds()
+    {
+        var legacy = ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+        var runtime = new MigratingStorageJsRuntime(legacy);
+        var result = await new ThemeStudioStorage(runtime).LoadAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.NotNull(result.Document);
+        Assert.Equal(
+            ["get:maliev.shadcn.theme-studio.document.v2", "get:maliev.shadcn.theme-studio.v1", "set:maliev.shadcn.theme-studio.document.v2", "remove:maliev.shadcn.theme-studio.v1"],
+            runtime.Calls);
+        Assert.Contains("\"schemaVersion\": 2", runtime.CanonicalJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task BrowserStorageRetainsLegacyValueWhenCanonicalWriteFails()
+    {
+        var legacy = ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
+        var runtime = new MigratingStorageJsRuntime(legacy) { FailCanonicalWrite = true };
+        var result = await new ThemeStudioStorage(runtime).LoadAsync();
+
+        Assert.False(result.Succeeded);
+        Assert.DoesNotContain("remove:maliev.shadcn.theme-studio.v1", runtime.Calls);
     }
 
     private static ThemeStudioState CreateState() => new(new RecordingStorage());
@@ -357,17 +421,17 @@ public sealed class ThemeStudioStateTests
     {
         public ThemeStudioStorageResult? LoadResult { get; set; }
         public string? SaveDiagnostic { get; set; }
-        private ShadcnTheme? _theme;
+        private ShadcnThemeDocument? _document;
 
         public ValueTask<ThemeStudioStorageResult> LoadAsync() =>
-            ValueTask.FromResult(LoadResult ?? ThemeStudioStorageResult.Success(_theme));
+            ValueTask.FromResult(LoadResult ?? ThemeStudioStorageResult.Success(_document));
 
-        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme)
+        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document)
         {
             if (SaveDiagnostic is not null)
                 return ValueTask.FromResult(ThemeStudioStorageResult.Failure(SaveDiagnostic));
-            _theme = theme;
-            return ValueTask.FromResult(ThemeStudioStorageResult.Success(theme));
+            _document = document;
+            return ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
         }
     }
 
@@ -380,6 +444,41 @@ public sealed class ThemeStudioStateTests
         {
             Assert.Equal("localStorage.getItem", identifier);
             return ValueTask.FromResult((TValue)(object?)storedJson!);
+        }
+    }
+
+    private sealed class MigratingStorageJsRuntime(string legacyJson) : IJSRuntime
+    {
+        public List<string> Calls { get; } = [];
+        public bool FailCanonicalWrite { get; init; }
+        public string? CanonicalJson { get; private set; }
+
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) =>
+            InvokeAsync<TValue>(identifier, CancellationToken.None, args);
+
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
+        {
+            var key = args?[0]?.ToString() ?? string.Empty;
+            if (identifier == "localStorage.getItem")
+            {
+                Calls.Add($"get:{key}");
+                var value = key == ThemeStudioStorage.LegacyStorageKey ? legacyJson : null;
+                return ValueTask.FromResult((TValue)(object?)value!);
+            }
+            if (identifier == "localStorage.setItem")
+            {
+                Calls.Add($"set:{key}");
+                if (FailCanonicalWrite)
+                    throw new JSException("quota");
+                CanonicalJson = args?[1]?.ToString();
+                return ValueTask.FromResult(default(TValue)!);
+            }
+            if (identifier == "localStorage.removeItem")
+            {
+                Calls.Add($"remove:{key}");
+                return ValueTask.FromResult(default(TValue)!);
+            }
+            throw new InvalidOperationException(identifier);
         }
     }
 }
@@ -511,7 +610,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(2, storage.SaveCount);
-            Assert.Equal("#222222", storage.LastSaved?.Light.Primary);
+            Assert.Equal("#222222", storage.LastSaved?.Theme.Light.Primary);
         });
     }
 
@@ -534,7 +633,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(2, storage.SaveCount);
-            Assert.Equal("#444444", storage.LastSaved?.Light.Primary);
+            Assert.Equal("#444444", storage.LastSaved?.Theme.Light.Primary);
         });
     }
 
@@ -596,7 +695,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(2, storage.SaveCount);
-            Assert.Equal("#222222", storage.LastSaved?.Light.Primary);
+            Assert.Equal("#222222", storage.LastSaved?.Theme.Light.Primary);
         });
     }
 
@@ -619,7 +718,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(2, storage.SaveCount);
-            Assert.Equal("#222222", storage.LastSaved?.Light.Primary);
+            Assert.Equal("#222222", storage.LastSaved?.Theme.Light.Primary);
         });
     }
 
@@ -650,7 +749,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     private sealed class NoOpStorage : IThemeStudioStorage
     {
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
-        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme) => ValueTask.FromResult(ThemeStudioStorageResult.Success(theme));
+        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) => ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
     }
 
     private sealed class DelayedStorage(bool releaseFirstImmediately = false) : IThemeStudioStorage
@@ -659,7 +758,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         private readonly TaskCompletionSource _firstSaveStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly TaskCompletionSource _firstSaveCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int SaveCount { get; private set; }
-        public ShadcnTheme? LastSaved { get; private set; }
+        public ShadcnThemeDocument? LastSaved { get; private set; }
         public Task FirstSaveStarted => _firstSaveStarted.Task;
         public Task FirstSaveCompleted => _firstSaveCompleted.Task;
 
@@ -671,16 +770,16 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
             return ThemeStudioStorageResult.Success(null);
         }
 
-        public async ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme)
+        public async ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document)
         {
             SaveCount++;
-            LastSaved = theme;
+            LastSaved = document;
             _firstSaveStarted.TrySetResult();
             if (SaveCount == 1 && !releaseFirstImmediately)
                 await _firstSaveRelease.Task;
             if (SaveCount == 1)
                 _firstSaveCompleted.TrySetResult();
-            return ThemeStudioStorageResult.Success(theme);
+            return ThemeStudioStorageResult.Success(document);
         }
 
         public void ReleaseFirstSave() => _firstSaveRelease.TrySetResult();
@@ -691,18 +790,18 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         private readonly TaskCompletionSource<ThemeStudioStorageResult> _firstSave = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly TaskCompletionSource _firstSaveCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int SaveCount { get; private set; }
-        public ShadcnTheme? LastSaved { get; private set; }
+        public ShadcnThemeDocument? LastSaved { get; private set; }
         public Task FirstSaveCompleted => _firstSaveCompleted.Task;
 
         public ValueTask<ThemeStudioStorageResult> LoadAsync() =>
             ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
 
-        public async ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnTheme theme)
+        public async ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document)
         {
             SaveCount++;
-            LastSaved = theme;
+            LastSaved = document;
             if (SaveCount > 1)
-                return ThemeStudioStorageResult.Success(theme);
+                return ThemeStudioStorageResult.Success(document);
             try
             {
                 return await _firstSave.Task;

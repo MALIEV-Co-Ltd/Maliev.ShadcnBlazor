@@ -6,6 +6,8 @@ public sealed record ThemeStudioSnapshot(
     ShadcnTheme Draft,
     ShadcnTheme Applied,
     ShadcnTheme Baseline,
+    ShadcnThemeDocument DocumentTemplate,
+    ShadcnThemeDocument BaselineDocumentTemplate,
     IReadOnlyDictionary<string, string> TokenEditorValues,
     IReadOnlyDictionary<string, string> MetricEditorValues,
     string SelectedPresetId,

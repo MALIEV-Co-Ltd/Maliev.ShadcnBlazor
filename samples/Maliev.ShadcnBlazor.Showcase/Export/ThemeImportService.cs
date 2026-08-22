@@ -1,14 +1,11 @@
-using System.Text;
-using System.Text.Json;
 using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Export;
 
 public sealed class ThemeImportService
 {
-    public const int MaxImportBytes = 1_048_576;
+    public const int MaxImportBytes = ShadcnThemeDocumentLoader.MaxDocumentBytes;
 
-    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private static readonly HashSet<string> SupportedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "application/json",
@@ -29,47 +26,37 @@ public sealed class ThemeImportService
         if (!SupportedContentTypes.Contains(normalizedContentType))
             return ThemeImportResult.Failure("Theme import content type must be application/json or text/json.");
 
-        string json;
         try
         {
-            json = StrictUtf8.GetString(bytes);
-        }
-        catch (DecoderFallbackException)
-        {
-            return ThemeImportResult.Failure("Theme import must contain valid UTF-8 text.");
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(json);
-            var legacy = document.RootElement.ValueKind == JsonValueKind.Object &&
-                         !document.RootElement.TryGetProperty("schemaVersion", out _);
-            var theme = ShadcnThemeSerializer.Deserialize(json);
-            return legacy
-                ? ThemeImportResult.Success(theme, $"Legacy theme schema 0 was migrated to schema {ShadcnTheme.CurrentSchemaVersion}.")
-                : ThemeImportResult.Success(theme, $"Theme schema {theme.SchemaVersion} passed parsing and validation.");
+            using var stream = new MemoryStream(bytes.ToArray(), writable: false);
+            var document = ShadcnThemeDocumentLoader.Load(stream);
+            return ThemeImportResult.Success(document, $"Theme document schema {document.SchemaVersion} passed parsing and validation.");
         }
         catch (NotSupportedException exception)
         {
             return ThemeImportResult.Failure(exception.Message);
         }
-        catch (JsonException exception) when (
+        catch (System.Text.Json.JsonException exception) when (
             exception.Message.Contains("could not be mapped", StringComparison.OrdinalIgnoreCase) ||
             exception.Message.Contains("unmapped", StringComparison.OrdinalIgnoreCase))
         {
             return ThemeImportResult.Failure($"Theme JSON contains an unmapped field. {exception.Message}");
         }
-        catch (JsonException exception) when (exception.Message.Contains("is invalid", StringComparison.OrdinalIgnoreCase))
+        catch (System.Text.Json.JsonException exception) when (exception.Message.Contains("is invalid", StringComparison.OrdinalIgnoreCase))
         {
             return ThemeImportResult.Failure(exception.Message);
         }
-        catch (JsonException exception)
+        catch (System.Text.Json.JsonException exception)
         {
             return ThemeImportResult.Failure($"Theme import contains malformed JSON. {exception.Message}");
         }
         catch (ArgumentException exception)
         {
             return ThemeImportResult.Failure($"Theme import is invalid. {exception.Message}");
+        }
+        catch (InvalidDataException exception)
+        {
+            return ThemeImportResult.Failure(exception.Message);
         }
     }
 }

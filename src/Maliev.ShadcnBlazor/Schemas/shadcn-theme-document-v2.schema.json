@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maliev.com/schemas/shadcn-theme-document-v2.schema.json",
+  "title": "MALIEV Shadcn theme document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "theme", "application", "palette", "typography"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "theme": { "type": "object" },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preset", "style", "baseColor", "iconLibrary", "menuAccent", "menuColor", "defaultDarkMode", "defaultDirection", "defaultLocale", "reducedMotionBehavior"],
+      "properties": {
+        "preset": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "style": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "baseColor": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "iconLibrary": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "menuAccent": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "menuColor": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "defaultDarkMode": { "type": "boolean" },
+        "defaultDirection": { "enum": ["leftToRight", "rightToLeft"] },
+        "defaultLocale": { "type": "string", "pattern": "^[A-Za-z0-9-]{2,35}$" },
+        "reducedMotionBehavior": { "enum": ["respectSystemPreference", "alwaysReduce"] }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithmVersion", "seed", "baseColor", "lockedTokens"],
+      "properties": {
+        "algorithmVersion": { "type": "integer", "minimum": 1 },
+        "seed": { "type": "integer", "minimum": 0 },
+        "baseColor": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "lockedTokens": { "type": "array", "maxItems": 128, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body", "thaiFallback", "code", "roles"],
+      "properties": {
+        "body": { "$ref": "#/$defs/font" },
+        "thaiFallback": { "$ref": "#/$defs/font" },
+        "code": { "$ref": "#/$defs/font" },
+        "roles": {
+          "type": "object",
+          "propertyNames": { "enum": ["body", "heading1", "heading2", "heading3", "heading4To6", "label", "button", "caption", "code"] },
+          "additionalProperties": { "$ref": "#/$defs/role" },
+          "maxProperties": 9
+        }
+      }
+    }
+  },
+  "$defs": {
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "fallback", "googleFontsId"],
+      "properties": {
+        "family": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "fallback": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "googleFontsId": { "type": ["string", "null"], "maxLength": 256 }
+      }
+    },
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weight", "scale", "lineHeight", "letterSpacingEm"],
+      "properties": {
+        "weight": { "type": "integer", "minimum": 100, "maximum": 1000 },
+        "scale": { "type": "number", "minimum": 0.5, "maximum": 8 },
+        "lineHeight": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "letterSpacingEm": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    }
+  }
+}
