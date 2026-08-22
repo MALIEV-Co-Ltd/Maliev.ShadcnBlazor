@@ -7928,6 +7928,21 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 /* Toggle Group: a real drawing-review toolbar demonstrates connected geometry,
    direct selection, and orientation changes without turning the preview into a
    generic control gallery. */
+.showcase-dropzone-dossier {
+    display: grid;
+    inline-size: min(100%, 38rem);
+    gap: 1rem;
+}
+
+.showcase-dropzone-dossier__heading {
+    display: grid;
+    gap: .25rem;
+}
+
+.showcase-dropzone-dossier__heading strong { font-size: 1rem; }
+.showcase-dropzone-dossier__heading span { color: var(--shadcn-muted-foreground); font-size: .8125rem; }
+.showcase-dropzone-dossier__control { inline-size: 100%; }
+
 .showcase-toggle-group-dossier {
     display: grid;
     inline-size: min(100%, 46rem);

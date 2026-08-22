@@ -193,6 +193,11 @@ public sealed class ComponentApiCatalog
             ["date-picker"] = Types(
                 "Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker",
                 "Maliev.ShadcnBlazor.Components.Forms.ShadcnDateRange"),
+            ["dropzone"] = Types(
+                "Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzone",
+                "Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneSelection",
+                "Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneError",
+                "Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneValidation"),
             ["input"] = Types("Maliev.ShadcnBlazor.Components.Forms.ShadcnInput`1"),
             ["input-group"] = Types(
                 "Maliev.ShadcnBlazor.Components.Forms.ShadcnInputGroup",

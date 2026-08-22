@@ -7,6 +7,28 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input)::placeholder { color: var(--shadcn-muted-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input):focus-visible { border-color: var(--shadcn-ring); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input)[aria-invalid="true"] { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 24%, transparent); }
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone { position: relative; display: grid; min-block-size: 12rem; box-sizing: border-box; place-items: center; align-content: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px dashed var(--shadcn-border); border-radius: var(--shadcn-radius-xl); padding: calc(1.5rem * var(--shadcn-spacing-multiplier)); background: color-mix(in oklch, var(--shadcn-muted) 40%, transparent); text-align: center; transition: border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-input { position: absolute; inset: 0; z-index: 1; inline-size: 100%; block-size: 100%; cursor: pointer; opacity: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone:has(.shadcn-dropzone-input:focus-visible) { border-color: var(--shadcn-ring); outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone[data-state="dragging"] { border-color: var(--shadcn-primary); background: color-mix(in oklch, var(--shadcn-primary) 8%, var(--shadcn-background)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone[data-state="invalid"] { border-color: var(--shadcn-destructive); background: color-mix(in oklch, var(--shadcn-destructive) 7%, var(--shadcn-background)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone:is([data-state="disabled"], [data-state="loading"]) { cursor: not-allowed; opacity: .55; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-icon { display: inline-flex; inline-size: 2.5rem; block-size: 2.5rem; align-items: center; justify-content: center; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-icon svg { inline-size: 1.25rem; block-size: 1.25rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-instructions { font-size: .875rem; font-weight: 600; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-dropzone-description, .shadcn-dropzone-status) { color: var(--shadcn-muted-foreground); font-size: .8125rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-status:empty { display: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone-errors { z-index: 2; margin: .25rem 0 0; padding-inline-start: 1rem; color: var(--shadcn-destructive); font-size: .8125rem; pointer-events: none; text-align: start; }
+
+@media (prefers-reduced-motion: reduce) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone { transition: none; }
+}
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone { border-color: CanvasText; forced-color-adjust: auto; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-dropzone:has(.shadcn-dropzone-input:focus-visible) { border-color: Highlight; outline-color: Highlight; }
+}
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] :is(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-input-group, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input),
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"]:is(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-input-group, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input) { background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(input, textarea, select, button):disabled { cursor: not-allowed; opacity: .5; }

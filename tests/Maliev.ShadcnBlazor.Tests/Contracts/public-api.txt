@@ -721,6 +721,20 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   DateOnly VisibleMonth
   EventCallback<DateOnly> VisibleMonthChanged
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDateRange
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzone
+  String Accept
+  String Description
+  Boolean Disabled
+  String Instructions
+  Boolean Loading
+  Int64 MaxFileSize
+  Int32 MaxFiles
+  Boolean Multiple
+  EventCallback<ShadcnDropzoneSelection> SelectionChanged
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneError
+enum Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneErrorCode: TooManyFiles, FileTooLarge, FileTypeNotAccepted
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneSelection
+type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneValidation
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnField
   RenderFragment ChildContent
   String DescriptionId

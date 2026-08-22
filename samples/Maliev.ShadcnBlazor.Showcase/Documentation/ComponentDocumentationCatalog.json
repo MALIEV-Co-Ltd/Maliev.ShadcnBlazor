@@ -27,6 +27,7 @@
     { "slug": "direction", "namespace": "Maliev.ShadcnBlazor.Components.Direction", "primaryType": "ShadcnDirectionProvider" },
     { "slug": "drawer", "namespace": "Maliev.ShadcnBlazor.Components.Overlays", "primaryType": "ShadcnDrawer", "capabilities": ["swipe gestures", "snap points", "modal modes", "four directions"] },
     { "slug": "dropdown-menu", "namespace": "Maliev.ShadcnBlazor.Components.Overlays", "primaryType": "ShadcnDropdownMenu", "capabilities": ["keyboard navigation", "typeahead", "submenus", "checked items"] },
+    { "slug": "dropzone", "namespace": "Maliev.ShadcnBlazor.Components.Forms", "primaryType": "ShadcnDropzone", "aliases": ["file drop", "upload area"], "capabilities": ["click and keyboard selection", "native drag and drop", "validation", "multiple files", "disabled and loading states"] },
     { "slug": "empty", "namespace": "Maliev.ShadcnBlazor.Components.Content", "primaryType": "ShadcnEmpty" },
     { "slug": "field", "namespace": "Maliev.ShadcnBlazor.Components.Forms", "primaryType": "ShadcnField" },
     { "slug": "hover-card", "namespace": "Maliev.ShadcnBlazor.Components.Overlays", "primaryType": "ShadcnHoverCard", "capabilities": ["open and close delays", "pointer bridge", "collision handling"] },

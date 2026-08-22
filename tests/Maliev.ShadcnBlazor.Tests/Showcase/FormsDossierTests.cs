@@ -9,7 +9,7 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
 public sealed class FormsDossierTests : BunitContext
 {
-    private static readonly string[] Slugs = ["calendar", "combobox", "date-picker", "input", "input-group", "input-otp", "native-select", "select", "textarea"];
+    private static readonly string[] Slugs = ["calendar", "combobox", "date-picker", "dropzone", "input", "input-group", "input-otp", "native-select", "select", "textarea"];
 
     public FormsDossierTests()
     {
@@ -88,6 +88,7 @@ public sealed class FormsDossierTests : BunitContext
             ["calendar"] = "ShadcnCalendar",
             ["combobox"] = "ShadcnCombobox`1",
             ["date-picker"] = "ShadcnDatePicker",
+            ["dropzone"] = "ShadcnDropzone",
             ["input"] = "ShadcnInput`1",
             ["input-group"] = "ShadcnInputGroup",
             ["input-otp"] = "ShadcnInputOtp",
@@ -129,6 +130,7 @@ public sealed class FormsDossierTests : BunitContext
             ["calendar"] = ["ShadcnCalendar", "ShadcnDateRange"],
             ["combobox"] = ["ShadcnCombobox`1", "ShadcnComboboxOption`1"],
             ["date-picker"] = ["ShadcnDatePicker", "ShadcnDateRange"],
+            ["dropzone"] = ["ShadcnDropzone", "ShadcnDropzoneError", "ShadcnDropzoneSelection", "ShadcnDropzoneValidation"],
             ["input"] = ["ShadcnInput`1"],
             ["input-group"] = ["ShadcnInputGroup", "ShadcnInputGroupAddon", "ShadcnInputGroupButton", "ShadcnInputGroupText"],
             ["input-otp"] = ["ShadcnInputOtp", "ShadcnInputOtpGroup", "ShadcnInputOtpSeparator", "ShadcnInputOtpSlot"],
