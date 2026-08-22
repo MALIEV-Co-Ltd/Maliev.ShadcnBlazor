@@ -293,8 +293,8 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains(":has(> [data-slot=\"bubble-reactions\"][data-side=\"top\"])", css, StringComparison.Ordinal);
         Assert.Contains("color:var(--shadcn-foreground)", css, StringComparison.Ordinal);
         Assert.Contains("background-clip:text", css, StringComparison.Ordinal);
-        Assert.Contains("background-position:-200% 0", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position:-200% 0; } to { background-position:200% 0; } }", css, StringComparison.Ordinal);
+        Assert.Contains("background-position-x:200%", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position-x:200%; } to { background-position-x:0%; } }", css, StringComparison.Ordinal);
         Assert.Contains("-webkit-text-fill-color:CanvasText", css, StringComparison.Ordinal);
     }
 

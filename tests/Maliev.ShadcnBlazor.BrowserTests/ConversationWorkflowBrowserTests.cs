@@ -256,6 +256,8 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.Equal("shadcn-marker-dots", await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
         Assert.Equal("none", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
         Assert.Equal("shadcn-marker-wave", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var shimmerKeyframes = await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string[]>("element => element.getAnimations().find(animation => animation.animationName === 'shadcn-marker-wave')?.effect?.getKeyframes().map(frame => frame.backgroundPositionX) ?? []");
+        Assert.Equal(["200%", "0%"], shimmerKeyframes);
 
         await using var reducedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.Reduce });
         var reducedPage = await reducedContext.NewPageAsync();
