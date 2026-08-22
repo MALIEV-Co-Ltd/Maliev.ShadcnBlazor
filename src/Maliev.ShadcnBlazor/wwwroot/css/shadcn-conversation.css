@@ -57,9 +57,9 @@
 .shadcn-marker-icon[data-streaming="true"] { display:inline-flex; width:1rem; height:1rem; align-items:center; justify-content:center; color:var(--shadcn-primary); }
 .shadcn-marker-icon[data-streaming="true"] svg { display:block; width:100%; height:100%; }
 .shadcn-marker-content { min-width:0; overflow-wrap:anywhere; }
-.shadcn-marker-content[data-streaming="true"] { display:inline-block; color:var(--shadcn-foreground); background-image:linear-gradient(100deg, var(--shadcn-foreground) 0%, var(--shadcn-foreground) 50%, color-mix(in oklch, var(--shadcn-primary) 72%, var(--shadcn-foreground)) 60%, var(--shadcn-foreground) 70%); background-position-x:200%; background-size:200% 100%; background-repeat:no-repeat; background-color:transparent; background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
+.shadcn-marker-content[data-streaming="true"] { display:inline-block; color:var(--shadcn-muted-foreground); -webkit-text-fill-color:currentColor; -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%; mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%; animation:shadcn-marker-wave var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
 .shadcn-marker-content[data-streaming="true"]::after { content:none; }
-@keyframes shadcn-marker-wave { from { background-position-x:200%; } to { background-position-x:0%; } }
+@keyframes shadcn-marker-wave { from { mask-position:right; -webkit-mask-position:right; } to { mask-position:left; -webkit-mask-position:left; } }
 .shadcn-message { position:relative; display:flex; width:100%; min-width:0; gap:calc(.625rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-message[data-align="end"] { flex-direction:row-reverse; }
 .shadcn-message-avatar { display:flex; width:fit-content; flex:none; align-items:center; justify-content:center; align-self:flex-start; overflow:hidden; border-radius:9999px; background:var(--shadcn-muted); }
@@ -69,8 +69,8 @@
 .shadcn-message-footer button { min-width:0 !important; min-height:1.75rem; border:0; border-radius:999px; padding-inline:calc(.375rem * var(--shadcn-spacing-multiplier)); background:transparent; }
 [data-align="end"] .shadcn-message-footer { justify-content:flex-end; }
 .shadcn-message-footer :is(button,a):focus-visible { outline:2px solid currentColor !important; outline-offset:2px !important; }
-@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; } .shadcn-marker-content[data-streaming="true"] { animation:none; background-image:none; -webkit-text-fill-color:currentColor; } .shadcn-marker-content[data-streaming="true"]::after { animation:none; } }
-@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } .shadcn-marker-content[data-streaming="true"] { color:CanvasText; background-image:none; -webkit-text-fill-color:CanvasText; animation:none !important; } .shadcn-marker-content[data-streaming="true"]::after { background:none; animation:none; } }
+@media (prefers-reduced-motion:reduce) { .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; } .shadcn-marker-content[data-streaming="true"] { animation:none; mask:none; -webkit-mask:none; -webkit-text-fill-color:currentColor; } .shadcn-marker-content[data-streaming="true"]::after { animation:none; } }
+@media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } .shadcn-marker-content[data-streaming="true"] { color:CanvasText; mask:none; -webkit-mask:none; -webkit-text-fill-color:CanvasText; animation:none !important; } .shadcn-marker-content[data-streaming="true"]::after { background:none; animation:none; } }
 .shadcn-message-scroller { position:relative; display:flex; width:100%; height:100%; min-height:0; flex-direction:column; overflow:hidden; }
 .shadcn-message-scroller-viewport { width:100%; height:100%; min-width:0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
 .shadcn-message-scroller-content { display:flex; min-height:100%; height:max-content; flex-direction:column; }
@@ -291,9 +291,13 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
     color: var(--shadcn-foreground);
 }
 /* The showcase has its own streaming treatment. Keep the package contract authoritative:
-   the icon is static, the loader owns the dots, and the content owns one text-clipped wave. */
+   the icon is static, the loader owns the dots, and the content owns one text mask wave. */
 html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] {
     animation: none;
+}
+html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] {
+    color: var(--shadcn-muted-foreground);
+    -webkit-text-fill-color: currentColor;
 }
 html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after {
     content: none;
@@ -495,7 +499,7 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     .shadcn-attachment[data-state="uploading"] .showcase-attachment-spinner,
     .shadcn-marker-icon[data-streaming="true"],
     .shadcn-marker-loader { animation: none !important; }
-    .shadcn-marker-content[data-streaming="true"] { animation: none !important; background-image: none !important; -webkit-text-fill-color: currentColor; }
+    .shadcn-marker-content[data-streaming="true"] { animation: none !important; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: currentColor; }
     .shadcn-marker-content[data-streaming="true"]::after { animation: none !important; }
     .shadcn-bubble-group[data-reveal="true"] > [data-slot="bubble"] { opacity: 1; animation: none !important; }
     .showcase-scroller-composer button,
@@ -505,10 +509,10 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     .shadcn-attachment-media, .shadcn-message-avatar, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"] { border-color: CanvasText; }
     .shadcn-questionnaire-choice[data-checked="true"] { outline: 2px solid Highlight; }
     .shadcn-marker-icon[data-streaming="true"], .shadcn-marker-loader { color: CanvasText; animation: none !important; }
-    .shadcn-marker-content[data-streaming="true"] { color: CanvasText; background-image: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
+    .shadcn-marker-content[data-streaming="true"] { color: CanvasText; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
     .shadcn-marker-content[data-streaming="true"]::after { background: none; animation: none !important; }
     html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] { animation: none; }
-    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; background-image: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
+    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
     html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after { background: none; animation: none; }
     .shadcn-message-action,.shadcn-message-reply-dismiss { color:ButtonText !important; }
     .shadcn-message-reply-quote { border-color:Highlight; background:Canvas; color:CanvasText; }

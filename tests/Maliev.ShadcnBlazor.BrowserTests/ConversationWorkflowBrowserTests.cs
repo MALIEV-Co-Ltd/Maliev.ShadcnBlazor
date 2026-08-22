@@ -255,16 +255,30 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.Contains("radial-gradient", loaderBackground, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("shadcn-marker-dots", await animatedLoader.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
         Assert.Equal("none", await animatedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("shadcn-marker-wave", await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        var shimmerKeyframes = await animatedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string[]>("element => element.getAnimations().find(animation => animation.animationName === 'shadcn-marker-wave')?.effect?.getKeyframes().map(frame => frame.backgroundPositionX) ?? []");
-        Assert.Equal(["200%", "0%"], shimmerKeyframes);
+        var animatedContent = animatedMarker.Locator("[data-slot='marker-content']");
+        Assert.Equal("shadcn-marker-wave", await animatedContent.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var contentColor = await animatedContent.EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", contentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", contentColor, StringComparer.OrdinalIgnoreCase);
+        var textFillColor = await animatedContent.EvaluateAsync<string>("element => getComputedStyle(element).webkitTextFillColor");
+        Assert.NotEqual("transparent", textFillColor, StringComparer.OrdinalIgnoreCase);
+        var maskImage = await animatedContent.EvaluateAsync<string>("element => getComputedStyle(element).maskImage || getComputedStyle(element).webkitMaskImage");
+        Assert.Contains("linear-gradient", maskImage, StringComparison.OrdinalIgnoreCase);
+        var shimmerKeyframes = await animatedContent.EvaluateAsync<string>("element => [...document.styleSheets].flatMap(sheet => { try { return [...sheet.cssRules]; } catch { return []; } }).filter(rule => rule.name === 'shadcn-marker-wave').flatMap(rule => [...rule.cssRules]).map(rule => rule.cssText).join(' ')");
+        Assert.Contains("mask-position: right center", shimmerKeyframes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("mask-position: left center", shimmerKeyframes, StringComparison.OrdinalIgnoreCase);
 
         await using var reducedContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ReducedMotion = ReducedMotion.Reduce });
         var reducedPage = await reducedContext.NewPageAsync();
         await reducedPage.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
         var reducedMarker = reducedPage.Locator("[data-slot='marker'][role='status']");
         Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-icon']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("none", await reducedMarker.Locator("[data-slot='marker-content']").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var reducedContent = reducedMarker.Locator("[data-slot='marker-content']");
+        Assert.Equal("none", await reducedContent.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var reducedContentColor = await reducedContent.EvaluateAsync<string>("element => getComputedStyle(element).color");
+        Assert.NotEqual("transparent", reducedContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", reducedContentColor, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal("none", await reducedContent.EvaluateAsync<string>("element => getComputedStyle(element).maskImage || getComputedStyle(element).webkitMaskImage"));
         Assert.Equal("none", await reducedMarker.Locator(".showcase-marker-loader").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
 
         await using var forcedColorsContext = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 640, Height = 700 }, ForcedColors = ForcedColors.Active });

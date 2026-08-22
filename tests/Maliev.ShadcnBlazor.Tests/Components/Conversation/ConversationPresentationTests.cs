@@ -291,10 +291,12 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains(".shadcn-bubble-reactions :is(svg,img)", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-bubble[data-variant=\"ghost\"] { width:fit-content; max-width:80%; }", css, StringComparison.Ordinal);
         Assert.Contains(":has(> [data-slot=\"bubble-reactions\"][data-side=\"top\"])", css, StringComparison.Ordinal);
-        Assert.Contains("color:var(--shadcn-foreground)", css, StringComparison.Ordinal);
-        Assert.Contains("background-clip:text", css, StringComparison.Ordinal);
-        Assert.Contains("background-position-x:200%", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes shadcn-marker-wave { from { background-position-x:200%; } to { background-position-x:0%; } }", css, StringComparison.Ordinal);
+        Assert.Contains("color:var(--shadcn-muted-foreground)", css, StringComparison.Ordinal);
+        Assert.Contains("mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("-webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes shadcn-marker-wave { from { mask-position:right; -webkit-mask-position:right; } to { mask-position:left; -webkit-mask-position:left; } }", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("background-clip:text", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("-webkit-text-fill-color:transparent", css, StringComparison.Ordinal);
         Assert.Contains("-webkit-text-fill-color:CanvasText", css, StringComparison.Ordinal);
     }
 
