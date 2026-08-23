@@ -614,8 +614,9 @@ internal static class ConversationWorkflowExamples
 
 <ShadcnMessageScrollerProvider AutoScroll="true" DefaultScrollPosition="ShadcnMessageDefaultScrollPosition.End">
     <ShadcnMessageScroller Class="showcase-scroller-frame" Style="height:24rem">
-        <ShadcnMessageScrollerViewport AccessibleName="Project conversation">
-            <ShadcnMessageScrollerContent>
+        <div class="showcase-scroller-transcript">
+            <ShadcnMessageScrollerViewport AccessibleName="Project conversation">
+                <ShadcnMessageScrollerContent>
                 <ShadcnMessageScrollerItem MessageId="user-1" ScrollAnchor="true">
                     <ShadcnMessage Align="ShadcnLogicalAlign.End">
                         <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
@@ -642,9 +643,10 @@ internal static class ConversationWorkflowExamples
                         </ShadcnMessageContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
-            </ShadcnMessageScrollerContent>
-        </ShadcnMessageScrollerViewport>
-        <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="Jump to latest">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+                </ShadcnMessageScrollerContent>
+            </ShadcnMessageScrollerViewport>
+            <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="Jump to latest">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+        </div>
         <form class="showcase-scroller-composer" @onsubmit:preventDefault="true">
             <input @bind="message" aria-label="New message" />
             <button type="submit" aria-label="Send message">Send</button>

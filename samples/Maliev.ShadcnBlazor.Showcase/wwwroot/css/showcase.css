@@ -1470,6 +1470,8 @@ a {
 
 .showcase-scroller-frame {
     position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
     min-height: 20rem;
     overflow: hidden;
     border: 1px solid var(--shadcn-border);
@@ -1478,11 +1480,19 @@ a {
     box-shadow: var(--shadcn-shadow-sm);
 }
 
-.showcase-scroller-frame::after {
+.showcase-scroller-transcript {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.showcase-scroller-transcript::after {
     position: absolute;
     z-index: 7;
-    inset-inline: 0;
-    inset-block-end: calc(3.75rem + env(safe-area-inset-bottom));
+    inset-inline-start: 0;
+    inset-inline-end: 1rem;
+    inset-block-end: 0;
     block-size: 2.5rem;
     background: linear-gradient(to bottom, transparent, var(--shadcn-card));
     content: "";
@@ -1490,13 +1500,13 @@ a {
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-viewport {
+    height: 100%;
     scrollbar-color: var(--shadcn-muted-foreground) transparent;
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-content {
     gap: 0.25rem;
-    padding: 1rem 1.25rem 5rem;
-    padding-block-end: calc(5rem + env(safe-area-inset-bottom));
+    padding: 1rem 1.25rem 2.75rem;
 }
 
 .showcase-scroller-frame .shadcn-message-scroller-item {
@@ -1526,15 +1536,14 @@ a {
 }
 
 .showcase-scroller-frame .showcase-scroller-composer {
-    position: absolute;
-    inset-inline: .75rem;
-    inset-block-end: calc(.75rem + env(safe-area-inset-bottom));
+    position: relative;
     z-index: 8;
     display: flex;
     min-inline-size: 0;
     align-items: center;
     gap: .35rem;
-    margin: 0;
+    margin: .75rem;
+    margin-block-end: calc(.75rem + env(safe-area-inset-bottom));
     padding: .25rem;
     border: 1px solid var(--shadcn-border);
     border-radius: 999px;

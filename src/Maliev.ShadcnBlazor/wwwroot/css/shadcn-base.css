@@ -31,18 +31,19 @@
 }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-toolbar {
     display: flex;
+    min-inline-size: 0;
     min-height: 2.25rem;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: calc(.5rem * var(--shadcn-spacing-multiplier));
     border-block-end: 1px solid var(--shadcn-border);
     padding-inline: calc(.625rem * var(--shadcn-spacing-multiplier));
 }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language { margin-inline-end: auto; color: var(--shadcn-muted-foreground); font-family: var(--shadcn-font-mono); font-size: .6875rem; text-transform: lowercase; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select { flex: 0 1 7rem; min-inline-size: 5.5rem; inline-size: auto; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-trigger { min-block-size: 1.75rem; border-radius: 999px; padding-block: calc(.2rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(.65rem * var(--shadcn-spacing-multiplier)) calc(.55rem * var(--shadcn-spacing-multiplier)); font-family: var(--shadcn-font-mono); font-size: .6875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select { flex: 0 1 6rem; min-inline-size: 0; max-inline-size: 6rem; inline-size: auto; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-trigger { min-inline-size: 0; min-block-size: 2rem; overflow: hidden; border-color: transparent; border-radius: var(--shadcn-radius-sm); padding-block: calc(.2rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(.375rem * var(--shadcn-spacing-multiplier)); background: transparent; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-trigger-icon { margin-inline-start: calc(.25rem * var(--shadcn-spacing-multiplier)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy { display: inline-flex; flex: 0 0 auto; width: auto; min-width: 1.75rem; height: 1.75rem; margin-inline-start: auto; padding-inline: calc(.375rem * var(--shadcn-spacing-multiplier)); align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); border: 1px solid transparent; border-radius: var(--shadcn-radius-sm); background: transparent; color: var(--shadcn-muted-foreground); opacity: 1; transition: color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy { display: inline-flex; flex: 0 0 2rem; inline-size: 2rem; min-inline-size: 2rem; block-size: 2rem; margin-inline-start: auto; padding: 0; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--shadcn-radius-sm); background: transparent; color: var(--shadcn-muted-foreground); opacity: 1; transition: color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy[data-copied="true"] {
     opacity: 1;
     border-color: color-mix(in oklch, var(--shadcn-primary) 55%, var(--shadcn-border));
@@ -52,9 +53,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy:hover { border-color: var(--shadcn-border); background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy svg { width: 1rem; height: 1rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-icon,
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback { display: inline-flex; align-items: center; justify-content: center; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback { display: inline-flex; align-items: center; justify-content: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-feedback { white-space: nowrap; animation: shadcn-code-block-copy-feedback 1.8s var(--shadcn-motion-easing-standard) forwards; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy-status { white-space: nowrap; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block pre { max-height: 32rem; overflow: auto; margin: 0; padding: calc(1rem * var(--shadcn-spacing-multiplier)); direction: ltr; background: var(--shadcn-background); color: var(--shadcn-foreground); font-family: var(--shadcn-font-mono); font-size: .8rem; line-height: 1.7; text-align: left; tab-size: 2; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block code { color: inherit; font: inherit; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-token { color: var(--shadcn-code-token-foreground); }
@@ -87,8 +87,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @keyframes shadcn-code-block-copy-feedback { 0%, 78% { opacity: 1; } 100% { opacity: 0; } }
 @media (max-width: 30rem) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-toolbar { flex-wrap: wrap; padding-block: calc(.375rem * var(--shadcn-spacing-multiplier)); }
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select { flex-basis: 6rem; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-toolbar { flex-wrap: nowrap; padding-block: calc(.375rem * var(--shadcn-spacing-multiplier)); }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select { flex-basis: 5rem; }
 }
 /* Geist, Noto Sans Thai, and JetBrains Mono are shipped with the package so
    the default typography is stable in offline and self-hosted deployments. */

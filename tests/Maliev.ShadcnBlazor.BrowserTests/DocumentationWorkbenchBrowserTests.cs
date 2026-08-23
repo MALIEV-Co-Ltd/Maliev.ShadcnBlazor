@@ -112,6 +112,8 @@ public sealed class DocumentationWorkbenchBrowserTests(
         Assert.EndsWith("/docs/components", new Uri(page.Url).AbsolutePath, StringComparison.Ordinal);
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Component catalog" })).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator(".documentation-icon-action svg[aria-hidden='true']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.GetByTestId("documentation-direction-toggle").Locator("[data-slot='icon']")).ToHaveAttributeAsync("data-library", "tabler");
+        await Assertions.Expect(page.GetByTestId("documentation-direction-toggle").Locator("[data-slot='icon']")).ToHaveAttributeAsync("data-icon", "text-direction-rtl");
         await Assertions.Expect(page.GetByText("Build accessible Blazor interfaces with shadcn primitives")).ToBeVisibleAsync();
     }
 

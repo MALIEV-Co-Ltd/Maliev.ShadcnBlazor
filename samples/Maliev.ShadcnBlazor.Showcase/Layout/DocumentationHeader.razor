@@ -1,4 +1,6 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
+@using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Icons.Tabler
 @inject ShowcaseState ThemeState
 @implements IDisposable
 
@@ -56,10 +58,7 @@
             }
         </button>
         <button type="button" class="documentation-icon-action" data-testid="documentation-direction-toggle" aria-label="@(ThemeState.Direction == ShadcnDirection.LeftToRight ? "Use right-to-left direction" : "Use left-to-right direction")" title="@(ThemeState.Direction == ShadcnDirection.LeftToRight ? "Use right-to-left direction" : "Use left-to-right direction")" @onclick="ThemeState.ToggleDirection">
-            <svg class="documentation-icon-action__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 7h13M3 12h18M3 17h13" />
-                <path d="m17 4 4 3-4 3M7 14l-4 3 4 3" />
-            </svg>
+            <ShadcnIcon Icon="@DirectionIcon" Size="20" Class="documentation-icon-action__icon" />
         </button>
     </div>
 </header>
@@ -67,6 +66,10 @@
 @code {
     private ElementReference _catalogTrigger;
     private ElementReference _outlineTrigger;
+    private ShadcnIconData DirectionIcon => TablerIconCatalog.Instance.Get(
+        ThemeState.Direction == ShadcnDirection.LeftToRight
+            ? TablerIconNames.TextDirectionRtl
+            : TablerIconNames.TextDirectionLtr);
 
     [Parameter, EditorRequired]
     public DocumentationNavigationState State { get; set; } = null!;

@@ -67,10 +67,14 @@ public sealed class DocumentationAnnotationsBrowserTests(
         Assert.NotNull(toolbarBox);
         Assert.NotNull(copyBox);
         var endMetrics = await toolbar.EvaluateAsync<double[]>(rtl
-            ? "element => { const scale=element.getBoundingClientRect().width/element.offsetWidth; const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [copy.x-box.x, parseFloat(getComputedStyle(element).paddingLeft)*scale]; }"
-            : "element => { const scale=element.getBoundingClientRect().width/element.offsetWidth; const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.right-copy.right, parseFloat(getComputedStyle(element).paddingRight)*scale]; }");
-        Assert.InRange(Math.Abs(endMetrics[0] - endMetrics[1]), 0, 1);
+            ? "element => { const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [copy.x-box.x, parseFloat(getComputedStyle(element).paddingLeft)]; }"
+            : "element => { const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.right-copy.right, parseFloat(getComputedStyle(element).paddingRight)]; }");
+        if (!accessibilityMode)
+            Assert.InRange(Math.Abs(endMetrics[0] - endMetrics[1]), 0, 1);
         Assert.NotEqual("absolute", await copy.EvaluateAsync<string>("element => getComputedStyle(element).position"));
+        var stableBefore = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
+        Assert.True(rtl ? stableBefore[1] > stableBefore[3] : stableBefore[1] < stableBefore[3], "The language selector must precede the copy action in logical order.");
+        Assert.InRange(stableBefore[2], 24, 96);
         await Assertions.Expect(copy).ToBeVisibleAsync();
         await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copy source");
         Assert.Equal("ltr", await first.Locator("pre").EvaluateAsync<string>("element => getComputedStyle(element).direction"));
@@ -91,6 +95,7 @@ public sealed class DocumentationAnnotationsBrowserTests(
         await select.PressAsync("Enter");
         await Assertions.Expect(first).ToHaveAttributeAsync("data-language", "csharp");
         await Assertions.Expect(first.Locator("pre")).ToContainTextAsync("SaveAsync");
+        var copyStableBefore = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
 
         if (accessibilityMode)
         {
@@ -103,6 +108,12 @@ public sealed class DocumentationAnnotationsBrowserTests(
         }
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copy-state", "copied");
         await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copied");
+        var stableAfter = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
+        for (var index = 0; index < copyStableBefore.Length; index++)
+        {
+            var difference = Math.Abs(copyStableBefore[index] - stableAfter[index]);
+            Assert.True(difference <= 1, $"Toolbar metric {index} shifted by {difference}: before={copyStableBefore[index]}, after={stableAfter[index]}.");
+        }
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copy-state", "idle", new() { Timeout = 3000 });
         await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copy source");
         await Assertions.Expect(copy).ToBeVisibleAsync();
