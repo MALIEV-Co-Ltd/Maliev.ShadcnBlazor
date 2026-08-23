@@ -16,7 +16,7 @@ jobs:
   publish:
     name: Validate and publish
     runs-on: windows-2022
-    timeout-minutes: 30
+    timeout-minutes: 90
     environment: nuget
     permissions:
       contents: write

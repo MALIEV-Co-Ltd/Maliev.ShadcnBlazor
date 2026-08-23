@@ -250,8 +250,8 @@ public sealed class CodeBlockTests : BunitContext
         var root = FindRoot();
         var index = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "index.html"));
 
-        Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-base.css?v=1.1.1", index, StringComparison.Ordinal);
-        Assert.Contains("css/showcase.css?v=1.1.1", index, StringComparison.Ordinal);
+        Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-base.css?v=1.2.0", index, StringComparison.Ordinal);
+        Assert.Contains("css/showcase.css?v=1.2.0", index, StringComparison.Ordinal);
     }
 
     [Fact]
