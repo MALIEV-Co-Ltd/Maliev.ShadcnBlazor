@@ -49,6 +49,26 @@ public sealed class WorkflowSecurityTests
     }
 
     [Fact]
+    public void ReleasePublishesCoreAndEveryCompanionIconPackage()
+    {
+        var release = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "release.yml"));
+        var packageIds = new[]
+        {
+            "Maliev.ShadcnBlazor",
+            "Maliev.ShadcnBlazor.Icons.Lucide",
+            "Maliev.ShadcnBlazor.Icons.Tabler",
+            "Maliev.ShadcnBlazor.Icons.Phosphor",
+            "Maliev.ShadcnBlazor.Icons.Hugeicons"
+        };
+
+        foreach (var packageId in packageIds)
+        {
+            Assert.Contains($"artifacts/package/{packageId}.${{{{ steps.version.outputs.version }}}}.nupkg", release, StringComparison.Ordinal);
+            Assert.Contains($"artifacts/package/{packageId}.${{{{ steps.version.outputs.version }}}}.snupkg", release, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void ContinuousIntegrationUsesLockedRestoreAndPublicSurfaceGuard()
     {
         var ci = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "ci.yml"));

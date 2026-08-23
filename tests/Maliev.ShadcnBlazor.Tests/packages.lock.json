@@ -470,35 +470,31 @@
       "maliev.shadcnblazor.icons.hugeicons": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.0, )"
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
         }
       },
       "maliev.shadcnblazor.icons.lucide": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.0, )"
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
         }
       },
       "maliev.shadcnblazor.icons.phosphor": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.0, )"
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
         }
       },
       "maliev.shadcnblazor.icons.tabler": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.0, )"
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
         }
       },
       "maliev.shadcnblazor.showcase": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.0, )",
-          "Maliev.ShadcnBlazor.Icons.Hugeicons": "[1.2.0, )",
-          "Maliev.ShadcnBlazor.Icons.Lucide": "[1.2.0, )",
-          "Maliev.ShadcnBlazor.Icons.Phosphor": "[1.2.0, )",
-          "Maliev.ShadcnBlazor.Icons.Tabler": "[1.2.0, )",
+          "Maliev.ShadcnBlazor": "[1.2.1, )",
           "Microsoft.AspNetCore.Components.WebAssembly": "[10.0.3, )",
           "Microsoft.DotNet.HotReload.WebAssembly.Browser": "[10.0.111, )"
         }

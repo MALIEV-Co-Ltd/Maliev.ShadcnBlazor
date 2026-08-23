@@ -8679,10 +8679,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     position: relative;
     min-inline-size: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in oklch, var(--shadcn-border) 82%, transparent);
-    border-radius: calc(var(--shadcn-radius-xl) + .375rem);
-    background: color-mix(in oklch, var(--shadcn-muted) 48%, var(--shadcn-background));
-    padding: clamp(.625rem, 1.5cqi, 1.25rem);
 }
 
 .theme-runway::before,
@@ -8767,7 +8763,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 }
 
 @media (forced-colors: active) {
-    .theme-runway,
     .theme-use-case-card,
     .theme-runway-nav-list button { border-color: CanvasText; }
     .theme-runway::before,

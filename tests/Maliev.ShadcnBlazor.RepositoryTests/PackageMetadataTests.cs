@@ -4,7 +4,7 @@ namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class PackageMetadataTests
 {
-    private const string ReleaseVersion = "1.2.0";
+    private const string ReleaseVersion = "1.2.1";
 
     [Fact]
     public void PackageMetadataIsReadyForPublicNuGetDistribution()
@@ -73,7 +73,7 @@ public sealed class PackageMetadataTests
         var changelog = File.ReadAllText(Path.Combine(root, "CHANGELOG.md"));
         Assert.Contains($"## [{ReleaseVersion}]", changelog, StringComparison.Ordinal);
         Assert.Contains($"compare/v{ReleaseVersion}...HEAD", changelog, StringComparison.Ordinal);
-        Assert.Contains($"compare/v1.1.1...v{ReleaseVersion}", changelog, StringComparison.Ordinal);
+        Assert.Contains($"compare/v1.2.0...v{ReleaseVersion}", changelog, StringComparison.Ordinal);
     }
 
     [Theory]
