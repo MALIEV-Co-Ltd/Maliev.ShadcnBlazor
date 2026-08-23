@@ -16,7 +16,7 @@ public sealed record ShadcnIconData
     private static readonly HashSet<string> AllowedAttributes = new(StringComparer.Ordinal)
     {
         "clip-rule", "cx", "cy", "d", "fill", "fill-rule", "height", "opacity", "points", "r", "rx", "ry",
-        "stroke", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-width",
+        "stroke", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-width",
         "transform", "width", "x", "x1", "x2", "y", "y1", "y2"
     };
 

@@ -2,6 +2,10 @@
   <Project Path="samples/Maliev.ShadcnBlazor.Showcase/Maliev.ShadcnBlazor.Showcase.csproj" />
   <Project Path="samples/Maliev.ShadcnBlazor.ThemeConsumer/Maliev.ShadcnBlazor.ThemeConsumer.csproj" />
   <Project Path="src/Maliev.ShadcnBlazor.Build/Maliev.ShadcnBlazor.Build.csproj" />
+  <Project Path="src/Maliev.ShadcnBlazor.Icons.Hugeicons/Maliev.ShadcnBlazor.Icons.Hugeicons.csproj" />
+  <Project Path="src/Maliev.ShadcnBlazor.Icons.Lucide/Maliev.ShadcnBlazor.Icons.Lucide.csproj" />
+  <Project Path="src/Maliev.ShadcnBlazor.Icons.Phosphor/Maliev.ShadcnBlazor.Icons.Phosphor.csproj" />
+  <Project Path="src/Maliev.ShadcnBlazor.Icons.Tabler/Maliev.ShadcnBlazor.Icons.Tabler.csproj" />
   <Project Path="src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj" />
   <Project Path="tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj" />
   <Project Path="tests/Maliev.ShadcnBlazor.RepositoryTests/Maliev.ShadcnBlazor.RepositoryTests.csproj" />

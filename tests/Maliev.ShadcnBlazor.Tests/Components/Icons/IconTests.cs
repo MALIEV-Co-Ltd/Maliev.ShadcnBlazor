@@ -77,4 +77,16 @@ public sealed class IconTests : BunitContext
 
         Assert.Equal("viewBox", exception.ParamName);
     }
+
+    [Fact]
+    public void FreeCatalogPresentationAttributesRemainRenderable()
+    {
+        var icon = new ShadcnIconData(
+            "test",
+            "mitered-shape",
+            "0 0 24 24",
+            "<path d=\"M2 2h20v20z\" stroke=\"currentColor\" stroke-miterlimit=\"10\" />");
+
+        Assert.Contains("stroke-miterlimit", icon.SvgContent, StringComparison.Ordinal);
+    }
 }

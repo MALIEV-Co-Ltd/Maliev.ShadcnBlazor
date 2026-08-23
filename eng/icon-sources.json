@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "lucide",
+      "displayName": "Lucide",
+      "packageSuffix": "Lucide",
+      "version": "1.33.0",
+      "commit": "59978cecf84986af59f1f9f503bcebdc89c6d166",
+      "archiveUrl": "https://codeload.github.com/lucide-icons/lucide/zip/59978cecf84986af59f1f9f503bcebdc89c6d166",
+      "archiveSha256": "9ffd3773c606d83a09f4230570026df94e133566ed9bb4528b30e5adb12aa8b0",
+      "sourceDirectory": "icons",
+      "sourcePattern": "*.svg",
+      "licensePath": "LICENSE",
+      "licenseExpression": "ISC",
+      "licenseFileName": "Lucide-LICENSE.txt"
+    },
+    {
+      "id": "tabler",
+      "displayName": "Tabler Icons",
+      "packageSuffix": "Tabler",
+      "version": "3.46.0",
+      "commit": "8ac7d81b72ece11072ef25ea9fd92e80c6f3c9fc",
+      "archiveUrl": "https://codeload.github.com/tabler/tabler-icons/zip/8ac7d81b72ece11072ef25ea9fd92e80c6f3c9fc",
+      "archiveSha256": "a5f369b293d03a02752334a6277322ca95c7129c5f41e458c6929d20384dfc7f",
+      "sourceDirectory": "icons/outline",
+      "sourcePattern": "*.svg",
+      "licensePath": "LICENSE",
+      "licenseExpression": "MIT",
+      "licenseFileName": "Tabler-LICENSE.txt"
+    },
+    {
+      "id": "phosphor",
+      "displayName": "Phosphor Icons",
+      "packageSuffix": "Phosphor",
+      "version": "2.0.8",
+      "commit": "d42782b2abe747d904b971ccab48b182a1455f86",
+      "archiveUrl": "https://codeload.github.com/phosphor-icons/core/zip/d42782b2abe747d904b971ccab48b182a1455f86",
+      "archiveSha256": "7e8dc880e9100b002099abad14ebc36dc0a3608bf239b1e309bceca36f94bbd1",
+      "sourceDirectory": "assets/regular",
+      "sourcePattern": "*.svg",
+      "licensePath": "LICENSE",
+      "licenseExpression": "MIT",
+      "licenseFileName": "Phosphor-LICENSE.txt"
+    },
+    {
+      "id": "hugeicons",
+      "displayName": "Hugeicons Free",
+      "packageSuffix": "Hugeicons",
+      "version": "free-3365154",
+      "commit": "3365154e0ae2461fbfb6249b89649127207a4f9e",
+      "archiveUrl": "https://codeload.github.com/hugeicons/hugeicons/zip/3365154e0ae2461fbfb6249b89649127207a4f9e",
+      "archiveSha256": "790393c9760f90f79e1d96bc49ec31138d93345426fef81cda179c4af49705de",
+      "sourceDirectory": "icons",
+      "sourcePattern": "*.svg",
+      "licensePath": "LICENSE.md",
+      "licenseExpression": "MIT",
+      "licenseFileName": "Hugeicons-Free-LICENSE.md"
+    }
+  ]
+}
