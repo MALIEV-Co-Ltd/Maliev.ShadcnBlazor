@@ -91,7 +91,7 @@ public sealed class IconCatalogRepositoryTests
     }
 
     [Fact]
-    public void ShowcaseReferencesEveryOptionalCatalogWhileCoreReferencesNone()
+    public void ShowcaseReferencesOnlyTheCatalogItRendersWhileCoreReferencesNone()
     {
         var root = FindRoot();
         var showcase = XDocument.Load(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Maliev.ShadcnBlazor.Showcase.csproj"));
@@ -99,11 +99,19 @@ public sealed class IconCatalogRepositoryTests
         var showcaseReferences = showcase.Descendants("ProjectReference").Select(reference => reference.Attribute("Include")?.Value).ToArray();
         var coreReferences = core.Descendants("ProjectReference").Select(reference => reference.Attribute("Include")?.Value).ToArray();
 
+        Assert.Contains(showcaseReferences, reference =>
+            reference?.Contains("Maliev.ShadcnBlazor.Icons.Tabler", StringComparison.Ordinal) == true);
+        Assert.DoesNotContain(showcaseReferences, reference =>
+            reference?.Contains("Maliev.ShadcnBlazor.Icons.Lucide", StringComparison.Ordinal) == true);
+        Assert.DoesNotContain(showcaseReferences, reference =>
+            reference?.Contains("Maliev.ShadcnBlazor.Icons.Phosphor", StringComparison.Ordinal) == true);
+        Assert.DoesNotContain(showcaseReferences, reference =>
+            reference?.Contains("Maliev.ShadcnBlazor.Icons.Hugeicons", StringComparison.Ordinal) == true);
+
         foreach (var expected in ExpectedSources)
         {
             var suffix = expected.Id == "hugeicons" ? "Hugeicons" : char.ToUpperInvariant(expected.Id[0]) + expected.Id[1..];
             var projectName = $"Maliev.ShadcnBlazor.Icons.{suffix}";
-            Assert.Contains(showcaseReferences, reference => reference?.Contains(projectName, StringComparison.Ordinal) == true);
             Assert.DoesNotContain(coreReferences, reference => reference?.Contains(projectName, StringComparison.Ordinal) == true);
         }
     }
