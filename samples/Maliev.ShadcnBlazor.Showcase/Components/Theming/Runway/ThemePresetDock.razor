@@ -1,0 +1,31 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Icons.Lucide
+@using Maliev.ShadcnBlazor.Icons.Tabler
+@using Maliev.ShadcnBlazor.Icons.Phosphor
+@using Maliev.ShadcnBlazor.Icons.Hugeicons
+
+<div class="theme-preset-dock" aria-label="Active curated theme" data-testid="theme-preset-dock">
+    <ShadcnIcon Icon="@PreviewIcon" Size="22" Class="theme-preset-dock__icon" Title="@($"{State.IconLibrary} factory icon")" />
+    <div><span>Preset</span><strong>@PresetName</strong></div>
+    <div><span>Style</span><strong>@State.StyleId</strong></div>
+    <div><span>Accent</span><strong>@State.BaseColorId</strong></div>
+    <div><span>Radius</span><strong>@PresetRadius</strong></div>
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="Shuffle" data-testid="runway-shuffle">Shuffle</ShadcnButton>
+    <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="TogglePause" aria-pressed="@(State.Workbench.RunwayPaused ? "true" : "false")" data-testid="runway-dock-pause">@(State.Workbench.RunwayPaused ? "Resume" : "Pause")</ShadcnButton>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    private string PresetName => State.CuratedPresets.FirstOrDefault(item => item.Id == State.SelectedPresetId)?.DisplayName ?? "Custom imported";
+    private string PresetRadius => State.CuratedPresets.FirstOrDefault(item => item.Id == State.SelectedPresetId)?.Radius.ToString() ?? State.RadiusPreset.ToString();
+    private ShadcnIconData PreviewIcon => State.IconLibrary switch
+    {
+        ThemeStudioIconLibrary.Tabler => TablerIconCatalog.Instance.Get("building-factory"),
+        ThemeStudioIconLibrary.Phosphor => PhosphorIconCatalog.Instance.Get("factory"),
+        ThemeStudioIconLibrary.Hugeicons => HugeiconsIconCatalog.Instance.Get("factory"),
+        _ => LucideIconCatalog.Instance.Get("factory")
+    };
+    private void Shuffle() => State.ShufflePreset();
+    private void TogglePause() => State.Workbench.SetRunwayPaused(!State.Workbench.RunwayPaused);
+}

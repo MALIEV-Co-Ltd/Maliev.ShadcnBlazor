@@ -1,0 +1,109 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+
+<article class="theme-use-case-card"
+         data-use-case-id="@Definition.Id"
+         data-track="@Definition.Track.ToString().ToLowerInvariant()"
+         data-mirror="@(IsMirror ? "true" : "false")"
+         aria-hidden="@(IsMirror ? "true" : null)"
+         inert="@IsMirror">
+    <header class="theme-use-case-card__header">
+        <div><span class="theme-use-case-card__eyebrow">@Eyebrow</span><h2>@Title</h2></div>
+        <ShadcnBadge Variant="ShadcnBadgeVariant.Outline">@Status</ShadcnBadge>
+    </header>
+
+    @switch (Definition.Id)
+    {
+        case "production-capacity":
+            <div class="theme-runway-stat"><strong>@Frame.CapacityPercent.ToString("0")%</strong><span>5-axis capacity · Cell A3</span></div>
+            <ShadcnProgress Value="Frame.CapacityPercent"><ShadcnProgressLabel>Weekly capacity</ShadcnProgressLabel><ShadcnProgressValue /></ShadcnProgress>
+            <div class="theme-use-case-card__actions"><ShadcnBadge>On schedule</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Review plan</ShadcnButton></div>
+            break;
+        case "operator-profile":
+            <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>CNC engineer · Samut Prakan</span></div></div>
+            <label>Name<ShadcnInput TValue="string" Value="@(_profileName ?? "Narin S.")" ValueChanged="value => _profileName = value" Disabled="IsMirror" /></label>
+            <label>Shift<ShadcnInput TValue="string" Value="@ShiftValue" ReadOnly="true" /></label>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Save profile</ShadcnButton>
+            break;
+        case "quotation-files":
+            <ShadcnDropzone Accept=".step,.stp,.pdf" Multiple="true" MaxFiles="5" MaxFileSize="20971520" Loading="@(Frame.UploadPercent is > 0 and < 100)" Disabled="IsMirror" Instructions="Drop production drawings here" Description="STEP or PDF · up to 20 MB" />
+            <div class="theme-runway-file"><span>enclosure-rev-c.step</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@Frame.UploadPercent.ToString("0")%</ShadcnBadge></div>
+            <ShadcnProgress Value="Frame.UploadPercent"><ShadcnProgressLabel>Upload progress</ShadcnProgressLabel></ShadcnProgress>
+            break;
+        case "shipping-handoff":
+            <label>Factory<ShadcnInput TValue="string" Value="@FactoryValue" ReadOnly="true" /></label>
+            <div class="theme-runway-fields"><label>Dock<ShadcnInput TValue="string" Value="@DockValue" ReadOnly="true" /></label><label>Reference<ShadcnInput TValue="string" Value="@ReferenceValue" ReadOnly="true" /></label></div>
+            <label class="theme-runway-check"><ShadcnCheckbox Value="@_saveAddress" ValueChanged="value => _saveAddress = value ?? false" Disabled="IsMirror" /> Save as production handoff</label>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Confirm address</ShadcnButton>
+            break;
+        case "inspection-alerts":
+            @foreach (var option in AlertOptions)
+            {
+                <label class="theme-runway-check"><ShadcnCheckbox Value="@option.Enabled" Disabled="IsMirror" /><span><strong>@option.Label</strong><small>@option.Description</small></span></label>
+            }
+            <div class="theme-use-case-card__actions"><span>Quiet hours</span><ShadcnSwitch Value="true" Disabled="IsMirror" aria-label="Use quiet hours" /></div>
+            break;
+        case "deposit-approval":
+            <div class="theme-runway-amount"><span>Manufacturing deposit</span><strong>฿48,500.00</strong></div>
+            <ShadcnSeparator />
+            <dl class="theme-runway-summary"><div><dt>Quotation</dt><dd>Q-2847</dd></div><div><dt>Due</dt><dd>23 Aug 2569</dd></div><div><dt>Terms</dt><dd>50% before production</dd></div></dl>
+            <div class="theme-use-case-card__actions"><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Review</ShadcnButton><ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Approve deposit</ShadcnButton></div>
+            break;
+        case "assigned-reviewers":
+            <ShadcnAvatarGroup><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>NP</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>PS</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatarGroupCount Size="ShadcnAvatarSize.Small">+4</ShadcnAvatarGroupCount></ShadcnAvatarGroup>
+            <ul class="theme-runway-reviewers"><li><span>Nattapong · Machining</span><ShadcnBadge>Ready</ShadcnBadge></li><li><span>Kanda · Quality</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Reviewing</ShadcnBadge></li><li><span>Pim · Logistics</span><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Queued</ShadcnBadge></li></ul>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Manage reviewers</ShadcnButton>
+            break;
+        case "work-order-navigation":
+            <nav aria-label="Work order path" class="theme-runway-breadcrumb"><a href="theme" @onclick:preventDefault>Production</a><span>/</span><a href="theme" @onclick:preventDefault>Cell A3</a><span>/</span><strong>WO-2418</strong></nav>
+            <div class="theme-runway-nav-list"><button type="button" disabled="@IsMirror"><span><strong>Change process plan</strong><small>12 operations · revision C</small></span><span>›</span></button><button type="button" disabled="@IsMirror"><span><strong>Schedule inspection</strong><small>Final dimensional report</small></span><span>›</span></button><button type="button" disabled="@IsMirror"><span><strong>Release delivery</strong><small>Awaiting quality approval</small></span><span>›</span></button></div>
+            break;
+        case "machine-cell":
+            <div class="theme-runway-machine"><div><strong>DMG MORI DMU 50</strong><span>5-axis milling · Cell A3</span></div><ShadcnBadge>Live</ShadcnBadge></div>
+            <div class="theme-runway-stat"><strong>@(Frame.CapacityPercent - 7).ToString("0")%</strong><span>Spindle load</span></div>
+            <ShadcnProgress Value="@(Frame.CapacityPercent - 7)"><ShadcnProgressLabel>Spindle load</ShadcnProgressLabel></ShadcnProgress>
+            <ShadcnAlert><ShadcnAlertTitle>In-process inspection</ShadcnAlertTitle><ShadcnAlertDescription>Bore diameter within tolerance at 14:20.</ShadcnAlertDescription></ShadcnAlert>
+            break;
+        case "assistant-conversation":
+            <div class="theme-runway-chat" aria-label="Assistant conversation preview">
+                <div class="theme-runway-message theme-runway-message--user"><span>ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย</span></div>
+                <div class="theme-runway-message"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar><span>@AssistantMessage[..Math.Min(Frame.ChatCharacters, AssistantMessage.Length)]<span class="theme-runway-caret" aria-hidden="true"></span></span></div>
+                <div class="theme-runway-composer"><ShadcnInput TValue="string" Placeholder="Ask about this work order" Disabled="IsMirror" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" Disabled="IsMirror">↑</ShadcnButton></div>
+            </div>
+            break;
+        case "issue-report":
+            <ShadcnAlert Variant="@(Frame.FormStep == 3 ? ShadcnAlertVariant.Destructive : ShadcnAlertVariant.Default)"><ShadcnAlertTitle>@(Frame.FormStep == 3 ? "Drawing revision required" : "Report a production issue")</ShadcnAlertTitle><ShadcnAlertDescription>Quality receives the machine, work order, and validation context.</ShadcnAlertDescription></ShadcnAlert>
+            <label>Subject<ShadcnInput TValue="string" Value="@(Frame.FormStep > 0 ? "Tolerance mismatch on bore 4" : string.Empty)" Placeholder="Describe the issue" ReadOnly="true" /></label>
+            <label>Details<ShadcnTextarea TValue="string" Value="@(Frame.FormStep > 1 ? "Measured 24.982 mm against 25.000 ±0.010 mm." : string.Empty)" Placeholder="Add inspection evidence" ReadOnly="true" /></label>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Submit issue</ShadcnButton>
+            break;
+        case "dispatch-confirmation":
+            <ShadcnAlert><ShadcnAlertTitle>Release WO-2418 for dispatch?</ShadcnAlertTitle><ShadcnAlertDescription>Three packages passed final inspection. Kerry Express collection is scheduled for 16:00.</ShadcnAlertDescription></ShadcnAlert>
+            <dl class="theme-runway-summary"><div><dt>Destination</dt><dd>Bang Na, Bangkok</dd></div><div><dt>Carrier</dt><dd>Kerry Express</dd></div></dl>
+            <div class="theme-use-case-card__actions"><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Cancel</ShadcnButton><ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">@(Frame.ApprovalState == 2 ? "Dispatched" : "Confirm dispatch")</ShadcnButton></div>
+            break;
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public ThemeUseCaseDefinition Definition { get; set; } = null!;
+    [Parameter, EditorRequired] public ThemeDemonstrationFrame Frame { get; set; } = null!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    [Parameter] public bool IsMirror { get; set; }
+    private string? _profileName;
+    private bool _saveAddress = true;
+    private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
+    private string Eyebrow => $"{Definition.Order:00} · MALIEV workflow";
+    private string Status => Definition.Id switch { "machine-cell" => "Live", "quotation-files" => "Uploading", "deposit-approval" => "Approval", _ => "Preview" };
+    private const string AssistantMessage = "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย";
+    private const string ShiftValue = "Night · Cell A3";
+    private const string FactoryValue = "MALIEV · Samut Prakan";
+    private const string DockValue = "B-04";
+    private const string ReferenceValue = "WO-2418";
+    private static readonly (string Label, string Description, bool Enabled)[] AlertOptions =
+    [
+        ("Inspection failures", "Immediate quality notification", true),
+        ("Machine state changes", "Stops, holds, and resumptions", true),
+        ("Routine progress", "Hourly production summary", false)
+    ];
+}

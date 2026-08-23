@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Theming\Presets\ThemeStudioPresetCatalog.json" />
     <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor\Maliev.ShadcnBlazor.csproj" />
     <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor.Icons.Hugeicons\Maliev.ShadcnBlazor.Icons.Hugeicons.csproj" />
     <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor.Icons.Lucide\Maliev.ShadcnBlazor.Icons.Lucide.csproj" />

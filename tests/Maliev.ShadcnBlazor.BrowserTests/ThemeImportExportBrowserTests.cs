@@ -40,14 +40,13 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
 
-        await page.GetByTestId("mode-dark").ClickAsync();
-        await page.GetByTestId("direction-rtl").ClickAsync();
+        await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await page.GetByTestId("locale-thai").ClickAsync();
-        var primary = page.Locator("input[data-testid='theme-token-light-primary']");
-        await primary.FillAsync("#123456");
-        await primary.PressAsync("Tab");
-        await page.GetByTestId("font-family-select").ClickAsync();
-        await page.GetByText("DM Sans", new() { Exact = true }).ClickAsync();
+        await page.GetByTestId("theme-preset").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Cobalt Precision", Exact = true }).ClickAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
+        await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
         var headingScale = page.GetByTestId("theme-role-heading-1-scale");
         await headingScale.FillAsync("2.5");
         await headingScale.PressAsync("Tab");
@@ -61,7 +60,7 @@ public sealed class ThemeImportExportBrowserTests(
 
         var download = await page.RunAndWaitForDownloadAsync(
             () => page.GetByTestId("theme-download").ClickAsync());
-        Assert.Equal("maliev-shadcn-theme-base-vega-neutral-2.zip", download.SuggestedFilename);
+        Assert.Equal("maliev-shadcn-theme-cobalt-precision-2.zip", download.SuggestedFilename);
         var downloadPath = await download.PathAsync();
         Assert.NotNull(downloadPath);
 
@@ -90,22 +89,21 @@ public sealed class ThemeImportExportBrowserTests(
             Assert.True(themeDocument.RootElement.GetProperty("application").GetProperty("defaultDarkMode").GetBoolean());
             Assert.Equal("rightToLeft", themeDocument.RootElement.GetProperty("application").GetProperty("defaultDirection").GetString());
             Assert.Equal("th", themeDocument.RootElement.GetProperty("application").GetProperty("defaultLocale").GetString());
-            Assert.Equal(0UL, themeDocument.RootElement.GetProperty("palette").GetProperty("seed").GetUInt64());
-            Assert.Contains("#123456", themeJson, StringComparison.Ordinal);
+            Assert.Equal(303UL, themeDocument.RootElement.GetProperty("palette").GetProperty("seed").GetUInt64());
+            Assert.Contains("oklch(0.49 0.22 264)", themeJson, StringComparison.Ordinal);
             var css = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.css")!));
-            Assert.Contains("#123456", css, StringComparison.Ordinal);
+            Assert.Contains("oklch(0.49 0.22 264)", css, StringComparison.Ordinal);
             Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", css, StringComparison.Ordinal);
             Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", css, StringComparison.Ordinal);
-            Assert.Contains("#123456", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("MalievShadcnTheme.cs")!)), StringComparison.Ordinal);
+            Assert.Contains("oklch(0.49 0.22 264)", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("MalievShadcnTheme.cs")!)), StringComparison.Ordinal);
         }
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Close theme export" }).ClickAsync();
-        await page.GetByTestId("mode-light").ClickAsync();
-        await page.GetByTestId("direction-ltr").ClickAsync();
+        await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await page.GetByTestId("locale-english").ClickAsync();
-        await primary.FillAsync("#654321");
-        await primary.PressAsync("Tab");
-        await Assertions.Expect(primary).ToHaveValueAsync("#654321");
+        await page.GetByTestId("theme-preset").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Base / Vega / Neutral", Exact = true }).ClickAsync();
         await page.GetByTestId("theme-import-open").ClickAsync();
         await page.GetByTestId("theme-import-file").SetInputFilesAsync(new FilePayload
         {
@@ -115,20 +113,19 @@ public sealed class ThemeImportExportBrowserTests(
         });
 
         await Assertions.Expect(page.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
-        await Assertions.Expect(primary).ToHaveValueAsync("#123456");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
         await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
         await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2')?.includes('\\\"schemaVersion\\\": 2')");
         await page.ReloadAsync();
         await page.GetByTestId("theme-studio").WaitForAsync();
-        await Assertions.Expect(page.Locator("input[data-testid='theme-token-light-primary']")).ToHaveValueAsync("#123456");
+        await Assertions.Expect(page.GetByTestId("theme-preset-dock")).ToContainTextAsync("Cobalt Precision");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
         var restoredTypography = await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style");
         Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", restoredTypography, StringComparison.Ordinal);
-        Assert.Empty(errors);
+        Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
 
     [Fact]
@@ -143,9 +140,11 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
         await OpenSettingsIfClosedAsync(page);
-        var primary = page.Locator("input[data-testid='theme-token-light-primary']");
-        await primary.FillAsync("#123456");
-        await primary.PressAsync("Tab");
+        await page.GetByTestId("theme-preset").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Cobalt Precision", Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-preset")).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.Locator("[data-testid='theme-preset'] + [data-slot='select-content']")).ToHaveCountAsync(0);
+        var primary = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
         await page.GetByTestId("theme-import-open").ClickAsync();
 
         foreach (var payload in new[]
@@ -157,7 +156,7 @@ public sealed class ThemeImportExportBrowserTests(
         {
             await page.GetByTestId("theme-import-file").SetInputFilesAsync(payload);
             await Assertions.Expect(page.GetByTestId("theme-import-status")).ToContainTextAsync("not changed");
-            await Assertions.Expect(primary).ToHaveValueAsync("#123456");
+            Assert.Equal(primary, await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
         }
     }
 
@@ -193,7 +192,7 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByRole(AriaRole.Button, new() { Name = closeName }).ClickAsync();
         await Assertions.Expect(page.GetByTestId(dialogTestId)).Not.ToBeVisibleAsync();
         await Assertions.Expect(opener).ToBeFocusedAsync();
-        Assert.Empty(errors);
+        Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
 
     [Fact]
@@ -217,7 +216,7 @@ public sealed class ThemeImportExportBrowserTests(
         await page.Locator("main").WaitForAsync();
         await page.Keyboard.PressAsync("Escape");
 
-        Assert.Empty(errors);
+        Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
 
     private static void CapturePageErrors(IPage page, ICollection<string> errors)

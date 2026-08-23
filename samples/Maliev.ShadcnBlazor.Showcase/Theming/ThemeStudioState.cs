@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Security.Cryptography;
 using Maliev.ShadcnBlazor.Theming;
+using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
@@ -113,6 +114,7 @@ public sealed class ThemeStudioState
 {
     private const int HistoryLimit = 50;
     private readonly IThemeStudioStorage storage;
+    private readonly IThemeStudioPresetCatalog presetCatalog;
     private readonly List<ThemeStudioSnapshot> _undo = [];
     private readonly List<ThemeStudioSnapshot> _redo = [];
     private readonly Dictionary<string, string> _tokenEditorValues = new(StringComparer.Ordinal);
@@ -133,14 +135,20 @@ public sealed class ThemeStudioState
         ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
 
     public ThemeStudioState(IThemeStudioStorage storage)
-        : this(storage, new ThemeStudioWorkbenchState())
+        : this(storage, new ThemeStudioWorkbenchState(), new ThemeStudioPresetCatalog())
     {
     }
 
     public ThemeStudioState(IThemeStudioStorage storage, ThemeStudioWorkbenchState workbench)
+        : this(storage, workbench, new ThemeStudioPresetCatalog())
+    {
+    }
+
+    public ThemeStudioState(IThemeStudioStorage storage, ThemeStudioWorkbenchState workbench, IThemeStudioPresetCatalog presetCatalog)
     {
         this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
         Workbench = workbench ?? throw new ArgumentNullException(nameof(workbench));
+        this.presetCatalog = presetCatalog ?? throw new ArgumentNullException(nameof(presetCatalog));
         Workbench.Changed += OnWorkbenchChanged;
     }
 
@@ -285,18 +293,45 @@ public sealed class ThemeStudioState
 
     public void ApplyPreset(string presetId)
     {
-        var preset = ShadcnThemePresets.All.FirstOrDefault(item => string.Equals(item.Id, presetId, StringComparison.Ordinal))
-            ?? throw new ArgumentException($"Unknown theme preset '{presetId}'.", nameof(presetId));
-        CaptureHistory("preset");
-        var theme = preset.CreateTheme();
-        _documentTemplate = ShadcnThemeDocumentSerializer.Deserialize(ShadcnThemeSerializer.Serialize(theme));
-        _baselineDocumentTemplate = _documentTemplate;
-        Draft = Clone(theme);
-        Applied = Clone(theme);
-        _baseline = Clone(theme);
+        ApplyCuratedPreset(presetCatalog.Get(presetId), captureHistory: true);
+    }
+
+    public string ShufflePreset()
+    {
+        var candidates = presetCatalog.All.Where(item => !string.Equals(item.Id, SelectedPresetId, StringComparison.Ordinal)).ToArray();
+        var selected = candidates[RandomNumberGenerator.GetInt32(candidates.Length)];
+        ApplyCuratedPreset(selected, captureHistory: true);
+        return selected.Id;
+    }
+
+    public IReadOnlyList<ThemeStudioPresetDefinition> CuratedPresets => presetCatalog.All;
+
+    private void ApplyCuratedPreset(ThemeStudioPresetDefinition preset, bool captureHistory)
+    {
+        var document = preset.CreateDocument();
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+        if (!validation.IsValid)
+            throw new ArgumentException($"Curated preset '{preset.Id}' is invalid.", nameof(preset));
+        if (captureHistory)
+            CaptureHistory("preset");
+        _documentTemplate = document;
+        _baselineDocumentTemplate = document;
+        Draft = Clone(document.Theme);
+        Applied = Clone(document.Theme);
+        _baseline = Clone(document.Theme);
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
         SelectedPresetId = preset.Id;
+        StyleId = preset.Style;
+        BaseColorId = preset.BaseColor;
+        IconLibrary = preset.IconLibrary;
+        MenuAccent = ParseOption<ThemeStudioMenuAccent>(document.Application.MenuAccent);
+        MenuColor = ParseOption<ThemeStudioMenuColor>(document.Application.MenuColor);
+        _baselineStyleId = StyleId;
+        _baselineBaseColorId = BaseColorId;
+        _baselineIconLibrary = IconLibrary;
+        _baselineMenuAccent = MenuAccent;
+        _baselineMenuColor = MenuColor;
         RevalidateAndApply();
     }
 

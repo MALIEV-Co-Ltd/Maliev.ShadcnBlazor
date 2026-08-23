@@ -2,7 +2,7 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
 @inject IJSRuntime JS
-<CascadingValue Value="Context" IsFixed="true"><div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-wrapper")" style="@MergeStyle(ProviderStyle)" data-slot="sidebar-wrapper" data-state="@(EffectiveOpen ? "expanded" : "collapsed")" data-device="@(IsMobile ? "mobile" : "desktop")">@ChildContent</div></CascadingValue>
+<CascadingValue Value="Context"><div @ref="Root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-wrapper")" style="@MergeStyle(ProviderStyle)" data-slot="sidebar-wrapper" data-state="@(EffectiveOpen ? "expanded" : "collapsed")" data-device="@(IsMobile ? "mobile" : "desktop")">@ChildContent</div></CascadingValue>
 @code {
     [Parameter] public bool Open { get; set; } = true;
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
@@ -49,7 +49,7 @@
     internal void RegisterSidebar(string id, object owner, ShadcnSidebarCollapsible value, string elementId) { if (_sidebars.TryGetValue(id, out var existing) && !ReferenceEquals(existing.Owner, owner)) throw new InvalidOperationException($"Sidebar ID '{id}' is already registered."); _sidebars[id] = (owner, value, elementId); }
     internal void UnregisterSidebar(string id, object owner) { if (_sidebars.TryGetValue(id, out var existing) && ReferenceEquals(existing.Owner, owner)) _sidebars.Remove(id); }
     internal async ValueTask SetOpenAsync(bool value) { if (value == _effectiveOpen) return; if (OpenChanged.HasDelegate) await OpenChanged.InvokeAsync(value); else { _effectiveOpen = value; await InvokeAsync(StateHasChanged); } if (StateStore is not null && StateKey is not null) try { await StateStore.SaveAsync(StateKey, value); } catch (Exception error) { await OnPersistenceError.InvokeAsync(error); } }
-    internal async ValueTask SetMobileOpenAsync(bool value) { if (value == _effectiveMobileOpen) return; if (MobileOpenChanged.HasDelegate) await MobileOpenChanged.InvokeAsync(value); else { _effectiveMobileOpen = value; await InvokeAsync(StateHasChanged); } }
+    internal async ValueTask SetMobileOpenAsync(bool value) { if (value == _effectiveMobileOpen) return; if (!value && _module is not null) await _module.InvokeVoidAsync("releaseSidebarOverlayWithin", Root); if (MobileOpenChanged.HasDelegate) await MobileOpenChanged.InvokeAsync(value); else { _effectiveMobileOpen = value; await InvokeAsync(StateHasChanged); } }
     [JSInvokable] public async Task SetMobileAsync(bool value) { if (IsMobile == value) return; IsMobile = value; if (!value && _effectiveMobileOpen) await SetMobileOpenAsync(false); await InvokeAsync(StateHasChanged); }
     [JSInvokable] public Task ToggleFromShortcutAsync() => ToggleAsync().AsTask();
     [JSInvokable] public Task CloseMobileFromOverlayAsync() => SetMobileOpenAsync(false).AsTask();

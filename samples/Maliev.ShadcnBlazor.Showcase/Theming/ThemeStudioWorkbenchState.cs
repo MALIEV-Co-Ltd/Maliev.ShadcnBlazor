@@ -6,20 +6,23 @@ public sealed class ThemeStudioWorkbenchState
 {
     private static readonly IReadOnlySet<string> Sections = new HashSet<string>(StringComparer.Ordinal)
     {
-        "colors",
+        "preview",
+        "preset",
         "typography",
-        "generation",
+        "icons",
+        "accessibility",
         "transfer"
     };
 
     public bool SidebarOpen { get; private set; }
-    public string ActiveSection { get; private set; } = "colors";
+    public string ActiveSection { get; private set; } = "preview";
     public ThemeStudioViewport Viewport { get; private set; } = ThemeStudioViewport.Desktop;
     public ThemeStudioMode Mode { get; private set; } = ThemeStudioMode.Light;
     public ShadcnDirection Direction { get; private set; } = ShadcnDirection.LeftToRight;
     public ThemeStudioLocale Locale { get; private set; } = ThemeStudioLocale.English;
     public bool ReducedMotion { get; private set; }
     public bool HighContrastPreview { get; private set; }
+    public bool RunwayPaused { get; private set; }
     public bool SystemDarkMode { get; private set; }
     public bool EffectiveDarkMode => Mode == ThemeStudioMode.Dark || Mode == ThemeStudioMode.System && SystemDarkMode;
 
@@ -99,6 +102,13 @@ public sealed class ThemeStudioWorkbenchState
     {
         if (HighContrastPreview == enabled) return;
         HighContrastPreview = enabled;
+        RaiseChanged();
+    }
+
+    public void SetRunwayPaused(bool paused)
+    {
+        if (RunwayPaused == paused) return;
+        RunwayPaused = paused;
         RaiseChanged();
     }
 

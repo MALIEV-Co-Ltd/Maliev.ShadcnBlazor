@@ -1,26 +1,19 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using Maliev.ShadcnBlazor.Components.Navigation.Sidebar
 
-<aside id="theme-studio-sidebar"
-       class="theme-studio-sidebar"
-       aria-label="Theme settings"
-       aria-hidden="@(State.Workbench.SidebarOpen ? "false" : "true")"
-       inert="@(!State.Workbench.SidebarOpen)"
-       data-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
-       data-testid="theme-studio-sidebar">
-    <div class="theme-studio-sidebar__mobile-heading">
+<ShadcnSidebarProvider id="theme-studio-sidebar-region" Open="State.Workbench.SidebarOpen" OpenChanged="SetOpen" MobileOpen="State.Workbench.SidebarOpen" MobileOpenChanged="SetOpen" Width="20rem" MobileWidth="min(22rem, 92vw)" ToggleLabel="Toggle theme settings" CloseLabel="Close theme settings" Class="theme-studio-sidebar-provider">
+    <ShadcnSidebar Id="theme-settings-navigation" Label="Theme settings" Variant="ShadcnSidebarVariant.Sidebar" Collapsible="ShadcnSidebarCollapsible.OffCanvas" Class="theme-studio-sidebar" data-testid="theme-studio-sidebar" data-focus-return-id="theme-settings-toggle">
+    <ShadcnSidebarHeader><div class="theme-studio-sidebar__mobile-heading">
         <strong>Theme settings</strong>
-        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
-                      Size="ShadcnButtonSize.IconSmall"
-                      aria-label="Close theme settings"
-                      data-testid="theme-settings-close"
-                      OnClick="CloseRequested">
+        <ShadcnSidebarTrigger TargetId="theme-settings-navigation" Class="theme-studio-sidebar__close" data-testid="theme-settings-close">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
-        </ShadcnButton>
-    </div>
-    <ThemeInspector State="State" />
-</aside>
+        </ShadcnSidebarTrigger>
+    </div></ShadcnSidebarHeader>
+    <ShadcnSidebarContent><ThemeInspector State="State" /></ShadcnSidebarContent>
+    </ShadcnSidebar>
+</ShadcnSidebarProvider>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
-    [Parameter] public EventCallback CloseRequested { get; set; }
+    private Task SetOpen(bool open) { State.Workbench.SetSidebarOpen(open); return Task.CompletedTask; }
 }

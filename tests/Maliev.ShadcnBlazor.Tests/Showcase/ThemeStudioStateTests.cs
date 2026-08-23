@@ -1,9 +1,12 @@
 using Bunit;
+using Maliev.ShadcnBlazor.Showcase;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
 using Maliev.ShadcnBlazor.Showcase.Pages;
 using Maliev.ShadcnBlazor.Showcase.MockSites;
 using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
+using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
+using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -20,7 +23,7 @@ public sealed class ThemeStudioStateTests
         workbench.Changed += (_, _) => changes++;
 
         Assert.False(workbench.SidebarOpen);
-        Assert.Equal("colors", workbench.ActiveSection);
+        Assert.Equal("preview", workbench.ActiveSection);
         Assert.Equal(ThemeStudioViewport.Desktop, workbench.Viewport);
         Assert.Equal(ThemeStudioMode.Light, workbench.Mode);
         Assert.Equal(ShadcnDirection.LeftToRight, workbench.Direction);
@@ -558,6 +561,10 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Services.AddMalievShadcn();
         Services.AddSingleton<IThemeStudioStorage>(new NoOpStorage());
         Services.AddSingleton<ThemeStudioState>();
+        Services.AddSingleton<ShowcaseState>();
+        Services.AddSingleton<IThemeStudioPresetCatalog, ThemeStudioPresetCatalog>();
+        Services.AddSingleton<IThemeUseCaseRegistry, ThemeUseCaseRegistry>();
+        Services.AddSingleton<ThemeRunwayState>();
         Services.AddSingleton<MockSiteState>();
         Services.AddSingleton(new HttpClient(new MissingCatalogHandler())
         {
@@ -567,23 +574,20 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void InspectorExposesEveryTokenAndMetricWithStableAccessibleLabelsAndTestIds()
+    public void InspectorExposesCuratedControlsWithoutRawTokenEditing()
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
-        Assert.Equal(70, cut.FindAll("[data-theme-token]").Count);
-        Assert.Equal(17, cut.FindAll("[data-theme-metric]")
-            .Select(element => element.GetAttribute("data-theme-metric"))
-            .Distinct(StringComparer.Ordinal)
-            .Count());
+        Assert.Empty(cut.FindAll("[data-theme-token]"));
+        Assert.Empty(cut.FindAll("[data-theme-metric]"));
         Assert.Equal(3, cut.FindAll("[data-testid^='theme-font-slot-']").Count);
         Assert.Equal(9, cut.FindAll("fieldset[data-testid^='theme-role-']").Count);
-        Assert.NotEmpty(cut.FindAll("[data-testid='theme-undo']"));
-        Assert.NotEmpty(cut.FindAll("[data-testid='theme-reset-all']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset-shuffle']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-icon-library-select']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-device-controls']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-validation-summary']"));
-        Assert.All(cut.FindAll("[data-theme-token], [data-theme-metric]"), element =>
-            Assert.False(string.IsNullOrWhiteSpace(element.GetAttribute("aria-label"))));
     }
 
     [Fact]
@@ -639,32 +643,33 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void GeneratorControlsAndCodeActionAreExposedWithStableAccessibleHooks()
+    public void CuratedPresetAndTransferActionsAreExposedWithStableAccessibleHooks()
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
         var inspector = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-generator-options']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-style-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-base-color-select']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset-shuffle']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-icon-library-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-accent-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-menu-color-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-seed']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-generate']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-new-seed']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-palette-share']"));
-        Assert.Empty(inspector.FindAll("[data-testid='theme-generator-options'] .mud-select"));
-        Assert.Equal(64, inspector.FindAll("[data-testid$='-lock']").Count);
+        Assert.NotEmpty(inspector.FindAll("[data-testid='runway-pause']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
+        Assert.Empty(inspector.FindAll("[data-testid='theme-generator-options']"));
+        Assert.Empty(inspector.FindAll("[data-testid='theme-palette-seed']"));
+        Assert.Empty(inspector.FindAll("[data-testid$='-lock']"));
+    }
 
-        inspector.Find("[data-testid='theme-palette-seed']").Input("23");
-        inspector.Find("[data-testid='theme-palette-generate']").Click();
-        Assert.Equal(23UL, state.Document.Palette.Seed);
+    [Fact]
+    public void CuratedPresetSelectionClosesItsListboxBeforeOtherSettingsRemainInteractive()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var inspector = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
-        inspector.Find("[data-testid='theme-token-light-primary-lock']").Click();
-        Assert.True(state.IsPaletteLocked(ThemeStudioScheme.Light, "primary"));
+        inspector.Find("[data-testid='theme-preset']").Click();
+        inspector.Find("[role='option'][data-value='cobalt-precision']").Click();
+
+        Assert.Equal("cobalt-precision", state.SelectedPresetId);
+        Assert.Empty(inspector.FindAll("[data-slot='select-content']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-import-open']"));
     }
 
     [Fact]
@@ -747,20 +752,12 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public async Task ThemeStudioSwitchingMockupsResetsTheDestinationFixtureBeforeRender()
+    public void ThemeStudioUsesTheFixedRunwayInsteadOfMockSites()
     {
-        var theme = Services.GetRequiredService<ThemeStudioState>();
-        var mockSites = Services.GetRequiredService<MockSiteState>();
         var cut = Render<ThemeStudio>();
-        mockSites.SetCustomerQuery("วริศรา");
-        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
-
-        cut.WaitForAssertion(() => Assert.Equal(string.Empty, mockSites.Customers.Query));
-        mockSites.SetCustomerQuery("กานต์ชนก");
-        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.OperationsDashboard));
-        await cut.InvokeAsync(() => theme.SetSelectedMockup(ThemeStudioMockup.CustomerWorkspace));
-
-        cut.WaitForAssertion(() => Assert.Equal(string.Empty, mockSites.Customers.Query));
+        Assert.Single(cut.FindAll("[data-testid='theme-runway']"));
+        Assert.Equal(36, cut.FindAll("[data-use-case-id]").Count);
+        Assert.Empty(cut.FindAll("[data-testid$='-mock']"));
     }
 
     [Fact]

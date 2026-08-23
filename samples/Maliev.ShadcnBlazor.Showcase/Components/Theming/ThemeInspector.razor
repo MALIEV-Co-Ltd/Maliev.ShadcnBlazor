@@ -1,69 +1,67 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 
 <div class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
-    <div class="theme-inspector__sticky-heading">
-        <h2 id="theme-inspector-title">Theme controls</h2>
-        <span class="theme-dirty-indicator" data-dirty="@(State.IsDirty ? "true" : "false")">@(State.IsDirty ? "Edited" : "Preset")</span>
-    </div>
-
+    <div class="theme-inspector__sticky-heading"><h2 id="theme-inspector-title">Theme controls</h2><span class="theme-dirty-indicator" data-dirty="@(State.IsDirty ? "true" : "false")">@(State.IsDirty ? "Custom" : "Curated")</span></div>
     <nav class="theme-inspector-nav" aria-label="Theme settings sections">
-        <a href="#theme-settings-colors" aria-current="@(State.Workbench.ActiveSection == "colors" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("colors")'>Colors</a>
-        <a href="#theme-settings-typography" aria-current="@(State.Workbench.ActiveSection == "typography" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("typography")'>Typography</a>
-        <a href="#theme-settings-generation" aria-current="@(State.Workbench.ActiveSection == "generation" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("generation")'>Generation</a>
-        <a href="#theme-settings-transfer" aria-current="@(State.Workbench.ActiveSection == "transfer" ? "location" : null)" @onclick='() => State.Workbench.SetActiveSection("transfer")'>Import / export</a>
+        @foreach (var item in Sections)
+        {
+            <button type="button" aria-current="@(State.Workbench.ActiveSection == item.Id ? "location" : null)" @onclick="() => SelectSection(item.Id)">@item.Label</button>
+        }
     </nav>
-
-    <div class="theme-inspector-actions">
-        <label class="theme-inspector-select">
-            <span>Theme preset</span>
-            <ShadcnSelect TValue="string"
-                          Value="State.SelectedPresetId"
-                          ValueChanged="State.ApplyPreset"
-                          Options="PresetOptions"
-                          Size="ShadcnControlSize.Small"
-                          aria-label="Theme preset"
-                          data-testid="theme-preset" />
-        </label>
-        <div class="theme-history-actions">
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" aria-label="Undo theme change" data-testid="theme-undo" OnClick="() => State.Undo()">Undo</ShadcnButton>
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" aria-label="Redo theme change" data-testid="theme-redo" OnClick="() => State.Redo()">Redo</ShadcnButton>
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.IsDirty)" aria-label="Reset entire theme" data-testid="theme-reset-all" OnClick="State.ResetAll">Reset all</ShadcnButton>
+    <section class="theme-inspector-group" id="theme-settings-preview" data-testid="theme-device-controls">
+        <div class="theme-inspector-group__heading"><div><h3>Preview device</h3><p>Choose the centered runway size without consuming preview space.</p></div></div>
+        <div class="theme-device-options" role="group" aria-label="Preview device">
+            @foreach (var viewport in ThemeStudioViewport.All)
+            {
+                <ShadcnButton Class="@($"theme-device-choice theme-device-choice--{viewport.Id}")" Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Viewport == viewport ? "true" : "false")" data-testid="@($"viewport-{viewport.Id}")" OnClick="() => State.SetViewport(viewport)">@viewport.DisplayName <span aria-hidden="true">@viewport.Width</span></ShadcnButton>
+            }
         </div>
-    </div>
-
-    <ThemeValidationSummary State="State" />
-    <span class="theme-settings-anchor" id="theme-settings-generation" aria-hidden="true"></span>
-    <ThemeGeneratorOptions State="State" />
-    <span class="theme-settings-anchor" id="theme-settings-colors" aria-hidden="true"></span>
-    <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Light" Group="ThemeStudioGroup.Colors" />
-    <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Dark" Group="ThemeStudioGroup.Colors" />
-    <span class="theme-settings-anchor" id="theme-settings-typography" aria-hidden="true"></span>
-    <ThemeTypographyEditor State="State" />
-    <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Geometry" />
-    <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Light" Group="ThemeStudioGroup.Shadows" />
-    <ThemeColorGroup State="State" Scheme="ThemeStudioScheme.Dark" Group="ThemeStudioGroup.Shadows" />
-    <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Focus" />
-    <ThemeMetricsGroup State="State" Group="ThemeStudioGroup.Motion" />
-    <section class="theme-transfer-section" id="theme-settings-transfer" aria-labelledby="theme-transfer-title">
-        <h3 id="theme-transfer-title">Import and export</h3>
-        <p>Move this theme between projects or copy the generated package setup.</p>
-        <div class="theme-transfer-actions">
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-import-open" aria-haspopup="dialog" OnClick="@(() => _importOpen = true)">Import JSON</ShadcnButton>
-            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-code-open" aria-haspopup="dialog" OnClick="@(() => _codeOpen = true)">Get code</ShadcnButton>
-            <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export bundle</ShadcnButton>
+        <div class="theme-locale-options" role="group" aria-label="Preview language">
+            <ShadcnButton Variant="@(State.Locale == ThemeStudioLocale.English ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Locale == ThemeStudioLocale.English ? "true" : "false")" data-testid="locale-english" OnClick="() => State.SetLocale(ThemeStudioLocale.English)">English</ShadcnButton>
+            <ShadcnButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Locale == ThemeStudioLocale.Thai ? "true" : "false")" data-testid="locale-thai" OnClick="() => State.SetLocale(ThemeStudioLocale.Thai)">ไทย</ShadcnButton>
         </div>
     </section>
-    <ThemeImportDialog State="State" @bind-Open="_importOpen" />
-    <ThemeCodeDialog State="State" @bind-Open="_codeOpen" />
-    <ThemeExportDialog State="State" @bind-Open="_exportOpen" />
+    <section class="theme-inspector-group" id="theme-settings-preset">
+        <div class="theme-inspector-group__heading"><div><h3>Curated preset</h3><p>Shuffle changes only reviewed configuration. Card order and content stay fixed.</p></div></div>
+        <label class="theme-inspector-select"><span>Preset</span><ShadcnSelect TValue="string" Value="State.SelectedPresetId" ValueChanged="ApplyPreset" Open="_presetOpen" OpenChanged="SetPresetOpen" Options="PresetOptions" Size="ShadcnControlSize.Small" aria-label="Curated theme preset" data-testid="theme-preset" /></label>
+        <div class="theme-history-actions"><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Shuffle" data-testid="theme-preset-shuffle">Shuffle preset</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" OnClick="() => State.Undo()">Undo</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" OnClick="() => State.Redo()">Redo</ShadcnButton></div>
+    </section>
+    <section class="theme-inspector-group" id="theme-settings-typography"><ThemeTypographyEditor State="State" /></section>
+    <section class="theme-inspector-group" id="theme-settings-icons">
+        <div class="theme-inspector-group__heading"><div><h3>Icon library</h3><p>Preview one of four optional, licensed companion packages.</p></div></div>
+        <ShadcnSelect TValue="ThemeStudioIconLibrary" Value="State.IconLibrary" ValueChanged="State.SetIconLibrary" Options="IconOptions" Size="ShadcnControlSize.Small" aria-label="Preview icon library" data-testid="theme-icon-library-select" />
+        <p class="theme-inspector-note">Package: <code>@IconPackage</code></p>
+    </section>
+    <section class="theme-inspector-group" id="theme-settings-accessibility">
+        <div class="theme-inspector-group__heading"><div><h3>Accessibility and motion</h3><p>Motion pauses automatically while a user interacts with the runway.</p></div></div>
+        <label class="theme-toggle-row"><span>Pause runway</span><ShadcnSwitch Value="State.Workbench.RunwayPaused" ValueChanged="State.Workbench.SetRunwayPaused" aria-label="Pause automatic runway" data-testid="runway-pause" /></label>
+        <label class="theme-toggle-row"><span>Reduce preview motion</span><ShadcnSwitch Value="State.Workbench.ReducedMotion" ValueChanged="State.Workbench.SetReducedMotion" aria-label="Reduce preview motion" data-testid="preview-reduced-motion" /></label>
+        <label class="theme-toggle-row"><span>High contrast preview</span><ShadcnSwitch Value="State.Workbench.HighContrastPreview" ValueChanged="State.Workbench.SetHighContrastPreview" aria-label="Use high contrast preview" data-testid="preview-high-contrast" /></label>
+    </section>
+    <ThemeValidationSummary State="State" />
+    <section class="theme-transfer-section" id="theme-settings-transfer" aria-labelledby="theme-transfer-title">
+        <h3 id="theme-transfer-title">Import and export</h3><p>Move this exact curated or imported theme into a consuming project.</p>
+        <div class="theme-transfer-actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-import-open" aria-haspopup="dialog" OnClick="@(() => _importOpen = true)">Import JSON</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-code-open" aria-haspopup="dialog" OnClick="@(() => _codeOpen = true)">Get code</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export bundle</ShadcnButton></div>
+    </section>
+    <ThemeImportDialog State="State" @bind-Open="_importOpen" /><ThemeCodeDialog State="State" @bind-Open="_codeOpen" /><ThemeExportDialog State="State" @bind-Open="_exportOpen" />
 </div>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
-    private bool _importOpen;
-    private bool _codeOpen;
-    private bool _exportOpen;
-    private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = ShadcnThemePresets.All
-        .Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName))
-        .ToArray();
+    private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
+    private bool _presetOpen;
+    private static readonly (string Id, string Label)[] Sections = [("preview", "Preview"), ("preset", "Preset"), ("typography", "Typography"), ("icons", "Icons"), ("accessibility", "Accessibility"), ("transfer", "Import / export")];
+    private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = new ThemeStudioPresetCatalog().All.Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioIconLibrary>> IconOptions = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).Select(value => new ShadcnSelectOption<ThemeStudioIconLibrary>(value, value.ToString())).ToArray();
+    private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
+    private void Shuffle() => State.ShufflePreset();
+    private async Task ApplyPreset(string presetId)
+    {
+        State.ApplyPreset(presetId);
+        await Task.Yield();
+        _presetOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+    private Task SetPresetOpen(bool open) { _presetOpen = open; return InvokeAsync(StateHasChanged); }
+    private void SelectSection(string id) => State.Workbench.SetActiveSection(id);
 }

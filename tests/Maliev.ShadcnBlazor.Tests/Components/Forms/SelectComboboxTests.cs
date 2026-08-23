@@ -123,6 +123,8 @@ public sealed class SelectComboboxTests : BunitContext
 
         Assert.Equal(2, selected);
         Assert.False(open);
+        Assert.Equal("false", cut.Find("button[data-slot='select-trigger']").GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='select-content']"));
     }
 
     [Fact]
