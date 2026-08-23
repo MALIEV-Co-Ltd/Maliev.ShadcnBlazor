@@ -69,7 +69,19 @@ jobs:
       - name: Run browser tests
         run: dotnet test tests/Maliev.ShadcnBlazor.BrowserTests/Maliev.ShadcnBlazor.BrowserTests.csproj -c Release --no-build --no-restore
       - name: Pack immutable release
-        run: dotnet pack src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj -c Release --no-build --no-restore -o artifacts/package -p:Version=${{ steps.version.outputs.version }}
+        shell: pwsh
+        run: |
+          $projects = @(
+            'src/Maliev.ShadcnBlazor/Maliev.ShadcnBlazor.csproj',
+            'src/Maliev.ShadcnBlazor.Icons.Lucide/Maliev.ShadcnBlazor.Icons.Lucide.csproj',
+            'src/Maliev.ShadcnBlazor.Icons.Tabler/Maliev.ShadcnBlazor.Icons.Tabler.csproj',
+            'src/Maliev.ShadcnBlazor.Icons.Phosphor/Maliev.ShadcnBlazor.Icons.Phosphor.csproj',
+            'src/Maliev.ShadcnBlazor.Icons.Hugeicons/Maliev.ShadcnBlazor.Icons.Hugeicons.csproj'
+          )
+          foreach ($project in $projects) {
+            dotnet pack $project -c Release --no-build --no-restore -o artifacts/package -p:Version=${{ steps.version.outputs.version }}
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Verify public package
         shell: pwsh
         run: ./eng/Verify-PublicSurface.ps1 -Root . -Package artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg
@@ -82,13 +94,33 @@ jobs:
           subject-path: |
             artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg
             artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.snupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Lucide.${{ steps.version.outputs.version }}.nupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Lucide.${{ steps.version.outputs.version }}.snupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Tabler.${{ steps.version.outputs.version }}.nupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Tabler.${{ steps.version.outputs.version }}.snupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Phosphor.${{ steps.version.outputs.version }}.nupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Phosphor.${{ steps.version.outputs.version }}.snupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Hugeicons.${{ steps.version.outputs.version }}.nupkg
+            artifacts/package/Maliev.ShadcnBlazor.Icons.Hugeicons.${{ steps.version.outputs.version }}.snupkg
       - name: Get short-lived NuGet credential
         id: nuget-login
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.0.0
         with:
           user: ${{ vars.NUGET_USER }}
       - name: Publish to NuGet.org
-        run: dotnet nuget push artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        shell: pwsh
+        run: |
+          $packages = @(
+            'artifacts/package/Maliev.ShadcnBlazor.${{ steps.version.outputs.version }}.nupkg',
+            'artifacts/package/Maliev.ShadcnBlazor.Icons.Lucide.${{ steps.version.outputs.version }}.nupkg',
+            'artifacts/package/Maliev.ShadcnBlazor.Icons.Tabler.${{ steps.version.outputs.version }}.nupkg',
+            'artifacts/package/Maliev.ShadcnBlazor.Icons.Phosphor.${{ steps.version.outputs.version }}.nupkg',
+            'artifacts/package/Maliev.ShadcnBlazor.Icons.Hugeicons.${{ steps.version.outputs.version }}.nupkg'
+          )
+          foreach ($package in $packages) {
+            dotnet nuget push $package --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Attach packages to the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

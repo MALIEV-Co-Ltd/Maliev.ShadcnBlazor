@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-08-23
+
+### Added
+
+- Published the complete licensed Lucide, Tabler, Phosphor, and Hugeicons
+  companion catalogs as separately consumable NuGet packages.
+
+### Changed
+
+- Reworked Theme Studio into a centered, curated use-case runway with stable
+  realistic cards, responsive device controls, controlled preset shuffling,
+  scoped typography, and interaction-aware opposing column motion (#227).
+
+### Fixed
+
+- Kept Message Scroller content constrained above its composer and limited the
+  bottom fade to the conversation content instead of the scrollbar.
+- Stabilized Code Block language and copy controls, unified the Theme Studio
+  shell with documentation navigation, and versioned mutable Showcase boot
+  assets so mobile clients do not mix pre- and post-deployment application
+  shells.
+
 ## [1.2.0] - 2026-08-23
 
 ### Added
@@ -217,7 +239,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.11...v1.1.0
