@@ -1,5 +1,6 @@
 @using Maliev.ShadcnBlazor.Components.Actions
 @using Maliev.ShadcnBlazor.Components.Feedback
+@using Maliev.ShadcnBlazor.Components.Primitives
 
 <section class="showcase-spinner-export" data-testid="spinner-export" aria-busy="@(_processing ? "true" : "false")" aria-label="Production report export">
     <header class="showcase-spinner-export__header">
@@ -15,21 +16,21 @@
     </header>
 
     <div class="showcase-spinner-export__status" aria-live="polite">
-        @if (_processing)
-        {
-            <ShadcnSpinner Label="@(Decorative ? null : "Generating production report")"
-                           SpinnerRole="@(Decorative ? ShadcnSpinnerRole.None : ShadcnSpinnerRole.Status)"
-                           Size="@(Large ? "1.5rem" : "1rem")"
-                           ReducedMotion="@ReducedMotion" />
-            <span><strong>Preparing production report</strong><small>Collecting inspection results…</small></span>
-        }
-        else
-        {
-            <span class="showcase-spinner-export__paused" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 7v10M15 7v10" /></svg>
-            </span>
-            <span><strong>Export paused</strong><small>Your report settings are saved.</small></span>
-        }
+        <ShadcnStateTransition Active="_processing" ReducedMotion="ReducedMotion">
+            <ActiveContent>
+                <ShadcnSpinner Label="@(Decorative ? null : "Generating production report")"
+                               SpinnerRole="@(Decorative ? ShadcnSpinnerRole.None : ShadcnSpinnerRole.Status)"
+                               Size="@(Large ? "1.5rem" : "1rem")"
+                               ReducedMotion="@ReducedMotion" />
+                <span><strong>Preparing production report</strong><small>Collecting inspection results…</small></span>
+            </ActiveContent>
+            <InactiveContent>
+                <span class="showcase-spinner-export__paused" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 7v10M15 7v10" /></svg>
+                </span>
+                <span><strong>Export paused</strong><small>Your report settings are saved.</small></span>
+            </InactiveContent>
+        </ShadcnStateTransition>
     </div>
 
     <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" OnClick="@(_ => ToggleExport())">

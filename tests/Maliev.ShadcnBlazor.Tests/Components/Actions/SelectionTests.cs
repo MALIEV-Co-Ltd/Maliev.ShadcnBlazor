@@ -182,9 +182,27 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void CardRadioPresentationMarksTheWholeNativeLabelSurface()
+    {
+        var cut = Render<ShadcnRadioGroup<string>>(parameters => parameters
+            .Add(component => component.Value, "priority")
+            .Add(component => component.Presentation, ShadcnRadioGroupPresentation.Card)
+            .AddChildContent<ShadcnRadioGroupItem<string>>(item => item
+                .Add(component => component.Value, "priority")
+                .Add(component => component.ChildContent, "Priority review")));
+
+        Assert.Equal("card", cut.Find("[data-slot='radio-group']").GetAttribute("data-presentation"));
+        var card = cut.Find("label[data-slot='radio-group-item-root']");
+        Assert.Equal("card", card.GetAttribute("data-presentation"));
+        Assert.Equal("checked", card.GetAttribute("data-state"));
+        Assert.NotNull(card.QuerySelector("input[type='radio']"));
+    }
+
+    [Fact]
     public void SelectionControlsRejectUnknownEnums()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnSwitch>(p => p.Add(x => x.Size, (ShadcnSwitchSize)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnRadioGroup<string>>(p => p.Add(x => x.Orientation, (ShadcnRadioGroupOrientation)999)));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnRadioGroup<string>>(p => p.Add(x => x.Presentation, (ShadcnRadioGroupPresentation)999)));
     }
 }

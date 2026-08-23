@@ -95,11 +95,19 @@ public sealed class CalendarDatePickerTests : BunitContext
             .Add(component => component.ToYear, 2028)
             .Add(component => component.VisibleMonthChanged, value => visible = value));
 
-        cut.Find("select[data-slot='calendar-month-select']").Change("8");
+        cut.Find("[data-slot='calendar-month-select'] [role='combobox']").Click();
+        cut.Find("[data-slot='calendar-month-select'] [role='option'][data-value='8']").Click();
         Assert.Equal(new DateOnly(2026, 8, 1), visible);
         Assert.Equal("0", cut.FindAll("[data-slot='calendar-day']").Single(day => day.GetAttribute("tabindex") == "0").GetAttribute("tabindex"));
-        cut.Find("select[data-slot='calendar-year-select']").Change("2027");
-        Assert.Equal(new DateOnly(2027, 7, 1), visible);
+        cut.Render(parameters => parameters
+            .Add(component => component.VisibleMonth, visible!.Value)
+            .Add(component => component.CaptionLayout, ShadcnCalendarCaptionLayout.Dropdown)
+            .Add(component => component.FromYear, 2024)
+            .Add(component => component.ToYear, 2028)
+            .Add(component => component.VisibleMonthChanged, value => visible = value));
+        cut.Find("[data-slot='calendar-year-select'] [role='combobox']").Click();
+        cut.Find("[data-slot='calendar-year-select'] [role='option'][data-value='2027']").Click();
+        Assert.Equal(new DateOnly(2027, 8, 1), visible);
     }
 
     [Fact]
@@ -156,8 +164,8 @@ public sealed class CalendarDatePickerTests : BunitContext
         Assert.Equal("true", grid.GetAttribute("aria-multiselectable"));
         Assert.Equal("true", grid.GetAttribute("aria-readonly"));
         Assert.Equal("date", cut.Find("[data-day='2026-08-13']").GetAttribute("aria-current"));
-        Assert.Equal("เลือกเดือน", cut.Find("[data-slot='calendar-month-select']").GetAttribute("aria-label"));
-        Assert.Equal("เลือกปี", cut.Find("[data-slot='calendar-year-select']").GetAttribute("aria-label"));
+        Assert.Equal("เลือกเดือน", cut.Find("[data-slot='calendar-month-select'] [role='combobox']").GetAttribute("aria-label"));
+        Assert.Equal("เลือกปี", cut.Find("[data-slot='calendar-year-select'] [role='combobox']").GetAttribute("aria-label"));
     }
 
     [Fact]
@@ -227,7 +235,35 @@ public sealed class CalendarDatePickerTests : BunitContext
             .Add(component => component.CaptionLayout, ShadcnCalendarCaptionLayout.Dropdown)
             .Add(component => component.Disabled, true));
 
-        Assert.All(cut.FindAll("[data-slot$='-select']"), select => Assert.True(select.HasAttribute("disabled")));
+        Assert.All(cut.FindAll("[data-slot='calendar-caption'] [role='combobox']"), select => Assert.True(select.HasAttribute("disabled")));
+    }
+
+    [Fact]
+    public void WeekNumberHeaderSharesTheAlignedDistinguishedColumnStyle()
+    {
+        var cut = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1))
+            .Add(component => component.ShowWeekNumbers, true));
+
+        Assert.Contains("shadcn-calendar-week-number", cut.Find("[data-slot='calendar-week-number-header']").ClassList);
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+        Assert.Contains(".shadcn-calendar-week-number", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-muted)", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InvalidCalendarAssociatesItsMessageAndMarksTheSelectedDate()
+    {
+        var cut = Render<ShadcnCalendar>(parameters => parameters
+            .Add(component => component.VisibleMonth, new DateOnly(2026, 8, 1))
+            .Add(component => component.Value, new DateOnly(2026, 8, 13))
+            .Add(component => component.Invalid, true)
+            .AddUnmatched("aria-describedby", "calendar-error"));
+
+        var calendar = cut.Find("[data-slot='calendar']");
+        Assert.Equal("true", calendar.GetAttribute("aria-invalid"));
+        Assert.Equal("calendar-error", calendar.GetAttribute("aria-describedby"));
+        Assert.Equal("true", cut.Find("[data-day='2026-08-13']").GetAttribute("data-invalid"));
     }
 
     [Fact]
@@ -584,5 +620,30 @@ public sealed class CalendarDatePickerTests : BunitContext
     {
         public DateOnly? Date { get; set; }
         public ShadcnDateRange? Window { get; set; }
+    }
+
+    [Fact]
+    public void DatePickerPublishesModeForIntrinsicSingleAndFlexibleRangeSizing()
+    {
+        var single = Render<ShadcnDatePicker>(parameters => parameters
+            .Add(component => component.Mode, ShadcnCalendarSelectionMode.Single));
+        var range = Render<ShadcnDatePicker>(parameters => parameters
+            .Add(component => component.Mode, ShadcnCalendarSelectionMode.Range));
+
+        Assert.Equal("single", single.Find("[data-slot='date-picker']").GetAttribute("data-mode"));
+        Assert.Equal("range", range.Find("[data-slot='date-picker']").GetAttribute("data-mode"));
+
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+        Assert.Contains(".shadcn-date-picker[data-mode=\"single\"]", css, StringComparison.Ordinal);
+        Assert.Contains("inline-size: fit-content", css, StringComparison.Ordinal);
+        Assert.Contains("max-inline-size: min(18rem, 100%)", css, StringComparison.Ordinal);
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }

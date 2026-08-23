@@ -24,15 +24,26 @@ public sealed class InputShowcaseBrowserTests(
         var source = page.Locator("#preview .component-code pre");
 
         await Assertions.Expect(preview.Locator("[data-slot='card']")).ToBeVisibleAsync();
-        await Assertions.Expect(preview.Locator("input[data-slot='input']")).ToHaveCountAsync(2);
+        await Assertions.Expect(preview.Locator("input[data-slot='input']")).ToHaveCountAsync(1);
+        await Assertions.Expect(preview.Locator("[data-slot='input-group'].shadcn-secret-input")).ToHaveCountAsync(1);
+        await Assertions.Expect(key).ToHaveAttributeAsync("type", "text");
+        await Assertions.Expect(key).ToHaveAttributeAsync("readonly", "");
+        await Assertions.Expect(key).ToHaveValueAsync(string.Empty);
+        await key.FocusAsync();
         await Assertions.Expect(key).ToHaveAttributeAsync("type", "password");
+        await Assertions.Expect(key).Not.ToHaveAttributeAsync("readonly", "");
         await key.FillAsync("api_live_demo_updated");
+        await key.BlurAsync();
+        await Assertions.Expect(key).ToHaveValueAsync($"api{new string('•', 18)}");
         await page.GetByTestId("forms-dossier-save").ClickAsync();
         await Assertions.Expect(page.GetByTestId("forms-dossier-status")).ToHaveTextAsync("Credentials saved for this demo.");
 
         await page.GetByTestId("control-input-masked").UncheckAsync();
+        await Assertions.Expect(key).ToHaveAttributeAsync("type", "password");
+        await Assertions.Expect(source).ToContainTextAsync("MaskStart=\"0\"");
+        await preview.Locator("[data-secret-input-toggle]").ClickAsync();
         await Assertions.Expect(key).ToHaveAttributeAsync("type", "text");
-        await Assertions.Expect(source).ToContainTextAsync("Type=\"text\"");
+        await Assertions.Expect(key).ToHaveValueAsync("api_live_demo_updated");
 
         await page.GetByTestId("control-input-invalid").CheckAsync();
         await Assertions.Expect(key).ToHaveAttributeAsync("aria-invalid", "true");

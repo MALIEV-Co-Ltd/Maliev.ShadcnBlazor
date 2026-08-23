@@ -122,7 +122,12 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
     [Fact]
     public async Task NativeFieldsInputGroupMultipleComboboxCalendarAndDatePickerOperateInRealBrowser()
     {
-        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 1280, Height = 1000 }, ReducedMotion = ReducedMotion.Reduce });
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 1000 },
+            ReducedMotion = ReducedMotion.Reduce,
+            Locale = "en-US"
+        });
         var page = await context.NewPageAsync();
         await page.GotoAsync(Url("light", "ltr"));
         await page.GetByTestId("forms-date-fixture").WaitForAsync();
@@ -156,7 +161,7 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         await Assertions.Expect(calendar.Locator("[data-day='2026-08-25']")).ToHaveAttributeAsync("data-range-middle", "true");
         await Assertions.Expect(calendar.Locator("[data-day='2026-08-26']")).ToHaveAttributeAsync("data-range-end", "true");
         await calendar.Locator("[data-slot='calendar-next']").ClickAsync();
-        await Assertions.Expect(calendar.Locator("[data-slot='calendar-month-select']")).ToHaveValueAsync("9");
+        await Assertions.Expect(calendar.Locator("[data-slot='calendar-month-select'] [data-slot='select-value']")).ToHaveTextAsync("กันยายน");
 
         var picker = page.GetByTestId("forms-date-picker");
         await picker.ClickAsync();
@@ -189,7 +194,10 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         Assert.NotEqual("none", styles[2]);
         Assert.NotEqual("rgba(0, 0, 0, 0)", styles[3]);
         Assert.False(await page.Locator("[data-slot='input-otp']").First.EvaluateAsync<bool>("input => input.hasAttribute('pattern')"));
-        await Assertions.Expect(page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]").Locator("[data-slot='calendar-year-select'] option[value='2026']")).ToHaveTextAsync("2569");
+        var calendar = page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]");
+        var yearSelect = calendar.Locator("[data-slot='calendar-year-select']");
+        await yearSelect.Locator("[data-slot='select-trigger']").ClickAsync();
+        await Assertions.Expect(yearSelect.Locator("[role='option'][data-value='2026']")).ToHaveTextAsync("2569✓");
     }
 
     [Fact]

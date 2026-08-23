@@ -3,7 +3,7 @@
 @implements IDisposable
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
-<label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State">
+<label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State" data-presentation="@PresentationValue">
     <span class="shadcn-radio-control" data-slot="radio-group-control">
         <input @attributes="ForwardedAttributes"
                id="@EffectiveId"
@@ -42,6 +42,7 @@
     private bool Selected => Context?.IsSelected(Value) == true;
     private bool EffectiveDisabled => Disabled || Context?.Disabled == true;
     private string State => Selected ? "checked" : "unchecked";
+    private string PresentationValue => Context?.Presentation == ShadcnRadioGroupPresentation.Card ? "card" : "default";
     private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
     private string? SerializedValue => Convert.ToString(Value, CultureInfo.InvariantCulture);
     private int TabIndex => Context?.GetTabIndex(RegistrationKey) ?? -1;

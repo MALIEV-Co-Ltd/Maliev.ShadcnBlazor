@@ -8,6 +8,20 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Forms;
 
 public sealed class SelectComboboxTests : BunitContext
 {
+    [Fact]
+    public void MultipleComboboxSeparatesWrappedChipsFromItsInput()
+    {
+        var cut = Render<ShadcnCombobox<string>>(parameters => parameters
+            .Add(component => component.Multiple, true)
+            .Add(component => component.Values, new[] { "cnc" })
+            .Add(component => component.Options, new[] { new ShadcnComboboxOption<string>("cnc", "CNC machining") }));
+
+        Assert.NotNull(cut.Find("[data-slot='combobox-chips']"));
+        Assert.NotNull(cut.Find("[data-slot='combobox-input']"));
+        var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css"));
+        Assert.Contains(".shadcn-combobox-chips + .shadcn-combobox-input", css, StringComparison.Ordinal);
+        Assert.Contains("margin-block-start: calc(.5rem * var(--shadcn-spacing-multiplier))", css, StringComparison.Ordinal);
+    }
     public SelectComboboxTests()
     {
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
@@ -386,5 +400,13 @@ public sealed class SelectComboboxTests : BunitContext
     {
         public int? Priority { get; set; }
         public IReadOnlyList<string> Frameworks { get; set; } = [];
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
     }
 }
