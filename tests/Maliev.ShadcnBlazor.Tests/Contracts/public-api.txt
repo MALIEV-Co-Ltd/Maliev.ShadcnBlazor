@@ -870,6 +870,20 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelect`1
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnTextarea`1
   String Placeholder
   Nullable<Int32> Rows
+type Maliev.ShadcnBlazor.Components.Icons.IShadcnIconCatalog
+  String Library
+  IReadOnlyList<String> Names
+  method ShadcnIconData Get(String name)
+  method Boolean TryGet(String name, ShadcnIconData& icon)
+type Maliev.ShadcnBlazor.Components.Icons.ShadcnIcon
+  ShadcnIconData Icon
+  String Label
+  Double Size
+type Maliev.ShadcnBlazor.Components.Icons.ShadcnIconData
+  String Library
+  String Name
+  String SvgContent
+  String ViewBox
 type Maliev.ShadcnBlazor.Components.Layout.IShadcnResizableStateStore
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio
   RenderFragment ChildContent

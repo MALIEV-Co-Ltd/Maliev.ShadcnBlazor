@@ -1,0 +1,52 @@
+@using Maliev.ShadcnBlazor.Components.Primitives
+@inherits ShadcnComponentBase
+
+<svg @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-icon")"
+     style="@IconStyle"
+     data-slot="icon"
+     data-library="@Icon.Library"
+     data-icon="@Icon.Name"
+     role="@EffectiveRole"
+     aria-label="@EffectiveLabel"
+     aria-hidden="@AriaHidden"
+     focusable="false"
+     viewBox="@Icon.ViewBox"
+     fill="none"
+     stroke="currentColor">@((MarkupString)Icon.SvgContent)</svg>
+
+@code {
+    /// <summary>
+    /// Gets or sets the sanitized icon definition to render.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public ShadcnIconData Icon { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the accessible name. Leave empty for a decorative icon.
+    /// </summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>
+    /// Gets or sets the icon size in CSS pixels.
+    /// </summary>
+    [Parameter]
+    public double Size { get; set; } = 24;
+
+    private string? EffectiveRole => Label is null ? null : "img";
+    private string? EffectiveLabel => Label;
+    private string? AriaHidden => Label is null ? "true" : null;
+    private string IconStyle => MergeStyle(FormattableString.Invariant($"--shadcn-icon-size: {Size}px"))!;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot", "data-library", "data-icon", "role", "aria-label", "aria-hidden", "focusable", "viewBox", "fill", "stroke");
+
+    protected override void OnParametersSet()
+    {
+        ArgumentNullException.ThrowIfNull(Icon);
+        if (Label is not null && string.IsNullOrWhiteSpace(Label))
+            throw new ArgumentException("Icon labels cannot be empty or whitespace.", nameof(Label));
+        if (!double.IsFinite(Size) || Size <= 0)
+            throw new ArgumentOutOfRangeException(nameof(Size), "Icon size must be positive and finite.");
+    }
+}

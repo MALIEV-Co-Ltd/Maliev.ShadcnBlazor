@@ -13,6 +13,7 @@ public sealed class SidebarTests : BunitContext
         module.SetupVoid("detachSidebarProvider", _ => true);
         module.SetupVoid("attachSidebarOverlay", _ => true);
         module.SetupVoid("detachSidebarOverlay", _ => true);
+        module.SetupVoid("releaseSidebarOverlayWithin", _ => true);
     }
 
     [Fact]
@@ -71,6 +72,9 @@ public sealed class SidebarTests : BunitContext
         Assert.Equal("-1", sheet.GetAttribute("tabindex"));
         Assert.NotNull(cut.Find("button[data-slot='sidebar-backdrop']"));
         Assert.Equal("ปิดเมนู", cut.Find("button[data-slot='sidebar-backdrop']").GetAttribute("aria-label"));
+
+        cut.Find("button[data-slot='sidebar-trigger']").Click();
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("releaseSidebarOverlayWithin", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -93,6 +97,7 @@ public sealed class SidebarTests : BunitContext
         Assert.Equal("none", sidebar.GetAttribute("data-collapsible"));
         Assert.Equal("false", sidebar.GetAttribute("data-mobile"));
         Assert.Empty(cut.FindAll("[aria-modal='true']"));
+        Assert.DoesNotContain(JSInterop.Invocations, invocation => invocation.Identifier.EndsWith("attachSidebarOverlay", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -183,6 +188,10 @@ public sealed class SidebarTests : BunitContext
         Assert.Contains("element.inert = true", script, StringComparison.Ordinal);
         Assert.Contains("element.inert = inert", script, StringComparison.Ordinal);
         Assert.Contains("while (branch && branch !== document.body)", script, StringComparison.Ordinal);
+        Assert.Contains("aside.dataset.focusReturnId", script, StringComparison.Ordinal);
+        Assert.Contains("document.getElementById(returnFocusId)", script, StringComparison.Ordinal);
+        Assert.Contains("value.previous?.focus?.({ preventScroll: true })", script, StringComparison.Ordinal);
+        Assert.Contains("releaseSidebarOverlayWithin(root)", script, StringComparison.Ordinal);
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
         Assert.Contains("inset-inline-start: 0", css, StringComparison.Ordinal);
         Assert.Contains("inset-inline-end: 0", css, StringComparison.Ordinal);

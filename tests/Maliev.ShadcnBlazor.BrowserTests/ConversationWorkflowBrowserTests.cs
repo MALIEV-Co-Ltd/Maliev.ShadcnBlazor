@@ -358,7 +358,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var aligned = await assistant.EvaluateAsync<double[]>("element => { const body = element.querySelector('[data-slot=message-body]').getBoundingClientRect(); const avatar = element.querySelector('[data-slot=message-avatar]').getBoundingClientRect(); return [body.bottom, avatar.bottom]; }");
         Assert.InRange(Math.Abs(aligned[0] - aligned[1]), 0, 1);
 
-        await Assertions.Expect(scroller).Not.ToHaveAttributeAsync("data-autoscrolling", "", new() { Timeout = 2000 });
+        await Assertions.Expect(scroller).ToHaveAttributeAsync("data-autoscrolling", "");
         await viewport.EvaluateAsync("element => { element.scrollTop = 0; element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); }");
         await Assertions.Expect(scroller).ToHaveAttributeAsync("data-unread", "true");
         await page.WaitForTimeoutAsync(180);
@@ -370,10 +370,13 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.GetByTestId("scroller-streaming")).ToHaveCountAsync(0, new() { Timeout = 5000 });
         await page.WaitForFunctionAsync("element => element.scrollHeight - element.clientHeight - element.scrollTop <= 8", await viewport.ElementHandleAsync());
 
-        var safeGeometry = await scroller.EvaluateAsync<double[]>("element => { const last = element.querySelector('[data-slot=message-scroller-item]:last-child').getBoundingClientRect(); const composer = element.querySelector('.showcase-scroller-composer').getBoundingClientRect(); const fade = getComputedStyle(element, '::after'); return [last.bottom, composer.top, fade.pointerEvents === 'none' ? 1 : 0, fade.backgroundImage.includes('gradient') ? 1 : 0]; }");
+        var safeGeometry = await scroller.EvaluateAsync<double[]>("element => { const last = element.querySelector('[data-slot=message-scroller-item]:last-child').getBoundingClientRect(); const transcript = element.querySelector('.showcase-scroller-transcript'); const transcriptBox = transcript.getBoundingClientRect(); const viewport = transcript.querySelector('[data-slot=message-scroller-viewport]').getBoundingClientRect(); const composer = element.querySelector('.showcase-scroller-composer').getBoundingClientRect(); const fade = getComputedStyle(transcript, '::after'); return [last.bottom, composer.top, transcriptBox.bottom, viewport.bottom, fade.pointerEvents === 'none' ? 1 : 0, fade.backgroundImage.includes('gradient') ? 1 : 0, parseFloat(fade.width), transcriptBox.width]; }");
         Assert.True(safeGeometry[0] < safeGeometry[1]);
-        Assert.Equal(1, safeGeometry[2]);
-        Assert.Equal(1, safeGeometry[3]);
+        Assert.InRange(Math.Abs(safeGeometry[2] - safeGeometry[3]), 0, 1);
+        Assert.True(safeGeometry[2] <= safeGeometry[1], "The transcript must end above the composer.");
+        Assert.Equal(1, safeGeometry[4]);
+        Assert.Equal(1, safeGeometry[5]);
+        Assert.True(safeGeometry[6] <= safeGeometry[7] - 12, "The message fade must stop before the vertical scrollbar gutter.");
     }
 
     [Fact]

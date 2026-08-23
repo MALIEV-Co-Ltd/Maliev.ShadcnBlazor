@@ -56,11 +56,15 @@
     private bool IsObserving;
     private bool _uncontrolledOpen;
     private bool _openInitialized;
+    private bool _controlledOpenPending;
+    private bool _requestedOpen;
+    private bool _lastOpenParameter;
+    private bool _openParameterInitialized;
     private int ActiveIndex;
     private ShadcnSelectOption<TValue>? SelectedOption => Options.FirstOrDefault(IsSelected);
     private IEnumerable<IGrouping<string, ShadcnSelectOption<TValue>>> GroupedOptions => Options.GroupBy(option => option.Group ?? string.Empty);
     private string SizeValue => Size switch { ShadcnControlSize.Default => "default", ShadcnControlSize.Small => "sm", _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown control size.") };
-    private bool EffectiveOpen => OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
+    private bool EffectiveOpen => OpenChanged.HasDelegate && _controlledOpenPending ? _requestedOpen : OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
     private string? ActiveDescendant => EffectiveOpen && ActiveIndex >= 0 ? OptionId(ActiveIndex) : null;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "type", "role", "data-slot", "data-size", "disabled", "aria-haspopup", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-readonly", "aria-required", "aria-invalid", "aria-describedby");
     protected override void OnParametersSet()
@@ -72,6 +76,18 @@
             _uncontrolledOpen = Open;
             _openInitialized = true;
         }
+        if (!_openParameterInitialized)
+        {
+            _lastOpenParameter = Open;
+            _openParameterInitialized = true;
+        }
+        else if (Open != _lastOpenParameter)
+        {
+            _lastOpenParameter = Open;
+            _controlledOpenPending = false;
+        }
+        if (_controlledOpenPending && Open == _requestedOpen)
+            _controlledOpenPending = false;
         var selected = SelectedOption is null ? -1 : OptionIndex(SelectedOption);
         ActiveIndex = selected >= 0 ? selected : FirstEnabled();
     }
@@ -82,7 +98,10 @@
     {
         if (OpenChanged.HasDelegate)
         {
+            _requestedOpen = value;
+            _controlledOpenPending = true;
             await OpenChanged.InvokeAsync(value);
+            await InvokeAsync(StateHasChanged);
             return;
         }
 
@@ -92,7 +111,7 @@
     }
     private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
     private async Task ClearAsync() { if (!EffectiveDisabled && !ReadOnly) await SetCurrentValueAsync(default!); }
-    private async Task SelectAsync(ShadcnSelectOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; await SetCurrentValueAsync(option.Value); await CloseAndFocusAsync(); }
+    private async Task SelectAsync(ShadcnSelectOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; await SetOpenAsync(false); await SetCurrentValueAsync(option.Value); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private async Task HandleKeyDownAsync(KeyboardEventArgs args)
     {
         if (EffectiveDisabled || ReadOnly) return;

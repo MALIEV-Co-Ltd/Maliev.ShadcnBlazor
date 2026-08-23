@@ -55,9 +55,25 @@ public sealed class CodeBlockTests : BunitContext
             var copy = cut.Find("[data-testid='copy-source']");
             Assert.Equal("true", copy.GetAttribute("data-copied"));
             Assert.Equal("Copied", copy.GetAttribute("aria-label"));
-            Assert.Equal("Copied", copy.QuerySelector(".shadcn-code-block-copy-status")?.TextContent.Trim());
+            Assert.Null(copy.QuerySelector(".shadcn-code-block-copy-status"));
+            Assert.NotNull(copy.QuerySelector("svg"));
             Assert.Equal("Source copied to clipboard.", cut.Find("[aria-live='polite']").TextContent.Trim());
         });
+    }
+
+    [Fact]
+    public void ToolbarAlwaysPlacesACompactLanguageSelectorBeforeTheStableCopyAction()
+    {
+        var cut = Render<ShadcnCodeBlock>(parameters => parameters
+            .Add(component => component.Source, "dotnet add package Maliev.ShadcnBlazor")
+            .Add(component => component.Language, "bash"));
+
+        var toolbar = cut.Find("[data-slot='code-block-toolbar']");
+        var selector = toolbar.QuerySelector(".shadcn-code-block-language-select");
+        Assert.NotNull(selector);
+        Assert.Equal("copy-source", selector.NextElementSibling?.GetAttribute("data-testid"));
+        Assert.Equal("bash", toolbar.QuerySelector("[data-slot='select-value']")?.TextContent.Trim());
+        Assert.Null(toolbar.QuerySelector(".shadcn-code-block-language"));
     }
 
     [Fact]
@@ -239,6 +255,8 @@ public sealed class CodeBlockTests : BunitContext
         Assert.DoesNotContain("shadcn-code-block-copy-fade", baseCss, StringComparison.Ordinal);
 
         Assert.Contains("margin-inline-start: auto", baseCss, StringComparison.Ordinal);
+        Assert.Contains("inline-size: 2rem", baseCss, StringComparison.Ordinal);
+        Assert.Contains("min-inline-size: 0", baseCss, StringComparison.Ordinal);
         Assert.Contains("direction: ltr", baseCss, StringComparison.Ordinal);
         Assert.DoesNotContain(".component-code__surface .shadcn-code-block-copy {\n    position: absolute", showcaseCss, StringComparison.Ordinal);
         Assert.DoesNotContain("@keyframes component-code-copied-feedback", showcaseCss, StringComparison.Ordinal);

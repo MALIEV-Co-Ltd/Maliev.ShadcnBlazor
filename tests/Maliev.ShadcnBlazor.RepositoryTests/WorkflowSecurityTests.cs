@@ -86,6 +86,7 @@ public sealed class WorkflowSecurityTests
         var workflow = File.ReadAllText(Path.Combine(RepositoryRoot.Find(), ".github", "workflows", "visual-proof.yml"));
 
         Assert.Contains("ComponentCatalogVisualProofTests", workflow, StringComparison.Ordinal);
+        Assert.Contains("timeout-minutes: 30", workflow, StringComparison.Ordinal);
         Assert.Contains("if: always()", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/visual-proof", workflow, StringComparison.Ordinal);
         Assert.Contains("update-baselines:", workflow, StringComparison.Ordinal);

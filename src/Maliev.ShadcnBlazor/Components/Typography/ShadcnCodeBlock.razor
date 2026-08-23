@@ -6,25 +6,20 @@
 
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-code-block")" style="@MergeStyle(null)" data-slot="code-block" data-language="@SelectedLanguage">
     <div class="shadcn-code-block-toolbar" data-slot="code-block-toolbar">
-        <span class="shadcn-code-block-language" aria-hidden="true">@SelectedLanguage</span>
-        @if (SourceByLanguage.Count > 1)
-        {
-            <label class="shadcn-sr-only" for="@LanguageId">Code language</label>
-            <ShadcnSelect TValue="string"
-                          id="@LanguageId"
-                          Class="shadcn-code-block-language-select"
-                          Value="@SelectedLanguage"
-                          ValueChanged="@ChangeLanguageAsync"
-                          Options="@LanguageOptions"
-                          Placeholder="Code language"
-                          Size="ShadcnControlSize.Small" />
-        }
+        <label class="shadcn-sr-only" for="@LanguageId">Code language</label>
+        <ShadcnSelect TValue="string"
+                      id="@LanguageId"
+                      Class="shadcn-code-block-language-select"
+                      Value="@SelectedLanguage"
+                      ValueChanged="@ChangeLanguageAsync"
+                      Options="@LanguageOptions"
+                      Placeholder="Code language"
+                      Size="ShadcnControlSize.Small" />
         <button type="button" class="shadcn-code-block-copy" data-testid="copy-source" data-copied="@_copied.ToString().ToLowerInvariant()" data-copy-state="@(_copied ? "copied" : "idle")" aria-label="@(_copied ? "Copied" : "Copy source")" title="@(_copied ? "Copied" : "Copy source")" @onclick="CopyAsync">
             @if (_copied)
             {
                 <span @key="_copyFeedbackId" class="shadcn-code-block-copy-feedback" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                    <span class="shadcn-code-block-copy-status">Copied</span>
                 </span>
             }
             else

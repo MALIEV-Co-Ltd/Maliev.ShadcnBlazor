@@ -9,6 +9,7 @@ namespace Maliev.ShadcnBlazor.Tests.Contracts;
 public sealed class PublicApiSnapshotTests
 {
     private const string ThemingNamespace = "Maliev.ShadcnBlazor.Theming";
+    private const string IconsNamespace = "Maliev.ShadcnBlazor.Components.Icons";
 
     private static readonly string[] OwnedNamespaces =
     [
@@ -20,6 +21,7 @@ public sealed class PublicApiSnapshotTests
         "Maliev.ShadcnBlazor.Components.Disclosure",
         "Maliev.ShadcnBlazor.Components.Direction",
         "Maliev.ShadcnBlazor.Components.Forms",
+        "Maliev.ShadcnBlazor.Components.Icons",
         "Maliev.ShadcnBlazor.Components.Feedback",
         "Maliev.ShadcnBlazor.Components.Feedback.Toast",
         "Maliev.ShadcnBlazor.Components.Layout",
@@ -63,7 +65,8 @@ public sealed class PublicApiSnapshotTests
 
             lines.Add($"type {type.FullName}");
             var isThemeApi = string.Equals(type.Namespace, ThemingNamespace, StringComparison.Ordinal);
-            if (isThemeApi)
+            var isContractApi = isThemeApi || string.Equals(type.Namespace, IconsNamespace, StringComparison.Ordinal);
+            if (isContractApi)
             {
                 foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                              .Where(field => field.IsLiteral)
@@ -74,10 +77,10 @@ public sealed class PublicApiSnapshotTests
             }
 
             foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                         .Concat(isThemeApi
+                         .Concat(isContractApi
                              ? type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                              : [])
-                         .Where(property => isThemeApi || type == typeof(ShadcnSliderThumbAttributes) ||
+                         .Where(property => isContractApi || type == typeof(ShadcnSliderThumbAttributes) ||
                                             property.GetCustomAttribute<ParameterAttribute>() is not null ||
                                             type.IsValueType)
                          .OrderBy(property => property.Name, StringComparer.Ordinal))
@@ -87,7 +90,7 @@ public sealed class PublicApiSnapshotTests
                 lines.Add($"  {FriendlyName(property.PropertyType)} {property.Name}{suffix}");
             }
 
-            if (isThemeApi)
+            if (isContractApi)
             {
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                              .Where(method => !method.IsSpecialName &&

@@ -4,32 +4,34 @@
 <div class="showcase-scroller-demo" data-testid="scroller-demo" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-unread="@(AppendUnread ? "true" : "false")">
     <ShadcnMessageScrollerProvider AutoScroll="@AutoFollow" DefaultScrollPosition="@OpeningPosition">
         <ShadcnMessageScroller Class="showcase-scroller-frame" Style="height:24rem" data-preview-auto="@(AutoFollow ? "true" : "false")" data-preview-position="@OpeningPosition.ToString().ToLowerInvariant()">
-            <ShadcnMessageScrollerViewport AccessibleName="บทสนทนาโครงการ">
-                <ShadcnMessageScrollerContent>
-                    @foreach (var message in _messages)
-                    {
-                        <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
-                            <ShadcnMessage Align="@message.Align">
-                                <ShadcnMessageAvatar>
-                                    <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
-                                </ShadcnMessageAvatar>
-                                <ShadcnMessageContent>
-                                    <ShadcnMessageBody>
-                                        <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
-                                        <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
-                                            <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
-                                                {
-                                                    <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
-                                                }</ShadcnBubbleContent>
-                                        </ShadcnBubble>
-                                    </ShadcnMessageBody>
-                                </ShadcnMessageContent>
-                            </ShadcnMessage>
-                        </ShadcnMessageScrollerItem>
-                    }
-                </ShadcnMessageScrollerContent>
-            </ShadcnMessageScrollerViewport>
-            <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="ไปข้อความล่าสุด">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+            <div class="showcase-scroller-transcript">
+                <ShadcnMessageScrollerViewport AccessibleName="บทสนทนาโครงการ">
+                    <ShadcnMessageScrollerContent>
+                        @foreach (var message in _messages)
+                        {
+                            <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
+                                <ShadcnMessage Align="@message.Align">
+                                    <ShadcnMessageAvatar>
+                                        <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
+                                    </ShadcnMessageAvatar>
+                                    <ShadcnMessageContent>
+                                        <ShadcnMessageBody>
+                                            <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
+                                            <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
+                                                <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
+                                                    {
+                                                        <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
+                                                    }</ShadcnBubbleContent>
+                                            </ShadcnBubble>
+                                        </ShadcnMessageBody>
+                                    </ShadcnMessageContent>
+                                </ShadcnMessage>
+                            </ShadcnMessageScrollerItem>
+                        }
+                    </ShadcnMessageScrollerContent>
+                </ShadcnMessageScrollerViewport>
+                <ShadcnMessageScrollerButton Direction="ShadcnMessageScrollDirection.End" AccessibleName="ไปข้อความล่าสุด">ข้อความล่าสุด</ShadcnMessageScrollerButton>
+            </div>
             <form class="showcase-scroller-composer" aria-label="ส่งข้อความ" @onsubmit="SendAsync" @onsubmit:preventDefault="true">
                 <input type="text" @bind="Composer" @bind:event="oninput" aria-label="ข้อความใหม่" />
                 <button type="submit" aria-label="ส่งข้อความ" data-testid="scroller-send" disabled="@IsStreaming">

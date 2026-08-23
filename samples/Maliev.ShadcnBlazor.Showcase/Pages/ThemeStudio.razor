@@ -3,66 +3,39 @@
 @implements IDisposable
 @implements IAsyncDisposable
 @inject ThemeStudioState State
-@inject MockSiteState MockSites
+@inject ShowcaseState ShellState
 @inject ILogger<ThemeStudio> Logger
 @inject IJSRuntime JavaScript
-@inject NavigationManager Navigation
-@using System.Globalization
-@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
-
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
-<div class="theme-studio"
-     data-testid="theme-studio"
-     data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
-     lang="@LocaleCode"
-     @onkeydown="HandleWorkbenchKeyDownAsync">
+<div class="theme-studio" data-testid="theme-studio" data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")" lang="@LocaleCode" @onkeydown="HandleWorkbenchKeyDownAsync">
     <ThemeFontLoader State="State" />
-    <ThemeStudioAppBar State="State" ToggleSettings="ToggleSettingsAsync" />
-
-    <button type="button"
-            class="theme-studio-sidebar-backdrop"
-            aria-label="Close theme settings"
-            tabindex="-1"
-            data-testid="theme-settings-backdrop"
-            @onclick="CloseSettingsAsync"></button>
-
     <div class="theme-studio-workbench" data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
-        <ThemeStudioSidebar State="State" CloseRequested="CloseSettingsAsync" />
-        <main class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
-            <div class="theme-preview-stage"
-                 data-testid="theme-preview-stage"
-                 data-preview-width="@State.Viewport.Width"
-                 style="@($"--theme-preview-width: {State.Viewport.Width}px")">
-                <div class="theme-preview-settings" data-testid="theme-generator-summary" aria-label="Active generator settings">
-                    <span><strong>Style</strong> @State.StyleId</span>
-                    <span><strong>Base</strong> @State.BaseColorId</span>
-                    <span><strong>Icons</strong> @State.IconLibrary</span>
-                    <span><strong>Menu</strong> @State.MenuAccent / @State.MenuColor</span>
-                    <span><strong>Radius</strong> @State.RadiusPreset</span>
-                    <span class="theme-preview-settings__mode">
-                        <ShadcnButton Variant="@(!ScenarioMode ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" data-testid="theme-preview-sites" OnClick="ShowMockSites">Sites</ShadcnButton>
-                        <ShadcnButton Variant="@(ScenarioMode ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)" Size="ShadcnButtonSize.Small" data-testid="theme-preview-components" OnClick="ShowComponents">Components</ShadcnButton>
-                    </span>
-                </div>
-                <div class="theme-preview-scope" style="@TypographyStyle">
-                    @if (ScenarioMode)
-                    {
-                        <ThemeScenarioBrowser ComponentSlug="@ComponentSlug"
-                                              ScenarioId="@ScenarioId"
-                                              Culture="ScenarioCulture"
-                                              SelectionChanged="NavigateScenario" />
-                    }
-                    else
-                    {
-                        <MockSiteHost State="MockSites" Mockup="State.SelectedMockup" Locale="State.Locale" Viewport="State.Viewport" />
-                    }
+        <ThemeStudioSidebar State="State" />
+        <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
+            <div class="theme-preview-stage" data-testid="theme-preview-stage" data-preview-width="@State.Viewport.Width" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
+                <div class="shadcn-scope theme-preview-scope"
+                     style="@TypographyStyle"
+                     data-shadcn-scope
+                     data-shadcn-theme="@(ShellState.IsDarkMode ? "dark" : "light")"
+                     data-shadcn-reduced-motion="@(State.Workbench.ReducedMotion ? "always" : "system")"
+                     dir="@(ShellState.Direction == ShadcnDirection.RightToLeft ? "rtl" : "ltr")"
+                     data-testid="theme-preview-scope"
+                     data-theme-style="@State.StyleId"
+                     data-theme-base-color="@State.BaseColorId"
+                     data-theme-icon-library="@State.IconLibrary.ToString().ToLowerInvariant()"
+                     data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
+                     data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
+                    <CascadingValue Value="PreviewContext">
+                        <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                        <ThemePresetDock State="State" />
+                    </CascadingValue>
                 </div>
             </div>
-        </main>
+        </section>
     </div>
 </div>
 
@@ -71,34 +44,44 @@
     private bool _persisting;
     private bool _persistRequested;
     private bool _disposed;
+    private bool _syncingShell;
     private Task _persistenceTask = Task.CompletedTask;
     private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
-    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
-    private bool ScenarioMode => !string.IsNullOrWhiteSpace(ComponentSlug) || !string.IsNullOrWhiteSpace(ScenarioId);
-    private CultureInfo ScenarioCulture => CultureInfo.GetCultureInfo(State.Locale == ThemeStudioLocale.Thai ? "th-TH" : "en-US");
+    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, ShellState.IsDarkMode);
+    private ShadcnContext PreviewContext => new(ShellState.IsDarkMode, ShellState.Direction);
 
-    [SupplyParameterFromQuery(Name = "component")] public string? ComponentSlug { get; set; }
-    [SupplyParameterFromQuery(Name = "scenario")] public string? ScenarioId { get; set; }
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
-        _selectedMockup = State.SelectedMockup;
+        ShellState.Changed += OnShellChanged;
         await State.InitializeAsync();
         if (_disposed) return;
+        State.SetDirection(ShellState.Direction);
+        State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
         _initialized = true;
+    }
+
+    private void OnShellChanged(object? sender, EventArgs args)
+    {
+        if (_syncingShell) { _ = InvokeAsync(StateHasChanged); return; }
+        State.SetDirection(ShellState.Direction);
+        State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private void OnStateChanged(object? sender, EventArgs args)
     {
         if (_disposed) return;
-        if (_selectedMockup != State.SelectedMockup)
+        _syncingShell = true;
+        try
         {
-            MockSites.Reset(State.SelectedMockup);
-            _selectedMockup = State.SelectedMockup;
+            if (State.Mode != ThemeStudioMode.System)
+                ShellState.SetTheme(State.Mode == ThemeStudioMode.Dark);
+            ShellState.SetDirection(State.Direction);
         }
-        var shouldPersist = _initialized;
-        _persistenceTask = ObservePersistenceAsync(shouldPersist);
+        finally { _syncingShell = false; }
+        _persistenceTask = ObservePersistenceAsync(_initialized);
     }
 
     private async Task ObservePersistenceAsync(bool shouldPersist)
@@ -114,102 +97,45 @@
                 await DrainPersistenceAsync();
             });
         }
-        catch (Exception exception) when (_disposed &&
-            exception is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
-        {
-        }
+        catch (Exception exception) when (_disposed && exception is ObjectDisposedException or TaskCanceledException or OperationCanceledException) { }
         catch (Exception exception)
         {
             Logger.LogError(exception, "Theme Studio persistence failed.");
             if (_disposed) return;
-
             State.ReportStorageDiagnostic($"Theme could not be saved locally: {exception.Message}");
-            try
-            {
-                await InvokeAsync(StateHasChanged);
-            }
-            catch (Exception renderException) when (_disposed &&
-                renderException is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
-            {
-            }
-            catch (Exception renderException)
-            {
-                Logger.LogError(renderException, "Theme Studio persistence diagnostic could not be rendered.");
-            }
+            try { await InvokeAsync(StateHasChanged); }
+            catch (Exception renderException) when (_disposed && renderException is ObjectDisposedException or TaskCanceledException or OperationCanceledException) { }
+            catch (Exception renderException) { Logger.LogError(renderException, "Theme Studio persistence diagnostic could not be rendered."); }
         }
     }
 
     private async Task DrainPersistenceAsync()
     {
-        if (_persisting || _disposed)
-            return;
-
+        if (_persisting || _disposed) return;
         _persisting = true;
-        try
-        {
-            while (!_disposed && _persistRequested)
-            {
-                _persistRequested = false;
-                await State.PersistAsync();
-                if (!_disposed)
-                    StateHasChanged();
-            }
-        }
-        finally
-        {
-            _persisting = false;
-        }
+        try { while (!_disposed && _persistRequested) { _persistRequested = false; await State.PersistAsync(); } }
+        finally { _persisting = false; }
     }
-
-    private ThemeStudioMockup _selectedMockup;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
-        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
-        if (await _module.InvokeAsync<bool>("isDesktopWorkbench"))
-            State.Workbench.OpenSidebar();
+        if (firstRender)
+        {
+            _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+            if (await _module.InvokeAsync<bool>("isDesktopWorkbench")) State.Workbench.OpenSidebar();
+        }
     }
 
-    private async Task ToggleSettingsAsync()
+    private Task CloseSettingsAsync()
     {
-        if (State.Workbench.SidebarOpen)
-            await CloseSettingsAsync();
-        else
-            State.Workbench.OpenSidebar();
-    }
-
-    private async Task CloseSettingsAsync()
-    {
-        if (!State.Workbench.SidebarOpen) return;
+        if (!State.Workbench.SidebarOpen) return Task.CompletedTask;
         State.Workbench.CloseSidebar();
-        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
-        await _module.InvokeVoidAsync("focusElementById", "theme-settings-toggle");
+        return Task.CompletedTask;
     }
 
     private async Task HandleWorkbenchKeyDownAsync(KeyboardEventArgs args)
     {
-        if (args.Key == "Escape" && State.Workbench.SidebarOpen)
-            await CloseSettingsAsync();
-    }
-
-    private void ShowMockSites() => Navigation.NavigateTo("theme");
-
-    private void ShowComponents()
-    {
-        var component = ComponentSlug ?? "accordion";
-        var scenario = ScenarioId ?? $"{component}-default";
-        NavigateScenario(new(component, scenario));
-    }
-
-    private void NavigateScenario(ThemeScenarioSelection selection)
-    {
-        var uri = Navigation.GetUriWithQueryParameters(new Dictionary<string, object?>
-        {
-            ["component"] = selection.ComponentSlug,
-            ["scenario"] = selection.ScenarioId
-        });
-        Navigation.NavigateTo(uri);
+        if (args.Key == "Escape" && State.Workbench.SidebarOpen) await CloseSettingsAsync();
     }
 
     public void Dispose()
@@ -217,18 +143,13 @@
         _disposed = true;
         _persistRequested = false;
         State.Changed -= OnStateChanged;
+        ShellState.Changed -= OnShellChanged;
     }
 
     public async ValueTask DisposeAsync()
     {
         Dispose();
         if (_module is null) return;
-        try
-        {
-            await _module.DisposeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-        }
+        try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { }
     }
 }

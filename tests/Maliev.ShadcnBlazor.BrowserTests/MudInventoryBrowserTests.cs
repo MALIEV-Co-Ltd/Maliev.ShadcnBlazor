@@ -120,8 +120,10 @@ public sealed class MudInventoryBrowserTests(ShowcaseServerFixture server, Playw
         Assert.False(string.IsNullOrWhiteSpace(materialListboxId));
         var materialListbox = page.Locator($"#{materialListboxId}");
         await Assertions.Expect(materialListbox).ToHaveAttributeAsync("role", "listbox");
-        await materialListbox.GetByRole(AriaRole.Option, new() { Name = "Aluminium", Exact = true }).ClickAsync();
+        await material.PressAsync("End");
         await Assertions.Expect(material).ToHaveTextAsync("Aluminium");
+        await material.PressAsync("Escape");
+        await Assertions.Expect(material).ToHaveAttributeAsync("aria-expanded", "false");
 
         Assert.True(await page.Locator(".mud-input-error").CountAsync() >= 1);
         var overviewTab = page.GetByRole(AriaRole.Tab, new() { Name = "Overview", Exact = true });

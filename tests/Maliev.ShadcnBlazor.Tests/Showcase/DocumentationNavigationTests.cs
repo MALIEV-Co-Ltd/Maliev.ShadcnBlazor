@@ -231,6 +231,9 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Contains("images/brand/MALIEV_BLACK.svg", cut.Find(".documentation-brand__mark img").GetAttribute("src"), StringComparison.Ordinal);
         Assert.Equal("Use dark theme", cut.Find("[data-testid='documentation-theme-toggle']").GetAttribute("aria-label"));
         Assert.Equal("Use right-to-left direction", cut.Find("[data-testid='documentation-direction-toggle']").GetAttribute("aria-label"));
+        var directionIcon = cut.Find("[data-testid='documentation-direction-toggle'] [data-slot='icon']");
+        Assert.Equal("tabler", directionIcon.GetAttribute("data-library"));
+        Assert.Equal("text-direction-rtl", directionIcon.GetAttribute("data-icon"));
     }
 
     private IRenderedComponent<DocumentationLayout> RenderDocumentationLayout() => Render<DocumentationLayout>(parameters => parameters

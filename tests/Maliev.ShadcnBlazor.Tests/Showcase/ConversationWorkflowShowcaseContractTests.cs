@@ -327,6 +327,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, cut.FindAll("[data-slot='message-body']").Count);
         Assert.Single(cut.FindAll("form.showcase-scroller-composer"));
         Assert.Single(cut.FindAll("[data-slot='message-scroller'] form.showcase-scroller-composer"));
+        Assert.Single(cut.FindAll("[data-slot='message-scroller'] > .showcase-scroller-transcript"));
+        Assert.Single(cut.FindAll(".showcase-scroller-transcript > [data-slot='message-scroller-viewport']"));
+        Assert.Empty(cut.FindAll(".showcase-scroller-transcript form.showcase-scroller-composer"));
         Assert.Empty(cut.FindAll("[data-testid='scroller-demo'] > form.showcase-scroller-composer"));
         Assert.Equal("อธิบายวิธีติดตามข้อความล่าสุดให้หน่อย", cut.Find(".showcase-scroller-composer input").GetAttribute("value"));
         Assert.NotEmpty(cut.FindAll("button[data-testid='scroller-send']"));
@@ -358,12 +361,13 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
 
         var css = File.ReadAllText(Path.Combine(FindRoot(), "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
         Assert.Contains(".showcase-scroller-frame .showcase-scroller-composer", css, StringComparison.Ordinal);
-        Assert.Contains("padding: 1rem 1.25rem 5rem", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-rows: minmax(0, 1fr) auto", css, StringComparison.Ordinal);
         Assert.Contains(".showcase-scroller-frame {", css, StringComparison.Ordinal);
         Assert.Contains("position: relative", css, StringComparison.Ordinal);
-        Assert.Contains(".showcase-scroller-frame::after", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-scroller-transcript::after", css, StringComparison.Ordinal);
         Assert.Contains("linear-gradient(to bottom", css, StringComparison.Ordinal);
         Assert.Contains("pointer-events: none", css, StringComparison.Ordinal);
+        Assert.Contains("inset-inline-end: 1rem", css, StringComparison.Ordinal);
         Assert.Contains("env(safe-area-inset-bottom)", css, StringComparison.Ordinal);
     }
 
