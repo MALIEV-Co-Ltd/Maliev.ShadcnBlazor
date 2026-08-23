@@ -1,0 +1,6 @@
+{
+  "option": "A2-mobile",
+  "name": "Centered runway mobile",
+  "approved": true,
+  "prompt": "Compact universal app bar, closed settings drawer, no viewport selector, one natural-scroll realistic use-case card column, animated component states, and a safe-area curated-preset dock."
+}
