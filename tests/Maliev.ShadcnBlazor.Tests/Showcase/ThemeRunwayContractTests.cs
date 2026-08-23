@@ -20,6 +20,11 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("prefers-reduced-motion", script, StringComparison.Ordinal);
         Assert.Contains("@container (max-width: 43.999rem)", css, StringComparison.Ordinal);
         Assert.Contains(".theme-runway__mobile { display: grid", css, StringComparison.Ordinal);
+        var runwayRule = css[css.IndexOf(".theme-runway {", StringComparison.Ordinal)..css.IndexOf(".theme-runway::before", StringComparison.Ordinal)];
+        Assert.DoesNotContain("border:", runwayRule, StringComparison.Ordinal);
+        Assert.DoesNotContain("border-radius:", runwayRule, StringComparison.Ordinal);
+        Assert.DoesNotContain("background:", runwayRule, StringComparison.Ordinal);
+        Assert.DoesNotContain("padding:", runwayRule, StringComparison.Ordinal);
     }
 
     [Fact]
