@@ -6558,23 +6558,12 @@ a {
     font-family: var(--shadcn-font-sans, 'Geist', 'Noto Sans Thai', sans-serif);
 }
 
-.showcase-boot__mark {
-    display: grid;
-    width: 3rem;
-    height: 3rem;
-    place-items: center;
-    border: 1px solid var(--shadcn-border, #e4e4e7);
-    border-radius: var(--shadcn-radius-lg, .625rem);
-    background: var(--shadcn-primary, #18181b);
-    color: var(--shadcn-primary-foreground, #fafafa);
-    box-shadow: var(--shadcn-shadow-sm, 0 1px 3px rgb(0 0 0 / .1));
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.showcase-boot__mark svg {
-    inline-size: 1.45rem;
-    block-size: 1.45rem;
+.showcase-boot__logo {
+    display: block;
+    inline-size: clamp(12rem, 32vw, 17.6875rem);
+    block-size: auto;
+    border: 0;
+    border-radius: 0;
 }
 
 .showcase-boot__copy {
@@ -6584,7 +6573,6 @@ a {
     text-align: center;
 }
 
-.showcase-boot__copy strong { font-size: 1rem; letter-spacing: -.01em; }
 .showcase-boot__copy span { color: var(--shadcn-muted-foreground, #71717a); font-size: .875rem; }
 
 .showcase-boot__spinner {

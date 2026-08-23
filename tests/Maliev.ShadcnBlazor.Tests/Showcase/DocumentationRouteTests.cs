@@ -101,8 +101,12 @@ public sealed class DocumentationRouteTests : BunitContext
 
         Assert.Contains("class=\"showcase-boot\"", index, StringComparison.Ordinal);
         Assert.Contains("role=\"status\"", index, StringComparison.Ordinal);
+        Assert.Contains("class=\"showcase-boot__logo\"", index, StringComparison.Ordinal);
+        Assert.Contains("src=\"images/brand/MALIEV_BLACK.svg\"", index, StringComparison.Ordinal);
+        Assert.DoesNotContain("class=\"showcase-boot__mark\"", index, StringComparison.Ordinal);
         Assert.Contains("showcase-boot__spinner", index, StringComparison.Ordinal);
         Assert.Contains("place-content: center", css, StringComparison.Ordinal);
+        Assert.Contains(".showcase-boot__logo", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes showcase-boot-spin", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
     }
