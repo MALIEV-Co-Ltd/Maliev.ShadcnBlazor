@@ -41,6 +41,7 @@ public sealed class WorkflowSecurityTests
         Assert.Contains("id-token: write", release, StringComparison.Ordinal);
         Assert.Contains("environment: nuget", release, StringComparison.Ordinal);
         Assert.Contains("runs-on: windows-2022", release, StringComparison.Ordinal);
+        Assert.Contains("timeout-minutes: 90", release, StringComparison.Ordinal);
         Assert.Contains("NuGet/login@", release, StringComparison.Ordinal);
         Assert.Contains("steps.nuget-login.outputs.NUGET_API_KEY", release, StringComparison.Ordinal);
         Assert.DoesNotContain("secrets.NUGET_API_KEY", release, StringComparison.Ordinal);

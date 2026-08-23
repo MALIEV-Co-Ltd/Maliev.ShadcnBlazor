@@ -154,7 +154,7 @@ public sealed class ThemeBuildValidationTests : IClassFixture<ThemePackageFixtur
                     <MalievShadcnThemeWarningsAsErrors>{{warningsAsErrors.ToString().ToLowerInvariant()}}</MalievShadcnThemeWarningsAsErrors>
                   </PropertyGroup>
                   <ItemGroup>
-                    <PackageReference Include="Maliev.ShadcnBlazor" Version="1.1.1" />
+                    <PackageReference Include="Maliev.ShadcnBlazor" Version="1.2.0" />
                   </ItemGroup>
                 </Project>
                 """, new UTF8Encoding(false));

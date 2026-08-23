@@ -6,6 +6,47 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-23
+
+### Added
+
+- Added the responsive Theme Studio workbench with a canonical portable theme
+  document schema, strict loading and migration, deterministic palette
+  generation, typography roles, 198 bilingual component scenarios, and
+  package-supported build-time validation for clean consumers (#171).
+- Added the accessible Dropzone component and catalog dossier, custom-answer
+  questionnaire choices, primary and secondary chart axes with major and minor
+  grid controls, and meaningful expanded table content (#194-#196, #208).
+- Added reusable state transitions, controlled and uncontrolled secret-input
+  reveal with partial masking, and card presentation for radio groups
+  (#199, #206, #209).
+
+### Changed
+
+- Expanded the reviewed catalog to 66 component families, including complete
+  Code Block and Dropzone documentation, synchronized Razor source, and
+  desktop/mobile Theme scenario evidence (#207-#208).
+- Refined Calendar week numbers, package Select month/year navigation,
+  invalid-date feedback, Combobox chip spacing, Date Picker width, semantic
+  Toast queues, vertical Carousel sizing, and the Toggle Group use case
+  (#198, #200-#206, #210).
+- Made the documentation header span the viewport while retaining centered
+  readable content and responsive navigation (#170).
+
+### Fixed
+
+- Stabilized Accordion, Sidebar, Alert Dialog, Context Menu, Drawer, Dropdown
+  Menu, Hover Card, Menubar, and Sheet interaction and responsive presentation
+  without trigger or layout shifts (#211-#219).
+- Kept Message Scroller auto-follow continuous and resumable, aligned avatars
+  to message bodies, and kept the composer and fade inside the transcript safe
+  area (#192-#193).
+- Finished Code Block copy, toolbar, language selection, Razor/C# highlighting,
+  generated imports, API-table wrapping, prose-list alignment, and mobile
+  documentation navigation (#184-#191).
+- Corrected Chart, Table, Badge, and Carousel rendering states and preserved
+  Marker text beneath its left-to-right streaming shimmer (#195-#198).
+
 ## [1.1.1] - 2026-08-22
 
 ### Fixed
@@ -176,7 +217,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.0.11...v1.1.0
 [1.0.11]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/v1.0.11
