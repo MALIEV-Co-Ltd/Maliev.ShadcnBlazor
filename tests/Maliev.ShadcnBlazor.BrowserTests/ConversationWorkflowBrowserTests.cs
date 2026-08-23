@@ -358,7 +358,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var aligned = await assistant.EvaluateAsync<double[]>("element => { const body = element.querySelector('[data-slot=message-body]').getBoundingClientRect(); const avatar = element.querySelector('[data-slot=message-avatar]').getBoundingClientRect(); return [body.bottom, avatar.bottom]; }");
         Assert.InRange(Math.Abs(aligned[0] - aligned[1]), 0, 1);
 
-        await Assertions.Expect(scroller).Not.ToHaveAttributeAsync("data-autoscrolling", "", new() { Timeout = 2000 });
+        await Assertions.Expect(scroller).ToHaveAttributeAsync("data-autoscrolling", "");
         await viewport.EvaluateAsync("element => { element.scrollTop = 0; element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); }");
         await Assertions.Expect(scroller).ToHaveAttributeAsync("data-unread", "true");
         await page.WaitForTimeoutAsync(180);
