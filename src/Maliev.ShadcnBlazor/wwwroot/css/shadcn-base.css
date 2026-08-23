@@ -10,6 +10,22 @@
     border: 0;
 }
 
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    inline-size: var(--shadcn-icon-size, 1.5rem);
+    block-size: var(--shadcn-icon-size, 1.5rem);
+    color: currentColor;
+    vertical-align: middle;
+}
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-icon {
+        color: CanvasText;
+        forced-color-adjust: auto;
+    }
+}
+
 /* Public copyable source primitive. The toolbar stays compact and stable while
    keeping language and copy actions visible to pointer and keyboard users. */
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block {
