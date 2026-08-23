@@ -99,7 +99,7 @@ public sealed class IconCatalogRepositoryTests
         var showcaseReferences = showcase.Descendants("ProjectReference").Select(reference => reference.Attribute("Include")?.Value).ToArray();
         var coreReferences = core.Descendants("ProjectReference").Select(reference => reference.Attribute("Include")?.Value).ToArray();
 
-        Assert.Contains(showcaseReferences, reference =>
+        Assert.DoesNotContain(showcaseReferences, reference =>
             reference?.Contains("Maliev.ShadcnBlazor.Icons.Tabler", StringComparison.Ordinal) == true);
         Assert.DoesNotContain(showcaseReferences, reference =>
             reference?.Contains("Maliev.ShadcnBlazor.Icons.Lucide", StringComparison.Ordinal) == true);

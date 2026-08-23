@@ -1,6 +1,5 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
 @using Maliev.ShadcnBlazor.Components.Icons
-@using Maliev.ShadcnBlazor.Icons.Tabler
 @inject ShowcaseState ThemeState
 @implements IDisposable
 
@@ -86,10 +85,15 @@
 @code {
     private ElementReference _catalogTrigger;
     private ElementReference _outlineTrigger;
-    private ShadcnIconData DirectionIcon => TablerIconCatalog.Instance.Get(
-        ThemeState.Direction == ShadcnDirection.LeftToRight
-            ? TablerIconNames.TextDirectionRtl
-            : TablerIconNames.TextDirectionLtr);
+    private static readonly ShadcnIconData RightToLeftIcon = new("tabler", "text-direction-rtl", "0 0 24 24", """
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 4h-6.5a3.5 3.5 0 0 0 0 7h.5" /><path d="M14 15v-11" /><path d="M10 15v-11" /><path d="M5 19h14" /><path d="M7 21l-2 -2l2 -2" /></g>
+        """);
+    private static readonly ShadcnIconData LeftToRightIcon = new("tabler", "text-direction-ltr", "0 0 24 24", """
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 19h14" /><path d="M17 21l2 -2l-2 -2" /><path d="M16 4h-6.5a3.5 3.5 0 0 0 0 7h.5" /><path d="M14 15v-11" /><path d="M10 15v-11" /></g>
+        """);
+    private ShadcnIconData DirectionIcon => ThemeState.Direction == ShadcnDirection.LeftToRight
+        ? RightToLeftIcon
+        : LeftToRightIcon;
 
     [Parameter, EditorRequired]
     public DocumentationNavigationState State { get; set; } = null!;

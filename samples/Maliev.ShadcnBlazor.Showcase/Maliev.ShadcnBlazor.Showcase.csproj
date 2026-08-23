@@ -11,7 +11,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Theming\Presets\ThemeStudioPresetCatalog.json" />
     <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor\Maliev.ShadcnBlazor.csproj" />
-    <ProjectReference Include="..\..\src\Maliev.ShadcnBlazor.Icons.Tabler\Maliev.ShadcnBlazor.Icons.Tabler.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Documentation\ComponentDocumentationCatalog.json" />
