@@ -89,11 +89,18 @@ public sealed class ThemeRunwayContractTests
     public void AssistantTypingRevealUsesCssAndRespectsReducedMotion()
     {
         var root = FindRoot();
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains("animation: theme-runway-typing-reveal", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes theme-runway-typing-reveal", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-runway-typing { animation: none; clip-path: none;", css, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-runway-typing-character\"", card, StringComparison.Ordinal);
+        Assert.Contains("--typing-index: @index", card, StringComparison.Ordinal);
+        Assert.Contains("<span class=\"shadcn-sr-only\">@AssistantMessage</span>", card, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-runway-typing\" aria-hidden=\"true\"", card, StringComparison.Ordinal);
+        Assert.Contains("animation: theme-runway-type-character", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes theme-runway-type-character", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-runway-typing-reveal", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".theme-runway-typing { display: inline-block; max-inline-size: 100%; clip-path", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway-typing-character { animation: none; opacity: 1;", css, StringComparison.Ordinal);
     }
 
     private static int Count(string value, string needle) => (value.Length - value.Replace(needle, string.Empty, StringComparison.Ordinal).Length) / needle.Length;

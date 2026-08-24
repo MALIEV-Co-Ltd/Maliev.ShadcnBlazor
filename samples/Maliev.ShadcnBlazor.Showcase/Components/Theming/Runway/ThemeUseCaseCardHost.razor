@@ -1,4 +1,5 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using System.Globalization
 @using Maliev.ShadcnBlazor.Components.Conversation
 @using Maliev.ShadcnBlazor.Components.Icons
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
@@ -74,7 +75,7 @@
                     </ShadcnMessage>
                     <ShadcnMessage Align="ShadcnLogicalAlign.Start">
                         <ShadcnMessageAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" /><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar></ShadcnMessageAvatar>
-                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader><ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted"><ShadcnBubbleContent><span class="theme-runway-typing">@AssistantMessage<span class="theme-runway-caret" aria-hidden="true"></span></span></ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
+                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader><ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted"><ShadcnBubbleContent><span class="shadcn-sr-only">@AssistantMessage</span><span class="theme-runway-typing" aria-hidden="true">@for (var index = 0; index < AssistantMessageSegments.Length; index++) {<span class="theme-runway-typing-character" style="--typing-index: @index;">@AssistantMessageSegments[index]</span>}</span></ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
                     </ShadcnMessage>
                 </ShadcnMessageGroup>
                 <div class="theme-runway-composer"><ShadcnInput TValue="string" Placeholder="Ask about this work order" Disabled="IsMirror" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" Disabled="IsMirror"><ShadcnIcon Icon="@SendIcon" Size="16" /></ShadcnButton></div>
@@ -106,12 +107,20 @@
     private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private const string AssistantMessage = "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย";
+    private static readonly string[] AssistantMessageSegments = SplitTextElements(AssistantMessage);
     private const string ShiftValue = "Night · Cell A3";
     private const string FactoryValue = "MALIEV · Samut Prakan";
     private const string DockValue = "B-04";
     private const string ReferenceValue = "WO-2418";
     private static double ClampPercent(double value) => Math.Clamp(value, 0, 100);
     private static string FormatPercent(double value) => $"{ClampPercent(value):0}%";
+    private static string[] SplitTextElements(string value)
+    {
+        var elements = new List<string>();
+        var enumerator = StringInfo.GetTextElementEnumerator(value);
+        while (enumerator.MoveNext()) elements.Add(enumerator.GetTextElement());
+        return [.. elements];
+    }
     private static readonly (string Label, string Description, bool Enabled)[] AlertOptions =
     [
         ("Inspection failures", "Immediate quality notification", true),

@@ -284,15 +284,25 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var animatedContext = await NewContextAsync(1280, 900);
         var animatedPage = await OpenAsync(animatedContext);
         var animated = animatedPage.Locator("[data-use-case-id='assistant-conversation'] .theme-runway-typing").First;
+        var accessibleMessage = animatedPage.Locator("[data-use-case-id='assistant-conversation'] .shadcn-bubble-content > .shadcn-sr-only").First;
+        var animatedCharacters = animated.Locator(".theme-runway-typing-character");
         await Assertions.Expect(animated).ToHaveTextAsync(message);
-        Assert.Equal("theme-runway-typing-reveal", await animated.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        await Assertions.Expect(accessibleMessage).ToHaveTextAsync(message);
+        await Assertions.Expect(animated).ToHaveAttributeAsync("aria-hidden", "true");
+        await Assertions.Expect(animatedCharacters).ToHaveCountAsync(new System.Globalization.StringInfo(message).LengthInTextElements);
+        Assert.Equal("none", await animated.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("theme-runway-type-character", await animatedCharacters.First.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        var firstDelay = await animatedCharacters.Nth(0).EvaluateAsync<string>("element => getComputedStyle(element).animationDelay");
+        var secondDelay = await animatedCharacters.Nth(1).EvaluateAsync<string>("element => getComputedStyle(element).animationDelay");
+        Assert.NotEqual(firstDelay, secondDelay);
 
         await using var reducedContext = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
         var reducedPage = await OpenAsync(reducedContext);
         var reduced = reducedPage.Locator("[data-use-case-id='assistant-conversation'] .theme-runway-typing").First;
+        var reducedCharacters = reduced.Locator(".theme-runway-typing-character");
         await Assertions.Expect(reduced).ToHaveTextAsync(message);
-        Assert.Equal("none", await reduced.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
-        Assert.Equal("none", await reduced.EvaluateAsync<string>("element => getComputedStyle(element).clipPath"));
+        Assert.Equal("none", await reducedCharacters.First.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("1", await reducedCharacters.First.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
     }
 
     [Theory]
