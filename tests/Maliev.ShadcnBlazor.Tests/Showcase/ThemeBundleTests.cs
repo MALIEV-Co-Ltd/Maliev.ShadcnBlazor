@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Globalization;
 using Bunit;
 using Maliev.ShadcnBlazor.Components;
+using Maliev.ShadcnBlazor.Components.Styling;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
 using Maliev.ShadcnBlazor.Showcase.Export;
 using Maliev.ShadcnBlazor.Showcase.Theming;
@@ -49,6 +50,24 @@ public sealed class ThemeBundleTests
         Assert.Contains("options.FontFamily", code, StringComparison.Ordinal);
         Assert.Contains("FontFamily = \"'Geist'", code, StringComparison.Ordinal);
         Assert.Contains("new ShadcnTheme", code, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GeneratedVisualStyleSnippetUsesTheTypedComposableScope()
+    {
+        var code = ThemeStudioCodeGenerator.WriteVisualStyleSnippet(
+            ShadcnVisualStyle.LiquidGlass,
+            ShadcnColorTreatment.VibrantDark,
+            ShadcnDepthTreatment.Spatial,
+            ShadcnMotionTreatment.Expressive,
+            ShadcnStyleIntensity.Strong);
+
+        Assert.Contains("<ShadcnVisualStyleScope", code, StringComparison.Ordinal);
+        Assert.Contains("VisualStyle=\"ShadcnVisualStyle.LiquidGlass\"", code, StringComparison.Ordinal);
+        Assert.Contains("ColorTreatment=\"ShadcnColorTreatment.VibrantDark\"", code, StringComparison.Ordinal);
+        Assert.Contains("Depth=\"ShadcnDepthTreatment.Spatial\"", code, StringComparison.Ordinal);
+        Assert.Contains("Motion=\"ShadcnMotionTreatment.Expressive\"", code, StringComparison.Ordinal);
+        Assert.Contains("Intensity=\"ShadcnStyleIntensity.Strong\"", code, StringComparison.Ordinal);
     }
 
     private static readonly string[] ExpectedPaths =

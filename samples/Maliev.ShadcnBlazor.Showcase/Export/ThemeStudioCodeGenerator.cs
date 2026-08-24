@@ -1,5 +1,6 @@
 using System.Text;
 using Maliev.ShadcnBlazor.Theming;
+using Maliev.ShadcnBlazor.Components.Styling;
 
 namespace Maliev.ShadcnBlazor.Showcase.Export;
 
@@ -7,6 +8,32 @@ public static class ThemeStudioCodeGenerator
 {
     public static string WriteJson(ShadcnThemeDocument document) =>
         ShadcnThemeDocumentSerializer.Serialize(document);
+
+    public static string WriteVisualStyleSnippet(
+        ShadcnVisualStyle visualStyle,
+        ShadcnColorTreatment colorTreatment,
+        ShadcnDepthTreatment depth,
+        ShadcnMotionTreatment motion,
+        ShadcnStyleIntensity intensity)
+    {
+        ValidateEnum(visualStyle, nameof(visualStyle));
+        ValidateEnum(colorTreatment, nameof(colorTreatment));
+        ValidateEnum(depth, nameof(depth));
+        ValidateEnum(motion, nameof(motion));
+        ValidateEnum(intensity, nameof(intensity));
+
+        return $"""
+            @using Maliev.ShadcnBlazor.Components.Styling
+
+            <ShadcnVisualStyleScope VisualStyle="ShadcnVisualStyle.{visualStyle}"
+                                    ColorTreatment="ShadcnColorTreatment.{colorTreatment}"
+                                    Depth="ShadcnDepthTreatment.{depth}"
+                                    Motion="ShadcnMotionTreatment.{motion}"
+                                    Intensity="ShadcnStyleIntensity.{intensity}">
+                @* Place any Maliev.ShadcnBlazor components here. *@
+            </ShadcnVisualStyleScope>
+            """;
+    }
 
     public static string WriteCSharp(ShadcnThemeDocument document)
     {
@@ -65,5 +92,11 @@ public static class ThemeStudioCodeGenerator
             .Aggregate(new StringBuilder(), (builder, line) => builder.AppendLine(line))
             .ToString()
             .TrimEnd();
+
+    private static void ValidateEnum<T>(T value, string parameterName) where T : struct, Enum
+    {
+        if (!Enum.IsDefined(value))
+            throw new ArgumentOutOfRangeException(parameterName, value, "Unsupported visual style option.");
+    }
 
 }

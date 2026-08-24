@@ -6,6 +6,7 @@
 @inject ShowcaseState ShellState
 @inject ILogger<ThemeStudio> Logger
 @inject IJSRuntime JavaScript
+@using Maliev.ShadcnBlazor.Components.Styling
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
@@ -30,9 +31,16 @@
                      data-theme-icon-library="@State.IconLibrary.ToString().ToLowerInvariant()"
                      data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
                      data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
-                    <CascadingValue Value="PreviewContext">
-                        <ThemeBento Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
-                    </CascadingValue>
+                    <ShadcnVisualStyleScope VisualStyle="State.VisualStyle"
+                                            ColorTreatment="State.ColorTreatment"
+                                            Depth="State.DepthTreatment"
+                                            Motion="State.MotionTreatment"
+                                            Intensity="State.StyleIntensity"
+                                            data-testid="theme-visual-style-scope">
+                        <CascadingValue Value="PreviewContext">
+                            <ThemeBento Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                        </CascadingValue>
+                    </ShadcnVisualStyleScope>
                 </div>
             </div>
         </section>
