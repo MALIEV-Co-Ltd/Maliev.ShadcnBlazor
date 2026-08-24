@@ -17,8 +17,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var bento = page.GetByTestId("theme-bento");
         var cards = bento.Locator("[data-use-case-id]");
         await Assertions.Expect(bento).ToBeVisibleAsync();
-        Assert.Equal(19, await cards.CountAsync());
-        Assert.Equal(19, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(20, await cards.CountAsync());
+        Assert.Equal(20, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(66, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
         Assert.Equal("1px", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderLeftWidth"));
@@ -28,6 +29,37 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.True(await preview.EvaluateAsync<bool>("element => element.scrollHeight > element.clientHeight"));
         await preview.EvaluateAsync("element => element.scrollTop = 700");
         Assert.True(await preview.EvaluateAsync<double>("element => element.scrollTop") > 100);
+    }
+
+    [Fact]
+    public async Task ConversationAcceptsUserMessagesAndRevealsEachAssistantReplyForwardOnce()
+    {
+        await using var context = await NewContextAsync(1440, 900);
+        var page = await OpenAsync(context);
+        var conversation = page.Locator("[data-use-case-id='assistant-conversation']");
+        var turns = conversation.Locator("[data-slot='message-scroller-item']");
+        await Assertions.Expect(turns).ToHaveCountAsync(2);
+        await conversation.Locator(".theme-runway-composer input").FillAsync("สถานะการตรวจสอบล่าสุดเป็นอย่างไร");
+        await conversation.GetByRole(AriaRole.Button, new() { Name = "Send message" }).ClickAsync();
+        await Assertions.Expect(turns).ToHaveCountAsync(4);
+        await Assertions.Expect(conversation.GetByText("สถานะการตรวจสอบล่าสุดเป็นอย่างไร", new() { Exact = true })).ToBeVisibleAsync();
+        var lastCharacter = conversation.Locator(".theme-runway-typing-character").Last;
+        Assert.Equal("1", await lastCharacter.EvaluateAsync<string>("element => getComputedStyle(element).animationIterationCount"));
+        await Assertions.Expect(lastCharacter).ToHaveCSSAsync("opacity", "1", new() { Timeout = 8000 });
+    }
+
+    [Fact]
+    public async Task EveryCatalogComponentIsAvailableAsThreeInteractiveBentoStates()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var cards = page.Locator("[data-component-slug]");
+        Assert.Equal(66, await cards.CountAsync());
+        var accordion = page.Locator("[data-component-slug='accordion']");
+        await Assertions.Expect(accordion.GetByRole(AriaRole.Button, new() { Name = "Default", Exact = true })).ToHaveAttributeAsync("aria-pressed", "true");
+        await accordion.GetByRole(AriaRole.Button, new() { Name = "Stress", Exact = true }).ClickAsync();
+        await Assertions.Expect(accordion.GetByRole(AriaRole.Button, new() { Name = "Stress", Exact = true })).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(accordion.Locator("[data-theme-scenario-host$='-stress']")).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -123,7 +155,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(19, await page.Locator(".theme-bento__grid > [data-use-case-id]").CountAsync());
+        Assert.Equal(20, await page.Locator(".theme-bento__grid > [data-use-case-id]").CountAsync());
+        Assert.Equal(66, await page.Locator(".theme-bento__grid > [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
@@ -137,8 +170,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await toggle.ClickAsync();
         await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
         await Assertions.Expect(toggle).ToBeFocusedAsync();
-        var axe = await page.GetByTestId("theme-studio").RunAxe();
-        Assert.DoesNotContain(axe.Violations, violation => violation.Impact is "serious" or "critical");
+        foreach (var card in await page.Locator("[data-use-case-id]").AllAsync())
+        {
+            var axe = await card.RunAxe();
+            Assert.DoesNotContain(axe.Violations, violation => violation.Impact is "serious" or "critical");
+        }
     }
 
     private async Task<IBrowserContext> NewContextAsync(int width, int height, ReducedMotion motion = ReducedMotion.NoPreference, bool touch = false) => await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = width, Height = height }, ReducedMotion = motion, HasTouch = touch });

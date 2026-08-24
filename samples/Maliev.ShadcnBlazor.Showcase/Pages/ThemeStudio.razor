@@ -112,6 +112,7 @@
         {
             _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
             if (await _module.InvokeAsync<bool>("isDesktopWorkbench")) State.Workbench.OpenSidebar();
+            await _module.InvokeVoidAsync("resetInitialPreviewScroll");
         }
     }
 

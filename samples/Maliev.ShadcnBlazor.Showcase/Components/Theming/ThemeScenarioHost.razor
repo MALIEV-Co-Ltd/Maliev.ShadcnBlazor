@@ -11,7 +11,10 @@
          data-theme-scenario-host="@Scenario.Id"
          data-testid="theme-scenario-host"
          tabindex="-1"
-         aria-labelledby="@TitleId">
+         aria-labelledby="@(ShowHeading ? TitleId : null)"
+         aria-label="@(!ShowHeading ? Copy.Title : null)">
+    @if (ShowHeading)
+    {
     <header class="theme-scenario-host__heading">
         <div>
             <h2 id="@TitleId">@Copy.Title</h2>
@@ -19,6 +22,7 @@
         </div>
         <span class="theme-scenario-host__kind">@KindLabel</span>
     </header>
+    }
     <div class="theme-scenario-host__surface">
         @Preview
     </div>
@@ -27,6 +31,8 @@
 @code {
     [Parameter, EditorRequired] public ThemeScenarioDefinition Scenario { get; set; } = null!;
     [Parameter, EditorRequired] public CultureInfo Culture { get; set; } = CultureInfo.GetCultureInfo("en-US");
+    [Parameter] public bool AutoFocus { get; set; } = true;
+    [Parameter] public bool ShowHeading { get; set; } = true;
 
     private RenderFragment Preview { get; set; } = _ => { };
     private ElementReference Root;
@@ -51,6 +57,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!AutoFocus) return;
         if (string.Equals(_focusedScenarioId, Scenario.Id, StringComparison.Ordinal)) return;
         _focusedScenarioId = Scenario.Id;
         await Root.FocusAsync(preventScroll: true);

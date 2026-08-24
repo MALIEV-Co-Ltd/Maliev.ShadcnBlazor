@@ -1,0 +1,47 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
+
+<ShadcnCard Class="theme-use-case-card theme-scenario-bento-card"
+            data-component-slug="@ComponentSlug">
+    <ShadcnCardHeader Class="theme-use-case-card__header theme-scenario-bento-card__header">
+        <ShadcnCardTitle>@ComponentName</ShadcnCardTitle>
+        <div class="theme-scenario-bento-card__states" role="group" aria-label="@StateSelectorLabel">
+            @foreach (var scenario in Scenarios)
+            {
+                <ShadcnButton Size="ShadcnButtonSize.Small"
+                              Variant="@(scenario.Id == Selected.Id ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Ghost)"
+                              aria-pressed="@(scenario.Id == Selected.Id ? "true" : "false")"
+                              @onclick="() => Select(scenario)">@KindLabel(scenario.Kind)</ShadcnButton>
+            }
+        </div>
+    </ShadcnCardHeader>
+    <ShadcnCardContent Class="theme-scenario-bento-card__content">
+        <ThemeScenarioHost @key="Selected.Id" Scenario="Selected" Culture="Culture" AutoFocus="false" ShowHeading="false" />
+    </ShadcnCardContent>
+</ShadcnCard>
+
+@code {
+    [Parameter, EditorRequired] public string ComponentSlug { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public IReadOnlyList<ThemeScenarioDefinition> Scenarios { get; set; } = [];
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+
+    private string? _selectedId;
+    private ThemeScenarioDefinition Selected => Scenarios.FirstOrDefault(value => value.Id == _selectedId) ??
+        Scenarios.FirstOrDefault(value => value.Kind == ThemeScenarioKind.Default) ??
+        Scenarios.First();
+    private CultureInfo Culture => CultureInfo.GetCultureInfo(Locale == ThemeStudioLocale.Thai ? "th-TH" : "en-US");
+    private string ComponentName => string.Join(' ', ComponentSlug.Split('-', StringSplitOptions.RemoveEmptyEntries)
+        .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
+    private string StateSelectorLabel => Locale == ThemeStudioLocale.Thai ? $"สถานะตัวอย่าง {ComponentName}" : $"{ComponentName} example state";
+    private void Select(ThemeScenarioDefinition scenario) => _selectedId = scenario.Id;
+    private string KindLabel(ThemeScenarioKind kind) => (Locale, kind) switch
+    {
+        (ThemeStudioLocale.Thai, ThemeScenarioKind.Default) => "ปกติ",
+        (ThemeStudioLocale.Thai, ThemeScenarioKind.Stress) => "ซับซ้อน",
+        (ThemeStudioLocale.Thai, ThemeScenarioKind.Accessible) => "เข้าถึง",
+        (_, ThemeScenarioKind.Default) => "Default",
+        (_, ThemeScenarioKind.Stress) => "Stress",
+        _ => "Accessible"
+    };
+}

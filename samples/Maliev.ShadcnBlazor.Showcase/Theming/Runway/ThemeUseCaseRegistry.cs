@@ -22,7 +22,8 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
         Use("contact-dialog", 16, ThemeBentoSize.Standard, "Production contact", "ผู้ติดต่อฝ่ายผลิต", "ShadcnDialog", "ShadcnInput"),
         Use("dispatch-drawer", 17, ThemeBentoSize.Standard, "Dispatch review", "ตรวจสอบการจัดส่ง", "ShadcnDrawer"),
         Use("delivery-sheet", 18, ThemeBentoSize.Standard, "Delivery schedule", "กำหนดการส่งมอบ", "ShadcnSheet"),
-        Use("tooltip-guidance", 19, ThemeBentoSize.Standard, "Inspection guidance", "คำแนะนำการตรวจสอบ", "ShadcnTooltip", "ShadcnButton")
+        Use("tooltip-guidance", 19, ThemeBentoSize.Standard, "Inspection guidance", "คำแนะนำการตรวจสอบ", "ShadcnTooltip", "ShadcnButton"),
+        Use("project-questionnaire", 20, ThemeBentoSize.Standard, "Production review questionnaire", "แบบสอบถามการตรวจสอบงาน", "ShadcnQuestionnaire", "ShadcnQuestionnaireChoice", "ShadcnQuestionnaireInput")
     ];
 
     private static ThemeUseCaseDefinition Use(string id, int order, ThemeBentoSize size, string en, string th, params string[] components) =>

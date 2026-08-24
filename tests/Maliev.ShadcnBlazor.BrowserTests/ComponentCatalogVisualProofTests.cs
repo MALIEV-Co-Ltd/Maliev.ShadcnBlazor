@@ -163,7 +163,7 @@ public sealed class ComponentCatalogVisualProofTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
         await Assertions.Expect(page.GetByTestId("theme-bento")).ToBeVisibleAsync();
-        await Assertions.Expect(page.Locator("[data-testid='theme-bento'] .theme-use-case-card")).ToHaveCountAsync(19);
+        await Assertions.Expect(page.Locator("[data-testid='theme-bento'] .theme-use-case-card")).ToHaveCountAsync(86);
         if (mode.StartsWith("mobile", StringComparison.Ordinal))
         {
             var firstCard = page.Locator("[data-testid='theme-bento'] .theme-use-case-card").First;

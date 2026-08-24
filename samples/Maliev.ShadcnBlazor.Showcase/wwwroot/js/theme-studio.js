@@ -2,6 +2,20 @@ export function isDesktopWorkbench() {
     return window.matchMedia("(min-width: 64.0625rem)").matches;
 }
 
+export function resetInitialPreviewScroll() {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => {
+        const preview = document.querySelector(".theme-preview-region");
+        if (preview instanceof HTMLElement) {
+            preview.scrollTop = 0;
+            preview.scrollLeft = 0;
+        }
+        if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        resolve();
+    })));
+}
+
 export function loadGoogleFonts(stylesheet, timeoutMs = 5000) {
     const id = "theme-studio-google-fonts";
     const existing = document.getElementById(id);

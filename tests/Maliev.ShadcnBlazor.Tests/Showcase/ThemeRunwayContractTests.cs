@@ -14,12 +14,32 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("mirror", bento, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("inert", bento, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("data-runway-track", bento, StringComparison.Ordinal);
-        Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr))", css, StringComparison.Ordinal);
+        Assert.Contains("column-count: 4", css, StringComparison.Ordinal);
+        Assert.Contains("padding-block: 1rem", css, StringComparison.Ordinal);
+        Assert.Contains("padding-inline: 0", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".theme-bento__grid { display: grid", css, StringComparison.Ordinal);
         Assert.Contains("border: 1px solid var(--shadcn-border)", css, StringComparison.Ordinal);
         Assert.DoesNotContain("box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
         Assert.DoesNotContain("grid-auto-flow: dense", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-region { min-inline-size: 0;", css, StringComparison.Ordinal);
         Assert.Contains("border: 0; border-radius: 0; background: transparent", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BentoSurfacesEveryRegisteredComponentWithThreeSelectableRealScenarios()
+    {
+        var root = FindRoot();
+        var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
+        var scenarioCard = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeScenarioBentoCard.razor");
+        var scenarioHost = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioHost.razor");
+
+        Assert.Contains("IThemeScenarioRegistry", bento, StringComparison.Ordinal);
+        Assert.Contains("GroupBy(scenario => scenario.ComponentSlug", bento, StringComparison.Ordinal);
+        Assert.Contains("<ThemeScenarioBentoCard", bento, StringComparison.Ordinal);
+        Assert.Contains("@foreach (var scenario in Scenarios)", scenarioCard, StringComparison.Ordinal);
+        Assert.Contains("<ThemeScenarioHost", scenarioCard, StringComparison.Ordinal);
+        Assert.Contains("AutoFocus=\"false\"", scenarioCard, StringComparison.Ordinal);
+        Assert.Contains("[Parameter] public bool AutoFocus", scenarioHost, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -38,6 +58,7 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.Contains("theme-device-choice--{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.Contains("preview-animation-pause", inspector, StringComparison.Ordinal);
+        Assert.Contains("resetInitialPreviewScroll", page, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -80,6 +101,11 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("<ShadcnAvatarImage", card, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageGroup", card, StringComparison.Ordinal);
         Assert.Contains("<ShadcnBubble", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerProvider", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerViewport", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScrollerItem", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarker", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnQuestionnaire", card, StringComparison.Ordinal);
         Assert.Contains("Class=\"theme-runway-dropzone\"", card, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
@@ -97,11 +123,16 @@ public sealed class ThemeBentoContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains("class=\"theme-runway-typing-character\"", card, StringComparison.Ordinal);
-        Assert.Contains("--typing-index: @index", card, StringComparison.Ordinal);
+        Assert.Contains("TypingDelay(index)", card, StringComparison.Ordinal);
         Assert.Contains("<span class=\"shadcn-sr-only\">@AssistantMessage</span>", card, StringComparison.Ordinal);
         Assert.Contains("class=\"theme-runway-typing\" aria-hidden=\"true\"", card, StringComparison.Ordinal);
         Assert.Contains("animation: theme-runway-type-character", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes theme-runway-type-character", css, StringComparison.Ordinal);
+        Assert.Contains("forwards", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-runway-type-character var(--typing-cycle) steps(1, end) infinite", css, StringComparison.Ordinal);
+        Assert.Contains("@bind-Value=\"_composerText\"", card, StringComparison.Ordinal);
+        Assert.Contains("SendConversationMessage", card, StringComparison.Ordinal);
+        Assert.Contains("AssistantResponses", card, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-runway-typing-reveal", css, StringComparison.Ordinal);
         Assert.DoesNotContain(".theme-runway-typing { display: inline-block; max-inline-size: 100%; clip-path", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-character { animation: none !important; opacity: 1;", css, StringComparison.Ordinal);

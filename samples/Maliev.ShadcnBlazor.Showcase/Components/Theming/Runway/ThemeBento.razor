@@ -1,6 +1,8 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 @inject IThemeUseCaseRegistry Registry
+@inject IThemeScenarioRegistry ScenarioRegistry
 @inject ThemeRunwayState AnimationState
 @implements IDisposable
 
@@ -16,6 +18,15 @@
                                   Definition="card"
                                   Frame="AnimationState.Frame"
                                   Locale="Locale" />
+        }
+        @foreach (var componentScenarios in ScenarioRegistry.All
+            .GroupBy(scenario => scenario.ComponentSlug, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            <ThemeScenarioBentoCard @key="componentScenarios.Key"
+                                    ComponentSlug="@componentScenarios.Key"
+                                    Scenarios="@componentScenarios.OrderBy(scenario => scenario.Kind).ToArray()"
+                                    Locale="Locale" />
         }
     </div>
 </section>

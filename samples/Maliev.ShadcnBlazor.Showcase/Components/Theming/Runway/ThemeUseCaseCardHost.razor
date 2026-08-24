@@ -67,17 +67,62 @@
             break;
         case "assistant-conversation":
             <div class="theme-runway-chat" aria-label="Assistant conversation preview">
-                <ShadcnMessageGroup>
-                    <ShadcnMessage Align="ShadcnLogicalAlign.End">
-                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnBubble Align="ShadcnLogicalAlign.End"><ShadcnBubbleContent>ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย</ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
-                    </ShadcnMessage>
-                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
-                        <ShadcnMessageAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" /><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar></ShadcnMessageAvatar>
-                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader><ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted"><ShadcnBubbleContent><span class="shadcn-sr-only">@AssistantMessage</span><span class="theme-runway-typing" aria-hidden="true">@for (var index = 0; index < AssistantMessageSegments.Length; index++) {<span class="theme-runway-typing-character" style="--typing-index: @index;">@AssistantMessageSegments[index]</span>}</span></ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
-                    </ShadcnMessage>
-                </ShadcnMessageGroup>
-                <div class="theme-runway-composer"><ShadcnInput TValue="string" Placeholder="Ask about this work order" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message"><ShadcnIcon Icon="@SendIcon" Size="16" /></ShadcnButton></div>
+                <ShadcnMessageScrollerProvider AutoScroll="true" DefaultScrollPosition="ShadcnMessageDefaultScrollPosition.End">
+                    <ShadcnMessageScroller>
+                        <ShadcnMessageScrollerViewport AccessibleName="Assistant conversation messages">
+                            <ShadcnMessageScrollerContent>
+                                <ShadcnMarker Variant="ShadcnMarkerVariant.Separator"><ShadcnMarkerContent>Today · WO-2418</ShadcnMarkerContent></ShadcnMarker>
+                                <ShadcnMessageGroup>
+                                    @foreach (var turn in _conversationTurns)
+                                    {
+                                        var segments = SplitTextElements(turn.Text);
+                                        <ShadcnMessageScrollerItem @key="turn.Id" MessageId="@turn.Id" ScrollAnchor="@(turn.Id == _conversationTurns[^1].Id)">
+                                            <ShadcnMessage Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)">
+                                                @if (turn.Assistant)
+                                                {
+                                                    <ShadcnMessageAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" /><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar></ShadcnMessageAvatar>
+                                                }
+                                                <ShadcnMessageContent><ShadcnMessageBody>
+                                                    @if (turn.Assistant) { <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader> }
+                                                    <ShadcnBubble Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)" Variant="ShadcnBubbleVariant.Ghost"><ShadcnBubbleContent>
+                                                        @if (turn.Assistant && turn.Id == _conversationTurns[^1].Id)
+                                                        {
+                                                            <span class="shadcn-sr-only">@AssistantMessage</span><span class="theme-runway-typing" aria-hidden="true">@for (var index = 0; index < segments.Length; index++) {<span class="theme-runway-typing-character" style="@TypingDelay(index)">@segments[index]</span>}</span>
+                                                        }
+                                                        else { @turn.Text }
+                                                    </ShadcnBubbleContent></ShadcnBubble>
+                                                </ShadcnMessageBody></ShadcnMessageContent>
+                                            </ShadcnMessage>
+                                        </ShadcnMessageScrollerItem>
+                                    }
+                                </ShadcnMessageGroup>
+                            </ShadcnMessageScrollerContent>
+                        </ShadcnMessageScrollerViewport>
+                    </ShadcnMessageScroller>
+                </ShadcnMessageScrollerProvider>
+                <div class="theme-runway-composer"><ShadcnInput TValue="string" @bind-Value="_composerText" Placeholder="Ask about this work order" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" @onclick="SendConversationMessage"><ShadcnIcon Icon="@SendIcon" Size="16" /></ShadcnButton></div>
             </div>
+            break;
+        case "project-questionnaire":
+            <ShadcnQuestionnaire Items="QuestionnaireItems" DefaultItem="scope" Shortcuts="ShadcnQuestionnaireShortcutMode.Numbers" AccessibleName="Production review questionnaire">
+                <ShadcnQuestionnaireProgress AccessibleName="Questionnaire progress" />
+                <ShadcnQuestionnaireItem Name="scope">
+                    <ShadcnQuestionnaireTitle>Choose the review scope</ShadcnQuestionnaireTitle>
+                    <ShadcnQuestionnaireDescription>Select the team that should inspect WO-2418.</ShadcnQuestionnaireDescription>
+                    <ShadcnQuestionnaireChoices>
+                        <ShadcnQuestionnaireChoice Value="machining">Machining<ShadcnQuestionnaireChoiceDescription>Toolpath and surface finish</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
+                        <ShadcnQuestionnaireChoice Value="quality">Quality<ShadcnQuestionnaireChoiceDescription>Dimensions and inspection evidence</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
+                    </ShadcnQuestionnaireChoices>
+                    <ShadcnQuestionnaireError />
+                </ShadcnQuestionnaireItem>
+                <ShadcnQuestionnaireItem Name="notes">
+                    <ShadcnQuestionnaireTitle>Add inspection notes</ShadcnQuestionnaireTitle>
+                    <ShadcnQuestionnaireDescription>Include the customer-specific acceptance criteria.</ShadcnQuestionnaireDescription>
+                    <ShadcnQuestionnaireInput AccessibleName="Inspection notes" />
+                    <ShadcnQuestionnaireError />
+                </ShadcnQuestionnaireItem>
+                <ShadcnQuestionnaireActions><ShadcnQuestionnairePrevious>Back</ShadcnQuestionnairePrevious><ShadcnQuestionnaireSkip>Skip</ShadcnQuestionnaireSkip><ShadcnQuestionnaireNext>Next</ShadcnQuestionnaireNext><ShadcnQuestionnaireSubmit>Submit review</ShadcnQuestionnaireSubmit></ShadcnQuestionnaireActions>
+            </ShadcnQuestionnaire>
             break;
         case "issue-report":
             <ShadcnAlert Variant="@(Frame.FormStep == 3 ? ShadcnAlertVariant.Destructive : ShadcnAlertVariant.Default)"><ShadcnAlertTitle>@(Frame.FormStep == 3 ? "Drawing revision required" : "Report a production issue")</ShadcnAlertTitle><ShadcnAlertDescription>Quality receives the machine, work order, and validation context.</ShadcnAlertDescription></ShadcnAlert>
@@ -186,11 +231,29 @@
     private string _contactName = "Narin S.";
     private string _contactPhone = "+66 81 555 2418";
     private bool _reviewerHoverOpen;
+    private string _composerText = string.Empty;
+    private int _conversationSequence = 2;
     private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
     private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
-    private const string AssistantMessage = "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย";
-    private static readonly string[] AssistantMessageSegments = SplitTextElements(AssistantMessage);
+    private sealed record ConversationTurn(string Id, string Text, bool Assistant);
+    private readonly List<ConversationTurn> _conversationTurns =
+    [
+        new("conversation-user-1", "ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย", false),
+        new("conversation-assistant-2", "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย", true)
+    ];
+    private static readonly string[] AssistantResponses =
+    [
+        "WO-2418 ผ่านงานกัดแล้ว ทีมคุณภาพกำลังตรวจมิติขั้นสุดท้าย และยังพร้อมส่งวันศุกร์เวลา 16:00 น.",
+        "ฉันตรวจสอบคิวแล้ว งานนี้ไม่มีรายการค้างจากฝ่ายผลิต เหลือเพียงอนุมัติรายงานตรวจสอบก่อนจัดส่ง",
+        "สถานะล่าสุดคือพร้อมส่งมอบ กรุณายืนยันผู้รับและจุดส่งที่บางนาเพื่อให้ทีมโลจิสติกส์ดำเนินการต่อ"
+    ];
+    private string AssistantMessage => _conversationTurns.Last(turn => turn.Assistant).Text;
+    private static readonly ShadcnQuestionnaireItemDefinition[] QuestionnaireItems =
+    [
+        new("scope", Required: true, Choices: [new("machining"), new("quality")]),
+        new("notes", AllowsFreeform: true)
+    ];
     private const string ShiftValue = "Night · Cell A3";
     private const string FactoryValue = "MALIEV · Samut Prakan";
     private const string DockValue = "B-04";
@@ -203,6 +266,16 @@
         var enumerator = StringInfo.GetTextElementEnumerator(value);
         while (enumerator.MoveNext()) elements.Add(enumerator.GetTextElement());
         return [.. elements];
+    }
+    private static string TypingDelay(int index) => $"--typing-delay: {index * 32}ms";
+    private void SendConversationMessage()
+    {
+        var message = _composerText.Trim();
+        if (message.Length == 0) return;
+        _conversationTurns.Add(new($"conversation-user-{++_conversationSequence}", message, false));
+        var response = AssistantResponses[Random.Shared.Next(AssistantResponses.Length)];
+        _conversationTurns.Add(new($"conversation-assistant-{++_conversationSequence}", response, true));
+        _composerText = string.Empty;
     }
     private static readonly (string Label, string Description, bool Enabled)[] AlertOptions =
     [
