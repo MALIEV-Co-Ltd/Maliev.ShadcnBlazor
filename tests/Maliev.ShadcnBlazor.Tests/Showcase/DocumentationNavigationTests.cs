@@ -236,6 +236,23 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("text-direction-rtl", directionIcon.GetAttribute("data-icon"));
     }
 
+    [Fact]
+    public void ThemeStudioMobileActionsUseDistinctLibraryIcons()
+    {
+        var cut = Render<DocumentationHeader>(parameters => parameters
+            .Add(component => component.State, new DocumentationNavigationState())
+            .Add(component => component.StudioMode, true));
+
+        var catalogIcon = cut.Find("[data-testid='catalog-trigger'] [data-slot='icon']");
+        var settingsIcon = cut.Find("[data-testid='theme-controls-toggle'] [data-slot='icon']");
+
+        Assert.Equal("lucide", catalogIcon.GetAttribute("data-library"));
+        Assert.Equal("layout-grid", catalogIcon.GetAttribute("data-icon"));
+        Assert.Equal("lucide", settingsIcon.GetAttribute("data-library"));
+        Assert.Equal("sliders-horizontal", settingsIcon.GetAttribute("data-icon"));
+        Assert.NotEqual(catalogIcon.OuterHtml, settingsIcon.OuterHtml);
+    }
+
     private IRenderedComponent<DocumentationLayout> RenderDocumentationLayout() => Render<DocumentationLayout>(parameters => parameters
         .Add(x => x.Body, (RenderFragment)(builder => builder.AddContent(0, "Documentation body"))));
 
