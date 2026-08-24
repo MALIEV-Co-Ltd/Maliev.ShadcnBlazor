@@ -25,6 +25,7 @@ The configured font family is applied to both MudBlazor typography and the scope
 <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-layout.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-forms.css" rel="stylesheet" />
@@ -58,6 +59,7 @@ Do not also render `MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`
 ## Semantic foundations
 
 The first reusable component family includes `ShadcnDirectionProvider`, `ShadcnAspectRatio`,
+`ShadcnBentoGrid`, `ShadcnBentoItem`,
 `ShadcnTypeset`, `ShadcnTypography`, `ShadcnLabel`, the complete `ShadcnField*` composition,
 the complete `ShadcnItem*` composition, `ShadcnKbd`, `ShadcnKbdGroup`, `ShadcnSeparator`, and
 the complete `ShadcnEmpty*` composition. `ShadcnCodeBlock` provides a copyable, syntax-colored

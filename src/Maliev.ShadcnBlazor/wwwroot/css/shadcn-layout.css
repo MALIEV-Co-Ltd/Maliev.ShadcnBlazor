@@ -1,0 +1,58 @@
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid {
+    container: shadcn-bento / inline-size;
+    min-inline-size: 0;
+    inline-size: 100%;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--shadcn-bento-gap, calc(1rem * var(--shadcn-spacing-multiplier)));
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item {
+    min-inline-size: 0;
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+@container shadcn-bento (min-width: 40rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid__layout {
+        grid-template-columns: repeat(var(--shadcn-bento-medium-columns), minmax(0, 1fr));
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-medium-columns="2"] .shadcn-bento-item[data-column-span="2"],
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-medium-columns="2"] .shadcn-bento-item[data-column-span="3"],
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-medium-columns="2"] .shadcn-bento-item[data-column-span="4"] {
+        grid-column: 1 / -1;
+    }
+}
+
+@container shadcn-bento (min-width: 72rem) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid__layout {
+        grid-template-columns: repeat(var(--shadcn-bento-columns), minmax(0, 1fr));
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-column-span="2"] {
+        grid-column: span 2;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="3"] .shadcn-bento-item[data-column-span="3"],
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="3"] .shadcn-bento-item[data-column-span="4"],
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="4"] .shadcn-bento-item[data-column-span="4"] {
+        grid-column: 1 / -1;
+    }
+
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="4"] .shadcn-bento-item[data-column-span="3"] {
+        grid-column: span 3;
+    }
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-row-span="2"] { grid-row: span 2; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-row-span="3"] { grid-row: span 3; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-row-span="4"] { grid-row: span 4; }
+
+@media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item { forced-color-adjust: auto; }
+}

@@ -1,0 +1,34 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-bento-item")"
+     data-slot="bento-item"
+     data-column-span="@ColumnSpan"
+     data-row-span="@RowSpan">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>Gets or sets the maximum number of columns occupied by the item.</summary>
+    [Parameter]
+    public int ColumnSpan { get; set; } = 1;
+
+    /// <summary>Gets or sets the maximum number of rows occupied by the item.</summary>
+    [Parameter]
+    public int RowSpan { get; set; } = 1;
+
+    /// <summary>Gets or sets the content rendered inside the item.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes =>
+        AttributesExcept("data-slot", "data-column-span", "data-row-span");
+
+    protected override void OnParametersSet()
+    {
+        if (ColumnSpan is < 1 or > 4)
+            throw new ArgumentOutOfRangeException(nameof(ColumnSpan), ColumnSpan, "Bento column span must be between one and four.");
+        if (RowSpan is < 1 or > 4)
+            throw new ArgumentOutOfRangeException(nameof(RowSpan), RowSpan, "Bento row span must be between one and four.");
+    }
+}

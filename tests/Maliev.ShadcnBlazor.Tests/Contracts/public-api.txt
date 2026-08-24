@@ -901,6 +901,15 @@ type Maliev.ShadcnBlazor.Components.Layout.IShadcnResizableStateStore
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio
   RenderFragment ChildContent
   Double Ratio
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid
+  RenderFragment ChildContent
+  Int32 Columns
+  String Gap
+  Int32 MediumColumns
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem
+  RenderFragment ChildContent
+  Int32 ColumnSpan
+  Int32 RowSpan
 enum Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableDirection: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableGroup
   RenderFragment ChildContent
