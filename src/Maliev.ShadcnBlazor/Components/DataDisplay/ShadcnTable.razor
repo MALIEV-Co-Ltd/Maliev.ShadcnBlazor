@@ -1,5 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div class="shadcn-table-container" data-slot="table-container">
+<div class="shadcn-table-container" data-slot="table-container" tabindex="0">
     <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table" data-borders="@(Borders ? "true" : "false")" data-expected-columns="@ExpectedColumnCount"><CascadingValue Value="TableContext" IsFixed="true"><CascadingValue Name="ShadcnTableExpectedColumnCount" Value="ExpectedColumnCount">@ChildContent</CascadingValue></CascadingValue></table>
 </div>
 @code {

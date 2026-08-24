@@ -17,8 +17,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var bento = page.GetByTestId("theme-bento");
         var cards = bento.Locator("[data-use-case-id]");
         await Assertions.Expect(bento).ToBeVisibleAsync();
-        Assert.Equal(20, await cards.CountAsync());
-        Assert.Equal(20, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(26, await cards.CountAsync());
+        Assert.Equal(26, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(66, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
@@ -117,7 +117,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         await page.Locator("[data-use-case-id='quotation-actions']").GetByText("Actions", new() { Exact = true }).ClickAsync();
-        await Assertions.Expect(page.GetByText("Open details", new() { Exact = true })).ToBeVisibleAsync();
+        var menuItem = page.GetByText("Open details", new() { Exact = true });
+        await Assertions.Expect(menuItem).ToBeVisibleAsync();
+        var menuBackground = await menuItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        await menuItem.HoverAsync();
+        Assert.NotEqual(menuBackground, await menuItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
         await page.Keyboard.PressAsync("Escape");
         await page.Locator("[data-use-case-id='contact-dialog']").GetByText("Edit contact", new() { Exact = true }).ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Dialog).GetByText("Production contact", new() { Exact = true })).ToBeVisibleAsync();
@@ -125,6 +129,15 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.Locator("[data-use-case-id='file-context'] .theme-bento-context-target").ClickAsync(new() { Button = MouseButton.Right });
         await Assertions.Expect(page.GetByText("Open drawing", new() { Exact = true })).ToBeVisibleAsync();
         await page.Keyboard.PressAsync("Escape");
+        await page.Locator("[data-use-case-id='dispatch-drawer']").GetByText("Review dispatch", new() { Exact = true }).ClickAsync();
+        var drawer = page.Locator("[data-slot='drawer-content']");
+        var drawerBox = await drawer.BoundingBoxAsync();
+        Assert.NotNull(drawerBox);
+        Assert.InRange(drawerBox!.Width, 638, 642);
+        Assert.InRange(Math.Abs(drawerBox.X - (1440 - drawerBox.Width) / 2), 0, 1);
+        Assert.Equal("row", await drawer.Locator("[data-slot='drawer-footer']").EvaluateAsync<string>("element => getComputedStyle(element).flexDirection"));
+        Assert.Equal(new[] { "Cancel", "Confirm dispatch" }, await drawer.Locator("[data-slot='drawer-footer'] button").AllTextContentsAsync());
+        await drawer.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true }).ClickAsync();
         await Assertions.Expect(page.Locator("[data-use-case-id='reviewer-details']").GetByText("Kanda T.", new() { Exact = true })).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator("[data-use-case-id='tooltip-guidance']").GetByText("Surface finish", new() { Exact = true })).ToBeEnabledAsync();
     }
@@ -155,7 +168,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(20, await page.Locator(".theme-bento__grid > [data-use-case-id]").CountAsync());
+        Assert.Equal(26, await page.Locator(".theme-bento__grid > [data-use-case-id]").CountAsync());
         Assert.Equal(66, await page.Locator(".theme-bento__grid > [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));

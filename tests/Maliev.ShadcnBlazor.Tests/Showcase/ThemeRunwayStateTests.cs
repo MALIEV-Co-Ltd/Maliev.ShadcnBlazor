@@ -8,10 +8,10 @@ public sealed class ThemePreviewAnimationStateTests
     public void RegistryHasOrderedBilingualRealisticBentoCardsIncludingOverlays()
     {
         var cards = new ThemeUseCaseRegistry().All;
-        Assert.Equal(20, cards.Count);
-        Assert.Equal(Enumerable.Range(1, 20), cards.Select(card => card.Order));
+        Assert.Equal(26, cards.Count);
+        Assert.Equal(Enumerable.Range(1, 26), cards.Select(card => card.Order));
         Assert.Contains(cards, card => card.Size == ThemeBentoSize.Wide);
-        Assert.Equal(20, cards.Select(card => card.Id).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(26, cards.Select(card => card.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.All(cards, card =>
         {
             Assert.NotEqual(card.EnglishTitle, card.ThaiTitle);

@@ -78,6 +78,41 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
+    public void CuratedDeckNamesTheMissingDataConversationAndFeedbackWorkflows()
+    {
+        var root = FindRoot();
+        var registry = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Theming", "Runway", "ThemeUseCaseRegistry.cs");
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+
+        foreach (var id in new[] { "production-analytics", "drawing-attachment", "inspection-table", "quotation-data-table", "quality-alert", "conversation-marker", "assistant-conversation", "project-questionnaire" })
+            Assert.Contains($"\"{id}\"", registry, StringComparison.Ordinal);
+
+        Assert.Contains("<ShadcnChart", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachment", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTable", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDataTable", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAlert", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarker", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMessageScroller", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnQuestionnaire", card, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ThemeOverlaysHaveResponsiveDrawerGeometryAndPointerHoverFeedback()
+    {
+        var css = Read(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css");
+
+        Assert.Contains("@media (min-width: 40.001rem)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-drawer-content[data-swipe-axis=\"y\"]", css, StringComparison.Ordinal);
+        Assert.Contains("inline-size: min(40rem, calc(100vw - 2rem))", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-drawer-content[data-swipe-axis=\"y\"] .shadcn-drawer-footer", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-dropdown-menu-item:hover", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-dropdown-menu-checkbox-item:hover", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-dropdown-menu-radio-item:hover", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-dropdown-menu-sub-trigger:hover", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void CuratedRunwayDoesNotExposeTheInternalScenarioQaMatrix()
     {
         var root = FindRoot();

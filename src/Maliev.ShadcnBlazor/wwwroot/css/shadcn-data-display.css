@@ -5,6 +5,7 @@
     overscroll-behavior-inline: contain;
     scrollbar-color: color-mix(in oklch, var(--shadcn-muted-foreground) 35%, transparent) transparent;
 }
+.shadcn-table-container:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
 
 .shadcn-table {
     width: 100%;
