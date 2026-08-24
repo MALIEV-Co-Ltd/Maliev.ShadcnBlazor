@@ -71,6 +71,23 @@
       "deviations": []
     },
     {
+      "name": "Bento Grid",
+      "slug": "bento-grid",
+      "plan": 6,
+      "classification": "custom",
+      "status": "complete",
+      "evidence": {
+        "api": true,
+        "componentTests": true,
+        "accessibility": true,
+        "interaction": true,
+        "computedStyle": true,
+        "visual": true,
+        "integration": true
+      },
+      "deviations": []
+    },
+    {
       "name": "Attachment",
       "slug": "attachment",
       "plan": 9,

@@ -8843,3 +8843,24 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 @media (forced-colors: active) {
     .theme-use-case-card { border-color: CanvasText; }
 }
+.showcase-bento-example {
+    inline-size: min(100%, 64rem);
+    margin-inline: auto;
+}
+
+.showcase-bento-example__card {
+    display: grid;
+    align-content: start;
+    gap: .375rem;
+    min-block-size: 8rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-card);
+    color: var(--shadcn-card-foreground);
+    padding: 1rem;
+}
+
+.showcase-bento-example__card > span {
+    color: var(--shadcn-muted-foreground);
+    font-size: .875rem;
+}

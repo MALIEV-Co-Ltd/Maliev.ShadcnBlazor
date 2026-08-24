@@ -88,7 +88,7 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("Build accessible Blazor interfaces with shadcn primitives", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Interactive, typed, and themeable", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal(66, cut.FindAll(".documentation-catalog-card").Count);
+        Assert.Equal(67, cut.FindAll(".documentation-catalog-card").Count);
         Assert.Contains(cut.FindAll(".documentation-landing__actions a"), link => link.GetAttribute("href") == "theme");
     }
 

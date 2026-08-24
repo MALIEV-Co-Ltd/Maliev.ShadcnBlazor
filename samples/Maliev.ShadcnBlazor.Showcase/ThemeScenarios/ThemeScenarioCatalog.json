@@ -3809,6 +3809,51 @@
       ]
     },
     {
+      "id": "bento-grid-default",
+      "componentSlug": "bento-grid",
+      "family": "DisclosureNavigation",
+      "kind": "Default",
+      "english": {
+        "title": "Production command center",
+        "description": "Arrange capacity, quality, delivery, and staffing signals in a responsive production overview."
+      },
+      "thai": {
+        "title": "ศูนย์ควบคุมการผลิต",
+        "description": "จัดวางข้อมูลกำลังการผลิต คุณภาพ การส่งมอบ และบุคลากรในภาพรวมที่ตอบสนองต่อขนาดพื้นที่"
+      },
+      "tags": ["workflow", "production", "bento-grid"]
+    },
+    {
+      "id": "bento-grid-stress",
+      "componentSlug": "bento-grid",
+      "family": "DisclosureNavigation",
+      "kind": "Stress",
+      "english": {
+        "title": "Dense production operations board",
+        "description": "Keep mixed-span operational cards readable when labels, alerts, and production metrics become dense."
+      },
+      "thai": {
+        "title": "กระดานปฏิบัติการโรงงานแบบหนาแน่น",
+        "description": "รักษาความอ่านง่ายของการ์ดหลายขนาดเมื่อมีป้ายแจ้งเตือนและตัวชี้วัดการผลิตจำนวนมาก"
+      },
+      "tags": ["stress", "dense", "responsive", "bento-grid"]
+    },
+    {
+      "id": "bento-grid-accessible",
+      "componentSlug": "bento-grid",
+      "family": "DisclosureNavigation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Source-order-safe operations board",
+        "description": "Navigate a responsive operations board whose visual spans preserve logical reading and keyboard order."
+      },
+      "thai": {
+        "title": "กระดานปฏิบัติการที่คงลำดับการอ่าน",
+        "description": "นำทางกระดานที่ตอบสนองต่อพื้นที่โดยยังคงลำดับการอ่านและแป้นพิมพ์ตามโครงสร้างเนื้อหา"
+      },
+      "tags": ["accessible", "keyboard", "source-order", "bento-grid"]
+    },
+    {
       "id": "typography-default",
       "componentSlug": "typography",
       "family": "SemanticFoundation",

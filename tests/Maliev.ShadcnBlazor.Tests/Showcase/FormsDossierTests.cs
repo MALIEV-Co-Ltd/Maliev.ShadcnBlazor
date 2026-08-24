@@ -59,7 +59,7 @@ public sealed class FormsDossierTests : BunitContext
             Assert.True(entry.Evidence.Visual);
         }
 
-        Assert.Equal(66, documentation.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(67, documentation.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(documentation.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
     }
 

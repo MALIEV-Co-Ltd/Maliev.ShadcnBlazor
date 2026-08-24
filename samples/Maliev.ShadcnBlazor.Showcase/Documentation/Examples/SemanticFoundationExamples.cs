@@ -18,6 +18,7 @@ internal static class SemanticFoundationExamples
     {
         "direction" => [Direction()],
         "aspect-ratio" => [AspectRatio()],
+        "bento-grid" => BentoGrid(),
         "code-block" => CodeBlock(),
         "typography" => [Typography()],
         "label" => [Label()],
@@ -219,6 +220,74 @@ public async Task SaveAsync(CancellationToken cancellationToken)
                 "1:1"
             ]) with
         { RazorSourceProvider = Source };
+    }
+
+    private static IReadOnlyList<ComponentExampleDefinition> BentoGrid()
+    {
+        return
+        [
+            BentoExample(
+                "bento-grid-featured",
+                "Production overview",
+                "Give the primary production summary two tracks while supporting work stays compact.",
+                4,
+                2,
+                [("Capacity plan", 2, 1), ("Quality holds", 1, 1), ("Dispatch queue", 1, 1), ("Machine status", 1, 1)]),
+            BentoExample(
+                "bento-grid-mixed",
+                "Mixed operational spans",
+                "Combine standard, wide, and tall regions without changing their source order.",
+                4,
+                2,
+                [("Inspection results", 2, 1), ("Reviewer activity", 1, 2), ("Revision notes", 1, 1), ("Release checklist", 2, 1)]),
+            BentoExample(
+                "bento-grid-reflow",
+                "Narrow container reflow",
+                "Let a two-track handoff layout collapse safely when its container becomes narrow.",
+                2,
+                1,
+                [("Delivery address", 2, 1), ("Carrier", 1, 1), ("Collection window", 1, 1)])
+        ];
+    }
+
+    private static ComponentExampleDefinition BentoExample(
+        string id,
+        string title,
+        string description,
+        int columns,
+        int mediumColumns,
+        IReadOnlyList<(string Title, int ColumnSpan, int RowSpan)> items)
+    {
+        RenderFragment preview = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-bento-example");
+            builder.OpenComponent<ShadcnBentoGrid>(2);
+            builder.AddAttribute(3, nameof(ShadcnBentoGrid.Columns), columns);
+            builder.AddAttribute(4, nameof(ShadcnBentoGrid.MediumColumns), mediumColumns);
+            builder.AddAttribute(5, nameof(ShadcnBentoGrid.ChildContent), (RenderFragment)(content =>
+            {
+                var sequence = 0;
+                foreach (var item in items)
+                {
+                    content.OpenComponent<ShadcnBentoItem>(sequence++);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.ColumnSpan), item.ColumnSpan);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.RowSpan), item.RowSpan);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.ChildContent), BentoExampleCard(item.Title));
+                    content.CloseComponent();
+                }
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        };
+        var itemSource = string.Join(Environment.NewLine, items.Select(item =>
+            $"    <ShadcnBentoItem ColumnSpan=\"{item.ColumnSpan}\" RowSpan=\"{item.RowSpan}\"><article>{item.Title}</article></ShadcnBentoItem>"));
+        var source = $"""
+<ShadcnBentoGrid Columns="{columns}" MediumColumns="{mediumColumns}">
+{itemSource}
+</ShadcnBentoGrid>
+""";
+        return new(id, title, description, source, preview, [], ["responsive", "container-query", "spans", "source-order"]);
     }
 
     private static ComponentExampleDefinition Typography()
@@ -744,6 +813,19 @@ public async Task SaveAsync(CancellationToken cancellationToken)
         new($"{slug}-primary", title, description, source, preview, controls, stateTags);
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private static RenderFragment BentoExampleCard(string title) => builder =>
+    {
+        builder.OpenElement(0, "article");
+        builder.AddAttribute(1, "class", "showcase-bento-example__card");
+        builder.OpenElement(2, "strong");
+        builder.AddContent(3, title);
+        builder.CloseElement();
+        builder.OpenElement(4, "span");
+        builder.AddContent(5, "Live package layout item");
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 
     private static RenderFragment DirectionContent(bool isRightToLeft) => builder =>
     {
