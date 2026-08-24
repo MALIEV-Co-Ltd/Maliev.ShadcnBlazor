@@ -130,17 +130,11 @@
   .shadcn-card,
   .shadcn-alert,
   .shadcn-calendar,
-  .shadcn-questionnaire,
   .shadcn-sidebar,
-  .shadcn-message-scroller,
-  .shadcn-bubble,
-  .shadcn-table-container,
-  .shadcn-data-table,
   [data-slot="card"],
   [data-slot="alert"],
   [data-slot="empty"],
-  [data-slot="command"],
-  [data-slot="questionnaire"]
+  [data-slot="command"]
 ) {
   border-color: var(--shadcn-style-border, var(--shadcn-border));
   border-width: var(--shadcn-style-border-width, 1px);

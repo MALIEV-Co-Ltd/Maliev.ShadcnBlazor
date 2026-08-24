@@ -90,6 +90,65 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ComplexCuratedWorkflowsReceiveWideSpansWithoutNestedFrames()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        foreach (var id in new[] { "drawing-attachment", "quality-alert", "project-questionnaire" })
+            Assert.Equal("2", await page.Locator($"[data-use-case-item='{id}']").GetAttributeAsync("data-column-span"));
+
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+        await Assertions.Expect(questionnaire.GetByText("Interactive questionnaire", new() { Exact = true })).ToHaveCountAsync(0);
+        Assert.Equal("0px", await questionnaire.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.Equal("0px", await questionnaire.Locator("form[data-slot='questionnaire']").EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.Equal("1px", await questionnaire.Locator("[data-slot='questionnaire-choice']").First.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+
+        var dataTableFrame = page.Locator("[data-use-case-id='quotation-data-table'] .shadcn-data-table-frame");
+        Assert.Equal("0px", await dataTableFrame.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+    }
+
+    [Fact]
+    public async Task CuratedWorkflowActionsExposeVisibleStateAndReviewerExpansion()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        var shipping = page.Locator("[data-use-case-id='shipping-handoff']");
+        await shipping.GetByRole(AriaRole.Button, new() { Name = "Confirm address", Exact = true }).ClickAsync();
+        await Assertions.Expect(shipping.GetByRole(AriaRole.Status)).ToContainTextAsync("Handoff saved");
+
+        var deposit = page.Locator("[data-use-case-id='deposit-approval']");
+        await deposit.GetByRole(AriaRole.Button, new() { Name = "Approve deposit", Exact = true }).ClickAsync();
+        await Assertions.Expect(deposit.GetByRole(AriaRole.Status)).ToContainTextAsync("Deposit approved");
+
+        var dispatch = page.Locator("[data-use-case-id='dispatch-confirmation']");
+        await dispatch.GetByRole(AriaRole.Button, new() { Name = "Confirm dispatch", Exact = true }).ClickAsync();
+        await Assertions.Expect(dispatch.GetByRole(AriaRole.Status)).ToContainTextAsync("Dispatch confirmed");
+
+        var reviewers = page.Locator("[data-use-case-id='assigned-reviewers']");
+        var count = reviewers.GetByRole(AriaRole.Button, new() { Name = "Show four more reviewers", Exact = true });
+        await count.ClickAsync();
+        await Assertions.Expect(count).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(reviewers.Locator("[data-slot='avatar']")).ToHaveCountAsync(7);
+    }
+
+    [Fact]
+    public async Task AnimatedIssueFieldsAndSidebarTypographyControlsRemainReadable()
+    {
+        await using var context = await NewContextAsync(1569, 1032);
+        var page = await OpenAsync(context);
+
+        var issue = page.Locator("[data-use-case-id='issue-report']");
+        await Assertions.Expect(issue.Locator("[data-animated-input]")).ToHaveCountAsync(1);
+        await Assertions.Expect(issue.Locator("[data-animated-textarea]")).ToHaveCountAsync(1);
+
+        await OpenAdvancedAsync(page, "theme-advanced-typography");
+        var weight = page.GetByTestId("theme-role-body-weight");
+        Assert.True((await weight.BoundingBoxAsync())!.Width >= 96);
+    }
+
+    [Fact]
     public async Task ConversationAcceptsUserMessagesAndRevealsEachAssistantReplyForwardOnce()
     {
         await using var context = await NewContextAsync(1440, 900);
