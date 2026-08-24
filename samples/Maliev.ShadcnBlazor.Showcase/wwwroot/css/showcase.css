@@ -8671,6 +8671,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-bento__grid .shadcn-bento-grid__layout { align-items: start; }
 .theme-bento__grid .shadcn-bento-item { min-inline-size: 0; }
 .theme-bento__grid .shadcn-bento-item > .theme-use-case-card { block-size: 100%; }
+.theme-bento__grid[data-layout="masonry"] .shadcn-bento-item > .theme-use-case-card { block-size: auto; }
 .theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="pending"] { opacity: 0; transform: translateY(1rem); }
 .theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] { animation: theme-bento-card-reveal 520ms cubic-bezier(.16, 1, .3, 1) both; }
 .theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] :is(.shadcn-card-header, .shadcn-card-content) { animation: theme-bento-content-reveal 460ms cubic-bezier(.16, 1, .3, 1) both; }
@@ -8686,7 +8687,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     min-inline-size: 0;
     border: 1px solid var(--shadcn-border);
     box-shadow: none;
-    font-size: calc(1rem * var(--shadcn-typography-body-scale));
+    font-size: clamp(.875rem, calc(1rem * var(--shadcn-typography-body-scale)), 1.125rem);
     font-weight: var(--shadcn-typography-body-weight);
     line-height: var(--shadcn-typography-body-line-height);
     letter-spacing: var(--shadcn-typography-body-letter-spacing);
@@ -8714,19 +8715,19 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-dropzone > .shadcn-dropzone-input { opacity: 0 !important; }
 .theme-runway-dropzone[data-state="loading"] { opacity: 1; }
 .theme-use-case-card .shadcn-card-title {
-    font-size: calc(1rem * var(--shadcn-typography-heading-4-to-6-scale));
+    font-size: clamp(1rem, calc(1rem * var(--shadcn-typography-heading-4-to-6-scale)), 1.5rem);
     font-weight: var(--shadcn-typography-heading-4-to-6-weight);
     line-height: var(--shadcn-typography-heading-4-to-6-line-height);
     letter-spacing: var(--shadcn-typography-heading-4-to-6-letter-spacing);
 }
 .theme-use-case-card :where(label, .shadcn-progress-label) {
-    font-size: calc(1rem * var(--shadcn-typography-label-scale));
+    font-size: clamp(.75rem, calc(1rem * var(--shadcn-typography-label-scale)), 1rem);
     font-weight: var(--shadcn-typography-label-weight);
     line-height: var(--shadcn-typography-label-line-height);
     letter-spacing: var(--shadcn-typography-label-letter-spacing);
 }
 .theme-use-case-card .shadcn-button {
-    font-size: calc(1rem * var(--shadcn-typography-button-scale));
+    font-size: clamp(.75rem, calc(1rem * var(--shadcn-typography-button-scale)), 1rem);
     font-weight: var(--shadcn-typography-button-weight);
     line-height: var(--shadcn-typography-button-line-height);
     letter-spacing: var(--shadcn-typography-button-letter-spacing);
@@ -8743,7 +8744,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-profile > :last-child { display: grid; min-inline-size: 0; justify-items: start; gap: .125rem; text-align: start; }
 .theme-runway-profile :where(strong, span, a) { text-align: start; }
 .theme-runway-stat { display: grid; gap: .125rem; }
-.theme-runway-stat strong { font-size: clamp(1.75rem, 5cqi, 3rem); letter-spacing: -.06em; }
+.theme-runway-stat strong { font-size: clamp(1.75rem, 4cqi, 2.5rem); letter-spacing: -.06em; }
 .theme-runway-stat span,
 .theme-runway-profile span,
 .theme-runway-machine span { display: block; color: var(--shadcn-muted-foreground); font-size: .75rem; }

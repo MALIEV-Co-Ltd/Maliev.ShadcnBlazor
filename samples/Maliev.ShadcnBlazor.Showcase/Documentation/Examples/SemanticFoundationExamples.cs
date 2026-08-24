@@ -240,7 +240,8 @@ public async Task SaveAsync(CancellationToken cancellationToken)
                 "Combine standard, wide, and tall regions without changing their source order.",
                 4,
                 2,
-                [("Inspection results", 2, 1), ("Reviewer activity", 1, 2), ("Revision notes", 1, 1), ("Release checklist", 2, 1)]),
+                [("Inspection results", 2, 1), ("Reviewer activity", 1, 2), ("Revision notes", 1, 1), ("Release checklist", 2, 1)],
+                masonry: true),
             BentoExample(
                 "bento-grid-reflow",
                 "Narrow container reflow",
@@ -257,7 +258,8 @@ public async Task SaveAsync(CancellationToken cancellationToken)
         string description,
         int columns,
         int mediumColumns,
-        IReadOnlyList<(string Title, int ColumnSpan, int RowSpan)> items)
+        IReadOnlyList<(string Title, int ColumnSpan, int RowSpan)> items,
+        bool masonry = false)
     {
         RenderFragment preview = builder =>
         {
@@ -266,7 +268,8 @@ public async Task SaveAsync(CancellationToken cancellationToken)
             builder.OpenComponent<ShadcnBentoGrid>(2);
             builder.AddAttribute(3, nameof(ShadcnBentoGrid.Columns), columns);
             builder.AddAttribute(4, nameof(ShadcnBentoGrid.MediumColumns), mediumColumns);
-            builder.AddAttribute(5, nameof(ShadcnBentoGrid.ChildContent), (RenderFragment)(content =>
+            builder.AddAttribute(5, nameof(ShadcnBentoGrid.Masonry), masonry);
+            builder.AddAttribute(6, nameof(ShadcnBentoGrid.ChildContent), (RenderFragment)(content =>
             {
                 var sequence = 0;
                 foreach (var item in items)
@@ -283,12 +286,15 @@ public async Task SaveAsync(CancellationToken cancellationToken)
         };
         var itemSource = string.Join(Environment.NewLine, items.Select(item =>
             $"    <ShadcnBentoItem ColumnSpan=\"{item.ColumnSpan}\" RowSpan=\"{item.RowSpan}\"><article>{item.Title}</article></ShadcnBentoItem>"));
+        var masonryAttribute = masonry ? " Masonry=\"true\"" : string.Empty;
         var source = $"""
-<ShadcnBentoGrid Columns="{columns}" MediumColumns="{mediumColumns}">
+<ShadcnBentoGrid Columns="{columns}" MediumColumns="{mediumColumns}"{masonryAttribute}>
 {itemSource}
 </ShadcnBentoGrid>
 """;
-        return new(id, title, description, source, preview, [], ["responsive", "container-query", "spans", "source-order"]);
+        return new(id, title, description, source, preview, [], masonry
+            ? ["responsive", "container-query", "spans", "source-order", "masonry"]
+            : ["responsive", "container-query", "spans", "source-order"]);
     }
 
     private static ComponentExampleDefinition Typography()

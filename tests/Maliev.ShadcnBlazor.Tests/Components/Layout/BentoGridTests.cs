@@ -35,6 +35,17 @@ public sealed class BentoGridTests : BunitContext
     }
 
     [Fact]
+    public void GridCanOptIntoContentMeasuredMasonryPacking()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<ShadcnBentoGrid>(parameters => parameters
+            .Add(component => component.Masonry, true)
+            .AddChildContent("workflow"));
+
+        Assert.Equal("masonry", cut.Find("[data-slot='bento-grid']").GetAttribute("data-layout"));
+    }
+
+    [Fact]
     public void GridAndItemProtectOwnedAttributesWhileForwardingConsumerAttributes()
     {
         var cut = Render<ShadcnBentoGrid>(parameters => parameters

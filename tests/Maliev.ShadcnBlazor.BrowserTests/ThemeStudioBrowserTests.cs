@@ -48,6 +48,48 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task BentoMasonryClosesShortCardGapsAndKeepsWideContentReadable()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var grid = page.Locator(".theme-bento__grid");
+        var layout = grid.Locator("[data-slot='bento-grid-layout']");
+        await Assertions.Expect(grid).ToHaveAttributeAsync("data-layout", "masonry");
+        await Assertions.Expect(grid).ToHaveAttributeAsync("data-masonry-ready", "true");
+        Assert.Contains("dense", await layout.EvaluateAsync<string>("element => getComputedStyle(element).gridAutoFlow"), StringComparison.Ordinal);
+
+        var capacity = page.Locator("[data-use-case-item='production-capacity']");
+        var capacityBox = await capacity.BoundingBoxAsync();
+        Assert.NotNull(capacityBox);
+        var placement = await capacity.EvaluateAsync<string>(
+            "target => JSON.stringify(Array.from(target.parentElement.children).map(item => { const box = item.getBoundingClientRect(); return { id: item.dataset.useCaseItem, left: box.left, top: box.top, bottom: box.bottom }; }))");
+        var closesGap = await capacity.EvaluateAsync<bool>(
+            "target => Array.from(target.parentElement.children).some(item => { const box = item.getBoundingClientRect(); return item !== target && Math.abs(box.left - target.getBoundingClientRect().left) < 2 && box.top >= target.getBoundingClientRect().bottom && box.top - target.getBoundingClientRect().bottom < 48; })");
+        Assert.True(closesGap, placement);
+
+        var attachment = page.Locator("[data-use-case-item='drawing-attachment']");
+        Assert.Equal("2", await attachment.GetAttributeAsync("data-column-span"));
+        Assert.True((await attachment.BoundingBoxAsync())!.Width > capacityBox!.Width * 1.8);
+        Assert.InRange(await page.Locator("[data-use-case-id='production-capacity'] .theme-runway-stat strong").EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).fontSize)"), 28, 40);
+    }
+
+    [Fact]
+    public async Task ProductionAnalyticsUsesDistinctSemanticSeriesColors()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var chart = page.Locator("[data-use-case-id='production-analytics']");
+        var milling = chart.Locator("rect[data-series='milling']").First;
+        var turning = chart.Locator("rect[data-series='turning']").First;
+        await Assertions.Expect(milling).ToBeVisibleAsync();
+        var millingFill = await milling.EvaluateAsync<string>("element => getComputedStyle(element).fill");
+        var turningFill = await turning.EvaluateAsync<string>("element => getComputedStyle(element).fill");
+        Assert.NotEqual(millingFill, turningFill);
+        Assert.DoesNotContain(millingFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
+        Assert.DoesNotContain(turningFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
+    }
+
+    [Fact]
     public async Task ConversationAcceptsUserMessagesAndRevealsEachAssistantReplyForwardOnce()
     {
         await using var context = await NewContextAsync(1440, 900);

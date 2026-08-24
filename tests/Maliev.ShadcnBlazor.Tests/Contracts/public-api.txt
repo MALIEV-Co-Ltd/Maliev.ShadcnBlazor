@@ -905,6 +905,7 @@ type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid
   RenderFragment ChildContent
   Int32 Columns
   String Gap
+  Boolean Masonry
   Int32 MediumColumns
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem
   RenderFragment ChildContent

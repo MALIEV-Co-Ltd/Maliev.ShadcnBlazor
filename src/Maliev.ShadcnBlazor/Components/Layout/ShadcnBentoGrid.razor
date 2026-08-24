@@ -1,11 +1,15 @@
 @using System.Globalization
 @using System.Text.RegularExpressions
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
 
-<div @attributes="ForwardedAttributes"
+<div @ref="_root"
+     @attributes="ForwardedAttributes"
      class="@MergeClass("shadcn-bento-grid")"
      style="@MergeStyle(FrameworkStyle)"
      data-slot="bento-grid"
+     data-layout="@(Masonry ? "masonry" : "grid")"
      data-columns="@Columns"
      data-medium-columns="@MediumColumns">
     <div class="shadcn-bento-grid__layout" data-slot="bento-grid-layout">
@@ -30,6 +34,10 @@
     [Parameter]
     public string? Gap { get; set; }
 
+    /// <summary>Gets or sets whether item heights are measured so later items densely fill available vertical space.</summary>
+    [Parameter]
+    public bool Masonry { get; set; }
+
     /// <summary>Gets or sets the items rendered by the grid.</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -42,7 +50,11 @@
     }.Where(value => value is not null));
 
     private IReadOnlyDictionary<string, object> ForwardedAttributes =>
-        AttributesExcept("data-slot", "data-columns", "data-medium-columns");
+        AttributesExcept("data-slot", "data-layout", "data-columns", "data-medium-columns", "data-masonry-ready");
+
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _masonryObserver;
 
     protected override void OnParametersSet()
     {
@@ -52,5 +64,39 @@
             throw new ArgumentOutOfRangeException(nameof(MediumColumns), MediumColumns, "Bento intermediate column count must be between one and the maximum column count.");
         if (Gap is not null && !CssLengthPattern.IsMatch(Gap))
             throw new ArgumentException("Bento gap must be a non-negative CSS length.", nameof(Gap));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Masonry && _masonryObserver is null)
+        {
+            _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-bento-grid.js");
+            _masonryObserver = await _module.InvokeAsync<IJSObjectReference>("observeMasonry", _root);
+        }
+        else if (!Masonry && _masonryObserver is not null)
+        {
+            await DetachMasonryAsync();
+        }
+    }
+
+    private async ValueTask DetachMasonryAsync()
+    {
+        if (_masonryObserver is null) return;
+        try
+        {
+            await _masonryObserver.InvokeVoidAsync("dispose");
+            await _masonryObserver.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        _masonryObserver = null;
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await DetachMasonryAsync();
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
     }
 }

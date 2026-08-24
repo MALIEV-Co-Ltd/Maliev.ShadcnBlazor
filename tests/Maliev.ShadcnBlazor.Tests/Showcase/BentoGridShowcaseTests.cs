@@ -19,5 +19,6 @@ public sealed class BentoGridShowcaseTests
             Assert.Contains("<ShadcnBentoGrid", example.RazorSource, StringComparison.Ordinal);
             Assert.Contains("<ShadcnBentoItem", example.RazorSource, StringComparison.Ordinal);
         });
+        Assert.Contains(examples, example => example.RazorSource.Contains("Masonry=\"true\"", StringComparison.Ordinal));
     }
 }

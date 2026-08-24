@@ -313,8 +313,8 @@
     private static readonly string[] ProductionChartCategories = ["W1", "W2", "W3", "W4", "W5", "W6"];
     private static readonly ShadcnChartConfig ProductionChartConfig = new()
     {
-        ["milling"] = new("Milling"),
-        ["turning"] = new("Turning")
+        ["milling"] = new("Milling") { Color = "var(--shadcn-chart-1)" },
+        ["turning"] = new("Turning") { Color = "var(--shadcn-chart-2)" }
     };
     private static readonly ShadcnChartSeries[] ProductionChartSeries =
     [
