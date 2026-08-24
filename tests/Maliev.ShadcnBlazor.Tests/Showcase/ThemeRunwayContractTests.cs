@@ -13,6 +13,8 @@ public sealed class ThemeRunwayContractTests
         Assert.Equal(2, Count(runway, "data-runway-track="));
         Assert.Contains("aria-hidden=\"true\" inert", runway, StringComparison.Ordinal);
         Assert.Contains("theme-runway__mobile", runway, StringComparison.Ordinal);
+        Assert.Contains("ScenarioRegistry.All", runway, StringComparison.Ordinal);
+        Assert.Contains("ThemeScenarioRunwayCard", runway, StringComparison.Ordinal);
         Assert.Contains("scrollTop", script, StringComparison.Ordinal);
         Assert.Contains("onScroll", script, StringComparison.Ordinal);
         Assert.Contains("pointerenter", script, StringComparison.Ordinal);
@@ -48,6 +50,19 @@ public sealed class ThemeRunwayContractTests
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.Contains("theme-device-choice--{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.Contains("runway-pause", inspector, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RunwayScenarioCatalogProvidesThreeRealPreviewsForEveryDocumentedComponent()
+    {
+        var root = FindRoot();
+        var runwayCard = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeScenarioRunwayCard.razor");
+        var catalog = ThemeScenarioCatalogTests.CreateRegistry();
+
+        Assert.All(catalog.All.GroupBy(scenario => scenario.ComponentSlug), group => Assert.Equal(3, group.Count()));
+        Assert.Contains("ThemeScenarioPreviewFactory.Create", runwayCard, StringComparison.Ordinal);
+        Assert.Contains("data-component-slug", runwayCard, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnCard", runwayCard, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -171,12 +171,15 @@ public static partial class ShadcnThemeValidator
 
         foreach (var (name, value) in GetMetrics(metrics))
         {
-            if (!double.IsFinite(value) || value <= 0 || value > 100)
+            var minimum = string.Equals(name, "radiusRem", StringComparison.Ordinal) ? 0 : double.Epsilon;
+            if (!double.IsFinite(value) || value < minimum || value > 100)
             {
                 errors.Add(new ShadcnThemeValidationMessage(
                     "invalid-metric",
                     $"metrics.{name}",
-                    "Metric must be a finite invariant number greater than zero and no greater than 100."));
+                    string.Equals(name, "radiusRem", StringComparison.Ordinal)
+                        ? "Base radius must be a finite invariant number from zero through 100."
+                        : "Metric must be a finite invariant number greater than zero and no greater than 100."));
             }
         }
         ValidateRange("spacingScaleMultiplier", metrics.SpacingScaleMultiplier, 0.25, 4, errors);

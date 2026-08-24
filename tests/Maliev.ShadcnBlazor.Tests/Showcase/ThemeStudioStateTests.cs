@@ -1,12 +1,15 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
+using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 using Maliev.ShadcnBlazor.Showcase.Pages;
 using Maliev.ShadcnBlazor.Showcase.MockSites;
 using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
+using Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -272,6 +275,18 @@ public sealed class ThemeStudioStateTests
         Assert.Equal(ThemeStudioMenuColor.Translucent, restored.MenuColor);
         Assert.Equal(ThemeStudioRadiusPreset.Relaxed, restored.RadiusPreset);
         Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public void SharpRadiusPresetAppliesAZeroRadius()
+    {
+        var state = CreateState();
+
+        state.SetRadiusPreset(ThemeStudioRadiusPreset.Sharp);
+
+        Assert.Equal(0, state.Draft.Metrics.RadiusRem);
+        Assert.Equal(0, state.Applied.Metrics.RadiusRem);
+        Assert.Equal(ThemeStudioRadiusPreset.Sharp, state.RadiusPreset);
     }
 
     [Fact]
@@ -564,6 +579,14 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Services.AddSingleton<ShowcaseState>();
         Services.AddSingleton<IThemeStudioPresetCatalog, ThemeStudioPresetCatalog>();
         Services.AddSingleton<IThemeUseCaseRegistry, ThemeUseCaseRegistry>();
+        Services.AddSingleton<IComponentDocumentationCatalog, ComponentDocumentationCatalog>();
+        Services.AddSingleton<IComponentExampleRegistry, ComponentExampleRegistry>();
+        Services.AddSingleton<IThemeScenarioRegistry>(services =>
+        {
+            var documentation = services.GetRequiredService<IComponentDocumentationCatalog>();
+            var scenarios = ThemeScenarioCatalog.Load(documentation);
+            return ThemeScenarioRegistry.Create(scenarios, ThemeScenarioFactoryCatalog.Create(documentation, scenarios));
+        });
         Services.AddSingleton<ThemeRunwayState>();
         Services.AddSingleton<MockSiteState>();
         Services.AddSingleton(new HttpClient(new MissingCatalogHandler())

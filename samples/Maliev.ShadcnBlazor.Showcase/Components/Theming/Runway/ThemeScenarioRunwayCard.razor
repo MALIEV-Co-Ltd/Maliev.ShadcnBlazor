@@ -1,0 +1,45 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.Documentation.Examples
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
+@inject IComponentExampleRegistry Examples
+
+<ShadcnCard Class="theme-use-case-card theme-use-case-card--scenario"
+            data-scenario-id="@Scenario.Id"
+            data-scenario-instance="@InstanceId"
+            data-component-slug="@Scenario.ComponentSlug"
+            data-scenario-kind="@Scenario.Kind.ToString().ToLowerInvariant()"
+            data-mirror="@(IsMirror ? "true" : "false")"
+            aria-hidden="@(IsMirror ? "true" : null)"
+            inert="@IsMirror">
+    <ShadcnCardHeader Class="theme-use-case-card__header">
+        <ShadcnCardTitle>@Copy.Title</ShadcnCardTitle>
+        <ShadcnCardDescription>@Copy.Description</ShadcnCardDescription>
+    </ShadcnCardHeader>
+    <ShadcnCardContent Class="theme-use-case-card__content theme-scenario-runway-card__content">
+        @if (Active)
+        {
+            @Preview
+        }
+        else
+        {
+            <div class="theme-scenario-runway-card__placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
+        }
+    </ShadcnCardContent>
+</ShadcnCard>
+
+@code {
+    [Parameter, EditorRequired] public ThemeScenarioDefinition Scenario { get; set; } = null!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    [Parameter] public bool IsMirror { get; set; }
+    [Parameter, EditorRequired] public string InstanceId { get; set; } = string.Empty;
+    [Parameter] public bool Active { get; set; }
+
+    private RenderFragment Preview { get; set; } = _ => { };
+    private CultureInfo Culture => Locale == ThemeStudioLocale.Thai
+        ? CultureInfo.GetCultureInfo("th-TH")
+        : CultureInfo.GetCultureInfo("en-US");
+    private ThemeScenarioCopy Copy => Scenario.GetCopy(Culture);
+
+    protected override void OnParametersSet() => Preview = ThemeScenarioPreviewFactory.Create(Examples, Scenario);
+}

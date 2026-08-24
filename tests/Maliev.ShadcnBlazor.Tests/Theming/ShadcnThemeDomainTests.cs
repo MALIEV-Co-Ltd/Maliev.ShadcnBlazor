@@ -179,6 +179,16 @@ public sealed class ShadcnThemeDomainTests
         Assert.DoesNotContain(result.Errors, error => error.Path == "metrics.focusRingOffsetPx");
     }
 
+    [Fact]
+    public void ValidationAllowsAZeroBaseRadiusButRejectsNegativeRadius()
+    {
+        var sharp = CreateTheme() with { Metrics = CreateMetrics() with { RadiusRem = 0 } };
+        var invalid = CreateTheme() with { Metrics = CreateMetrics() with { RadiusRem = -0.01 } };
+
+        Assert.DoesNotContain(ShadcnThemeValidator.Validate(sharp).Errors, error => error.Path == "metrics.radiusRem");
+        Assert.Contains(ShadcnThemeValidator.Validate(invalid).Errors, error => error.Path == "metrics.radiusRem");
+    }
+
     [Theory]
     [InlineData("MonospaceFontFamily", "")]
     [InlineData("MotionEasing", "linear; color: red")]

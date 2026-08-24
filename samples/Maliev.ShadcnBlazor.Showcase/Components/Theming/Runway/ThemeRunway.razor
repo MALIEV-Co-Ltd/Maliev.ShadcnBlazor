@@ -1,6 +1,8 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 @inject IThemeUseCaseRegistry Registry
+@inject IThemeScenarioRegistry ScenarioRegistry
 @inject ThemeRunwayState RunwayState
 @inject IJSRuntime JavaScript
 @implements IAsyncDisposable
@@ -18,10 +20,18 @@
                 {
                     <ThemeUseCaseCardHost @key="card.Id" Definition="card" Frame="RunwayState.Frame" Locale="Locale" />
                 }
+                @foreach (var scenario in LeftScenarios)
+                {
+                    <ThemeScenarioRunwayCard @key="scenario.Id" Scenario="scenario" Locale="Locale" InstanceId="@($"left-{scenario.Id}")" Active="@IsScenarioActive($"left-{scenario.Id}")" />
+                }
                 <div class="theme-runway__mirror" aria-hidden="true" inert>
                     @foreach (var card in LeftCards)
                     {
                         <ThemeUseCaseCardHost @key="@($"mirror-left-{card.Id}")" Definition="card" Frame="RunwayState.Frame" Locale="Locale" IsMirror="true" />
+                    }
+                    @foreach (var scenario in LeftScenarios)
+                    {
+                        <ThemeScenarioRunwayCard @key="@($"mirror-left-{scenario.Id}")" Scenario="scenario" Locale="Locale" InstanceId="@($"mirror-left-{scenario.Id}")" Active="@IsScenarioActive($"mirror-left-{scenario.Id}")" IsMirror="true" />
                     }
                 </div>
             </div>
@@ -32,10 +42,18 @@
                 {
                     <ThemeUseCaseCardHost @key="card.Id" Definition="card" Frame="RunwayState.Frame" Locale="Locale" />
                 }
+                @foreach (var scenario in RightScenarios)
+                {
+                    <ThemeScenarioRunwayCard @key="scenario.Id" Scenario="scenario" Locale="Locale" InstanceId="@($"right-{scenario.Id}")" Active="@IsScenarioActive($"right-{scenario.Id}")" />
+                }
                 <div class="theme-runway__mirror" aria-hidden="true" inert>
                     @foreach (var card in RightCards)
                     {
                         <ThemeUseCaseCardHost @key="@($"mirror-right-{card.Id}")" Definition="card" Frame="RunwayState.Frame" Locale="Locale" IsMirror="true" />
+                    }
+                    @foreach (var scenario in RightScenarios)
+                    {
+                        <ThemeScenarioRunwayCard @key="@($"mirror-right-{scenario.Id}")" Scenario="scenario" Locale="Locale" InstanceId="@($"mirror-right-{scenario.Id}")" Active="@IsScenarioActive($"mirror-right-{scenario.Id}")" IsMirror="true" />
                     }
                 </div>
             </div>
@@ -45,6 +63,10 @@
         @foreach (var card in Registry.All)
         {
             <ThemeUseCaseCardHost @key="@($"mobile-{card.Id}")" Definition="card" Frame="RunwayState.Frame" Locale="Locale" />
+        }
+        @foreach (var scenario in ScenarioRegistry.All)
+        {
+            <ThemeScenarioRunwayCard @key="@($"mobile-{scenario.Id}")" Scenario="scenario" Locale="Locale" InstanceId="@($"mobile-{scenario.Id}")" Active="@IsScenarioActive($"mobile-{scenario.Id}")" />
         }
     </div>
 </section>
@@ -58,8 +80,11 @@
     private IJSObjectReference? _controller;
     private DotNetObjectReference<ThemeRunway>? _self;
     private bool _systemReducedMotion;
+    private readonly HashSet<string> _activeScenarioInstances = new(StringComparer.Ordinal);
     private IReadOnlyList<ThemeUseCaseDefinition> LeftCards => Registry.All.Where(card => card.Track == ThemeRunwayTrack.Left).ToArray();
     private IReadOnlyList<ThemeUseCaseDefinition> RightCards => Registry.All.Where(card => card.Track == ThemeRunwayTrack.Right).ToArray();
+    private IReadOnlyList<ThemeScenarioDefinition> LeftScenarios => ScenarioRegistry.All.Where((_, index) => index % 2 == 0).ToArray();
+    private IReadOnlyList<ThemeScenarioDefinition> RightScenarios => ScenarioRegistry.All.Where((_, index) => index % 2 != 0).ToArray();
 
     protected override void OnInitialized()
     {
@@ -100,6 +125,18 @@
         _systemReducedMotion = reduced;
         RunwayState.SetReducedMotion(ReducedMotion || _systemReducedMotion);
     }
+
+    [JSInvokable]
+    public void SetVisibleScenarios(string[] instanceIds)
+    {
+        var next = instanceIds.ToHashSet(StringComparer.Ordinal);
+        if (_activeScenarioInstances.SetEquals(next)) return;
+        _activeScenarioInstances.Clear();
+        _activeScenarioInstances.UnionWith(next);
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private bool IsScenarioActive(string instanceId) => _activeScenarioInstances.Contains(instanceId);
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
 

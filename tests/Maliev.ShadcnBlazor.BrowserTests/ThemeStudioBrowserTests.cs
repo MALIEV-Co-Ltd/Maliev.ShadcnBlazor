@@ -21,7 +21,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByTestId("theme-runway-mobile")).ToBeHiddenAsync();
         Assert.Equal(12, (await LogicalCardIdsAsync(page)).Count);
 
-        await page.WaitForTimeoutAsync(300);
+        await page.WaitForTimeoutAsync(1800);
         var before = await TrackScrollPositionsAsync(page);
         await page.WaitForTimeoutAsync(1800);
         var moving = await TrackScrollPositionsAsync(page);
@@ -137,8 +137,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var initialRadius = await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)");
 
         await page.GetByTestId("theme-radius-select").ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "Pill · 1.25rem", Exact = true }).ClickAsync();
-        Assert.True(await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)") > initialRadius);
+        await page.GetByRole(AriaRole.Option, new() { Name = "Sharp · 0", Exact = true }).ClickAsync();
+        Assert.Equal(0, await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)"));
+        Assert.True(initialRadius > 0);
 
         await page.GetByTestId("theme-role-heading-4-to-6-weight").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "900", Exact = true }).ClickAsync();
@@ -163,6 +164,27 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var after = await viewport.EvaluateAsync<double>("element => element.scrollTop");
         Assert.True(after > before + 100, $"Manual runway scroll did not move: {before} -> {after}");
         Assert.Equal("0", await page.Locator("[data-use-case-id='quotation-files'] .shadcn-dropzone-input").First.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
+    }
+
+    [Fact]
+    public async Task RunwayIncludesThreeInteractiveExamplesForEveryComponent()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        foreach (var slug in new[] { "dropzone", "table", "chart" })
+            Assert.Equal(3, await page.Locator($".theme-runway__viewport > .theme-runway__track > [data-component-slug='{slug}']").CountAsync());
+
+        var scenarioDropzone = page.Locator(".theme-runway__viewport > .theme-runway__track > [data-component-slug='dropzone'][data-scenario-kind='default']");
+        await scenarioDropzone.ScrollIntoViewIfNeededAsync();
+        var scenarioInput = scenarioDropzone.Locator(".shadcn-dropzone-input");
+        await Assertions.Expect(scenarioInput).ToBeEnabledAsync();
+        await scenarioInput.SetInputFilesAsync(new FilePayload
+        {
+            Name = "bracket.step",
+            MimeType = "application/octet-stream",
+            Buffer = "solid-model"u8.ToArray()
+        });
+        await Assertions.Expect(scenarioDropzone.Locator(".shadcn-dropzone-status")).ToHaveTextAsync("1 file selected");
     }
 
     [Fact]

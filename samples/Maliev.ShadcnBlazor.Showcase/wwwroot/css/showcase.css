@@ -8703,6 +8703,13 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     letter-spacing: var(--shadcn-typography-button-letter-spacing);
 }
 .theme-use-case-card__content { display: grid; gap: .875rem; }
+.theme-use-case-card--scenario { overflow: visible; }
+.theme-scenario-runway-card__content { min-block-size: 12rem; min-inline-size: 0; overflow: visible; }
+.theme-scenario-runway-card__content > :where(section, div, form, article) { max-inline-size: 100%; }
+.theme-scenario-runway-card__placeholder { display: grid; align-content: center; gap: .75rem; min-block-size: 10rem; }
+.theme-scenario-runway-card__placeholder span { display: block; block-size: .75rem; border-radius: var(--shadcn-radius-sm); background: var(--shadcn-muted); }
+.theme-scenario-runway-card__placeholder span:nth-child(2) { inline-size: 82%; }
+.theme-scenario-runway-card__placeholder span:nth-child(3) { inline-size: 58%; }
 .theme-use-case-card :where(label) { display: grid; gap: .375rem; color: var(--shadcn-foreground); font-size: .75rem; font-weight: 600; }
 .theme-use-case-card__actions,
 .theme-runway-profile,
