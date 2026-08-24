@@ -81,6 +81,20 @@ public sealed class ThemeRunwayContractTests
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-runway-typing\"", card, StringComparison.Ordinal);
+        Assert.Contains("@AssistantMessage", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("AssistantMessage[..Math.Min(Frame.ChatCharacters", card, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AssistantTypingRevealUsesCssAndRespectsReducedMotion()
+    {
+        var root = FindRoot();
+        var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+
+        Assert.Contains("animation: theme-runway-typing-reveal", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes theme-runway-typing-reveal", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway-typing { animation: none; clip-path: none;", css, StringComparison.Ordinal);
     }
 
     private static int Count(string value, string needle) => (value.Length - value.Replace(needle, string.Empty, StringComparison.Ordinal).Length) / needle.Length;

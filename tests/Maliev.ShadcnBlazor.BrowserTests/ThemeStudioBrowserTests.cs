@@ -216,6 +216,24 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.Locator(".theme-use-case-card__eyebrow, [data-use-case-id] > .theme-use-case-card__header .shadcn-badge")).ToHaveCountAsync(0);
     }
 
+    [Fact]
+    public async Task AssistantMessageUsesASmoothCssRevealAndReducedMotionShowsTheFullText()
+    {
+        const string message = "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย";
+        await using var animatedContext = await NewContextAsync(1280, 900);
+        var animatedPage = await OpenAsync(animatedContext);
+        var animated = animatedPage.Locator("[data-use-case-id='assistant-conversation'] .theme-runway-typing").First;
+        await Assertions.Expect(animated).ToHaveTextAsync(message);
+        Assert.Equal("theme-runway-typing-reveal", await animated.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+
+        await using var reducedContext = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var reducedPage = await OpenAsync(reducedContext);
+        var reduced = reducedPage.Locator("[data-use-case-id='assistant-conversation'] .theme-runway-typing").First;
+        await Assertions.Expect(reduced).ToHaveTextAsync(message);
+        Assert.Equal("none", await reduced.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        Assert.Equal("none", await reduced.EvaluateAsync<string>("element => getComputedStyle(element).clipPath"));
+    }
+
     [Theory]
     [MemberData(nameof(ReleaseViewports))]
     public async Task RunwayIsResponsiveWithoutDocumentOverflow(int width, int height)

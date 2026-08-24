@@ -8740,7 +8740,11 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-nav-list small { color: var(--shadcn-muted-foreground); }
 .theme-runway-chat { display: grid; gap: .75rem; }
 .theme-runway-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; border-block-start: 1px solid var(--shadcn-border); padding-block-start: .75rem; }
+.theme-runway-typing { display: inline-block; max-inline-size: 100%; clip-path: inset(0 100% 0 0); animation: theme-runway-typing-reveal 8s cubic-bezier(.22, 1, .36, 1) infinite; will-change: clip-path; }
+.theme-preview-scope[dir="rtl"] .theme-runway-typing { animation-name: theme-runway-typing-reveal-rtl; }
 .theme-runway-caret { display: inline-block; inline-size: .4rem; block-size: 1em; margin-inline-start: .125rem; background: currentColor; vertical-align: -.125em; animation: theme-runway-caret 1s steps(1) infinite; }
+@keyframes theme-runway-typing-reveal { 0%, 8% { clip-path: inset(0 100% 0 0); } 68%, 90% { clip-path: inset(0); } 100% { clip-path: inset(0 100% 0 0); } }
+@keyframes theme-runway-typing-reveal-rtl { 0%, 8% { clip-path: inset(0 0 0 100%); } 68%, 90% { clip-path: inset(0); } 100% { clip-path: inset(0 0 0 100%); } }
 @keyframes theme-runway-caret { 50% { opacity: 0; } }
 
 @container (max-width: 43.999rem) {
@@ -8757,6 +8761,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 
 @media (prefers-reduced-motion: reduce) {
     .theme-runway__track { transform: none !important; }
+    .theme-runway-typing { animation: none; clip-path: none; }
     .theme-runway-caret { animation: none; }
 }
 
