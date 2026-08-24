@@ -1628,6 +1628,18 @@ type Maliev.ShadcnBlazor.Components.ShadcnThemeProvider
   String Style
   EventCallback<Boolean> SystemDarkModeChanged
   ShadcnTheme Theme
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnColorTreatment: Inherit, VibrantDark
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnDepthTreatment: Inherit, Flat, Raised, Floating, Spatial
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnMotionTreatment: Inherit, Calm, Expressive, None
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnStyleIntensity: Subtle, Default, Strong
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle: Inherit, Minimal, Glass, NeoBrutalist, LiquidGlass
+type Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope
+  RenderFragment ChildContent
+  ShadcnColorTreatment ColorTreatment
+  ShadcnDepthTreatment Depth
+  ShadcnStyleIntensity Intensity
+  ShadcnMotionTreatment Motion
+  ShadcnVisualStyle VisualStyle
 type Maliev.ShadcnBlazor.Components.Typography.ShadcnCodeBlock
   String Language
   String Source

@@ -1,0 +1,91 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-visual-style-scope")"
+     style="@MergeStyle(null)"
+     data-slot="visual-style-scope"
+     data-visual-style="@VisualStyleValue"
+     data-color-treatment="@ColorTreatmentValue"
+     data-depth="@DepthValue"
+     data-motion="@MotionValue"
+     data-intensity="@IntensityValue">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>Gets or sets the surface and control treatment.</summary>
+    [Parameter]
+    public ShadcnVisualStyle VisualStyle { get; set; } = ShadcnVisualStyle.Inherit;
+
+    /// <summary>Gets or sets an optional color treatment.</summary>
+    [Parameter]
+    public ShadcnColorTreatment ColorTreatment { get; set; } = ShadcnColorTreatment.Inherit;
+
+    /// <summary>Gets or sets the perceived surface depth.</summary>
+    [Parameter]
+    public ShadcnDepthTreatment Depth { get; set; } = ShadcnDepthTreatment.Inherit;
+
+    /// <summary>Gets or sets the decorative motion treatment.</summary>
+    [Parameter]
+    public ShadcnMotionTreatment Motion { get; set; } = ShadcnMotionTreatment.Inherit;
+
+    /// <summary>Gets or sets the bounded strength of the selected treatments.</summary>
+    [Parameter]
+    public ShadcnStyleIntensity Intensity { get; set; } = ShadcnStyleIntensity.Default;
+
+    /// <summary>Gets or sets the content rendered inside the scope.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string VisualStyleValue => VisualStyle switch
+    {
+        ShadcnVisualStyle.Inherit => "inherit",
+        ShadcnVisualStyle.Minimal => "minimal",
+        ShadcnVisualStyle.Glass => "glass",
+        ShadcnVisualStyle.NeoBrutalist => "neo-brutalist",
+        ShadcnVisualStyle.LiquidGlass => "liquid-glass",
+        _ => throw new ArgumentOutOfRangeException(nameof(VisualStyle), VisualStyle, "Unsupported visual style.")
+    };
+
+    private string ColorTreatmentValue => ColorTreatment switch
+    {
+        ShadcnColorTreatment.Inherit => "inherit",
+        ShadcnColorTreatment.VibrantDark => "vibrant-dark",
+        _ => throw new ArgumentOutOfRangeException(nameof(ColorTreatment), ColorTreatment, "Unsupported color treatment.")
+    };
+
+    private string DepthValue => Depth switch
+    {
+        ShadcnDepthTreatment.Inherit => "inherit",
+        ShadcnDepthTreatment.Flat => "flat",
+        ShadcnDepthTreatment.Raised => "raised",
+        ShadcnDepthTreatment.Floating => "floating",
+        ShadcnDepthTreatment.Spatial => "spatial",
+        _ => throw new ArgumentOutOfRangeException(nameof(Depth), Depth, "Unsupported depth treatment.")
+    };
+
+    private string MotionValue => Motion switch
+    {
+        ShadcnMotionTreatment.Inherit => "inherit",
+        ShadcnMotionTreatment.Calm => "calm",
+        ShadcnMotionTreatment.Expressive => "expressive",
+        ShadcnMotionTreatment.None => "none",
+        _ => throw new ArgumentOutOfRangeException(nameof(Motion), Motion, "Unsupported motion treatment.")
+    };
+
+    private string IntensityValue => Intensity switch
+    {
+        ShadcnStyleIntensity.Subtle => "subtle",
+        ShadcnStyleIntensity.Default => "default",
+        ShadcnStyleIntensity.Strong => "strong",
+        _ => throw new ArgumentOutOfRangeException(nameof(Intensity), Intensity, "Unsupported style intensity.")
+    };
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot",
+        "data-visual-style",
+        "data-color-treatment",
+        "data-depth",
+        "data-motion",
+        "data-intensity");
+}
