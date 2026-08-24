@@ -5,7 +5,7 @@
          data-valid="@(State.Validation.IsValid ? "true" : "false")"
          aria-live="polite"
          aria-atomic="true">
-    <h3>@(State.Validation.IsValid ? "Theme is valid" : "Theme is invalid")</h3>
+    <h3>@ValidationHeading</h3>
     <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count warnings · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
     @if (State.PaletteDiagnostics.Count > 0)
     {
@@ -50,6 +50,9 @@
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private int PassingContrastCount => State.Validation.ContrastResults.Count(result => result.Passes);
+    private string ValidationHeading => State.Validation.IsValid
+        ? State.Validation.Warnings.Count > 0 ? "Valid with warnings" : "Theme is ready"
+        : "Theme needs attention";
     private static string EditorHref(string path) => path.StartsWith("light.", StringComparison.Ordinal) || path.StartsWith("dark.", StringComparison.Ordinal)
         ? $"#theme-editor-{path.Replace('.', '-')}"
         : "#theme-generator-options-title";

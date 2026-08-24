@@ -36,8 +36,9 @@ public sealed class ThemeStudioWorkbenchContractTests
         var inspector = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeInspector.razor");
         var combined = page + inspector;
 
-        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "runway-pause", "theme-icon-library-select" })
+        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "runway-pause" })
             Assert.Contains($"data-testid=\"{hook}\"", combined, StringComparison.Ordinal);
+        Assert.Contains("theme-icon-library-{library.ToString().ToLowerInvariant()}", inspector, StringComparison.Ordinal);
 
         Assert.Contains("viewport-{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
@@ -61,7 +62,7 @@ public sealed class ThemeStudioWorkbenchContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-runway", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] :is(.theme-runway, .theme-scenario-browser)", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);
         Assert.Contains("position: fixed", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: clip", css, StringComparison.Ordinal);

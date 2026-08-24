@@ -13,8 +13,8 @@ public sealed class ThemeRunwayContractTests
         Assert.Equal(2, Count(runway, "data-runway-track="));
         Assert.Contains("aria-hidden=\"true\" inert", runway, StringComparison.Ordinal);
         Assert.Contains("theme-runway__mobile", runway, StringComparison.Ordinal);
-        Assert.Contains("ScenarioRegistry.All", runway, StringComparison.Ordinal);
-        Assert.Contains("ThemeScenarioRunwayCard", runway, StringComparison.Ordinal);
+        Assert.DoesNotContain("ScenarioRegistry.All", runway, StringComparison.Ordinal);
+        Assert.DoesNotContain("ThemeScenarioRunwayCard", runway, StringComparison.Ordinal);
         Assert.Contains("scrollTop", script, StringComparison.Ordinal);
         Assert.Contains("onScroll", script, StringComparison.Ordinal);
         Assert.Contains("pointerenter", script, StringComparison.Ordinal);
@@ -25,7 +25,7 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("scrollbar-width: none", css, StringComparison.Ordinal);
         Assert.Contains(".theme-runway__viewport::-webkit-scrollbar { display: none; }", css, StringComparison.Ordinal);
         var runwayStart = css.IndexOf("\n.theme-runway {\n", StringComparison.Ordinal) + 1;
-        var runwayRule = css[runwayStart..css.IndexOf(".theme-runway__columns", runwayStart, StringComparison.Ordinal)];
+        var runwayRule = css[runwayStart..(css.IndexOf("\n}\n", runwayStart, StringComparison.Ordinal) + 3)];
         Assert.DoesNotContain("border:", runwayRule, StringComparison.Ordinal);
         Assert.DoesNotContain("border-radius:", runwayRule, StringComparison.Ordinal);
         Assert.DoesNotContain("background:", runwayRule, StringComparison.Ordinal);
@@ -46,23 +46,25 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemePresetDock", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
-        Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.Contains("theme-device-choice--{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.Contains("runway-pause", inspector, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void RunwayScenarioCatalogProvidesThreeRealPreviewsForEveryDocumentedComponent()
+    public void FocusedScenarioBrowserProvidesThreeRealPreviewsForEveryDocumentedComponent()
     {
         var root = FindRoot();
-        var runwayCard = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeScenarioRunwayCard.razor");
+        var browser = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioBrowser.razor");
+        var host = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioHost.razor");
         var catalog = ThemeScenarioCatalogTests.CreateRegistry();
 
         Assert.All(catalog.All.GroupBy(scenario => scenario.ComponentSlug), group => Assert.Equal(3, group.Count()));
-        Assert.Contains("ThemeScenarioPreviewFactory.Create", runwayCard, StringComparison.Ordinal);
-        Assert.Contains("data-component-slug", runwayCard, StringComparison.Ordinal);
-        Assert.Contains("<ShadcnCard", runwayCard, StringComparison.Ordinal);
+        Assert.Contains("Enum.GetValues<ThemeScenarioKind>()", browser, StringComparison.Ordinal);
+        Assert.Contains("<ThemeScenarioHost", browser, StringComparison.Ordinal);
+        Assert.Contains("ThemeScenarioPreviewFactory.Create", host, StringComparison.Ordinal);
+        Assert.Contains("data-theme-scenario-host", host, StringComparison.Ordinal);
     }
 
     [Fact]

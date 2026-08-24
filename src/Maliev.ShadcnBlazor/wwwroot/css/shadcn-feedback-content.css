@@ -95,7 +95,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-avatar-image, .shadcn-avatar-fallback) { clip-path: inset(0 round 9999px); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-image { display: block; max-inline-size: none; object-fit: cover; object-position: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-image:is([data-state="loading"], [data-state="error"]) { visibility: hidden; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--shadcn-muted); color: var(--shadcn-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback[data-state="hidden"] { visibility: hidden; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-badge { position: absolute; inset-inline-end: 0; inset-block-end: 0; z-index: 1; display: inline-flex; width: 0.625rem; height: 0.625rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--shadcn-background); border-radius: 9999px; background: var(--shadcn-success, oklch(0.72 0.18 145)); color: var(--shadcn-success-foreground, oklch(0.24 0.08 145)); box-shadow: 0 0 0 1px color-mix(in oklch, var(--shadcn-background) 80%, transparent); font-size: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar[data-size="sm"] .shadcn-avatar-badge { width: 0.5rem; height: 0.5rem; }
@@ -103,7 +103,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group { --shadcn-avatar-overlap: 0.5rem; display: flex; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > * + * { margin-inline-start: calc(-1 * var(--shadcn-avatar-overlap)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > :where([data-slot="avatar"], [data-slot="avatar-group-count"]) { box-shadow: 0 0 0 2px var(--shadcn-background); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count { display: inline-flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count { display: inline-flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="sm"] { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="lg"] { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
 

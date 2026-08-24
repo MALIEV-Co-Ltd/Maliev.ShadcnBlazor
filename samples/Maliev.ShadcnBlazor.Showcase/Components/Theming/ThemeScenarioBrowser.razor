@@ -89,17 +89,28 @@
     private ThemeScenarioDefinition Active { get; set; } = null!;
     private IReadOnlyList<ComponentDocumentationEntry> OrderedComponents { get; set; } = [];
     private IReadOnlyList<ComponentDocumentationEntry> VisibleComponents { get; set; } = [];
+    private bool _initialized;
+    private string? _appliedComponentSlug;
+    private string? _appliedScenarioId;
     private int ActiveIndex => Math.Max(0, OrderedComponents.ToList().FindIndex(value => value.Slug == Active.ComponentSlug));
     private string DirectLink => $"theme?component={Uri.EscapeDataString(Active.ComponentSlug)}&scenario={Uri.EscapeDataString(Active.Id)}";
 
     protected override void OnParametersSet()
     {
         OrderedComponents = Documentation.All.OrderBy(value => value.Name, StringComparer.OrdinalIgnoreCase).ToArray();
-        var requestedComponent = OrderedComponents.FirstOrDefault(value => string.Equals(value.Slug, ComponentSlug, StringComparison.Ordinal))
-            ?? OrderedComponents[0];
-        Active = Registry.ForComponent(requestedComponent.Slug)
-            .FirstOrDefault(value => string.Equals(value.Id, ScenarioId, StringComparison.Ordinal))
-            ?? ScenarioFor(requestedComponent.Slug, ThemeScenarioKind.Default);
+        if (!_initialized
+            || !string.Equals(ComponentSlug, _appliedComponentSlug, StringComparison.Ordinal)
+            || !string.Equals(ScenarioId, _appliedScenarioId, StringComparison.Ordinal))
+        {
+            var requestedComponent = OrderedComponents.FirstOrDefault(value => string.Equals(value.Slug, ComponentSlug, StringComparison.Ordinal))
+                ?? OrderedComponents[0];
+            Active = Registry.ForComponent(requestedComponent.Slug)
+                .FirstOrDefault(value => string.Equals(value.Id, ScenarioId, StringComparison.Ordinal))
+                ?? ScenarioFor(requestedComponent.Slug, ThemeScenarioKind.Default);
+            _appliedComponentSlug = ComponentSlug;
+            _appliedScenarioId = ScenarioId;
+            _initialized = true;
+        }
         ApplySearch();
     }
 
@@ -131,8 +142,11 @@
         return SelectAsync(ScenarioFor(OrderedComponents[index].Slug, Active.Kind));
     }
 
-    private Task SelectAsync(ThemeScenarioDefinition scenario) =>
-        SelectionChanged.InvokeAsync(new ThemeScenarioSelection(scenario.ComponentSlug, scenario.Id));
+    private async Task SelectAsync(ThemeScenarioDefinition scenario)
+    {
+        Active = scenario;
+        await SelectionChanged.InvokeAsync(new ThemeScenarioSelection(scenario.ComponentSlug, scenario.Id));
+    }
 
     private ThemeScenarioDefinition ScenarioFor(string slug, ThemeScenarioKind kind) =>
         Registry.ForComponent(slug).Single(value => value.Kind == kind);

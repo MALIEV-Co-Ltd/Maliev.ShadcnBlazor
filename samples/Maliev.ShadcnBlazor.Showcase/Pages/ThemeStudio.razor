@@ -1,4 +1,6 @@
 @page "/theme"
+@using System.Globalization
+@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 @layout ThemeStudioLayout
 @implements IDisposable
 @implements IAsyncDisposable
@@ -16,6 +18,7 @@
     <div class="theme-studio-workbench" data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
         <ThemeStudioSidebar State="State" />
         <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
+            <header class="theme-preview-intro"><h1>Theme Studio</h1><p>Compare realistic component workflows, then open settings to tune the preview.</p></header>
             <div class="theme-preview-stage" data-testid="theme-preview-stage" data-preview-width="@State.Viewport.Width" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
                 <div class="shadcn-scope theme-preview-scope"
                      style="@TypographyStyle"
@@ -30,7 +33,14 @@
                      data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
                      data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
                     <CascadingValue Value="PreviewContext">
-                        <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                        @if (State.Workbench.PreviewSurface == ThemeStudioPreviewSurface.Curated)
+                        {
+                            <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                        }
+                        else
+                        {
+                            <ThemeScenarioBrowser ComponentSlug="ComponentSlug" ScenarioId="ScenarioId" Culture="PreviewCulture" />
+                        }
                     </CascadingValue>
                 </div>
             </div>
@@ -48,6 +58,17 @@
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
     private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
     private ShadcnContext PreviewContext => new(State.EffectiveDarkMode, State.Direction);
+    private CultureInfo PreviewCulture => State.Locale == ThemeStudioLocale.Thai
+        ? CultureInfo.GetCultureInfo("th-TH")
+        : CultureInfo.GetCultureInfo("en-US");
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "component")]
+    public string? ComponentSlug { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "scenario")]
+    public string? ScenarioId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,6 +77,8 @@
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
         await State.InitializeAsync();
+        if (!string.IsNullOrWhiteSpace(ComponentSlug))
+            State.Workbench.SetPreviewSurface(ThemeStudioPreviewSurface.Coverage);
         if (_disposed) return;
         _initialized = true;
     }

@@ -35,6 +35,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.InRange(Math.Abs(still.Left - paused.Left), 0, 1.5);
         Assert.InRange(Math.Abs(still.Right - paused.Right), 0, 1.5);
 
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
         await page.GetByTestId("runway-pause").ClickAsync();
         await Assertions.Expect(page.GetByTestId("runway-pause")).ToBeCheckedAsync();
         await Assertions.Expect(page.GetByTestId("theme-runway")).ToHaveAttributeAsync("data-runway-paused", "true");
@@ -60,6 +61,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1440, 900);
         var page = await OpenAsync(context);
         await page.WaitForTimeoutAsync(2400);
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
         await page.GetByTestId("runway-pause").ClickAsync();
         var before = await TrackScrollPositionsAsync(page);
         var capacityBefore = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
@@ -101,8 +103,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
         Assert.Contains("DM Sans", await ComputedFontAsync(page.Locator("[data-use-case-id='operator-profile']").First));
         Assert.Equal(headerFont, await ComputedFontAsync(page.Locator(".documentation-header")));
-        await page.GetByTestId("theme-icon-library-select").ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "Tabler", Exact = true }).ClickAsync();
+        await OpenAdvancedAsync(page, "theme-advanced-icons");
+        await page.GetByTestId("theme-icon-library-tabler").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-theme-icon-library", "tabler");
         await Assertions.Expect(page.GetByText("Maliev.ShadcnBlazor.Icons.Tabler", new() { Exact = true })).ToBeVisibleAsync();
     }
@@ -115,6 +117,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var shellFont = await ComputedFontAsync(page.Locator(".documentation-header"));
         var shellBackground = await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
         await Assertions.Expect(page.GetByTestId("preview-high-contrast")).Not.ToBeCheckedAsync();
         await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
         await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
@@ -141,11 +144,13 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal(0, await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)"));
         Assert.True(initialRadius > 0);
 
+        await OpenAdvancedAsync(page, "theme-advanced-typography");
         await page.GetByTestId("theme-role-heading-4-to-6-weight").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "900", Exact = true }).ClickAsync();
         Assert.Equal("900", await title.EvaluateAsync<string>("element => getComputedStyle(element).fontWeight"));
 
         var normalBorder = await page.GetByTestId("theme-runway").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-border').trim()");
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
         await page.GetByTestId("preview-high-contrast").ClickAsync();
         var contrastBorder = await page.GetByTestId("theme-runway").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-border').trim()");
         Assert.NotEqual(normalBorder, contrastBorder);
@@ -167,15 +172,20 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task RunwayIncludesThreeInteractiveExamplesForEveryComponent()
+    public async Task ComponentCoverageOffersThreeInteractiveExamplesForEveryComponentWithoutInflatingTheRunway()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
-        foreach (var slug in new[] { "dropzone", "table", "chart" })
-            Assert.Equal(3, await page.Locator($".theme-runway__viewport > .theme-runway__track > [data-component-slug='{slug}']").CountAsync());
+        Assert.Equal(36, await page.Locator(".theme-use-case-card").CountAsync());
+        await page.GetByTestId("preview-surface-coverage").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-runway")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByTestId("theme-scenario-browser")).ToBeVisibleAsync();
+        Assert.Equal(3, await page.Locator("[data-testid^='theme-scenario-kind-']").CountAsync());
 
-        var scenarioDropzone = page.Locator(".theme-runway__viewport > .theme-runway__track > [data-component-slug='dropzone'][data-scenario-kind='default']");
-        await scenarioDropzone.ScrollIntoViewIfNeededAsync();
+        await page.GetByTestId("theme-scenario-search").FillAsync("Dropzone");
+        await page.Locator("[data-theme-scenario-component='dropzone']").ClickAsync();
+        await page.GetByTestId("theme-scenario-kind-default").ClickAsync();
+        var scenarioDropzone = page.Locator("[data-theme-scenario-host='dropzone-default']");
         var scenarioInput = scenarioDropzone.Locator(".shadcn-dropzone-input");
         await Assertions.Expect(scenarioInput).ToBeEnabledAsync();
         await scenarioInput.SetInputFilesAsync(new FilePayload
@@ -185,6 +195,41 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             Buffer = "solid-model"u8.ToArray()
         });
         await Assertions.Expect(scenarioDropzone.Locator(".shadcn-dropzone-status")).ToHaveTextAsync("1 file selected");
+    }
+
+    [Fact]
+    public async Task RunwayCommunicatesAutomaticAndInteractionPauseStates()
+    {
+        await using var context = await NewContextAsync(1280, 900);
+        var page = await OpenAsync(context);
+        var status = page.GetByTestId("runway-motion-status");
+
+        await Assertions.Expect(status).ToContainTextAsync("running");
+        await page.GetByTestId("theme-runway").HoverAsync();
+        await Assertions.Expect(status).ToContainTextAsync("interact");
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
+        await page.GetByTestId("runway-pause").ClickAsync();
+        await Assertions.Expect(status).ToContainTextAsync("paused");
+    }
+
+    [Fact]
+    public async Task SemanticSuccessStylingSurvivesAccentChangesAndHistoryControlsMeetTouchSize()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce, true);
+        var page = await OpenAsync(context);
+        var success = page.Locator("[data-use-case-id='production-capacity'] .theme-status-success.shadcn-badge").First;
+        var before = await success.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+
+        await page.GetByTestId("theme-preset").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Ruby Alert", Exact = true }).ClickAsync();
+        Assert.Equal(before, await success.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        foreach (var control in await page.Locator(".theme-history-actions .shadcn-button").AllAsync())
+        {
+            var box = await control.BoundingBoxAsync();
+            Assert.NotNull(box);
+            Assert.True(box.Width >= 44 && box.Height >= 44, $"History control measured {box.Width}x{box.Height}.");
+        }
     }
 
     [Fact]
@@ -251,8 +296,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         {
             await Assertions.Expect(page.GetByTestId("theme-runway-mobile")).ToBeVisibleAsync();
             await Assertions.Expect(page.GetByTestId("theme-runway-columns")).ToBeHiddenAsync();
+            Assert.Equal(12, await page.Locator(".theme-runway__mobile > [data-use-case-id]").CountAsync());
             await OpenSettingsAsync(page);
-            await Assertions.Expect(page.GetByTestId("theme-device-controls")).ToBeHiddenAsync();
+            await Assertions.Expect(page.GetByTestId("theme-device-controls")).ToBeVisibleAsync();
+            await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync();
+            await Assertions.Expect(page.GetByTestId("preview-surface-coverage")).ToBeVisibleAsync();
         }
         else if (width <= 1024)
         {
@@ -298,6 +346,13 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private async Task<IBrowserContext> NewContextAsync(int width, int height, ReducedMotion motion = ReducedMotion.NoPreference, bool touch = false) => await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = width, Height = height }, ReducedMotion = motion, HasTouch = touch });
     private async Task<IPage> OpenAsync(IBrowserContext context) { var page = await context.NewPageAsync(); await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString()); await page.GetByTestId("theme-studio").WaitForAsync(); return page; }
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
+    private static async Task OpenAdvancedAsync(IPage page, string testId)
+    {
+        var disclosure = page.GetByTestId(testId);
+        var trigger = disclosure.Locator("[data-slot='collapsible-trigger']");
+        if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+            await trigger.ClickAsync();
+    }
     private static async Task<IReadOnlyList<string>> LogicalCardIdsAsync(IPage page) => await page.Locator(".theme-runway__viewport > .theme-runway__track > [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
     private static async Task<(double Left, double Right)> TrackScrollPositionsAsync(IPage page) { var values = await page.Locator(".theme-runway__viewport").EvaluateAllAsync<double[]>("nodes => nodes.map(node => node.scrollTop)"); return (values[0], values[1]); }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");

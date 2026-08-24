@@ -1,5 +1,7 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 @using System.Globalization
+@using Maliev.ShadcnBlazor.Components.Disclosure
+@using Maliev.ShadcnBlazor.Components.Icons
 @using Maliev.ShadcnBlazor.Showcase.Theming.Fonts
 @inject GoogleFontCatalogService CatalogService
 
@@ -7,9 +9,9 @@
     <div class="theme-inspector-group__heading">
         <div>
             <h3 id="theme-typography-title">Typography</h3>
-            <p>Choose body, Thai fallback, and code families, then tune nine semantic roles.</p>
+            <p>Choose body, Thai fallback, and code families. Semantic role overrides stay optional.</p>
         </div>
-        <MudButton Variant="Variant.Text" Size="Size.Small" aria-label="Reset Typography" data-testid="theme-reset-metrics-typography" OnClick="() => State.ResetGroup(ThemeStudioGroup.Typography)">Reset group</MudButton>
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost" Size="ShadcnButtonSize.Small" aria-label="Reset typography" data-testid="theme-reset-metrics-typography" OnClick="() => State.ResetGroup(ThemeStudioGroup.Typography)">Reset</ShadcnButton>
     </div>
 
     <div class="theme-font-current" aria-label="Selected font families">
@@ -31,7 +33,7 @@
     </div>
 
     <p class="theme-font-status" role="status" aria-live="polite" data-testid="theme-font-catalog-status">@CatalogStatus</p>
-    @if (_catalog is not null)
+    @if (_catalog is not null && ShowResults)
     {
         <ul class="theme-font-results" aria-label="Font search results">
             @foreach (var entry in Results)
@@ -46,19 +48,22 @@
     }
     <p class="theme-font-load-status" role="status" aria-live="polite" data-state="@State.FontLoadState.ToString().ToLowerInvariant()" data-testid="theme-font-load-status">@FontLoadStatus</p>
 
-    <div class="theme-role-list" aria-label="Semantic typography roles">
-        @foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
-        {
-            var style = State.Typography.Roles[role];
-            <fieldset class="theme-role-card" data-testid="theme-role-@RoleId(role)">
-                <legend>@RoleLabel(role)</legend>
-                <label><span>Weight</span><ShadcnSelect TValue="int" Value="style.Weight" ValueChanged="value => ChangeWeight(role, value)" Options="WeightOptions" Size="ShadcnControlSize.Small" aria-label="@($"{RoleLabel(role)} weight")" data-testid="@($"theme-role-{RoleId(role)}-weight")" /></label>
-                <label><span>Scale</span><input type="number" min="0.625" max="4" step="0.025" value="@Format(style.Scale)" aria-label="@($"{RoleLabel(role)} scale")" data-testid="theme-role-@RoleId(role)-scale" @onchange="args => ChangeRole(role, nameof(style.Scale), args)" /></label>
-                <label><span>Line</span><input type="number" min="1" max="2.5" step="0.05" value="@Format(style.LineHeight)" aria-label="@($"{RoleLabel(role)} line height")" data-testid="theme-role-@RoleId(role)-line-height" @onchange="args => ChangeRole(role, nameof(style.LineHeight), args)" /></label>
-                <label><span>Tracking</span><input type="number" min="-0.1" max="0.2" step="0.005" value="@Format(style.LetterSpacingEm)" aria-label="@($"{RoleLabel(role)} letter spacing")" data-testid="theme-role-@RoleId(role)-letter-spacing" @onchange="args => ChangeRole(role, nameof(style.LetterSpacingEm), args)" /></label>
-            </fieldset>
-        }
-    </div>
+    <ShadcnCollapsible Open="false" Class="theme-typography-advanced" data-testid="theme-advanced-typography">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Advanced role overrides</strong><small>Weight, scale, line height, and tracking</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><div class="theme-role-list" aria-label="Semantic typography roles">
+            @foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
+            {
+                var style = State.Typography.Roles[role];
+                <fieldset class="theme-role-card" data-testid="theme-role-@RoleId(role)">
+                    <legend>@RoleLabel(role)</legend>
+                    <label><span>Weight</span><ShadcnSelect TValue="int" Value="style.Weight" ValueChanged="value => ChangeWeight(role, value)" Options="WeightOptions" Size="ShadcnControlSize.Small" aria-label="@($"{RoleLabel(role)} weight")" data-testid="@($"theme-role-{RoleId(role)}-weight")" /></label>
+                    <label><span>Scale</span><input type="number" min="0.625" max="4" step="0.025" value="@Format(style.Scale)" aria-label="@($"{RoleLabel(role)} scale")" data-testid="theme-role-@RoleId(role)-scale" @onchange="args => ChangeRole(role, nameof(style.Scale), args)" /></label>
+                    <label><span>Line</span><input type="number" min="1" max="2.5" step="0.05" value="@Format(style.LineHeight)" aria-label="@($"{RoleLabel(role)} line height")" data-testid="theme-role-@RoleId(role)-line-height" @onchange="args => ChangeRole(role, nameof(style.LineHeight), args)" /></label>
+                    <label><span>Tracking</span><input type="number" min="-0.1" max="0.2" step="0.005" value="@Format(style.LetterSpacingEm)" aria-label="@($"{RoleLabel(role)} letter spacing")" data-testid="theme-role-@RoleId(role)-letter-spacing" @onchange="args => ChangeRole(role, nameof(style.LetterSpacingEm), args)" /></label>
+                </fieldset>
+            }
+        </div></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
     @if (_roleDiagnostic is not null)
     {
         <p class="theme-font-status" role="alert">@_roleDiagnostic</p>
@@ -74,17 +79,20 @@
     private bool _variableOnly;
     private string? _roleDiagnostic;
     private static readonly IReadOnlyList<ShadcnSelectOption<int>> WeightOptions = Enumerable.Range(1, 9).Select(value => value * 100).Select(value => new ShadcnSelectOption<int>(value, value.ToString(CultureInfo.InvariantCulture))).ToArray();
+    private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-down", "0 0 24 24", "<path d=\"m6 9 6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     protected override async Task OnInitializedAsync() => _catalog = await CatalogService.GetAsync();
 
     private IReadOnlyList<GoogleFontCatalogEntry> Results => _catalog?.Search(
         _query,
         _thaiOnly || _slot == ThemeStudioFontSlot.ThaiFallback ? "thai" : null,
-        _variableOnly).Take(24).ToArray() ?? [];
+        _variableOnly).Take(12).ToArray() ?? [];
+    private bool ShowResults => !string.IsNullOrWhiteSpace(_query) || _thaiOnly || _variableOnly;
 
     private string CatalogStatus => _catalog switch
     {
         null => "Loading local font catalog…",
         { Source: GoogleFontCatalogSource.BundledFallback } => "Local catalog unavailable. Three bundled, offline-safe families remain available.",
+        _ when !ShowResults => $"Search {_catalog.Entries.Count:N0} checked-in families.",
         _ => $"{Results.Count} of {_catalog.Entries.Count} local families shown."
     };
 
@@ -140,7 +148,7 @@
         State.SetTypographyRole(role, current with { Weight = weight });
     }
 
-    private static string Format(double value) => value.ToString("G17", CultureInfo.InvariantCulture);
+    private static string Format(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string SlotId(ThemeStudioFontSlot slot) => slot.ToString().ToLowerInvariant();
     private static string SlotLabel(ThemeStudioFontSlot slot) => slot switch { ThemeStudioFontSlot.ThaiFallback => "Thai fallback", _ => slot.ToString() };
     private static string RoleId(ShadcnTypographyRole role) => role switch

@@ -17,21 +17,6 @@ export function attachRunway(root, dotnet) {
     const onReducedChange = event => dotnet.invokeMethodAsync("SetSystemReducedMotion", event.matches);
     dotnet.invokeMethodAsync("SetSystemReducedMotion", reducedQuery.matches);
     reducedQuery.addEventListener("change", onReducedChange);
-    const visibleScenarios = new Set();
-    const scenarioObserver = new IntersectionObserver(entries => {
-        let changed = false;
-        for (const entry of entries) {
-            const instance = entry.target.dataset.scenarioInstance;
-            if (!instance) continue;
-            if (!entry.isIntersecting || visibleScenarios.has(instance)) continue;
-            visibleScenarios.add(instance);
-            scenarioObserver.unobserve(entry.target);
-            changed = true;
-        }
-        if (changed) dotnet.invokeMethodAsync("SetVisibleScenarios", [...visibleScenarios]);
-    }, { root: null, rootMargin: "900px 0px", threshold: 0 });
-    for (const card of root.querySelectorAll("[data-scenario-instance]")) scenarioObserver.observe(card);
-
     function isStaticLayout() {
         return root.clientWidth < 704 || reducedQuery.matches || root.dataset.reducedMotion === "true";
     }
@@ -149,7 +134,6 @@ export function attachRunway(root, dotnet) {
             for (const viewport of tracks) viewport.removeEventListener("scroll", onScroll);
             document.removeEventListener("visibilitychange", onVisibilityChange);
             reducedQuery.removeEventListener("change", onReducedChange);
-            scenarioObserver.disconnect();
         }
     };
 }

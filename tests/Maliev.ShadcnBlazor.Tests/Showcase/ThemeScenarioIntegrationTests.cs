@@ -63,7 +63,7 @@ public sealed class ThemeScenarioIntegrationTests : BunitContext
         Assert.Equal(new("table", "table-default"), selected);
 
         cut.Find("[data-testid='theme-scenario-next']").Click();
-        Assert.Equal(new("alert", "alert-default"), selected);
+        Assert.Equal(new("tabs", "tabs-default"), selected);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class ThemeScenarioIntegrationTests : BunitContext
     }
 
     [Fact]
-    public void ThemeStudioUsesCuratedRunwayWithoutMountingTheIndependentScenarioQaRegistry()
+    public void ThemeStudioSeparatesTheCuratedRunwayFromTheFocusedScenarioBrowser()
     {
         var root = FindRoot();
         var page = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor"));
@@ -91,9 +91,9 @@ public sealed class ThemeScenarioIntegrationTests : BunitContext
         var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
 
         Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
-        Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<MockSiteHost", page, StringComparison.Ordinal);
-        Assert.DoesNotContain("SupplyParameterFromQuery", page, StringComparison.Ordinal);
+        Assert.Contains("SupplyParameterFromQuery", page, StringComparison.Ordinal);
         Assert.Contains("IThemeScenarioRegistry", program, StringComparison.Ordinal);
         Assert.Contains(".theme-scenario-browser__layout", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr)", css, StringComparison.Ordinal);
