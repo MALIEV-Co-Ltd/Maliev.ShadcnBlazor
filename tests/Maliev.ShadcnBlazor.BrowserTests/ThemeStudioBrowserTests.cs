@@ -172,29 +172,14 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task ComponentCoverageOffersThreeInteractiveExamplesForEveryComponentWithoutInflatingTheRunway()
+    public async Task ThemeStudioKeepsOneCuratedInteractiveCanvasWithoutAMatrixMode()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         Assert.Equal(36, await page.Locator(".theme-use-case-card").CountAsync());
-        await page.GetByTestId("preview-surface-coverage").ClickAsync();
-        await Assertions.Expect(page.GetByTestId("theme-runway")).ToHaveCountAsync(0);
-        await Assertions.Expect(page.GetByTestId("theme-scenario-browser")).ToBeVisibleAsync();
-        Assert.Equal(3, await page.Locator("[data-testid^='theme-scenario-kind-']").CountAsync());
-
-        await page.GetByTestId("theme-scenario-search").FillAsync("Dropzone");
-        await page.Locator("[data-theme-scenario-component='dropzone']").ClickAsync();
-        await page.GetByTestId("theme-scenario-kind-default").ClickAsync();
-        var scenarioDropzone = page.Locator("[data-theme-scenario-host='dropzone-default']");
-        var scenarioInput = scenarioDropzone.Locator(".shadcn-dropzone-input");
-        await Assertions.Expect(scenarioInput).ToBeEnabledAsync();
-        await scenarioInput.SetInputFilesAsync(new FilePayload
-        {
-            Name = "bracket.step",
-            MimeType = "application/octet-stream",
-            Buffer = "solid-model"u8.ToArray()
-        });
-        await Assertions.Expect(scenarioDropzone.Locator(".shadcn-dropzone-status")).ToHaveTextAsync("1 file selected");
+        await Assertions.Expect(page.GetByTestId("theme-runway")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("theme-scenario-browser")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("[data-testid^='preview-surface-']")).ToHaveCountAsync(0);
     }
 
     [Fact]
@@ -245,6 +230,37 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.True(geometry.Bottom >= 868, $"Runway stopped at {geometry.Bottom}px in a 900px viewport.");
         Assert.True(geometry.Gap >= 24, $"Curated cards are packed too tightly: {geometry.Gap}px.");
         Assert.Equal("none", geometry.BeforeContent);
+        Assert.Equal("0px", await page.GetByTestId("theme-preview-stage").Locator("xpath=..").EvaluateAsync<string>("element => getComputedStyle(element).paddingTop"));
+    }
+
+    [Fact]
+    public async Task DesktopSidebarCanCollapseAndReopenFromThePersistentHeaderControl()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var toggle = page.GetByTestId("theme-controls-toggle");
+
+        await Assertions.Expect(toggle).ToBeVisibleAsync();
+        await toggle.ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToBeHiddenAsync();
+        await Assertions.Expect(toggle).ToBeVisibleAsync();
+        await toggle.ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task CuratedCardsUseAQuietSingleEdgeAndInputsUseASubtleFocusRing()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='shipping-handoff']").First;
+        var input = card.Locator(".shadcn-input").First;
+
+        Assert.Equal("0px", await card.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
+        await input.FocusAsync();
+        Assert.Equal("0px", await input.EvaluateAsync<string>("element => getComputedStyle(element).outlineWidth"));
+        Assert.NotEqual("none", await input.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
     }
 
     [Fact]
@@ -300,7 +316,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             await OpenSettingsAsync(page);
             await Assertions.Expect(page.GetByTestId("theme-device-controls")).ToBeVisibleAsync();
             await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync();
-            await Assertions.Expect(page.GetByTestId("preview-surface-coverage")).ToBeVisibleAsync();
+            await Assertions.Expect(page.Locator("[data-testid^='preview-surface-']")).ToHaveCountAsync(0);
         }
         else if (width <= 1024)
         {

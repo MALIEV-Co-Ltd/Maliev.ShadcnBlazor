@@ -56,7 +56,7 @@
         }
         else
         {
-            <button id="theme-settings-toggle" type="button" class="documentation-trigger documentation-trigger--outline" data-testid="theme-controls-toggle" aria-label="Toggle theme settings" aria-controls="theme-studio-sidebar-region" aria-expanded="@SettingsOpen.ToString().ToLowerInvariant()" @onclick="ToggleSettings">
+            <button id="theme-settings-toggle" type="button" class="documentation-trigger documentation-trigger--outline documentation-trigger--theme-settings" data-testid="theme-controls-toggle" aria-label="Toggle theme settings" aria-controls="theme-studio-sidebar-region" aria-expanded="@SettingsOpen.ToString().ToLowerInvariant()" @onclick="ToggleSettings">
                 <ShadcnIcon Icon="@ThemeSettingsIcon" Size="20" Class="documentation-trigger__icon" />
                 <span>Theme settings</span>
             </button>

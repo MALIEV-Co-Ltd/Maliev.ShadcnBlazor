@@ -62,7 +62,9 @@ public sealed class ThemeStudioWorkbenchContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] :is(.theme-runway, .theme-scenario-browser)", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-runway", css, StringComparison.Ordinal);
+        Assert.Contains(".documentation-trigger--theme-settings", css, StringComparison.Ordinal);
+        Assert.Contains("padding-block: 0", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);
         Assert.Contains("position: fixed", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: clip", css, StringComparison.Ordinal);

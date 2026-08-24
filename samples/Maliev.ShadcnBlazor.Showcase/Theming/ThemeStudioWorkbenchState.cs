@@ -2,12 +2,6 @@ using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
-public enum ThemeStudioPreviewSurface
-{
-    Curated,
-    Coverage
-}
-
 public sealed class ThemeStudioWorkbenchState
 {
     private static readonly IReadOnlySet<string> Sections = new HashSet<string>(StringComparer.Ordinal)
@@ -26,7 +20,6 @@ public sealed class ThemeStudioWorkbenchState
     public ThemeStudioMode Mode { get; private set; } = ThemeStudioMode.Light;
     public ShadcnDirection Direction { get; private set; } = ShadcnDirection.LeftToRight;
     public ThemeStudioLocale Locale { get; private set; } = ThemeStudioLocale.English;
-    public ThemeStudioPreviewSurface PreviewSurface { get; private set; } = ThemeStudioPreviewSurface.Curated;
     public bool ReducedMotion { get; private set; }
     public bool HighContrastPreview { get; private set; }
     public bool RunwayPaused { get; private set; }
@@ -95,14 +88,6 @@ public sealed class ThemeStudioWorkbenchState
         ValidateEnum(locale, nameof(locale));
         if (Locale == locale) return;
         Locale = locale;
-        RaiseChanged();
-    }
-
-    public void SetPreviewSurface(ThemeStudioPreviewSurface surface)
-    {
-        ValidateEnum(surface, nameof(surface));
-        if (PreviewSurface == surface) return;
-        PreviewSurface = surface;
         RaiseChanged();
     }
 

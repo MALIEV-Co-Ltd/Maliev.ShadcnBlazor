@@ -1,6 +1,4 @@
 @page "/theme"
-@using System.Globalization
-@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 @layout ThemeStudioLayout
 @implements IDisposable
 @implements IAsyncDisposable
@@ -33,14 +31,7 @@
                      data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
                      data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
                     <CascadingValue Value="PreviewContext">
-                        @if (State.Workbench.PreviewSurface == ThemeStudioPreviewSurface.Curated)
-                        {
-                            <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
-                        }
-                        else
-                        {
-                            <ThemeScenarioBrowser ComponentSlug="ComponentSlug" ScenarioId="ScenarioId" Culture="PreviewCulture" />
-                        }
+                        <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
                     </CascadingValue>
                 </div>
             </div>
@@ -58,18 +49,6 @@
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
     private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
     private ShadcnContext PreviewContext => new(State.EffectiveDarkMode, State.Direction);
-    private CultureInfo PreviewCulture => State.Locale == ThemeStudioLocale.Thai
-        ? CultureInfo.GetCultureInfo("th-TH")
-        : CultureInfo.GetCultureInfo("en-US");
-
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "component")]
-    public string? ComponentSlug { get; set; }
-
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "scenario")]
-    public string? ScenarioId { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
@@ -77,8 +56,6 @@
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
         await State.InitializeAsync();
-        if (!string.IsNullOrWhiteSpace(ComponentSlug))
-            State.Workbench.SetPreviewSurface(ThemeStudioPreviewSurface.Coverage);
         if (_disposed) return;
         _initialized = true;
     }

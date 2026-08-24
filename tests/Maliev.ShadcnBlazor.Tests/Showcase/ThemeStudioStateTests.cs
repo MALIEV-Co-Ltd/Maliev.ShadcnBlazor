@@ -31,7 +31,6 @@ public sealed class ThemeStudioStateTests
         Assert.Equal(ThemeStudioMode.Light, workbench.Mode);
         Assert.Equal(ShadcnDirection.LeftToRight, workbench.Direction);
         Assert.Equal(ThemeStudioLocale.English, workbench.Locale);
-        Assert.Equal(ThemeStudioPreviewSurface.Curated, workbench.PreviewSurface);
         Assert.False(workbench.ReducedMotion);
         Assert.False(workbench.HighContrastPreview);
 
@@ -41,17 +40,14 @@ public sealed class ThemeStudioStateTests
         workbench.SetLocale(ThemeStudioLocale.Thai);
         workbench.SetReducedMotion(true);
         workbench.SetHighContrastPreview(true);
-        workbench.SetPreviewSurface(ThemeStudioPreviewSurface.Coverage);
         workbench.SetActiveSection("typography");
         workbench.OpenSidebar();
         workbench.CloseSidebar();
 
-        Assert.Equal(10, changes);
+        Assert.Equal(9, changes);
         Assert.False(workbench.SidebarOpen);
         Assert.Equal("typography", workbench.ActiveSection);
-        Assert.Equal(ThemeStudioPreviewSurface.Coverage, workbench.PreviewSurface);
         Assert.Throws<ArgumentOutOfRangeException>(() => workbench.SetMode((ThemeStudioMode)999));
-        Assert.Throws<ArgumentOutOfRangeException>(() => workbench.SetPreviewSurface((ThemeStudioPreviewSurface)999));
         Assert.Throws<ArgumentOutOfRangeException>(() => workbench.SetViewport(new("unknown", "Unknown", 1)));
     }
 
@@ -615,8 +611,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal(4, cut.FindAll("[data-testid^='theme-icon-library-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-device-controls']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-validation-summary']"));
-        Assert.NotEmpty(cut.FindAll("[data-testid='preview-surface-curated']"));
-        Assert.NotEmpty(cut.FindAll("[data-testid='preview-surface-coverage']"));
+        Assert.Empty(cut.FindAll("[data-testid^='preview-surface-']"));
         Assert.All(cut.FindAll("[data-testid^='theme-advanced-'] [data-slot='collapsible-trigger']"), trigger =>
             Assert.Equal("false", trigger.GetAttribute("aria-expanded")));
     }
@@ -795,20 +790,13 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void ThemeStudioSwitchesBetweenCuratedRunwayAndFocusedComponentCoverage()
+    public void ThemeStudioUsesOnlyTheCuratedRunway()
     {
-        var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<ThemeStudio>();
 
         Assert.Single(cut.FindAll("[data-testid='theme-runway']"));
         Assert.Empty(cut.FindAll("[data-testid='theme-scenario-browser']"));
-
-        cut.Find("[data-testid='preview-surface-coverage']").Click();
-
-        Assert.Empty(cut.FindAll("[data-testid='theme-runway']"));
-        Assert.Single(cut.FindAll("[data-testid='theme-scenario-browser']"));
-        Assert.Equal(ThemeStudioPreviewSurface.Coverage, state.Workbench.PreviewSurface);
-        Assert.Equal(3, cut.FindAll("[data-testid^='theme-scenario-kind-']").Count);
+        Assert.Empty(cut.FindAll("[data-testid^='preview-surface-']"));
     }
 
     [Fact]

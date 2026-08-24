@@ -46,25 +46,22 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemePresetDock", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
-        Assert.Contains("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.Contains("theme-device-choice--{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.Contains("runway-pause", inspector, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void FocusedScenarioBrowserProvidesThreeRealPreviewsForEveryDocumentedComponent()
+    public void CuratedRunwayDoesNotExposeTheInternalScenarioQaMatrix()
     {
         var root = FindRoot();
-        var browser = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioBrowser.razor");
-        var host = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioHost.razor");
-        var catalog = ThemeScenarioCatalogTests.CreateRegistry();
+        var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
+        var inspector = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeInspector.razor");
 
-        Assert.All(catalog.All.GroupBy(scenario => scenario.ComponentSlug), group => Assert.Equal(3, group.Count()));
-        Assert.Contains("Enum.GetValues<ThemeScenarioKind>()", browser, StringComparison.Ordinal);
-        Assert.Contains("<ThemeScenarioHost", browser, StringComparison.Ordinal);
-        Assert.Contains("ThemeScenarioPreviewFactory.Create", host, StringComparison.Ordinal);
-        Assert.Contains("data-theme-scenario-host", host, StringComparison.Ordinal);
+        Assert.DoesNotContain("ThemeScenarioBrowser", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("Component coverage", inspector, StringComparison.Ordinal);
+        Assert.DoesNotContain("Component matrix", page + inspector, StringComparison.Ordinal);
     }
 
     [Fact]
