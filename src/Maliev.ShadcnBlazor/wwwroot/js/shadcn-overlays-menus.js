@@ -74,7 +74,7 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
     }
     const state = { content, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
     const keydown = event => {
-        menu.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
+        content.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
         if (event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); releaseDialog(content); dotnet.invokeMethodAsync('RequestCloseAsync'); return; }
         if (!trapFocus || event.key !== 'Tab') return;
@@ -177,7 +177,7 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
     drawers.set(content, { down, move, up, cancel, resize, outside, modal, snapObserver });
     content.dataset.drawerReady = 'true';
 }
-export function detachDrawer(content) { content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
+export function detachDrawer(content) { if (!content) return; content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
 
 const positioned = new WeakMap();
 function placePositioned(content, trigger, preferredSide, align, sideOffset, alignOffset, padding) {

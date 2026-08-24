@@ -249,6 +249,8 @@ public sealed class SheetDrawerTests : BunitContext
         var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
         var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
 
+        Assert.Contains("export function detachDrawer(content) { if (!content) return;", script, StringComparison.Ordinal);
+        Assert.Contains("content.querySelectorAll('[data-pointer-highlighted=\"true\"]')", script, StringComparison.Ordinal);
         Assert.Contains("content.removeAttribute('data-drawer-ready')", script, StringComparison.Ordinal);
         Assert.Contains("content.dataset.drawerReady = 'true'", script, StringComparison.Ordinal);
         Assert.Contains("button,a,input,textarea,select,[data-no-drag]", script, StringComparison.Ordinal);
