@@ -41,14 +41,14 @@ public sealed class ThemeScenarioIntegrationTests : BunitContext
     }
 
     [Fact]
-    public void ThemeStudioUsesOnlyTheCuratedRunwayWhileKeepingScenarioQaInternal()
+    public void ThemeStudioUsesOnlyTheCuratedBentoWhileKeepingScenarioQaInternal()
     {
         var root = FindRoot();
         var page = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor"));
         var program = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Program.cs"));
         var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
 
-        Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeBento", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<MockSiteHost", page, StringComparison.Ordinal);
         Assert.DoesNotContain("SupplyParameterFromQuery", page, StringComparison.Ordinal);

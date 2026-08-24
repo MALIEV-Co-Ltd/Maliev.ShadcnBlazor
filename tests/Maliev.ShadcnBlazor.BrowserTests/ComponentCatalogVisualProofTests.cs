@@ -162,11 +162,11 @@ public sealed class ComponentCatalogVisualProofTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
-        await Assertions.Expect(page.GetByTestId("theme-runway")).ToBeVisibleAsync();
-        await Assertions.Expect(page.Locator("[data-testid='theme-runway-mobile'] .theme-use-case-card")).ToHaveCountAsync(210);
+        await Assertions.Expect(page.GetByTestId("theme-bento")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-testid='theme-bento'] .theme-use-case-card")).ToHaveCountAsync(19);
         if (mode.StartsWith("mobile", StringComparison.Ordinal))
         {
-            var firstCard = page.Locator("[data-testid='theme-runway-mobile'] .theme-use-case-card").First;
+            var firstCard = page.Locator("[data-testid='theme-bento'] .theme-use-case-card").First;
             await Assertions.Expect(firstCard).ToBeVisibleAsync();
             await Assertions.Expect(firstCard).ToBeInViewportAsync();
         }

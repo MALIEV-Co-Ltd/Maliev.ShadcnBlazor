@@ -14,7 +14,7 @@ public sealed class ThemeStudioWorkbenchContractTests
 
         Assert.Contains("<DocumentationHeader", layout, StringComparison.Ordinal);
         Assert.Contains("<ThemeStudioSidebar", page, StringComparison.Ordinal);
-        Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeBento", page, StringComparison.Ordinal);
         Assert.Contains("aria-label=\"Theme preview\"", page, StringComparison.Ordinal);
         Assert.Contains("images/brand/MALIEV_BLACK.svg", header, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSidebarProvider", sidebar, StringComparison.Ordinal);
@@ -36,7 +36,7 @@ public sealed class ThemeStudioWorkbenchContractTests
         var inspector = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeInspector.razor");
         var combined = page + inspector;
 
-        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "runway-pause" })
+        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "preview-animation-pause" })
             Assert.Contains($"data-testid=\"{hook}\"", combined, StringComparison.Ordinal);
         Assert.Contains("theme-icon-library-{library.ToString().ToLowerInvariant()}", inspector, StringComparison.Ordinal);
 
@@ -62,7 +62,7 @@ public sealed class ThemeStudioWorkbenchContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-runway", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-bento", css, StringComparison.Ordinal);
         Assert.Contains(".documentation-trigger--theme-settings", css, StringComparison.Ordinal);
         Assert.Contains("padding-block: 0", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);

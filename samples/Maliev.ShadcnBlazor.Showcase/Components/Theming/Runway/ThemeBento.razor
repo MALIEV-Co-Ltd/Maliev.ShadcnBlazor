@@ -1,0 +1,46 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+@inject IThemeUseCaseRegistry Registry
+@inject ThemeRunwayState AnimationState
+@implements IDisposable
+
+<section class="theme-bento"
+         aria-label="Curated realistic component use cases"
+         data-testid="theme-bento"
+         data-animation-paused="@(Paused ? "true" : "false")"
+         data-reduced-motion="@(ReducedMotion ? "true" : "false")">
+    <div class="theme-bento__grid">
+        @foreach (var card in Registry.All.OrderBy(card => card.Order))
+        {
+            <ThemeUseCaseCardHost @key="card.Id"
+                                  Definition="card"
+                                  Frame="AnimationState.Frame"
+                                  Locale="Locale" />
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    [Parameter] public bool Paused { get; set; }
+    [Parameter] public bool ReducedMotion { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AnimationState.Changed += OnChanged;
+        ApplyMotionSettings();
+        AnimationState.Start();
+    }
+
+    protected override void OnParametersSet() => ApplyMotionSettings();
+
+    private void ApplyMotionSettings()
+    {
+        AnimationState.SetPersistentPaused(Paused);
+        AnimationState.SetReducedMotion(ReducedMotion);
+    }
+
+    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AnimationState.Changed -= OnChanged;
+}

@@ -1,35 +1,23 @@
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
-public sealed class ThemeRunwayContractTests
+public sealed class ThemeBentoContractTests
 {
     [Fact]
-    public void RunwayOwnsTwoOpposingTracksInertMirrorsAndMobileNaturalFlow()
+    public void PreviewUsesOneResponsiveInteractiveBentoGridWithRealCardBorders()
     {
         var root = FindRoot();
-        var runway = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeRunway.razor");
-        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-studio-runway.js");
+        var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Equal(2, Count(runway, "data-runway-track="));
-        Assert.Contains("aria-hidden=\"true\" inert", runway, StringComparison.Ordinal);
-        Assert.Contains("theme-runway__mobile", runway, StringComparison.Ordinal);
-        Assert.DoesNotContain("ScenarioRegistry.All", runway, StringComparison.Ordinal);
-        Assert.DoesNotContain("ThemeScenarioRunwayCard", runway, StringComparison.Ordinal);
-        Assert.Contains("scrollTop", script, StringComparison.Ordinal);
-        Assert.Contains("onScroll", script, StringComparison.Ordinal);
-        Assert.Contains("pointerenter", script, StringComparison.Ordinal);
-        Assert.Contains("visibilitychange", script, StringComparison.Ordinal);
-        Assert.Contains("prefers-reduced-motion", script, StringComparison.Ordinal);
-        Assert.Contains("@container (max-width: 43.999rem)", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-runway__mobile { display: grid", css, StringComparison.Ordinal);
-        Assert.Contains("scrollbar-width: none", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-runway__viewport::-webkit-scrollbar { display: none; }", css, StringComparison.Ordinal);
-        var runwayStart = css.IndexOf("\n.theme-runway {\n", StringComparison.Ordinal) + 1;
-        var runwayRule = css[runwayStart..(css.IndexOf("\n}\n", runwayStart, StringComparison.Ordinal) + 3)];
-        Assert.DoesNotContain("border:", runwayRule, StringComparison.Ordinal);
-        Assert.DoesNotContain("border-radius:", runwayRule, StringComparison.Ordinal);
-        Assert.DoesNotContain("background:", runwayRule, StringComparison.Ordinal);
-        Assert.DoesNotContain("padding:", runwayRule, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-bento\"", bento, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-bento__grid\"", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("mirror", bento, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("inert", bento, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("data-runway-track", bento, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr))", css, StringComparison.Ordinal);
+        Assert.Contains("border: 1px solid var(--shadcn-border)", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("grid-auto-flow: dense", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-region { min-inline-size: 0;", css, StringComparison.Ordinal);
         Assert.Contains("border: 0; border-radius: 0; background: transparent", css, StringComparison.Ordinal);
     }
@@ -43,13 +31,29 @@ public sealed class ThemeRunwayContractTests
         var inspector = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeInspector.razor");
 
         Assert.Contains("<DocumentationHeader", layout, StringComparison.Ordinal);
-        Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeBento", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemePresetDock", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.Contains("theme-device-choice--{viewport.Id}", inspector, StringComparison.Ordinal);
-        Assert.Contains("runway-pause", inspector, StringComparison.Ordinal);
+        Assert.Contains("preview-animation-pause", inspector, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BentoIncludesFullyInteractiveOverlayComponentExamples()
+    {
+        var root = FindRoot();
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+
+        Assert.Contains("<ShadcnDialog", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDrawer", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSheet", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnDropdownMenu", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnHoverCard", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnTooltip", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnContextMenu", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("Disabled=\"IsMirror\"", card, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -100,10 +104,9 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("@keyframes theme-runway-type-character", css, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-runway-typing-reveal", css, StringComparison.Ordinal);
         Assert.DoesNotContain(".theme-runway-typing { display: inline-block; max-inline-size: 100%; clip-path", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-runway-typing-character { animation: none; opacity: 1;", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-character { animation: none !important; opacity: 1;", css, StringComparison.Ordinal);
     }
 
-    private static int Count(string value, string needle) => (value.Length - value.Replace(needle, string.Empty, StringComparison.Ordinal).Length) / needle.Length;
     private static string Read(string root, params string[] segments) => File.ReadAllText(Path.Combine([root, .. segments]));
     private static string FindRoot()
     {

@@ -680,7 +680,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset-shuffle']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
         Assert.Equal(4, inspector.FindAll("[data-testid^='theme-icon-library-']").Count);
-        Assert.NotEmpty(inspector.FindAll("[data-testid='runway-pause']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='preview-animation-pause']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
         Assert.Empty(inspector.FindAll("[data-testid='theme-generator-options']"));
         Assert.Empty(inspector.FindAll("[data-testid='theme-palette-seed']"));
@@ -781,20 +781,20 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void ThemeStudioUsesTheFixedRunwayInsteadOfMockSites()
+    public void ThemeStudioUsesTheBentoPreviewInsteadOfMockSites()
     {
         var cut = Render<ThemeStudio>();
-        Assert.Single(cut.FindAll("[data-testid='theme-runway']"));
-        Assert.Equal(36, cut.FindAll("[data-use-case-id]").Count);
+        Assert.Single(cut.FindAll("[data-testid='theme-bento']"));
+        Assert.Equal(19, cut.FindAll("[data-use-case-id]").Count);
         Assert.Empty(cut.FindAll("[data-testid$='-mock']"));
     }
 
     [Fact]
-    public void ThemeStudioUsesOnlyTheCuratedRunway()
+    public void ThemeStudioUsesOnlyTheCuratedBentoPreview()
     {
         var cut = Render<ThemeStudio>();
 
-        Assert.Single(cut.FindAll("[data-testid='theme-runway']"));
+        Assert.Single(cut.FindAll("[data-testid='theme-bento']"));
         Assert.Empty(cut.FindAll("[data-testid='theme-scenario-browser']"));
         Assert.Empty(cut.FindAll("[data-testid^='preview-surface-']"));
     }
