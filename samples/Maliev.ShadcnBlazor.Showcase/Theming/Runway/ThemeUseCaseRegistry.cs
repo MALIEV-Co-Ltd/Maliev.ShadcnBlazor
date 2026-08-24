@@ -15,7 +15,7 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
         Use("drawing-attachment", 9, ThemeBentoSize.Wide, "Drawing attachment", "ไฟล์แนบแบบงาน", "ShadcnAttachment", "ShadcnAttachmentAction"),
         Use("quality-alert", 10, ThemeBentoSize.Wide, "Quality alert", "การแจ้งเตือนคุณภาพ", "ShadcnAlert"),
         Use("deposit-approval", 11, ThemeBentoSize.Standard, "Deposit approval", "อนุมัติเงินมัดจำ", "ShadcnBadge", "ShadcnSeparator", "ShadcnButton"),
-        Use("conversation-marker", 12, ThemeBentoSize.Standard, "Conversation marker", "ตัวคั่นบทสนทนา", "ShadcnMarker"),
+        Use("conversation-marker", 12, ThemeBentoSize.Wide, "Conversation marker", "ตัวคั่นบทสนทนา", "ShadcnMarker"),
         Use("assigned-reviewers", 13, ThemeBentoSize.Standard, "Assigned reviewers", "ผู้ตรวจสอบที่ได้รับมอบหมาย", "ShadcnAvatarGroup", "ShadcnBadge", "ShadcnButton"),
         Use("assistant-conversation", 14, ThemeBentoSize.Wide, "Message scroller conversation", "บทสนทนาแบบเลื่อนข้อความ", "ShadcnMessageScroller", "ShadcnMessage", "ShadcnBubble", "ShadcnAvatar", "ShadcnButton"),
         Use("project-questionnaire", 15, ThemeBentoSize.Wide, "Interactive questionnaire", "แบบสอบถามเชิงโต้ตอบ", "ShadcnQuestionnaire", "ShadcnQuestionnaireChoice", "ShadcnQuestionnaireInput"),

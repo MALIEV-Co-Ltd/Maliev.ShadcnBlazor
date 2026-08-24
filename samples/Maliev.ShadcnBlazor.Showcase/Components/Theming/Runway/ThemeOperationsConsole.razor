@@ -19,7 +19,7 @@
                     <ShadcnAlertDescription>@StatusDescription</ShadcnAlertDescription>
                 </ShadcnAlert>
                 <ShadcnChart Id="@($"{Kind}-throughput")" Title="Cell throughput" Description="Completed and inspected operations" Type="ShadcnChartType.Bar" Config="ChartConfig" Categories="ChartCategories" Series="ChartSeries" ShowGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" InitialWidth="430" InitialHeight="190" />
-                <ShadcnTable Borders="true" ExpectedColumnCount="3">
+                <ShadcnTable ExpectedColumnCount="3">
                     <ShadcnTableCaption>Current production gates</ShadcnTableCaption>
                     <ShadcnTableHeader><ShadcnTableRow><ShadcnTableHead>Gate</ShadcnTableHead><ShadcnTableHead>Owner</ShadcnTableHead><ShadcnTableHead>Status</ShadcnTableHead></ShadcnTableRow></ShadcnTableHeader>
                     <ShadcnTableBody>
@@ -96,7 +96,11 @@
     private string StatusTitle => Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" };
     private string StatusDescription => Kind switch { "quality" => "All critical dimensions are within the approved tolerance band.", "handoff" => "The recipient, dock, and courier window have been verified.", _ => "Cell A3 has capacity for the next two scheduled work orders." };
     private static readonly string[] ChartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-    private static readonly ShadcnChartConfig ChartConfig = new() { ["completed"] = new("Completed"), ["inspected"] = new("Inspected") };
+    private static readonly ShadcnChartConfig ChartConfig = new()
+    {
+        ["completed"] = new("Completed") { Color = "var(--shadcn-chart-1)" },
+        ["inspected"] = new("Inspected") { Color = "var(--shadcn-chart-2)" }
+    };
     private static readonly ShadcnChartSeries[] ChartSeries = [new("completed", [28, 36, 31, 43, 48]), new("inspected", [22, 30, 27, 35, 41])];
     protected override void OnParametersSet()
     {

@@ -8733,8 +8733,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     letter-spacing: var(--shadcn-typography-button-letter-spacing);
 }
 .theme-use-case-card__content { display: grid; gap: .875rem; }
-.theme-use-case-card[data-use-case-id="project-questionnaire"] { border: 0; background: transparent; box-shadow: none; }
-.theme-use-case-card[data-use-case-id="project-questionnaire"] > .theme-use-case-card__content { padding: 0; }
 .theme-use-case-card[data-use-case-id="project-questionnaire"] [data-slot="questionnaire-choice"]:focus-within { outline-width: 1px; outline-offset: 1px; }
 .theme-use-case-card[data-use-case-id="project-questionnaire"] [data-slot="questionnaire-actions"] { display: flex; flex-wrap: wrap; justify-content: space-between; }
 .theme-use-case-card[data-use-case-id="quotation-data-table"] .shadcn-data-table-frame { border: 0; border-radius: 0; }
@@ -8894,8 +8892,10 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-operations-console__overview,
 .theme-operations-console__release,
 .theme-operations-console__support { display: grid; gap: .9rem; padding-block-start: .9rem; }
-.theme-operations-console__overview { grid-template-columns: minmax(0, 1.15fr) minmax(15rem, .85fr); align-items: start; }
+.theme-operations-console__overview { grid-template-columns: minmax(0, 1fr); align-items: start; }
 .theme-operations-console__overview > .shadcn-alert { grid-column: 1 / -1; }
+.theme-operations-console__overview > .shadcn-chart { min-inline-size: 0; }
+.theme-operations-console__overview > .shadcn-table-container { min-inline-size: 0; inline-size: 100%; overflow-x: auto; }
 .theme-operations-console__form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; align-items: end; }
 .theme-operations-console__form-row > label,
 .theme-operations-console__controls > label { display: grid; gap: .4rem; font-size: .75rem; font-weight: 600; }

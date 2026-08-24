@@ -100,7 +100,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
         await Assertions.Expect(questionnaire.GetByText("Interactive questionnaire", new() { Exact = true })).ToHaveCountAsync(0);
-        Assert.Equal("0px", await questionnaire.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.Equal("1px", await questionnaire.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
         Assert.Equal("0px", await questionnaire.Locator("form[data-slot='questionnaire']").EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
         Assert.Equal("1px", await questionnaire.Locator("[data-slot='questionnaire-choice']").First.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
 
@@ -129,8 +129,36 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var reviewers = page.Locator("[data-use-case-id='assigned-reviewers']");
         var count = reviewers.GetByRole(AriaRole.Button, new() { Name = "Show four more reviewers", Exact = true });
         await count.ClickAsync();
-        await Assertions.Expect(count).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(count).ToHaveCountAsync(0);
         await Assertions.Expect(reviewers.Locator("[data-slot='avatar']")).ToHaveCountAsync(7);
+        var hoveredAvatar = reviewers.Locator("[data-slot='avatar']").Nth(3);
+        await hoveredAvatar.HoverAsync();
+        Assert.Equal("3", await hoveredAvatar.EvaluateAsync<string>("element => getComputedStyle(element).zIndex"));
+    }
+
+    [Fact]
+    public async Task DenseWorkflowCardsKeepActionsChartsAndTablesInsideReadableBounds()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        Assert.Equal("2", await page.Locator("[data-use-case-item='conversation-marker']").GetAttributeAsync("data-column-span"));
+        foreach (var id in new[] { "drawing-attachment", "file-context" })
+        {
+            var card = page.Locator($"[data-use-case-id='{id}']");
+            Assert.True(await card.EvaluateAsync<bool>("element => Array.from(element.querySelectorAll('[data-slot=attachment-action]')).every(action => { const a = action.getBoundingClientRect(); const attachment = action.closest('[data-slot=attachment]').getBoundingClientRect(); return a.left >= attachment.left && a.right <= attachment.right; })"));
+        }
+
+        var console = page.Locator("[data-console='production']");
+        Assert.Equal("1", await console.Locator(".theme-operations-console__overview").EvaluateAsync<string>("element => getComputedStyle(element).gridTemplateColumns.split(' ').length.toString()"));
+        var completed = console.Locator("rect[data-series='completed']").First;
+        var inspected = console.Locator("rect[data-series='inspected']").First;
+        var completedFill = await completed.EvaluateAsync<string>("element => getComputedStyle(element).fill");
+        var inspectedFill = await inspected.EvaluateAsync<string>("element => getComputedStyle(element).fill");
+        Assert.NotEqual(completedFill, inspectedFill);
+        Assert.DoesNotContain(completedFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
+        Assert.DoesNotContain(inspectedFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
+        Assert.True(await console.Locator(".shadcn-table-container").EvaluateAsync<bool>("element => element.scrollWidth <= element.clientWidth + 1"));
     }
 
     [Fact]

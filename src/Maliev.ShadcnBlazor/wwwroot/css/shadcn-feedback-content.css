@@ -103,12 +103,15 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group { --shadcn-avatar-overlap: 0.5rem; display: flex; isolation: isolate; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > * + * { margin-inline-start: calc(-1 * var(--shadcn-avatar-overlap)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > :where([data-slot="avatar"], [data-slot="avatar-group-count"]) { position: relative; box-shadow: 0 0 0 2px var(--shadcn-background); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"] { z-index: 1; transition: transform var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within) { z-index: 3; transform: translateY(-0.125rem) scale(1.04); box-shadow: 0 0 0 2px var(--shadcn-background), 0 .25rem .75rem color-mix(in oklch, var(--shadcn-foreground) 16%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count { z-index: 2; display: inline-flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-foreground); padding: 0; font: inherit; font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count { cursor: pointer; transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), scale var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); scale: 1.04; }
 :where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="sm"] { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="lg"] { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) { :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"] { transition: none; } :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within) { transform: none; } }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress { display: flex; flex-wrap: wrap; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-track { position: relative; display: flex; width: 100%; height: 0.375rem; align-items: center; overflow: hidden; border-radius: 9999px; background: var(--shadcn-muted); }
