@@ -248,9 +248,10 @@
                 <ShadcnDialogContent ShowCloseButton="true" CloseLabel="Close contact editor">
                     <ShadcnDialogHeader><ShadcnDialogTitle>Production contact</ShadcnDialogTitle><ShadcnDialogDescription>Changes apply to work order WO-2418.</ShadcnDialogDescription></ShadcnDialogHeader>
                     <ShadcnFieldGroup><ShadcnField><ShadcnFieldLabel For="bento-contact-name">Name</ShadcnFieldLabel><ThemeAnimatedInput Id="bento-contact-name" @bind-Value="_contactName" /></ShadcnField><ShadcnField><ShadcnFieldLabel For="bento-contact-phone">Phone</ShadcnFieldLabel><ThemeAnimatedInput Id="bento-contact-phone" @bind-Value="_contactPhone" /></ShadcnField></ShadcnFieldGroup>
-                    <ShadcnDialogFooter><ShadcnDialogClose>Cancel</ShadcnDialogClose><ShadcnDialogClose Variant="ShadcnButtonVariant.Default">Save contact</ShadcnDialogClose></ShadcnDialogFooter>
+                    <ShadcnDialogFooter><ShadcnDialogClose OnClick="CancelContact">Cancel</ShadcnDialogClose><ShadcnDialogClose Variant="ShadcnButtonVariant.Default" OnClick="SaveContact">Save contact</ShadcnDialogClose></ShadcnDialogFooter>
                 </ShadcnDialogContent>
             </ShadcnDialog>
+            @if (_contactStatus is not null) { <p class="theme-runway-action-status" role="status">@_contactStatus</p> }
             break;
         case "dispatch-drawer":
             <p class="theme-use-case-card__description">Three inspected packages are ready for the Bangkok handoff.</p>
@@ -259,9 +260,10 @@
                 <ShadcnDrawerContent Class="theme-bento-dispatch-drawer">
                     <ShadcnDrawerHeader><ShadcnDrawerTitle>Confirm dispatch</ShadcnDrawerTitle><ShadcnDrawerDescription>Check the destination before releasing WO-2418.</ShadcnDrawerDescription></ShadcnDrawerHeader>
                     <div class="theme-bento-overlay-body"><dl class="theme-runway-summary"><div><dt>Destination</dt><dd>Bang Na, Bangkok</dd></div><div><dt>Carrier</dt><dd>Kerry Express</dd></div></dl></div>
-                    <ShadcnDrawerFooter><ShadcnDrawerClose Variant="ShadcnButtonVariant.Outline">Cancel</ShadcnDrawerClose><ShadcnDrawerClose Variant="ShadcnButtonVariant.Default">Confirm dispatch</ShadcnDrawerClose></ShadcnDrawerFooter>
+                    <ShadcnDrawerFooter><ShadcnDrawerClose Variant="ShadcnButtonVariant.Outline" OnClick="HoldDrawerDispatch">Cancel</ShadcnDrawerClose><ShadcnDrawerClose Variant="ShadcnButtonVariant.Default" OnClick="ReleaseDrawerDispatch">Confirm dispatch</ShadcnDrawerClose></ShadcnDrawerFooter>
                 </ShadcnDrawerContent>
             </ShadcnDrawer>
+            @if (_drawerStatus is not null) { <p class="theme-runway-action-status" role="status">@_drawerStatus</p> }
             break;
         case "delivery-sheet":
             <p class="theme-use-case-card__description">Friday, 28 August · 16:00 · Samut Prakan</p>
@@ -269,10 +271,11 @@
                 <ShadcnSheetTrigger>Open schedule</ShadcnSheetTrigger>
                 <ShadcnSheetContent CloseLabel="Close delivery schedule">
                     <ShadcnSheetHeader><ShadcnSheetTitle>Delivery schedule</ShadcnSheetTitle><ShadcnSheetDescription>Coordinate the inspection release and courier collection.</ShadcnSheetDescription></ShadcnSheetHeader>
-                    <div class="theme-bento-overlay-body"><label>Production contact<ThemeAnimatedInput @bind-Value="_contactName" /></label><label class="theme-runway-check"><ShadcnCheckbox Value="true" /> Notify the project team</label></div>
-                    <ShadcnSheetFooter><ShadcnSheetClose>Cancel</ShadcnSheetClose><ShadcnSheetClose Variant="ShadcnButtonVariant.Default">Save schedule</ShadcnSheetClose></ShadcnSheetFooter>
+                    <div class="theme-bento-overlay-body"><label>Production contact<ThemeAnimatedInput @bind-Value="_contactName" /></label><label class="theme-runway-check"><ShadcnCheckbox Value="@_notifyProjectTeam" ValueChanged="value => _notifyProjectTeam = value ?? false" /> Notify the project team</label></div>
+                    <ShadcnSheetFooter><ShadcnSheetClose OnClick="CancelSchedule">Cancel</ShadcnSheetClose><ShadcnSheetClose Variant="ShadcnButtonVariant.Default" OnClick="SaveSchedule">Save schedule</ShadcnSheetClose></ShadcnSheetFooter>
                 </ShadcnSheetContent>
             </ShadcnSheet>
+            @if (_scheduleStatus is not null) { <p class="theme-runway-action-status" role="status">@_scheduleStatus</p> }
             break;
         case "tooltip-guidance":
             <p class="theme-use-case-card__description">Hover or focus the controls for concise inspection guidance.</p>
@@ -310,6 +313,10 @@
     private bool _issueSubmitted;
     private string _contactName = "Narin S.";
     private string _contactPhone = "+66 81 555 2418";
+    private string? _contactStatus;
+    private string? _drawerStatus;
+    private string? _scheduleStatus;
+    private bool _notifyProjectTeam = true;
     private bool _reviewerHoverOpen;
     private bool _planReviewOpen;
     private bool _inspectionReportOpen;
@@ -424,6 +431,14 @@
         _ => "Attachment action completed."
     };
     private void SubmitIssue() => _issueSubmitted = true;
+    private void SaveContact(MouseEventArgs _) => _contactStatus = $"Production contact saved for {_contactName}.";
+    private void CancelContact(MouseEventArgs _) => _contactStatus = "Contact changes discarded.";
+    private void ReleaseDrawerDispatch(MouseEventArgs _) => _drawerStatus = "Dispatch released to Kerry Express.";
+    private void HoldDrawerDispatch(MouseEventArgs _) => _drawerStatus = "Dispatch remains on hold.";
+    private void SaveSchedule(MouseEventArgs _) => _scheduleStatus = _notifyProjectTeam
+        ? "Delivery schedule saved and the project team notified."
+        : "Delivery schedule saved without notifications.";
+    private void CancelSchedule(MouseEventArgs _) => _scheduleStatus = "Schedule changes discarded.";
     private Task OnQuotationTableStateChanged(ShadcnDataTableState state)
     {
         _quotationTableState = state;

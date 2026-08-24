@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.OverlaysMenus;
 
@@ -80,6 +81,7 @@ public sealed class DialogAlertDialogTests : BunitContext
     [Fact]
     public void DialogDistinguishesTheIconDismissalFromFooterCloseActions()
     {
+        var saveCalls = 0;
         var cut = Render<ShadcnDialog>(parameters => parameters
             .Add(component => component.Open, true)
             .AddChildContent(builder =>
@@ -95,6 +97,7 @@ public sealed class DialogAlertDialogTests : BunitContext
                     {
                         footer.OpenComponent<ShadcnDialogClose>(0);
                         footer.AddAttribute(1, nameof(ShadcnDialogClose.ChildContent), (RenderFragment)(text => text.AddContent(0, "Save changes")));
+                        footer.AddAttribute(2, nameof(ShadcnDialogClose.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, () => saveCalls++));
                         footer.CloseComponent();
                     }));
                     content.CloseComponent();
@@ -112,6 +115,7 @@ public sealed class DialogAlertDialogTests : BunitContext
         Assert.Contains("Save changes", footerClose.TextContent, StringComparison.Ordinal);
 
         footerClose.Click();
+        Assert.Equal(1, saveCalls);
         Assert.Empty(cut.FindAll("[data-slot='dialog-content']"));
     }
 

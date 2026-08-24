@@ -398,6 +398,63 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task OverlayWorkflowActionsPersistUsefulResultsOnTheirCards()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        var contact = page.Locator("[data-use-case-id='contact-dialog']");
+        await contact.GetByRole(AriaRole.Button, new() { Name = "Edit contact", Exact = true }).ClickAsync();
+        await page.GetByRole(AriaRole.Dialog).GetByRole(AriaRole.Button, new() { Name = "Save contact", Exact = true }).ClickAsync();
+        await Assertions.Expect(contact.GetByRole(AriaRole.Status)).ToContainTextAsync("Production contact saved");
+
+        var dispatch = page.Locator("[data-use-case-id='dispatch-drawer']");
+        await dispatch.GetByRole(AriaRole.Button, new() { Name = "Review dispatch", Exact = true }).ClickAsync();
+        var drawer = page.Locator("[data-slot='drawer-content']");
+        await drawer.GetByRole(AriaRole.Button, new() { Name = "Confirm dispatch", Exact = true }).ClickAsync();
+        await Assertions.Expect(drawer).ToBeHiddenAsync();
+        await Assertions.Expect(dispatch.GetByRole(AriaRole.Status)).ToContainTextAsync("Dispatch released");
+
+        var schedule = page.Locator("[data-use-case-id='delivery-sheet']");
+        await schedule.GetByRole(AriaRole.Button, new() { Name = "Open schedule", Exact = true }).ClickAsync();
+        var sheet = page.Locator("[data-slot='sheet-content']");
+        await Assertions.Expect(sheet).ToBeVisibleAsync();
+        await sheet.GetByRole(AriaRole.Button, new() { Name = "Save schedule", Exact = true }).ClickAsync();
+        await Assertions.Expect(schedule.GetByRole(AriaRole.Status)).ToContainTextAsync("Delivery schedule saved");
+    }
+
+    [Theory]
+    [MemberData(nameof(ReleaseViewports))]
+    public async Task EveryCuratedCardContainsItsVisibleControlsAndMaintainsReadableType(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);
+        var page = await OpenAsync(context);
+        var diagnostics = await page.Locator("[data-use-case-id]").EvaluateAllAsync<string>("""
+            cards => JSON.stringify(cards.flatMap(card => {
+                const cardBox = card.getBoundingClientRect();
+                const issues = [];
+                if (card.scrollWidth > card.clientWidth + 1)
+                    issues.push(`${card.dataset.useCaseId}: card overflow ${card.scrollWidth}/${card.clientWidth}`);
+                const title = card.querySelector('.shadcn-card-title');
+                if (title && parseFloat(getComputedStyle(title).fontSize) > 24)
+                    issues.push(`${card.dataset.useCaseId}: title ${getComputedStyle(title).fontSize}`);
+                card.querySelectorAll('button, input, textarea, select, [role=combobox]').forEach(control => {
+                    const style = getComputedStyle(control);
+                    const box = control.getBoundingClientRect();
+                    if (style.display === 'none' || style.visibility === 'hidden' || box.width === 0 || box.height === 0)
+                        return;
+                    const horizontalScroller = Array.from(control.parentElement?.closest('[data-use-case-id]')?.querySelectorAll('*') ?? [])
+                        .find(candidate => candidate.contains(control) && candidate.scrollWidth > candidate.clientWidth + 1 && ['auto', 'scroll'].includes(getComputedStyle(candidate).overflowX));
+                    if (!horizontalScroller && (box.left < cardBox.left - 1 || box.right > cardBox.right + 1))
+                        issues.push(`${card.dataset.useCaseId}: ${control.tagName.toLowerCase()} outside card`);
+                });
+                return issues;
+            }))
+            """);
+        Assert.Equal("[]", diagnostics);
+    }
+
+    [Fact]
     public async Task CardsUsePackageComponentsAndCorrectPercentages()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);

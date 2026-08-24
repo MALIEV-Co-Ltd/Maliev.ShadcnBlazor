@@ -1278,6 +1278,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogClose
   RenderFragment ChildContent
   Boolean Disabled
   String Label
+  EventCallback<MouseEventArgs> OnClick
   ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogContent
   RenderFragment ChildContent
@@ -1308,6 +1309,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawer
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerClose
   RenderFragment ChildContent
   Boolean Disabled
+  EventCallback<MouseEventArgs> OnClick
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerDescription
@@ -1509,6 +1511,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetClose
   RenderFragment ChildContent
   Boolean Disabled
   String Label
+  EventCallback<MouseEventArgs> OnClick
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetContent
   RenderFragment ChildContent
   String CloseLabel

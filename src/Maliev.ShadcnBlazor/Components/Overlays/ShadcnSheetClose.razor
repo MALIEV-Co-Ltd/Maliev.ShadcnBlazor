@@ -1,9 +1,10 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="Forwarded" class="@MergeClass(ChildContent is null ? "shadcn-sheet-close shadcn-sheet-close-icon" : "shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" type="button" aria-label="@Label" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
+<button @attributes="Forwarded" class="@MergeClass(ChildContent is null ? "shadcn-sheet-close shadcn-sheet-close-icon" : "shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" type="button" aria-label="@(ChildContent is null ? Label : null)" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
 @code {
     [CascadingParameter] private ShadcnSheetContext Context { get; set; } = default!;
     [Parameter] public string Label { get; set; } = "Close";
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private RenderFragment DefaultContent => builder =>
@@ -24,9 +25,12 @@
     };
 
     private IReadOnlyDictionary<string, object> Forwarded => AttributesExcept("data-slot", "type", "aria-label", "disabled");
-    private async Task CloseAsync()
+    private async Task CloseAsync(MouseEventArgs args)
     {
-        if (!Disabled)
-            await Context.Owner.SetOpenAsync(false);
+        if (Disabled)
+            return;
+
+        await OnClick.InvokeAsync(args);
+        await Context.Owner.SetOpenAsync(false);
     }
 }
