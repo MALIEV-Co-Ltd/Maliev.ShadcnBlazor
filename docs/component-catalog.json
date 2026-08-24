@@ -88,6 +88,23 @@
       "deviations": []
     },
     {
+      "name": "Visual Style Scope",
+      "slug": "visual-style-scope",
+      "plan": 2,
+      "classification": "custom",
+      "status": "complete",
+      "evidence": {
+        "api": true,
+        "componentTests": true,
+        "accessibility": true,
+        "interaction": true,
+        "computedStyle": true,
+        "visual": true,
+        "integration": true
+      },
+      "deviations": []
+    },
+    {
       "name": "Attachment",
       "slug": "attachment",
       "plan": 9,

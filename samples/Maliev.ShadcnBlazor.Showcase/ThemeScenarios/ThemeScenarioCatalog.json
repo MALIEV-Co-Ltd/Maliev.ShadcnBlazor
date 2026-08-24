@@ -3854,6 +3854,51 @@
       "tags": ["accessible", "keyboard", "source-order", "bento-grid"]
     },
     {
+      "id": "visual-style-scope-default",
+      "componentSlug": "visual-style-scope",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Production workspace visual treatment",
+        "description": "Compose a reviewed surface, color, depth, and motion treatment around a realistic production workspace."
+      },
+      "thai": {
+        "title": "รูปแบบภาพสำหรับพื้นที่งานผลิต",
+        "description": "ประกอบรูปแบบพื้นผิว สี มิติ และการเคลื่อนไหวที่ผ่านการทบทวนรอบพื้นที่งานผลิตจริง"
+      },
+      "tags": ["workflow", "styling", "composition", "visual-style-scope"]
+    },
+    {
+      "id": "visual-style-scope-stress",
+      "componentSlug": "visual-style-scope",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Nested visual treatments under load",
+        "description": "Keep nested styles, dense controls, charts, and overlays legible without changing application layout or interaction."
+      },
+      "thai": {
+        "title": "รูปแบบภาพซ้อนกันภายใต้ข้อมูลหนาแน่น",
+        "description": "คงความชัดเจนของรูปแบบซ้อน ตัวควบคุม กราฟ และโอเวอร์เลย์โดยไม่เปลี่ยนเลย์เอาต์หรือการโต้ตอบของแอป"
+      },
+      "tags": ["stress", "nested", "overlay", "visual-style-scope"]
+    },
+    {
+      "id": "visual-style-scope-accessible",
+      "componentSlug": "visual-style-scope",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Resilient visual treatment preferences",
+        "description": "Verify reduced motion, increased contrast, forced colors, keyboard focus, and RTL inside a scoped visual treatment."
+      },
+      "thai": {
+        "title": "รูปแบบภาพที่รองรับการตั้งค่าการเข้าถึง",
+        "description": "ตรวจสอบการลดการเคลื่อนไหว ความคมชัดสูง สีบังคับ โฟกัสแป้นพิมพ์ และ RTL ภายในขอบเขตรูปแบบภาพ"
+      },
+      "tags": ["accessible", "forced-colors", "reduced-motion", "visual-style-scope"]
+    },
+    {
       "id": "typography-default",
       "componentSlug": "typography",
       "family": "SemanticFoundation",

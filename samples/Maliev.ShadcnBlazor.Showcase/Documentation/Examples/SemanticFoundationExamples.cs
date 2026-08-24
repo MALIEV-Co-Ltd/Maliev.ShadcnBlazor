@@ -19,6 +19,7 @@ internal static class SemanticFoundationExamples
         "direction" => [Direction()],
         "aspect-ratio" => [AspectRatio()],
         "bento-grid" => BentoGrid(),
+        "visual-style-scope" => VisualStyleScopeExamples.Create(),
         "code-block" => CodeBlock(),
         "typography" => [Typography()],
         "label" => [Label()],

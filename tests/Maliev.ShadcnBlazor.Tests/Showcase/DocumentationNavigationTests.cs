@@ -76,7 +76,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var state = new DocumentationNavigationState();
         var cut = Render<DocumentationCatalogRail>(parameters => parameters.Add(component => component.State, state));
 
-        Assert.Equal(67, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(68, cut.FindAll(".documentation-component-list a").Count);
         Assert.Equal(
             new[] { "Composition", "Data", "Feedback", "Forms", "Foundation", "Layout", "Overlays" },
             cut.FindAll(".documentation-category h3").Select(heading => heading.TextContent.Trim()));
@@ -86,7 +86,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("No components found", cut.Find("[role='status']").TextContent.Trim());
         Assert.Equal("Clear search", cut.Find("[data-testid='clear-component-search']").TextContent.Trim());
         cut.Find("[data-testid='clear-component-search']").Click();
-        Assert.Equal(67, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(68, cut.FindAll(".documentation-component-list a").Count);
     }
 
     [Fact]

@@ -27,6 +27,7 @@ public sealed class ComponentApiCatalog
         "Maliev.ShadcnBlazor.Components.Overlays",
         "Maliev.ShadcnBlazor.Components.Primitives",
         "Maliev.ShadcnBlazor.Components.Selection",
+        "Maliev.ShadcnBlazor.Components.Styling",
         "Maliev.ShadcnBlazor.Components.Typography"
     ];
 
@@ -65,6 +66,13 @@ public sealed class ComponentApiCatalog
             ["bento-grid"] = Types(
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid",
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem"),
+            ["visual-style-scope"] = Types(
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnColorTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnDepthTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnMotionTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnStyleIntensity"),
             ["accordion"] = Types(
                 "Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordion",
                 "Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionItem",

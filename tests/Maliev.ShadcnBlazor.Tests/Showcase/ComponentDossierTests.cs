@@ -31,7 +31,7 @@ public sealed class ComponentDossierTests : BunitContext
         foreach (var entry in complete)
         {
             var examples = registry.GetBySlug(entry.Slug);
-            if (entry.Slug == "bento-grid") Assert.Equal(3, examples.Count);
+            if (entry.Slug is "bento-grid" or "visual-style-scope") Assert.Equal(3, examples.Count);
             else Assert.Equal($"{entry.Slug}-primary", Assert.Single(examples).Id);
             foreach (var example in examples)
             {
