@@ -1,4 +1,5 @@
 using Maliev.ShadcnBlazor.Theming;
+using Maliev.ShadcnBlazor.Components.Styling;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 
@@ -15,6 +16,11 @@ public sealed record ThemeStudioPresetDefinition(
     string ControlTreatment,
     string MotionProfile,
     ThemeStudioIconLibrary IconLibrary,
+    ShadcnVisualStyle VisualStyle,
+    ShadcnColorTreatment ColorTreatment,
+    ShadcnDepthTreatment DepthTreatment,
+    ShadcnMotionTreatment MotionTreatment,
+    ShadcnStyleIntensity StyleIntensity,
     ShadcnThemeDocument Document)
 {
     public ShadcnThemeDocument CreateDocument() =>

@@ -608,6 +608,12 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal(9, cut.FindAll("fieldset[data-testid^='theme-role-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset-shuffle']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-visual-treatment-controls']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-visual-style']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-color-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-depth-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-motion-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-style-intensity']"));
         Assert.Equal(4, cut.FindAll("[data-testid^='theme-icon-library-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-device-controls']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-validation-summary']"));

@@ -1,6 +1,7 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 @using Maliev.ShadcnBlazor.Components.Disclosure
 @using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Components.Styling
 @inject IJSRuntime JavaScript
 @implements IAsyncDisposable
 
@@ -46,6 +47,15 @@
         <p class="theme-preset-status" role="status" aria-live="polite" data-testid="theme-preset-status">@_presetStatus</p>
     </section>
 
+    <section class="theme-inspector-group" id="theme-settings-visual-treatment" data-testid="theme-visual-treatment-controls">
+        <div class="theme-inspector-group__heading"><div><h3>Visual treatment</h3><p>Compose surface, color, depth, motion, and intensity inside the preview only.</p></div></div>
+        <label class="theme-inspector-select"><span>Surface style</span><ShadcnSelect TValue="ShadcnVisualStyle" Value="State.VisualStyle" ValueChanged="State.SetVisualStyle" Options="VisualStyleOptions" Size="ShadcnControlSize.Small" aria-label="Preview surface style" data-testid="theme-visual-style" /></label>
+        <label class="theme-inspector-select"><span>Color treatment</span><ShadcnSelect TValue="ShadcnColorTreatment" Value="State.ColorTreatment" ValueChanged="State.SetColorTreatment" Options="ColorTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview color treatment" data-testid="theme-color-treatment" /></label>
+        <label class="theme-inspector-select"><span>Depth</span><ShadcnSelect TValue="ShadcnDepthTreatment" Value="State.DepthTreatment" ValueChanged="State.SetDepthTreatment" Options="DepthTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview depth treatment" data-testid="theme-depth-treatment" /></label>
+        <label class="theme-inspector-select"><span>Motion</span><ShadcnSelect TValue="ShadcnMotionTreatment" Value="State.MotionTreatment" ValueChanged="State.SetMotionTreatment" Options="MotionTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview motion treatment" data-testid="theme-motion-treatment" /></label>
+        <label class="theme-inspector-select"><span>Intensity</span><ShadcnSelect TValue="ShadcnStyleIntensity" Value="State.StyleIntensity" ValueChanged="State.SetStyleIntensity" Options="StyleIntensityOptions" Size="ShadcnControlSize.Small" aria-label="Preview style intensity" data-testid="theme-style-intensity" /></label>
+    </section>
+
     <section class="theme-inspector-group" id="theme-settings-typography"><ThemeTypographyEditor State="State" /></section>
 
     <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-icons">
@@ -81,6 +91,39 @@
     private string _presetStatus = "Ready to compare a reviewed preset.";
     private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = new ThemeStudioPresetCatalog().All.Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName)).ToArray();
     private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioRadiusPreset>> RadiusOptions = ThemeStudioGeneratorCatalog.Radii.Select(value => new ShadcnSelectOption<ThemeStudioRadiusPreset>(value.Preset, value.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnVisualStyle>> VisualStyleOptions =
+    [
+        new(ShadcnVisualStyle.Minimal, "Clean minimal"),
+        new(ShadcnVisualStyle.Glass, "Frosted glass"),
+        new(ShadcnVisualStyle.NeoBrutalist, "Bold frame"),
+        new(ShadcnVisualStyle.LiquidGlass, "Spatial glass")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnColorTreatment>> ColorTreatmentOptions =
+    [
+        new(ShadcnColorTreatment.Inherit, "Theme colors"),
+        new(ShadcnColorTreatment.VibrantDark, "Vibrant night")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnDepthTreatment>> DepthTreatmentOptions =
+    [
+        new(ShadcnDepthTreatment.Inherit, "Theme depth"),
+        new(ShadcnDepthTreatment.Flat, "Flat"),
+        new(ShadcnDepthTreatment.Raised, "Raised"),
+        new(ShadcnDepthTreatment.Floating, "Floating"),
+        new(ShadcnDepthTreatment.Spatial, "Spatial")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnMotionTreatment>> MotionTreatmentOptions =
+    [
+        new(ShadcnMotionTreatment.Inherit, "Theme motion"),
+        new(ShadcnMotionTreatment.Calm, "Calm"),
+        new(ShadcnMotionTreatment.Expressive, "Expressive"),
+        new(ShadcnMotionTreatment.None, "None")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnStyleIntensity>> StyleIntensityOptions =
+    [
+        new(ShadcnStyleIntensity.Subtle, "Subtle"),
+        new(ShadcnStyleIntensity.Default, "Standard"),
+        new(ShadcnStyleIntensity.Strong, "Strong")
+    ];
     private static readonly IReadOnlyList<ThemeStudioIconLibrary> IconLibraries = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).ToArray();
     private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
     private string ValidationLabel => State.Validation.IsValid ? State.Validation.Warnings.Count > 0 ? $"Valid with {State.Validation.Warnings.Count} warnings" : "Ready to export" : $"{State.Validation.Errors.Count} errors require attention";

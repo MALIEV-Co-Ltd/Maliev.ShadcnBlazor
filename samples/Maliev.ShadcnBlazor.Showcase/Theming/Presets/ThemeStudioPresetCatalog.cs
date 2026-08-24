@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using Maliev.ShadcnBlazor.Theming;
+using Maliev.ShadcnBlazor.Components.Styling;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 
@@ -44,6 +45,11 @@ public sealed class ThemeStudioPresetCatalog : IThemeStudioPresetCatalog
     {
         if (!Enum.TryParse<ThemeStudioRadiusPreset>(entry.Radius, true, out var radius) ||
             !Enum.TryParse<ThemeStudioIconLibrary>(entry.IconLibrary, true, out var icons) ||
+            !Enum.TryParse<ShadcnVisualStyle>(entry.VisualStyle, true, out var visualStyle) || visualStyle == ShadcnVisualStyle.Inherit ||
+            !Enum.TryParse<ShadcnColorTreatment>(entry.ColorTreatment, true, out var colorTreatment) ||
+            !Enum.TryParse<ShadcnDepthTreatment>(entry.DepthTreatment, true, out var depthTreatment) ||
+            !Enum.TryParse<ShadcnMotionTreatment>(entry.MotionTreatment, true, out var motionTreatment) ||
+            !Enum.TryParse<ShadcnStyleIntensity>(entry.StyleIntensity, true, out var styleIntensity) ||
             !ThemeStudioGeneratorCatalog.IsKnownStyle(entry.Style) ||
             !ThemeStudioGeneratorCatalog.IsKnownBaseColor(entry.BaseColor))
             throw new JsonException($"Curated preset '{entry.Id}' contains an unsupported option.");
@@ -70,7 +76,8 @@ public sealed class ThemeStudioPresetCatalog : IThemeStudioPresetCatalog
             throw new JsonException($"Curated preset '{entry.Id}' failed document validation.");
 
         return new(entry.Id, entry.DisplayName, entry.Style, entry.BaseColor, entry.Accent, radius, entry.Density,
-            entry.BorderTreatment, entry.SurfaceTreatment, entry.ControlTreatment, entry.MotionProfile, icons, document);
+            entry.BorderTreatment, entry.SurfaceTreatment, entry.ControlTreatment, entry.MotionProfile, icons,
+            visualStyle, colorTreatment, depthTreatment, motionTreatment, styleIntensity, document);
     }
 
     private static ShadcnColorScheme ApplyPalette(ShadcnColorScheme source, PresetEntry entry, bool dark)
@@ -112,6 +119,8 @@ public sealed class ThemeStudioPresetCatalog : IThemeStudioPresetCatalog
     private sealed record PresetEntry(
         string Id, string DisplayName, string Style, string BaseColor, string Accent, string Radius,
         string Density, string BorderTreatment, string SurfaceTreatment, string ControlTreatment,
-        string MotionProfile, string IconLibrary, string MenuAccent, string MenuColor, ulong Seed,
+        string MotionProfile, string IconLibrary, string VisualStyle, string ColorTreatment,
+        string DepthTreatment, string MotionTreatment, string StyleIntensity,
+        string MenuAccent, string MenuColor, ulong Seed,
         string LightPrimary, string DarkPrimary, string LightAccent, string DarkAccent, string Chart2, string Chart3);
 }
