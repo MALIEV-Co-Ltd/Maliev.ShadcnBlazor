@@ -8,7 +8,7 @@
     { "slug": "avatar", "namespace": "Maliev.ShadcnBlazor.Components.Content", "primaryType": "ShadcnAvatar", "aliases": ["profile image"], "capabilities": ["fallback", "sizes", "badge", "group"] },
     { "slug": "badge", "namespace": "Maliev.ShadcnBlazor.Components.Content", "primaryType": "ShadcnBadge", "aliases": ["status label"], "capabilities": ["variants", "link rendering"] },
     { "slug": "breadcrumb", "namespace": "Maliev.ShadcnBlazor.Components.Navigation", "primaryType": "ShadcnBreadcrumb", "aliases": ["path navigation"], "capabilities": ["composed landmarks", "custom separators", "collapsed paths"] },
-    { "slug": "bubble", "namespace": "Maliev.ShadcnBlazor.Components.Conversation", "primaryType": "ShadcnBubble", "aliases": ["chat bubble"], "capabilities": ["seven variants", "alignment", "reactions", "interactive content"] },
+    { "slug": "bubble", "namespace": "Maliev.ShadcnBlazor.Components.Conversation", "primaryType": "ShadcnBubble", "aliases": ["chat bubble"], "capabilities": ["ghost default", "seven variants", "alignment", "avatar reactions", "expandable reaction overflow", "interactive content"] },
     { "slug": "button", "namespace": "Maliev.ShadcnBlazor.Components.Actions", "primaryType": "ShadcnButton", "aliases": ["action", "link button"], "capabilities": ["variants", "sizes", "form action"] },
     { "slug": "button-group", "namespace": "Maliev.ShadcnBlazor.Components.Actions", "primaryType": "ShadcnButtonGroup", "aliases": ["action group"], "capabilities": ["composition", "orientation"] },
     { "slug": "calendar", "namespace": "Maliev.ShadcnBlazor.Components.Forms", "primaryType": "ShadcnCalendar", "aliases": ["date grid"], "capabilities": ["single selection", "range selection", "culture", "keyboard navigation"] },

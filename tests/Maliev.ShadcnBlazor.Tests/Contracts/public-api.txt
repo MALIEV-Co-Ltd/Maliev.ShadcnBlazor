@@ -227,6 +227,16 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleContent
   EventCallback OnActivate
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleGroup
   RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReaction
+  String AccessibleName
+  String Fallback
+  String Source
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
+  String AccessibleName
+  RenderFragment ChildContent
+  Int32 Count
+  Boolean DefaultExpanded
+  EventCallback<Boolean> ExpandedChanged
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactions
   String AccessibleName
   ShadcnLogicalAlign Align

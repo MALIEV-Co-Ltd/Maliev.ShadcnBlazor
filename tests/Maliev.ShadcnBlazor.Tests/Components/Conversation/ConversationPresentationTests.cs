@@ -28,6 +28,14 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void BubbleDefaultsToGhostVariant()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent<ShadcnBubbleContent>(content => content.AddChildContent("Default bubble")));
+
+        Assert.Equal("ghost", cut.Find("[data-slot='bubble']").GetAttribute("data-variant"));
+    }
+
+    [Fact]
     public void BubbleSupportsInteractiveContentAndAccessibleReactions()
     {
         var clicked = false;
@@ -49,9 +57,75 @@ public sealed class ConversationPresentationTests : BunitContext
         button.Click();
         Assert.True(clicked);
         var reactions = cut.Find("[data-slot='bubble-reactions']");
-        Assert.Equal("img", reactions.GetAttribute("role"));
+        Assert.Equal("group", reactions.GetAttribute("role"));
         Assert.Equal("top", reactions.GetAttribute("data-side"));
         Assert.Equal("start", reactions.GetAttribute("data-align"));
+    }
+
+    [Fact]
+    public void BubbleReactionUsesAvatarPresentationAndAccessibleReactionName()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleContent>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleContent.ChildContent), Text("Approved"));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnBubbleReactions>(2);
+            builder.AddAttribute(3, nameof(ShadcnBubbleReactions.AccessibleName), "Reactions to Approved");
+            builder.AddAttribute(4, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Narin reacted with thumbs up");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "NS");
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("[data-slot='bubble-reaction']");
+        Assert.Equal("img", reaction.GetAttribute("role"));
+        Assert.Equal("Narin reacted with thumbs up", reaction.GetAttribute("aria-label"));
+        Assert.Equal("NS", reaction.QuerySelector("[data-slot='avatar-fallback']")?.TextContent);
+    }
+
+    [Fact]
+    public void BubbleReactionOverflowRevealsAndHidesAdditionalReactions()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleContent>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleContent.ChildContent), Text("Approved"));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnBubbleReactions>(2);
+            builder.AddAttribute(3, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReactionOverflow>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReactionOverflow.Count), 2);
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReactionOverflow.ChildContent), (RenderFragment)(overflow =>
+                {
+                    overflow.OpenComponent<ShadcnBubbleReaction>(0);
+                    overflow.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Mali reacted with fire");
+                    overflow.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "ML");
+                    overflow.CloseComponent();
+                }));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var trigger = cut.Find("button[data-slot='bubble-reaction-overflow-trigger']");
+        Assert.Equal("+2", trigger.TextContent.Trim());
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
+
+        trigger.Click();
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        Assert.Single(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
+        Assert.Contains("Mali reacted with fire", cut.Markup, StringComparison.Ordinal);
+
+        trigger.Click();
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
     }
 
     [Theory]
@@ -251,6 +325,8 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageActions>(p => p.AddChildContent("orphan")));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageStatus>(p => p.AddChildContent("orphan")));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnMessageReplyAction>(p => p.Add(c => c.Quote, "orphan")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnBubbleReaction>(p => p.Add(c => c.AccessibleName, "Orphan reaction").Add(c => c.Fallback, "OR")));
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnBubbleReactionOverflow>(p => p.Add(c => c.Count, 2).AddChildContent("Orphan reactions")));
     }
 
     [Fact]
@@ -288,7 +364,8 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains(".shadcn-bubble[data-align=\"end\"] > .shadcn-bubble-content", css, StringComparison.Ordinal);
         Assert.Contains("border-end-start-radius", css, StringComparison.Ordinal);
         Assert.Contains("border-end-end-radius", css, StringComparison.Ordinal);
-        Assert.Contains(".shadcn-bubble-reactions :is(svg,img)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble-reaction > .shadcn-avatar", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble-reaction-overflow-trigger:focus-visible", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-bubble[data-variant=\"ghost\"] { width:fit-content; max-width:80%; }", css, StringComparison.Ordinal);
         Assert.Contains(":has(> [data-slot=\"bubble-reactions\"][data-side=\"top\"])", css, StringComparison.Ordinal);
         Assert.Contains("color:var(--shadcn-muted-foreground)", css, StringComparison.Ordinal);

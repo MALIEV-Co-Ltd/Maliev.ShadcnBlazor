@@ -145,7 +145,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
-    public async Task BubblePreviewAppliesVariantTailRadiusAndReactionIconTreatment()
+    public async Task BubblePreviewAppliesVariantTailRadiusAndExpandableAvatarReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -179,10 +179,17 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var endTop = Math.Max(ParseCssPixels(endRadiusValues[2]), ParseCssPixels(endRadiusValues[3]));
         Assert.True(endTail < endTop, $"end tail={endTail}px, top={endTop}px");
 
-        var reactionIcon = page.Locator("[data-slot='bubble-reactions'] .showcase-bubble-reaction-icon").First;
-        Assert.True(await reactionIcon.EvaluateAsync<double>("element => element.getBoundingClientRect().width") >= 16);
-        var reactionColor = await reactionIcon.EvaluateAsync<string>("element => getComputedStyle(element).color");
-        Assert.DoesNotContain("rgba(0, 0, 0, 0)", reactionColor, StringComparison.OrdinalIgnoreCase);
+        var reactionAvatar = page.Locator("[data-slot='bubble-reactions'] [data-slot='bubble-reaction'] [data-slot='avatar']").First;
+        Assert.True(await reactionAvatar.EvaluateAsync<double>("element => element.getBoundingClientRect().width") >= 24);
+        await Assertions.Expect(reactionAvatar.Locator("[data-slot='avatar-image']")).ToBeVisibleAsync();
+
+        var overflow = page.Locator("[data-slot='bubble-reaction-overflow']");
+        var overflowTrigger = overflow.Locator("[data-slot='bubble-reaction-overflow-trigger']");
+        await Assertions.Expect(overflowTrigger).ToHaveTextAsync("+2");
+        await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await overflowTrigger.ClickAsync();
+        await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(overflow.Locator("[data-slot='bubble-reaction-overflow-content'] [data-slot='bubble-reaction']")).ToHaveCountAsync(2);
     }
 
     [Fact]
