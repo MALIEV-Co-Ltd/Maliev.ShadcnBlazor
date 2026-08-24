@@ -4931,6 +4931,7 @@ a {
     min-block-size: 3.5rem;
     border-block-end: 1px solid var(--shadcn-border);
     background: color-mix(in oklch, var(--shadcn-muted) 54%, var(--shadcn-background));
+    gap: .25rem;
     padding-inline: 1rem;
 }
 
@@ -4942,7 +4943,9 @@ a {
     line-height: 1.65;
 }
 
-.showcase-toggle-dossier__copy[data-emphasis="bold"] { font-weight: 700; }
+.showcase-toggle-dossier__copy[data-bold="true"] { font-weight: 700; }
+.showcase-toggle-dossier__copy[data-italic="true"] { font-style: italic; }
+.showcase-toggle-dossier__copy[data-underline="true"] { text-decoration: underline; text-underline-offset: .2em; }
 
 @media (max-width: 34rem) {
     .showcase-toggle-dossier__header { display: grid; }
@@ -5265,6 +5268,21 @@ a {
     inline-size: fit-content;
     max-inline-size: 100%;
     padding-block: .25rem;
+}
+
+.showcase-avatar-group-preview__overflow {
+    transition: inline-size var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+        margin-inline-start var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+        opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
+        scale var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
+}
+
+.showcase-avatar-group-preview[data-expanded="false"] .showcase-avatar-group-preview__overflow {
+    inline-size: 0;
+    margin-inline-start: 0;
+    opacity: 0;
+    pointer-events: none;
+    scale: .72;
 }
 
 .showcase-avatar-demo .shadcn-avatar {
@@ -5857,6 +5875,12 @@ a {
     gap: .875rem;
 }
 
+.showcase-field-dossier__card-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
 .showcase-field-dossier .shadcn-field[data-orientation="horizontal"] > :is(.shadcn-input, .shadcn-select) {
     flex: 0 1 20rem;
 }
@@ -5888,6 +5912,7 @@ a {
     .showcase-field-dossier { gap: .75rem; }
     .showcase-field-dossier__heading { display: grid; gap: .5rem; }
     .showcase-field-dossier .shadcn-field-group { gap: .625rem; }
+    .showcase-field-dossier__card-row { grid-template-columns: 1fr; gap: .625rem; }
     .showcase-field-dossier .shadcn-field-description { font-size: .75rem; line-height: 1.35; }
     .showcase-field-dossier .shadcn-textarea { min-block-size: 4rem; }
     .showcase-field-dossier__security-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
@@ -6369,6 +6394,11 @@ a {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
     align-items: end;
     gap: 0.75rem;
+}
+
+.component-preview__controls:has(> .component-preview__control:only-child) {
+    grid-template-columns: minmax(10rem, 18rem);
+    justify-content: start;
 }
 
 .component-preview__control {
@@ -8698,11 +8728,12 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-use-case-card__description { margin: 0; color: var(--shadcn-muted-foreground); line-height: 1.5; }
 .theme-use-case-card :where(label) { display: grid; gap: .375rem; color: var(--shadcn-foreground); font-size: .75rem; font-weight: 600; }
 .theme-use-case-card__actions,
-.theme-runway-profile,
 .theme-runway-machine,
 .theme-runway-file,
 .theme-runway-amount { display: flex; min-inline-size: 0; align-items: center; justify-content: space-between; gap: .75rem; }
 .theme-use-case-card__header { min-inline-size: 0; }
+.theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start; gap: .75rem; text-align: start; }
+.theme-runway-profile > :last-child { display: grid; min-inline-size: 0; gap: .125rem; }
 .theme-runway-stat { display: grid; gap: .125rem; }
 .theme-runway-stat strong { font-size: clamp(1.75rem, 5cqi, 3rem); letter-spacing: -.06em; }
 .theme-runway-stat span,

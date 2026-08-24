@@ -141,6 +141,24 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
+    public void AvatarGroupCountCanActAsAnAccessibleExpansionTrigger()
+    {
+        var expanded = false;
+        var cut = Render<ShadcnAvatarGroupCount>(parameters => parameters
+            .Add(component => component.Expanded, expanded)
+            .Add(component => component.ExpandLabel, "Show one more teammate")
+            .Add(component => component.OnClick, _ => expanded = true)
+            .AddChildContent("+1"));
+
+        var trigger = cut.Find("button[data-slot='avatar-group-count']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal("Show one more teammate", trigger.GetAttribute("aria-label"));
+
+        trigger.Click();
+        Assert.True(expanded);
+    }
+
+    [Fact]
     public void ProgressLabelParameterFallsBackWhenCompositionHasNoLabelAndExposesValueText()
     {
         var cut = Render<ShadcnProgress>(parameters => parameters

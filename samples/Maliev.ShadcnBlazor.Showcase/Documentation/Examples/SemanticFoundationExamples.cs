@@ -410,21 +410,23 @@ public async Task SaveAsync(CancellationToken cancellationToken)
                 <ShadcnFieldSet Disabled="{{disabled.ToString().ToLowerInvariant()}}">
                     <ShadcnFieldLegend Variant="ShadcnFieldLegendVariant.{{legendVariant}}">Card details</ShadcnFieldLegend>
                     <ShadcnFieldGroup>
-                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="cardholder-help">
-                            <ShadcnFieldLabel For="cardholder">Name on card</ShadcnFieldLabel>
-                            <ShadcnInput TValue="string" id="cardholder" Name="cardholder" AutoComplete="cc-name" @bind-Value="cardholder" />
-                            <ShadcnFieldDescription Id="cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
-                        </ShadcnField>
+                        <div class="payment-card-row">
+                            <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="cardholder-help">
+                                <ShadcnFieldLabel For="cardholder">Name on card</ShadcnFieldLabel>
+                                <ShadcnInput TValue="string" id="cardholder" Name="cardholder" AutoComplete="cc-name" @bind-Value="cardholder" />
+                                <ShadcnFieldDescription Id="cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
+                            </ShadcnField>
 
-                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
-                            <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
-                            <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
-                            <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
-                            @if (invalid)
-                            {
-                                <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
-                            }
-                        </ShadcnField>
+                            <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
+                                <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
+                                <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
+                                <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                                @if (invalid)
+                                {
+                                    <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
+                                }
+                            </ShadcnField>
+                        </div>
 
                         <div class="payment-security-row">
                             <ShadcnField>

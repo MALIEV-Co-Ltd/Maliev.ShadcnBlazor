@@ -1,9 +1,26 @@
+@using Microsoft.AspNetCore.Components.Web
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-group-count")" style="@MergeStyle(null)" data-slot="avatar-group-count" data-size="@SizeValue">@ChildContent</span>
+@if (OnClick.HasDelegate)
+{
+    <button @attributes="ForwardedAttributes" type="button" class="@MergeClass("shadcn-avatar-group-count")" style="@MergeStyle(null)" data-slot="avatar-group-count" data-size="@SizeValue" aria-expanded="@Expanded.ToString().ToLowerInvariant()" aria-label="@ExpandLabel" @onclick="OnClick">@ChildContent</button>
+}
+else
+{
+    <span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-group-count")" style="@MergeStyle(null)" data-slot="avatar-group-count" data-size="@SizeValue">@ChildContent</span>
+}
 @code {
     [CascadingParameter] private ShadcnAvatarSize? GroupSize { get; set; }
     [Parameter] public ShadcnAvatarSize? Size { get; set; }
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public string ExpandLabel { get; set; } = "Show remaining avatars";
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private string SizeValue => (Size ?? GroupSize ?? ShadcnAvatarSize.Default) switch { ShadcnAvatarSize.Small => "sm", ShadcnAvatarSize.Default => "default", ShadcnAvatarSize.Large => "lg", _ => throw new ArgumentOutOfRangeException(nameof(Size)) };
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-size");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("type", "data-slot", "data-size", "aria-expanded", "aria-label");
+
+    protected override void OnParametersSet()
+    {
+        if (OnClick.HasDelegate && string.IsNullOrWhiteSpace(ExpandLabel))
+            throw new ArgumentException("An interactive avatar count requires an accessible label.", nameof(ExpandLabel));
+    }
 }

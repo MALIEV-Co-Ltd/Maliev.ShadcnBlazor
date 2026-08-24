@@ -398,6 +398,58 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void FieldAndActionExamplesUseCompactRealisticCompositions()
+    {
+        var field = RenderPreview("field");
+        Assert.Equal(2, field.FindAll(".showcase-field-dossier__card-row > [data-slot='field']").Count);
+        Assert.Contains("class=\"payment-card-row\"", GetExample("field").RazorSource, StringComparison.Ordinal);
+
+        var slider = RenderPreview("slider");
+        Assert.All(slider.FindAll("input[data-slot='slider-thumb']"), thumb => Assert.Equal("1", thumb.GetAttribute("step")));
+        Assert.Contains("Step=\"1\"", GetExample("slider").RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Step=\"5\"", GetExample("slider").RazorSource, StringComparison.Ordinal);
+
+        var toggle = RenderPreview("toggle");
+        var tools = toggle.FindAll("[role='toolbar'] button[data-slot='toggle']");
+        Assert.Equal(3, tools.Count);
+        Assert.Equal(["Toggle bold emphasis", "Toggle italic emphasis", "Toggle underline emphasis"], tools.Select(tool => tool.GetAttribute("aria-label")));
+        Assert.All(tools, tool => Assert.NotNull(tool.QuerySelector("[data-slot='icon']")));
+        Assert.Contains("LucideIconCatalog.Instance.Get", GetExample("toggle").RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SinglePreviewControlAndThemeProfileUseIntrinsicStartAlignedLayout()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.Contains(".component-preview__controls:has(> .component-preview__control:only-child)", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AvatarGroupOverflowExpandsAndCollapsesWithTheCountTrigger()
+    {
+        var source = GetExample("avatar");
+        source.Controls.Single(control => control.Id == "avatar-group").Apply("true");
+        Assert.Contains("Expanded=\"groupExpanded\"", source.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("OnClick=\"_ => groupExpanded = !groupExpanded\"", source.RazorSource, StringComparison.Ordinal);
+
+        var avatar = RenderPreview("avatar");
+        avatar.Find("[data-testid='control-avatar-group']").Change(true);
+        var group = avatar.Find("[data-testid='avatar-group-preview']");
+        Assert.Equal("false", group.GetAttribute("data-expanded"));
+        Assert.True(group.QuerySelector(".showcase-avatar-group-preview__overflow")?.HasAttribute("aria-hidden"));
+
+        group.QuerySelector("button[data-slot='avatar-group-count']")!.Click();
+
+        avatar.WaitForAssertion(() =>
+        {
+            group = avatar.Find("[data-testid='avatar-group-preview']");
+            Assert.Equal("true", group.GetAttribute("data-expanded"));
+            Assert.False(group.QuerySelector(".showcase-avatar-group-preview__overflow")?.HasAttribute("aria-hidden"));
+        });
+    }
+
+    [Fact]
     public void ItemControlsCoverRootVariantsSizesMediaVariantsAndLinkOutput()
     {
         var cut = RenderPreview("item");
@@ -527,9 +579,12 @@ public sealed class ComponentDossierTests : BunitContext
 
     private IRenderedComponent<ComponentPreview> RenderPreview(string slug)
     {
-        var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug(slug));
+        var example = GetExample(slug);
         return Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
     }
+
+    private ComponentExampleDefinition GetExample(string slug) =>
+        Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug(slug));
 
     private static string[] OptionValues(IRenderedComponent<ComponentPreview> cut, string testId) =>
         cut.SelectControlOptions(testId["control-".Length..]);

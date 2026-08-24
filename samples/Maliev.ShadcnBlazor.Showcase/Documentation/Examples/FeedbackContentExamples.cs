@@ -83,7 +83,7 @@ internal static class FeedbackContentExamples
         var groupMarkup = group
             ? $$"""
 
-<section aria-label="Recently active team members">
+<section aria-label="Recently active team members" data-expanded="@groupExpanded">
     <ShadcnAvatarGroup Size="ShadcnAvatarSize.{{size}}" Overlap="0.625rem">
         <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
             <ShadcnAvatarImage Source="{{firstSource}}" Alt="Thai CNC operator" />
@@ -97,9 +97,25 @@ internal static class FeedbackContentExamples
             <ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="Thai support assistant" />
             <ShadcnAvatarFallback>SA</ShadcnAvatarFallback>
         </ShadcnAvatar>
-        <ShadcnAvatarGroupCount Size="ShadcnAvatarSize.{{size}}">+1</ShadcnAvatarGroupCount>
+        @if (groupExpanded)
+        {
+            <ShadcnAvatar Size="ShadcnAvatarSize.{{size}}">
+                <ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
+                <ShadcnAvatarFallback>PC</ShadcnAvatarFallback>
+            </ShadcnAvatar>
+        }
+        <ShadcnAvatarGroupCount Size="ShadcnAvatarSize.{{size}}"
+                                Expanded="groupExpanded"
+                                ExpandLabel="@(groupExpanded ? "Collapse teammate list" : "Show one more teammate")"
+                                OnClick="_ => groupExpanded = !groupExpanded">
+            @(groupExpanded ? "−" : "+1")
+        </ShadcnAvatarGroupCount>
     </ShadcnAvatarGroup>
 </section>
+
+@code {
+    private bool groupExpanded;
+}
 """
             : string.Empty;
 

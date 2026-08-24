@@ -65,6 +65,9 @@ type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroup
   ShadcnAvatarSize Size
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroupCount
   RenderFragment ChildContent
+  String ExpandLabel
+  Boolean Expanded
+  EventCallback<MouseEventArgs> OnClick
   Nullable<ShadcnAvatarSize> Size
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarImage
   String Alt
