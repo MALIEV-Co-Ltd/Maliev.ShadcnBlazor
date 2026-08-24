@@ -107,6 +107,31 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ComposableVisualTreatmentsUpdateOnlyThePreviewScope()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var shell = page.Locator(".theme-studio-shell");
+        var shellBackground = await shell.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+
+        await SelectOptionAsync(page, "theme-visual-style", "Frosted glass");
+        await SelectOptionAsync(page, "theme-color-treatment", "Vibrant night");
+        await SelectOptionAsync(page, "theme-depth-treatment", "Floating");
+        await SelectOptionAsync(page, "theme-motion-treatment", "Expressive");
+        await SelectOptionAsync(page, "theme-style-intensity", "Strong");
+
+        var scope = page.GetByTestId("theme-visual-style-scope");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-visual-style", "glass");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-color-treatment", "vibrant-dark");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-depth", "floating");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-motion", "expressive");
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-intensity", "strong");
+        Assert.True(await scope.EvaluateAsync<bool>("element => Boolean(element.closest('[data-testid=theme-preview-scope]'))"));
+        Assert.Equal(0, await page.Locator("[data-testid='theme-studio'] > [data-slot='visual-style-scope']").CountAsync());
+        Assert.Equal(shellBackground, await shell.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+    }
+
+    [Fact]
     public async Task RadiusHighContrastAndAnimationControlsAffectThePreviewOnly()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
@@ -233,5 +258,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
     private static async Task OpenAdvancedAsync(IPage page, string testId) { var trigger = page.GetByTestId(testId).Locator("[data-slot='collapsible-trigger']"); if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await trigger.ClickAsync(); }
     private static Task<string[]> CardIdsAsync(IPage page) => page.Locator(".theme-bento__grid [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
+
+    private static async Task SelectOptionAsync(IPage page, string testId, string option)
+    {
+        await page.GetByTestId(testId).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = option, Exact = true }).ClickAsync();
+    }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
 }
