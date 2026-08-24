@@ -50,6 +50,6 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
             "ShadcnNavigationMenu", "ShadcnPagination", "ShadcnPopover", "ShadcnProgress", "ShadcnQuestionnaire", "ShadcnRadioGroup",
             "ShadcnResizableGroup", "ShadcnScrollArea", "ShadcnSelect", "ShadcnSeparator", "ShadcnSheet", "ShadcnSidebar", "ShadcnSkeleton",
             "ShadcnSlider", "ShadcnSpinner", "ShadcnSwitch", "ShadcnTable", "ShadcnTabs", "ShadcnTextarea", "ShadcnToaster",
-            "ShadcnToggle", "ShadcnToggleGroup", "ShadcnTooltip", "ShadcnTypography");
+            "ShadcnToggle", "ShadcnToggleGroup", "ShadcnTooltip", "ShadcnTypography", "ShadcnVisualStyleScope");
 }
 

@@ -149,7 +149,7 @@
   box-shadow: var(--shadcn-style-shadow, none);
   backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
   -webkit-backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
-  transition: box-shadow var(--shadcn-style-transition-duration, 150ms) ease, border-color var(--shadcn-style-transition-duration, 150ms) ease, background-color var(--shadcn-style-transition-duration, 150ms) ease;
+  transition: box-shadow var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease;
 }
 
 .shadcn-visual-style-scope :where(
@@ -187,7 +187,7 @@
   .shadcn-dropzone
 ) {
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
-  transition: transform var(--shadcn-style-transition-duration, 150ms) ease, box-shadow var(--shadcn-style-transition-duration, 150ms) ease, background-color var(--shadcn-style-transition-duration, 150ms) ease, border-color var(--shadcn-style-transition-duration, 150ms) ease;
+  transition: transform var(--shadcn-style-transition-duration) ease, box-shadow var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease;
 }
 
 .shadcn-visual-style-scope[data-visual-style="neo-brutalist"] :where(.shadcn-button, .shadcn-toggle, .shadcn-tabs-trigger):is(:hover, :focus-visible) {
