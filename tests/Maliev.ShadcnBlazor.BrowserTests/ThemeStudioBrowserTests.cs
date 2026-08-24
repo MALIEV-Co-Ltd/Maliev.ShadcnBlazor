@@ -137,6 +137,88 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task QualityDepositAndReviewerActionsProduceObservableResults()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        var quality = page.Locator("[data-use-case-id='quality-alert']");
+        await quality.GetByRole(AriaRole.Button, new() { Name = "Open report", Exact = true }).ClickAsync();
+        await Assertions.Expect(quality.GetByRole(AriaRole.Region, new() { Name = "Inspection report" })).ToBeVisibleAsync();
+
+        var deposit = page.Locator("[data-use-case-id='deposit-approval']");
+        await deposit.GetByRole(AriaRole.Button, new() { Name = "Approve deposit", Exact = true }).ClickAsync();
+        await deposit.GetByRole(AriaRole.Button, new() { Name = "Review", Exact = true }).ClickAsync();
+        await Assertions.Expect(deposit.GetByRole(AriaRole.Button, new() { Name = "Approve deposit", Exact = true })).ToBeEnabledAsync();
+        await Assertions.Expect(deposit.GetByRole(AriaRole.Status)).ToContainTextAsync("pending approval");
+
+        var reviewers = page.Locator("[data-use-case-id='assigned-reviewers']");
+        await reviewers.GetByRole(AriaRole.Button, new() { Name = "Manage reviewers", Exact = true }).ClickAsync();
+        await Assertions.Expect(reviewers.GetByRole(AriaRole.Region, new() { Name = "Reviewer management" })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task TypingInConversationDoesNotRepositionThePreviewCanvas()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var preview = page.Locator(".theme-preview-region");
+        var input = page.Locator("[data-use-case-id='assistant-conversation'] .theme-runway-composer input");
+        await input.ScrollIntoViewIfNeededAsync();
+        await input.FocusAsync();
+        var before = await preview.EvaluateAsync<double>("element => element.scrollTop");
+        var beforeLayout = await input.EvaluateAsync<string>("element => JSON.stringify({ input: element.getBoundingClientRect().top, item: element.closest('[data-slot=bento-item]').getBoundingClientRect().top, preview: element.closest('.theme-preview-region').getBoundingClientRect().top, height: element.closest('.theme-preview-region').scrollHeight, active: document.activeElement === element })");
+        await input.PressSequentiallyAsync("stable composer", new() { Delay = 20 });
+        var after = await preview.EvaluateAsync<double>("element => element.scrollTop");
+        var afterLayout = await input.EvaluateAsync<string>("element => JSON.stringify({ input: element.getBoundingClientRect().top, item: element.closest('[data-slot=bento-item]').getBoundingClientRect().top, preview: element.closest('.theme-preview-region').getBoundingClientRect().top, height: element.closest('.theme-preview-region').scrollHeight, active: document.activeElement === element })");
+        Assert.True(Math.Abs(after - before) <= 1, $"scroll {before} -> {after}; before {beforeLayout}; after {afterLayout}");
+    }
+
+    [Fact]
+    public async Task CuratedActionControlsAreNotDecorativeDeadEnds()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        var capacity = page.Locator("[data-use-case-id='production-capacity']");
+        await capacity.GetByRole(AriaRole.Button, new() { Name = "Review plan", Exact = true }).ClickAsync();
+        await Assertions.Expect(capacity.GetByRole(AriaRole.Region, new() { Name = "Capacity plan review" })).ToBeVisibleAsync();
+
+        var profile = page.Locator("[data-use-case-id='operator-profile']");
+        await profile.GetByRole(AriaRole.Button, new() { Name = "Save profile", Exact = true }).ClickAsync();
+        await Assertions.Expect(profile.GetByRole(AriaRole.Status)).ToContainTextAsync("Profile saved");
+
+        var attachment = page.Locator("[data-use-case-id='drawing-attachment']");
+        await attachment.GetByRole(AriaRole.Button, new() { Name = "Cancel drawing upload", Exact = true }).ClickAsync();
+        await Assertions.Expect(attachment.GetByRole(AriaRole.Status)).ToContainTextAsync("cancelled");
+
+        var navigation = page.Locator("[data-use-case-id='work-order-navigation']");
+        await navigation.GetByRole(AriaRole.Button, new() { Name = "Change process plan 12 operations · revision C", Exact = true }).ClickAsync();
+        await Assertions.Expect(navigation.GetByRole(AriaRole.Status)).ToContainTextAsync("Process plan opened");
+
+        var quotation = page.Locator("[data-use-case-id='quotation-actions']");
+        await quotation.GetByRole(AriaRole.Button, new() { Name = "Actions", Exact = true }).ClickAsync();
+        await page.GetByRole(AriaRole.Menuitem, new() { Name = "Duplicate revision", Exact = true }).ClickAsync();
+        await Assertions.Expect(quotation.GetByRole(AriaRole.Status)).ToContainTextAsync("duplicated");
+
+        var drawing = page.Locator("[data-use-case-id='file-context']");
+        await drawing.GetByRole(AriaRole.Button, new() { Name = "Download revision C", Exact = true }).ClickAsync();
+        await Assertions.Expect(drawing.GetByRole(AriaRole.Status)).ToContainTextAsync("download prepared");
+        await drawing.GetByRole(AriaRole.Button, new() { Name = "Open viewer", Exact = true }).ClickAsync();
+        await Assertions.Expect(drawing.GetByRole(AriaRole.Status)).ToContainTextAsync("viewer opened");
+
+        var qualityConsole = page.Locator("[data-console='quality']");
+        await qualityConsole.GetByRole(AriaRole.Button, new() { Name = "Save review", Exact = true }).ClickAsync();
+        await Assertions.Expect(qualityConsole.GetByRole(AriaRole.Status)).ToContainTextAsync("saved as a draft");
+
+        var handoffConsole = page.Locator("[data-console='handoff']");
+        await handoffConsole.GetByRole(AriaRole.Option, new() { Name = "Schedule review", Exact = true }).ClickAsync();
+        await Assertions.Expect(handoffConsole.GetByText("Review scheduling opened.", new() { Exact = true })).ToBeVisibleAsync();
+        await handoffConsole.GetByRole(AriaRole.Button, new() { Name = "Next", Exact = true }).ClickAsync();
+        await Assertions.Expect(handoffConsole.GetByRole(AriaRole.Button, new() { Name = "2", Exact = true })).ToHaveAttributeAsync("aria-current", "page");
+    }
+
+    [Fact]
     public async Task DenseWorkflowCardsKeepActionsChartsAndTablesInsideReadableBounds()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);

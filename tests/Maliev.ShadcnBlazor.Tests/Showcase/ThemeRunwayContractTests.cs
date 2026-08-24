@@ -150,6 +150,8 @@ public sealed class ThemeBentoContractTests
     {
         var root = FindRoot();
         var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+        var composer = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeConversationComposer.razor");
+        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-studio.js");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
@@ -159,7 +161,10 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("@keyframes theme-runway-type-text", css, StringComparison.Ordinal);
         Assert.Contains("forwards", css, StringComparison.Ordinal);
         Assert.Contains("clip-path", css, StringComparison.Ordinal);
-        Assert.Contains("@bind-Value=\"_composerText\"", card, StringComparison.Ordinal);
+        Assert.Contains("<ThemeConversationComposer OnSend=\"SendConversationMessage\"", card, StringComparison.Ordinal);
+        Assert.Contains("@bind-Value=\"_text\"", composer, StringComparison.Ordinal);
+        Assert.Contains("preservePreviewScrollOnInput", composer, StringComparison.Ordinal);
+        Assert.Contains("preservePreviewScrollOnInput", script, StringComparison.Ordinal);
         Assert.Contains("SendConversationMessage", card, StringComparison.Ordinal);
         Assert.Contains("AssistantResponses", card, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-text", css, StringComparison.Ordinal);

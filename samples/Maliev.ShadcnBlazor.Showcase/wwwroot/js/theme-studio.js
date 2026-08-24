@@ -32,6 +32,43 @@ export function restorePreviewScroll(position) {
     })));
 }
 
+export function preservePreviewScrollOnInput(root) {
+    const input = root instanceof HTMLInputElement ? root : root?.querySelector?.("input");
+    if (!(input instanceof HTMLInputElement)) return { dispose() {} };
+    const preview = input.closest(".theme-preview-region");
+    if (!(preview instanceof HTMLElement)) return { dispose() {} };
+    let top = preview.scrollTop;
+    let left = preview.scrollLeft;
+    let editing = false;
+    const capture = () => { top = preview.scrollTop; left = preview.scrollLeft; };
+    const restore = () => {
+        preview.scrollTop = top;
+        preview.scrollLeft = left;
+        let frames = 6;
+        const hold = () => {
+            preview.scrollTop = top;
+            preview.scrollLeft = left;
+            if (--frames > 0) requestAnimationFrame(hold);
+        };
+        requestAnimationFrame(hold);
+    };
+    const begin = () => { editing = true; capture(); };
+    const end = () => { editing = false; };
+    const beforeInput = () => { if (!editing) capture(); };
+    input.addEventListener("focus", begin);
+    input.addEventListener("blur", end);
+    input.addEventListener("beforeinput", beforeInput);
+    input.addEventListener("input", restore);
+    return {
+        dispose() {
+            input.removeEventListener("focus", begin);
+            input.removeEventListener("blur", end);
+            input.removeEventListener("beforeinput", beforeInput);
+            input.removeEventListener("input", restore);
+        }
+    };
+}
+
 export function loadGoogleFonts(stylesheet, timeoutMs = 5000) {
     const id = "theme-studio-google-fonts";
     const existing = document.getElementById(id);

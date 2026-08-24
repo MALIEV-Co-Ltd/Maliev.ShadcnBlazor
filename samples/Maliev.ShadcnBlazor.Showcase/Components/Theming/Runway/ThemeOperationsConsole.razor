@@ -53,7 +53,8 @@
                     <label>Release lane<ShadcnNativeSelect TValue="string" @bind-Value="_lane"><ShadcnNativeSelectOption TValue="string" Value="@("quality")">Quality desk</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("dispatch")">Dispatch desk</ShadcnNativeSelectOption></ShadcnNativeSelect></label>
                     <label>Approval code<ShadcnInputOtp @bind-Value="_otp" MaxLength="4"><ShadcnInputOtpGroup><ShadcnInputOtpSlot Index="0" /><ShadcnInputOtpSlot Index="1" /><ShadcnInputOtpSlot Index="2" /><ShadcnInputOtpSlot Index="3" /></ShadcnInputOtpGroup></ShadcnInputOtp></label>
                 </div>
-                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline">Save review</ShadcnButton><ShadcnButton>Approve release</ShadcnButton></ShadcnButtonGroup>
+                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" @onclick="SaveReview">Save review</ShadcnButton><ShadcnButton @onclick="ApproveRelease" Disabled="_releaseApproved">@(_releaseApproved ? "Release approved" : "Approve release")</ShadcnButton></ShadcnButtonGroup>
+                @if (_releaseStatus is not null) { <p class="theme-runway-action-status" role="status">@_releaseStatus</p> }
             </div>
         </ShadcnTabsContent>
 
@@ -62,7 +63,7 @@
                 <ShadcnCommand Label="Work order actions">
                     <ShadcnCommandInput Placeholder="Search work-order actions" />
                     <ShadcnCommandList>
-                        <ShadcnCommandGroup Heading="Production"><ShadcnCommandItem Value="open-drawing">Open latest drawing<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review">Schedule review<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
+                        <ShadcnCommandGroup Heading="Production"><ShadcnCommandItem Value="open-drawing" OnSelect="SelectCommand">Open latest drawing<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review" OnSelect="SelectCommand">Schedule review<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
                         <ShadcnCommandEmpty>No matching production action.</ShadcnCommandEmpty>
                     </ShadcnCommandList>
                 </ShadcnCommand>
@@ -73,7 +74,8 @@
                 </ShadcnResizableGroup>
                 <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="Add a handoff note" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">Add</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
                 @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">Note added to WO-2418</ShadcnBadge> }
-                <ShadcnPagination Label="Console pages"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Disabled="true" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="true">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink>2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
+                @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@_commandStatus</p> }
+                <ShadcnPagination Label="Console pages"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
             </div>
         </ShadcnTabsContent>
     </ShadcnTabs>
@@ -91,6 +93,10 @@
     private string _otp = "2418";
     private string _note = string.Empty;
     private bool _noteAdded;
+    private bool _releaseApproved;
+    private string? _releaseStatus;
+    private string? _commandStatus;
+    private int _page = 1;
     private string? _configuredKind;
     private string ConsoleTitle => Kind switch { "quality" => "Quality release", "handoff" => "Customer handoff", _ => "Production planning" };
     private string StatusTitle => Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" };
@@ -109,4 +115,11 @@
         _tab = Kind switch { "quality" => "release", "handoff" => "support", _ => "overview" };
     }
     private void AddNote() { if (!string.IsNullOrWhiteSpace(_note)) { _noteAdded = true; _note = string.Empty; } }
+    private void SaveReview() => _releaseStatus = "Release review saved as a draft.";
+    private void ApproveRelease() { _releaseApproved = true; _releaseStatus = "Release approved for the selected lane."; }
+    private void SelectCommand(string command) => _commandStatus = command == "open-drawing" ? "Latest drawing opened." : "Review scheduling opened.";
+    private void PreviousPage(MouseEventArgs _) => _page = Math.Max(1, _page - 1);
+    private void NextPage(MouseEventArgs _) => _page = Math.Min(2, _page + 1);
+    private void SelectPageOne(MouseEventArgs _) => _page = 1;
+    private void SelectPageTwo(MouseEventArgs _) => _page = 2;
 }

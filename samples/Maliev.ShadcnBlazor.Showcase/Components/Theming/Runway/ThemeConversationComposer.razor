@@ -1,0 +1,41 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Icons
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="theme-runway-composer" @ref="_root">
+    <ShadcnInput TValue="string" @bind-Value="_text" Placeholder="Ask about this work order" />
+    <ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" @onclick="SendAsync">
+        <ShadcnIcon Icon="@SendIcon" Size="16" />
+    </ShadcnButton>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public EventCallback<string> OnSend { get; set; }
+    private string _text = string.Empty;
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _scrollGuard;
+    private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+
+    private async Task SendAsync()
+    {
+        var message = _text.Trim();
+        if (message.Length == 0) return;
+        _text = string.Empty;
+        await OnSend.InvokeAsync(message);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+        _scrollGuard = await _module.InvokeAsync<IJSObjectReference>("preservePreviewScrollOnInput", _root);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_scrollGuard is not null) { try { await _scrollGuard.InvokeVoidAsync("dispose"); await _scrollGuard.DisposeAsync(); } catch (JSDisconnectedException) { } }
+        if (_module is not null) { try { await _module.DisposeAsync(); } catch (JSDisconnectedException) { } }
+    }
+}

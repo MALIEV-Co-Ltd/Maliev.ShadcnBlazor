@@ -22,7 +22,8 @@
         case "production-capacity":
             <div class="theme-runway-stat"><strong>@FormatPercent(Frame.CapacityPercent)</strong><span>5-axis capacity · Cell A3</span></div>
             <ShadcnProgress Class="theme-status-success" Value="@ClampPercent(Frame.CapacityPercent)"><ShadcnProgressLabel>Weekly capacity</ShadcnProgressLabel><ShadcnProgressValue /></ShadcnProgress>
-            <div class="theme-use-case-card__actions"><ShadcnBadge Class="theme-status-success">On schedule</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline">Review plan</ShadcnButton></div>
+            <div class="theme-use-case-card__actions"><ShadcnBadge Class="theme-status-success">On schedule</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" @onclick="TogglePlanReview">@(_planReviewOpen ? "Close plan" : "Review plan")</ShadcnButton></div>
+            @if (_planReviewOpen) { <div class="theme-inline-detail" role="region" aria-label="Capacity plan review">Cell A3 can accept two additional work orders before Friday.</div> }
             break;
         case "production-analytics":
             <ShadcnChart Class="theme-production-chart" Id="theme-production-analytics" Title="Completed operations" Description="Six-week output by production cell" Type="ShadcnChartType.Bar" Config="ProductionChartConfig" Categories="ProductionChartCategories" Series="ProductionChartSeries" ShowGrid="true" ShowMajorGrid="true" ShowMinorGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" LegendInteractive="true" InitialWidth="520" InitialHeight="230" />
@@ -31,18 +32,18 @@
             <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Narin S., Thai CNC engineer" /><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>CNC engineer · Samut Prakan</span></div></div>
             <label>Name<ThemeAnimatedInput Value="@(_profileName ?? "Narin S.")" ValueChanged="value => _profileName = value" /></label>
             <label>Shift<ThemeAnimatedInput Value="@ShiftValue" ReadOnly="true" /></label>
-            <ShadcnButton Size="ShadcnButtonSize.Small">Save profile</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Small" @onclick="SaveProfile">Save profile</ShadcnButton>
             break;
         case "drawing-attachment":
             <ShadcnAttachment Title="housing-rev-d.step" State="ShadcnAttachmentState.Uploading" Progress="@ClampPercent(Frame.UploadPercent)">
                 <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>housing-rev-d.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>8.4 MB · STEP · uploading</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="Cancel drawing upload">Cancel</ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="Cancel drawing upload" OnAction="HandleAttachmentAction">Cancel</ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             <ShadcnAttachment Title="inspection-plan.pdf" State="ShadcnAttachmentState.Done">
                 <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>inspection-plan.pdf</ShadcnAttachmentTitle><ShadcnAttachmentDescription>1.2 MB · ready for review</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="Remove inspection plan">Remove</ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="Remove inspection plan" OnAction="HandleAttachmentAction">Remove</ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             break;
         case "quotation-files":
@@ -73,14 +74,17 @@
             <ShadcnDataTable TItem="QuotationRow" Items="QuotationRows" Columns="QuotationColumns" RowKey="@(row => row.Id)" State="_quotationTableState" StateChanged="OnQuotationTableStateChanged" Selectable="true" FilterPlaceholder="Search quotations" EmptyText="No quotations found" />
             break;
         case "inspection-alerts":
-            @foreach (var option in AlertOptions)
+            @for (var index = 0; index < AlertOptions.Length; index++)
             {
-                <label class="theme-runway-check"><ShadcnCheckbox Value="@option.Enabled" /><span><strong>@option.Label</strong><small>@option.Description</small></span></label>
+                var optionIndex = index;
+                var option = AlertOptions[index];
+                <label class="theme-runway-check"><ShadcnCheckbox Value="@_alertEnabled[index]" ValueChanged="value => SetAlertEnabled(optionIndex, value)" /><span><strong>@option.Label</strong><small>@option.Description</small></span></label>
             }
-            <div class="theme-use-case-card__actions"><span>Quiet hours</span><ShadcnSwitch Value="true" aria-label="Use quiet hours" /></div>
+            <div class="theme-use-case-card__actions"><span>Quiet hours</span><ShadcnSwitch @bind-Value="_quietHours" aria-label="Use quiet hours" /></div>
             break;
         case "quality-alert":
-            <ShadcnAlert Variant="ShadcnAlertVariant.Destructive"><ShadcnAlertTitle>Inspection hold</ShadcnAlertTitle><ShadcnAlertDescription>Bore 4 is 0.012 mm below the lower tolerance. Review the probe result before machining resumes.</ShadcnAlertDescription><ShadcnAlertAction><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline">Open report</ShadcnButton></ShadcnAlertAction></ShadcnAlert>
+            <ShadcnAlert Variant="ShadcnAlertVariant.Destructive"><ShadcnAlertTitle>Inspection hold</ShadcnAlertTitle><ShadcnAlertDescription>Bore 4 is 0.012 mm below the lower tolerance. Review the probe result before machining resumes.</ShadcnAlertDescription><ShadcnAlertAction><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" @onclick="ToggleInspectionReport">@(_inspectionReportOpen ? "Close report" : "Open report")</ShadcnButton></ShadcnAlertAction></ShadcnAlert>
+            @if (_inspectionReportOpen) { <div class="theme-inline-detail" role="region" aria-label="Inspection report"><strong>Bore 4 probe report</strong><span>Measured 24.988 mm · lower limit 24.990 mm · hold active</span></div> }
             <ShadcnAlert><ShadcnAlertTitle>Calibration current</ShadcnAlertTitle><ShadcnAlertDescription>Probe P-08 was calibrated today at 08:10.</ShadcnAlertDescription></ShadcnAlert>
             break;
         case "deposit-approval":
@@ -93,7 +97,8 @@
         case "assigned-reviewers":
             <ShadcnAvatarGroup Class="theme-runway-reviewer-avatars"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Nattapong, Thai machining reviewer" /><ShadcnAvatarFallback>NP</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Kanda, Thai quality reviewer" /><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Pim, Thai logistics reviewer" /><ShadcnAvatarFallback>PS</ShadcnAvatarFallback></ShadcnAvatar>@if (_reviewersExpanded) { <ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>SK</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>AP</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>TN</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>WR</ShadcnAvatarFallback></ShadcnAvatar> } else { <ShadcnAvatarGroupCount Size="ShadcnAvatarSize.Small" ExpandLabel="Show four more reviewers" OnClick="ToggleReviewers">+4</ShadcnAvatarGroupCount> }</ShadcnAvatarGroup>
             <ul class="theme-runway-reviewers"><li><span>Nattapong · Machining</span><ShadcnBadge Class="theme-status-success">Ready</ShadcnBadge></li><li><span>Kanda · Quality</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Reviewing</ShadcnBadge></li><li><span>Pim · Logistics</span><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Queued</ShadcnBadge></li></ul>
-            <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline">Manage reviewers</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" @onclick="ToggleReviewerManagement">@(_reviewerManagerOpen ? "Close reviewer management" : "Manage reviewers")</ShadcnButton>
+            @if (_reviewerManagerOpen) { <div class="theme-inline-detail" role="region" aria-label="Reviewer management"><strong>Reviewer coverage</strong><span>Machining, Quality, and Logistics are assigned. Four alternates are available.</span></div> }
             break;
         case "conversation-marker":
             <ShadcnMarker Variant="ShadcnMarkerVariant.Separator"><ShadcnMarkerContent>14:32 · WO-2418</ShadcnMarkerContent></ShadcnMarker>
@@ -101,8 +106,8 @@
             <ShadcnMarker Variant="ShadcnMarkerVariant.Default" Live="true"><ShadcnMarkerIcon><span class="shadcn-marker-loader" aria-hidden="true"></span></ShadcnMarkerIcon><ShadcnMarkerContent Streaming="true">Dispatch team is preparing the Bangkok handoff</ShadcnMarkerContent></ShadcnMarker>
             break;
         case "work-order-navigation":
-            <nav aria-label="Work order path" class="theme-runway-breadcrumb"><a href="theme" @onclick:preventDefault>Production</a><span>/</span><a href="theme" @onclick:preventDefault>Cell A3</a><span>/</span><strong>WO-2418</strong></nav>
-            <div class="theme-runway-nav-list"><button type="button"><span><strong>Change process plan</strong><small>12 operations · revision C</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button"><span><strong>Schedule inspection</strong><small>Final dimensional report</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button"><span><strong>Release delivery</strong><small>Awaiting quality approval</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button></div>
+            <nav aria-label="Work order path" class="theme-runway-breadcrumb"><a href="theme" @onclick="OpenProductionQueue" @onclick:preventDefault>Production</a><span>/</span><a href="theme" @onclick="OpenMachineCell" @onclick:preventDefault>Cell A3</a><span>/</span><strong>WO-2418</strong></nav>
+            <div class="theme-runway-nav-list"><button type="button" @onclick="OpenProcessPlan"><span><strong>Change process plan</strong><small>12 operations · revision C</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button" @onclick="OpenInspectionSchedule"><span><strong>Schedule inspection</strong><small>Final dimensional report</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button" @onclick="OpenDeliveryRelease"><span><strong>Release delivery</strong><small>Awaiting quality approval</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button></div>
             break;
         case "machine-cell":
             <div class="theme-runway-machine"><div><strong>DMG MORI DMU 50</strong><span>5-axis milling · Cell A3</span></div></div>
@@ -144,7 +149,7 @@
                         </ShadcnMessageScrollerViewport>
                     </ShadcnMessageScroller>
                 </ShadcnMessageScrollerProvider>
-                <div class="theme-runway-composer"><ShadcnInput TValue="string" @bind-Value="_composerText" Placeholder="Ask about this work order" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" @onclick="SendConversationMessage"><ShadcnIcon Icon="@SendIcon" Size="16" /></ShadcnButton></div>
+                <ThemeConversationComposer OnSend="SendConversationMessage" />
             </div>
             break;
         case "project-questionnaire":
@@ -189,10 +194,10 @@
                     <ShadcnDropdownMenuTrigger>Actions</ShadcnDropdownMenuTrigger>
                     <ShadcnDropdownMenuContent>
                         <ShadcnDropdownMenuLabel>Quotation</ShadcnDropdownMenuLabel>
-                        <ShadcnDropdownMenuItem>Open details</ShadcnDropdownMenuItem>
-                        <ShadcnDropdownMenuItem>Duplicate revision</ShadcnDropdownMenuItem>
+                        <ShadcnDropdownMenuItem OnSelect="OpenQuotationDetails">Open details</ShadcnDropdownMenuItem>
+                        <ShadcnDropdownMenuItem OnSelect="DuplicateQuotationRevision">Duplicate revision</ShadcnDropdownMenuItem>
                         <ShadcnDropdownMenuSeparator />
-                        <ShadcnDropdownMenuItem Variant="ShadcnMenuItemVariant.Destructive">Archive draft</ShadcnDropdownMenuItem>
+                        <ShadcnDropdownMenuItem Variant="ShadcnMenuItemVariant.Destructive" OnSelect="ArchiveQuotationDraft">Archive draft</ShadcnDropdownMenuItem>
                     </ShadcnDropdownMenuContent>
                 </ShadcnDropdownMenu>
             </div>
@@ -216,7 +221,7 @@
             <ShadcnAttachment Title="enclosure-rev-c.step" State="ShadcnAttachmentState.Done">
                 <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>enclosure-rev-c.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>Revision C · STEP · 8.4 MB</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Download" AccessibleName="Download revision C">Download</ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Download" AccessibleName="Download revision C" OnAction="HandleAttachmentAction">Download</ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             <ShadcnContextMenu>
                 <ShadcnContextMenuTrigger Class="theme-bento-context-target">
@@ -228,13 +233,13 @@
                 </ShadcnContextMenuTrigger>
                 <ShadcnContextMenuContent>
                     <ShadcnContextMenuLabel>Drawing actions</ShadcnContextMenuLabel>
-                    <ShadcnContextMenuItem>Open drawing</ShadcnContextMenuItem>
-                    <ShadcnContextMenuItem>Rename</ShadcnContextMenuItem>
+                    <ShadcnContextMenuItem OnSelect="OpenDrawing">Open drawing</ShadcnContextMenuItem>
+                    <ShadcnContextMenuItem OnSelect="EnableDrawingRename">Rename</ShadcnContextMenuItem>
                     <ShadcnContextMenuSeparator />
-                    <ShadcnContextMenuItem Variant="ShadcnMenuItemVariant.Destructive">Move to trash</ShadcnContextMenuItem>
+                    <ShadcnContextMenuItem Variant="ShadcnMenuItemVariant.Destructive" OnSelect="TrashDrawing">Move to trash</ShadcnContextMenuItem>
                 </ShadcnContextMenuContent>
             </ShadcnContextMenu>
-            <div class="theme-use-case-card__actions"><span>Revision C is ready to inspect</span><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline">Open viewer</ShadcnButton></div>
+            <div class="theme-use-case-card__actions"><span>Revision C is ready to inspect</span><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" @onclick="OpenDrawingViewer">Open viewer</ShadcnButton></div>
             break;
         case "contact-dialog":
             <p class="theme-use-case-card__description">Update the contact shown to the machining and dispatch teams.</p>
@@ -286,6 +291,7 @@
             <ThemeOperationsConsole Kind="handoff" />
             break;
     }
+    @if (_actionStatus is not null) { <p class="theme-runway-action-status" role="status">@_actionStatus</p> }
     </ShadcnCardContent>
 </ShadcnCard>
 
@@ -305,10 +311,14 @@
     private string _contactName = "Narin S.";
     private string _contactPhone = "+66 81 555 2418";
     private bool _reviewerHoverOpen;
-    private string _composerText = string.Empty;
+    private bool _planReviewOpen;
+    private bool _inspectionReportOpen;
+    private bool _reviewerManagerOpen;
+    private bool _quietHours = true;
+    private readonly bool[] _alertEnabled = [true, true, false];
+    private string? _actionStatus;
     private int _conversationSequence = 2;
     private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
-    private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData FileIcon = new("lucide", "file", "0 0 24 24", "<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M14 2v6h6\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private sealed record QuotationRow(string Id, string Customer, string Status, double Amount);
@@ -360,17 +370,21 @@
     private const string ReferenceValue = "WO-2418";
     private static double ClampPercent(double value) => Math.Clamp(value, 0, 100);
     private static string FormatPercent(double value) => $"{ClampPercent(value):0}%";
-    private void SendConversationMessage()
+    private void SendConversationMessage(string message)
     {
-        var message = _composerText.Trim();
-        if (message.Length == 0) return;
         _conversationTurns.Add(new($"conversation-user-{++_conversationSequence}", message, false));
         var response = AssistantResponses[Random.Shared.Next(AssistantResponses.Length)];
         _conversationTurns.Add(new($"conversation-assistant-{++_conversationSequence}", response, true));
-        _composerText = string.Empty;
     }
+    private void TogglePlanReview() => _planReviewOpen = !_planReviewOpen;
+    private void SaveProfile() => _actionStatus = $"Profile saved for {_profileName ?? "Narin S."}.";
+    private void ToggleInspectionReport() => _inspectionReportOpen = !_inspectionReportOpen;
     private void ConfirmHandoff() => _handoffSaved = true;
-    private void ReviewDeposit() => _depositStatus = "Deposit terms opened for review.";
+    private void ReviewDeposit()
+    {
+        _depositApproved = false;
+        _depositStatus = "Deposit returned to pending approval.";
+    }
     private void ApproveDeposit()
     {
         _depositApproved = true;
@@ -387,6 +401,28 @@
         _dispatchStatus = "Dispatch held for another review.";
     }
     private void ToggleReviewers(MouseEventArgs _) => _reviewersExpanded = !_reviewersExpanded;
+    private void ToggleReviewerManagement() => _reviewerManagerOpen = !_reviewerManagerOpen;
+    private void SetAlertEnabled(int index, bool? value) => _alertEnabled[index] = value ?? false;
+    private void SelectWorkflowAction(string status) => _actionStatus = status;
+    private void OpenProcessPlan() => SelectWorkflowAction("Process plan opened.");
+    private void OpenProductionQueue() => SelectWorkflowAction("Production queue opened.");
+    private void OpenMachineCell() => SelectWorkflowAction("Cell A3 workspace opened.");
+    private void OpenInspectionSchedule() => SelectWorkflowAction("Inspection scheduling opened.");
+    private void OpenDeliveryRelease() => SelectWorkflowAction("Delivery release opened.");
+    private void OpenQuotationDetails(MouseEventArgs _) => SelectWorkflowAction("Quotation details opened.");
+    private void DuplicateQuotationRevision(MouseEventArgs _) => SelectWorkflowAction("Revision duplicated as a new draft.");
+    private void ArchiveQuotationDraft(MouseEventArgs _) => SelectWorkflowAction("Draft archived.");
+    private void OpenDrawing(MouseEventArgs _) => SelectWorkflowAction("Drawing opened in the review workspace.");
+    private void EnableDrawingRename(MouseEventArgs _) => SelectWorkflowAction("Rename mode enabled.");
+    private void TrashDrawing(MouseEventArgs _) => SelectWorkflowAction("Drawing moved to the review trash.");
+    private void OpenDrawingViewer() => SelectWorkflowAction("3D drawing viewer opened.");
+    private void HandleAttachmentAction(ShadcnAttachmentActionKind action) => _actionStatus = action switch
+    {
+        ShadcnAttachmentActionKind.Cancel => "Drawing upload cancelled.",
+        ShadcnAttachmentActionKind.Remove => "Attachment removed from this review.",
+        ShadcnAttachmentActionKind.Download => "Secure drawing download prepared.",
+        _ => "Attachment action completed."
+    };
     private void SubmitIssue() => _issueSubmitted = true;
     private Task OnQuotationTableStateChanged(ShadcnDataTableState state)
     {
