@@ -3,7 +3,7 @@
 @using Maliev.ShadcnBlazor.Showcase.Theming.Fonts
 @inject GoogleFontCatalogService CatalogService
 
-<section class="theme-inspector-group theme-typography-editor" style="@TypographyStyle" aria-labelledby="theme-typography-title" data-testid="theme-typography-editor">
+<section class="theme-inspector-group theme-typography-editor" aria-labelledby="theme-typography-title" data-testid="theme-typography-editor">
     <div class="theme-inspector-group__heading">
         <div>
             <h3 id="theme-typography-title">Typography</h3>
@@ -86,8 +86,6 @@
     private bool _thaiOnly;
     private bool _variableOnly;
     private string? _roleDiagnostic;
-    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
-
     protected override async Task OnInitializedAsync() => _catalog = await CatalogService.GetAsync();
 
     private IReadOnlyList<GoogleFontCatalogEntry> Results => _catalog?.Search(

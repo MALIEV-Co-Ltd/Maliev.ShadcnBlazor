@@ -86,14 +86,14 @@ public sealed class ComponentCatalogVisualProofTests(
                 ColorScheme = ColorScheme.Dark
             }, darkRtl: true, openSettings: true);
         await CaptureThemeStudioAsync(
-            "mobile-forced-colors",
+            "mobile-light",
             new BrowserNewContextOptions
             {
                 ViewportSize = new() { Width = 390, Height = 844 },
                 DeviceScaleFactor = 1,
                 ReducedMotion = ReducedMotion.Reduce,
-                ForcedColors = ForcedColors.Active
-            }, openSettings: true);
+                ColorScheme = ColorScheme.Light
+            });
     }
 
     private async Task CaptureModeAsync(
@@ -162,6 +162,14 @@ public sealed class ComponentCatalogVisualProofTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
+        await Assertions.Expect(page.GetByTestId("theme-runway")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-testid='theme-runway-mobile'] .theme-use-case-card")).ToHaveCountAsync(12);
+        if (mode.StartsWith("mobile", StringComparison.Ordinal))
+        {
+            var firstCard = page.Locator("[data-testid='theme-runway-mobile'] .theme-use-case-card").First;
+            await Assertions.Expect(firstCard).ToBeVisibleAsync();
+            await Assertions.Expect(firstCard).ToBeInViewportAsync();
+        }
         if (darkRtl)
         {
             await page.GetByTestId("documentation-theme-toggle").ClickAsync();
@@ -177,9 +185,10 @@ public sealed class ComponentCatalogVisualProofTests(
         if (await catalogStatus.CountAsync() > 0)
             await Assertions.Expect(catalogStatus).Not.ToContainTextAsync("Loading local font catalog");
         await page.EvaluateAsync("document.fonts.ready");
+        await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
         var actual = await page.ScreenshotAsync(new()
         {
-            Animations = ScreenshotAnimations.Disabled,
+            Animations = ScreenshotAnimations.Allow,
             FullPage = false
         });
         await VisualProof.CompareOrUpdateAsync(page, "theme-studio", mode, actual);

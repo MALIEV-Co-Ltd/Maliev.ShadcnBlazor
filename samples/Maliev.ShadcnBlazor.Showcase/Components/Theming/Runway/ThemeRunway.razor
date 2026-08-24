@@ -71,10 +71,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
-        _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio-runway.js");
-        _self = DotNetObjectReference.Create(this);
-        _controller = await _module.InvokeAsync<IJSObjectReference>("attachRunway", _root, _self);
+        if (firstRender)
+        {
+            _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio-runway.js");
+            _self = DotNetObjectReference.Create(this);
+            _controller = await _module.InvokeAsync<IJSObjectReference>("attachRunway", _root, _self);
+            return;
+        }
+
+        if (_controller is not null)
+            await _controller.InvokeVoidAsync("refresh");
     }
 
     protected override async Task OnParametersSetAsync()

@@ -54,6 +54,25 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ShufflePreservesTheRunwayPositionAndDemonstrationFrame()
+    {
+        await using var context = await NewContextAsync(1440, 900);
+        var page = await OpenAsync(context);
+        await page.WaitForTimeoutAsync(2400);
+        await page.GetByTestId("runway-pause").ClickAsync();
+        var before = await TrackOffsetsAsync(page);
+        var capacityBefore = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
+
+        await page.GetByTestId("theme-preset-shuffle").ClickAsync();
+        var after = await TrackOffsetsAsync(page);
+        var capacityAfter = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
+
+        Assert.InRange(Math.Abs(after.Left - before.Left), 0, 24);
+        Assert.InRange(Math.Abs(after.Right - before.Right), 0, 24);
+        Assert.Equal(capacityBefore, capacityAfter);
+    }
+
+    [Fact]
     public async Task UniversalHeaderOwnsColorAndDirectionWhileSidebarOwnsPreviewSettings()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
@@ -68,7 +87,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("locale-thai").ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-preview-stage")).ToHaveAttributeAsync("data-preview-width", "768");
         await Assertions.Expect(page.GetByTestId("theme-studio")).ToHaveAttributeAsync("lang", "th");
-        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity'] h2").First).ToContainTextAsync("กำลังการผลิต");
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title").First).ToContainTextAsync("กำลังการผลิต");
     }
 
     [Fact]
@@ -86,6 +105,54 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-theme-icon-library", "tabler");
         await Assertions.Expect(page.GetByTestId("theme-preset-dock").Locator("[data-icon='building-factory']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByText("Maliev.ShadcnBlazor.Icons.Tabler", new() { Exact = true })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task CompanyShellStaysStableAndPreviewAccessibilityStartsOff()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var shellFont = await ComputedFontAsync(page.Locator(".documentation-header"));
+        var shellBackground = await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+
+        await Assertions.Expect(page.GetByTestId("preview-high-contrast")).Not.ToBeCheckedAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
+        await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
+        await page.GetByTestId("theme-preset-shuffle").ClickAsync();
+
+        Assert.Equal(shellFont, await ComputedFontAsync(page.Locator(".documentation-header")));
+        Assert.Equal(shellBackground, await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        Assert.Equal("left", await page.Locator(".theme-font-results button").First.EvaluateAsync<string>("element => getComputedStyle(element).textAlign"));
+        await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-preview-high-contrast", "false");
+    }
+
+    [Fact]
+    public async Task DesktopRunwayFillsTheAvailableHeightAndHasNoWrapperSurface()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var geometry = await page.GetByTestId("theme-runway").EvaluateAsync<RunwayGeometry>("element => { const style=getComputedStyle(element); const columns=element.querySelector('[data-testid=theme-runway-columns]').getBoundingClientRect(); return { borderWidth: style.borderTopWidth, radius: style.borderRadius, background: style.backgroundColor, bottom: columns.bottom, gap: parseFloat(getComputedStyle(element.querySelector('.theme-runway__track')).gap), beforeContent: getComputedStyle(element, '::before').content }; }");
+
+        Assert.Equal("0px", geometry.BorderWidth);
+        Assert.Equal("0px", geometry.Radius);
+        Assert.Equal("rgba(0, 0, 0, 0)", geometry.Background);
+        Assert.True(geometry.Bottom >= 868, $"Runway stopped at {geometry.Bottom}px in a 900px viewport.");
+        Assert.True(geometry.Gap >= 24, $"Curated cards are packed too tightly: {geometry.Gap}px.");
+        Assert.Equal("none", geometry.BeforeContent);
+    }
+
+    [Fact]
+    public async Task RunwayUsesPackageCardsMessagesAvatarsAndCorrectPercentages()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        await Assertions.Expect(page.Locator("[data-use-case-id='operator-profile'].shadcn-card").First).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='operator-profile'] .shadcn-avatar-image").First).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='assistant-conversation'] .shadcn-message-group").First).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='assistant-conversation'] .shadcn-bubble").First).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='machine-cell'] [data-testid='machine-load-percent']").First).ToHaveTextAsync("75%");
+        await Assertions.Expect(page.Locator(".theme-use-case-card__eyebrow, [data-use-case-id] > .theme-use-case-card__header .shadcn-badge")).ToHaveCountAsync(0);
     }
 
     [Theory]
@@ -155,4 +222,13 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private static async Task<IReadOnlyList<string>> LogicalCardIdsAsync(IPage page) => await page.Locator(".theme-runway__viewport > .theme-runway__track > [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
     private static async Task<(double Left, double Right)> TrackOffsetsAsync(IPage page) { var values = await page.Locator(".theme-runway__track").EvaluateAllAsync<double[]>("nodes => nodes.map(node => new DOMMatrix(getComputedStyle(node).transform).m42)"); return (values[0], values[1]); }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
+    private sealed class RunwayGeometry
+    {
+        public string BorderWidth { get; set; } = string.Empty;
+        public string Radius { get; set; } = string.Empty;
+        public string Background { get; set; } = string.Empty;
+        public double Bottom { get; set; }
+        public double Gap { get; set; }
+        public string BeforeContent { get; set; } = string.Empty;
+    }
 }

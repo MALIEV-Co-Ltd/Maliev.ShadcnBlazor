@@ -20,9 +20,9 @@
                 <div class="shadcn-scope theme-preview-scope"
                      style="@TypographyStyle"
                      data-shadcn-scope
-                     data-shadcn-theme="@(ShellState.IsDarkMode ? "dark" : "light")"
+                     data-shadcn-theme="@(State.EffectiveDarkMode ? "dark" : "light")"
                      data-shadcn-reduced-motion="@(State.Workbench.ReducedMotion ? "always" : "system")"
-                     dir="@(ShellState.Direction == ShadcnDirection.RightToLeft ? "rtl" : "ltr")"
+                     dir="@(State.Direction == ShadcnDirection.RightToLeft ? "rtl" : "ltr")"
                      data-testid="theme-preview-scope"
                      data-theme-style="@State.StyleId"
                      data-theme-base-color="@State.BaseColorId"
@@ -44,27 +44,25 @@
     private bool _persisting;
     private bool _persistRequested;
     private bool _disposed;
-    private bool _syncingShell;
     private Task _persistenceTask = Task.CompletedTask;
     private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
-    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, ShellState.IsDarkMode);
-    private ShadcnContext PreviewContext => new(ShellState.IsDarkMode, ShellState.Direction);
+    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
+    private ShadcnContext PreviewContext => new(State.EffectiveDarkMode, State.Direction);
 
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
         ShellState.Changed += OnShellChanged;
-        await State.InitializeAsync();
-        if (_disposed) return;
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
+        await State.InitializeAsync();
+        if (_disposed) return;
         _initialized = true;
     }
 
     private void OnShellChanged(object? sender, EventArgs args)
     {
-        if (_syncingShell) { _ = InvokeAsync(StateHasChanged); return; }
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
         _ = InvokeAsync(StateHasChanged);
@@ -73,14 +71,6 @@
     private void OnStateChanged(object? sender, EventArgs args)
     {
         if (_disposed) return;
-        _syncingShell = true;
-        try
-        {
-            if (State.Mode != ThemeStudioMode.System)
-                ShellState.SetTheme(State.Mode == ThemeStudioMode.Dark);
-            ShellState.SetDirection(State.Direction);
-        }
-        finally { _syncingShell = false; }
         _persistenceTask = ObservePersistenceAsync(_initialized);
     }
 

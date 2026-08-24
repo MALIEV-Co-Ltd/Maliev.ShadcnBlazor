@@ -115,6 +115,8 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
+        await Assertions.Expect(page.Locator(".theme-studio-provider")).ToHaveAttributeAsync("data-shadcn-theme", "light");
+        await Assertions.Expect(page.Locator(".theme-studio-provider")).ToHaveAttributeAsync("dir", "ltr");
         await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
         await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2')?.includes('\\\"schemaVersion\\\": 2')");
         await page.ReloadAsync();
@@ -122,9 +124,10 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-preset-dock")).ToContainTextAsync("Cobalt Precision");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
-        var restoredTypography = await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style");
+        var restoredTypography = await page.GetByTestId("theme-preview-scope").GetAttributeAsync("style");
         Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", restoredTypography, StringComparison.Ordinal);
+        Assert.Null(await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style"));
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
 

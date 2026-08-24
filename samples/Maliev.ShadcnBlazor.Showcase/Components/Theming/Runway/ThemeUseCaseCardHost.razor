@@ -1,34 +1,36 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Conversation
+@using Maliev.ShadcnBlazor.Components.Icons
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 
-<article class="theme-use-case-card"
+<ShadcnCard Class="theme-use-case-card"
          data-use-case-id="@Definition.Id"
          data-track="@Definition.Track.ToString().ToLowerInvariant()"
          data-mirror="@(IsMirror ? "true" : "false")"
          aria-hidden="@(IsMirror ? "true" : null)"
          inert="@IsMirror">
-    <header class="theme-use-case-card__header">
-        <div><span class="theme-use-case-card__eyebrow">@Eyebrow</span><h2>@Title</h2></div>
-        <ShadcnBadge Variant="ShadcnBadgeVariant.Outline">@Status</ShadcnBadge>
-    </header>
+    <ShadcnCardHeader Class="theme-use-case-card__header">
+        <ShadcnCardTitle>@Title</ShadcnCardTitle>
+    </ShadcnCardHeader>
 
+    <ShadcnCardContent Class="theme-use-case-card__content">
     @switch (Definition.Id)
     {
         case "production-capacity":
-            <div class="theme-runway-stat"><strong>@Frame.CapacityPercent.ToString("0")%</strong><span>5-axis capacity · Cell A3</span></div>
-            <ShadcnProgress Value="Frame.CapacityPercent"><ShadcnProgressLabel>Weekly capacity</ShadcnProgressLabel><ShadcnProgressValue /></ShadcnProgress>
+            <div class="theme-runway-stat"><strong>@FormatPercent(Frame.CapacityPercent)</strong><span>5-axis capacity · Cell A3</span></div>
+            <ShadcnProgress Value="@ClampPercent(Frame.CapacityPercent)"><ShadcnProgressLabel>Weekly capacity</ShadcnProgressLabel><ShadcnProgressValue /></ShadcnProgress>
             <div class="theme-use-case-card__actions"><ShadcnBadge>On schedule</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Review plan</ShadcnButton></div>
             break;
         case "operator-profile":
-            <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>CNC engineer · Samut Prakan</span></div></div>
+            <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Narin S., Thai CNC engineer" /><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>CNC engineer · Samut Prakan</span></div></div>
             <label>Name<ShadcnInput TValue="string" Value="@(_profileName ?? "Narin S.")" ValueChanged="value => _profileName = value" Disabled="IsMirror" /></label>
             <label>Shift<ShadcnInput TValue="string" Value="@ShiftValue" ReadOnly="true" /></label>
             <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Save profile</ShadcnButton>
             break;
         case "quotation-files":
             <ShadcnDropzone Accept=".step,.stp,.pdf" Multiple="true" MaxFiles="5" MaxFileSize="20971520" Loading="@(Frame.UploadPercent is > 0 and < 100)" Disabled="IsMirror" Instructions="Drop production drawings here" Description="STEP or PDF · up to 20 MB" />
-            <div class="theme-runway-file"><span>enclosure-rev-c.step</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@Frame.UploadPercent.ToString("0")%</ShadcnBadge></div>
-            <ShadcnProgress Value="Frame.UploadPercent"><ShadcnProgressLabel>Upload progress</ShadcnProgressLabel></ShadcnProgress>
+            <div class="theme-runway-file"><span>enclosure-rev-c.step</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@FormatPercent(Frame.UploadPercent)</ShadcnBadge></div>
+            <ShadcnProgress Value="@ClampPercent(Frame.UploadPercent)"><ShadcnProgressLabel>Upload progress</ShadcnProgressLabel></ShadcnProgress>
             break;
         case "shipping-handoff":
             <label>Factory<ShadcnInput TValue="string" Value="@FactoryValue" ReadOnly="true" /></label>
@@ -50,25 +52,32 @@
             <div class="theme-use-case-card__actions"><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Review</ShadcnButton><ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Approve deposit</ShadcnButton></div>
             break;
         case "assigned-reviewers":
-            <ShadcnAvatarGroup><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>NP</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>PS</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatarGroupCount Size="ShadcnAvatarSize.Small">+4</ShadcnAvatarGroupCount></ShadcnAvatarGroup>
+            <ShadcnAvatarGroup Class="theme-runway-reviewer-avatars"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Nattapong, Thai machining reviewer" /><ShadcnAvatarFallback>NP</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Kanda, Thai quality reviewer" /><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Pim, Thai logistics reviewer" /><ShadcnAvatarFallback>PS</ShadcnAvatarFallback></ShadcnAvatar><ShadcnAvatarGroupCount Size="ShadcnAvatarSize.Small">+4</ShadcnAvatarGroupCount></ShadcnAvatarGroup>
             <ul class="theme-runway-reviewers"><li><span>Nattapong · Machining</span><ShadcnBadge>Ready</ShadcnBadge></li><li><span>Kanda · Quality</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Reviewing</ShadcnBadge></li><li><span>Pim · Logistics</span><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">Queued</ShadcnBadge></li></ul>
             <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Manage reviewers</ShadcnButton>
             break;
         case "work-order-navigation":
             <nav aria-label="Work order path" class="theme-runway-breadcrumb"><a href="theme" @onclick:preventDefault>Production</a><span>/</span><a href="theme" @onclick:preventDefault>Cell A3</a><span>/</span><strong>WO-2418</strong></nav>
-            <div class="theme-runway-nav-list"><button type="button" disabled="@IsMirror"><span><strong>Change process plan</strong><small>12 operations · revision C</small></span><span>›</span></button><button type="button" disabled="@IsMirror"><span><strong>Schedule inspection</strong><small>Final dimensional report</small></span><span>›</span></button><button type="button" disabled="@IsMirror"><span><strong>Release delivery</strong><small>Awaiting quality approval</small></span><span>›</span></button></div>
+            <div class="theme-runway-nav-list"><button type="button" disabled="@IsMirror"><span><strong>Change process plan</strong><small>12 operations · revision C</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button" disabled="@IsMirror"><span><strong>Schedule inspection</strong><small>Final dimensional report</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button><button type="button" disabled="@IsMirror"><span><strong>Release delivery</strong><small>Awaiting quality approval</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></button></div>
             break;
         case "machine-cell":
-            <div class="theme-runway-machine"><div><strong>DMG MORI DMU 50</strong><span>5-axis milling · Cell A3</span></div><ShadcnBadge>Live</ShadcnBadge></div>
-            <div class="theme-runway-stat"><strong>@(Frame.CapacityPercent - 7).ToString("0")%</strong><span>Spindle load</span></div>
-            <ShadcnProgress Value="@(Frame.CapacityPercent - 7)"><ShadcnProgressLabel>Spindle load</ShadcnProgressLabel></ShadcnProgress>
+            <div class="theme-runway-machine"><div><strong>DMG MORI DMU 50</strong><span>5-axis milling · Cell A3</span></div></div>
+            <div class="theme-runway-stat"><strong data-testid="machine-load-percent">@FormatPercent(Frame.CapacityPercent - 7)</strong><span>Spindle load</span></div>
+            <ShadcnProgress Value="@ClampPercent(Frame.CapacityPercent - 7)"><ShadcnProgressLabel>Spindle load</ShadcnProgressLabel><ShadcnProgressValue /></ShadcnProgress>
             <ShadcnAlert><ShadcnAlertTitle>In-process inspection</ShadcnAlertTitle><ShadcnAlertDescription>Bore diameter within tolerance at 14:20.</ShadcnAlertDescription></ShadcnAlert>
             break;
         case "assistant-conversation":
             <div class="theme-runway-chat" aria-label="Assistant conversation preview">
-                <div class="theme-runway-message theme-runway-message--user"><span>ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย</span></div>
-                <div class="theme-runway-message"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar><span>@AssistantMessage[..Math.Min(Frame.ChatCharacters, AssistantMessage.Length)]<span class="theme-runway-caret" aria-hidden="true"></span></span></div>
-                <div class="theme-runway-composer"><ShadcnInput TValue="string" Placeholder="Ask about this work order" Disabled="IsMirror" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" Disabled="IsMirror">↑</ShadcnButton></div>
+                <ShadcnMessageGroup>
+                    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnBubble Align="ShadcnLogicalAlign.End"><ShadcnBubbleContent>ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย</ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
+                    </ShadcnMessage>
+                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+                        <ShadcnMessageAvatar><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/assistant-thai.png" Alt="MALIEV Assistant" /><ShadcnAvatarFallback>MA</ShadcnAvatarFallback></ShadcnAvatar></ShadcnMessageAvatar>
+                        <ShadcnMessageContent><ShadcnMessageBody><ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader><ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted"><ShadcnBubbleContent>@AssistantMessage[..Math.Min(Frame.ChatCharacters, AssistantMessage.Length)]<span class="theme-runway-caret" aria-hidden="true"></span></ShadcnBubbleContent></ShadcnBubble></ShadcnMessageBody></ShadcnMessageContent>
+                    </ShadcnMessage>
+                </ShadcnMessageGroup>
+                <div class="theme-runway-composer"><ShadcnInput TValue="string" Placeholder="Ask about this work order" Disabled="IsMirror" /><ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" Disabled="IsMirror"><ShadcnIcon Icon="@SendIcon" Size="16" /></ShadcnButton></div>
             </div>
             break;
         case "issue-report":
@@ -83,7 +92,8 @@
             <div class="theme-use-case-card__actions"><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" Disabled="IsMirror">Cancel</ShadcnButton><ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">@(Frame.ApprovalState == 2 ? "Dispatched" : "Confirm dispatch")</ShadcnButton></div>
             break;
     }
-</article>
+    </ShadcnCardContent>
+</ShadcnCard>
 
 @code {
     [Parameter, EditorRequired] public ThemeUseCaseDefinition Definition { get; set; } = null!;
@@ -93,13 +103,15 @@
     private string? _profileName;
     private bool _saveAddress = true;
     private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
-    private string Eyebrow => $"{Definition.Order:00} · MALIEV workflow";
-    private string Status => Definition.Id switch { "machine-cell" => "Live", "quotation-files" => "Uploading", "deposit-approval" => "Approval", _ => "Preview" };
+    private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+    private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private const string AssistantMessage = "กำหนดส่งยังเป็นวันศุกร์ เวลา 16:00 น. งานกัดเสร็จแล้วและกำลังรอรายงานตรวจสอบขั้นสุดท้าย";
     private const string ShiftValue = "Night · Cell A3";
     private const string FactoryValue = "MALIEV · Samut Prakan";
     private const string DockValue = "B-04";
     private const string ReferenceValue = "WO-2418";
+    private static double ClampPercent(double value) => Math.Clamp(value, 0, 100);
+    private static string FormatPercent(double value) => $"{ClampPercent(value):0}%";
     private static readonly (string Label, string Description, bool Enabled)[] AlertOptions =
     [
         ("Inspection failures", "Immediate quality notification", true),

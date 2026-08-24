@@ -52,14 +52,28 @@ public sealed class ThemeStudioWorkbenchContractTests
         var root = FindRoot();
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains(".theme-studio-provider[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-studio-provider[data-preview-high-contrast=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);
         Assert.Contains("position: fixed", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: clip", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreviewThemeNeverMutatesTheCompanyShell()
+    {
+        var root = FindRoot();
+        var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
+        var typography = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeTypographyEditor.razor");
+
+        Assert.Contains("data-shadcn-theme=\"@(State.EffectiveDarkMode", page, StringComparison.Ordinal);
+        Assert.Contains("dir=\"@(State.Direction", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShellState.SetTheme", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShellState.SetDirection", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("style=\"@TypographyStyle\"", typography, StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] segments) =>

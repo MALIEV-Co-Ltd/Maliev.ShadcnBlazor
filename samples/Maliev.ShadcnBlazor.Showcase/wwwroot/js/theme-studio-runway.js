@@ -1,7 +1,16 @@
 export function attachRunway(root, dotnet) {
     if (!root) throw new Error("Theme runway root is required.");
     const tracks = [...root.querySelectorAll("[data-runway-track]")];
-    const state = { progress: 0, last: performance.now(), temporary: false, persistent: false, disposed: false, resumeTimer: 0 };
+    const state = {
+        progress: new Map(tracks.map(track => [track, 0])),
+        lengths: new Map(),
+        transforms: new Map(),
+        last: performance.now(),
+        temporary: false,
+        persistent: false,
+        disposed: false,
+        resumeTimer: 0
+    };
     const speed = 9;
     const reducedQuery = matchMedia("(prefers-reduced-motion: reduce)");
     const onReducedChange = event => dotnet.invokeMethodAsync("SetSystemReducedMotion", event.matches);
@@ -18,18 +27,32 @@ export function attachRunway(root, dotnet) {
             const mirror = sequence?.querySelector(".theme-runway__mirror");
             if (!sequence || !mirror) continue;
             const length = mirror.offsetTop;
-            if (!length || isStaticLayout()) { sequence.style.transform = ""; continue; }
-            const normalized = ((state.progress % length) + length) % length;
-            sequence.style.transform = viewport.dataset.runwayTrack === "left"
+            if (!length || isStaticLayout()) { sequence.style.transform = ""; state.transforms.delete(sequence); continue; }
+            let progress = state.progress.get(viewport) ?? 0;
+            const previousLength = state.lengths.get(viewport);
+            if (previousLength && Math.abs(previousLength - length) > 0.5) {
+                const renderedTransform = sequence.style.transform || state.transforms.get(sequence) || getComputedStyle(sequence).transform;
+                const renderedOffset = renderedTransform === "none" ? 0 : new DOMMatrix(renderedTransform).m42;
+                progress = viewport.dataset.runwayTrack === "left" ? renderedOffset + length : -renderedOffset;
+                state.progress.set(viewport, progress);
+            }
+            state.lengths.set(viewport, length);
+            const normalized = ((progress % length) + length) % length;
+            const transform = viewport.dataset.runwayTrack === "left"
                 ? `translate3d(0, ${normalized - length}px, 0)`
                 : `translate3d(0, ${-normalized}px, 0)`;
+            sequence.style.transform = transform;
+            state.transforms.set(sequence, transform);
         }
     }
     function frame(now) {
         if (state.disposed) return;
         const elapsed = Math.min(64, now - state.last);
         state.last = now;
-        if (!paused()) state.progress += elapsed * speed / 1000;
+        if (!paused()) {
+            for (const viewport of tracks)
+                state.progress.set(viewport, (state.progress.get(viewport) ?? 0) + elapsed * speed / 1000);
+        }
         render();
         requestAnimationFrame(frame);
     }

@@ -80,8 +80,14 @@ internal static class RepositoryRoot
     public static string Find()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, ".git")))
+        while (directory is not null)
+        {
+            var gitPath = Path.Combine(directory.FullName, ".git");
+            if (Directory.Exists(gitPath) || File.Exists(gitPath))
+                break;
+
             directory = directory.Parent;
+        }
 
         return directory?.FullName ?? throw new InvalidOperationException("Repository root was not found.");
     }
