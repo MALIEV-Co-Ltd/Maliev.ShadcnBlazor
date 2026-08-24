@@ -140,8 +140,8 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);
-        Assert.Contains("class=\"theme-runway-typing\"", card, StringComparison.Ordinal);
-        Assert.Contains("@AssistantMessage", card, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
+        Assert.Contains("@turn.Text", card, StringComparison.Ordinal);
         Assert.DoesNotContain("AssistantMessage[..Math.Min(Frame.ChatCharacters", card, StringComparison.Ordinal);
     }
 
@@ -152,20 +152,32 @@ public sealed class ThemeBentoContractTests
         var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains("class=\"theme-runway-typing-character\"", card, StringComparison.Ordinal);
-        Assert.Contains("TypingDelay(index)", card, StringComparison.Ordinal);
-        Assert.Contains("<span class=\"shadcn-sr-only\">@AssistantMessage</span>", card, StringComparison.Ordinal);
-        Assert.Contains("class=\"theme-runway-typing\" aria-hidden=\"true\"", card, StringComparison.Ordinal);
-        Assert.Contains("animation: theme-runway-type-character", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes theme-runway-type-character", css, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-runway-typing-character", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("SplitTextElements", card, StringComparison.Ordinal);
+        Assert.Contains("animation: theme-runway-type-text", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes theme-runway-type-text", css, StringComparison.Ordinal);
         Assert.Contains("forwards", css, StringComparison.Ordinal);
-        Assert.DoesNotContain("theme-runway-type-character var(--typing-cycle) steps(1, end) infinite", css, StringComparison.Ordinal);
+        Assert.Contains("clip-path", css, StringComparison.Ordinal);
         Assert.Contains("@bind-Value=\"_composerText\"", card, StringComparison.Ordinal);
         Assert.Contains("SendConversationMessage", card, StringComparison.Ordinal);
         Assert.Contains("AssistantResponses", card, StringComparison.Ordinal);
-        Assert.DoesNotContain("theme-runway-typing-reveal", css, StringComparison.Ordinal);
-        Assert.DoesNotContain(".theme-runway-typing { display: inline-block; max-inline-size: 100%; clip-path", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-character { animation: none !important; opacity: 1;", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-text", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BentoRevealIsPreviewScopedAndOneTime()
+    {
+        var root = FindRoot();
+        var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
+        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-bento.js");
+        var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+
+        Assert.Contains("attachBentoReveal", bento, StringComparison.Ordinal);
+        Assert.Contains("IntersectionObserver", script, StringComparison.Ordinal);
+        Assert.Contains("unobserve", script, StringComparison.Ordinal);
+        Assert.Contains("data-reveal-state", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope", css, StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] segments) => File.ReadAllText(Path.Combine([root, .. segments]));

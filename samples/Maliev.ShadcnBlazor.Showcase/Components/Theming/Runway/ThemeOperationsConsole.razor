@@ -1,0 +1,108 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.DataDisplay
+@using Maliev.ShadcnBlazor.Components.Disclosure
+@using Maliev.ShadcnBlazor.Components.Navigation
+@using Maliev.ShadcnBlazor.Components.Overlays
+
+<div class="theme-operations-console" data-console="@Kind">
+    <ShadcnTabs Value="@_tab" ValueChanged="value => _tab = value" Class="theme-operations-console__tabs">
+        <ShadcnTabsList Label="@($"{ConsoleTitle} workspace")">
+            <ShadcnTabsTrigger Value="overview">Overview</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="release">Release</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="support">Support</ShadcnTabsTrigger>
+        </ShadcnTabsList>
+
+        <ShadcnTabsContent Value="overview" ForceMount="true">
+            <div class="theme-operations-console__overview">
+                <ShadcnAlert>
+                    <ShadcnAlertTitle>@StatusTitle</ShadcnAlertTitle>
+                    <ShadcnAlertDescription>@StatusDescription</ShadcnAlertDescription>
+                </ShadcnAlert>
+                <ShadcnChart Id="@($"{Kind}-throughput")" Title="Cell throughput" Description="Completed and inspected operations" Type="ShadcnChartType.Bar" Config="ChartConfig" Categories="ChartCategories" Series="ChartSeries" ShowGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" InitialWidth="430" InitialHeight="190" />
+                <ShadcnTable Borders="true" ExpectedColumnCount="3">
+                    <ShadcnTableCaption>Current production gates</ShadcnTableCaption>
+                    <ShadcnTableHeader><ShadcnTableRow><ShadcnTableHead>Gate</ShadcnTableHead><ShadcnTableHead>Owner</ShadcnTableHead><ShadcnTableHead>Status</ShadcnTableHead></ShadcnTableRow></ShadcnTableHeader>
+                    <ShadcnTableBody>
+                        <ShadcnTableRow><ShadcnTableCell>Machining</ShadcnTableCell><ShadcnTableCell>Nattapong</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Class="theme-status-success">Ready</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
+                        <ShadcnTableRow><ShadcnTableCell>Inspection</ShadcnTableCell><ShadcnTableCell>Kanda</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Review</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
+                    </ShadcnTableBody>
+                </ShadcnTable>
+            </div>
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent Value="release" ForceMount="true">
+            <div class="theme-operations-console__release">
+                <ShadcnAccordion Values="@_openGates" ValuesChanged="values => _openGates = values" Multiple="true" Label="Release gates">
+                    <ShadcnAccordionItem Value="inspection"><ShadcnAccordionTrigger>Final inspection</ShadcnAccordionTrigger><ShadcnAccordionContent>Three dimensional reports are signed and traceable.</ShadcnAccordionContent></ShadcnAccordionItem>
+                    <ShadcnAccordionItem Value="dispatch"><ShadcnAccordionTrigger>Dispatch documents</ShadcnAccordionTrigger><ShadcnAccordionContent>Packing list and delivery reference WO-2418 are ready.</ShadcnAccordionContent></ShadcnAccordionItem>
+                </ShadcnAccordion>
+                <ShadcnCollapsible @bind-Open="_advancedOpen"><ShadcnCollapsibleTrigger>Advanced release controls</ShadcnCollapsibleTrigger><ShadcnCollapsibleContent>
+                    <div class="theme-operations-console__controls">
+                        <label>Inspection threshold<ShadcnSlider Values="@_threshold" ValuesChanged="values => _threshold = values" Minimum="0" Maximum="100" Step="1" /></label>
+                        <ShadcnRadioGroup TValue="string" @bind-Value="_priority" Name="@($"{Kind}-priority")" Presentation="ShadcnRadioGroupPresentation.Card">
+                            <ShadcnRadioGroupItem TValue="string" Value="@("standard")">Standard release</ShadcnRadioGroupItem>
+                            <ShadcnRadioGroupItem TValue="string" Value="@("priority")">Priority dispatch</ShadcnRadioGroupItem>
+                        </ShadcnRadioGroup>
+                        <ShadcnToggleGroup TValue="string" Values="@_layers" ValuesChanged="values => _layers = values" Multiple="true">
+                            <ShadcnToggleGroupItem TValue="string" Value="@("dimensions")">Dimensions</ShadcnToggleGroupItem>
+                            <ShadcnToggleGroupItem TValue="string" Value="@("notes")">Notes</ShadcnToggleGroupItem>
+                        </ShadcnToggleGroup>
+                    </div>
+                </ShadcnCollapsibleContent></ShadcnCollapsible>
+                <div class="theme-operations-console__form-row">
+                    <label>Release lane<ShadcnNativeSelect TValue="string" @bind-Value="_lane"><ShadcnNativeSelectOption TValue="string" Value="@("quality")">Quality desk</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("dispatch")">Dispatch desk</ShadcnNativeSelectOption></ShadcnNativeSelect></label>
+                    <label>Approval code<ShadcnInputOtp @bind-Value="_otp" MaxLength="4"><ShadcnInputOtpGroup><ShadcnInputOtpSlot Index="0" /><ShadcnInputOtpSlot Index="1" /><ShadcnInputOtpSlot Index="2" /><ShadcnInputOtpSlot Index="3" /></ShadcnInputOtpGroup></ShadcnInputOtp></label>
+                </div>
+                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline">Save review</ShadcnButton><ShadcnButton>Approve release</ShadcnButton></ShadcnButtonGroup>
+            </div>
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent Value="support" ForceMount="true">
+            <div class="theme-operations-console__support">
+                <ShadcnCommand Label="Work order actions">
+                    <ShadcnCommandInput Placeholder="Search work-order actions" />
+                    <ShadcnCommandList>
+                        <ShadcnCommandGroup Heading="Production"><ShadcnCommandItem Value="open-drawing">Open latest drawing<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review">Schedule review<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
+                        <ShadcnCommandEmpty>No matching production action.</ShadcnCommandEmpty>
+                    </ShadcnCommandList>
+                </ShadcnCommand>
+                <ShadcnResizableGroup Class="theme-operations-console__resizable">
+                    <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>WO-2418</strong></p><p>Revision C is ready for final dimensional review.</p><p>Courier collection remains booked for 16:00.</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
+                    <ShadcnResizableHandle WithHandle="true" />
+                    <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="Refreshing activity" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
+                </ShadcnResizableGroup>
+                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="Add a handoff note" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">Add</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
+                @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">Note added to WO-2418</ShadcnBadge> }
+                <ShadcnPagination Label="Console pages"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Disabled="true" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="true">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink>2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
+            </div>
+        </ShadcnTabsContent>
+    </ShadcnTabs>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Kind { get; set; } = "production";
+    private string _tab = "overview";
+    private IReadOnlyCollection<string> _openGates = ["inspection"];
+    private bool _advancedOpen;
+    private IReadOnlyList<double> _threshold = [86d];
+    private IReadOnlyCollection<string> _layers = ["dimensions"];
+    private string _priority = "standard";
+    private string _lane = "quality";
+    private string _otp = "2418";
+    private string _note = string.Empty;
+    private bool _noteAdded;
+    private string? _configuredKind;
+    private string ConsoleTitle => Kind switch { "quality" => "Quality release", "handoff" => "Customer handoff", _ => "Production planning" };
+    private string StatusTitle => Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" };
+    private string StatusDescription => Kind switch { "quality" => "All critical dimensions are within the approved tolerance band.", "handoff" => "The recipient, dock, and courier window have been verified.", _ => "Cell A3 has capacity for the next two scheduled work orders." };
+    private static readonly string[] ChartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+    private static readonly ShadcnChartConfig ChartConfig = new() { ["completed"] = new("Completed"), ["inspected"] = new("Inspected") };
+    private static readonly ShadcnChartSeries[] ChartSeries = [new("completed", [28, 36, 31, 43, 48]), new("inspected", [22, 30, 27, 35, 41])];
+    protected override void OnParametersSet()
+    {
+        if (string.Equals(_configuredKind, Kind, StringComparison.Ordinal)) return;
+        _configuredKind = Kind;
+        _tab = Kind switch { "quality" => "release", "handoff" => "support", _ => "overview" };
+    }
+    private void AddNote() { if (!string.IsNullOrWhiteSpace(_note)) { _noteAdded = true; _note = string.Empty; } }
+}

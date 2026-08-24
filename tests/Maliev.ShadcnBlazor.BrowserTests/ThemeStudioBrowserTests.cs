@@ -17,8 +17,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var bento = page.GetByTestId("theme-bento");
         var cards = bento.Locator("[data-use-case-id]");
         await Assertions.Expect(bento).ToBeVisibleAsync();
-        Assert.Equal(26, await cards.CountAsync());
-        Assert.Equal(26, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(29, await cards.CountAsync());
+        Assert.Equal(29, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(0, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
@@ -59,9 +59,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await conversation.GetByRole(AriaRole.Button, new() { Name = "Send message" }).ClickAsync();
         await Assertions.Expect(turns).ToHaveCountAsync(4);
         await Assertions.Expect(conversation.GetByText("สถานะการตรวจสอบล่าสุดเป็นอย่างไร", new() { Exact = true })).ToBeVisibleAsync();
-        var lastCharacter = conversation.Locator(".theme-runway-typing-character").Last;
-        Assert.Equal("1", await lastCharacter.EvaluateAsync<string>("element => getComputedStyle(element).animationIterationCount"));
-        await Assertions.Expect(lastCharacter).ToHaveCSSAsync("opacity", "1", new() { Timeout = 8000 });
+        var typingText = conversation.Locator(".theme-runway-typing-text").Last;
+        Assert.Equal("1", await typingText.EvaluateAsync<string>("element => getComputedStyle(element).animationIterationCount"));
+        Assert.DoesNotContain('\uFFFD', await typingText.InnerTextAsync());
+        await Assertions.Expect(typingText).ToHaveCSSAsync("clip-path", "inset(0px 0% 0px 0px)", new() { Timeout = 8000 });
     }
 
     [Fact]
@@ -128,16 +129,23 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         await page.Locator("[data-use-case-id='quotation-actions']").GetByText("Actions", new() { Exact = true }).ClickAsync();
-        var menuItem = page.GetByText("Open details", new() { Exact = true });
+        var menuItem = page.GetByText("Duplicate revision", new() { Exact = true });
         await Assertions.Expect(menuItem).ToBeVisibleAsync();
         var menuBackground = await menuItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
         await menuItem.HoverAsync();
-        Assert.NotEqual(menuBackground, await menuItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        var hoveredMenuBackground = await menuItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        var hoverDiagnostics = await menuItem.EvaluateAsync<string>("element => JSON.stringify({ hover: element.matches(':hover'), className: element.className, slot: element.dataset.slot, accent: getComputedStyle(element).getPropertyValue('--shadcn-accent') })");
+        Assert.True(menuBackground != hoveredMenuBackground, hoverDiagnostics);
         await page.Keyboard.PressAsync("Escape");
         await page.Locator("[data-use-case-id='contact-dialog']").GetByText("Edit contact", new() { Exact = true }).ClickAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Dialog).GetByText("Production contact", new() { Exact = true })).ToBeVisibleAsync();
-        await page.Keyboard.PressAsync("Escape");
-        await page.Locator("[data-use-case-id='file-context'] .theme-bento-context-target").ClickAsync(new() { Button = MouseButton.Right });
+        var contactDialog = page.GetByRole(AriaRole.Dialog);
+        await Assertions.Expect(contactDialog.GetByText("Production contact", new() { Exact = true })).ToBeVisibleAsync();
+        await contactDialog.GetByRole(AriaRole.Button, new() { Name = "Close contact editor", Exact = true }).ClickAsync();
+        await Assertions.Expect(contactDialog).ToBeHiddenAsync();
+        var drawingReview = page.Locator("[data-use-case-id='file-context'] .theme-drawing-review");
+        await drawingReview.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(drawingReview).ToBeInViewportAsync();
+        await drawingReview.ClickAsync(new() { Button = MouseButton.Right });
         await Assertions.Expect(page.GetByText("Open drawing", new() { Exact = true })).ToBeVisibleAsync();
         await page.Keyboard.PressAsync("Escape");
         await page.Locator("[data-use-case-id='dispatch-drawer']").GetByText("Review dispatch", new() { Exact = true }).ClickAsync();
@@ -166,6 +174,25 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal("0", await page.Locator("[data-use-case-id='quotation-files'] .shadcn-dropzone-input").EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
     }
 
+    [Fact]
+    public async Task ComprehensiveWorkflowConsolesRenderAndRemainInteractive()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var consoles = page.Locator("[data-console]");
+        await Assertions.Expect(consoles).ToHaveCountAsync(3);
+        await Assertions.Expect(consoles.Locator(".shadcn-tabs")).ToHaveCountAsync(3);
+        await Assertions.Expect(consoles.Locator(".shadcn-chart")).ToHaveCountAsync(3);
+        await Assertions.Expect(consoles.Locator(".shadcn-table")).ToHaveCountAsync(3);
+        await Assertions.Expect(consoles.Locator(".shadcn-accordion")).ToHaveCountAsync(3);
+        var production = page.Locator("[data-console='production']");
+        await production.GetByRole(AriaRole.Tab, new() { Name = "Support", Exact = true }).ClickAsync();
+        var note = production.GetByPlaceholder("Add a handoff note");
+        await note.FillAsync("Customer requested inspection photos");
+        await production.GetByRole(AriaRole.Button, new() { Name = "Add", Exact = true }).ClickAsync();
+        await Assertions.Expect(production.GetByText("Note added to WO-2418", new() { Exact = true })).ToBeVisibleAsync();
+    }
+
     [Theory]
     [MemberData(nameof(ReleaseViewports))]
     public async Task BentoIsResponsiveWithoutDocumentOverflow(int width, int height)
@@ -179,7 +206,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(26, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
+        Assert.Equal(29, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
         Assert.Equal(0, await page.Locator(".theme-bento__grid [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));

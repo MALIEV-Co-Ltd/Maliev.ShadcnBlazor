@@ -16,6 +16,22 @@ export function resetInitialPreviewScroll() {
     })));
 }
 
+export function capturePreviewScroll() {
+    const preview = document.querySelector(".theme-preview-region");
+    return preview instanceof HTMLElement ? { top: preview.scrollTop, left: preview.scrollLeft } : { top: 0, left: 0 };
+}
+
+export function restorePreviewScroll(position) {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => {
+        const preview = document.querySelector(".theme-preview-region");
+        if (preview instanceof HTMLElement) {
+            preview.scrollTop = Number(position?.top) || 0;
+            preview.scrollLeft = Number(position?.left) || 0;
+        }
+        resolve();
+    })));
+}
+
 export function loadGoogleFonts(stylesheet, timeoutMs = 5000) {
     const id = "theme-studio-google-fonts";
     const existing = document.getElementById(id);

@@ -30,14 +30,18 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.NotEmpty(complete);
         foreach (var entry in complete)
         {
-            var example = Assert.Single(registry.GetBySlug(entry.Slug));
-            Assert.Equal($"{entry.Slug}-primary", example.Id);
-            Assert.False(string.IsNullOrWhiteSpace(example.RazorSource));
-            Assert.Contains(entry.PrimaryType!.Split('`')[0], example.RazorSource, StringComparison.Ordinal);
-            Assert.NotEmpty(example.StateTags);
+            var examples = registry.GetBySlug(entry.Slug);
+            if (entry.Slug == "bento-grid") Assert.Equal(3, examples.Count);
+            else Assert.Equal($"{entry.Slug}-primary", Assert.Single(examples).Id);
+            foreach (var example in examples)
+            {
+                Assert.False(string.IsNullOrWhiteSpace(example.RazorSource));
+                Assert.Contains(entry.PrimaryType!.Split('`')[0], example.RazorSource, StringComparison.Ordinal);
+                Assert.NotEmpty(example.StateTags);
 
-            var preview = Render(example.Preview);
-            Assert.NotEmpty(preview.FindAll("[data-slot]"));
+                var preview = Render(example.Preview);
+                Assert.NotEmpty(preview.FindAll("[data-slot]"));
+            }
         }
 
         var actionSlugs = new HashSet<string>(["button", "button-group", "checkbox", "radio-group", "slider", "switch", "toggle", "toggle-group"], StringComparer.Ordinal);
@@ -59,14 +63,15 @@ public sealed class ComponentDossierTests : BunitContext
 
         foreach (var entry in _documentation.All.Where(entry => entry.Status == ComponentDocumentationStatus.Complete))
         {
-            var example = Assert.Single(registry.GetBySlug(entry.Slug));
-            var markup = Render(example.Preview).Markup;
             var expectedSlot = expectedSlots.GetValueOrDefault(entry.Slug, entry.Slug);
-
-            Assert.Contains(
-                $"data-slot=\"{expectedSlot}\"",
-                markup,
-                StringComparison.Ordinal);
+            foreach (var example in registry.GetBySlug(entry.Slug))
+            {
+                var markup = Render(example.Preview).Markup;
+                Assert.Contains(
+                    $"data-slot=\"{expectedSlot}\"",
+                    markup,
+                    StringComparison.Ordinal);
+            }
         }
     }
 

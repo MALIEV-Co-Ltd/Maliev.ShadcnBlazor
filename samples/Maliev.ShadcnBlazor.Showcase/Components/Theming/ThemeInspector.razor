@@ -1,6 +1,8 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
 @using Maliev.ShadcnBlazor.Components.Disclosure
 @using Maliev.ShadcnBlazor.Components.Icons
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
 
 <div class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
     <div class="theme-inspector__sticky-heading">
@@ -84,7 +86,15 @@
     private string ValidationLabel => State.Validation.IsValid ? State.Validation.Warnings.Count > 0 ? $"Valid with {State.Validation.Warnings.Count} warnings" : "Ready to export" : $"{State.Validation.Errors.Count} errors require attention";
     private void OpenValidation() { _validationOpen = true; _focusValidation = true; }
     private void SetValidationOpen(bool open) => _validationOpen = open;
-    private void Shuffle() { State.ShufflePreset(); _presetStatus = $"Applied {SelectedPresetName}. The preview position was preserved."; }
+    private async Task Shuffle()
+    {
+        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+        var position = await _module.InvokeAsync<PreviewScrollPosition>("capturePreviewScroll");
+        State.ShufflePreset();
+        _presetStatus = $"Applied {SelectedPresetName}. The preview position was preserved.";
+        await InvokeAsync(StateHasChanged);
+        await _module.InvokeVoidAsync("restorePreviewScroll", position);
+    }
     private void Undo() { if (State.Undo()) _presetStatus = "Undid the previous theme change."; }
     private void Redo() { if (State.Redo()) _presetStatus = "Restored the next theme change."; }
     private async Task ApplyPreset(string presetId) { State.ApplyPreset(presetId); _presetStatus = $"Applied {SelectedPresetName}."; await Task.Yield(); _presetOpen = false; await InvokeAsync(StateHasChanged); }
@@ -104,4 +114,12 @@
     private static readonly ShadcnIconData UndoIcon = new("lucide", "undo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/></g>");
     private static readonly ShadcnIconData RedoIcon = new("lucide", "redo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/></g>");
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-down", "0 0 24 24", "<path d=\"m6 9 6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+    private IJSObjectReference? _module;
+    private sealed record PreviewScrollPosition(double Top, double Left);
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
 }

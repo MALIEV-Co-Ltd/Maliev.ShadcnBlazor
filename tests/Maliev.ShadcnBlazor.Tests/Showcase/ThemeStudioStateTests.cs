@@ -804,7 +804,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     {
         var cut = Render<ThemeStudio>();
         Assert.Single(cut.FindAll("[data-testid='theme-bento']"));
-        Assert.Equal(26, cut.FindAll("[data-use-case-id]").Count);
+        Assert.Equal(29, cut.FindAll("[data-use-case-id]").Count);
         Assert.Empty(cut.FindAll("[data-testid$='-mock']"));
     }
 

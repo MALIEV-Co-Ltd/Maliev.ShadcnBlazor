@@ -188,7 +188,12 @@
 .shadcn-context-menu-item:hover,
 .shadcn-context-menu-checkbox-item:hover,
 .shadcn-context-menu-radio-item:hover,
-.shadcn-context-menu-sub-trigger:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.shadcn-context-menu-sub-trigger:hover { background: color-mix(in srgb, var(--shadcn-accent, rgba(127, 127, 127, .18)) 84%, var(--shadcn-foreground, #111) 16%); color: var(--shadcn-accent-foreground, var(--shadcn-foreground, #111)); }
+[data-slot="context-menu-item"]:hover,
+[data-slot="context-menu-checkbox-item"]:hover,
+[data-slot="context-menu-radio-item"]:hover,
+[data-slot="context-menu-sub-trigger"]:hover { background-color: color-mix(in srgb, var(--shadcn-accent, rgba(127, 127, 127, .18)) 78%, var(--shadcn-foreground, #111) 22%) !important; }
+[data-slot^="context-menu-"][data-pointer-highlighted="true"] { background-color: var(--shadcn-accent) !important; color: var(--shadcn-accent-foreground); }
 .shadcn-dropdown-menu-item:focus-visible,
 .shadcn-context-menu-item:focus-visible,
 .shadcn-dropdown-menu-checkbox-item:focus-visible,
@@ -318,7 +323,12 @@
 .shadcn-dropdown-menu-item:hover,
 .shadcn-dropdown-menu-checkbox-item:hover,
 .shadcn-dropdown-menu-radio-item:hover,
-.shadcn-dropdown-menu-sub-trigger:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
+.shadcn-dropdown-menu-sub-trigger:hover { background: color-mix(in srgb, var(--shadcn-accent, rgba(127, 127, 127, .18)) 84%, var(--shadcn-foreground, #111) 16%); color: var(--shadcn-accent-foreground, var(--shadcn-foreground, #111)); }
+[data-slot="dropdown-menu-item"]:hover,
+[data-slot="dropdown-menu-checkbox-item"]:hover,
+[data-slot="dropdown-menu-radio-item"]:hover,
+[data-slot="dropdown-menu-sub-trigger"]:hover { background-color: color-mix(in srgb, var(--shadcn-accent, rgba(127, 127, 127, .18)) 78%, var(--shadcn-foreground, #111) 22%) !important; }
+[data-slot^="dropdown-menu-"][data-pointer-highlighted="true"] { background-color: var(--shadcn-accent) !important; color: var(--shadcn-accent-foreground); }
 .shadcn-dropdown-menu-checkbox-item,
 .shadcn-dropdown-menu-radio-item { padding-inline-start: calc(2rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-dropdown-menu-item[data-inset="true"],

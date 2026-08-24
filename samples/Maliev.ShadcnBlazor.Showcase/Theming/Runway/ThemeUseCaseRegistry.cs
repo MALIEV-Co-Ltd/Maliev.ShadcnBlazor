@@ -25,14 +25,31 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
         Use("dispatch-confirmation", 19, ThemeBentoSize.Standard, "Dispatch confirmation", "ยืนยันการจัดส่ง", "ShadcnAlertDialog", "ShadcnBadge", "ShadcnButton"),
         Use("quotation-actions", 20, ThemeBentoSize.Standard, "Quotation actions", "การดำเนินการใบเสนอราคา", "ShadcnDropdownMenu"),
         Use("reviewer-details", 21, ThemeBentoSize.Standard, "Reviewer details", "รายละเอียดผู้ตรวจสอบ", "ShadcnHoverCard", "ShadcnTooltip", "ShadcnAvatar"),
-        Use("file-context", 22, ThemeBentoSize.Standard, "Drawing workspace", "พื้นที่ทำงานแบบ", "ShadcnContextMenu"),
+        Use("file-context", 22, ThemeBentoSize.Wide, "Drawing review workspace", "พื้นที่ตรวจสอบแบบ", "ShadcnContextMenu", "ShadcnAttachment", "ShadcnAvatar", "ShadcnBadge", "ShadcnButton"),
         Use("contact-dialog", 23, ThemeBentoSize.Standard, "Production contact", "ผู้ติดต่อฝ่ายผลิต", "ShadcnDialog", "ShadcnInput"),
         Use("dispatch-drawer", 24, ThemeBentoSize.Standard, "Dispatch review", "ตรวจสอบการจัดส่ง", "ShadcnDrawer"),
         Use("delivery-sheet", 25, ThemeBentoSize.Standard, "Delivery schedule", "กำหนดการส่งมอบ", "ShadcnSheet"),
-        Use("tooltip-guidance", 26, ThemeBentoSize.Standard, "Inspection guidance", "คำแนะนำการตรวจสอบ", "ShadcnTooltip", "ShadcnButton")
+        Use("tooltip-guidance", 26, ThemeBentoSize.Standard, "Inspection guidance", "คำแนะนำการตรวจสอบ", "ShadcnTooltip", "ShadcnButton"),
+        Suite("production-planning-suite", 27, "Production planning console", "ศูนย์วางแผนการผลิต"),
+        Suite("quality-release-suite", 28, "Quality release console", "ศูนย์อนุมัติคุณภาพ"),
+        Suite("customer-handoff-suite", 29, "Customer handoff console", "ศูนย์ส่งมอบลูกค้า")
     ];
 
     private static ThemeUseCaseDefinition Use(string id, int order, ThemeBentoSize size, string en, string th, params string[] components) =>
         new(id, order, size, en, th, Array.AsReadOnly(components));
+
+    private static ThemeUseCaseDefinition Suite(string id, int order, string en, string th) =>
+        Use(id, order, ThemeBentoSize.Wide, en, th,
+            "ShadcnAccordion", "ShadcnAlert", "ShadcnAlertDialog", "ShadcnAspectRatio", "ShadcnAttachment", "ShadcnAvatar",
+            "ShadcnBadge", "ShadcnBentoGrid", "ShadcnBreadcrumb", "ShadcnBubble", "ShadcnButton", "ShadcnButtonGroup",
+            "ShadcnCalendar", "ShadcnCard", "ShadcnCarousel", "ShadcnChart", "ShadcnCheckbox", "ShadcnCodeBlock",
+            "ShadcnCollapsible", "ShadcnCombobox", "ShadcnCommand", "ShadcnContextMenu", "ShadcnDataTable", "ShadcnDatePicker",
+            "ShadcnDialog", "ShadcnDirectionProvider", "ShadcnDrawer", "ShadcnDropdownMenu", "ShadcnDropzone", "ShadcnEmpty",
+            "ShadcnField", "ShadcnHoverCard", "ShadcnInput", "ShadcnInputGroup", "ShadcnInputOtp", "ShadcnItem", "ShadcnKbd",
+            "ShadcnLabel", "ShadcnMarker", "ShadcnMenubar", "ShadcnMessage", "ShadcnMessageScroller", "ShadcnNativeSelect",
+            "ShadcnNavigationMenu", "ShadcnPagination", "ShadcnPopover", "ShadcnProgress", "ShadcnQuestionnaire", "ShadcnRadioGroup",
+            "ShadcnResizableGroup", "ShadcnScrollArea", "ShadcnSelect", "ShadcnSeparator", "ShadcnSheet", "ShadcnSidebar", "ShadcnSkeleton",
+            "ShadcnSlider", "ShadcnSpinner", "ShadcnSwitch", "ShadcnTable", "ShadcnTabs", "ShadcnTextarea", "ShadcnToaster",
+            "ShadcnToggle", "ShadcnToggleGroup", "ShadcnTooltip", "ShadcnTypography");
 }
 

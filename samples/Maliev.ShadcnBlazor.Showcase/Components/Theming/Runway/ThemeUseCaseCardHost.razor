@@ -26,8 +26,8 @@
             break;
         case "operator-profile":
             <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Narin S., Thai CNC engineer" /><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>CNC engineer · Samut Prakan</span></div></div>
-            <label>Name<ShadcnInput TValue="string" Value="@(_profileName ?? "Narin S.")" ValueChanged="value => _profileName = value" /></label>
-            <label>Shift<ShadcnInput TValue="string" Value="@ShiftValue" ReadOnly="true" /></label>
+            <label>Name<ThemeAnimatedInput Value="@(_profileName ?? "Narin S.")" ValueChanged="value => _profileName = value" /></label>
+            <label>Shift<ThemeAnimatedInput Value="@ShiftValue" ReadOnly="true" /></label>
             <ShadcnButton Size="ShadcnButtonSize.Small">Save profile</ShadcnButton>
             break;
         case "drawing-attachment":
@@ -59,8 +59,8 @@
             </ShadcnTable>
             break;
         case "shipping-handoff":
-            <label>Factory<ShadcnInput TValue="string" Value="@FactoryValue" ReadOnly="true" /></label>
-            <div class="theme-runway-fields"><label>Dock<ShadcnInput TValue="string" Value="@DockValue" ReadOnly="true" /></label><label>Reference<ShadcnInput TValue="string" Value="@ReferenceValue" ReadOnly="true" /></label></div>
+            <label>Factory<ThemeAnimatedInput Value="@FactoryValue" ReadOnly="true" /></label>
+            <div class="theme-runway-fields"><label>Dock<ThemeAnimatedInput Value="@DockValue" ReadOnly="true" /></label><label>Reference<ThemeAnimatedInput Value="@ReferenceValue" ReadOnly="true" /></label></div>
             <label class="theme-runway-check"><ShadcnCheckbox Value="@_saveAddress" ValueChanged="value => _saveAddress = value ?? false" /> Save as production handoff</label>
             <ShadcnButton Size="ShadcnButtonSize.Small">Confirm address</ShadcnButton>
             break;
@@ -114,7 +114,6 @@
                                 <ShadcnMessageGroup>
                                     @foreach (var turn in _conversationTurns)
                                     {
-                                        var segments = SplitTextElements(turn.Text);
                                         <ShadcnMessageScrollerItem @key="turn.Id" MessageId="@turn.Id" ScrollAnchor="@(turn.Id == _conversationTurns[^1].Id)">
                                             <ShadcnMessage Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)">
                                                 @if (turn.Assistant)
@@ -126,7 +125,7 @@
                                                     <ShadcnBubble Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)" Variant="ShadcnBubbleVariant.Ghost"><ShadcnBubbleContent>
                                                         @if (turn.Assistant && turn.Id == _conversationTurns[^1].Id)
                                                         {
-                                                            <span class="shadcn-sr-only">@AssistantMessage</span><span class="theme-runway-typing" aria-hidden="true">@for (var index = 0; index < segments.Length; index++) {<span class="theme-runway-typing-character" style="@TypingDelay(index)">@segments[index]</span>}</span>
+                                                            <span class="theme-runway-typing-text">@turn.Text</span>
                                                         }
                                                         else { @turn.Text }
                                                     </ShadcnBubbleContent></ShadcnBubble>
@@ -165,7 +164,7 @@
             break;
         case "issue-report":
             <ShadcnAlert Variant="@(Frame.FormStep == 3 ? ShadcnAlertVariant.Destructive : ShadcnAlertVariant.Default)"><ShadcnAlertTitle>@(Frame.FormStep == 3 ? "Drawing revision required" : "Report a production issue")</ShadcnAlertTitle><ShadcnAlertDescription>Quality receives the machine, work order, and validation context.</ShadcnAlertDescription></ShadcnAlert>
-            <label>Subject<ShadcnInput TValue="string" Value="@(Frame.FormStep > 0 ? "Tolerance mismatch on bore 4" : string.Empty)" Placeholder="Describe the issue" ReadOnly="true" /></label>
+            <label>Subject<ThemeAnimatedInput Value="@(Frame.FormStep > 0 ? "Tolerance mismatch on bore 4" : string.Empty)" Placeholder="Describe the issue" ReadOnly="true" /></label>
             <label>Details<ShadcnTextarea TValue="string" Value="@(Frame.FormStep > 1 ? "Measured 24.982 mm against 25.000 ±0.010 mm." : string.Empty)" Placeholder="Add inspection evidence" ReadOnly="true" /></label>
             <ShadcnButton Size="ShadcnButtonSize.Small">Submit issue</ShadcnButton>
             break;
@@ -206,8 +205,19 @@
             <ShadcnTooltipProvider><ShadcnTooltip><ShadcnTooltipTrigger>Due 15:30</ShadcnTooltipTrigger><ShadcnTooltipContent>45 minutes remaining</ShadcnTooltipContent></ShadcnTooltip></ShadcnTooltipProvider>
             break;
         case "file-context":
+            <ShadcnAttachment Title="enclosure-rev-c.step" State="ShadcnAttachmentState.Done">
+                <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
+                <ShadcnAttachmentContent><ShadcnAttachmentTitle>enclosure-rev-c.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>Revision C · STEP · 8.4 MB</ShadcnAttachmentDescription></ShadcnAttachmentContent>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Download" AccessibleName="Download revision C">Download</ShadcnAttachmentAction></ShadcnAttachmentActions>
+            </ShadcnAttachment>
             <ShadcnContextMenu>
-                <ShadcnContextMenuTrigger Class="theme-bento-context-target"><strong>enclosure-rev-c.step</strong><span>Right-click for file actions</span></ShadcnContextMenuTrigger>
+                <ShadcnContextMenuTrigger Class="theme-bento-context-target">
+                    <div class="theme-drawing-review">
+                        <div class="theme-drawing-review__meta"><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">2 comments</ShadcnBadge><span>Updated 14:32</span></div>
+                        <div class="theme-runway-profile"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Kanda, Thai quality reviewer" /><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Kanda T.</strong><span>Final dimensional review</span></div></div>
+                        <span>Right-click this review summary for file actions</span>
+                    </div>
+                </ShadcnContextMenuTrigger>
                 <ShadcnContextMenuContent>
                     <ShadcnContextMenuLabel>Drawing actions</ShadcnContextMenuLabel>
                     <ShadcnContextMenuItem>Open drawing</ShadcnContextMenuItem>
@@ -216,6 +226,7 @@
                     <ShadcnContextMenuItem Variant="ShadcnMenuItemVariant.Destructive">Move to trash</ShadcnContextMenuItem>
                 </ShadcnContextMenuContent>
             </ShadcnContextMenu>
+            <div class="theme-use-case-card__actions"><span>Revision C is ready to inspect</span><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline">Open viewer</ShadcnButton></div>
             break;
         case "contact-dialog":
             <p class="theme-use-case-card__description">Update the contact shown to the machining and dispatch teams.</p>
@@ -223,7 +234,7 @@
                 <ShadcnDialogTrigger>Edit contact</ShadcnDialogTrigger>
                 <ShadcnDialogContent ShowCloseButton="true" CloseLabel="Close contact editor">
                     <ShadcnDialogHeader><ShadcnDialogTitle>Production contact</ShadcnDialogTitle><ShadcnDialogDescription>Changes apply to work order WO-2418.</ShadcnDialogDescription></ShadcnDialogHeader>
-                    <ShadcnFieldGroup><ShadcnField><ShadcnFieldLabel For="bento-contact-name">Name</ShadcnFieldLabel><ShadcnInput TValue="string" id="bento-contact-name" @bind-Value="_contactName" /></ShadcnField><ShadcnField><ShadcnFieldLabel For="bento-contact-phone">Phone</ShadcnFieldLabel><ShadcnInput TValue="string" id="bento-contact-phone" @bind-Value="_contactPhone" /></ShadcnField></ShadcnFieldGroup>
+                    <ShadcnFieldGroup><ShadcnField><ShadcnFieldLabel For="bento-contact-name">Name</ShadcnFieldLabel><ThemeAnimatedInput Id="bento-contact-name" @bind-Value="_contactName" /></ShadcnField><ShadcnField><ShadcnFieldLabel For="bento-contact-phone">Phone</ShadcnFieldLabel><ThemeAnimatedInput Id="bento-contact-phone" @bind-Value="_contactPhone" /></ShadcnField></ShadcnFieldGroup>
                     <ShadcnDialogFooter><ShadcnDialogClose>Cancel</ShadcnDialogClose><ShadcnDialogClose Variant="ShadcnButtonVariant.Default">Save contact</ShadcnDialogClose></ShadcnDialogFooter>
                 </ShadcnDialogContent>
             </ShadcnDialog>
@@ -245,7 +256,7 @@
                 <ShadcnSheetTrigger>Open schedule</ShadcnSheetTrigger>
                 <ShadcnSheetContent CloseLabel="Close delivery schedule">
                     <ShadcnSheetHeader><ShadcnSheetTitle>Delivery schedule</ShadcnSheetTitle><ShadcnSheetDescription>Coordinate the inspection release and courier collection.</ShadcnSheetDescription></ShadcnSheetHeader>
-                    <div class="theme-bento-overlay-body"><label>Production contact<ShadcnInput TValue="string" @bind-Value="_contactName" /></label><label class="theme-runway-check"><ShadcnCheckbox Value="true" /> Notify the project team</label></div>
+                    <div class="theme-bento-overlay-body"><label>Production contact<ThemeAnimatedInput @bind-Value="_contactName" /></label><label class="theme-runway-check"><ShadcnCheckbox Value="true" /> Notify the project team</label></div>
                     <ShadcnSheetFooter><ShadcnSheetClose>Cancel</ShadcnSheetClose><ShadcnSheetClose Variant="ShadcnButtonVariant.Default">Save schedule</ShadcnSheetClose></ShadcnSheetFooter>
                 </ShadcnSheetContent>
             </ShadcnSheet>
@@ -256,6 +267,15 @@
                 <ShadcnTooltipProvider><ShadcnTooltip><ShadcnTooltipTrigger>Surface finish</ShadcnTooltipTrigger><ShadcnTooltipContent>Measure Ra across three traces</ShadcnTooltipContent></ShadcnTooltip></ShadcnTooltipProvider>
                 <ShadcnTooltipProvider><ShadcnTooltip><ShadcnTooltipTrigger>Diameter</ShadcnTooltipTrigger><ShadcnTooltipContent>Target 25.000 ±0.010 mm</ShadcnTooltipContent></ShadcnTooltip></ShadcnTooltipProvider>
             </div>
+            break;
+        case "production-planning-suite":
+            <ThemeOperationsConsole Kind="production" />
+            break;
+        case "quality-release-suite":
+            <ThemeOperationsConsole Kind="quality" />
+            break;
+        case "customer-handoff-suite":
+            <ThemeOperationsConsole Kind="handoff" />
             break;
     }
     </ShadcnCardContent>
@@ -314,7 +334,6 @@
         "ฉันตรวจสอบคิวแล้ว งานนี้ไม่มีรายการค้างจากฝ่ายผลิต เหลือเพียงอนุมัติรายงานตรวจสอบก่อนจัดส่ง",
         "สถานะล่าสุดคือพร้อมส่งมอบ กรุณายืนยันผู้รับและจุดส่งที่บางนาเพื่อให้ทีมโลจิสติกส์ดำเนินการต่อ"
     ];
-    private string AssistantMessage => _conversationTurns.Last(turn => turn.Assistant).Text;
     private static readonly ShadcnQuestionnaireItemDefinition[] QuestionnaireItems =
     [
         new("scope", Required: true, Choices: [new("machining"), new("quality")]),
@@ -326,14 +345,6 @@
     private const string ReferenceValue = "WO-2418";
     private static double ClampPercent(double value) => Math.Clamp(value, 0, 100);
     private static string FormatPercent(double value) => $"{ClampPercent(value):0}%";
-    private static string[] SplitTextElements(string value)
-    {
-        var elements = new List<string>();
-        var enumerator = StringInfo.GetTextElementEnumerator(value);
-        while (enumerator.MoveNext()) elements.Add(enumerator.GetTextElement());
-        return [.. elements];
-    }
-    private static string TypingDelay(int index) => $"--typing-delay: {index * 32}ms";
     private void SendConversationMessage()
     {
         var message = _composerText.Trim();
