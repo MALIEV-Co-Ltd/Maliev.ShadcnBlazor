@@ -46,26 +46,13 @@
     }
     <p class="theme-font-load-status" role="status" aria-live="polite" data-state="@State.FontLoadState.ToString().ToLowerInvariant()" data-testid="theme-font-load-status">@FontLoadStatus</p>
 
-    <div class="theme-typography-specimen" data-testid="theme-typography-specimen">
-        <h1>Precision manufacturing</h1>
-        <h2>Production-ready type</h2>
-        <h3>Clear operational hierarchy</h3>
-        <h4>Detailed process guidance</h4>
-        <p>Readable body copy for production teams.</p>
-        <p lang="th">การผลิตที่แม่นยำสำหรับทุกโครงการ</p>
-        <span class="theme-typography-specimen__label">Inspection label</span>
-        <button type="button">Review drawing</button>
-        <small>Updated moments ago</small>
-        <code>tolerance = ±0.02 mm</code>
-    </div>
-
     <div class="theme-role-list" aria-label="Semantic typography roles">
         @foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
         {
             var style = State.Typography.Roles[role];
             <fieldset class="theme-role-card" data-testid="theme-role-@RoleId(role)">
                 <legend>@RoleLabel(role)</legend>
-                <label><span>Weight</span><input type="number" min="100" max="900" step="100" value="@style.Weight" aria-label="@($"{RoleLabel(role)} weight")" data-testid="theme-role-@RoleId(role)-weight" @onchange="args => ChangeRole(role, nameof(style.Weight), args)" /></label>
+                <label><span>Weight</span><ShadcnSelect TValue="int" Value="style.Weight" ValueChanged="value => ChangeWeight(role, value)" Options="WeightOptions" Size="ShadcnControlSize.Small" aria-label="@($"{RoleLabel(role)} weight")" data-testid="@($"theme-role-{RoleId(role)}-weight")" /></label>
                 <label><span>Scale</span><input type="number" min="0.625" max="4" step="0.025" value="@Format(style.Scale)" aria-label="@($"{RoleLabel(role)} scale")" data-testid="theme-role-@RoleId(role)-scale" @onchange="args => ChangeRole(role, nameof(style.Scale), args)" /></label>
                 <label><span>Line</span><input type="number" min="1" max="2.5" step="0.05" value="@Format(style.LineHeight)" aria-label="@($"{RoleLabel(role)} line height")" data-testid="theme-role-@RoleId(role)-line-height" @onchange="args => ChangeRole(role, nameof(style.LineHeight), args)" /></label>
                 <label><span>Tracking</span><input type="number" min="-0.1" max="0.2" step="0.005" value="@Format(style.LetterSpacingEm)" aria-label="@($"{RoleLabel(role)} letter spacing")" data-testid="theme-role-@RoleId(role)-letter-spacing" @onchange="args => ChangeRole(role, nameof(style.LetterSpacingEm), args)" /></label>
@@ -86,6 +73,7 @@
     private bool _thaiOnly;
     private bool _variableOnly;
     private string? _roleDiagnostic;
+    private static readonly IReadOnlyList<ShadcnSelectOption<int>> WeightOptions = Enumerable.Range(1, 9).Select(value => value * 100).Select(value => new ShadcnSelectOption<int>(value, value.ToString(CultureInfo.InvariantCulture))).ToArray();
     protected override async Task OnInitializedAsync() => _catalog = await CatalogService.GetAsync();
 
     private IReadOnlyList<GoogleFontCatalogEntry> Results => _catalog?.Search(
@@ -143,6 +131,13 @@
         }
         _roleDiagnostic = null;
         State.SetTypographyRole(role, next);
+    }
+
+    private void ChangeWeight(ShadcnTypographyRole role, int weight)
+    {
+        var current = State.Typography.Roles[role];
+        _roleDiagnostic = null;
+        State.SetTypographyRole(role, current with { Weight = weight });
     }
 
     private static string Format(double value) => value.ToString("G17", CultureInfo.InvariantCulture);

@@ -50,7 +50,7 @@ public sealed class ThemeStudioPresetCatalog : IThemeStudioPresetCatalog
 
         var baseTheme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
         var theme = string.Equals(entry.Id, ShadcnThemePresets.BaseVegaNeutral.Id, StringComparison.Ordinal)
-            ? baseTheme
+            ? baseTheme with { Name = entry.DisplayName }
             : baseTheme with
             {
                 Name = entry.DisplayName,

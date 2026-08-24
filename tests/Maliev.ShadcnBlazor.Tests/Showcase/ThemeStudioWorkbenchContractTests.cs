@@ -19,6 +19,8 @@ public sealed class ThemeStudioWorkbenchContractTests
         Assert.Contains("images/brand/MALIEV_BLACK.svg", header, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSidebarProvider", sidebar, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSidebar", sidebar, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSidebarRail", sidebar, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-sidebar-collapse\"", sidebar, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSelect", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("<Mud", header + sidebar + inspector, StringComparison.Ordinal);
         Assert.Contains("Label=\"Theme settings\"", sidebar, StringComparison.Ordinal);
@@ -41,6 +43,12 @@ public sealed class ThemeStudioWorkbenchContractTests
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeGeneratorOptions", inspector, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-inspector-nav", inspector, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-radius-select\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@DeviceIcon(viewport)\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@ShuffleIcon\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@UndoIcon\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@RedoIcon\"", inspector, StringComparison.Ordinal);
 
         foreach (var section in new[] { "preview", "preset", "typography", "icons", "accessibility", "transfer" })
             Assert.Contains($"id=\"theme-settings-{section}\"", inspector, StringComparison.Ordinal);
@@ -53,13 +61,24 @@ public sealed class ThemeStudioWorkbenchContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-runway", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);
         Assert.Contains("position: fixed", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: clip", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TypographyUsesSelectableWeightsWithoutDuplicatingASettingsSpecimen()
+    {
+        var root = FindRoot();
+        var typography = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeTypographyEditor.razor");
+
+        Assert.DoesNotContain("theme-typography-specimen", typography, StringComparison.Ordinal);
+        Assert.Contains("ShadcnSelect TValue=\"int\"", typography, StringComparison.Ordinal);
+        Assert.Contains("State.SetTypographyRole", typography, StringComparison.Ordinal);
     }
 
     [Fact]

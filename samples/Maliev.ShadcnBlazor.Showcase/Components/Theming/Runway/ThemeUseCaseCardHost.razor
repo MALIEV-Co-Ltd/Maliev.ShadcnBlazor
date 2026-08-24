@@ -28,7 +28,7 @@
             <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="IsMirror">Save profile</ShadcnButton>
             break;
         case "quotation-files":
-            <ShadcnDropzone Accept=".step,.stp,.pdf" Multiple="true" MaxFiles="5" MaxFileSize="20971520" Loading="@(Frame.UploadPercent is > 0 and < 100)" Disabled="IsMirror" Instructions="Drop production drawings here" Description="STEP or PDF · up to 20 MB" />
+            <ShadcnDropzone Class="theme-runway-dropzone" Accept=".step,.stp,.pdf" Multiple="true" MaxFiles="5" MaxFileSize="20971520" Loading="@(Frame.UploadPercent is > 0 and < 100)" Disabled="IsMirror" Instructions="Drop production drawings here" Description="STEP or PDF · up to 20 MB" />
             <div class="theme-runway-file"><span>enclosure-rev-c.step</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@FormatPercent(Frame.UploadPercent)</ShadcnBadge></div>
             <ShadcnProgress Value="@ClampPercent(Frame.UploadPercent)"><ShadcnProgressLabel>Upload progress</ShadcnProgressLabel></ShadcnProgress>
             break;

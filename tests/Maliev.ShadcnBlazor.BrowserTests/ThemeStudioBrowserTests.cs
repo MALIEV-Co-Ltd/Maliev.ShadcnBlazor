@@ -21,21 +21,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByTestId("theme-runway-mobile")).ToBeHiddenAsync();
         Assert.Equal(12, (await LogicalCardIdsAsync(page)).Count);
 
-        var before = await TrackOffsetsAsync(page);
+        await page.WaitForTimeoutAsync(300);
+        var before = await TrackScrollPositionsAsync(page);
         await page.WaitForTimeoutAsync(1800);
-        var moving = await TrackOffsetsAsync(page);
-        Assert.True(moving.Left > before.Left + 8, $"Left track did not move down: {before.Left} -> {moving.Left}");
-        Assert.True(moving.Right < before.Right - 8, $"Right track did not move up: {before.Right} -> {moving.Right}");
+        var moving = await TrackScrollPositionsAsync(page);
+        Assert.True(moving.Left < before.Left - 8, $"Left track did not move down: {before.Left} -> {moving.Left}");
+        Assert.True(moving.Right > before.Right + 8, $"Right track did not move up: {before.Right} -> {moving.Right}");
 
         await page.GetByTestId("theme-runway").HoverAsync();
-        var paused = await TrackOffsetsAsync(page);
+        var paused = await TrackScrollPositionsAsync(page);
         await page.WaitForTimeoutAsync(700);
-        var still = await TrackOffsetsAsync(page);
+        var still = await TrackScrollPositionsAsync(page);
         Assert.InRange(Math.Abs(still.Left - paused.Left), 0, 1.5);
         Assert.InRange(Math.Abs(still.Right - paused.Right), 0, 1.5);
 
-        await page.GetByTestId("runway-dock-pause").ClickAsync();
-        await Assertions.Expect(page.GetByTestId("runway-dock-pause")).ToHaveAttributeAsync("aria-pressed", "true");
+        await page.GetByTestId("runway-pause").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("runway-pause")).ToBeCheckedAsync();
         await Assertions.Expect(page.GetByTestId("theme-runway")).ToHaveAttributeAsync("data-runway-paused", "true");
     }
 
@@ -45,10 +46,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         var cardIds = await LogicalCardIdsAsync(page);
-        var originalPreset = await page.GetByTestId("theme-preset-dock").InnerTextAsync();
-        await page.GetByTestId("runway-shuffle").ClickAsync();
+        var originalPreset = await page.GetByTestId("theme-preset").InnerTextAsync();
+        await page.GetByTestId("theme-preset-shuffle").ClickAsync();
         Assert.Equal(cardIds, await LogicalCardIdsAsync(page));
-        Assert.NotEqual(originalPreset, await page.GetByTestId("theme-preset-dock").InnerTextAsync());
+        Assert.NotEqual(originalPreset, await page.GetByTestId("theme-preset").InnerTextAsync());
         await Assertions.Expect(page.Locator("[data-testid='theme-token-light-primary']")).ToHaveCountAsync(0);
         await Assertions.Expect(page.Locator("[data-testid='theme-palette-seed']")).ToHaveCountAsync(0);
     }
@@ -60,11 +61,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var page = await OpenAsync(context);
         await page.WaitForTimeoutAsync(2400);
         await page.GetByTestId("runway-pause").ClickAsync();
-        var before = await TrackOffsetsAsync(page);
+        var before = await TrackScrollPositionsAsync(page);
         var capacityBefore = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
 
         await page.GetByTestId("theme-preset-shuffle").ClickAsync();
-        var after = await TrackOffsetsAsync(page);
+        var after = await TrackScrollPositionsAsync(page);
         var capacityAfter = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
 
         Assert.InRange(Math.Abs(after.Left - before.Left), 0, 24);
@@ -103,7 +104,6 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-icon-library-select").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "Tabler", Exact = true }).ClickAsync();
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-theme-icon-library", "tabler");
-        await Assertions.Expect(page.GetByTestId("theme-preset-dock").Locator("[data-icon='building-factory']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByText("Maliev.ShadcnBlazor.Icons.Tabler", new() { Exact = true })).ToBeVisibleAsync();
     }
 
@@ -122,8 +122,47 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         Assert.Equal(shellFont, await ComputedFontAsync(page.Locator(".documentation-header")));
         Assert.Equal(shellBackground, await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
-        Assert.Equal("left", await page.Locator(".theme-font-results button").First.EvaluateAsync<string>("element => getComputedStyle(element).textAlign"));
+        Assert.Equal("start", await page.Locator(".theme-font-results button").First.EvaluateAsync<string>("element => getComputedStyle(element).textAlign"));
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-preview-high-contrast", "false");
+    }
+
+    [Fact]
+    public async Task PreviewControlsChangeRadiusTypographyAndHighContrastInsideTheRunwayOnly()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='production-capacity']").First;
+        var title = card.Locator(".shadcn-card-title");
+        var shellBorder = await page.Locator(".documentation-header").EvaluateAsync<string>("element => getComputedStyle(element).borderBottomColor");
+        var initialRadius = await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)");
+
+        await page.GetByTestId("theme-radius-select").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Pill · 1.25rem", Exact = true }).ClickAsync();
+        Assert.True(await card.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).borderRadius)") > initialRadius);
+
+        await page.GetByTestId("theme-role-heading-4-to-6-weight").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "900", Exact = true }).ClickAsync();
+        Assert.Equal("900", await title.EvaluateAsync<string>("element => getComputedStyle(element).fontWeight"));
+
+        var normalBorder = await page.GetByTestId("theme-runway").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-border').trim()");
+        await page.GetByTestId("preview-high-contrast").ClickAsync();
+        var contrastBorder = await page.GetByTestId("theme-runway").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-border').trim()");
+        Assert.NotEqual(normalBorder, contrastBorder);
+        Assert.Equal(shellBorder, await page.Locator(".documentation-header").EvaluateAsync<string>("element => getComputedStyle(element).borderBottomColor"));
+    }
+
+    [Fact]
+    public async Task RunwayAllowsManualScrollingAndKeepsNativeDropzoneInputVisuallyHidden()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var viewport = page.Locator("[data-runway-track='right']");
+        var before = await viewport.EvaluateAsync<double>("element => element.scrollTop");
+        await viewport.HoverAsync();
+        await page.Mouse.WheelAsync(0, 320);
+        var after = await viewport.EvaluateAsync<double>("element => element.scrollTop");
+        Assert.True(after > before + 100, $"Manual runway scroll did not move: {before} -> {after}");
+        Assert.Equal("0", await page.Locator("[data-use-case-id='quotation-files'] .shadcn-dropzone-input").First.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
     }
 
     [Fact]
@@ -190,10 +229,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
-        var before = await TrackOffsetsAsync(page);
+        var before = await TrackScrollPositionsAsync(page);
         var capacity = await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow");
         await page.WaitForTimeoutAsync(1200);
-        var after = await TrackOffsetsAsync(page);
+        var after = await TrackScrollPositionsAsync(page);
         Assert.InRange(Math.Abs(after.Left - before.Left), 0, 1);
         Assert.InRange(Math.Abs(after.Right - before.Right), 0, 1);
         Assert.Equal(capacity, await page.Locator("[data-use-case-id='production-capacity'] [role='progressbar']").First.GetAttributeAsync("aria-valuenow"));
@@ -207,7 +246,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var toggle = page.GetByTestId("theme-controls-toggle");
         await toggle.ClickAsync();
         Assert.Equal("theme-settings-toggle", await page.GetByTestId("theme-studio-sidebar").GetAttributeAsync("data-focus-return-id"));
-        await page.GetByTestId("theme-settings-close").ClickAsync();
+        await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
         await Assertions.Expect(toggle).ToBeFocusedAsync();
         await toggle.ClickAsync();
         await page.Keyboard.PressAsync("Escape");
@@ -220,7 +259,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private async Task<IPage> OpenAsync(IBrowserContext context) { var page = await context.NewPageAsync(); await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString()); await page.GetByTestId("theme-studio").WaitForAsync(); return page; }
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
     private static async Task<IReadOnlyList<string>> LogicalCardIdsAsync(IPage page) => await page.Locator(".theme-runway__viewport > .theme-runway__track > [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
-    private static async Task<(double Left, double Right)> TrackOffsetsAsync(IPage page) { var values = await page.Locator(".theme-runway__track").EvaluateAllAsync<double[]>("nodes => nodes.map(node => new DOMMatrix(getComputedStyle(node).transform).m42)"); return (values[0], values[1]); }
+    private static async Task<(double Left, double Right)> TrackScrollPositionsAsync(IPage page) { var values = await page.Locator(".theme-runway__viewport").EvaluateAllAsync<double[]>("nodes => nodes.map(node => node.scrollTop)"); return (values[0], values[1]); }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
     private sealed class RunwayGeometry
     {

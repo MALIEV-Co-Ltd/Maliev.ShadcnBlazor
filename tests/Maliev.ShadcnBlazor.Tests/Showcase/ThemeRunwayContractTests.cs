@@ -13,14 +13,17 @@ public sealed class ThemeRunwayContractTests
         Assert.Equal(2, Count(runway, "data-runway-track="));
         Assert.Contains("aria-hidden=\"true\" inert", runway, StringComparison.Ordinal);
         Assert.Contains("theme-runway__mobile", runway, StringComparison.Ordinal);
-        Assert.Contains("normalized - length", script, StringComparison.Ordinal);
-        Assert.Contains("-normalized", script, StringComparison.Ordinal);
+        Assert.Contains("scrollTop", script, StringComparison.Ordinal);
+        Assert.Contains("onScroll", script, StringComparison.Ordinal);
         Assert.Contains("pointerenter", script, StringComparison.Ordinal);
         Assert.Contains("visibilitychange", script, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", script, StringComparison.Ordinal);
         Assert.Contains("@container (max-width: 43.999rem)", css, StringComparison.Ordinal);
         Assert.Contains(".theme-runway__mobile { display: grid", css, StringComparison.Ordinal);
-        var runwayRule = css[css.IndexOf(".theme-runway {", StringComparison.Ordinal)..css.IndexOf(".theme-runway__columns", StringComparison.Ordinal)];
+        Assert.Contains("scrollbar-width: none", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway__viewport::-webkit-scrollbar { display: none; }", css, StringComparison.Ordinal);
+        var runwayStart = css.IndexOf("\n.theme-runway {\n", StringComparison.Ordinal) + 1;
+        var runwayRule = css[runwayStart..css.IndexOf(".theme-runway__columns", runwayStart, StringComparison.Ordinal)];
         Assert.DoesNotContain("border:", runwayRule, StringComparison.Ordinal);
         Assert.DoesNotContain("border-radius:", runwayRule, StringComparison.Ordinal);
         Assert.DoesNotContain("background:", runwayRule, StringComparison.Ordinal);
@@ -39,6 +42,7 @@ public sealed class ThemeRunwayContractTests
 
         Assert.Contains("<DocumentationHeader", layout, StringComparison.Ordinal);
         Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ThemePresetDock", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
         Assert.DoesNotContain("<ThemeScenarioBrowser", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
@@ -58,6 +62,7 @@ public sealed class ThemeRunwayContractTests
         Assert.Contains("<ShadcnAvatarImage", card, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageGroup", card, StringComparison.Ordinal);
         Assert.Contains("<ShadcnBubble", card, StringComparison.Ordinal);
+        Assert.Contains("Class=\"theme-runway-dropzone\"", card, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);

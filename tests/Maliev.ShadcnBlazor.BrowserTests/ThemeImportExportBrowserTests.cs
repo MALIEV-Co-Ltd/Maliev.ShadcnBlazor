@@ -103,7 +103,7 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await page.GetByTestId("locale-english").ClickAsync();
         await page.GetByTestId("theme-preset").ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "Base / Vega / Neutral", Exact = true }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "MALIEV Precision", Exact = true }).ClickAsync();
         await page.GetByTestId("theme-import-open").ClickAsync();
         await page.GetByTestId("theme-import-file").SetInputFilesAsync(new FilePayload
         {
@@ -121,7 +121,7 @@ public sealed class ThemeImportExportBrowserTests(
         await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2')?.includes('\\\"schemaVersion\\\": 2')");
         await page.ReloadAsync();
         await page.GetByTestId("theme-studio").WaitForAsync();
-        await Assertions.Expect(page.GetByTestId("theme-preset-dock")).ToContainTextAsync("Cobalt Precision");
+        await Assertions.Expect(page.GetByTestId("theme-preset")).ToContainTextAsync("Cobalt Precision");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
         var restoredTypography = await page.GetByTestId("theme-preview-scope").GetAttributeAsync("style");

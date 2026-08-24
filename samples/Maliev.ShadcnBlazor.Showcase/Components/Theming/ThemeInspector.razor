@@ -1,19 +1,14 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using Maliev.ShadcnBlazor.Components.Icons
 
 <div class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
     <div class="theme-inspector__sticky-heading"><h2 id="theme-inspector-title">Theme controls</h2><span class="theme-dirty-indicator" data-dirty="@(State.IsDirty ? "true" : "false")">@(State.IsDirty ? "Custom" : "Curated")</span></div>
-    <nav class="theme-inspector-nav" aria-label="Theme settings sections">
-        @foreach (var item in Sections)
-        {
-            <button type="button" aria-current="@(State.Workbench.ActiveSection == item.Id ? "location" : null)" @onclick="() => SelectSection(item.Id)">@item.Label</button>
-        }
-    </nav>
     <section class="theme-inspector-group" id="theme-settings-preview" data-testid="theme-device-controls">
         <div class="theme-inspector-group__heading"><div><h3>Preview device</h3><p>Choose the centered runway size without consuming preview space.</p></div></div>
         <div class="theme-device-options" role="group" aria-label="Preview device">
             @foreach (var viewport in ThemeStudioViewport.All)
             {
-                <ShadcnButton Class="@($"theme-device-choice theme-device-choice--{viewport.Id}")" Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Viewport == viewport ? "true" : "false")" data-testid="@($"viewport-{viewport.Id}")" OnClick="() => State.SetViewport(viewport)">@viewport.DisplayName <span aria-hidden="true">@viewport.Width</span></ShadcnButton>
+                <ShadcnButton Class="@($"theme-device-choice theme-device-choice--{viewport.Id}")" Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.IconSmall" aria-label="@($"Preview at {viewport.DisplayName} width, {viewport.Width} pixels")" title="@($"{viewport.DisplayName} · {viewport.Width}px")" aria-pressed="@(State.Viewport == viewport ? "true" : "false")" data-testid="@($"viewport-{viewport.Id}")" OnClick="() => State.SetViewport(viewport)"><ShadcnIcon Icon="@DeviceIcon(viewport)" Size="17" /></ShadcnButton>
             }
         </div>
         <div class="theme-locale-options" role="group" aria-label="Preview language">
@@ -24,7 +19,8 @@
     <section class="theme-inspector-group" id="theme-settings-preset">
         <div class="theme-inspector-group__heading"><div><h3>Curated preset</h3><p>Shuffle changes only reviewed configuration. Card order and content stay fixed.</p></div></div>
         <label class="theme-inspector-select"><span>Preset</span><ShadcnSelect TValue="string" Value="State.SelectedPresetId" ValueChanged="ApplyPreset" Open="_presetOpen" OpenChanged="SetPresetOpen" Options="PresetOptions" Size="ShadcnControlSize.Small" aria-label="Curated theme preset" data-testid="theme-preset" /></label>
-        <div class="theme-history-actions"><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Shuffle" data-testid="theme-preset-shuffle">Shuffle preset</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" OnClick="() => State.Undo()">Undo</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" OnClick="() => State.Redo()">Redo</ShadcnButton></div>
+        <label class="theme-inspector-select"><span>Border radius</span><ShadcnSelect TValue="ThemeStudioRadiusPreset" Value="State.RadiusPreset" ValueChanged="State.SetRadiusPreset" Options="RadiusOptions" Size="ShadcnControlSize.Small" aria-label="Preview border radius" data-testid="theme-radius-select" /></label>
+        <div class="theme-history-actions" aria-label="Theme history"><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.IconSmall" OnClick="Shuffle" aria-label="Shuffle preset" title="Shuffle preset" data-testid="theme-preset-shuffle"><ShadcnIcon Icon="@ShuffleIcon" Size="17" /></ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.IconSmall" Disabled="@(!State.CanUndo)" OnClick="() => State.Undo()" aria-label="Undo theme change" title="Undo"><ShadcnIcon Icon="@UndoIcon" Size="17" /></ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.IconSmall" Disabled="@(!State.CanRedo)" OnClick="() => State.Redo()" aria-label="Redo theme change" title="Redo"><ShadcnIcon Icon="@RedoIcon" Size="17" /></ShadcnButton></div>
     </section>
     <section class="theme-inspector-group" id="theme-settings-typography"><ThemeTypographyEditor State="State" /></section>
     <section class="theme-inspector-group" id="theme-settings-icons">
@@ -50,8 +46,8 @@
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
     private bool _presetOpen;
-    private static readonly (string Id, string Label)[] Sections = [("preview", "Preview"), ("preset", "Preset"), ("typography", "Typography"), ("icons", "Icons"), ("accessibility", "Accessibility"), ("transfer", "Import / export")];
     private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = new ThemeStudioPresetCatalog().All.Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioRadiusPreset>> RadiusOptions = ThemeStudioGeneratorCatalog.Radii.Select(value => new ShadcnSelectOption<ThemeStudioRadiusPreset>(value.Preset, value.DisplayName)).ToArray();
     private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioIconLibrary>> IconOptions = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).Select(value => new ShadcnSelectOption<ThemeStudioIconLibrary>(value, value.ToString())).ToArray();
     private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
     private void Shuffle() => State.ShufflePreset();
@@ -63,5 +59,11 @@
         await InvokeAsync(StateHasChanged);
     }
     private Task SetPresetOpen(bool open) { _presetOpen = open; return InvokeAsync(StateHasChanged); }
-    private void SelectSection(string id) => State.Workbench.SetActiveSection(id);
+    private static ShadcnIconData DeviceIcon(ThemeStudioViewport viewport) => viewport.Id switch { "desktop" => DesktopIcon, "tablet" => TabletIcon, _ => MobileIcon };
+    private static readonly ShadcnIconData DesktopIcon = new("lucide", "monitor", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><path d=\"M8 21h8m-4-4v4\"/></g>");
+    private static readonly ShadcnIconData TabletIcon = new("lucide", "tablet", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"16\" height=\"20\" x=\"4\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></g>");
+    private static readonly ShadcnIconData MobileIcon = new("lucide", "smartphone", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></g>");
+    private static readonly ShadcnIconData ShuffleIcon = new("lucide", "shuffle", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"m18 14 4 4-4 4M18 2l4 4-4 4M2 18h1.4c1.2 0 2.3-.6 3-1.7L11.6 7.7c.7-1.1 1.8-1.7 3-1.7H22M2 6h1.9c1.4 0 2.6.8 3.2 2M22 18h-6.1c-1.4 0-2.6-.8-3.2-2l-.5-.8\"/></g>");
+    private static readonly ShadcnIconData UndoIcon = new("lucide", "undo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/></g>");
+    private static readonly ShadcnIconData RedoIcon = new("lucide", "redo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/></g>");
 }

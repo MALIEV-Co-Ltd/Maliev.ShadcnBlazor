@@ -196,7 +196,7 @@ public sealed class ThemeStudioStateTests
     public void PresetsAreIsolatedAndResetScopesRestoreOnlyTheirOwnedValues()
     {
         var state = CreateState();
-        var defaults = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var defaults = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with { Name = "MALIEV Precision" };
         state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
         state.SetToken(ThemeStudioScheme.Light, "secondary", "#abcdef");
         state.SetMetric("radiusRem", "1.25");
@@ -649,7 +649,9 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         var inspector = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset']"));
+        Assert.Contains("MALIEV Precision", inspector.Markup, StringComparison.Ordinal);
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset-shuffle']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-icon-library-select']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='runway-pause']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
