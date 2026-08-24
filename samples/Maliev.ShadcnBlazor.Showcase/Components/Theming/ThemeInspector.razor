@@ -6,7 +6,14 @@
     <div class="theme-inspector__sticky-heading">
         <h2 id="theme-inspector-title">Theme controls</h2>
         <div class="theme-inspector-completion">
-            <a href="#theme-settings-validation">@ValidationLabel</a>
+            <button type="button"
+                    class="theme-validation-status"
+                    data-testid="theme-validation-status"
+                    aria-expanded="@_validationOpen"
+                    aria-controls="theme-settings-validation"
+                    @onclick="OpenValidation">
+                @ValidationLabel
+            </button>
             <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export</ShadcnButton>
         </div>
     </div>
@@ -49,9 +56,9 @@
         <ShadcnCollapsibleContent><section class="theme-inspector-group" id="theme-settings-accessibility"><p>Motion settings affect animated examples inside the curated preview only.</p><label class="theme-toggle-row"><span>Pause preview animations</span><ShadcnSwitch Value="State.Workbench.RunwayPaused" ValueChanged="State.Workbench.SetRunwayPaused" aria-label="Pause preview animations" data-testid="preview-animation-pause" /></label><label class="theme-toggle-row"><span>Reduce preview motion</span><ShadcnSwitch Value="State.Workbench.ReducedMotion" ValueChanged="State.Workbench.SetReducedMotion" aria-label="Reduce preview motion" data-testid="preview-reduced-motion" /></label><label class="theme-toggle-row"><span>High contrast preview</span><ShadcnSwitch Value="State.Workbench.HighContrastPreview" ValueChanged="State.Workbench.SetHighContrastPreview" aria-label="Use high contrast preview" data-testid="preview-high-contrast" /></label></section></ShadcnCollapsibleContent>
     </ShadcnCollapsible>
 
-    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-validation">
+    <ShadcnCollapsible Open="_validationOpen" OpenChanged="SetValidationOpen" Class="theme-inspector-disclosure" data-testid="theme-advanced-validation">
         <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Validation</strong><small>@ValidationLabel</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
-        <ShadcnCollapsibleContent><div id="theme-settings-validation"><ThemeValidationSummary State="State" /></div></ShadcnCollapsibleContent>
+        <ShadcnCollapsibleContent><div id="theme-settings-validation" tabindex="-1" @ref="_validationTarget"><ThemeValidationSummary State="State" /></div></ShadcnCollapsibleContent>
     </ShadcnCollapsible>
 
     <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-transfer">
@@ -66,18 +73,29 @@
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
     private bool _presetOpen;
+    private bool _validationOpen;
+    private bool _focusValidation;
+    private ElementReference _validationTarget;
     private string _presetStatus = "Ready to compare a reviewed preset.";
     private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = new ThemeStudioPresetCatalog().All.Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName)).ToArray();
     private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioRadiusPreset>> RadiusOptions = ThemeStudioGeneratorCatalog.Radii.Select(value => new ShadcnSelectOption<ThemeStudioRadiusPreset>(value.Preset, value.DisplayName)).ToArray();
     private static readonly IReadOnlyList<ThemeStudioIconLibrary> IconLibraries = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).ToArray();
     private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
     private string ValidationLabel => State.Validation.IsValid ? State.Validation.Warnings.Count > 0 ? $"Valid with {State.Validation.Warnings.Count} warnings" : "Ready to export" : $"{State.Validation.Errors.Count} errors require attention";
+    private void OpenValidation() { _validationOpen = true; _focusValidation = true; }
+    private void SetValidationOpen(bool open) => _validationOpen = open;
     private void Shuffle() { State.ShufflePreset(); _presetStatus = $"Applied {SelectedPresetName}. The preview position was preserved."; }
     private void Undo() { if (State.Undo()) _presetStatus = "Undid the previous theme change."; }
     private void Redo() { if (State.Redo()) _presetStatus = "Restored the next theme change."; }
     private async Task ApplyPreset(string presetId) { State.ApplyPreset(presetId); _presetStatus = $"Applied {SelectedPresetName}."; await Task.Yield(); _presetOpen = false; await InvokeAsync(StateHasChanged); }
     private string SelectedPresetName => PresetOptions.First(option => string.Equals(option.Value, State.SelectedPresetId, StringComparison.Ordinal)).Text;
     private Task SetPresetOpen(bool open) { _presetOpen = open; return InvokeAsync(StateHasChanged); }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusValidation) return;
+        _focusValidation = false;
+        await _validationTarget.FocusAsync();
+    }
     private static ShadcnIconData DeviceIcon(ThemeStudioViewport viewport) => viewport.Id switch { "desktop" => DesktopIcon, "tablet" => TabletIcon, _ => MobileIcon };
     private static readonly ShadcnIconData DesktopIcon = new("lucide", "monitor", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><path d=\"M8 21h8m-4-4v4\"/></g>");
     private static readonly ShadcnIconData TabletIcon = new("lucide", "tablet", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"16\" height=\"20\" x=\"4\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></g>");

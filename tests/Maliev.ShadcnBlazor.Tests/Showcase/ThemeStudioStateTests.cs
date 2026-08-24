@@ -617,6 +617,25 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void ValidationStatusRevealsItsInspectorSectionWithoutNavigatingAway()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+
+        var status = cut.Find("[data-testid='theme-validation-status']");
+        Assert.Equal("BUTTON", status.TagName);
+        Assert.False(status.HasAttribute("href"));
+
+        status.Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal("open", cut.Find("[data-testid='theme-advanced-validation']").GetAttribute("data-state"));
+            Assert.Equal("true", cut.Find("[data-testid='theme-advanced-validation'] [data-slot='collapsible-trigger']").GetAttribute("aria-expanded"));
+        });
+    }
+
+    [Fact]
     public void TypographyEditorSelectsCatalogFamiliesAndMutatesSemanticRolesThroughPackageControls()
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
