@@ -408,6 +408,12 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         Assert.InRange(shellBox.Height, 480, 620);
         Assert.True(shellBox.Width >= 540, $"The resizable sidebar workspace was only {shellBox.Width}px wide.");
         await Assertions.Expect(canvas.Locator("[data-slot='sidebar-content']")).ToHaveCSSAsync("text-align", "start");
+        var firstMenuButton = canvas.Locator("[data-slot='sidebar-menu-button']").First;
+        await Assertions.Expect(firstMenuButton).ToHaveCSSAsync("justify-content", "flex-start");
+        var railBox = await canvas.Locator("[data-slot='sidebar-rail']").BoundingBoxAsync();
+        Assert.NotNull(railBox);
+        Assert.InRange(Math.Abs(railBox.Y - shellBox.Y), 0, 1);
+        Assert.InRange(Math.Abs((railBox.Y + railBox.Height) - (shellBox.Y + shellBox.Height)), 0, 1);
 
         var trigger = canvas.Locator("[data-slot='sidebar-trigger']");
         await trigger.ClickAsync();
