@@ -34,7 +34,8 @@
         grid-template-columns: repeat(var(--shadcn-bento-columns), minmax(0, 1fr));
     }
 
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-column-span="2"] {
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="3"] .shadcn-bento-item[data-column-span="2"],
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-columns="4"] .shadcn-bento-item[data-column-span="2"] {
         grid-column: span 2;
     }
 

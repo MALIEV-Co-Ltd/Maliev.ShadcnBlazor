@@ -19,7 +19,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(bento).ToBeVisibleAsync();
         Assert.Equal(26, await cards.CountAsync());
         Assert.Equal(26, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(66, await bento.Locator("[data-component-slug]").CountAsync());
+        Assert.Equal(0, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
         Assert.Equal("1px", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderLeftWidth"));
@@ -29,6 +29,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.True(await preview.EvaluateAsync<bool>("element => element.scrollHeight > element.clientHeight"));
         await preview.EvaluateAsync("element => element.scrollTop = 700");
         Assert.True(await preview.EvaluateAsync<double>("element => element.scrollTop") > 100);
+    }
+
+    [Theory]
+    [InlineData(1920, 4, 2)]
+    [InlineData(1440, 2, 2)]
+    [InlineData(1024, 2, 2)]
+    [InlineData(390, 1, 1)]
+    public async Task WideWorkflowsSpanResponsiveBentoTracks(int width, int expectedTracks, int expectedSpan)
+    {
+        await using var context = await NewContextAsync(width, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var layout = page.Locator(".theme-bento__grid [data-slot='bento-grid-layout']");
+        var wide = page.Locator("[data-use-case-item='production-analytics']");
+        Assert.Equal(expectedTracks, await layout.EvaluateAsync<int>("element => getComputedStyle(element).gridTemplateColumns.split(' ').length"));
+        var columns = await wide.EvaluateAsync<string>("element => `${getComputedStyle(element).gridColumnStart} / ${getComputedStyle(element).gridColumnEnd}`");
+        Assert.Contains(expectedSpan == expectedTracks && expectedTracks > 1 ? "1 / -1" : $"span {expectedSpan}", columns, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -49,17 +65,12 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task EveryCatalogComponentIsAvailableAsThreeInteractiveBentoStates()
+    public async Task ThemeStudioDoesNotRenderDocumentationScenarioCards()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
-        var cards = page.Locator("[data-component-slug]");
-        Assert.Equal(66, await cards.CountAsync());
-        var accordion = page.Locator("[data-component-slug='accordion']");
-        await Assertions.Expect(accordion.GetByRole(AriaRole.Button, new() { Name = "Default", Exact = true })).ToHaveAttributeAsync("aria-pressed", "true");
-        await accordion.GetByRole(AriaRole.Button, new() { Name = "Stress", Exact = true }).ClickAsync();
-        await Assertions.Expect(accordion.GetByRole(AriaRole.Button, new() { Name = "Stress", Exact = true })).ToHaveAttributeAsync("aria-pressed", "true");
-        await Assertions.Expect(accordion.Locator("[data-theme-scenario-host$='-stress']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-component-slug], [data-theme-scenario-host]")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-analytics'] .shadcn-chart")).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -168,8 +179,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(26, await page.Locator(".theme-bento__grid > [data-use-case-id]").CountAsync());
-        Assert.Equal(66, await page.Locator(".theme-bento__grid > [data-component-slug]").CountAsync());
+        Assert.Equal(26, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
+        Assert.Equal(0, await page.Locator(".theme-bento__grid [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
@@ -194,6 +205,6 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private async Task<IPage> OpenAsync(IBrowserContext context) { var page = await context.NewPageAsync(); await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString()); await page.GetByTestId("theme-studio").WaitForAsync(); return page; }
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
     private static async Task OpenAdvancedAsync(IPage page, string testId) { var trigger = page.GetByTestId(testId).Locator("[data-slot='collapsible-trigger']"); if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await trigger.ClickAsync(); }
-    private static Task<string[]> CardIdsAsync(IPage page) => page.Locator(".theme-bento__grid > [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
+    private static Task<string[]> CardIdsAsync(IPage page) => page.Locator(".theme-bento__grid [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
 }

@@ -1,8 +1,7 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Layout
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
-@using Maliev.ShadcnBlazor.Showcase.ThemeScenarios
 @inject IThemeUseCaseRegistry Registry
-@inject IThemeScenarioRegistry ScenarioRegistry
 @inject ThemeRunwayState AnimationState
 @implements IDisposable
 
@@ -11,24 +10,19 @@
          data-testid="theme-bento"
          data-animation-paused="@(Paused ? "true" : "false")"
          data-reduced-motion="@(ReducedMotion ? "true" : "false")">
-    <div class="theme-bento__grid">
+    <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1.5rem">
         @foreach (var card in Registry.All.OrderBy(card => card.Order))
         {
-            <ThemeUseCaseCardHost @key="card.Id"
-                                  Definition="card"
-                                  Frame="AnimationState.Frame"
-                                  Locale="Locale" />
+            <ShadcnBentoItem @key="card.Id"
+                             ColumnSpan="@ColumnSpan(card.Size)"
+                             RowSpan="@RowSpan(card.Size)"
+                             data-use-case-item="@card.Id">
+                <ThemeUseCaseCardHost Definition="card"
+                                      Frame="AnimationState.Frame"
+                                      Locale="Locale" />
+            </ShadcnBentoItem>
         }
-        @foreach (var componentScenarios in ScenarioRegistry.All
-            .GroupBy(scenario => scenario.ComponentSlug, StringComparer.OrdinalIgnoreCase)
-            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            <ThemeScenarioBentoCard @key="componentScenarios.Key"
-                                    ComponentSlug="@componentScenarios.Key"
-                                    Scenarios="@componentScenarios.OrderBy(scenario => scenario.Kind).ToArray()"
-                                    Locale="Locale" />
-        }
-    </div>
+    </ShadcnBentoGrid>
 </section>
 
 @code {
@@ -52,6 +46,10 @@
     }
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    private static int ColumnSpan(ThemeBentoSize size) => size == ThemeBentoSize.Wide ? 2 : 1;
+
+    private static int RowSpan(ThemeBentoSize size) => size == ThemeBentoSize.Tall ? 2 : 1;
 
     public void Dispose() => AnimationState.Changed -= OnChanged;
 }

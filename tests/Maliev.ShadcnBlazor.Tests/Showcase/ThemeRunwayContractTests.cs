@@ -10,14 +10,14 @@ public sealed class ThemeBentoContractTests
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
         Assert.Contains("data-testid=\"theme-bento\"", bento, StringComparison.Ordinal);
-        Assert.Contains("class=\"theme-bento__grid\"", bento, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnBentoGrid Class=\"theme-bento__grid\"", bento, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnBentoItem", bento, StringComparison.Ordinal);
         Assert.DoesNotContain("mirror", bento, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("inert", bento, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("data-runway-track", bento, StringComparison.Ordinal);
-        Assert.Contains("column-count: 4", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("column-count:", css, StringComparison.Ordinal);
         Assert.Contains("padding-block: 1rem", css, StringComparison.Ordinal);
         Assert.Contains("padding-inline: 0", css, StringComparison.Ordinal);
-        Assert.DoesNotContain(".theme-bento__grid { display: grid", css, StringComparison.Ordinal);
         Assert.Contains("border: 1px solid var(--shadcn-border)", css, StringComparison.Ordinal);
         Assert.DoesNotContain("box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
         Assert.DoesNotContain("grid-auto-flow: dense", css, StringComparison.Ordinal);
@@ -26,20 +26,15 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
-    public void BentoSurfacesEveryRegisteredComponentWithThreeSelectableRealScenarios()
+    public void BentoUsesOnlyDedicatedCuratedWorkflowCards()
     {
         var root = FindRoot();
         var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
-        var scenarioCard = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeScenarioBentoCard.razor");
-        var scenarioHost = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeScenarioHost.razor");
-
-        Assert.Contains("IThemeScenarioRegistry", bento, StringComparison.Ordinal);
-        Assert.Contains("GroupBy(scenario => scenario.ComponentSlug", bento, StringComparison.Ordinal);
-        Assert.Contains("<ThemeScenarioBentoCard", bento, StringComparison.Ordinal);
-        Assert.Contains("@foreach (var scenario in Scenarios)", scenarioCard, StringComparison.Ordinal);
-        Assert.Contains("<ThemeScenarioHost", scenarioCard, StringComparison.Ordinal);
-        Assert.Contains("AutoFocus=\"false\"", scenarioCard, StringComparison.Ordinal);
-        Assert.Contains("[Parameter] public bool AutoFocus", scenarioHost, StringComparison.Ordinal);
+        Assert.Contains("IThemeUseCaseRegistry", bento, StringComparison.Ordinal);
+        Assert.Contains("Registry.All.OrderBy", bento, StringComparison.Ordinal);
+        Assert.Contains("<ThemeUseCaseCardHost", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("IThemeScenarioRegistry", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("ThemeScenarioBentoCard", bento, StringComparison.Ordinal);
     }
 
     [Fact]
