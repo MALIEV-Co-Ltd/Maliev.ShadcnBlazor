@@ -417,6 +417,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ConversationActionsReserveTheirLayoutAndSubmittedRepliesKeepTheirQuote()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var conversation = page.Locator("[data-use-case-id='assistant-conversation']");
+        var assistantMessage = conversation.Locator(".shadcn-message[data-align='start']").First;
+        await assistantMessage.ScrollIntoViewIfNeededAsync();
+
+        var before = await assistantMessage.EvaluateAsync<string>("element => JSON.stringify({ height: element.getBoundingClientRect().height, nextTop: element.closest('[data-slot=message-scroller-item]').nextElementSibling?.getBoundingClientRect().top ?? 0 })");
+        await assistantMessage.HoverAsync();
+        var after = await assistantMessage.EvaluateAsync<string>("element => JSON.stringify({ height: element.getBoundingClientRect().height, nextTop: element.closest('[data-slot=message-scroller-item]').nextElementSibling?.getBoundingClientRect().top ?? 0 })");
+        Assert.Equal(before, after);
+
+        await assistantMessage.GetByRole(AriaRole.Button, new() { Name = "Reply to message" }).ClickAsync();
+        await conversation.Locator(".theme-runway-composer input").FillAsync("Please confirm the final inspection owner.");
+        await conversation.GetByRole(AriaRole.Button, new() { Name = "Send message" }).ClickAsync();
+
+        var submittedReply = conversation.Locator(".shadcn-message[data-align='end']")
+            .Filter(new() { HasText = "Please confirm the final inspection owner." });
+        await Assertions.Expect(submittedReply).ToHaveCountAsync(1);
+        var attachedQuote = submittedReply.Locator("[data-slot='message-reply-quote']");
+        await Assertions.Expect(attachedQuote).ToHaveCountAsync(1);
+        await Assertions.Expect(attachedQuote).ToContainTextAsync("Delivery remains Friday at 16:00.");
+    }
+
+    [Fact]
     public async Task DarkGhostMessagesAndInputGroupsKeepReadableSingleBoundaries()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);

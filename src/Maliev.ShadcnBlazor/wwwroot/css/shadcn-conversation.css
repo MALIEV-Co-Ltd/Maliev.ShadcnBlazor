@@ -353,15 +353,15 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-message-body:has(> .shadcn-bubble[data-variant="ghost"]) > .shadcn-message-header { padding-inline: calc(.875rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-message-footer {
     width:100%;
+    min-block-size:1.75rem;
+    max-block-size:1.75rem;
     color: var(--shadcn-muted-foreground);
     font-size: .6875rem;
-    max-block-size: 0;
     overflow: hidden;
     pointer-events: none;
     opacity: 0;
     transform: translateY(-.25rem);
-    transition: max-block-size var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
-        opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
+    transition: opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
         transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:2; grid-row:2; justify-content:flex-start; }
@@ -369,7 +369,6 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-message:hover .shadcn-message-footer,
 .shadcn-message:focus-within .shadcn-message-footer,
 .shadcn-message-footer[data-visibility="always"] {
-    max-block-size: 3rem;
     overflow: visible;
     pointer-events: auto;
     opacity: 1;
@@ -402,6 +401,8 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-message-reply-quote { position:relative; display:grid; width:min(100%, 28rem); gap:calc(.125rem * var(--shadcn-spacing-multiplier)); margin-block-start:calc(.75rem * var(--shadcn-spacing-multiplier)); padding:calc(.625rem * var(--shadcn-spacing-multiplier)) calc(2.5rem * var(--shadcn-spacing-multiplier)) calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.75rem * var(--shadcn-spacing-multiplier)); border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); background:var(--shadcn-muted); color:var(--shadcn-foreground); }
 .shadcn-message-reply-quote-label { color:var(--shadcn-muted-foreground); font-size:.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
 .shadcn-message-reply-quote q { min-width:0; overflow-wrap:anywhere; font-size:.8125rem; }
+.shadcn-bubble-content > .shadcn-message-reply-quote { width:100%; margin-block:0 calc(.5rem * var(--shadcn-spacing-multiplier)); border-color:color-mix(in srgb,currentColor 28%,transparent); background:color-mix(in srgb,currentColor 8%,transparent); color:inherit; padding:calc(.5rem * var(--shadcn-spacing-multiplier)) calc(.625rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-bubble-content > .shadcn-message-reply-quote .shadcn-message-reply-quote-label { color:inherit; opacity:.72; }
 .shadcn-message-reply-dismiss { position:absolute; inset-block-start:.375rem; inset-inline-end:.375rem; display:grid; width:1.75rem; height:1.75rem; place-items:center; border:0; border-radius:999px; background:transparent; color:var(--shadcn-muted-foreground); cursor:pointer; }
 .shadcn-message-reply-dismiss:hover { background:var(--shadcn-accent); color:var(--shadcn-accent-foreground); }
 .shadcn-message-reply-dismiss svg { width:1rem; height:1rem; }

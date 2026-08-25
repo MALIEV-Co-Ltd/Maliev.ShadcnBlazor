@@ -166,6 +166,10 @@
                                                 <ShadcnMessageContent><ShadcnMessageBody>
                                                     @if (turn.Assistant) { <ShadcnMessageHeader>@T("MALIEV Assistant")</ShadcnMessageHeader> }
                                                     <ShadcnBubble Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)" Variant="@(turn.Assistant ? ShadcnBubbleVariant.Ghost : ShadcnBubbleVariant.Default)"><ShadcnBubbleContent>
+                                                        @if (!string.IsNullOrWhiteSpace(TurnReplyText(turn)))
+                                                        {
+                                                            <ShadcnMessageReplyQuote Quote="@(TurnReplyText(turn)!)" Label="@T("Replying to")" />
+                                                        }
                                                         @if (turn.Assistant && turn.Id == _conversationTurns[^1].Id)
                                                         {
                                                             <span class="theme-runway-typing-text">@TurnText(turn)</span>
@@ -525,7 +529,7 @@
     private const string MachinePin = "241850";
     private const string WebhookSecret = "whsec_8b14f62a90c3";
     private ShadcnDataTableState _quotationTableState = new() { PageSize = 3 };
-    private sealed record ConversationTurn(string Id, string EnglishText, string ThaiText, bool Assistant);
+    private sealed record ConversationTurn(string Id, string EnglishText, string ThaiText, bool Assistant, string? ReplyEnglish = null, string? ReplyThai = null);
     private sealed record UploadedFile(Guid Id, string Name, long Size, string Status);
     private readonly List<ConversationTurn> _conversationTurns =
     [
@@ -552,10 +556,20 @@
     private string T(string english, params object?[] args) => ThemeRunwayCopy.Get(Locale, english, args);
     private string TranslateStatus(string english, object? argument) => argument is null ? T(english) : T(english, argument);
     private string TurnText(ConversationTurn turn) => Locale == ThemeStudioLocale.Thai ? turn.ThaiText : turn.EnglishText;
+    private string? TurnReplyText(ConversationTurn turn) => Locale == ThemeStudioLocale.Thai ? turn.ReplyThai : turn.ReplyEnglish;
     private static string FormatPercent(double value) => $"{ClampPercent(value):0}%";
     private void SendConversationMessage(string message)
     {
-        _conversationTurns.Add(new($"conversation-user-{++_conversationSequence}", message, message, false));
+        var repliedTurn = string.IsNullOrWhiteSpace(_replyQuote)
+            ? null
+            : _conversationTurns.FirstOrDefault(turn => string.Equals(turn.EnglishText, _replyQuote, StringComparison.Ordinal) || string.Equals(turn.ThaiText, _replyQuote, StringComparison.Ordinal));
+        _conversationTurns.Add(new(
+            $"conversation-user-{++_conversationSequence}",
+            message,
+            message,
+            false,
+            repliedTurn?.EnglishText ?? _replyQuote,
+            repliedTurn?.ThaiText ?? _replyQuote));
         var response = AssistantResponses[Random.Shared.Next(AssistantResponses.Length)];
         _conversationTurns.Add(new($"conversation-assistant-{++_conversationSequence}", response.English, response.Thai, true));
         _replyQuote = null;
