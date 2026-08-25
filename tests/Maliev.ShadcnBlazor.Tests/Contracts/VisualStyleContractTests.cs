@@ -47,6 +47,14 @@ public sealed class VisualStyleContractTests
     }
 
     [Fact]
+    public void StyleScopePreservesSwitchPillGeometry()
+    {
+        var css = ReadStylesheet();
+
+        Assert.DoesNotContain("  .shadcn-switch,", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseAndGeneratedIntegrationLoadTheStyleScopeAsset()
     {
         var root = FindRoot();

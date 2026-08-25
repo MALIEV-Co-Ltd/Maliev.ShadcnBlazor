@@ -23,6 +23,7 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("grid-auto-flow: dense", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-region { min-inline-size: 0;", css, StringComparison.Ordinal);
         Assert.Contains("border: 0; border-radius: 0; background: transparent", css, StringComparison.Ordinal);
+        Assert.Contains("Gap=\"1rem\"", bento, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -137,6 +138,11 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("<ShadcnMarker", card, StringComparison.Ordinal);
         Assert.Contains("<ShadcnQuestionnaire", card, StringComparison.Ordinal);
         Assert.Contains("Class=\"theme-runway-dropzone\"", card, StringComparison.Ordinal);
+        Assert.Contains("SelectionChanged=\"HandleDropzoneSelectionAsync\"", card, StringComparison.Ordinal);
+        Assert.Contains("Loading=\"_dropzoneUploading\"", card, StringComparison.Ordinal);
+        Assert.Contains("ButtonType=\"ShadcnButtonType.Submit\"", card, StringComparison.Ordinal);
+        Assert.Contains("BusyText=\"Saving\"", card, StringComparison.Ordinal);
+        Assert.Contains("SuccessText=\"Saved\"", card, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);

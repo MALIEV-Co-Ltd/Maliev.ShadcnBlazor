@@ -235,8 +235,32 @@ public sealed class ChartTests : BunitContext
         Assert.Equal("true", cut.Find("[data-slot='chart-point'][data-point='1']").GetAttribute("data-active"));
         Assert.Contains("Feb", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
         Assert.NotNull(cut.Find("[data-slot='chart-tooltip-cursor']"));
-        point.PointerLeave(new PointerEventArgs());
+        cut.Find("figure").MouseLeave(new MouseEventArgs());
         Assert.Empty(cut.FindAll("[data-slot='chart-tooltip-content']"));
+    }
+
+    [Fact]
+    public void BarHoverDirectlyExposesTheCategoryAndSeriesValues()
+    {
+        var cut = RenderChart();
+        var bar = cut.Find("rect[data-series='desktop'][data-point='1']");
+
+        bar.PointerEnter(new PointerEventArgs());
+
+        var tooltip = cut.Find("[data-slot='chart-tooltip-content']");
+        Assert.Contains("Feb", tooltip.TextContent);
+        Assert.Contains("305", tooltip.TextContent);
+        cut.Find("figure").MouseLeave(new MouseEventArgs());
+        Assert.Empty(cut.FindAll("[data-slot='chart-tooltip-content']"));
+    }
+
+    [Fact]
+    public void PointerMovementAcrossThePlotExposesTheHoveredCategory()
+    {
+        var cut = RenderChart();
+        cut.Find("svg").MouseMove(new MouseEventArgs { OffsetX = 90 });
+
+        Assert.Contains("Jan", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
     }
 
     [Fact]

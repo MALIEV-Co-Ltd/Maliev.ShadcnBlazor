@@ -10,11 +10,19 @@
     [Parameter] public ShadcnButtonType ButtonType { get; set; } = ShadcnButtonType.Button;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool PointerCursor { get; set; }
+    [Parameter] public bool? OperationFeedback { get; set; }
+    [Parameter] public string BusyText { get; set; } = "Working";
+    [Parameter] public string SuccessText { get; set; } = "Done";
+    [Parameter] public TimeSpan SuccessDuration { get; set; } = TimeSpan.FromMilliseconds(1200);
     [Parameter] public string? Href { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? LeadingIcon { get; set; }
     [Parameter] public RenderFragment? TrailingIcon { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private ButtonOperationState _operationState;
+    private bool HasOperationFeedback => OperationFeedback ?? ButtonType == ShadcnButtonType.Submit;
+    private bool EffectiveDisabled => Disabled || _operationState == ButtonOperationState.Busy;
 
     private string VariantValue => Variant switch
     {
@@ -53,42 +61,65 @@
         var sequence = 0;
         var isLink = Href is not null;
         builder.OpenElement(sequence++, isLink ? "a" : "button");
-        builder.AddMultipleAttributes(sequence++, AttributesExcept("type", "href", "disabled", "aria-disabled", "tabindex", "data-slot", "data-variant", "data-size"));
+        builder.AddMultipleAttributes(sequence++, AttributesExcept("type", "href", "disabled", "aria-disabled", "aria-busy", "tabindex", "data-slot", "data-variant", "data-size", "data-operation-state"));
         builder.AddAttribute(sequence++, "class", MergeClass("shadcn-button"));
         builder.AddAttribute(sequence++, "style", MergeStyle(null));
         builder.AddAttribute(sequence++, "data-slot", "button");
         builder.AddAttribute(sequence++, "data-variant", VariantValue);
         builder.AddAttribute(sequence++, "data-size", SizeValue);
-        builder.AddAttribute(sequence++, "data-disabled", Disabled ? "true" : null);
+        builder.AddAttribute(sequence++, "data-disabled", EffectiveDisabled ? "true" : null);
+        builder.AddAttribute(sequence++, "data-operation-state", OperationStateValue);
+        builder.AddAttribute(sequence++, "aria-busy", _operationState == ButtonOperationState.Busy ? "true" : null);
         builder.AddAttribute(sequence++, "data-pointer-cursor", PointerCursor ? "true" : null);
         if (isLink)
         {
-            builder.AddAttribute(sequence++, "href", Disabled ? null : Href);
-            builder.AddAttribute(sequence++, "aria-disabled", Disabled ? "true" : null);
-            builder.AddAttribute(sequence++, "tabindex", Disabled ? "-1" : null);
+            builder.AddAttribute(sequence++, "href", EffectiveDisabled ? null : Href);
+            builder.AddAttribute(sequence++, "aria-disabled", EffectiveDisabled ? "true" : null);
+            builder.AddAttribute(sequence++, "tabindex", EffectiveDisabled ? "-1" : null);
         }
         else
         {
             builder.AddAttribute(sequence++, "type", ButtonTypeValue);
-            builder.AddAttribute(sequence++, "disabled", Disabled);
+            builder.AddAttribute(sequence++, "disabled", EffectiveDisabled);
         }
         builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, HandleClickAsync));
-        if (LeadingIcon is not null)
+        if (_operationState == ButtonOperationState.Busy)
         {
             builder.OpenElement(sequence++, "span");
-            builder.AddAttribute(sequence++, "data-slot", "button-leading-icon");
-            builder.AddAttribute(sequence++, "data-icon", "inline-start");
-            builder.AddContent(sequence++, LeadingIcon);
+            builder.AddAttribute(sequence++, "class", "shadcn-button-spinner");
+            builder.AddAttribute(sequence++, "data-slot", "button-spinner");
+            builder.AddAttribute(sequence++, "aria-hidden", "true");
             builder.CloseElement();
+            builder.AddContent(sequence++, BusyText);
         }
-        builder.AddContent(sequence++, ChildContent);
-        if (TrailingIcon is not null)
+        else if (_operationState == ButtonOperationState.Success)
         {
             builder.OpenElement(sequence++, "span");
-            builder.AddAttribute(sequence++, "data-slot", "button-trailing-icon");
-            builder.AddAttribute(sequence++, "data-icon", "inline-end");
-            builder.AddContent(sequence++, TrailingIcon);
+            builder.AddAttribute(sequence++, "class", "shadcn-button-success-icon");
+            builder.AddAttribute(sequence++, "data-slot", "button-success-icon");
+            builder.AddAttribute(sequence++, "aria-hidden", "true");
             builder.CloseElement();
+            builder.AddContent(sequence++, SuccessText);
+        }
+        else
+        {
+            if (LeadingIcon is not null)
+            {
+                builder.OpenElement(sequence++, "span");
+                builder.AddAttribute(sequence++, "data-slot", "button-leading-icon");
+                builder.AddAttribute(sequence++, "data-icon", "inline-start");
+                builder.AddContent(sequence++, LeadingIcon);
+                builder.CloseElement();
+            }
+            builder.AddContent(sequence++, ChildContent);
+            if (TrailingIcon is not null)
+            {
+                builder.OpenElement(sequence++, "span");
+                builder.AddAttribute(sequence++, "data-slot", "button-trailing-icon");
+                builder.AddAttribute(sequence++, "data-icon", "inline-end");
+                builder.AddContent(sequence++, TrailingIcon);
+                builder.CloseElement();
+            }
         }
         builder.CloseElement();
     };
@@ -98,9 +129,45 @@
         if (!Enum.IsDefined(Variant)) throw Unknown(nameof(Variant), Variant);
         if (!Enum.IsDefined(Size)) throw Unknown(nameof(Size), Size);
         if (!Enum.IsDefined(ButtonType)) throw Unknown(nameof(ButtonType), ButtonType);
+        if (string.IsNullOrWhiteSpace(BusyText)) throw new ArgumentException("Button busy text cannot be empty.", nameof(BusyText));
+        if (string.IsNullOrWhiteSpace(SuccessText)) throw new ArgumentException("Button success text cannot be empty.", nameof(SuccessText));
+        if (SuccessDuration < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(SuccessDuration));
     }
 
-    private Task HandleClickAsync(MouseEventArgs args) => Disabled ? Task.CompletedTask : OnClick.InvokeAsync(args);
+    private async Task HandleClickAsync(MouseEventArgs args)
+    {
+        if (EffectiveDisabled) return;
+        if (!HasOperationFeedback || !OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(args);
+            return;
+        }
+
+        _operationState = ButtonOperationState.Busy;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            await OnClick.InvokeAsync(args);
+            _operationState = ButtonOperationState.Success;
+            await InvokeAsync(StateHasChanged);
+            if (SuccessDuration > TimeSpan.Zero)
+                await Task.Delay(SuccessDuration);
+        }
+        finally
+        {
+            _operationState = ButtonOperationState.Idle;
+        }
+    }
+
+    private string OperationStateValue => _operationState switch
+    {
+        ButtonOperationState.Idle => "idle",
+        ButtonOperationState.Busy => "busy",
+        ButtonOperationState.Success => "success",
+        _ => throw Unknown(nameof(_operationState), _operationState)
+    };
+
+    private enum ButtonOperationState { Idle, Busy, Success }
 
     private static ArgumentOutOfRangeException Unknown(string name, object value) =>
         new(name, value, $"Unknown Shadcn button {name.ToLowerInvariant()}.");

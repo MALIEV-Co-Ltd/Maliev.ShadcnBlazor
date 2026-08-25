@@ -53,7 +53,7 @@
                     <label>Release lane<ShadcnNativeSelect TValue="string" @bind-Value="_lane"><ShadcnNativeSelectOption TValue="string" Value="@("quality")">Quality desk</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("dispatch")">Dispatch desk</ShadcnNativeSelectOption></ShadcnNativeSelect></label>
                     <label>Approval code<ShadcnInputOtp @bind-Value="_otp" MaxLength="4"><ShadcnInputOtpGroup><ShadcnInputOtpSlot Index="0" /><ShadcnInputOtpSlot Index="1" /><ShadcnInputOtpSlot Index="2" /><ShadcnInputOtpSlot Index="3" /></ShadcnInputOtpGroup></ShadcnInputOtp></label>
                 </div>
-                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" @onclick="SaveReview">Save review</ShadcnButton><ShadcnButton @onclick="ApproveRelease" Disabled="_releaseApproved">@(_releaseApproved ? "Release approved" : "Approve release")</ShadcnButton></ShadcnButtonGroup>
+                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="SaveReview">Save review</ShadcnButton><ShadcnButton OnClick="ApproveRelease" Disabled="_releaseApproved">@(_releaseApproved ? "Release approved" : "Approve release")</ShadcnButton></ShadcnButtonGroup>
                 @if (_releaseStatus is not null) { <p class="theme-runway-action-status" role="status">@_releaseStatus</p> }
             </div>
         </ShadcnTabsContent>

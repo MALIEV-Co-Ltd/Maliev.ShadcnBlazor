@@ -177,7 +177,6 @@
   .shadcn-tabs-trigger,
   .shadcn-checkbox,
   .shadcn-radio-group-item,
-  .shadcn-switch,
   .shadcn-dropzone
 ) {
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));

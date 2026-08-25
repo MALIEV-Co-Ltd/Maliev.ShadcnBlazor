@@ -12,7 +12,7 @@
          data-testid="theme-bento"
          data-animation-paused="@(Paused ? "true" : "false")"
          data-reduced-motion="@(ReducedMotion ? "true" : "false")">
-    <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1.5rem" Masonry="true">
+    <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1rem" Masonry="true">
         @foreach (var card in Registry.All.OrderBy(card => card.Order))
         {
             <ShadcnBentoItem @key="card.Id"

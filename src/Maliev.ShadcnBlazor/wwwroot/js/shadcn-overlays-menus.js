@@ -322,13 +322,23 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
         else if ((event.key === 'ArrowLeft' && !rtl) || (event.key === 'ArrowRight' && rtl)) { if (scope !== menu) { event.preventDefault(); const sub = scope.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]'); if (sub?.getAttribute('aria-expanded') === 'true') sub.click(); sub?.focus({ preventScroll: true }); } }
         else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) { clearTimeout(timer); const key = event.key.toLocaleLowerCase(); buffer += key; timer = setTimeout(() => buffer = '', 700); const search = [...buffer].every(value => value === key) ? key : buffer; const ordered = [...items.slice(Math.max(0, current + 1)), ...items.slice(0, Math.max(0, current + 1))]; const match = ordered.find(item => (item.dataset.textValue || item.textContent || '').trim().toLocaleLowerCase().startsWith(search)); if (match) { event.preventDefault(); match.focus({ preventScroll: true }); } }
     };
+    const documentEscape = event => {
+        if (event.__shadcnLayerHandled || event.key !== 'Escape' || !isTopLayer(menu) || menu.contains(event.target)) return;
+        event.__shadcnLayerHandled = true;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const trigger = document.getElementById(triggerId);
+        trigger?.focus({ preventScroll: true });
+        const closing = dotnet?.invokeMethodAsync('RequestCloseAsync');
+        closing?.then(() => requestAnimationFrame(() => trigger?.focus({ preventScroll: true })));
+    };
     const outside = event => { if (isTopLayer(menu) && !menu.contains(event.target) && !document.getElementById(triggerId)?.contains(event.target)) dotnet?.invokeMethodAsync('RequestCloseAsync'); };
     let hoverTimer = 0;
     const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const item = event.target.closest?.('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]'); if (item && item.closest('[role="menu"]') === menu && item.getAttribute('aria-disabled') !== 'true') { menu.querySelectorAll('[data-pointer-highlighted="true"]').forEach(value => value.removeAttribute('data-pointer-highlighted')); item.setAttribute('data-pointer-highlighted', 'true'); } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
     const out = event => { const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || trigger.parentElement?.contains(event.relatedTarget)) return; hoverTimer = setTimeout(() => { if (trigger.getAttribute('aria-expanded') === 'true') trigger.click(); }, 300); };
-    menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
+    menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('keydown', documentEscape); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, documentEscape, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
 }
-export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('pointerdown', value.outside); menus.delete(menu); }
+export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('keydown', value.documentEscape); document.removeEventListener('pointerdown', value.outside); menus.delete(menu); }
 export function isMenuAttached(menu) { return menus.has(menu); }
 export function focusFirstMenuItem(menu) { requestAnimationFrame(() => menu.querySelector('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')?.focus({ preventScroll: true })); }
 export function focusSubTrigger(menu) { menu.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]')?.focus({ preventScroll: true }); }

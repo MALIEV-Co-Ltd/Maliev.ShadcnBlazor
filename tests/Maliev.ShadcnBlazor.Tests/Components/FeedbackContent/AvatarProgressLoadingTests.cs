@@ -141,6 +141,19 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
+    public void AvatarExposesRaisedStateWhilePointerIsOverIt()
+    {
+        var cut = Render<ShadcnAvatar>();
+        var avatar = cut.Find("[data-slot='avatar']");
+
+        avatar.MouseEnter();
+        Assert.Equal("true", avatar.GetAttribute("data-raised"));
+
+        avatar.MouseLeave();
+        Assert.Null(avatar.GetAttribute("data-raised"));
+    }
+
+    [Fact]
     public void AvatarGroupCountCanActAsAnAccessibleExpansionTrigger()
     {
         var expanded = false;

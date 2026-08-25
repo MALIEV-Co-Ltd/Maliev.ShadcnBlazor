@@ -1,12 +1,16 @@
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnButton
+  String BusyText
   ShadcnButtonType ButtonType
   RenderFragment ChildContent
   Boolean Disabled
   String Href
   RenderFragment LeadingIcon
   EventCallback<MouseEventArgs> OnClick
+  Nullable<Boolean> OperationFeedback
   Boolean PointerCursor
   ShadcnButtonSize Size
+  TimeSpan SuccessDuration
+  String SuccessText
   RenderFragment TrailingIcon
   ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroup

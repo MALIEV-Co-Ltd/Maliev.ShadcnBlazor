@@ -90,6 +90,50 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task CuratedChartSubmitButtonsSwitchAndDropzoneExposeCompleteFeedback()
+    {
+        await using var context = await NewContextAsync(1569, 1032);
+        var page = await OpenAsync(context);
+
+        var chart = page.Locator("[data-use-case-id='production-analytics']");
+        await chart.Locator("rect[data-series='milling']").First.HoverAsync();
+        await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("W1");
+        await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("42");
+
+        var profile = page.Locator("[data-use-case-id='operator-profile']");
+        var save = profile.Locator("button[data-operation-state]");
+        await Assertions.Expect(save).ToHaveTextAsync("Save profile");
+        await save.EvaluateAsync("element => element.click()");
+        await Assertions.Expect(save).ToContainTextAsync("Saving");
+        await Assertions.Expect(save).ToContainTextAsync("Saved", new() { Timeout = 2_000 });
+        await Assertions.Expect(save).ToContainTextAsync("Save profile", new() { Timeout = 2_000 });
+
+        var handoff = page.Locator("[data-use-case-id='shipping-handoff']");
+        var confirm = handoff.Locator("button[data-operation-state]");
+        await Assertions.Expect(confirm).ToHaveTextAsync("Confirm address");
+        await confirm.EvaluateAsync("element => element.click()");
+        await Assertions.Expect(confirm).ToContainTextAsync("Confirming");
+        await Assertions.Expect(confirm).ToContainTextAsync("Confirmed", new() { Timeout = 2_000 });
+        await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 2_000 });
+
+        var switchControl = page.GetByRole(AriaRole.Switch, new() { Name = "Use quiet hours", Exact = true });
+        var switchTrack = switchControl.Locator("xpath=parent::*");
+        Assert.True(await switchTrack.EvaluateAsync<bool>("element => parseFloat(getComputedStyle(element).width) >= 34"));
+        var switchDiagnostic = await switchControl.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return JSON.stringify({ width: style.width, height: style.height, radius: style.borderRadius }); }");
+        Assert.True(await switchControl.EvaluateAsync<bool>("element => { const style = getComputedStyle(element); return parseFloat(style.borderRadius) >= parseFloat(style.height) / 2 - 1; }"), switchDiagnostic);
+
+        var dropzone = page.Locator("[data-use-case-id='quotation-files']");
+        await dropzone.Locator("input[type=file]").SetInputFilesAsync(new FilePayload
+        {
+            Name = "fixture.step",
+            MimeType = "application/octet-stream",
+            Buffer = new byte[1_024]
+        });
+        await Assertions.Expect(dropzone).ToContainTextAsync("fixture.step");
+        await Assertions.Expect(dropzone).ToContainTextAsync("100%", new() { Timeout = 3_000 });
+    }
+
+    [Fact]
     public async Task ComplexCuratedWorkflowsReceiveWideSpansWithoutNestedFrames()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
@@ -373,6 +417,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var hoverDiagnostics = await menuItem.EvaluateAsync<string>("element => JSON.stringify({ hover: element.matches(':hover'), className: element.className, slot: element.dataset.slot, accent: getComputedStyle(element).getPropertyValue('--shadcn-accent') })");
         Assert.True(menuBackground != hoveredMenuBackground, hoverDiagnostics);
         await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(menuItem).ToBeHiddenAsync();
         await page.Locator("[data-use-case-id='contact-dialog']").GetByText("Edit contact", new() { Exact = true }).ClickAsync();
         var contactDialog = page.GetByRole(AriaRole.Dialog);
         await Assertions.Expect(contactDialog.GetByText("Production contact", new() { Exact = true })).ToBeVisibleAsync();
@@ -433,8 +478,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             cards => JSON.stringify(cards.flatMap(card => {
                 const cardBox = card.getBoundingClientRect();
                 const issues = [];
-                if (card.scrollWidth > card.clientWidth + 1)
-                    issues.push(`${card.dataset.useCaseId}: card overflow ${card.scrollWidth}/${card.clientWidth}`);
+                if (card.scrollWidth > card.clientWidth + 1) {
+                    const culprit = Array.from(card.querySelectorAll('*')).find(element => element.scrollWidth > element.clientWidth + 1);
+                    issues.push(`${culprit?.tagName}.${culprit?.className} ${culprit?.scrollWidth}/${culprit?.clientWidth}; ${card.dataset.useCaseId}: card overflow ${card.scrollWidth}/${card.clientWidth}`);
+                }
                 const title = card.querySelector('.shadcn-card-title');
                 if (title && parseFloat(getComputedStyle(title).fontSize) > 24)
                     issues.push(`${card.dataset.useCaseId}: title ${getComputedStyle(title).fontSize}`);
@@ -451,7 +498,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
                 return issues;
             }))
             """);
-        Assert.Equal("[]", diagnostics);
+        Assert.True(diagnostics == "[]", diagnostics);
     }
 
     [Fact]
