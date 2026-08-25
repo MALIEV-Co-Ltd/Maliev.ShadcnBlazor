@@ -266,6 +266,23 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("TurnText(turn)", card, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void OperationsConsolesUseDistinctWorkflowOverviewsWithoutClippingDepth()
+    {
+        var root = FindRoot();
+        var console = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeOperationsConsole.razor");
+        var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+
+        Assert.Contains("data-overview=\"production\"", console, StringComparison.Ordinal);
+        Assert.Contains("data-overview=\"quality\"", console, StringComparison.Ordinal);
+        Assert.Contains("data-overview=\"handoff\"", console, StringComparison.Ordinal);
+        Assert.Contains("Quality evidence readiness", console, StringComparison.Ordinal);
+        Assert.Contains("Delivery route", console, StringComparison.Ordinal);
+        Assert.DoesNotContain(".theme-operations-console { min-inline-size: 0; max-inline-size: 100%; overflow-x: clip; }", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-operations-console { min-inline-size: 0; max-inline-size: 100%; overflow: visible; }", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-use-case-card:has(.theme-operations-console) { overflow: visible; }", css, StringComparison.Ordinal);
+    }
+
     private static string Read(string root, params string[] segments) => File.ReadAllText(Path.Combine([root, .. segments]));
     private static string FindRoot()
     {
