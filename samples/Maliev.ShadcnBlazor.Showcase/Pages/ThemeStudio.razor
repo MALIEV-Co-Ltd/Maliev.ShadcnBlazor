@@ -38,7 +38,9 @@
                                             Intensity="State.StyleIntensity"
                                             data-testid="theme-visual-style-scope">
                         <CascadingValue Value="PreviewContext">
-                            <ThemeBento Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                            <CascadingValue Name="ThemeStudioIconLibrary" Value="State.IconLibrary">
+                                <ThemeBento Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                            </CascadingValue>
                         </CascadingValue>
                     </ShadcnVisualStyleScope>
                 </div>

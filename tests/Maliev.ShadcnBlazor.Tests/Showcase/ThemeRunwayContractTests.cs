@@ -1,7 +1,21 @@
+using Maliev.ShadcnBlazor.Showcase.Theming;
+using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
+
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
 public sealed class ThemeBentoContractTests
 {
+    [Theory]
+    [InlineData(ThemeStudioIconLibrary.Lucide, "lucide")]
+    [InlineData(ThemeStudioIconLibrary.Phosphor, "phosphor")]
+    [InlineData(ThemeStudioIconLibrary.Tabler, "tabler")]
+    [InlineData(ThemeStudioIconLibrary.Hugeicons, "hugeicons")]
+    public void EveryCompanionPackageResolvesTheCuratedSemanticIconSet(ThemeStudioIconLibrary library, string expectedLibrary)
+    {
+        foreach (var workflow in new[] { "production-analytics", "quality-alert", "inspection-camera", "api-credentials", "quotation-data-table", "drawing-attachment", "machine-cell", "assistant-conversation", "operator-profile", "project-questionnaire", "shipping-handoff", "assigned-reviewers", "quotation-files" })
+            Assert.Equal(expectedLibrary, ThemeStudioIconResolver.Resolve(library, workflow).Library);
+    }
+
     [Fact]
     public void PreviewUsesOneResponsiveInteractiveBentoGridWithRealCardBorders()
     {
@@ -36,6 +50,23 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("<ThemeUseCaseCardHost", bento, StringComparison.Ordinal);
         Assert.DoesNotContain("IThemeScenarioRegistry", bento, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeScenarioBentoCard", bento, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CuratedCardsResolveVisibleSemanticIconsFromTheSelectedCompanionPackage()
+    {
+        var root = FindRoot();
+        var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
+        var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+        var resolver = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Theming", "Runway", "ThemeStudioIconResolver.cs");
+
+        Assert.Contains("Name=\"ThemeStudioIconLibrary\" Value=\"State.IconLibrary\"", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("IconLibrary=\"IconLibrary\"", bento, StringComparison.Ordinal);
+        Assert.Contains("data-theme-workflow-icon", card, StringComparison.Ordinal);
+        Assert.Contains("ThemeStudioIconResolver.Resolve", card, StringComparison.Ordinal);
+        foreach (var library in new[] { "LucideIconCatalog", "PhosphorIconCatalog", "TablerIconCatalog", "HugeiconsIconCatalog" })
+            Assert.Contains(library, resolver, StringComparison.Ordinal);
     }
 
     [Fact]

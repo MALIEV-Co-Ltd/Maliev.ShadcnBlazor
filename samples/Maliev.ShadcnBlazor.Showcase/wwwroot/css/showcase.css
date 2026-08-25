@@ -8770,6 +8770,9 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-file,
 .theme-runway-amount { display: flex; min-inline-size: 0; align-items: center; justify-content: space-between; gap: .75rem; }
 .theme-use-case-card__header { min-inline-size: 0; }
+.theme-use-case-card__header .shadcn-card-title { display: flex; min-inline-size: 0; align-items: center; gap: .625rem; }
+.theme-use-case-card__title-icon { display: inline-grid; flex: 0 0 auto; inline-size: 2rem; block-size: 2rem; place-items: center; border: 1px solid color-mix(in oklch, var(--shadcn-primary) 20%, var(--shadcn-border)); border-radius: calc(var(--shadcn-radius-md) * .8); background: color-mix(in oklch, var(--shadcn-primary) 8%, var(--shadcn-card)); color: var(--shadcn-primary); transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease; }
+.theme-use-case-card:hover .theme-use-case-card__title-icon { border-color: color-mix(in oklch, var(--shadcn-primary) 42%, var(--shadcn-border)); background: color-mix(in oklch, var(--shadcn-primary) 13%, var(--shadcn-card)); transform: translateY(-1px); }
 .theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start; gap: .75rem; text-align: start; }
 .theme-runway-profile > :last-child { display: grid; min-inline-size: 0; max-inline-size: 100%; justify-items: start; gap: .125rem; overflow-wrap: anywhere; text-align: start; }
 .theme-runway-profile :where(strong, span, a) { text-align: start; }

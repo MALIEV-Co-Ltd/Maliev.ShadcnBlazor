@@ -15,7 +15,7 @@
     @if (Definition.Id != "project-questionnaire")
     {
         <ShadcnCardHeader Class="theme-use-case-card__header">
-            <ShadcnCardTitle>@Title</ShadcnCardTitle>
+            <ShadcnCardTitle><span class="theme-use-case-card__title-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="18" /></span><span>@Title</span></ShadcnCardTitle>
         </ShadcnCardHeader>
     }
 
@@ -399,6 +399,7 @@
     [Parameter, EditorRequired] public ThemeUseCaseDefinition Definition { get; set; } = null!;
     [Parameter, EditorRequired] public ThemeDemonstrationFrame Frame { get; set; } = null!;
     [Parameter] public ThemeStudioLocale Locale { get; set; }
+    [CascadingParameter(Name = "ThemeStudioIconLibrary")] public ThemeStudioIconLibrary IconLibrary { get; set; }
     private string? _profileName;
     private bool _saveAddress = true;
     private bool _handoffSaved;
@@ -438,6 +439,7 @@
     private string? _actionStatus;
     private int _conversationSequence = 2;
     private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
+    private ShadcnIconData WorkflowIcon => ThemeStudioIconResolver.Resolve(IconLibrary, Definition.Id);
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData FileIcon = new("lucide", "file", "0 0 24 24", "<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M14 2v6h6\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
     private static readonly ShadcnIconData XIcon = new("lucide", "x", "0 0 24 24", "<path d=\"M18 6 6 18M6 6l12 12\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\"/>");

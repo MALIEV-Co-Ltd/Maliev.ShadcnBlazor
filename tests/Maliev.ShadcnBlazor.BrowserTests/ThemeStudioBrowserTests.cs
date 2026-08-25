@@ -90,6 +90,26 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task IconLibrarySelectionUpdatesVisibleWorkflowIconsWithoutResettingCardState()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var icons = page.Locator("[data-theme-workflow-icon] [data-slot='icon']");
+        await Assertions.Expect(icons.First).ToBeVisibleAsync();
+        Assert.True(await icons.CountAsync() >= 30);
+        await Assertions.Expect(icons.First).ToHaveAttributeAsync("data-library", "lucide");
+
+        var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
+        await profileName.FillAsync("Kanda T.");
+        await page.GetByRole(AriaRole.Button, new() { NameRegex = new System.Text.RegularExpressions.Regex("^Icon library") }).ClickAsync();
+        await page.GetByTestId("theme-icon-library-phosphor").ClickAsync();
+
+        await Assertions.Expect(icons.First).ToHaveAttributeAsync("data-library", "phosphor");
+        await Assertions.Expect(profileName).ToHaveValueAsync("Kanda T.");
+        Assert.Equal("phosphor", await page.GetByTestId("theme-preview-scope").GetAttributeAsync("data-theme-icon-library"));
+    }
+
+    [Fact]
     public async Task CuratedChartsCredentialsAndMediaHaveThreeVisibleInteractiveUses()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
