@@ -64,6 +64,16 @@ public sealed class QuestionnaireTests : BunitContext
     }
 
     [Fact]
+    public void ChoiceCanHideItsNativeIndicatorWhileKeepingRadioSemantics()
+    {
+        var cut = Render<Fixtures.QuestionnaireFixture>();
+        var feature = cut.Find("label:has(input[value='feature'])");
+
+        Assert.Equal("hidden", feature.GetAttribute("data-indicator"));
+        Assert.Equal("radio", feature.QuerySelector("input")!.GetAttribute("type"));
+    }
+
+    [Fact]
     public void CustomChoiceRevealsAssociatedInputAndClearsItWhenStandardChoiceWins()
     {
         var cut = Render<Fixtures.QuestionnaireCustomChoiceFixture>();

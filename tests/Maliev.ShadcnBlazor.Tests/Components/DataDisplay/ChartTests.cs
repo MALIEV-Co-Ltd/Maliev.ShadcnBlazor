@@ -222,6 +222,30 @@ public sealed class ChartTests : BunitContext
         Assert.Equal(6, cut.FindAll("[data-slot='chart-legend-item']").Count);
         Assert.Contains("Jan เดสก์ท็อป", cut.Find("[data-slot='chart-legend']").TextContent);
         Assert.Contains("Mar มือถือ", cut.Find("[data-slot='chart-legend']").TextContent);
+        Assert.Equal("xMidYMid meet", cut.Find("svg[data-slot='chart-surface']").GetAttribute("preserveAspectRatio"));
+    }
+
+    [Fact]
+    public void RadialCategoriesCanOwnDistinctThemeColors()
+    {
+        var config = new ShadcnChartConfig
+        {
+            ["orders"] = new("Scheduled jobs") { Color = "red" },
+            ["orders-0"] = new("Aluminum") { Color = "blue" },
+            ["orders-1"] = new("Stainless") { Color = "green" },
+            ["orders-2"] = new("Polymer") { Color = "orange" }
+        };
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Type, ShadcnChartType.Donut)
+            .Add(component => component.Config, config)
+            .Add(component => component.Categories, new[] { "Aluminum", "Stainless", "Polymer" })
+            .Add(component => component.Series, new[] { new ShadcnChartSeries("orders", new double?[] { 12, 8, 5 }) })
+            .Add(component => component.Title, "Order mix")
+            .Add(component => component.ShowLegend, true));
+
+        Assert.Equal(new[] { "var(--color-orders-0)", "var(--color-orders-1)", "var(--color-orders-2)" },
+            cut.FindAll("path[data-series='orders']").Select(path => path.GetAttribute("fill")));
+        Assert.Equal(3, cut.FindAll("[data-slot='chart-legend-item']").Count);
     }
 
     [Fact]

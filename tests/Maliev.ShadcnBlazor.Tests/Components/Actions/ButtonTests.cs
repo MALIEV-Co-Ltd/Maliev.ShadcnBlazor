@@ -198,6 +198,15 @@ public sealed class ButtonTests : BunitContext
     }
 
     [Fact]
+    public void BusySpinnerUsesCalmComponentScopedTiming()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+
+        Assert.Contains("--shadcn-button-spinner-duration, var(--shadcn-motion-duration-slow)", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RejectsUnknownEnums()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnButton>(p => p.Add(x => x.Variant, (ShadcnButtonVariant)999)));

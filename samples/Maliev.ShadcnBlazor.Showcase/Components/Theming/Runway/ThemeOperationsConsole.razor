@@ -60,22 +60,37 @@
 
         <ShadcnTabsContent Value="support" ForceMount="true">
             <div class="theme-operations-console__support">
-                <ShadcnCommand Label="@CommandLabel">
-                    <ShadcnCommandInput Placeholder="@CommandPlaceholder" />
-                    <ShadcnCommandList>
-                        <ShadcnCommandGroup Heading="@CommandHeading"><ShadcnCommandItem Value="open-drawing" OnSelect="SelectCommand">@PrimaryCommand<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review" OnSelect="SelectCommand">@SecondaryCommand<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
-                        <ShadcnCommandEmpty>@CommandEmpty</ShadcnCommandEmpty>
-                    </ShadcnCommandList>
-                </ShadcnCommand>
-                <ShadcnResizableGroup Class="theme-operations-console__resizable">
-                    <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>@WorkspaceReference</strong></p><p>@WorkspaceSummary</p><p>@WorkspaceDetail</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
-                    <ShadcnResizableHandle WithHandle="true" />
-                <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="@T("Refreshing activity")" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
-                </ShadcnResizableGroup>
-                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@NotePlaceholder" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">@T("Add")</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
-                @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">@NoteConfirmation</ShadcnBadge> }
-                @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_commandStatus)</p> }
-            <ShadcnPagination Label="@T("Console pages")"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Label="@T("Previous")" Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Label="@T("Next")" Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
+                @if (Kind == "handoff")
+                {
+                    <div class="theme-handoff-console__route">
+                        <div><span>@T("Factory release")</span><strong>@T("Samut Prakan · 15:20")</strong><ShadcnBadge Class="theme-status-success">@T("Complete")</ShadcnBadge></div>
+                        <div><span>@T("Courier collection")</span><strong>Kerry Express · 16:00</strong><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@T("Scheduled")</ShadcnBadge></div>
+                        <div><span>@T("Recipient")</span><strong>@T("Bang Na receiving desk")</strong><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">@T("Awaiting confirmation")</ShadcnBadge></div>
+                    </div>
+                    <ShadcnAlert><ShadcnAlertTitle>@T("Delivery packet DH-118")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Packing list, inspection certificate, and courier label are attached.")</ShadcnAlertDescription></ShadcnAlert>
+                    <label class="theme-runway-check"><ShadcnCheckbox Value="@_recipientConfirmed" ValueChanged="value => _recipientConfirmed = value ?? false" /><span><strong>@T("Recipient details verified")</strong><small>@T("Narin confirmed the destination and contact number.")</small></span></label>
+                    <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@T("Add a recipient handoff note")" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => SaveHandoff())">@T("Save handoff")</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
+                    @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_commandStatus)</p> }
+                }
+                else
+                {
+                    <ShadcnCommand Label="@CommandLabel">
+                        <ShadcnCommandInput Placeholder="@CommandPlaceholder" />
+                        <ShadcnCommandList>
+                            <ShadcnCommandGroup Heading="@CommandHeading"><ShadcnCommandItem Value="open-drawing" OnSelect="SelectCommand">@PrimaryCommand<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review" OnSelect="SelectCommand">@SecondaryCommand<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
+                            <ShadcnCommandEmpty>@CommandEmpty</ShadcnCommandEmpty>
+                        </ShadcnCommandList>
+                    </ShadcnCommand>
+                    <ShadcnResizableGroup Class="theme-operations-console__resizable">
+                        <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>@WorkspaceReference</strong></p><p>@WorkspaceSummary</p><p>@WorkspaceDetail</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
+                        <ShadcnResizableHandle WithHandle="true" />
+                        <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="@T("Refreshing activity")" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
+                    </ShadcnResizableGroup>
+                    <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@NotePlaceholder" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">@T("Add")</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
+                    @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">@NoteConfirmation</ShadcnBadge> }
+                    @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_commandStatus)</p> }
+                    <ShadcnPagination Label="@T("Console pages")"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Label="@T("Previous")" Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Label="@T("Next")" Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
+                }
             </div>
         </ShadcnTabsContent>
     </ShadcnTabs>
@@ -95,6 +110,7 @@
     private string _note = string.Empty;
     private bool _noteAdded;
     private bool _releaseApproved;
+    private bool _recipientConfirmed;
     private string? _releaseStatus;
     private string? _commandStatus;
     private int _page = 1;
@@ -127,6 +143,13 @@
         _tab = Kind switch { "quality" => "release", "handoff" => "support", _ => "overview" };
     }
     private void AddNote() { if (!string.IsNullOrWhiteSpace(_note)) { _noteAdded = true; _note = string.Empty; } }
+    private void SaveHandoff()
+    {
+        _commandStatus = _recipientConfirmed
+            ? "Customer handoff saved with recipient confirmation."
+            : "Customer handoff saved; recipient confirmation remains pending.";
+        _note = string.Empty;
+    }
     private void SaveReview() => _releaseStatus = "Release review saved as a draft.";
     private void ApproveRelease() { _releaseApproved = true; _releaseStatus = "Release approved for the selected lane."; }
     private void SelectCommand(string command) => _commandStatus = (Kind, command) switch

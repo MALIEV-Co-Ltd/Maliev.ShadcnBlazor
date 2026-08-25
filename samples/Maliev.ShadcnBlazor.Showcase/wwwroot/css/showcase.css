@@ -8745,7 +8745,8 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-aspect-preview--drawing .theme-aspect-preview__canvas { background-image: linear-gradient(color-mix(in oklch, var(--shadcn-border) 48%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklch, var(--shadcn-border) 48%, transparent) 1px, transparent 1px); background-size: 1.25rem 1.25rem; }
 .theme-aspect-preview--drawing svg { inline-size: 88%; block-size: 88%; color: color-mix(in oklch, var(--shadcn-primary) 78%, var(--shadcn-foreground)); }
 .theme-aspect-preview__annotation { position: absolute; inset-block-end: .625rem; inset-inline-start: .625rem; border: 1px solid color-mix(in oklch, var(--shadcn-border) 70%, transparent); border-radius: var(--shadcn-radius-sm); background: color-mix(in oklch, var(--shadcn-popover) 88%, transparent); padding: .25rem .5rem; color: var(--shadcn-popover-foreground); font-size: .6875rem; font-weight: 600; backdrop-filter: blur(.5rem); }
-.theme-aspect-preview--camera .theme-aspect-preview__canvas { background: radial-gradient(circle at 52% 46%, color-mix(in oklch, var(--shadcn-chart-2) 24%, transparent), transparent 32%), linear-gradient(135deg, color-mix(in oklch, var(--shadcn-muted) 75%, var(--shadcn-card)), var(--shadcn-card)); }
+.theme-aspect-preview--camera .theme-aspect-preview__canvas { background-image: linear-gradient(180deg, rgb(4 10 18 / .08), rgb(4 10 18 / .28)), url("../images/theme-studio/inspection-camera-machined-bore.png"); background-position: center; background-size: cover; }
+.theme-camera-reading { position: absolute; inset-block-start: .625rem; inset-inline-end: .625rem; border: 1px solid rgb(255 255 255 / .42); border-radius: var(--shadcn-radius-sm); background: rgb(3 8 14 / .7); padding: .25rem .45rem; color: white; font-family: var(--shadcn-font-mono); font-size: .6875rem; backdrop-filter: blur(.35rem); }
 .theme-camera-reticle { inline-size: 34%; aspect-ratio: 1; border: 1px solid var(--shadcn-primary); border-radius: 50%; box-shadow: 0 0 0 .5rem color-mix(in oklch, var(--shadcn-primary) 10%, transparent); }
 .theme-camera-reticle::before,
 .theme-camera-reticle::after { content: ""; position: absolute; inset: 50% auto auto 50%; background: var(--shadcn-primary); transform: translate(-50%, -50%); }
@@ -8763,8 +8764,17 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-amount { display: flex; min-inline-size: 0; align-items: center; justify-content: space-between; gap: .75rem; }
 .theme-use-case-card__header { min-inline-size: 0; }
 .theme-use-case-card__header .shadcn-card-title { display: flex; min-inline-size: 0; align-items: center; gap: .625rem; }
-.theme-use-case-card__title-icon { display: inline-grid; flex: 0 0 auto; inline-size: 2rem; block-size: 2rem; place-items: center; border: 1px solid color-mix(in oklch, var(--shadcn-primary) 20%, var(--shadcn-border)); border-radius: calc(var(--shadcn-radius-md) * .8); background: color-mix(in oklch, var(--shadcn-primary) 8%, var(--shadcn-card)); color: var(--shadcn-primary); transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease; }
-.theme-use-case-card:hover .theme-use-case-card__title-icon { border-color: color-mix(in oklch, var(--shadcn-primary) 42%, var(--shadcn-border)); background: color-mix(in oklch, var(--shadcn-primary) 13%, var(--shadcn-card)); transform: translateY(-1px); }
+.theme-workflow-inline-icon { display:inline-grid; flex:0 0 auto; place-items:center; color:currentColor; transition:transform var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(button,a):hover > .theme-workflow-inline-icon { transform:translateY(-1px) scale(1.04); }
+.theme-runway-file > span { display:inline-flex; min-inline-size:0; align-items:center; gap:.5rem; }
+.theme-uploaded-files { display:grid; gap:.5rem; }
+.theme-uploaded-file { display:grid; min-inline-size:0; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.625rem; border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); padding:.625rem; background:color-mix(in oklch,var(--shadcn-muted) 34%,transparent); }
+.theme-uploaded-file > span:nth-child(2) { display:grid; min-inline-size:0; gap:.125rem; }
+.theme-uploaded-file :where(strong,small) { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.theme-uploaded-file small { color:var(--shadcn-muted-foreground); font-weight:400; }
+.theme-process-editor { inline-size:min(calc(100vw - 2rem),36rem); }
+.theme-process-editor__steps { display:grid; gap:.75rem; }
+.theme-use-case-card .shadcn-questionnaire-choice { border:1px solid var(--shadcn-border); }
 .theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start; gap: .75rem; text-align: start; }
 .theme-runway-profile > :last-child { display: grid; min-inline-size: 0; max-inline-size: 100%; justify-items: start; gap: .125rem; overflow-wrap: anywhere; text-align: start; }
 .theme-runway-profile :where(strong, span, a) { text-align: start; }
@@ -8952,6 +8962,11 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-operations-console .shadcn-command { border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); }
 .theme-operations-console .shadcn-command-shortcut { color: var(--shadcn-foreground); font-weight: 500; }
 .theme-operations-console .shadcn-pagination { justify-self: center; }
+.theme-handoff-console__route { display: grid; gap: .625rem; }
+.theme-handoff-console__route > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .2rem .75rem; border-block-end: 1px solid var(--shadcn-border); padding-block-end: .625rem; }
+.theme-handoff-console__route span { color: var(--shadcn-muted-foreground); font-size: .75rem; }
+.theme-handoff-console__route strong { grid-column: 1; font-size: .875rem; }
+.theme-handoff-console__route .shadcn-badge { grid-column: 2; grid-row: 1 / span 2; }
 @media (max-width: 46rem) {
     .theme-operations-console__overview,
     .theme-operations-console__form-row,

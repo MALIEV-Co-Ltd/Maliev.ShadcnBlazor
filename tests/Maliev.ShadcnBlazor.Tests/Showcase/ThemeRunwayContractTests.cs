@@ -53,7 +53,7 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
-    public void CuratedCardsResolveVisibleSemanticIconsFromTheSelectedCompanionPackage()
+    public void CuratedCardsResolveSemanticIconsInsideWorkflowContentInsteadOfRepeatingDecorativeHeaders()
     {
         var root = FindRoot();
         var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
@@ -64,9 +64,26 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("Name=\"ThemeStudioIconLibrary\" Value=\"State.IconLibrary\"", page, StringComparison.Ordinal);
         Assert.DoesNotContain("IconLibrary=\"IconLibrary\"", bento, StringComparison.Ordinal);
         Assert.Contains("data-theme-workflow-icon", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-use-case-card__title-icon", card, StringComparison.Ordinal);
+        Assert.Contains("theme-workflow-inline-icon", card, StringComparison.Ordinal);
         Assert.Contains("ThemeStudioIconResolver.Resolve", card, StringComparison.Ordinal);
         foreach (var library in new[] { "LucideIconCatalog", "PhosphorIconCatalog", "TablerIconCatalog", "HugeiconsIconCatalog" })
             Assert.Contains(library, resolver, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InteractiveWorkflowCardsExposeFilesProcessEditorAndComposerReplyContext()
+    {
+        var root = FindRoot();
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+
+        Assert.Contains("_dropzoneFiles", card, StringComparison.Ordinal);
+        Assert.Contains("theme-uploaded-files", card, StringComparison.Ordinal);
+        Assert.Contains("_processEditorOpen", card, StringComparison.Ordinal);
+        Assert.Contains("theme-process-editor", card, StringComparison.Ordinal);
+        Assert.Contains("_replyQuote", card, StringComparison.Ordinal);
+        Assert.Contains("ShadcnMessageReplyQuote", card, StringComparison.Ordinal);
+        Assert.Contains("Label=\"@T(\"Copy message\")\"", card, StringComparison.Ordinal);
     }
 
     [Fact]

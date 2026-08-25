@@ -380,6 +380,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireActions
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireAnswer
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoice
   RenderFragment ChildContent
+  Boolean HideIndicator
   String Value
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDefinition
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDescription

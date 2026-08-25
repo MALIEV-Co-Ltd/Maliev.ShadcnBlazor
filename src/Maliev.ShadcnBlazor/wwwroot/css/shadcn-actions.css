@@ -152,8 +152,8 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-root[data-state="checked"] .shadcn-checkbox-indicator::after { content: ""; width: 0.25rem; height: 0.5rem; border: solid currentColor; border-width: 0 0.125rem 0.125rem 0; transform: translateY(-0.0625rem) rotate(45deg); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-checkbox-root[data-state="indeterminate"] .shadcn-checkbox-indicator::after { content: ""; width: 0.5rem; height: 0.125rem; border-radius: 999px; background: currentColor; }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root { --shadcn-switch-travel: 1rem; width: 2.25rem; height: 1.25rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-size="sm"] { --shadcn-switch-travel: 0.625rem; width: 1.5rem; height: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root { --shadcn-switch-travel: 1rem; width: 2.25rem; min-width: 2.25rem; height: 1.25rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-root[data-size="sm"] { --shadcn-switch-travel: 0.625rem; width: 1.5rem; min-width: 1.5rem; height: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch { width: 100%; height: 100%; border: 1px solid transparent; border-radius: 999px; background: var(--shadcn-input); box-shadow: var(--shadcn-shadow-xs); transition: background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch:checked { background: var(--shadcn-primary); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-switch-thumb { position: absolute; inset-inline-start: 0.125rem; top: 50%; width: 1rem; height: 1rem; border-radius: 50%; background: var(--shadcn-background); box-shadow: var(--shadcn-shadow-xs); pointer-events: none; transform: translateY(-50%); transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
@@ -230,7 +230,7 @@
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-button-spinner, .shadcn-button-success-icon) { display: inline-block; width: 1rem; height: 1rem; flex: 0 0 auto; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-spinner { border: 0.125rem solid color-mix(in oklch, currentColor 30%, transparent); border-block-start-color: currentColor; border-radius: 50%; animation: shadcn-button-spin var(--shadcn-motion-duration) linear infinite; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-spinner { border: 0.125rem solid color-mix(in oklch, currentColor 30%, transparent); border-block-start-color: currentColor; border-radius: 50%; animation: shadcn-button-spin var(--shadcn-button-spinner-duration, var(--shadcn-motion-duration-slow)) linear infinite; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-success-icon { position: relative; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-button-success-icon::after { content: ""; position: absolute; inset-inline-start: 0.25rem; inset-block-start: 0.0625rem; width: 0.375rem; height: 0.6875rem; border: solid currentColor; border-width: 0 0.125rem 0.125rem 0; transform: rotate(45deg); }
 @keyframes shadcn-button-spin { to { transform: rotate(360deg); } }

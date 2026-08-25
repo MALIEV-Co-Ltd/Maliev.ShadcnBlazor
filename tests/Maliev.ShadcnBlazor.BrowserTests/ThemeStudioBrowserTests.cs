@@ -96,7 +96,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var page = await OpenAsync(context);
         var icons = page.Locator("[data-theme-workflow-icon] [data-slot='icon']");
         await Assertions.Expect(icons.First).ToBeVisibleAsync();
-        Assert.True(await icons.CountAsync() >= 30);
+        Assert.True(await icons.CountAsync() >= 6);
+        foreach (var useCase in new[] { "production-capacity", "operator-profile", "quotation-files", "shipping-handoff", "quotation-actions", "inspection-camera" })
+            await Assertions.Expect(page.Locator($"[data-use-case-id='{useCase}'] [data-theme-workflow-icon]").First).ToBeVisibleAsync();
         await Assertions.Expect(icons.First).ToHaveAttributeAsync("data-library", "lucide");
 
         var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
@@ -318,7 +320,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         var navigation = page.Locator("[data-use-case-id='work-order-navigation']");
         await navigation.GetByRole(AriaRole.Button, new() { Name = "Open process editor", Exact = true }).ClickAsync();
-        await Assertions.Expect(navigation.GetByRole(AriaRole.Status)).ToContainTextAsync("Process plan opened");
+        var processEditor = page.GetByRole(AriaRole.Dialog, new() { Name = "Process plan editor", Exact = true });
+        await Assertions.Expect(processEditor).ToBeVisibleAsync();
+        await processEditor.GetByRole(AriaRole.Button, new() { Name = "Save revision", Exact = true }).ClickAsync();
+        await Assertions.Expect(processEditor).ToBeHiddenAsync();
+        await Assertions.Expect(navigation.GetByRole(AriaRole.Status)).ToContainTextAsync("Process revision saved for review");
 
         var quotation = page.Locator("[data-use-case-id='quotation-actions']");
         await quotation.GetByRole(AriaRole.Button, new() { Name = "Actions", Exact = true }).ClickAsync();
@@ -342,10 +348,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(qualityConsole.GetByRole(AriaRole.Status)).ToContainTextAsync("saved as a draft");
 
         var handoffConsole = page.Locator("[data-console='handoff']");
-        await handoffConsole.GetByRole(AriaRole.Option, new() { Name = "Confirm recipient", Exact = true }).ClickAsync();
-        await Assertions.Expect(handoffConsole.GetByText("Recipient confirmation opened.", new() { Exact = true })).ToBeVisibleAsync();
-        await handoffConsole.GetByRole(AriaRole.Button, new() { Name = "Next", Exact = true }).ClickAsync();
-        await Assertions.Expect(handoffConsole.GetByRole(AriaRole.Button, new() { Name = "2", Exact = true })).ToHaveAttributeAsync("aria-current", "page");
+        await handoffConsole.Locator("input[type='checkbox']").CheckAsync();
+        await handoffConsole.GetByRole(AriaRole.Button, new() { Name = "Save handoff", Exact = true }).ClickAsync();
+        await Assertions.Expect(handoffConsole.GetByRole(AriaRole.Status)).ToContainTextAsync("saved with recipient confirmation");
     }
 
     [Fact]
