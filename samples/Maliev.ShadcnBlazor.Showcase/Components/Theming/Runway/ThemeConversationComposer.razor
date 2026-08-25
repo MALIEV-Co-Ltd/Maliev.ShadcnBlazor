@@ -1,22 +1,25 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
 @using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
 <div class="theme-runway-composer" @ref="_root">
-    <ShadcnInput TValue="string" @bind-Value="_text" Placeholder="Ask about this work order" />
-    <ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="Send message" @onclick="SendAsync">
+    <ShadcnInput TValue="string" @bind-Value="_text" Placeholder="@T("Ask about this work order")" />
+    <ShadcnButton Size="ShadcnButtonSize.Icon" aria-label="@T("Send message")" @onclick="SendAsync">
         <ShadcnIcon Icon="@SendIcon" Size="16" />
     </ShadcnButton>
 </div>
 
 @code {
     [Parameter, EditorRequired] public EventCallback<string> OnSend { get; set; }
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
     private string _text = string.Empty;
     private ElementReference _root;
     private IJSObjectReference? _module;
     private IJSObjectReference? _scrollGuard;
     private static readonly ShadcnIconData SendIcon = new("lucide", "send", "0 0 24 24", "<path d=\"m22 2-7 20-4-9-9-4Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M22 2 11 13\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+    private string T(string english) => ThemeRunwayCopy.Get(Locale, english);
 
     private async Task SendAsync()
     {

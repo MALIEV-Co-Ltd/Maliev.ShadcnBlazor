@@ -172,13 +172,13 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("SelectionChanged=\"HandleDropzoneSelectionAsync\"", card, StringComparison.Ordinal);
         Assert.Contains("Loading=\"_dropzoneUploading\"", card, StringComparison.Ordinal);
         Assert.Contains("ButtonType=\"ShadcnButtonType.Submit\"", card, StringComparison.Ordinal);
-        Assert.Contains("BusyText=\"Saving\"", card, StringComparison.Ordinal);
-        Assert.Contains("SuccessText=\"Saved\"", card, StringComparison.Ordinal);
+        Assert.Contains("BusyText=\"@T(\"Saving\")\"", card, StringComparison.Ordinal);
+        Assert.Contains("SuccessText=\"@T(\"Saved\")\"", card, StringComparison.Ordinal);
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);
         Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
-        Assert.Contains("@turn.Text", card, StringComparison.Ordinal);
+        Assert.Contains("@TurnText(turn)", card, StringComparison.Ordinal);
         Assert.DoesNotContain("AssistantMessage[..Math.Min(Frame.ChatCharacters", card, StringComparison.Ordinal);
     }
 
@@ -198,7 +198,7 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("@keyframes theme-runway-type-text", css, StringComparison.Ordinal);
         Assert.Contains("forwards", css, StringComparison.Ordinal);
         Assert.Contains("clip-path", css, StringComparison.Ordinal);
-        Assert.Contains("<ThemeConversationComposer OnSend=\"SendConversationMessage\"", card, StringComparison.Ordinal);
+        Assert.Contains("<ThemeConversationComposer Locale=\"Locale\" OnSend=\"SendConversationMessage\"", card, StringComparison.Ordinal);
         Assert.Contains("@bind-Value=\"_text\"", composer, StringComparison.Ordinal);
         Assert.Contains("preservePreviewScrollOnInput", composer, StringComparison.Ordinal);
         Assert.Contains("preservePreviewScrollOnInput", script, StringComparison.Ordinal);
@@ -220,6 +220,27 @@ public sealed class ThemeBentoContractTests
         Assert.Contains("unobserve", script, StringComparison.Ordinal);
         Assert.Contains("data-reveal-state", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-scope", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CuratedWorkflowsShareOneBilingualCopyBoundary()
+    {
+        var root = FindRoot();
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+        var composer = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeConversationComposer.razor");
+        var console = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeOperationsConsole.razor");
+        var copy = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Theming", "Runway", "ThemeRunwayCopy.cs");
+
+        Assert.Contains("ThemeRunwayCopy.Get(Locale", card, StringComparison.Ordinal);
+        Assert.Contains("ThemeRunwayCopy.Get(Locale", composer, StringComparison.Ordinal);
+        Assert.Contains("ThemeRunwayCopy.Get(Locale", console, StringComparison.Ordinal);
+        Assert.Contains("[Parameter] public ThemeStudioLocale Locale", composer, StringComparison.Ordinal);
+        Assert.Contains("[Parameter] public ThemeStudioLocale Locale", console, StringComparison.Ordinal);
+        Assert.Contains("ThemeStudioLocale.Thai", copy, StringComparison.Ordinal);
+        Assert.Contains("กำลังการผลิตรายสัปดาห์", copy, StringComparison.Ordinal);
+        Assert.Contains("กำลังการผลิตรายสัปดาห์", copy, StringComparison.Ordinal);
+        Assert.Contains("บันทึกโปรไฟล์", copy, StringComparison.Ordinal);
+        Assert.Contains("TurnText(turn)", card, StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] segments) => File.ReadAllText(Path.Combine([root, .. segments]));

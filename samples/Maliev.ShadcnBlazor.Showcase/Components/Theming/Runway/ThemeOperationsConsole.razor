@@ -6,10 +6,10 @@
 
 <div class="theme-operations-console" data-console="@Kind">
     <ShadcnTabs Value="@_tab" ValueChanged="value => _tab = value" Class="theme-operations-console__tabs">
-        <ShadcnTabsList Label="@($"{ConsoleTitle} workspace")">
-            <ShadcnTabsTrigger Value="overview">Overview</ShadcnTabsTrigger>
-            <ShadcnTabsTrigger Value="release">Release</ShadcnTabsTrigger>
-            <ShadcnTabsTrigger Value="support">Support</ShadcnTabsTrigger>
+        <ShadcnTabsList Label="@T("{0} workspace", ConsoleTitle)">
+            <ShadcnTabsTrigger Value="overview">@T("Overview")</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="release">@T("Release")</ShadcnTabsTrigger>
+            <ShadcnTabsTrigger Value="support">@T("Support")</ShadcnTabsTrigger>
         </ShadcnTabsList>
 
         <ShadcnTabsContent Value="overview" ForceMount="true">
@@ -18,13 +18,13 @@
                     <ShadcnAlertTitle>@StatusTitle</ShadcnAlertTitle>
                     <ShadcnAlertDescription>@StatusDescription</ShadcnAlertDescription>
                 </ShadcnAlert>
-                <ShadcnChart Id="@($"{Kind}-throughput")" Title="Cell throughput" Description="Completed and inspected operations" Type="ShadcnChartType.Bar" Config="ChartConfig" Categories="ChartCategories" Series="ChartSeries" ShowGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" InitialWidth="430" InitialHeight="190" />
+                <ShadcnChart Id="@($"{Kind}-throughput")" Title="@T("Cell throughput")" Description="@T("Completed and inspected operations")" CategoryLabel="@T("Category")" Type="ShadcnChartType.Bar" Config="LocalizedChartConfig" Categories="LocalizedChartCategories" Series="ChartSeries" ShowGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" InitialWidth="430" InitialHeight="190" />
                 <ShadcnTable ExpectedColumnCount="3">
-                    <ShadcnTableCaption>Current production gates</ShadcnTableCaption>
-                    <ShadcnTableHeader><ShadcnTableRow><ShadcnTableHead>Gate</ShadcnTableHead><ShadcnTableHead>Owner</ShadcnTableHead><ShadcnTableHead>Status</ShadcnTableHead></ShadcnTableRow></ShadcnTableHeader>
+                    <ShadcnTableCaption>@T("Current production gates")</ShadcnTableCaption>
+                    <ShadcnTableHeader><ShadcnTableRow><ShadcnTableHead>@T("Gate")</ShadcnTableHead><ShadcnTableHead>@T("Owner")</ShadcnTableHead><ShadcnTableHead>@T("Status")</ShadcnTableHead></ShadcnTableRow></ShadcnTableHeader>
                     <ShadcnTableBody>
-                        <ShadcnTableRow><ShadcnTableCell>Machining</ShadcnTableCell><ShadcnTableCell>Nattapong</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Class="theme-status-success">Ready</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
-                        <ShadcnTableRow><ShadcnTableCell>Inspection</ShadcnTableCell><ShadcnTableCell>Kanda</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">Review</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
+                        <ShadcnTableRow><ShadcnTableCell>@T("Machining")</ShadcnTableCell><ShadcnTableCell>Nattapong</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Class="theme-status-success">@T("Ready")</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
+                        <ShadcnTableRow><ShadcnTableCell>@T("Inspection")</ShadcnTableCell><ShadcnTableCell>Kanda</ShadcnTableCell><ShadcnTableCell><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@T("Review")</ShadcnBadge></ShadcnTableCell></ShadcnTableRow>
                     </ShadcnTableBody>
                 </ShadcnTable>
             </div>
@@ -32,29 +32,29 @@
 
         <ShadcnTabsContent Value="release" ForceMount="true">
             <div class="theme-operations-console__release">
-                <ShadcnAccordion Values="@_openGates" ValuesChanged="values => _openGates = values" Multiple="true" Label="Release gates">
-                    <ShadcnAccordionItem Value="inspection"><ShadcnAccordionTrigger>Final inspection</ShadcnAccordionTrigger><ShadcnAccordionContent>Three dimensional reports are signed and traceable.</ShadcnAccordionContent></ShadcnAccordionItem>
-                    <ShadcnAccordionItem Value="dispatch"><ShadcnAccordionTrigger>Dispatch documents</ShadcnAccordionTrigger><ShadcnAccordionContent>Packing list and delivery reference WO-2418 are ready.</ShadcnAccordionContent></ShadcnAccordionItem>
+                <ShadcnAccordion Values="@_openGates" ValuesChanged="values => _openGates = values" Multiple="true" Label="@T("Release gates")">
+                    <ShadcnAccordionItem Value="inspection"><ShadcnAccordionTrigger>@T("Final inspection")</ShadcnAccordionTrigger><ShadcnAccordionContent>@T("Three dimensional reports are signed and traceable.")</ShadcnAccordionContent></ShadcnAccordionItem>
+                    <ShadcnAccordionItem Value="dispatch"><ShadcnAccordionTrigger>@T("Dispatch documents")</ShadcnAccordionTrigger><ShadcnAccordionContent>@T("Packing list and delivery reference WO-2418 are ready.")</ShadcnAccordionContent></ShadcnAccordionItem>
                 </ShadcnAccordion>
-                <ShadcnCollapsible @bind-Open="_advancedOpen"><ShadcnCollapsibleTrigger>Advanced release controls</ShadcnCollapsibleTrigger><ShadcnCollapsibleContent>
+                <ShadcnCollapsible @bind-Open="_advancedOpen"><ShadcnCollapsibleTrigger>@T("Advanced release controls")</ShadcnCollapsibleTrigger><ShadcnCollapsibleContent>
                     <div class="theme-operations-console__controls">
-                        <label>Inspection threshold<ShadcnSlider Values="@_threshold" ValuesChanged="values => _threshold = values" Minimum="0" Maximum="100" Step="1" /></label>
+                        <label>@T("Inspection threshold")<ShadcnSlider Values="@_threshold" ValuesChanged="values => _threshold = values" Minimum="0" Maximum="100" Step="1" /></label>
                         <ShadcnRadioGroup TValue="string" @bind-Value="_priority" Name="@($"{Kind}-priority")" Presentation="ShadcnRadioGroupPresentation.Card">
-                            <ShadcnRadioGroupItem TValue="string" Value="@("standard")">Standard release</ShadcnRadioGroupItem>
-                            <ShadcnRadioGroupItem TValue="string" Value="@("priority")">Priority dispatch</ShadcnRadioGroupItem>
+                            <ShadcnRadioGroupItem TValue="string" Value="@("standard")">@T("Standard release")</ShadcnRadioGroupItem>
+                            <ShadcnRadioGroupItem TValue="string" Value="@("priority")">@T("Priority dispatch")</ShadcnRadioGroupItem>
                         </ShadcnRadioGroup>
                         <ShadcnToggleGroup TValue="string" Values="@_layers" ValuesChanged="values => _layers = values" Multiple="true">
-                            <ShadcnToggleGroupItem TValue="string" Value="@("dimensions")">Dimensions</ShadcnToggleGroupItem>
-                            <ShadcnToggleGroupItem TValue="string" Value="@("notes")">Notes</ShadcnToggleGroupItem>
+                            <ShadcnToggleGroupItem TValue="string" Value="@("dimensions")">@T("Dimensions")</ShadcnToggleGroupItem>
+                            <ShadcnToggleGroupItem TValue="string" Value="@("notes")">@T("Notes")</ShadcnToggleGroupItem>
                         </ShadcnToggleGroup>
                     </div>
                 </ShadcnCollapsibleContent></ShadcnCollapsible>
                 <div class="theme-operations-console__form-row">
-                    <label>Release lane<ShadcnNativeSelect TValue="string" @bind-Value="_lane"><ShadcnNativeSelectOption TValue="string" Value="@("quality")">Quality desk</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("dispatch")">Dispatch desk</ShadcnNativeSelectOption></ShadcnNativeSelect></label>
-                    <label>Approval code<ShadcnInputOtp @bind-Value="_otp" MaxLength="4"><ShadcnInputOtpGroup><ShadcnInputOtpSlot Index="0" /><ShadcnInputOtpSlot Index="1" /><ShadcnInputOtpSlot Index="2" /><ShadcnInputOtpSlot Index="3" /></ShadcnInputOtpGroup></ShadcnInputOtp></label>
+                    <label>@T("Release lane")<ShadcnNativeSelect TValue="string" @bind-Value="_lane"><ShadcnNativeSelectOption TValue="string" Value="@("quality")">@T("Quality desk")</ShadcnNativeSelectOption><ShadcnNativeSelectOption TValue="string" Value="@("dispatch")">@T("Dispatch desk")</ShadcnNativeSelectOption></ShadcnNativeSelect></label>
+                    <label>@T("Approval code")<ShadcnInputOtp @bind-Value="_otp" MaxLength="4"><ShadcnInputOtpGroup><ShadcnInputOtpSlot Index="0" /><ShadcnInputOtpSlot Index="1" /><ShadcnInputOtpSlot Index="2" /><ShadcnInputOtpSlot Index="3" /></ShadcnInputOtpGroup></ShadcnInputOtp></label>
                 </div>
-                <ShadcnButtonGroup Label="Release actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="SaveReview">Save review</ShadcnButton><ShadcnButton OnClick="ApproveRelease" Disabled="_releaseApproved">@(_releaseApproved ? "Release approved" : "Approve release")</ShadcnButton></ShadcnButtonGroup>
-                @if (_releaseStatus is not null) { <p class="theme-runway-action-status" role="status">@_releaseStatus</p> }
+                <ShadcnButtonGroup Label="@T("Release actions")"><ShadcnButton Variant="ShadcnButtonVariant.Outline" OnClick="SaveReview">@T("Save review")</ShadcnButton><ShadcnButton OnClick="ApproveRelease" Disabled="_releaseApproved">@T(_releaseApproved ? "Release approved" : "Approve release")</ShadcnButton></ShadcnButtonGroup>
+                @if (_releaseStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_releaseStatus)</p> }
             </div>
         </ShadcnTabsContent>
 
@@ -70,12 +70,12 @@
                 <ShadcnResizableGroup Class="theme-operations-console__resizable">
                     <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>@WorkspaceReference</strong></p><p>@WorkspaceSummary</p><p>@WorkspaceDetail</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
                     <ShadcnResizableHandle WithHandle="true" />
-                    <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="Refreshing activity" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
+                <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="@T("Refreshing activity")" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
                 </ShadcnResizableGroup>
-                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@NotePlaceholder" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">Add</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
+                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@NotePlaceholder" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">@T("Add")</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
                 @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">@NoteConfirmation</ShadcnBadge> }
-                @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@_commandStatus</p> }
-                <ShadcnPagination Label="Console pages"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
+                @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_commandStatus)</p> }
+            <ShadcnPagination Label="@T("Console pages")"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Label="@T("Previous")" Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Label="@T("Next")" Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
             </div>
         </ShadcnTabsContent>
     </ShadcnTabs>
@@ -83,6 +83,7 @@
 
 @code {
     [Parameter, EditorRequired] public string Kind { get; set; } = "production";
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
     private string _tab = "overview";
     private IReadOnlyCollection<string> _openGates = ["inspection"];
     private bool _advancedOpen;
@@ -98,25 +99,25 @@
     private string? _commandStatus;
     private int _page = 1;
     private string? _configuredKind;
-    private string ConsoleTitle => Kind switch { "quality" => "Quality release", "handoff" => "Customer handoff", _ => "Production planning" };
-    private string StatusTitle => Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" };
-    private string StatusDescription => Kind switch { "quality" => "All critical dimensions are within the approved tolerance band.", "handoff" => "The recipient, dock, and courier window have been verified.", _ => "Cell A3 has capacity for the next two scheduled work orders." };
-    private string CommandLabel => Kind switch { "quality" => "Inspection evidence actions", "handoff" => "Customer delivery actions", _ => "Production work-order actions" };
-    private string CommandPlaceholder => Kind switch { "quality" => "Search inspection evidence", "handoff" => "Search delivery actions", _ => "Search work-order actions" };
-    private string CommandHeading => Kind switch { "quality" => "Quality evidence", "handoff" => "Customer delivery", _ => "Production" };
-    private string PrimaryCommand => Kind switch { "quality" => "Open probe report", "handoff" => "Open delivery pack", _ => "Open latest drawing" };
-    private string SecondaryCommand => Kind switch { "quality" => "Assign corrective review", "handoff" => "Confirm recipient", _ => "Schedule review" };
-    private string CommandEmpty => Kind switch { "quality" => "No matching quality evidence.", "handoff" => "No matching delivery action.", _ => "No matching production action." };
+    private string ConsoleTitle => T(Kind switch { "quality" => "Quality release", "handoff" => "Customer handoff", _ => "Production planning" });
+    private string StatusTitle => T(Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" });
+    private string StatusDescription => T(Kind switch { "quality" => "All critical dimensions are within the approved tolerance band.", "handoff" => "The recipient, dock, and courier window have been verified.", _ => "Cell A3 has capacity for the next two scheduled work orders." });
+    private string CommandLabel => T(Kind switch { "quality" => "Inspection evidence actions", "handoff" => "Customer delivery actions", _ => "Production work-order actions" });
+    private string CommandPlaceholder => T(Kind switch { "quality" => "Search inspection evidence", "handoff" => "Search delivery actions", _ => "Search work-order actions" });
+    private string CommandHeading => T(Kind switch { "quality" => "Quality evidence", "handoff" => "Customer delivery", _ => "Production" });
+    private string PrimaryCommand => T(Kind switch { "quality" => "Open probe report", "handoff" => "Open delivery pack", _ => "Open latest drawing" });
+    private string SecondaryCommand => T(Kind switch { "quality" => "Assign corrective review", "handoff" => "Confirm recipient", _ => "Schedule review" });
+    private string CommandEmpty => T(Kind switch { "quality" => "No matching quality evidence.", "handoff" => "No matching delivery action.", _ => "No matching production action." });
     private string WorkspaceReference => Kind switch { "quality" => "Inspection IR-603", "handoff" => "Delivery DH-118", _ => "WO-2418" };
-    private string WorkspaceSummary => Kind switch { "quality" => "Probe P-08 evidence and the signed dimensional report are ready for approval.", "handoff" => "The delivery pack includes the packing list, recipient details, and courier label.", _ => "Revision C is ready for final dimensional review." };
-    private string WorkspaceDetail => Kind switch { "quality" => "Kanda T. owns the final quality gate.", "handoff" => "Bang Na reception confirmed the 16:00 collection window.", _ => "Courier collection remains booked for 16:00." };
-    private string NotePlaceholder => Kind switch { "quality" => "Add an inspection note", "handoff" => "Add a recipient handoff note", _ => "Add a production note" };
-    private string NoteConfirmation => Kind switch { "quality" => "Inspection note added to IR-603", "handoff" => "Recipient note added to DH-118", _ => "Production note added to WO-2418" };
-    private static readonly string[] ChartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-    private static readonly ShadcnChartConfig ChartConfig = new()
+    private string WorkspaceSummary => T(Kind switch { "quality" => "Probe P-08 evidence and the signed dimensional report are ready for approval.", "handoff" => "The delivery pack includes the packing list, recipient details, and courier label.", _ => "Revision C is ready for final dimensional review." });
+    private string WorkspaceDetail => T(Kind switch { "quality" => "Kanda T. owns the final quality gate.", "handoff" => "Bang Na reception confirmed the 16:00 collection window.", _ => "Courier collection remains booked for 16:00." });
+    private string NotePlaceholder => T(Kind switch { "quality" => "Add an inspection note", "handoff" => "Add a recipient handoff note", _ => "Add a production note" });
+    private string NoteConfirmation => T(Kind switch { "quality" => "Inspection note added to IR-603", "handoff" => "Recipient note added to DH-118", _ => "Production note added to WO-2418" });
+    private string[] LocalizedChartCategories => Locale == ThemeStudioLocale.Thai ? ["จ.", "อ.", "พ.", "พฤ.", "ศ."] : ["Mon", "Tue", "Wed", "Thu", "Fri"];
+    private ShadcnChartConfig LocalizedChartConfig => new()
     {
-        ["completed"] = new("Completed") { Color = "var(--shadcn-chart-1)" },
-        ["inspected"] = new("Inspected") { Color = "var(--shadcn-chart-2)" }
+        ["completed"] = new(T("Completed")) { Color = "var(--shadcn-chart-1)" },
+        ["inspected"] = new(T("Inspected")) { Color = "var(--shadcn-chart-2)" }
     };
     private static readonly ShadcnChartSeries[] ChartSeries = [new("completed", [28, 36, 31, 43, 48]), new("inspected", [22, 30, 27, 35, 41])];
     protected override void OnParametersSet()
@@ -141,4 +142,5 @@
     private void NextPage(MouseEventArgs _) => _page = Math.Min(2, _page + 1);
     private void SelectPageOne(MouseEventArgs _) => _page = 1;
     private void SelectPageTwo(MouseEventArgs _) => _page = 2;
+    private string T(string english, params object?[] args) => ThemeRunwayCopy.Get(Locale, english, args);
 }

@@ -110,6 +110,28 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ThaiLocaleTranslatesRepresentativeWorkflowsWithoutResettingInteractiveState()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
+        await profileName.FillAsync("กานดา ท.");
+
+        await page.GetByTestId("locale-thai").ClickAsync();
+
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity']")).ToContainTextAsync("กำลังการผลิตรายสัปดาห์");
+        await Assertions.Expect(page.Locator("[data-use-case-id='operator-profile']")).ToContainTextAsync("บันทึกโปรไฟล์");
+        await Assertions.Expect(page.Locator("[data-use-case-id='quotation-files']")).ToContainTextAsync("วางแบบงานผลิตที่นี่");
+        await Assertions.Expect(page.Locator("[data-use-case-id='inspection-table']")).ToContainTextAsync("ค่าที่วัดได้");
+        await Assertions.Expect(page.Locator("[data-use-case-id='quality-alert']")).ToContainTextAsync("ระงับเพื่อรอตรวจสอบ");
+        await Assertions.Expect(page.Locator("[data-use-case-id='assistant-conversation']")).ToContainTextAsync("ผู้ช่วย MALIEV");
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-planning-suite']")).ToContainTextAsync("ศูนย์วางแผนการผลิต");
+        await Assertions.Expect(page.Locator("[data-console='production']")).ToContainTextAsync("แผนกำลังการผลิตมีความพร้อม");
+        await Assertions.Expect(profileName).ToHaveValueAsync("กานดา ท.");
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity']")).Not.ToContainTextAsync("Weekly capacity");
+    }
+
+    [Fact]
     public async Task CuratedChartsCredentialsAndMediaHaveThreeVisibleInteractiveUses()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
