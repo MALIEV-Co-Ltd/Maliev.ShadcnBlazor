@@ -207,6 +207,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         });
         await Assertions.Expect(dropzone).ToContainTextAsync("fixture.step");
         await Assertions.Expect(dropzone).ToContainTextAsync("100%", new() { Timeout = 3_000 });
+        await Assertions.Expect(dropzone.Locator("[data-slot='attachment']")).ToHaveCountAsync(1);
+        await dropzone.GetByRole(AriaRole.Button, new() { Name = "Remove fixture.step", Exact = true }).ClickAsync();
+        await Assertions.Expect(dropzone.Locator("[data-slot='attachment']")).ToHaveCountAsync(0);
+        await Assertions.Expect(dropzone).ToContainTextAsync("No production drawings selected");
     }
 
     [Fact]

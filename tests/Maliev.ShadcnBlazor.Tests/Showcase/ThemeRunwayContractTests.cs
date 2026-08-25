@@ -78,7 +78,10 @@ public sealed class ThemeBentoContractTests
         var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
 
         Assert.Contains("_dropzoneFiles", card, StringComparison.Ordinal);
-        Assert.Contains("theme-uploaded-files", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentGroup", card, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnAttachmentAction", card, StringComparison.Ordinal);
+        Assert.Contains("RemoveUploadedFile", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-uploaded-file\"", card, StringComparison.Ordinal);
         Assert.Contains("_processEditorOpen", card, StringComparison.Ordinal);
         Assert.Contains("theme-process-editor", card, StringComparison.Ordinal);
         Assert.Contains("_replyQuote", card, StringComparison.Ordinal);

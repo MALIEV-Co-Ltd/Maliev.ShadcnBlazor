@@ -53,12 +53,21 @@
             <ShadcnDropzone Class="theme-runway-dropzone" Accept=".step,.stp,.pdf" Multiple="true" MaxFiles="5" MaxFileSize="20971520" Instructions="@T("Drop production drawings here")" Description="@T("STEP or PDF · up to 20 MB")" Loading="_dropzoneUploading" SelectionChanged="HandleDropzoneSelectionAsync" />
             @if (_dropzoneFiles.Count > 0)
             {
-                <div class="theme-uploaded-files" aria-label="@T("Selected production drawings")">
+                <ShadcnAttachmentGroup Class="theme-uploaded-files" AccessibleName="@T("Selected production drawings")">
                     @foreach (var file in _dropzoneFiles)
                     {
-                        <div class="theme-uploaded-file" @key="file.Name"><span class="theme-workflow-inline-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="16" /></span><span><strong>@file.Name</strong><small>@FormatFileSize(file.Size)</small></span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@T(file.Status)</ShadcnBadge></div>
+                        <ShadcnAttachment @key="file.Id" Title="@file.Name" State="@FileState(file)" Progress="@FileProgress(file)">
+                            <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="18" /></ShadcnAttachmentMedia>
+                            <ShadcnAttachmentContent>
+                                <ShadcnAttachmentTitle>@file.Name</ShadcnAttachmentTitle>
+                                <ShadcnAttachmentDescription>@FormatFileSize(file.Size) · @T(file.Status)</ShadcnAttachmentDescription>
+                            </ShadcnAttachmentContent>
+                            <ShadcnAttachmentActions>
+                                <ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="@T("Remove {0}", file.Name)" OnAction="_ => RemoveUploadedFile(file.Id)"><ShadcnIcon Icon="@TrashIcon" Size="16" /></ShadcnAttachmentAction>
+                            </ShadcnAttachmentActions>
+                        </ShadcnAttachment>
                     }
-                </div>
+                </ShadcnAttachmentGroup>
             }
             <div class="theme-runway-file"><span><span class="theme-workflow-inline-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="16" /></span>@_dropzoneFileName</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@FormatPercent(DropzoneProgress)</ShadcnBadge></div>
             <ShadcnProgress Value="@DropzoneProgress"><ShadcnProgressLabel>@T("Upload progress")</ShadcnProgressLabel></ShadcnProgress>
@@ -517,7 +526,7 @@
     private const string WebhookSecret = "whsec_8b14f62a90c3";
     private ShadcnDataTableState _quotationTableState = new() { PageSize = 3 };
     private sealed record ConversationTurn(string Id, string EnglishText, string ThaiText, bool Assistant);
-    private sealed record UploadedFile(string Name, long Size, string Status);
+    private sealed record UploadedFile(Guid Id, string Name, long Size, string Status);
     private readonly List<ConversationTurn> _conversationTurns =
     [
         new("conversation-user-1", "Please check the delivery date for WO-2418.", "ตรวจสอบกำหนดส่ง WO-2418 ให้หน่อย", false),
@@ -574,7 +583,7 @@
     {
         if (!selection.IsValid || selection.Files.Count == 0) return;
         _dropzoneFiles.Clear();
-        _dropzoneFiles.AddRange(selection.Files.Select(file => new UploadedFile(file.Name, file.Size, "Uploading")));
+        _dropzoneFiles.AddRange(selection.Files.Select(file => new UploadedFile(Guid.NewGuid(), file.Name, file.Size, "Uploading")));
         _dropzoneFileName = selection.Files.Count == 1 ? selection.Files[0].Name : T("{0} production drawings", selection.Files.Count);
         _dropzoneProgress = 0;
         _dropzoneUploading = true;
@@ -586,6 +595,20 @@
         }
         _dropzoneUploading = false;
         for (var index = 0; index < _dropzoneFiles.Count; index++) _dropzoneFiles[index] = _dropzoneFiles[index] with { Status = "Ready" };
+    }
+    private static ShadcnAttachmentState FileState(UploadedFile file) => file.Status == "Uploading" ? ShadcnAttachmentState.Uploading : ShadcnAttachmentState.Done;
+    private double? FileProgress(UploadedFile file) => file.Status == "Uploading" ? DropzoneProgress : null;
+    private void RemoveUploadedFile(Guid id)
+    {
+        _dropzoneFiles.RemoveAll(file => file.Id == id);
+        if (_dropzoneFiles.Count == 0)
+        {
+            _dropzoneFileName = T("No production drawings selected");
+            _dropzoneProgress = 0;
+            return;
+        }
+
+        _dropzoneFileName = _dropzoneFiles.Count == 1 ? _dropzoneFiles[0].Name : T("{0} production drawings", _dropzoneFiles.Count);
     }
     private void ReviewDeposit()
     {
