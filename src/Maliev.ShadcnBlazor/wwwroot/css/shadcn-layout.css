@@ -56,7 +56,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"] .shadcn-bento-grid__layout {
     grid-auto-flow: dense;
-    grid-auto-rows: .5rem;
+    grid-auto-rows: 1px;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"] .shadcn-bento-item {

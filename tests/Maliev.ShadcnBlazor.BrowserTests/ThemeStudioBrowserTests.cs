@@ -74,6 +74,58 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var grid = page.Locator(".theme-bento__grid");
+        var item = page.Locator("[data-use-case-item='production-analytics']");
+        await Assertions.Expect(grid).ToHaveAttributeAsync("data-masonry-ready", "true");
+
+        var initialSpan = await MasonrySpanAsync(item);
+        await item.Locator(":scope > *").EvaluateAsync("element => element.style.minBlockSize = '60rem'");
+        await WaitForMasonrySpanAsync(item, span => span > initialSpan);
+        var expandedSpan = await MasonrySpanAsync(item);
+
+        await item.Locator(":scope > *").EvaluateAsync("element => element.style.removeProperty('min-block-size')");
+        await WaitForMasonrySpanAsync(item, span => span < expandedSpan);
+
+        Assert.InRange(await MasonrySpanAsync(item), initialSpan - 1, initialSpan + 1);
+    }
+
+    [Fact]
+    public async Task BentoMasonryKeepsVisualPackingNearTheConfiguredGap()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var grid = page.Locator(".theme-bento__grid");
+        await Assertions.Expect(grid).ToHaveAttributeAsync("data-masonry-ready", "true");
+        await page.GetByTestId("locale-thai").ClickAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity']")).ToContainTextAsync("กำลังการผลิตรายสัปดาห์");
+        await Assertions.Expect(grid.Locator("[data-slot='bento-grid-layout']")).ToHaveCSSAsync("grid-auto-rows", "1px");
+
+        var largestGap = await grid.Locator("[data-slot='bento-grid-layout']").EvaluateAsync<double>("""
+            layout => {
+                const items = Array.from(layout.children);
+                const boxes = items.map(item => item.getBoundingClientRect());
+                return Math.max(...boxes.map((current, index) => {
+                    const nearestBottom = Math.max(
+                        ...boxes
+                            .filter((other, otherIndex) => otherIndex !== index
+                                && other.bottom <= current.top + 1
+                                && other.right > current.left + 1
+                                && other.left < current.right - 1)
+                            .map(other => other.bottom),
+                        current.top);
+                    return current.top - nearestBottom;
+                }));
+            }
+            """);
+
+        Assert.InRange(largestGap, 0, 33);
+    }
+
+    [Fact]
     public async Task ProductionAnalyticsUsesDistinctSemanticSeriesColors()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
@@ -860,6 +912,19 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
     private static async Task OpenAdvancedAsync(IPage page, string testId) { var trigger = page.GetByTestId(testId).Locator(":scope > [data-slot='collapsible-trigger']"); if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await trigger.ClickAsync(); }
     private static Task<string[]> CardIdsAsync(IPage page) => page.Locator(".theme-bento__grid [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
+    private static Task<int> MasonrySpanAsync(ILocator item) => item.EvaluateAsync<int>("element => Number.parseInt(element.style.getPropertyValue('--shadcn-bento-masonry-span'), 10)");
+
+    private static async Task WaitForMasonrySpanAsync(ILocator item, Func<int, bool> predicate)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (predicate(await MasonrySpanAsync(item))) return;
+            await Task.Delay(50);
+        }
+
+        Assert.Fail($"Masonry span did not reach the expected state. Current span: {await MasonrySpanAsync(item)}.");
+    }
 
     private static async Task SelectOptionAsync(IPage page, string testId, string option)
     {

@@ -3,18 +3,19 @@ export function observeMasonry(root) {
     if (!layout) return { dispose() {} };
 
     let frame = 0;
+    const items = () => Array.from(layout.children).filter(item => item.matches("[data-slot='bento-item']"));
+    const contentFor = item => item.firstElementChild ?? item;
     const measure = () => {
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(() => {
             if (!root.isConnected) return;
             const styles = getComputedStyle(layout);
-            const row = Number.parseFloat(styles.gridAutoRows) || 8;
+            const row = Number.parseFloat(styles.gridAutoRows) || 1;
             const gap = Number.parseFloat(styles.rowGap) || 0;
-            const items = Array.from(layout.children).filter(item => item.matches("[data-slot='bento-item']"));
 
-            for (const item of items) {
-                const content = item.firstElementChild;
-                const height = Math.max(content?.scrollHeight ?? 0, content?.getBoundingClientRect().height ?? 0, item.scrollHeight);
+            for (const item of items()) {
+                const content = contentFor(item);
+                const height = Math.max(content.scrollHeight, content.getBoundingClientRect().height);
                 const span = Math.max(1, Math.ceil((height + gap) / (row + gap)));
                 if (item.style.getPropertyValue("--shadcn-bento-masonry-span") !== String(span))
                     item.style.setProperty("--shadcn-bento-masonry-span", String(span));
@@ -24,15 +25,17 @@ export function observeMasonry(root) {
     };
 
     const resize = new ResizeObserver(measure);
-    resize.observe(root);
-    for (const item of layout.children) resize.observe(item);
-    const mutations = new MutationObserver(() => {
+    const observeSizes = () => {
         resize.disconnect();
         resize.observe(root);
-        for (const item of layout.children) resize.observe(item);
+        for (const item of items()) resize.observe(contentFor(item));
+    };
+    observeSizes();
+    const mutations = new MutationObserver(() => {
+        observeSizes();
         measure();
     });
-    mutations.observe(layout, { childList: true });
+    mutations.observe(layout, { childList: true, subtree: true });
     measure();
 
     return {
@@ -41,7 +44,7 @@ export function observeMasonry(root) {
             resize.disconnect();
             mutations.disconnect();
             root.removeAttribute("data-masonry-ready");
-            for (const item of layout.children) item.style.removeProperty("--shadcn-bento-masonry-span");
+            for (const item of items()) item.style.removeProperty("--shadcn-bento-masonry-span");
         }
     };
 }
