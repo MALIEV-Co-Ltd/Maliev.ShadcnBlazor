@@ -706,6 +706,30 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(schedule.GetByRole(AriaRole.Status)).ToContainTextAsync("Delivery schedule saved");
     }
 
+    [Fact]
+    public async Task DeliverySheetBackdropCoversTheViewportAndActionsShareTheFooterRow()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var schedule = page.Locator("[data-use-case-id='delivery-sheet']");
+
+        await schedule.GetByRole(AriaRole.Button, new() { Name = "Open schedule", Exact = true }).ClickAsync();
+
+        var overlay = page.Locator("[data-slot='sheet-overlay']");
+        var overlayBox = await overlay.BoundingBoxAsync();
+        Assert.NotNull(overlayBox);
+        Assert.InRange(overlayBox!.X, -0.5, 0.5);
+        Assert.InRange(overlayBox.Y, -0.5, 0.5);
+        Assert.InRange(overlayBox.Width, 1439.5, 1440.5);
+        Assert.InRange(overlayBox.Height, 899.5, 900.5);
+
+        var footer = page.Locator("[data-slot='sheet-footer']");
+        Assert.Equal("row", await footer.EvaluateAsync<string>("element => getComputedStyle(element).flexDirection"));
+        var actionBoxes = await footer.Locator("button").EvaluateAllAsync<double[]>("buttons => buttons.map(button => button.getBoundingClientRect().top)");
+        Assert.Equal(2, actionBoxes.Length);
+        Assert.InRange(Math.Abs(actionBoxes[0] - actionBoxes[1]), 0, 1);
+    }
+
     [Theory]
     [MemberData(nameof(ReleaseViewports))]
     public async Task EveryCuratedCardContainsItsVisibleControlsAndMaintainsReadableType(int width, int height)

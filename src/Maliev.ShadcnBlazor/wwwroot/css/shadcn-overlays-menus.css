@@ -1,5 +1,9 @@
 .shadcn-dialog-portal,
 .shadcn-alert-dialog-portal { position: fixed; inset: 0; z-index: var(--shadcn-z-dialog, 50); pointer-events: none; }
+.shadcn-dialog-portal,
+.shadcn-alert-dialog-portal,
+.shadcn-sheet-portal,
+.shadcn-drawer-portal { width: auto; height: auto; margin: 0; border: 0; background: transparent; padding: 0; color: inherit; }
 .shadcn-dialog-overlay,
 .shadcn-alert-dialog-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / 10%); pointer-events: auto; animation: shadcn-overlay-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 .shadcn-dialog-content,
@@ -83,6 +87,8 @@
 .shadcn-drawer-footer { display: flex; flex-direction: column; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-sheet-footer,
 .shadcn-drawer-footer { margin-block-start: auto; }
+.shadcn-sheet-footer { flex-flow: row wrap; justify-content: flex-end; }
+.shadcn-sheet-footer > * { flex: 1 1 8rem; }
 .shadcn-sheet-title,
 .shadcn-drawer-title { margin: 0; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; }
 .shadcn-sheet-description,

@@ -33,7 +33,7 @@ function releaseDialog(content, restore = true) {
     const wasTopmost = stackIndex === dialogStack.length - 1;
     if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
     if (state.modal && --modalCount === 0) document.documentElement.style.overflow = documentOverflow;
-    if (content.matches(':popover-open')) content.hidePopover();
+    if (state.topLayer?.matches(':popover-open')) state.topLayer.hidePopover();
     if (restore && wasTopmost) {
         const restoreFocus = () => {
             const target = state.previous?.isConnected
@@ -52,7 +52,8 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
     const previous = document.activeElement;
     const focusOwner = previous?.closest?.('[data-slot="dialog"]');
     const portal = content.closest('[data-slot$="-portal"]');
-    if (content.showPopover) { content.setAttribute('popover', 'manual'); content.showPopover(); }
+    const topLayer = portal?.showPopover ? portal : content;
+    if (topLayer.showPopover) { topLayer.setAttribute('popover', 'manual'); topLayer.showPopover(); }
     const inerted = new Set();
     if (modal) {
         let branch = portal || content;
@@ -72,7 +73,7 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (modalCount++ === 0) documentOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
     }
-    const state = { content, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
+    const state = { content, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
     const keydown = event => {
         content.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
