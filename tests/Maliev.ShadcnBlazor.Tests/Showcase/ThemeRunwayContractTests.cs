@@ -32,8 +32,13 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("column-count:", css, StringComparison.Ordinal);
         Assert.Contains("padding-block: 1rem", css, StringComparison.Ordinal);
         Assert.Contains("padding-inline: 0", css, StringComparison.Ordinal);
-        Assert.Contains("border: 1px solid var(--shadcn-border)", css, StringComparison.Ordinal);
-        Assert.DoesNotContain("box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
+        Assert.Contains("--theme-use-case-boundary:", css, StringComparison.Ordinal);
+        Assert.Contains("border: 1px solid transparent", css, StringComparison.Ordinal);
+        Assert.Contains("background-clip: padding-box", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-use-case-card::after", css, StringComparison.Ordinal);
+        Assert.Contains("border: var(--shadcn-style-border-width, 1px) solid var(--theme-use-case-boundary)", css, StringComparison.Ordinal);
+        Assert.Contains("border-radius: inherit", css, StringComparison.Ordinal);
+        Assert.Contains("var(--shadcn-style-shadow, none)", css, StringComparison.Ordinal);
         Assert.DoesNotContain("grid-auto-flow: dense", css, StringComparison.Ordinal);
         Assert.Contains(".theme-preview-region { min-inline-size: 0;", css, StringComparison.Ordinal);
         Assert.Contains("border: 0; border-radius: 0; background: transparent", css, StringComparison.Ordinal);

@@ -38,7 +38,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var first = cards.First;
         Assert.Equal("1px", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderLeftWidth"));
         Assert.Equal("1px", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderRightWidth"));
-        Assert.NotEqual("rgba(0, 0, 0, 0)", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderLeftColor"));
+        Assert.Equal("rgba(0, 0, 0, 0)", await first.EvaluateAsync<string>("element => getComputedStyle(element).borderLeftColor"));
+        Assert.NotEqual("rgba(0, 0, 0, 0)", await first.EvaluateAsync<string>("element => getComputedStyle(element, '::after').borderLeftColor"));
+        Assert.Equal(
+            await first.EvaluateAsync<string>("element => getComputedStyle(element).borderTopLeftRadius"),
+            await first.EvaluateAsync<string>("element => getComputedStyle(element, '::after').borderTopLeftRadius"));
         var preview = page.Locator(".theme-preview-region");
         Assert.True(await preview.EvaluateAsync<bool>("element => element.scrollHeight > element.clientHeight"));
         await preview.EvaluateAsync("element => element.scrollTop = 700");

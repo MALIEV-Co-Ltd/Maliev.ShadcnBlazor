@@ -8678,13 +8678,25 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-bento__grid[data-layout="masonry"] .theme-bento__reveal > .theme-use-case-card { block-size: auto; }
 
 .theme-use-case-card {
+    --theme-use-case-boundary: color-mix(in oklch, var(--shadcn-style-border, var(--shadcn-border)) 84%, var(--shadcn-foreground) 16%);
     min-inline-size: 0;
-    border: 1px solid var(--shadcn-border);
-    box-shadow: none;
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow: var(--shadcn-style-shadow, none);
     font-size: clamp(.875rem, calc(1rem * var(--shadcn-typography-body-scale)), 1.125rem);
     font-weight: var(--shadcn-typography-body-weight);
     line-height: var(--shadcn-typography-body-line-height);
     letter-spacing: var(--shadcn-typography-body-letter-spacing);
+}
+.theme-use-case-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border: var(--shadcn-style-border-width, 1px) solid var(--theme-use-case-boundary);
+    border-radius: inherit;
+    pointer-events: none;
 }
 .theme-use-case-card[data-bento-size] { vertical-align: top; }
 .theme-use-case-card :where(.shadcn-input:not([data-slot="input-group-control"]), .shadcn-textarea:not([data-slot="input-group-control"]), .shadcn-select-trigger):focus-visible {
@@ -8912,7 +8924,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 }
 
 @media (forced-colors: active) {
-    .theme-use-case-card { border-color: CanvasText; }
+    .theme-use-case-card::after { border-color: CanvasText; }
 }
 .showcase-bento-example {
     inline-size: min(100%, 64rem);
