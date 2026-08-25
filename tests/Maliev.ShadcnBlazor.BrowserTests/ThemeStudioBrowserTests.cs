@@ -654,13 +654,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         var preview = page.Locator(".theme-preview-region");
+        var bodyFont = page.GetByTestId("theme-font-slot-body").Locator("strong");
+        var thaiFont = page.GetByTestId("theme-font-slot-thaifallback").Locator("strong");
+        var codeFont = page.GetByTestId("theme-font-slot-code").Locator("strong");
         await preview.EvaluateAsync("element => element.scrollTop = 420");
         var beforeScroll = await preview.EvaluateAsync<double>("element => element.scrollTop");
         var beforeCards = await CardIdsAsync(page);
         var beforePreset = await page.GetByTestId("theme-preset").InnerTextAsync();
+        var beforeBodyFont = await bodyFont.InnerTextAsync();
+        var beforeThaiFont = await thaiFont.InnerTextAsync();
+        var beforeCodeFont = await codeFont.InnerTextAsync();
         await page.GetByTestId("theme-preset-shuffle").ClickAsync();
         Assert.Equal(beforeCards, await CardIdsAsync(page));
         Assert.NotEqual(beforePreset, await page.GetByTestId("theme-preset").InnerTextAsync());
+        Assert.NotEqual(beforeBodyFont, await bodyFont.InnerTextAsync());
+        Assert.NotEqual(beforeThaiFont, await thaiFont.InnerTextAsync());
+        Assert.NotEqual(beforeCodeFont, await codeFont.InnerTextAsync());
         Assert.InRange(Math.Abs(await preview.EvaluateAsync<double>("element => element.scrollTop") - beforeScroll), 0, 2);
     }
 

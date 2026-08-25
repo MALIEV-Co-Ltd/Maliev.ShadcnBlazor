@@ -42,19 +42,25 @@ public sealed class ThemeStudioCuratedPresetTests
     }
 
     [Fact]
-    public void ShuffleSelectsOnlyAnotherCuratedPresetAndCreatesOneUndoEntry()
+    public void ShuffleSelectsAnotherPresetAndAllFontFamiliesAsOneUndoEntry()
     {
         var catalog = new ThemeStudioPresetCatalog();
         var state = new ThemeStudioState(new NoOpStorage(), new ThemeStudioWorkbenchState(), catalog);
         var initial = state.SelectedPresetId;
+        var initialTypography = state.Typography;
 
         var shuffled = state.ShufflePreset();
 
         Assert.NotEqual(initial, shuffled);
         Assert.Contains(catalog.All, item => item.Id == shuffled);
+        Assert.NotEqual(initialTypography.Body.Family, state.Typography.Body.Family);
+        Assert.NotEqual(initialTypography.ThaiFallback.Family, state.Typography.ThaiFallback.Family);
+        Assert.NotEqual(initialTypography.Code.Family, state.Typography.Code.Family);
         Assert.True(state.CanUndo);
         state.Undo();
         Assert.Equal(initial, state.SelectedPresetId);
+        Assert.Equal(initialTypography, state.Typography);
+        Assert.False(state.CanUndo);
     }
 
     [Fact]

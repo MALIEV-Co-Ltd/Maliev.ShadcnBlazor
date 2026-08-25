@@ -114,6 +114,27 @@ public static partial class ThemeStudioMetadata
 public sealed class ThemeStudioState
 {
     private const int HistoryLimit = 50;
+    private static readonly IReadOnlyList<ShadcnFontSelection> BodyShuffleFonts =
+    [
+        BodyFont("Geist", bundled: true),
+        BodyFont("Inter", "inter"),
+        BodyFont("DM Sans", "dm-sans"),
+        BodyFont("Manrope", "manrope"),
+        BodyFont("Plus Jakarta Sans", "plus-jakarta-sans")
+    ];
+    private static readonly IReadOnlyList<ShadcnFontSelection> ThaiShuffleFonts =
+    [
+        ThaiFont("Noto Sans Thai", bundled: true),
+        ThaiFont("Prompt", "prompt"),
+        ThaiFont("Sarabun", "sarabun")
+    ];
+    private static readonly IReadOnlyList<ShadcnFontSelection> CodeShuffleFonts =
+    [
+        CodeFont("JetBrains Mono", bundled: true),
+        CodeFont("IBM Plex Mono", "ibm-plex-mono"),
+        CodeFont("Source Code Pro", "source-code-pro"),
+        CodeFont("Fira Code", "fira-code")
+    ];
     private readonly IThemeStudioStorage storage;
     private readonly IThemeStudioPresetCatalog presetCatalog;
     private readonly List<ThemeStudioSnapshot> _undo = [];
@@ -312,11 +333,62 @@ public sealed class ThemeStudioState
 
     public string ShufflePreset()
     {
+        var previousTypography = Typography;
         var candidates = presetCatalog.All.Where(item => !string.Equals(item.Id, SelectedPresetId, StringComparison.Ordinal)).ToArray();
         var selected = candidates[RandomNumberGenerator.GetInt32(candidates.Length)];
         ApplyCuratedPreset(selected, captureHistory: true);
+        ApplyShuffledTypography(previousTypography);
         return selected.Id;
     }
+
+    private void ApplyShuffledTypography(ShadcnTypographyScale previous)
+    {
+        var typography = _documentTemplate.Typography with
+        {
+            Body = SelectDifferentFont(previous.Body, BodyShuffleFonts),
+            ThaiFallback = SelectDifferentFont(previous.ThaiFallback, ThaiShuffleFonts),
+            Code = SelectDifferentFont(previous.Code, CodeShuffleFonts)
+        };
+        var metrics = Draft.Metrics with
+        {
+            FontFamily = typography.Body.Family,
+            MonospaceFontFamily = typography.Code.Family
+        };
+        var theme = Draft with { Metrics = metrics };
+        EnsureTypographyValid(theme, typography);
+
+        _documentTemplate = _documentTemplate with { Typography = typography };
+        _baselineDocumentTemplate = _baselineDocumentTemplate with { Typography = typography };
+        Draft = theme;
+        Applied = Clone(theme);
+        _baseline = Clone(theme);
+        RevalidateAndApply();
+    }
+
+    private static ShadcnFontSelection SelectDifferentFont(
+        ShadcnFontSelection current,
+        IReadOnlyList<ShadcnFontSelection> candidates)
+    {
+        var available = candidates
+            .Where(candidate => !string.Equals(candidate.Family, current.Family, StringComparison.Ordinal))
+            .ToArray();
+        return available[RandomNumberGenerator.GetInt32(available.Length)];
+    }
+
+    private static ShadcnFontSelection BodyFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        $"'{family}', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        "ui-sans-serif, system-ui, sans-serif",
+        bundled ? null : googleFontsId);
+
+    private static ShadcnFontSelection ThaiFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        family == "Noto Sans Thai" ? "'Noto Sans Thai', sans-serif" : $"'{family}', 'Noto Sans Thai', sans-serif",
+        "'Noto Sans Thai', sans-serif",
+        bundled ? null : googleFontsId);
+
+    private static ShadcnFontSelection CodeFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        $"'{family}', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        "ui-monospace, monospace",
+        bundled ? null : googleFontsId);
 
     public IReadOnlyList<ThemeStudioPresetDefinition> CuratedPresets => presetCatalog.All;
 
