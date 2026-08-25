@@ -221,6 +221,32 @@ public sealed class SheetDrawerTests : BunitContext
         Assert.Single(cut.FindAll("[data-slot='drawer-content']"));
     }
 
+    [Fact]
+    public void DrawerCloseUsesTheRequestedButtonVariant()
+    {
+        var cut = Render<ShadcnDrawer>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDrawerContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnDrawerContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnDrawerTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnDrawerTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Dispatch")));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnDrawerClose>(2);
+                    content.AddAttribute(3, nameof(ShadcnDrawerClose.Variant), Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonVariant.Default);
+                    content.AddAttribute(4, nameof(ShadcnDrawerClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Confirm dispatch")));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var close = cut.Find("[data-slot='drawer-close']");
+        Assert.Contains("shadcn-drawer-close", close.ClassList);
+        Assert.Equal("default", close.GetAttribute("data-variant"));
+    }
+
     [Theory]
     [InlineData(ShadcnDrawerSwipeDirection.Up, "block-start", "y")]
     [InlineData(ShadcnDrawerSwipeDirection.Right, "right", "x")]

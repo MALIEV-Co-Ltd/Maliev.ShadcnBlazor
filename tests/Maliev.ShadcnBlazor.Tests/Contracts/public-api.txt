@@ -1317,6 +1317,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerClose
   RenderFragment ChildContent
   Boolean Disabled
   EventCallback<MouseEventArgs> OnClick
+  ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerDescription

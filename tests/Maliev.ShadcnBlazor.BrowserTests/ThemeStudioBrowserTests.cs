@@ -255,7 +255,13 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await drawing.GetByRole(AriaRole.Button, new() { Name = "Download revision C", Exact = true }).ClickAsync();
         await Assertions.Expect(drawing.GetByRole(AriaRole.Status)).ToContainTextAsync("download prepared");
         await drawing.GetByRole(AriaRole.Button, new() { Name = "Open viewer", Exact = true }).ClickAsync();
-        await Assertions.Expect(drawing.GetByRole(AriaRole.Status)).ToContainTextAsync("viewer opened");
+        var viewer = page.GetByRole(AriaRole.Dialog).Filter(new() { HasText = "3D drawing review" });
+        await Assertions.Expect(viewer).ToBeVisibleAsync();
+        await viewer.GetByRole(AriaRole.Button, new() { Name = "Rotate model", Exact = true }).ClickAsync();
+        await Assertions.Expect(viewer.GetByText("Rotation 45°", new() { Exact = true })).ToBeVisibleAsync();
+        await viewer.GetByRole(AriaRole.Button, new() { Name = "Approve drawing", Exact = true }).ClickAsync();
+        await Assertions.Expect(viewer).ToBeHiddenAsync();
+        await Assertions.Expect(drawing.GetByRole(AriaRole.Status)).ToContainTextAsync("approved for inspection");
 
         var qualityConsole = page.Locator("[data-console='quality']");
         await qualityConsole.GetByRole(AriaRole.Button, new() { Name = "Save review", Exact = true }).ClickAsync();
@@ -325,6 +331,29 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal("1", await typingText.EvaluateAsync<string>("element => getComputedStyle(element).animationIterationCount"));
         Assert.DoesNotContain('\uFFFD', await typingText.InnerTextAsync());
         await Assertions.Expect(typingText).ToHaveCSSAsync("clip-path", "inset(0px 0% 0px 0px)", new() { Timeout = 8000 });
+    }
+
+    [Fact]
+    public async Task DarkGhostMessagesAndInputGroupsKeepReadableSingleBoundaries()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+
+        var conversation = page.Locator("[data-use-case-id='assistant-conversation']");
+        var assistantMessage = conversation.Locator(".shadcn-message").Filter(new() { HasText = "MALIEV Assistant" }).First;
+        Assert.True(await assistantMessage.EvaluateAsync<bool>("element => { const bubble = element.querySelector('.shadcn-bubble[data-variant=ghost]'); const header = element.querySelector('.shadcn-message-header'); const content = element.querySelector('.shadcn-bubble-content'); if (!bubble || !header || !content) return false; const style = getComputedStyle(bubble); const headerBox = header.getBoundingClientRect(); const contentBox = content.getBoundingClientRect(); return style.borderTopStyle !== 'none' && style.borderTopColor !== 'rgba(0, 0, 0, 0)' && Math.abs(headerBox.left - contentBox.left) <= 1; }"));
+
+        var qualityConsole = page.Locator("[data-console='quality']");
+        await qualityConsole.GetByRole(AriaRole.Tab, new() { Name = "Support", Exact = true }).ClickAsync();
+        var handoffNote = qualityConsole.Locator("input[placeholder='Add an inspection note']");
+        await handoffNote.ClickAsync();
+        var focusStyles = await handoffNote.EvaluateAsync<string>("element => { const group = element.closest('.shadcn-input-group'); if (!group) return 'missing-group'; const inputStyle = getComputedStyle(element); const groupStyle = getComputedStyle(group); return [inputStyle.outlineStyle, inputStyle.outlineWidth, inputStyle.boxShadow, groupStyle.boxShadow, groupStyle.borderTopWidth].join('|'); }");
+        var focusParts = focusStyles.Split('|');
+        Assert.True(focusParts[0] == "none" || focusParts[1] == "0px", focusStyles);
+        Assert.Equal("none", focusParts[2]);
+        Assert.NotEqual("none", focusParts[3]);
+        Assert.Equal("1px", focusParts[4]);
     }
 
     [Fact]
@@ -473,6 +502,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(drawingReview).ToBeInViewportAsync();
         await drawingReview.ClickAsync(new() { Button = MouseButton.Right });
         await Assertions.Expect(page.GetByText("Open drawing", new() { Exact = true })).ToBeVisibleAsync();
+        await page.WaitForTimeoutAsync(1200);
+        await Assertions.Expect(page.GetByText("Open drawing", new() { Exact = true })).ToBeVisibleAsync();
         await page.Keyboard.PressAsync("Escape");
         await page.Locator("[data-use-case-id='dispatch-drawer']").GetByText("Review dispatch", new() { Exact = true }).ClickAsync();
         var drawer = page.Locator("[data-slot='drawer-content']");
@@ -482,6 +513,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.InRange(Math.Abs(drawerBox.X - (1440 - drawerBox.Width) / 2), 0, 1);
         Assert.Equal("row", await drawer.Locator("[data-slot='drawer-footer']").EvaluateAsync<string>("element => getComputedStyle(element).flexDirection"));
         Assert.Equal(new[] { "Cancel", "Confirm dispatch" }, await drawer.Locator("[data-slot='drawer-footer'] button").AllTextContentsAsync());
+        await Assertions.Expect(drawer.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true })).ToHaveAttributeAsync("data-variant", "outline");
+        await Assertions.Expect(drawer.GetByRole(AriaRole.Button, new() { Name = "Confirm dispatch", Exact = true })).ToHaveAttributeAsync("data-variant", "default");
         await drawer.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true }).ClickAsync();
         await Assertions.Expect(page.Locator("[data-use-case-id='reviewer-details']").GetByText("Kanda T.", new() { Exact = true })).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator("[data-use-case-id='tooltip-guidance']").GetByText("Surface finish", new() { Exact = true })).ToBeEnabledAsync();

@@ -367,6 +367,9 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Contains(".shadcn-bubble-reaction > .shadcn-avatar", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-bubble-reaction-overflow-trigger:focus-visible", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-bubble[data-variant=\"ghost\"] { width:fit-content; max-width:80%; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-bubble[data-variant=\"ghost\"] > .shadcn-bubble-content {", css, StringComparison.Ordinal);
+        Assert.Contains("border-color: color-mix(in oklch, var(--shadcn-border)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message-body:has(> .shadcn-bubble[data-variant=\"ghost\"])", css, StringComparison.Ordinal);
         Assert.Contains(":has(> [data-slot=\"bubble-reactions\"][data-side=\"top\"])", css, StringComparison.Ordinal);
         Assert.Contains("color:var(--shadcn-muted-foreground)", css, StringComparison.Ordinal);
         Assert.Contains("mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right / 350% 100%", css, StringComparison.Ordinal);

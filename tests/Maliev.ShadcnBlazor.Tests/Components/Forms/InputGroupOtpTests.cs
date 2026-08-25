@@ -149,6 +149,8 @@ public sealed class InputGroupOtpTests : BunitContext
         Assert.Contains(".shadcn-input-group-button[data-size=\"icon-xs\"] { width: 1.5rem; height: 1.5rem;", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-input-group-addon[data-align=\"inline-end\"]:has(> button) { margin-inline-end: -.4rem;", css, StringComparison.Ordinal);
         Assert.Contains(":has(> [data-slot=\"input-group-control\"][aria-invalid=\"true\"])", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group > :where(.shadcn-input, .shadcn-textarea):focus-visible { outline: none; box-shadow: none; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
     }
 
     [Fact]

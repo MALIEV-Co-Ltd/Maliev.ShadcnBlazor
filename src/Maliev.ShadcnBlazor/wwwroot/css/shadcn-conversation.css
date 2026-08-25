@@ -38,7 +38,7 @@
 .shadcn-bubble[data-variant="muted"] > .shadcn-bubble-content { background:var(--shadcn-muted); color:var(--shadcn-muted-foreground); }
 .shadcn-bubble[data-variant="tinted"] > .shadcn-bubble-content { background:color-mix(in srgb,var(--shadcn-primary) 10%,transparent); color:var(--shadcn-foreground); }
 .shadcn-bubble[data-variant="outline"] > .shadcn-bubble-content { border-color:var(--shadcn-border); background:var(--shadcn-background); color:var(--shadcn-foreground); }
-.shadcn-bubble[data-variant="ghost"] > .shadcn-bubble-content { width:fit-content; max-width:100%; border-color:transparent; background:transparent; color:var(--shadcn-foreground); }
+.shadcn-bubble[data-variant="ghost"] > .shadcn-bubble-content { width:fit-content; max-width:100%; border-color: color-mix(in oklch, var(--shadcn-border) 72%, transparent); background: color-mix(in oklch, var(--shadcn-muted) 48%, transparent); color:var(--shadcn-foreground); }
 .shadcn-bubble[data-variant="destructive"] > .shadcn-bubble-content { border-color:color-mix(in srgb,var(--shadcn-destructive) 65%,transparent); background:var(--shadcn-destructive); color:var(--shadcn-destructive-foreground); }
 .shadcn-bubble[data-align="start"] > .shadcn-bubble-content { border-end-start-radius:var(--shadcn-radius-sm); }
 .shadcn-bubble[data-align="end"] > .shadcn-bubble-content { border-end-end-radius:var(--shadcn-radius-sm); }
@@ -350,6 +350,7 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-message[data-align="end"] .shadcn-message-body { grid-column:1; align-items:flex-end; }
 .shadcn-message-header { align-self: flex-start; color: var(--shadcn-muted-foreground); font-size: .75rem; font-weight: 600; line-height: 1.25; }
 .shadcn-message[data-align="end"] .shadcn-message-header { align-self: flex-end; }
+.shadcn-message-body:has(> .shadcn-bubble[data-variant="ghost"]) > .shadcn-message-header { padding-inline: calc(.875rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-message-footer {
     width:100%;
     color: var(--shadcn-muted-foreground);

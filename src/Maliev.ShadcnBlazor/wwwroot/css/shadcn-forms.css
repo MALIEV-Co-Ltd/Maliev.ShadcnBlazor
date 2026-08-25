@@ -46,7 +46,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group { position: relative; display: flex; width: 100%; min-width: 0; height: var(--shadcn-control-height); align-items: center; border: 1px solid var(--shadcn-input); border-radius: var(--shadcn-radius-md); background: transparent; box-shadow: var(--shadcn-shadow-xs); font-size: 1rem; outline: none; transition: border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope)[data-shadcn-theme="dark"] .shadcn-input-group { background: color-mix(in oklch, var(--shadcn-input) 30%, transparent); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 1px color-mix(in oklch, var(--shadcn-ring) 42%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:is([aria-invalid="true"], :has(> [data-slot="input-group-control"][aria-invalid="true"])) { border-color: var(--shadcn-destructive); box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 24%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> .shadcn-textarea), :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align^="block-"]) { height: auto; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align^="block-"]) { flex-direction: column; align-items: stretch; }
@@ -55,7 +55,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="block-start"]) > .shadcn-input { padding-block-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> [data-align="block-end"]) > .shadcn-input { padding-block-start: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group > :where(.shadcn-input, .shadcn-textarea) { flex: 1; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group > :where(.shadcn-input, .shadcn-textarea):focus-visible { box-shadow: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group > :where(.shadcn-input, .shadcn-textarea):focus-visible { outline: none; box-shadow: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon { display: flex; align-items: center; justify-content: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-block: calc(.375rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .875rem; font-weight: 500; cursor: text; user-select: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-start"] { order: -1; padding-inline-start: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group-addon[data-align="inline-end"] { order: 1; padding-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }

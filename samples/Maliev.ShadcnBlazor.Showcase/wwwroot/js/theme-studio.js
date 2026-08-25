@@ -44,13 +44,10 @@ export function preservePreviewScrollOnInput(root) {
     const restore = () => {
         preview.scrollTop = top;
         preview.scrollLeft = left;
-        let frames = 6;
-        const hold = () => {
+        requestAnimationFrame(() => {
             preview.scrollTop = top;
             preview.scrollLeft = left;
-            if (--frames > 0) requestAnimationFrame(hold);
-        };
-        requestAnimationFrame(hold);
+        });
     };
     const begin = () => { editing = true; capture(); };
     const end = () => { editing = false; };

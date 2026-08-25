@@ -247,6 +247,46 @@
                 </ShadcnContextMenuContent>
             </ShadcnContextMenu>
             <div class="theme-use-case-card__actions"><span>Revision C is ready to inspect</span><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="OpenDrawingViewer">Open viewer</ShadcnButton></div>
+            <ShadcnDialog Open="_drawingViewerOpen" OpenChanged="SetDrawingViewerOpen">
+                <ShadcnDialogContent Class="theme-drawing-viewer-dialog" ShowCloseButton="true" CloseLabel="Close drawing viewer">
+                    <ShadcnDialogHeader>
+                        <ShadcnDialogTitle>3D drawing review</ShadcnDialogTitle>
+                        <ShadcnDialogDescription>Inspect enclosure-rev-c.step before releasing Revision C.</ShadcnDialogDescription>
+                    </ShadcnDialogHeader>
+                    <div class="theme-drawing-viewer">
+                        <div class="theme-drawing-viewer__stage" data-section-view="@(_viewerSection ? "true" : "false")">
+                            <svg viewBox="0 0 520 300" role="img" aria-label="Interactive 3D preview of the CNC enclosure">
+                                <defs>
+                                    <linearGradient id="viewer-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".2"/><stop offset="1" stop-color="currentColor" stop-opacity=".04"/></linearGradient>
+                                </defs>
+                                <g class="theme-drawing-viewer__model" style="--viewer-rotation:@(_viewerRotation)deg;--viewer-zoom:@(_viewerZoom / 100d)">
+                                    <path d="M128 84 302 45 406 112 232 158Z" fill="url(#viewer-face)" />
+                                    <path d="M128 84v118l104 60V158Zm104 74v104l174-39V112Z" fill="currentColor" fill-opacity=".07" />
+                                    <path d="M128 84 302 45l104 67v111l-174 39-104-60Z M232 158l174-46M232 158 128 84m104 74v104" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+                                    <circle cx="268" cy="119" r="25" fill="none" stroke="currentColor" stroke-width="3" />
+                                    <path d="M243 119h50M268 94v50" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 5" />
+                                    @if (_viewerSection)
+                                    {
+                                        <path d="M178 92 352 53v108l-174 39Z" fill="var(--shadcn-primary)" fill-opacity=".18" stroke="var(--shadcn-primary)" stroke-width="2" stroke-dasharray="8 6" />
+                                    }
+                                </g>
+                                <g class="theme-drawing-viewer__axes" aria-hidden="true"><path d="M52 248h44M52 248v-44M52 248l-22 14"/><text x="99" y="253">X</text><text x="47" y="198">Y</text><text x="18" y="274">Z</text></g>
+                            </svg>
+                            <div class="theme-drawing-viewer__hud"><span>ISO</span><span>@_viewerZoom%</span><span>Rotation @_viewerRotation°</span></div>
+                        </div>
+                        <aside class="theme-drawing-viewer__details" aria-label="Drawing metadata">
+                            <dl><div><dt>Material</dt><dd>Aluminum 6061</dd></div><div><dt>Revision</dt><dd>C</dd></div><div><dt>Dimensions</dt><dd>320 × 180 × 96 mm</dd></div><div><dt>Tolerance</dt><dd>±0.02 mm</dd></div></dl>
+                            <div class="theme-drawing-viewer__controls" role="toolbar" aria-label="3D viewer controls">
+                                <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="RotateDrawing">Rotate model</ShadcnButton>
+                                <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="ToggleSectionView">@(_viewerSection ? "Hide section" : "Section view")</ShadcnButton>
+                                <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Ghost" OnClick="ZoomOutDrawing" aria-label="Zoom out">−</ShadcnButton>
+                                <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Ghost" OnClick="ZoomInDrawing" aria-label="Zoom in">+</ShadcnButton>
+                            </div>
+                        </aside>
+                    </div>
+                    <ShadcnDialogFooter><ShadcnDialogClose>Close</ShadcnDialogClose><ShadcnDialogClose Variant="ShadcnButtonVariant.Default" OnClick="ApproveDrawing">Approve drawing</ShadcnDialogClose></ShadcnDialogFooter>
+                </ShadcnDialogContent>
+            </ShadcnDialog>
             break;
         case "contact-dialog":
             <p class="theme-use-case-card__description">Update the contact shown to the machining and dispatch teams.</p>
@@ -329,6 +369,10 @@
     private bool _reviewerHoverOpen;
     private bool _planReviewOpen;
     private bool _inspectionReportOpen;
+    private bool _drawingViewerOpen;
+    private bool _viewerSection;
+    private int _viewerRotation;
+    private int _viewerZoom = 100;
     private bool _reviewerManagerOpen;
     private bool _quietHours = true;
     private bool _dropzoneUploading;
@@ -463,7 +507,21 @@
     private void OpenDrawing(MouseEventArgs _) => SelectWorkflowAction("Drawing opened in the review workspace.");
     private void EnableDrawingRename(MouseEventArgs _) => SelectWorkflowAction("Rename mode enabled.");
     private void TrashDrawing(MouseEventArgs _) => SelectWorkflowAction("Drawing moved to the review trash.");
-    private void OpenDrawingViewer() => SelectWorkflowAction("3D drawing viewer opened.");
+    private void OpenDrawingViewer()
+    {
+        _drawingViewerOpen = true;
+        _actionStatus = "3D drawing review opened.";
+    }
+    private Task SetDrawingViewerOpen(bool open)
+    {
+        _drawingViewerOpen = open;
+        return Task.CompletedTask;
+    }
+    private void RotateDrawing() => _viewerRotation = (_viewerRotation + 45) % 360;
+    private void ToggleSectionView() => _viewerSection = !_viewerSection;
+    private void ZoomOutDrawing() => _viewerZoom = Math.Max(50, _viewerZoom - 10);
+    private void ZoomInDrawing() => _viewerZoom = Math.Min(160, _viewerZoom + 10);
+    private void ApproveDrawing(MouseEventArgs _) => _actionStatus = "Revision C approved for inspection.";
     private void HandleAttachmentAction(ShadcnAttachmentActionKind action) => _actionStatus = action switch
     {
         ShadcnAttachmentActionKind.Cancel => "Drawing upload cancelled.",
