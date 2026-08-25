@@ -8625,6 +8625,8 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 
 /* Theme Studio typography editor and semantic preview contract. */
 .theme-typography-editor { gap: 1rem; }
+.theme-typography-editor__intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: .75rem; }
+.theme-typography-editor__intro p { margin: 0; color: var(--shadcn-muted-foreground); font-size: .75rem; line-height: 1.45; }
 .theme-font-current { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
 .theme-font-slot { display: grid; min-inline-size: 0; min-block-size: 3rem; gap: .125rem; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: var(--shadcn-background); color: var(--shadcn-foreground); padding: .5rem .625rem; font: inherit; text-align: start; cursor: pointer; }
 .theme-font-slot[data-active="true"] { border-color: var(--shadcn-ring); background: var(--shadcn-accent); }

@@ -303,6 +303,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(issue.Locator("[data-animated-input]")).ToHaveCountAsync(1);
         await Assertions.Expect(issue.Locator("[data-animated-textarea]")).ToHaveCountAsync(1);
 
+        await OpenAdvancedAsync(page, "theme-typography-section");
         await OpenAdvancedAsync(page, "theme-advanced-typography");
         var weight = page.GetByTestId("theme-role-body-weight");
         Assert.True((await weight.BoundingBoxAsync())!.Width >= 96);
@@ -359,12 +360,38 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var shellFont = await ComputedFontAsync(page.Locator(".documentation-header"));
         var shellBackground = await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
         await page.GetByTestId("theme-preset-shuffle").ClickAsync();
+        await OpenAdvancedAsync(page, "theme-typography-section");
         await OpenAdvancedAsync(page, "theme-advanced-typography");
         await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
         await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
         Assert.Contains("DM Sans", await ComputedFontAsync(page.Locator("[data-use-case-id='operator-profile']")));
         Assert.Equal(shellFont, await ComputedFontAsync(page.Locator(".documentation-header")));
         Assert.Equal(shellBackground, await page.Locator(".theme-studio-shell").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+    }
+
+    [Fact]
+    public async Task TypographyOffersRecommendedFamiliesBeforeSearchAndRemainsCollapsible()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var section = page.GetByTestId("theme-typography-section");
+        var trigger = section.Locator(":scope > [data-slot='collapsible-trigger']");
+
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await trigger.ClickAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(page.GetByTestId("theme-font-results").Locator("li")).ToHaveCountAsync(10);
+        await Assertions.Expect(page.GetByTestId("theme-font-results")).ToHaveAttributeAsync("aria-label", "Recommended font families");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-inter")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("theme-font-result-noto-sans-thai")).ToBeVisibleAsync();
+
+        await page.GetByTestId("theme-font-search").FillAsync("Space Grotesk");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-space-grotesk")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("theme-font-results")).ToHaveAttributeAsync("aria-label", "Font search results");
+
+        await trigger.ClickAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.GetByTestId("theme-font-results")).ToBeHiddenAsync();
     }
 
     [Fact]
@@ -589,7 +616,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     private async Task<IBrowserContext> NewContextAsync(int width, int height, ReducedMotion motion = ReducedMotion.NoPreference, bool touch = false) => await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = width, Height = height }, ReducedMotion = motion, HasTouch = touch });
     private async Task<IPage> OpenAsync(IBrowserContext context) { var page = await context.NewPageAsync(); await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString()); await page.GetByTestId("theme-studio").WaitForAsync(); return page; }
     private static async Task OpenSettingsAsync(IPage page) { var toggle = page.GetByTestId("theme-controls-toggle"); if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await toggle.ClickAsync(); }
-    private static async Task OpenAdvancedAsync(IPage page, string testId) { var trigger = page.GetByTestId(testId).Locator("[data-slot='collapsible-trigger']"); if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await trigger.ClickAsync(); }
+    private static async Task OpenAdvancedAsync(IPage page, string testId) { var trigger = page.GetByTestId(testId).Locator(":scope > [data-slot='collapsible-trigger']"); if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal)) await trigger.ClickAsync(); }
     private static Task<string[]> CardIdsAsync(IPage page) => page.Locator(".theme-bento__grid [data-use-case-id]").EvaluateAllAsync<string[]>("nodes => nodes.map(node => node.dataset.useCaseId)");
 
     private static async Task SelectOptionAsync(IPage page, string testId, string option)

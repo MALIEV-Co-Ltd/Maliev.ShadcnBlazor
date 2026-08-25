@@ -45,8 +45,10 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("locale-thai").ClickAsync();
         await page.GetByTestId("theme-preset").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "Cobalt Precision", Exact = true }).ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-typography-section");
         await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
         await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-typography");
         var headingScale = page.GetByTestId("theme-role-heading-1-scale");
         await headingScale.FillAsync("2.5");
         await headingScale.PressAsync("Tab");
@@ -104,7 +106,8 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("locale-english").ClickAsync();
         await page.GetByTestId("theme-preset").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "MALIEV Precision", Exact = true }).ClickAsync();
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
         await page.GetByTestId("theme-import-file").SetInputFilesAsync(new FilePayload
         {
             Name = "theme.json",
@@ -148,7 +151,8 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-preset")).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(page.Locator("[data-testid='theme-preset'] + [data-slot='select-content']")).ToHaveCountAsync(0);
         var primary = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
 
         foreach (var payload in new[]
         {
@@ -182,8 +186,11 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
         await OpenSettingsIfClosedAsync(page);
+        if (string.Equals(openerTestId, "theme-import-open", StringComparison.Ordinal))
+            await OpenCollapsibleAsync(page, "theme-advanced-transfer");
         var opener = page.GetByTestId(openerTestId);
 
+        await opener.ScrollIntoViewIfNeededAsync();
         await opener.ClickAsync();
         await Assertions.Expect(page.GetByTestId(dialogTestId)).ToBeVisibleAsync();
         await page.Keyboard.PressAsync("Escape");
@@ -213,7 +220,8 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("theme-studio").WaitForAsync();
         await OpenSettingsIfClosedAsync(page);
 
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
         await Assertions.Expect(page.GetByTestId("theme-import-dialog")).ToBeVisibleAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
         await page.Locator("main").WaitForAsync();
@@ -240,6 +248,20 @@ public sealed class ThemeImportExportBrowserTests(
         var toggle = page.GetByTestId("theme-controls-toggle");
         if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
             await toggle.ClickAsync();
+    }
+
+    private static async Task ClickInspectorControlAsync(IPage page, string testId)
+    {
+        var control = page.GetByTestId(testId);
+        await control.ScrollIntoViewIfNeededAsync();
+        await control.ClickAsync();
+    }
+
+    private static async Task OpenCollapsibleAsync(IPage page, string testId)
+    {
+        var trigger = page.GetByTestId(testId).Locator(":scope > [data-slot='collapsible-trigger']");
+        if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+            await trigger.ClickAsync();
     }
 
     private static bool IsOptionalGoogleFontFailure(IConsoleMessage message)

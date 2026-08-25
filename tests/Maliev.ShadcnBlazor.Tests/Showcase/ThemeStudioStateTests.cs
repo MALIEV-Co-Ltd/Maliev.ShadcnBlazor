@@ -646,6 +646,13 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+        var typographyTrigger = cut.Find("[data-testid='theme-typography-section'] > [data-slot='collapsible-trigger']");
+        Assert.Equal("false", typographyTrigger.GetAttribute("aria-expanded"));
+        typographyTrigger.Click();
+        Assert.Equal("Recommended font families", cut.Find("[data-testid='theme-font-results']").GetAttribute("aria-label"));
+        Assert.Equal(3, cut.FindAll("[data-testid='theme-font-results'] li").Count);
+        Assert.Contains("3 recommended families shown", cut.Find("[data-testid='theme-font-catalog-status']").TextContent, StringComparison.Ordinal);
+
         cut.Find("[data-testid='theme-font-search']").Input("DM Sans");
         cut.WaitForElement("[data-testid='theme-font-result-dm-sans']");
 
@@ -659,6 +666,26 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal("INPUT", cut.Find("[data-testid='theme-font-search']").TagName);
         Assert.Equal(2, cut.FindAll(".theme-font-filters [data-slot='checkbox']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-font-result-dm-sans']"));
+    }
+
+    [Fact]
+    public void TypographySectionCanCollapseAndReopenWithoutLosingItsCatalog()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+        var trigger = cut.Find("[data-testid='theme-typography-section'] > [data-slot='collapsible-trigger']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+
+        trigger.Click();
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        var fallbackCount = cut.FindAll("[data-testid='theme-font-results'] li").Count;
+
+        trigger.Click();
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+
+        trigger.Click();
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal(fallbackCount, cut.FindAll("[data-testid='theme-font-results'] li").Count);
     }
 
     [Fact]
