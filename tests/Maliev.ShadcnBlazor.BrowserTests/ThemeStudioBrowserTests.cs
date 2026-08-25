@@ -17,8 +17,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var bento = page.GetByTestId("theme-bento");
         var cards = bento.Locator("[data-use-case-id]");
         await Assertions.Expect(bento).ToBeVisibleAsync();
-        Assert.Equal(29, await cards.CountAsync());
-        Assert.Equal(29, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(37, await cards.CountAsync());
+        Assert.Equal(37, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(0, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
@@ -87,6 +87,38 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.NotEqual(millingFill, turningFill);
         Assert.DoesNotContain(millingFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
         Assert.DoesNotContain(turningFill, new[] { "rgb(0, 0, 0)", "rgba(0, 0, 0, 1)" });
+    }
+
+    [Fact]
+    public async Task CuratedChartsCredentialsAndMediaHaveThreeVisibleInteractiveUses()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-analytics'] .shadcn-chart")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='quality-trend'] .shadcn-chart")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='order-mix'] .shadcn-chart")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='api-credentials'] .shadcn-secret-input")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='machine-password'] .shadcn-secret-input")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='webhook-secret'] .shadcn-secret-input")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='drawing-preview'] .shadcn-aspect-ratio")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='inspection-camera'] .shadcn-aspect-ratio")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='customer-proof'] .shadcn-aspect-ratio")).ToBeVisibleAsync();
+
+        var bar = page.Locator("[data-use-case-id='production-analytics'] rect[data-series='milling']").First;
+        await bar.HoverAsync();
+        var tooltip = page.Locator("[data-use-case-id='production-analytics'] [data-slot='chart-tooltip-content']");
+        await Assertions.Expect(tooltip).ToContainTextAsync("W1");
+        await Assertions.Expect(tooltip).ToContainTextAsync("Milling");
+        await Assertions.Expect(tooltip).ToContainTextAsync("42");
+        await Assertions.Expect(tooltip).ToContainTextAsync("Turning");
+        await Assertions.Expect(tooltip).ToContainTextAsync("31");
+        await Assertions.Expect(tooltip).ToHaveAttributeAsync("data-active-point", "0");
+
+        var credential = page.Locator("[data-use-case-id='api-credentials'] .shadcn-secret-input");
+        await Assertions.Expect(credential).ToHaveAttributeAsync("data-revealed", "false");
+        await credential.GetByRole(AriaRole.Button, new() { Name = "Show API key", Exact = true }).ClickAsync();
+        await Assertions.Expect(credential).ToHaveAttributeAsync("data-revealed", "true");
     }
 
     [Fact]
@@ -651,7 +683,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(29, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
+        Assert.Equal(37, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
         Assert.Equal(0, await page.Locator(".theme-bento__grid [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));

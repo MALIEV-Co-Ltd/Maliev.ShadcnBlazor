@@ -32,7 +32,15 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
         Use("tooltip-guidance", 26, ThemeBentoSize.Standard, "Inspection guidance", "คำแนะนำการตรวจสอบ", "ShadcnTooltip", "ShadcnButton"),
         Suite("production-planning-suite", 27, "Production planning console", "ศูนย์วางแผนการผลิต"),
         Suite("quality-release-suite", 28, "Quality release console", "ศูนย์อนุมัติคุณภาพ"),
-        Suite("customer-handoff-suite", 29, "Customer handoff console", "ศูนย์ส่งมอบลูกค้า")
+        Suite("customer-handoff-suite", 29, "Customer handoff console", "ศูนย์ส่งมอบลูกค้า"),
+        Use("quality-trend", 30, ThemeBentoSize.Wide, "Quality trend", "แนวโน้มคุณภาพ", "ShadcnChart", "ShadcnBadge"),
+        Use("order-mix", 31, ThemeBentoSize.Standard, "Order mix", "สัดส่วนคำสั่งซื้อ", "ShadcnChart", "ShadcnBadge"),
+        Use("api-credentials", 32, ThemeBentoSize.Wide, "Integration credentials", "ข้อมูลรับรองการเชื่อมต่อ", "ShadcnSecretInput", "ShadcnButton", "ShadcnBadge"),
+        Use("machine-password", 33, ThemeBentoSize.Standard, "Machine access", "การเข้าถึงเครื่องจักร", "ShadcnSecretInput", "ShadcnButton", "ShadcnAlert"),
+        Use("webhook-secret", 34, ThemeBentoSize.Standard, "Webhook signing", "การลงนามเว็บฮุก", "ShadcnSecretInput", "ShadcnButton", "ShadcnBadge"),
+        Use("drawing-preview", 35, ThemeBentoSize.Wide, "Drawing comparison", "เปรียบเทียบแบบงาน", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton"),
+        Use("inspection-camera", 36, ThemeBentoSize.Standard, "Inspection camera", "กล้องตรวจสอบ", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton"),
+        Use("customer-proof", 37, ThemeBentoSize.Standard, "Customer proof", "หลักฐานสำหรับลูกค้า", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton")
     ];
 
     private static ThemeUseCaseDefinition Use(string id, int order, ThemeBentoSize size, string en, string th, params string[] components) =>

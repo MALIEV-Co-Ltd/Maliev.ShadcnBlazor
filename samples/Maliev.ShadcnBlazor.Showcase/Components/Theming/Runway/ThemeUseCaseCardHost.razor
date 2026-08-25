@@ -3,7 +3,9 @@
 @using Maliev.ShadcnBlazor.Components.Conversation
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 @using Maliev.ShadcnBlazor.Components.Disclosure
+@using Maliev.ShadcnBlazor.Components.Forms
 @using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Components.Layout
 @using Maliev.ShadcnBlazor.Components.Overlays
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 
@@ -340,6 +342,54 @@
         case "customer-handoff-suite":
             <ThemeOperationsConsole Kind="handoff" />
             break;
+        case "quality-trend":
+            <div class="theme-runway-table-summary"><span><strong>First-pass yield</strong><small>Quality performance across the last six shifts</small></span><ShadcnBadge Class="theme-status-success">+2.4%</ShadcnBadge></div>
+            <ShadcnChart Id="theme-quality-trend" Title="Quality trend" Description="Yield and rework rate by shift" Type="ShadcnChartType.Line" Config="QualityChartConfig" Categories="QualityChartCategories" Series="QualityChartSeries" ShowGrid="true" ShowMajorGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" LegendInteractive="true" InitialWidth="520" InitialHeight="230" />
+            break;
+        case "order-mix":
+            <div class="theme-runway-table-summary"><span><strong>Active order mix</strong><small>Material families scheduled this week</small></span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">25 jobs</ShadcnBadge></div>
+            <ShadcnChart Id="theme-order-mix" Title="Orders by material" Description="Share of scheduled work by material family" Type="ShadcnChartType.Donut" Config="OrderMixChartConfig" Categories="OrderMixCategories" Series="OrderMixSeries" ShowLegend="true" LegendInteractive="true" InitialWidth="360" InitialHeight="230" />
+            break;
+        case "api-credentials":
+            <p class="theme-use-case-card__description">Production API access for the quotation integration.</p>
+            <label>Live API key<ShadcnSecretInput Value="@ApiKey" MaskStart="3" ReadOnly="true" ShowLabel="Show API key" HideLabel="Hide API key" /></label>
+            <div class="theme-secret-meta"><span><strong>Scope</strong><small>quotes:write · drawings:read</small></span><ShadcnBadge Class="theme-status-success">Active</ShadcnBadge></div>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="RotateApiKey">Rotate key</ShadcnButton>
+            @if (_credentialStatus is not null) { <p class="theme-runway-action-status" role="status">@_credentialStatus</p> }
+            break;
+        case "machine-password":
+            <p class="theme-use-case-card__description">Authorize maintenance mode for DMG MORI Cell A3.</p>
+            <label>Maintenance PIN<ShadcnSecretInput Value="@MachinePin" MaskStart="0" ReadOnly="true" ShowLabel="Show maintenance PIN" HideLabel="Hide maintenance PIN" /></label>
+            <ShadcnButton Size="ShadcnButtonSize.Small" OnClick="VerifyMachinePin">Verify access</ShadcnButton>
+            @if (_machineAccessVerified) { <ShadcnAlert><ShadcnAlertTitle>Access verified</ShadcnAlertTitle><ShadcnAlertDescription>Maintenance mode is available for 10 minutes.</ShadcnAlertDescription></ShadcnAlert> }
+            break;
+        case "webhook-secret":
+            <p class="theme-use-case-card__description">Signing secret for production status callbacks.</p>
+            <label>Webhook secret<ShadcnSecretInput Value="@WebhookSecret" MaskStart="6" ReadOnly="true" ShowLabel="Show webhook secret" HideLabel="Hide webhook secret" /></label>
+            <div class="theme-use-case-card__actions"><ShadcnBadge Variant="ShadcnBadgeVariant.Outline">HMAC SHA-256</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="CopyWebhookSecret">Copy secret</ShadcnButton></div>
+            @if (_webhookCopied) { <p class="theme-runway-action-status" role="status">Secret copied for this demo.</p> }
+            break;
+        case "drawing-preview":
+            <ShadcnAspectRatio Ratio="@(16d / 9d)" Class="theme-aspect-preview theme-aspect-preview--drawing">
+                <div class="theme-aspect-preview__canvas" data-overlay="@_drawingDimensionsVisible.ToString().ToLowerInvariant()">
+                    <svg viewBox="0 0 640 360" role="img" aria-label="Revision C enclosure drawing"><path d="M130 82h350v196H130zM205 130h200v100H205z" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="170" cy="115" r="12" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="440" cy="245" r="12" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+                    @if (_drawingDimensionsVisible) { <span class="theme-aspect-preview__annotation">640 × 360 mm · Rev C</span> }
+                </div>
+            </ShadcnAspectRatio>
+            <div class="theme-use-case-card__actions"><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">STEP · Revision C</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="ToggleDrawingDimensions">@(_drawingDimensionsVisible ? "Hide dimensions" : "Show dimensions")</ShadcnButton></div>
+            break;
+        case "inspection-camera":
+            <ShadcnAspectRatio Ratio="@(4d / 3d)" Class="theme-aspect-preview theme-aspect-preview--camera">
+                <div class="theme-aspect-preview__canvas"><div class="theme-camera-reticle" aria-hidden="true"></div><span class="theme-aspect-preview__annotation">Probe P-08 · Bore 4</span></div>
+            </ShadcnAspectRatio>
+            <div class="theme-use-case-card__actions"><ShadcnBadge Class="theme-status-success">Live</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" OnClick="CaptureInspectionFrame">@(_inspectionFrameCaptured ? "Captured" : "Capture frame")</ShadcnButton></div>
+            break;
+        case "customer-proof":
+            <ShadcnAspectRatio Ratio="1" Class="theme-aspect-preview theme-aspect-preview--proof">
+                <div class="theme-aspect-preview__canvas"><div class="theme-proof-package"><span>MALIEV</span><strong>WO-2418</strong><small>3 inspected packages</small></div></div>
+            </ShadcnAspectRatio>
+            <div class="theme-use-case-card__actions"><span><strong>Dispatch proof</strong><small class="theme-aspect-caption">Bang Na · 16:00 collection</small></span><ShadcnButton Size="ShadcnButtonSize.Small" Variant="@(_proofApproved ? ShadcnButtonVariant.Outline : ShadcnButtonVariant.Default)" OnClick="ToggleProofApproval">@(_proofApproved ? "Approved" : "Approve proof")</ShadcnButton></div>
+            break;
     }
     @if (_actionStatus is not null) { <p class="theme-runway-action-status" role="status">@_actionStatus</p> }
     </ShadcnCardContent>
@@ -378,6 +428,12 @@
     private bool _dropzoneUploading;
     private double _dropzoneProgress;
     private string _dropzoneFileName = "enclosure-rev-c.step";
+    private string? _credentialStatus;
+    private bool _machineAccessVerified;
+    private bool _webhookCopied;
+    private bool _drawingDimensionsVisible = true;
+    private bool _inspectionFrameCaptured;
+    private bool _proofApproved;
     private readonly bool[] _alertEnabled = [true, true, false];
     private string? _actionStatus;
     private int _conversationSequence = 2;
@@ -412,6 +468,26 @@
         new("milling", [42, 55, 48, 63, 59, 72]),
         new("turning", [31, 37, 44, 39, 51, 56])
     ];
+    private static readonly string[] QualityChartCategories = ["06:00", "08:00", "10:00", "12:00", "14:00", "16:00"];
+    private static readonly ShadcnChartConfig QualityChartConfig = new()
+    {
+        ["yield"] = new("First-pass yield") { Color = "var(--shadcn-chart-2)" },
+        ["rework"] = new("Rework rate") { Color = "var(--shadcn-chart-4)" }
+    };
+    private static readonly ShadcnChartSeries[] QualityChartSeries =
+    [
+        new("yield", [92.4, 93.1, 94.8, 95.2, 96.4, 96.8]),
+        new("rework", [7.6, 6.9, 5.2, 4.8, 3.6, 3.2])
+    ];
+    private static readonly string[] OrderMixCategories = ["Aluminum", "Stainless", "Polymer"];
+    private static readonly ShadcnChartConfig OrderMixChartConfig = new()
+    {
+        ["orders"] = new("Scheduled jobs") { Color = "var(--shadcn-chart-3)" }
+    };
+    private static readonly ShadcnChartSeries[] OrderMixSeries = [new("orders", [12, 8, 5])];
+    private const string ApiKey = "sk-live-maliev-7f2a9c1d";
+    private const string MachinePin = "241850";
+    private const string WebhookSecret = "whsec_8b14f62a90c3";
     private ShadcnDataTableState _quotationTableState = new() { PageSize = 3 };
     private sealed record ConversationTurn(string Id, string Text, bool Assistant);
     private readonly List<ConversationTurn> _conversationTurns =
@@ -444,6 +520,12 @@
         _conversationTurns.Add(new($"conversation-assistant-{++_conversationSequence}", response, true));
     }
     private void TogglePlanReview() => _planReviewOpen = !_planReviewOpen;
+    private void RotateApiKey() => _credentialStatus = "A replacement key is ready; the current key remains active for 24 hours.";
+    private void VerifyMachinePin() => _machineAccessVerified = true;
+    private void CopyWebhookSecret() => _webhookCopied = true;
+    private void ToggleDrawingDimensions() => _drawingDimensionsVisible = !_drawingDimensionsVisible;
+    private void CaptureInspectionFrame() => _inspectionFrameCaptured = true;
+    private void ToggleProofApproval() => _proofApproved = !_proofApproved;
     private async Task SaveProfileAsync()
     {
         await Task.Delay(350);

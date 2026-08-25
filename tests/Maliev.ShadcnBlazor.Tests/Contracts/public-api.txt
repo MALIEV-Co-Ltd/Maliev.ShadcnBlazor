@@ -475,6 +475,8 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartSeries
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartShape
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTheme
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTooltipContent
+  Double AnchorXPercent
+  Double AnchorY
   String Category
   ShadcnChartConfig Config
   Boolean HideIndicator

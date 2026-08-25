@@ -38,17 +38,17 @@
             <g>
                 @foreach (var shape in Geometry.Shapes)
                 {
-                    if (shape.Kind == "rect") { var shapePoint = shape.PointIndex; <rect data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" x="@F(shape.Values[0])" y="@F(shape.Values[1])" width="@F(shape.Values[2])" height="@F(shape.Values[3])" rx="@BarRadius" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onmouseenter="() => Activate(shapePoint)" @onmousemove="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" /> }
+                    if (shape.Kind == "rect") { var shapePoint = shape.PointIndex; <rect data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" x="@F(shape.Values[0])" y="@F(shape.Values[1])" width="@F(shape.Values[2])" height="@F(shape.Values[3])" rx="@BarRadius" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onmouseenter="() => Activate(shapePoint)" @onmousemove:stopPropagation @onmousemove="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "polyline") { <polyline data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="none" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
                     else if (shape.Kind == "area") { <polygon data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="var(--color-@shape.SeriesKey)" fill-opacity="0.25" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
-                    else if (shape.Kind == "arc") { <path data-series="@shape.SeriesKey" d="@ArcPath(shape.Values)" fill="var(--color-@shape.SeriesKey)" /> }
+                    else if (shape.Kind == "arc") { var shapePoint = shape.PointIndex; <path data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" d="@ArcPath(shape.Values)" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "baseline" && ShowAxis) { <line x1="@F(shape.Values[0])" y1="@F(shape.Values[1])" x2="@F(shape.Values[2])" y2="@F(shape.Values[3])" /> }
                 }
             </g>
             @for (var pointIndex = 0; pointIndex < (VisibleSeries.Count > 0 ? Categories.Count : 0); pointIndex++)
             {
                 var capturedIndex = pointIndex;
-                <circle data-slot="chart-point" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@PointLabel(capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(capturedIndex))" r="6" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" />
+                <circle data-slot="chart-point" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@PointLabel(capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
             }
             @if (ShowTicks && !IsRadial)
             {
@@ -58,7 +58,7 @@
         @if (_activeIndex >= 0)
         {
             @if (TooltipTemplate is not null) { @TooltipTemplate(new(Categories[_activeIndex], _activeIndex, VisibleSeries)) }
-            else { <ShadcnChartTooltipContent Config="@Config" Category="@TooltipLabel(_activeIndex)" Series="@VisibleSeries" PointIndex="@_activeIndex" Indicator="@Indicator" HideLabel="@HideTooltipLabel" HideIndicator="@HideTooltipIndicator" NameKey="@NameKey" ValueFormatter="@ValueFormatter" /> }
+            else { <ShadcnChartTooltipContent Config="@Config" Category="@TooltipLabel(_activeIndex)" Series="@VisibleSeries" PointIndex="@_activeIndex" AnchorXPercent="@TooltipXPercent" AnchorY="@TooltipY" Indicator="@Indicator" HideLabel="@HideTooltipLabel" HideIndicator="@HideTooltipIndicator" NameKey="@NameKey" ValueFormatter="@ValueFormatter" /> }
         }
         @if (ShowLegend && LegendPlacement == ShadcnChartLegendPlacement.Bottom) { @LegendContent }
         <table class="shadcn-sr-only" data-slot="chart-accessible-table">
@@ -186,6 +186,8 @@
     }
     private string PointLabel(int index) => $"{Categories[index]}: {string.Join(", ", VisibleSeries.Select(item => $"{SeriesLabel(item.Key)} {Format(item.Values[index])}"))}";
     private string TooltipLabel(int index) => Config.TryGetValue(LabelKey ?? string.Empty, out var label) ? label.Label : Categories[index];
+    private double TooltipXPercent => Math.Clamp(PointX(_activeIndex) / Math.Max(1, _width) * 100, 0, 100);
+    private double TooltipY => Math.Max(48, PointY(_activeIndex) + 44);
     private void ToggleLegend(string key) { if (!_hiddenSeries.Add(key)) _hiddenSeries.Remove(key); if (_activeIndex >= 0 && VisibleSeries.Count == 0) _activeIndex = -1; }
     private RenderFragment LegendContent => builder =>
     {

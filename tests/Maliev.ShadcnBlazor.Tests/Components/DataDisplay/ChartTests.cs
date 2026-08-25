@@ -240,6 +240,21 @@ public sealed class ChartTests : BunitContext
     }
 
     [Fact]
+    public void PointerTooltipIsAnchoredToTheActiveDatum()
+    {
+        var cut = RenderChart();
+        var firstBar = cut.Find("rect[data-series='desktop'][data-point='0']");
+
+        firstBar.MouseEnter();
+
+        var tooltip = cut.Find("[data-slot='chart-tooltip-content']");
+        Assert.Equal("0", tooltip.GetAttribute("data-active-point"));
+        Assert.Contains("--shadcn-chart-tooltip-x:", tooltip.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Contains("--shadcn-chart-tooltip-y:", tooltip.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Contains("Jan", tooltip.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BarHoverDirectlyExposesTheCategoryAndSeriesValues()
     {
         var cut = RenderChart();
