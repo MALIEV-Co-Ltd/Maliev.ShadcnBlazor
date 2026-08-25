@@ -456,6 +456,28 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ReusableRevealShowsVisibleCardsAndRevealsMoreAsThePreviewScrolls()
+    {
+        await using var context = await NewContextAsync(1440, 900);
+        var page = await OpenAsync(context);
+        var preview = page.Locator(".theme-preview-region");
+        var group = page.GetByTestId("theme-bento");
+        var reveals = group.Locator("[data-slot='reveal']");
+
+        await Assertions.Expect(group).ToHaveAttributeAsync("data-reveal-reduced-motion", "false");
+        Assert.Equal(37, await reveals.CountAsync());
+        await page.WaitForTimeoutAsync(900);
+        var revealedBefore = await reveals.EvaluateAllAsync<int>("items => items.filter(item => item.dataset.revealState === 'revealed').length");
+        Assert.InRange(revealedBefore, 1, 36);
+
+        await preview.EvaluateAsync("element => element.scrollTop = 1800");
+        await page.WaitForTimeoutAsync(900);
+
+        var revealedAfter = await reveals.EvaluateAllAsync<int>("items => items.filter(item => item.dataset.revealState === 'revealed').length");
+        Assert.True(revealedAfter > revealedBefore, $"Expected scrolling to reveal more cards, but the count stayed at {revealedBefore}.");
+    }
+
+    [Fact]
     public async Task ShuffleUpdatesThemeWithoutRecreatingOrReanimatingCuratedComponents()
     {
         await using var context = await NewContextAsync(1440, 900);
@@ -469,8 +491,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var name = profile.Locator("input").First;
         await name.FillAsync("Kanda T.");
         await page.WaitForTimeoutAsync(700);
-        await Assertions.Expect(profile.Locator("xpath=ancestor::*[@data-slot='bento-item']")).ToHaveAttributeAsync("data-reveal-state", "revealed");
-        await page.EvaluateAsync("() => { const card = document.querySelector('[data-use-case-id=operator-profile]'); window.__themeShuffleCard = card; window.__themeShuffleAnimationStarts = 0; document.querySelector('[data-testid=theme-bento]').addEventListener('animationstart', event => { if (String(event.animationName).startsWith('theme-bento-')) window.__themeShuffleAnimationStarts++; }); }");
+        var profileReveal = profile.Locator("xpath=ancestor::*[@data-slot='reveal']");
+        var profileRevealState = await profileReveal.GetAttributeAsync("data-reveal-state");
+        Assert.Contains(profileRevealState, new[] { "pending", "revealed" });
+        await page.EvaluateAsync("() => { const card = document.querySelector('[data-use-case-id=operator-profile]'); window.__themeShuffleCard = card; window.__themeShuffleTransitions = 0; document.querySelector('[data-testid=theme-bento]').addEventListener('transitionrun', event => { if (event.target?.dataset?.slot === 'reveal') window.__themeShuffleTransitions++; }); }");
 
         await page.GetByTestId("theme-preset-shuffle").ClickAsync();
         await page.WaitForTimeoutAsync(700);
@@ -478,8 +502,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.True(await page.EvaluateAsync<bool>("() => window.__themeShuffleCard === document.querySelector('[data-use-case-id=operator-profile]')"));
         await Assertions.Expect(name).ToHaveValueAsync("Kanda T.");
         await Assertions.Expect(bento).ToHaveAttributeAsync("data-render-cycle", renderCycle!);
-        await Assertions.Expect(profile.Locator("xpath=ancestor::*[@data-slot='bento-item']")).ToHaveAttributeAsync("data-reveal-state", "revealed");
-        Assert.Equal(0, await page.EvaluateAsync<int>("() => window.__themeShuffleAnimationStarts"));
+        await Assertions.Expect(profileReveal).ToHaveAttributeAsync("data-reveal-state", profileRevealState!);
+        Assert.Equal(0, await page.EvaluateAsync<int>("() => window.__themeShuffleTransitions"));
     }
 
     [Fact]

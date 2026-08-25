@@ -751,6 +751,23 @@
       "deviations": []
     },
     {
+      "name": "Motion Reveal",
+      "slug": "motion-reveal",
+      "plan": 2,
+      "classification": "custom",
+      "status": "complete",
+      "evidence": {
+        "api": true,
+        "componentTests": true,
+        "accessibility": true,
+        "interaction": true,
+        "computedStyle": true,
+        "visual": true,
+        "integration": true
+      },
+      "deviations": []
+    },
+    {
       "name": "Navigation Menu",
       "slug": "navigation-menu",
       "plan": 6,

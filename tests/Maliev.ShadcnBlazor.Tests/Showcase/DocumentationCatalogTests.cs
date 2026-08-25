@@ -12,12 +12,12 @@ public sealed class DocumentationCatalogTests
         var ledger = ReadLedger();
         var catalog = new ComponentDocumentationCatalog();
 
-        Assert.Equal(68, catalog.All.Count);
+        Assert.Equal(69, catalog.All.Count);
         Assert.Empty(catalog.All.GroupBy(x => x.Slug).Where(x => x.Count() > 1));
         Assert.Equal(ledger.Keys.Order(), catalog.All.Select(x => x.Slug).Order());
         Assert.All(catalog.All, entry => Assert.Equal(ledger[entry.Slug].Status, entry.Status.ToString().ToLowerInvariant()));
         Assert.All(catalog.All, entry => Assert.Equal($"docs/components/{entry.Slug}", entry.DocumentationUrl));
-        Assert.Equal(68, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(69, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(catalog.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
     }
 

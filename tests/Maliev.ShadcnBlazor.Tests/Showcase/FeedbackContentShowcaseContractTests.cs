@@ -43,7 +43,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             Assert.NotEmpty(example.StateTags);
             Assert.NotEmpty(Render(example.Preview).FindAll("[data-slot]"));
         }
-        Assert.Equal(68, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(69, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(catalog.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
     }
 

@@ -68,6 +68,10 @@ public sealed class ComponentApiCatalog
             ["bento-grid"] = Types(
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid",
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem"),
+            ["motion-reveal"] = Types(
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealGroup",
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnReveal",
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealEffect"),
             ["visual-style-scope"] = Types(
                 "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope",
                 "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle",

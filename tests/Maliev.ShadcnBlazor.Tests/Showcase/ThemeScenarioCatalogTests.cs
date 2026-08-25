@@ -13,7 +13,7 @@ public sealed class ThemeScenarioCatalogTests
     public void CatalogContainsThreeStableBilingualScenariosForEveryDocumentedComponent()
     {
         var all = ThemeScenarioCatalog.Load(Documentation);
-        Assert.Equal(204, all.Count);
+        Assert.Equal(207, all.Count);
         Assert.Equal(Documentation.All.Select(value => value.Slug).Order(), all.Select(value => value.ComponentSlug).Distinct().Order());
         Assert.Equal(all.OrderBy(value => value.Id, StringComparer.Ordinal).Select(value => value.Id), all.Select(value => value.Id));
         Assert.All(all.GroupBy(value => value.ComponentSlug), group =>
@@ -23,8 +23,8 @@ public sealed class ThemeScenarioCatalogTests
                 group.Select(value => value.Kind).Order());
             Assert.Equal(group.Select(value => $"{group.Key}-{value.Kind.ToString().ToLowerInvariant()}").Order(), group.Select(value => value.Id).Order());
         });
-        Assert.Equal(204, all.Select(value => value.English.Title).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(204, all.Select(value => value.Thai.Title).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(207, all.Select(value => value.English.Title).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(207, all.Select(value => value.Thai.Title).Distinct(StringComparer.Ordinal).Count());
         Assert.All(all, value =>
         {
             Assert.NotEmpty(value.English.Description);

@@ -70,3 +70,72 @@
 @media (forced-colors: active) {
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item { forced-color-adjust: auto; }
 }
+.shadcn-reveal {
+    --shadcn-reveal-delay: 0ms;
+    --shadcn-reveal-stagger-delay: 0ms;
+    --shadcn-reveal-duration: calc(var(--shadcn-motion-duration) * 3.2);
+    --shadcn-reveal-detail-duration: calc(var(--shadcn-motion-duration) * 2.8);
+    --shadcn-reveal-detail-transform-duration: calc(var(--shadcn-motion-duration) * 3.46);
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 round var(--radius, 0.625rem));
+    transition:
+        opacity var(--shadcn-reveal-duration) var(--shadcn-motion-easing-enter),
+        transform var(--shadcn-reveal-duration) var(--shadcn-motion-easing-enter),
+        clip-path var(--shadcn-reveal-duration) var(--shadcn-motion-easing-enter);
+    transition-delay: calc(var(--shadcn-reveal-delay) + var(--shadcn-reveal-stagger-delay));
+}
+
+.shadcn-reveal[data-reveal-state='pending'] {
+    opacity: 0;
+}
+
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-effect='rise'] {
+    transform: translateY(1.25rem);
+}
+
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-effect='scale'] {
+    transform: scale(0.975);
+}
+
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-effect='clip'] {
+    clip-path: inset(0 0 100% round var(--radius, 0.625rem));
+}
+
+.shadcn-reveal[data-reveal-effect='none'],
+.shadcn-reveal[data-reveal-disabled='true'] {
+    transition: none;
+}
+
+.shadcn-reveal[data-reveal-cascade='true'] .shadcn-chart,
+.shadcn-reveal[data-reveal-cascade='true'] .shadcn-progress-indicator,
+.shadcn-reveal[data-reveal-cascade='true'] .shadcn-message,
+.shadcn-reveal[data-reveal-cascade='true'] .shadcn-field,
+.shadcn-reveal[data-reveal-cascade='true'] [data-motion-detail] {
+    opacity: 1;
+    transform: none;
+    transition:
+        opacity var(--shadcn-reveal-detail-duration) var(--shadcn-motion-easing-enter),
+        transform var(--shadcn-reveal-detail-transform-duration) var(--shadcn-motion-easing-enter);
+    transition-delay: calc(var(--shadcn-reveal-delay) + var(--shadcn-reveal-stagger-delay) + 100ms);
+}
+
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-cascade='true'] .shadcn-chart,
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-cascade='true'] .shadcn-progress-indicator,
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-cascade='true'] .shadcn-message,
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-cascade='true'] .shadcn-field,
+.shadcn-reveal[data-reveal-state='pending'][data-reveal-cascade='true'] [data-motion-detail] {
+    opacity: 0;
+    transform: translateY(0.625rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shadcn-reveal,
+    .shadcn-reveal[data-reveal-state='pending'],
+    .shadcn-reveal[data-reveal-cascade='true'] * {
+        opacity: 1 !important;
+        transform: none !important;
+        clip-path: none !important;
+        transition: none !important;
+    }
+}

@@ -208,18 +208,21 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
-    public void BentoRevealIsPreviewScopedAndOneTime()
+    public void BentoUsesTheReusableRevealBoundaryWithoutPrivateRuntimeOwnership()
     {
         var root = FindRoot();
         var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
-        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-bento.js");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains("attachBentoReveal", bento, StringComparison.Ordinal);
-        Assert.Contains("IntersectionObserver", script, StringComparison.Ordinal);
-        Assert.Contains("unobserve", script, StringComparison.Ordinal);
-        Assert.Contains("data-reveal-state", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope", css, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnRevealGroup", bento, StringComparison.Ordinal);
+        Assert.Contains("Paused=\"Paused\"", bento, StringComparison.Ordinal);
+        Assert.Contains("ReducedMotion=\"ReducedMotion\"", bento, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnReveal @key=\"card.Id\"", bento, StringComparison.Ordinal);
+        Assert.Contains("Cascade=\"true\"", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-bento.js", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("attachBentoReveal", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-bento-card-reveal", css, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-bento.js")));
     }
 
     [Fact]

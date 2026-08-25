@@ -19,6 +19,7 @@ internal static class SemanticFoundationExamples
         "direction" => [Direction()],
         "aspect-ratio" => [AspectRatio()],
         "bento-grid" => BentoGrid(),
+        "motion-reveal" => MotionReveal(),
         "visual-style-scope" => VisualStyleScopeExamples.Create(),
         "code-block" => CodeBlock(),
         "typography" => [Typography()],
@@ -250,6 +251,48 @@ public async Task SaveAsync(CancellationToken cancellationToken)
                 1,
                 [("Delivery address", 2, 1), ("Carrier", 1, 1), ("Collection window", 1, 1)])
         ];
+    }
+
+    private static IReadOnlyList<ComponentExampleDefinition> MotionReveal() =>
+    [
+        RevealExample("motion-reveal-primary", "Production queue reveal", "Reveal stable queue cards as they enter the viewport, with a reduced-motion-safe fallback.", ShadcnRevealEffect.Rise, true, false)
+    ];
+
+    private static ComponentExampleDefinition RevealExample(
+        string id,
+        string title,
+        string description,
+        ShadcnRevealEffect effect,
+        bool cascade,
+        bool reducedMotion)
+    {
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<ShadcnRevealGroup>(0);
+            builder.AddAttribute(1, nameof(ShadcnRevealGroup.ReducedMotion), reducedMotion);
+            builder.AddAttribute(2, nameof(ShadcnRevealGroup.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnReveal>(0);
+                content.AddAttribute(1, nameof(ShadcnReveal.Effect), effect);
+                content.AddAttribute(2, nameof(ShadcnReveal.Cascade), cascade);
+                content.AddAttribute(3, nameof(ShadcnReveal.ChildContent), (RenderFragment)(item =>
+                {
+                    item.OpenElement(0, "article");
+                    item.AddAttribute(1, "class", "showcase-bento-example__card");
+                    item.OpenElement(2, "strong");
+                    item.AddContent(3, title);
+                    item.CloseElement();
+                    item.OpenElement(4, "p");
+                    item.AddContent(5, description);
+                    item.CloseElement();
+                    item.CloseElement();
+                }));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        };
+        var source = $"<ShadcnRevealGroup ReducedMotion=\"{reducedMotion.ToString().ToLowerInvariant()}\"><ShadcnReveal Effect=\"ShadcnRevealEffect.{effect}\" Cascade=\"{cascade.ToString().ToLowerInvariant()}\">...</ShadcnReveal></ShadcnRevealGroup>";
+        return new(id, title, description, source, preview, [], ["intersection", "motion", reducedMotion ? "reduced-motion" : "animated"]);
     }
 
     private static ComponentExampleDefinition BentoExample(

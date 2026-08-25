@@ -2393,6 +2393,65 @@
       ]
     },
     {
+      "id": "motion-reveal-default",
+      "componentSlug": "motion-reveal",
+      "family": "SemanticFoundation",
+      "kind": "Default",
+      "english": {
+        "title": "Production workflow reveal",
+        "description": "Reveal stable production workflow cards as they enter the viewport without resetting their interactive state."
+      },
+      "thai": {
+        "title": "การเผยขั้นตอนการผลิต",
+        "description": "แสดงการ์ดขั้นตอนการผลิตเมื่อเข้าสู่พื้นที่มองเห็นโดยไม่รีเซ็ตสถานะการโต้ตอบ"
+      },
+      "tags": [
+        "workflow",
+        "scroll-reveal",
+        "motion-reveal"
+      ]
+    },
+    {
+      "id": "motion-reveal-stress",
+      "componentSlug": "motion-reveal",
+      "family": "SemanticFoundation",
+      "kind": "Stress",
+      "english": {
+        "title": "Dense production reveal sequence",
+        "description": "Coordinate dense, mixed-height workflow cards while preserving layout, focus, and live component state."
+      },
+      "thai": {
+        "title": "ลำดับการเผยข้อมูลการผลิตแบบหนาแน่น",
+        "description": "ประสานการแสดงการ์ดขั้นตอนที่มีความสูงต่างกันโดยคงเลย์เอาต์ โฟกัส และสถานะคอมโพเนนต์"
+      },
+      "tags": [
+        "stress",
+        "dense",
+        "mixed-height",
+        "motion-reveal"
+      ]
+    },
+    {
+      "id": "motion-reveal-accessible",
+      "componentSlug": "motion-reveal",
+      "family": "SemanticFoundation",
+      "kind": "Accessible",
+      "english": {
+        "title": "Reduced-motion workflow reveal",
+        "description": "Keep the complete workflow immediately visible and operable when motion is reduced or reveal enhancement is unavailable."
+      },
+      "thai": {
+        "title": "การแสดงขั้นตอนสำหรับโหมดลดการเคลื่อนไหว",
+        "description": "คงขั้นตอนทั้งหมดให้มองเห็นและใช้งานได้ทันทีเมื่อผู้ใช้ลดการเคลื่อนไหวหรือสคริปต์ไม่พร้อม"
+      },
+      "tags": [
+        "accessible",
+        "reduced-motion",
+        "progressive-enhancement",
+        "motion-reveal"
+      ]
+    },
+    {
       "id": "native-select-default",
       "componentSlug": "native-select",
       "family": "Forms",

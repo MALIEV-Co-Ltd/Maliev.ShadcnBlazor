@@ -3,16 +3,21 @@
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 @inject IThemeUseCaseRegistry Registry
 @inject ThemeRunwayState AnimationState
-@inject IJSRuntime JavaScript
-@implements IAsyncDisposable
+@implements IDisposable
 
-<section @ref="_root"
-         class="theme-bento"
-         aria-label="Curated realistic component use cases"
-         data-testid="theme-bento"
-         data-render-cycle="@_parameterCycle"
-         data-animation-paused="@(Paused ? "true" : "false")"
-         data-reduced-motion="@(ReducedMotion ? "true" : "false")">
+<ShadcnRevealGroup Tag="section"
+                   Class="theme-bento"
+                   Paused="Paused"
+                   ReducedMotion="ReducedMotion"
+                   Threshold="0.08"
+                   RootMargin="32px 0px"
+                   Stagger="60"
+                   Once="true"
+                   aria-label="Curated realistic component use cases"
+                   data-testid="theme-bento"
+                   data-render-cycle="@_parameterCycle"
+                   data-animation-paused="@(Paused ? "true" : "false")"
+                   data-reduced-motion="@(ReducedMotion ? "true" : "false")">
     <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1rem" Masonry="true">
         @foreach (var card in Registry.All.OrderBy(card => card.Order))
         {
@@ -20,21 +25,23 @@
                              ColumnSpan="@ColumnSpan(card.Size)"
                              RowSpan="@RowSpan(card.Size)"
                              data-use-case-item="@card.Id">
-                <ThemeUseCaseCardHost Definition="card"
-                                      Frame="AnimationState.Frame"
-                                      Locale="Locale" />
+                <ShadcnReveal @key="card.Id"
+                              Class="theme-bento__reveal"
+                              Effect="@RevealEffect(card.Order)"
+                              Cascade="true">
+                    <ThemeUseCaseCardHost Definition="card"
+                                          Frame="AnimationState.Frame"
+                                          Locale="Locale" />
+                </ShadcnReveal>
             </ShadcnBentoItem>
         }
     </ShadcnBentoGrid>
-</section>
+</ShadcnRevealGroup>
 
 @code {
     [Parameter] public ThemeStudioLocale Locale { get; set; }
     [Parameter] public bool Paused { get; set; }
     [Parameter] public bool ReducedMotion { get; set; }
-    private ElementReference _root;
-    private IJSObjectReference? _module;
-    private int _revealHandle;
     private int _parameterCycle;
 
     protected override void OnInitialized()
@@ -50,13 +57,6 @@
         ApplyMotionSettings();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender) return;
-        _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-bento.js");
-        _revealHandle = await _module.InvokeAsync<int>("attachBentoReveal", _root);
-    }
-
     private void ApplyMotionSettings()
     {
         AnimationState.SetPersistentPaused(Paused);
@@ -69,15 +69,13 @@
 
     private static int RowSpan(ThemeBentoSize size) => size == ThemeBentoSize.Tall ? 2 : 1;
 
-    public async ValueTask DisposeAsync()
+    private static ShadcnRevealEffect RevealEffect(int order) => (order % 5) switch
     {
-        AnimationState.Changed -= OnChanged;
-        if (_module is null) return;
-        try
-        {
-            await _module.InvokeVoidAsync("detachBentoReveal", _revealHandle);
-            await _module.DisposeAsync();
-        }
-        catch (JSDisconnectedException) { }
-    }
+        1 => ShadcnRevealEffect.Clip,
+        2 => ShadcnRevealEffect.Scale,
+        3 => ShadcnRevealEffect.Fade,
+        _ => ShadcnRevealEffect.Rise
+    };
+
+    public void Dispose() => AnimationState.Changed -= OnChanged;
 }

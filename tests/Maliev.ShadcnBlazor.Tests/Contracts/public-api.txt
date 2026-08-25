@@ -942,6 +942,25 @@ type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizablePanel
   String Id
   Double MaximumSize
   Double MinimumSize
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnReveal
+  Boolean Cascade
+  RenderFragment ChildContent
+  Int32 Delay
+  Boolean Disabled
+  Int32 Duration
+  ShadcnRevealEffect Effect
+  String Tag
+enum Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealEffect: Fade, Rise, Scale, Clip, None
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealGroup
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Once
+  Boolean Paused
+  Boolean ReducedMotion
+  String RootMargin
+  Int32 Stagger
+  String Tag
+  Double Threshold
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollArea
   RenderFragment ChildContent
   Int32 HideDelay
