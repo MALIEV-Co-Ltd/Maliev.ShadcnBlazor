@@ -10,6 +10,7 @@
          class="theme-bento"
          aria-label="Curated realistic component use cases"
          data-testid="theme-bento"
+         data-render-cycle="@_parameterCycle"
          data-animation-paused="@(Paused ? "true" : "false")"
          data-reduced-motion="@(ReducedMotion ? "true" : "false")">
     <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1rem" Masonry="true">
@@ -34,6 +35,7 @@
     private ElementReference _root;
     private IJSObjectReference? _module;
     private int _revealHandle;
+    private int _parameterCycle;
 
     protected override void OnInitialized()
     {
@@ -42,7 +44,11 @@
         AnimationState.Start();
     }
 
-    protected override void OnParametersSet() => ApplyMotionSettings();
+    protected override void OnParametersSet()
+    {
+        _parameterCycle++;
+        ApplyMotionSettings();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

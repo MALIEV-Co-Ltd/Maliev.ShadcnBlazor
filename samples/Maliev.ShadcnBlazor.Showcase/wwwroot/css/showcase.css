@@ -8675,11 +8675,11 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-bento__grid .shadcn-bento-item > .theme-use-case-card { block-size: 100%; }
 .theme-bento__grid[data-layout="masonry"] .shadcn-bento-item > .theme-use-case-card { block-size: auto; }
 .theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="pending"] { opacity: 0; transform: translateY(1rem); }
-.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] { animation: theme-bento-card-reveal 520ms cubic-bezier(.16, 1, .3, 1) both; }
-.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] :is(.shadcn-card-header, .shadcn-card-content) { animation: theme-bento-content-reveal 460ms cubic-bezier(.16, 1, .3, 1) both; }
-.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] .shadcn-card-content { animation-delay: 70ms; }
-.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] .shadcn-progress-indicator { transform-origin: left center; animation: theme-bento-progress-reveal 720ms cubic-bezier(.16, 1, .3, 1) 120ms both; }
-.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="visible"] .shadcn-chart rect[data-series] { transform-box: fill-box; transform-origin: center bottom; animation: theme-bento-chart-reveal 680ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(120ms + var(--theme-chart-delay, 0ms)); }
+.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="revealing"] { animation: theme-bento-card-reveal 520ms cubic-bezier(.16, 1, .3, 1) both; }
+.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="revealing"] :is(.shadcn-card-header, .shadcn-card-content) { animation: theme-bento-content-reveal 460ms cubic-bezier(.16, 1, .3, 1) both; }
+.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="revealing"] .shadcn-card-content { animation-delay: 70ms; }
+.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="revealing"] .shadcn-progress-indicator { transform-origin: left center; animation: theme-bento-progress-reveal 720ms cubic-bezier(.16, 1, .3, 1) 120ms both; }
+.theme-preview-scope .theme-bento__grid .shadcn-bento-item[data-reveal-state="revealing"] .shadcn-chart rect[data-series] { transform-box: fill-box; transform-origin: center bottom; animation: theme-bento-chart-reveal 680ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(120ms + var(--theme-chart-delay, 0ms)); }
 @keyframes theme-bento-card-reveal { from { opacity: 0; transform: translateY(1rem); } to { opacity: 1; transform: translateY(0); } }
 @keyframes theme-bento-content-reveal { from { opacity: 0; transform: translateY(.45rem); } to { opacity: 1; transform: translateY(0); } }
 @keyframes theme-bento-progress-reveal { from { scale: 0 1; } to { scale: 1 1; } }

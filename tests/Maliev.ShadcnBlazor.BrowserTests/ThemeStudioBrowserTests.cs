@@ -382,6 +382,33 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ShuffleUpdatesThemeWithoutRecreatingOrReanimatingCuratedComponents()
+    {
+        await using var context = await NewContextAsync(1440, 900);
+        var page = await OpenAsync(context);
+        await OpenAdvancedAsync(page, "theme-advanced-accessibility");
+        await page.GetByTestId("preview-animation-pause").ClickAsync();
+        var bento = page.GetByTestId("theme-bento");
+        await Assertions.Expect(bento).ToHaveAttributeAsync("data-animation-paused", "true");
+        var renderCycle = await bento.GetAttributeAsync("data-render-cycle");
+        var profile = page.Locator("[data-use-case-id='operator-profile']");
+        var name = profile.Locator("input").First;
+        await name.FillAsync("Kanda T.");
+        await page.WaitForTimeoutAsync(700);
+        await Assertions.Expect(profile.Locator("xpath=ancestor::*[@data-slot='bento-item']")).ToHaveAttributeAsync("data-reveal-state", "revealed");
+        await page.EvaluateAsync("() => { const card = document.querySelector('[data-use-case-id=operator-profile]'); window.__themeShuffleCard = card; window.__themeShuffleAnimationStarts = 0; document.querySelector('[data-testid=theme-bento]').addEventListener('animationstart', event => { if (String(event.animationName).startsWith('theme-bento-')) window.__themeShuffleAnimationStarts++; }); }");
+
+        await page.GetByTestId("theme-preset-shuffle").ClickAsync();
+        await page.WaitForTimeoutAsync(700);
+
+        Assert.True(await page.EvaluateAsync<bool>("() => window.__themeShuffleCard === document.querySelector('[data-use-case-id=operator-profile]')"));
+        await Assertions.Expect(name).ToHaveValueAsync("Kanda T.");
+        await Assertions.Expect(bento).ToHaveAttributeAsync("data-render-cycle", renderCycle!);
+        await Assertions.Expect(profile.Locator("xpath=ancestor::*[@data-slot='bento-item']")).ToHaveAttributeAsync("data-reveal-state", "revealed");
+        Assert.Equal(0, await page.EvaluateAsync<int>("() => window.__themeShuffleAnimationStarts"));
+    }
+
+    [Fact]
     public async Task ThemeAndTypographySettingsRemainScopedToThePreview()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);
