@@ -29,7 +29,9 @@ public sealed class ThemeStudioCuratedPresetTests
         Assert.Equal(
             Enum.GetValues<ShadcnVisualStyle>().Where(value => value != ShadcnVisualStyle.Inherit).Order(),
             catalog.All.Select(item => item.VisualStyle).Distinct().Order());
-        Assert.Contains(catalog.All, item => item.ColorTreatment == ShadcnColorTreatment.VibrantDark);
+        var graphite = Assert.Single(catalog.All, item => item.Id == "graphite-control");
+        Assert.Equal(ShadcnColorTreatment.Inherit, graphite.ColorTreatment);
+        Assert.All(catalog.All, item => Assert.Equal(ShadcnColorTreatment.Inherit, item.ColorTreatment));
         Assert.All(catalog.All, preset =>
         {
             Assert.NotEqual(ShadcnVisualStyle.Inherit, preset.VisualStyle);

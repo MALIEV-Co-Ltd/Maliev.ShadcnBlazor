@@ -368,6 +368,18 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task GraphiteControlInheritsTheUniversalColorMode()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        await SelectOptionAsync(page, "theme-preset", "Graphite Control");
+
+        await Assertions.Expect(page.GetByTestId("theme-visual-style-scope")).ToHaveAttributeAsync("data-color-treatment", "inherit");
+        await Assertions.Expect(page.GetByTestId("theme-color-treatment")).ToContainTextAsync("Theme colors");
+    }
+
+    [Fact]
     public async Task ComposableVisualTreatmentsUpdateOnlyThePreviewScope()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);

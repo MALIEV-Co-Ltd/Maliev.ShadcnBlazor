@@ -218,7 +218,7 @@
     "Chart2": "oklch(0.56 0.15 210)",
     "Chart3": "oklch(0.66 0.17 65)",
     "VisualStyle": "Minimal",
-    "ColorTreatment": "VibrantDark",
+    "ColorTreatment": "Inherit",
     "DepthTreatment": "Flat",
     "MotionTreatment": "Expressive",
     "StyleIntensity": "Strong"
