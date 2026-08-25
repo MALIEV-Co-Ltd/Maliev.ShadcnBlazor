@@ -504,7 +504,8 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"][type="checkbox"]:checked::before { transform: rotate(45deg) scale(1); }
 .shadcn-questionnaire-choice[data-indicator="hidden"] > [data-slot="questionnaire-choice-input"] { position:absolute; inline-size:1px; block-size:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .shadcn-questionnaire-choice[data-indicator="hidden"] { align-items:center; }
-.shadcn-questionnaire-choice-description { display: grid; min-width: 0; gap: calc(.2rem * var(--shadcn-spacing-multiplier)); line-height: 1.4; }
+.shadcn-questionnaire-choice > [data-slot="questionnaire-choice-label"] { min-width: 0; color: var(--shadcn-foreground); font-weight: 650; line-height: 1.35; }
+.shadcn-questionnaire-choice-description { display: grid; min-width: 0; gap: calc(.2rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-weight: 400; line-height: 1.4; }
 .showcase-questionnaire-choice-title { color: var(--shadcn-foreground); font-size: .9rem; font-weight: 650; }
 .showcase-questionnaire-choice-detail { color: var(--shadcn-muted-foreground); font-size: .8125rem; }
 .showcase-questionnaire-card { width: min(100%, 38rem) !important; border-radius: var(--shadcn-radius-xl) !important; padding: calc(clamp(1rem, 3vw, 1.75rem) * var(--shadcn-spacing-multiplier)) !important; }

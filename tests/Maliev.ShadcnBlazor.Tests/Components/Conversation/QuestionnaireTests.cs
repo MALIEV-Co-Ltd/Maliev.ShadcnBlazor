@@ -187,5 +187,7 @@ public sealed class QuestionnaireTests : BunitContext
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
         Assert.Contains("text-align:start", css, StringComparison.Ordinal);
+        Assert.Matches(@"\.shadcn-questionnaire-choice\s*>\s*\[data-slot=""questionnaire-choice-label""\][^{]*\{[^}]*font-weight:\s*650", css);
+        Assert.Matches(@"\.shadcn-questionnaire-choice-description\s*\{[^}]*font-weight:\s*400", css);
     }
 }
