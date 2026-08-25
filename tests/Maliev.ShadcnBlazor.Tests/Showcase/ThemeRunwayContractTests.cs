@@ -58,6 +58,20 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
+    public void AnimationTicksOnlyInvalidateCardsThatActuallyConsumeAnimatedFrames()
+    {
+        var root = FindRoot();
+        var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
+        var animatedHost = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeAnimatedUseCaseCardHost.razor");
+
+        Assert.Contains("AnimatedCardIds.Contains(card.Id)", bento, StringComparison.Ordinal);
+        Assert.Contains("<ThemeAnimatedUseCaseCardHost", bento, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimationState.Changed += OnChanged", bento, StringComparison.Ordinal);
+        Assert.Contains("AnimationState.Changed += OnChanged", animatedHost, StringComparison.Ordinal);
+        Assert.Contains("<ThemeUseCaseCardHost", animatedHost, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void CuratedCardsResolveSemanticIconsInsideWorkflowContentInsteadOfRepeatingDecorativeHeaders()
     {
         var root = FindRoot();

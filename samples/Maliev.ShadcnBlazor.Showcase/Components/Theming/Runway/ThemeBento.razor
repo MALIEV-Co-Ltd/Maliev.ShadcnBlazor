@@ -3,7 +3,6 @@
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 @inject IThemeUseCaseRegistry Registry
 @inject ThemeRunwayState AnimationState
-@implements IDisposable
 
 <ShadcnRevealGroup Tag="section"
                    Class="theme-bento"
@@ -29,9 +28,16 @@
                               Class="theme-bento__reveal"
                               Effect="@RevealEffect(card.Order)"
                               Cascade="true">
-                    <ThemeUseCaseCardHost Definition="card"
-                                          Frame="AnimationState.Frame"
-                                          Locale="Locale" />
+                    @if (AnimatedCardIds.Contains(card.Id))
+                    {
+                        <ThemeAnimatedUseCaseCardHost Definition="card" Locale="Locale" />
+                    }
+                    else
+                    {
+                        <ThemeUseCaseCardHost Definition="card"
+                                              Frame="AnimationState.Frame"
+                                              Locale="Locale" />
+                    }
                 </ShadcnReveal>
             </ShadcnBentoItem>
         }
@@ -43,10 +49,17 @@
     [Parameter] public bool Paused { get; set; }
     [Parameter] public bool ReducedMotion { get; set; }
     private int _parameterCycle;
+    private static readonly HashSet<string> AnimatedCardIds =
+    [
+        "production-capacity",
+        "quotation-files",
+        "drawing-attachment",
+        "machine-cell",
+        "issue-report"
+    ];
 
     protected override void OnInitialized()
     {
-        AnimationState.Changed += OnChanged;
         ApplyMotionSettings();
         AnimationState.Start();
     }
@@ -63,8 +76,6 @@
         AnimationState.SetReducedMotion(ReducedMotion);
     }
 
-    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
-
     private static int ColumnSpan(ThemeBentoSize size) => size == ThemeBentoSize.Wide ? 2 : 1;
 
     private static int RowSpan(ThemeBentoSize size) => size == ThemeBentoSize.Tall ? 2 : 1;
@@ -77,5 +88,4 @@
         _ => ShadcnRevealEffect.Rise
     };
 
-    public void Dispose() => AnimationState.Changed -= OnChanged;
 }

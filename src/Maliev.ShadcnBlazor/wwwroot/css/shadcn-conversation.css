@@ -111,7 +111,10 @@
 .shadcn-questionnaire-actions > [data-slot="questionnaire-previous"] { grid-column:1; justify-self:start; }
 .shadcn-questionnaire-actions > [data-slot="questionnaire-skip"] { grid-column:2; justify-self:end; }
 .shadcn-questionnaire-actions > :is([data-slot="questionnaire-next"],[data-slot="questionnaire-submit"]) { grid-column:3; justify-self:end; }
-.shadcn-questionnaire-navigation { min-height:var(--shadcn-control-height); border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); padding-inline:calc(1rem * var(--shadcn-spacing-multiplier)); background:var(--shadcn-primary); color:var(--shadcn-primary-foreground); }
+.shadcn-questionnaire-navigation { min-height:var(--shadcn-control-height); border:1px solid transparent; border-radius:var(--shadcn-radius-md); padding-inline:calc(1rem * var(--shadcn-spacing-multiplier)); background:var(--shadcn-primary); color:var(--shadcn-primary-foreground); }
+.shadcn-questionnaire-navigation[data-variant="outline"] { border-color:var(--shadcn-border); background:var(--shadcn-background); color:var(--shadcn-foreground); }
+.shadcn-questionnaire-navigation[data-variant="ghost"] { background:transparent; color:var(--shadcn-muted-foreground); }
+.shadcn-questionnaire-navigation[data-variant="outline"]:hover:not(:disabled),.shadcn-questionnaire-navigation[data-variant="ghost"]:hover:not(:disabled) { background:var(--shadcn-muted); color:var(--shadcn-foreground); }
 @media (prefers-reduced-motion:reduce) { .shadcn-questionnaire-choice { transition:none; } }
 @media (forced-colors:active) { .shadcn-questionnaire-choice[data-checked="true"] { outline:2px solid Highlight; } .shadcn-questionnaire-item[aria-invalid="true"] { border:2px solid Mark; } }
 @media (forced-colors:active) { .shadcn-message,.shadcn-message-header,.shadcn-message-footer,.shadcn-questionnaire,.shadcn-questionnaire-progress,.shadcn-questionnaire-title,.shadcn-questionnaire-description { color:CanvasText; } .shadcn-questionnaire-navigation { color:ButtonText; background:ButtonFace; border-color:ButtonText; } }

@@ -24,7 +24,7 @@
  internal ShadcnQuestionnaireAnswer Answer(string name)=>State.Answers.GetValueOrDefault(name,ShadcnQuestionnaireAnswer.Empty); internal string? Error(string name)=>State.Errors.GetValueOrDefault(name);
  internal string IdFor(string name,string part)=>$"{RootId}-{name}-{part}";internal string? DescribedBy(string name,bool invalid){var ids=new List<string>();if(_descriptions.Contains(name))ids.Add(IdFor(name,"description"));if(invalid&&_errors.Contains(name))ids.Add(IdFor(name,"error"));return ids.Count==0?null:string.Join(' ',ids);}internal void RegisterDescription(string name){if(_descriptions.Add(name))_registrationsChanged=true;}internal void RegisterError(string name){if(_errors.Add(name))_registrationsChanged=true;}
  internal Task ChoiceAsync(string name,string value,bool selected)=>QueueFieldMutationAsync($"choice:{name}",()=>_controller!.SetChoice(name,value,selected));
- internal Task InputAsync(string name,string? value)=>QueueFieldMutationAsync($"input:{name}",()=>_controller!.SetInput(name,value));
+ internal async Task InputAsync(string name,string? value){_controller!.SetInput(name,value);await ChangedAsync();}
  internal async Task SkipAsync(){if(Busy)return;Busy=true;StateHasChanged();try{_controller!.Skip(State.ActiveItemName);var result=await _controller.NextAsync();_focusPending=result.FocusItemName;await ChangedAsync();}finally{Busy=false;StateHasChanged();}}
  internal async Task PreviousAsync(){if(Busy)return;Busy=true;StateHasChanged();try{if(_controller!.Previous()){_focusPending=State.ActiveItemName;await ChangedAsync();}}finally{Busy=false;StateHasChanged();}}
  internal Task NextAsync()=>NextCoreAsync();

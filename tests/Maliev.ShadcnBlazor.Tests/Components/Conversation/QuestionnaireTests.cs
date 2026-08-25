@@ -33,6 +33,23 @@ public sealed class QuestionnaireTests : BunitContext
         Assert.Equal("Choose scope", cut.Find($"#{descriptionId}").TextContent);
         Assert.All(cut.FindAll("fieldset[data-slot='questionnaire-item'][hidden]"), item => Assert.NotNull(item.GetAttribute("inert")));
         Assert.Equal(["previous", "skip", "next", "submit"], cut.FindAll("[data-testid]").Select(element => element.GetAttribute("data-testid")));
+        Assert.Equal("outline", cut.Find("button[data-slot='questionnaire-previous']").GetAttribute("data-variant"));
+        Assert.Equal("ghost", cut.Find("button[data-slot='questionnaire-skip']").GetAttribute("data-variant"));
+        Assert.Equal("primary", cut.Find("button[data-slot='questionnaire-next']").GetAttribute("data-variant"));
+        Assert.Equal("primary", cut.Find("button[data-slot='questionnaire-submit']").GetAttribute("data-variant"));
+    }
+
+    [Fact]
+    public void FreeformInputCommitsWithoutEnteringBusyState()
+    {
+        var cut = Render<Fixtures.QuestionnaireFixture>();
+        cut.Find("input[value='component']").Change(true);
+        cut.Find("button[data-slot='questionnaire-next']").Click();
+        cut.Find("button[data-slot='questionnaire-skip']").Click();
+        cut.Find("input[data-slot='questionnaire-input']").Input("x");
+
+        Assert.Null(cut.Find("form[data-slot='questionnaire']").GetAttribute("aria-busy"));
+        Assert.Equal("x", cut.Find("input[data-slot='questionnaire-input']").GetAttribute("value"));
     }
 
     [Fact]

@@ -323,6 +323,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task CuratedQuestionnaireUsesSemanticActionsAndResponsiveTextInput()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+
+        await questionnaire.Locator("[data-slot='questionnaire-choice']").First.ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-next']").ClickAsync();
+
+        var previous = questionnaire.Locator("[data-slot='questionnaire-previous']");
+        var skip = questionnaire.Locator("[data-slot='questionnaire-skip']");
+        var submit = questionnaire.Locator("[data-slot='questionnaire-submit']");
+        await Assertions.Expect(previous).ToHaveAttributeAsync("data-variant", "outline");
+        await Assertions.Expect(skip).ToHaveAttributeAsync("data-variant", "ghost");
+        await Assertions.Expect(submit).ToHaveAttributeAsync("data-variant", "primary");
+
+        var input = questionnaire.Locator("[data-slot='questionnaire-input']");
+        await input.EvaluateAsync("element => { window.__questionnaireBusyTransitions = 0; const form = element.closest('form'); new MutationObserver(() => window.__questionnaireBusyTransitions++).observe(form, { attributes: true, attributeFilter: ['aria-busy'] }); }");
+        await input.PressSequentiallyAsync("Customer tolerance applies", new() { Delay = 5 });
+
+        await Assertions.Expect(input).ToHaveValueAsync("Customer tolerance applies");
+        Assert.Null(await questionnaire.Locator("form[data-slot='questionnaire']").GetAttributeAsync("aria-busy"));
+        Assert.Equal(0, await page.EvaluateAsync<int>("window.__questionnaireBusyTransitions"));
+    }
+
+    [Fact]
     public async Task QuotationTableShowsItsActivePageSizeAndKeepsOneDataColumnVisible()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
