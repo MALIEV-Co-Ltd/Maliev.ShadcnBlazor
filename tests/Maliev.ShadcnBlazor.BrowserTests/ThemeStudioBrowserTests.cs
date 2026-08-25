@@ -140,6 +140,26 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ScrolledBentoRevealsClipCardsAndPreservesRoundedBorders()
+    {
+        await using var context = await NewContextAsync(1900, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+        var preview = page.Locator(".theme-preview-region");
+        var clippedCard = page.Locator("[data-use-case-item='work-order-navigation'] .theme-bento__reveal");
+        var ordinaryCard = page.Locator("[data-use-case-item='project-questionnaire'] .theme-bento__reveal");
+
+        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "pending");
+        await preview.EvaluateAsync("element => element.scrollTop = 1000");
+        await Task.Delay(250);
+        await preview.EvaluateAsync("element => element.scrollTop = 1500");
+        await Task.Delay(250);
+        await preview.EvaluateAsync("element => element.scrollTop = 1900");
+        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "revealed");
+        await Assertions.Expect(clippedCard).ToHaveCSSAsync("opacity", "1");
+        await Assertions.Expect(ordinaryCard).ToHaveCSSAsync("clip-path", "none");
+    }
+
+    [Fact]
     public async Task ProductionAnalyticsUsesDistinctSemanticSeriesColors()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);

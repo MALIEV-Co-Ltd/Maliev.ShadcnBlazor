@@ -17,6 +17,7 @@ export function attachRevealGroup(root) {
 
     const media = window.matchMedia(REDUCED_MOTION_QUERY);
     const registered = new Set();
+    const observedItems = new Map();
     let observer;
     let mutations;
     let disposed = false;
@@ -27,12 +28,38 @@ export function attachRevealGroup(root) {
     const paused = () => root.dataset.revealPaused === "true";
     const once = () => root.dataset.revealOnce !== "false";
 
+    const observationTarget = item =>
+        item.dataset.revealEffect === "clip" && item.parentElement instanceof HTMLElement
+            ? item.parentElement
+            : item;
+
+    const stopObserving = item => {
+        const target = observationTarget(item);
+        const items = observedItems.get(target);
+        if (!items) return;
+        items.delete(item);
+        if (items.size > 0) return;
+        observedItems.delete(target);
+        observer?.unobserve(target);
+    };
+
+    const observe = item => {
+        const target = observationTarget(item);
+        let items = observedItems.get(target);
+        if (!items) {
+            items = new Set();
+            observedItems.set(target, items);
+            observer?.observe(target);
+        }
+        items.add(item);
+    };
+
     const show = (item, index = 0) => {
         const stagger = Math.min(numberAttribute(root, "data-reveal-stagger", 60) * index, 360);
         item.style.setProperty("--shadcn-reveal-stagger-delay", `${stagger}ms`);
         item.setAttribute("data-reveal-state", "revealed");
         item.removeAttribute("aria-hidden");
-        if (once()) observer?.unobserve(item);
+        if (once()) stopObserving(item);
     };
 
     const revealWithoutMotion = () => {
@@ -44,9 +71,11 @@ export function attachRevealGroup(root) {
         let visibleIndex = 0;
         for (const entry of entries) {
             if (entry.isIntersecting) {
-                show(entry.target, visibleIndex++);
+                const items = observedItems.get(entry.target) ?? [entry.target];
+                for (const item of [...items]) show(item, visibleIndex++);
             } else if (!once()) {
-                entry.target.setAttribute("data-reveal-state", "pending");
+                const items = observedItems.get(entry.target) ?? [entry.target];
+                for (const item of items) item.setAttribute("data-reveal-state", "pending");
             }
         }
     };
@@ -57,6 +86,7 @@ export function attachRevealGroup(root) {
             threshold: numberAttribute(root, "data-reveal-threshold", 0.08),
             rootMargin: root.getAttribute("data-reveal-root-margin") ?? "32px 0px"
         });
+        for (const target of observedItems.keys()) observer.observe(target);
     };
 
     const register = item => {
@@ -76,7 +106,7 @@ export function attachRevealGroup(root) {
         }
 
         item.setAttribute("data-reveal-state", "pending");
-        observer?.observe(item);
+        observe(item);
     };
 
     const refreshNow = () => {
@@ -90,7 +120,7 @@ export function attachRevealGroup(root) {
         root.querySelectorAll(ITEM_SELECTOR).forEach(register);
         if (!paused()) {
             registered.forEach(item => {
-                if (item.dataset.revealState !== "revealed" && !isDisabled(item)) observer?.observe(item);
+                if (item.dataset.revealState !== "revealed" && !isDisabled(item)) observe(item);
             });
         }
     };
@@ -132,6 +162,7 @@ export function attachRevealGroup(root) {
             window.cancelAnimationFrame(layoutFrame);
             window.cancelAnimationFrame(revealFrame);
             observer?.disconnect();
+            observedItems.clear();
             mutations?.disconnect();
             media.removeEventListener("change", refresh);
             registered.clear();

@@ -78,7 +78,7 @@
     --shadcn-reveal-detail-transform-duration: calc(var(--shadcn-motion-duration) * 3.46);
     opacity: 1;
     transform: none;
-    clip-path: inset(0 round var(--radius, 0.625rem));
+    clip-path: none;
     transition:
         opacity var(--shadcn-reveal-duration) var(--shadcn-motion-easing-enter),
         transform var(--shadcn-reveal-duration) var(--shadcn-motion-easing-enter),
@@ -99,7 +99,7 @@
 }
 
 .shadcn-reveal[data-reveal-state='pending'][data-reveal-effect='clip'] {
-    clip-path: inset(0 0 100% round var(--radius, 0.625rem));
+    clip-path: inset(0 0 100% round 0.625rem);
 }
 
 .shadcn-reveal[data-reveal-effect='none'],
