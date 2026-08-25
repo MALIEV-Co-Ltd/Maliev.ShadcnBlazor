@@ -94,6 +94,9 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         var point = surface.Locator("[data-slot='chart-point'][data-point='1']");
         await point.HoverAsync();
         await Assertions.Expect(point).ToHaveAttributeAsync("data-active", "true");
+        var pointBox = await point.BoundingBoxAsync();
+        Assert.NotNull(pointBox);
+        Assert.InRange(Math.Abs(pointBox.Width - pointBox.Height), 0, 0.5);
         await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("Feb");
         await chart.Locator("button[data-legend-series='mobile']").ClickAsync();
         await Assertions.Expect(surface.Locator("[data-series='mobile']")).ToHaveCountAsync(0);

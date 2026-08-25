@@ -103,6 +103,9 @@ public sealed class ChartTests : BunitContext
         Assert.Contains("requestAnimationFrame", source, StringComparison.Ordinal);
         Assert.Contains("invokeMethodAsync", source, StringComparison.Ordinal);
         Assert.Contains("OnChartResize", source, StringComparison.Ordinal);
+        Assert.Contains("[data-slot=\"chart-surface\"]", source, StringComparison.Ordinal);
+        Assert.Contains("(surface ?? element).getBoundingClientRect()", source, StringComparison.Ordinal);
+        Assert.Contains("observer.observe(surface ?? element)", source, StringComparison.Ordinal);
     }
 
     [Fact]
