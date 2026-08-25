@@ -20,7 +20,9 @@
             <legend class="shadcn-sr-only">@ColumnsLabel</legend>
             @foreach (var column in OrderedColumns.Where(column => column.Hideable))
             {
-                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@(!CurrentState.HiddenColumnKeys.Contains(column.Key))" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
+                var isVisible = !CurrentState.HiddenColumnKeys.Contains(column.Key);
+                var isLastVisibleColumn = isVisible && VisibleColumns.Count == 1;
+                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@isVisible" disabled="@isLastVisibleColumn" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
             }
         </fieldset>
     </div>
@@ -97,7 +99,7 @@
             <span data-slot="data-table-page-summary">@PageSummary(Result.PageIndex + 1, Result.PageCount)</span>
         </div>
         <div class="shadcn-data-table-footer__controls">
-            <label><span class="shadcn-sr-only">@PageSizeLabel</span><select data-slot="data-table-page-size" aria-label="@PageSizeLabel" value="@CurrentState.PageSize" @onchange="OnPageSizeChanged">@foreach (var size in PageSizeOptions) { <option value="@size">@size</option> }</select></label>
+            <label><span class="shadcn-sr-only">@PageSizeLabel</span><select data-slot="data-table-page-size" aria-label="@PageSizeLabel" value="@CurrentState.PageSize" @onchange="OnPageSizeChanged">@foreach (var size in EffectivePageSizeOptions) { <option value="@size">@size</option> }</select></label>
             <button type="button" data-slot="data-table-first" disabled="@(Result.PageIndex == 0)" @onclick="FirstPageAsync">@FirstLabel</button>
             <button type="button" data-slot="data-table-previous" disabled="@(Result.PageIndex == 0)" @onclick="PreviousPageAsync">@PreviousLabel</button>
             <button type="button" data-slot="data-table-next" disabled="@(Result.PageIndex >= Result.PageCount - 1)" @onclick="NextPageAsync">@NextLabel</button>
@@ -146,6 +148,9 @@
     private ShadcnDataTableState CurrentState => State ?? _internalState;
     private IReadOnlyList<ShadcnDataTableColumn<TItem>> OrderedColumns => Columns.OrderBy(column => column.Order).ThenBy(column => Array.IndexOf(Columns.ToArray(), column)).ToList();
     private IReadOnlyList<ShadcnDataTableColumn<TItem>> VisibleColumns => OrderedColumns.Where(column => !CurrentState.HiddenColumnKeys.Contains(column.Key)).ToList();
+    private IReadOnlyList<int> EffectivePageSizeOptions => PageSizeOptions.Contains(CurrentState.PageSize)
+        ? PageSizeOptions
+        : [CurrentState.PageSize, .. PageSizeOptions];
     private ShadcnDataTableResult<TItem> Result => Manual
         ? ShadcnDataTableEngine.EvaluateManual(Items, CurrentState, TotalCount, RowKey)
         : ShadcnDataTableEngine.Evaluate(Items, Columns, CurrentState, RowKey, FilterPredicate);
@@ -210,6 +215,7 @@
     private Task OnVisibilityChanged(ShadcnDataTableColumn<TItem> column, ChangeEventArgs args)
     {
         var visible = args.Value as bool? ?? bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
+        if (!visible && !CurrentState.HiddenColumnKeys.Contains(column.Key) && VisibleColumns.Count == 1) return Task.CompletedTask;
         var hidden = new HashSet<string>(CurrentState.HiddenColumnKeys, StringComparer.Ordinal);
         if (visible) hidden.Remove(column.Key); else hidden.Add(column.Key);
         return PublishAsync(CurrentState with { HiddenColumnKeys = hidden });

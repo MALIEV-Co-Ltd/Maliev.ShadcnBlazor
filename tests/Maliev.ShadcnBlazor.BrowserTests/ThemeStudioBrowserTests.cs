@@ -323,6 +323,30 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task QuotationTableShowsItsActivePageSizeAndKeepsOneDataColumnVisible()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var table = page.Locator("[data-use-case-id='quotation-data-table']");
+        var pageSize = table.Locator("select[data-slot='data-table-page-size']");
+
+        await Assertions.Expect(pageSize).ToHaveValueAsync("3");
+        Assert.Equal("3", await pageSize.EvaluateAsync<string>("element => element.selectedOptions[0].textContent.trim()"));
+
+        var visibilityToggles = table.Locator("input[data-column-visibility]");
+        var toggleCount = await visibilityToggles.CountAsync();
+        Assert.True(toggleCount > 1);
+        for (var index = 0; index < toggleCount - 1; index++)
+            await visibilityToggles.Nth(index).UncheckAsync();
+
+        var finalVisibleToggle = table.Locator("input[data-column-visibility]:checked");
+        await Assertions.Expect(finalVisibleToggle).ToHaveCountAsync(1);
+        await Assertions.Expect(finalVisibleToggle).ToBeDisabledAsync();
+        await Assertions.Expect(table.Locator("th[data-column]")).ToHaveCountAsync(1);
+        await Assertions.Expect(table.Locator("tbody tr[data-row-key] td[data-column]")).ToHaveCountAsync(3);
+    }
+
+    [Fact]
     public async Task CuratedWorkflowActionsExposeVisibleStateAndReviewerExpansion()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
