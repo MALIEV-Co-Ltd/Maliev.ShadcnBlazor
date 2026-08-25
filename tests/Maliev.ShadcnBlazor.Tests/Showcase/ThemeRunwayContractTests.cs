@@ -216,7 +216,7 @@ public sealed class ThemeBentoContractTests
         Assert.DoesNotContain("theme-use-case-card__eyebrow", card, StringComparison.Ordinal);
         Assert.DoesNotContain("private string Status", card, StringComparison.Ordinal);
         Assert.Contains("FormatPercent", card, StringComparison.Ordinal);
-        Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
+        Assert.Contains("<ThemeTypingText Class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
         Assert.Contains("@TurnText(turn)", card, StringComparison.Ordinal);
         Assert.DoesNotContain("AssistantMessage[..Math.Min(Frame.ChatCharacters", card, StringComparison.Ordinal);
     }
@@ -226,24 +226,29 @@ public sealed class ThemeBentoContractTests
     {
         var root = FindRoot();
         var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+        var animatedInput = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeAnimatedInput.razor");
+        var animatedTextarea = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeAnimatedTextarea.razor");
+        var typingText = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeTypingText.razor");
         var composer = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeConversationComposer.razor");
         var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-studio.js");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains("class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
-        Assert.DoesNotContain("theme-runway-typing-character", card, StringComparison.Ordinal);
-        Assert.DoesNotContain("SplitTextElements", card, StringComparison.Ordinal);
-        Assert.Contains("animation: theme-runway-type-text", css, StringComparison.Ordinal);
-        Assert.Contains("@keyframes theme-runway-type-text", css, StringComparison.Ordinal);
-        Assert.Contains("forwards", css, StringComparison.Ordinal);
-        Assert.Contains("clip-path", css, StringComparison.Ordinal);
+        Assert.Contains("<ThemeTypingText Class=\"theme-runway-typing-text\"", card, StringComparison.Ordinal);
+        Assert.Contains("Class=\"theme-animated-input__ink\"", animatedInput, StringComparison.Ordinal);
+        Assert.Contains("Class=\"theme-animated-textarea__ink\"", animatedTextarea, StringComparison.Ordinal);
+        Assert.Contains("StringInfo.GetTextElementEnumerator", typingText, StringComparison.Ordinal);
+        Assert.Contains("class=\"theme-typing-glyph\"", typingText, StringComparison.Ordinal);
+        Assert.Contains("animation-name: theme-typing-glyph-reveal", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes theme-typing-glyph-reveal", css, StringComparison.Ordinal);
+        Assert.Contains("animation-fill-mode: backwards", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("clip-path: inset(0 100% 0 0)", css, StringComparison.Ordinal);
         Assert.Contains("<ThemeConversationComposer Locale=\"Locale\" OnSend=\"SendConversationMessage\"", card, StringComparison.Ordinal);
         Assert.Contains("@bind-Value=\"_text\"", composer, StringComparison.Ordinal);
         Assert.Contains("preservePreviewScrollOnInput", composer, StringComparison.Ordinal);
         Assert.Contains("preservePreviewScrollOnInput", script, StringComparison.Ordinal);
         Assert.Contains("SendConversationMessage", card, StringComparison.Ordinal);
         Assert.Contains("AssistantResponses", card, StringComparison.Ordinal);
-        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-runway-typing-text", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"] .theme-typing-glyph", css, StringComparison.Ordinal);
     }
 
     [Fact]

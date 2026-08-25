@@ -8795,11 +8795,11 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-animated-input { position: relative; min-inline-size: 0; }
 .theme-animated-input > .shadcn-input { inline-size: 100%; }
 .theme-animated-input[data-interacted="false"] > .shadcn-input { color: transparent; caret-color: transparent; }
-.theme-animated-input__ink { position: absolute; inset-block: 0; inset-inline: .75rem; display: flex; min-inline-size: 0; align-items: center; overflow: hidden; color: var(--shadcn-foreground); white-space: nowrap; pointer-events: none; clip-path: inset(0 100% 0 0); animation: theme-runway-type-text 1.8s cubic-bezier(.16, 1, .3, 1) forwards; }
+.theme-animated-input__ink { position: absolute; inset-block: 0; inset-inline: .75rem; display: flex; min-inline-size: 0; align-items: center; overflow: hidden; color: var(--shadcn-foreground); white-space: nowrap; pointer-events: none; }
 .theme-animated-textarea { position: relative; min-inline-size: 0; }
 .theme-animated-textarea > .shadcn-textarea { inline-size: 100%; }
 .theme-animated-textarea[data-interacted="false"] > .shadcn-textarea { color: transparent; caret-color: transparent; }
-.theme-animated-textarea__ink { position: absolute; inset: .75rem; overflow: hidden; color: var(--shadcn-foreground); line-height: 1.45; white-space: pre-wrap; pointer-events: none; clip-path: inset(0 100% 0 0); animation: theme-runway-type-text 2.2s cubic-bezier(.16, 1, .3, 1) forwards; }
+.theme-animated-textarea__ink { position: absolute; inset: .75rem; overflow: hidden; color: var(--shadcn-foreground); line-height: 1.45; white-space: pre-wrap; pointer-events: none; }
 .theme-runway-check { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
 .theme-runway-check small { display: block; margin-block-start: .125rem; color: var(--shadcn-muted-foreground); font-size: .6875rem; font-weight: 400; }
 .theme-runway-summary { display: grid; gap: .5rem; margin: 0; }
@@ -8852,8 +8852,19 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-bento-dispatch-drawer [data-slot="drawer-footer"] { flex-direction: row; justify-content: flex-end; }
 .theme-runway-chat { display: grid; gap: .75rem; }
 .theme-runway-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; border-block-start: 1px solid var(--shadcn-border); padding-block-start: .75rem; }
-.theme-runway-typing-text { display: block; max-inline-size: 100%; overflow-wrap: anywhere; clip-path: inset(0 100% 0 0); animation: theme-runway-type-text 2.4s cubic-bezier(.16, 1, .3, 1) forwards; }
-@keyframes theme-runway-type-text { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.theme-runway-typing-text { display: block; max-inline-size: 100%; overflow-wrap: anywhere; white-space: pre-wrap; }
+.theme-typing-glyph {
+    opacity: 1;
+    animation-name: theme-typing-glyph-reveal;
+    animation-duration: 1ms;
+    animation-delay: calc(var(--theme-typing-index) * 32ms);
+    animation-timing-function: step-end;
+    animation-fill-mode: backwards;
+}
+@keyframes theme-typing-glyph-reveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
 .theme-runway-chat .shadcn-message-scroller { block-size: min(22rem, 46vh); }
 @media (max-width: 40rem) {
@@ -8868,11 +8879,9 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-scenario-bento-card .theme-scenario-host { border: 0; background: transparent; }
 .theme-scenario-bento-card .theme-scenario-host__surface { padding: 0; }
 
-.theme-preview-scope[data-preview-reduced-motion="true"] .theme-runway-typing-text,
-.theme-preview-scope[data-preview-reduced-motion="true"] .theme-animated-input__ink,
-.theme-preview-scope[data-preview-reduced-motion="true"] .theme-animated-textarea__ink,
+.theme-preview-scope[data-preview-reduced-motion="true"] .theme-typing-glyph,
 .theme-preview-scope[data-preview-reduced-motion="true"] .theme-bento__grid .shadcn-bento-item,
-.theme-preview-scope[data-preview-reduced-motion="true"] .theme-bento__grid .shadcn-bento-item * { animation: none !important; clip-path: none; opacity: 1; transform: none; }
+.theme-preview-scope[data-preview-reduced-motion="true"] .theme-bento__grid .shadcn-bento-item * { animation: none !important; opacity: 1; transform: none; }
 
 @media (forced-colors: active) {
     .theme-use-case-card,

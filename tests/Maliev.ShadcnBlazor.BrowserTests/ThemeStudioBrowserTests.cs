@@ -531,6 +531,14 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var issue = page.Locator("[data-use-case-id='issue-report']");
         await Assertions.Expect(issue.Locator("[data-animated-input]")).ToHaveCountAsync(1);
         await Assertions.Expect(issue.Locator("[data-animated-textarea]")).ToHaveCountAsync(1);
+        var typedDetails = issue.Locator("[data-animated-textarea] [data-typing-text]");
+        await Assertions.Expect(typedDetails).ToHaveCountAsync(1, new() { Timeout = 5000 });
+        var glyphs = typedDetails.Locator(".theme-typing-glyph");
+        Assert.True(await glyphs.CountAsync() > 20);
+        Assert.Equal("Measured 24.982 mm against 25.000 ±0.010 mm.", (await typedDetails.InnerTextAsync()).Trim());
+        var firstDelay = await glyphs.First.EvaluateAsync<string>("element => getComputedStyle(element).animationDelay");
+        var lastDelay = await glyphs.Last.EvaluateAsync<string>("element => getComputedStyle(element).animationDelay");
+        Assert.NotEqual(firstDelay, lastDelay);
 
         await OpenAdvancedAsync(page, "theme-typography-section");
         await OpenAdvancedAsync(page, "theme-advanced-typography");
@@ -551,9 +559,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(turns).ToHaveCountAsync(4);
         await Assertions.Expect(conversation.GetByText("สถานะการตรวจสอบล่าสุดเป็นอย่างไร", new() { Exact = true })).ToBeVisibleAsync();
         var typingText = conversation.Locator(".theme-runway-typing-text").Last;
-        Assert.Equal("1", await typingText.EvaluateAsync<string>("element => getComputedStyle(element).animationIterationCount"));
         Assert.DoesNotContain('\uFFFD', await typingText.InnerTextAsync());
-        await Assertions.Expect(typingText).ToHaveCSSAsync("clip-path", "inset(0px 0% 0px 0px)", new() { Timeout = 8000 });
+        var typingGlyphs = typingText.Locator(".theme-typing-glyph");
+        Assert.True(await typingGlyphs.CountAsync() > 20);
+        await Assertions.Expect(typingGlyphs.Last).ToHaveCSSAsync("opacity", "1", new() { Timeout = 8000 });
     }
 
     [Fact]

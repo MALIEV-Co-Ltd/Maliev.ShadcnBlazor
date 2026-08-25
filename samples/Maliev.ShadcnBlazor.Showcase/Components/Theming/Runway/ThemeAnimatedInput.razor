@@ -14,7 +14,7 @@
                  Disabled="@Disabled" />
     @if (!_interacted && !string.IsNullOrEmpty(Value))
     {
-        <span @key="_generation" class="theme-animated-input__ink" aria-hidden="true">@Value</span>
+        <ThemeTypingText @key="_generation" Class="theme-animated-input__ink" Text="@Value" />
     }
 </div>
 

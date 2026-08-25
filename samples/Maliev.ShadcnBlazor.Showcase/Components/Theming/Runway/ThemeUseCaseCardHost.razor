@@ -172,7 +172,7 @@
                                                         }
                                                         @if (turn.Assistant && turn.Id == _conversationTurns[^1].Id)
                                                         {
-                                                            <span class="theme-runway-typing-text">@TurnText(turn)</span>
+                                                            <ThemeTypingText Class="theme-runway-typing-text" Text="@TurnText(turn)" />
                                                         }
                                                         else { @TurnText(turn) }
                                                     </ShadcnBubbleContent></ShadcnBubble>
