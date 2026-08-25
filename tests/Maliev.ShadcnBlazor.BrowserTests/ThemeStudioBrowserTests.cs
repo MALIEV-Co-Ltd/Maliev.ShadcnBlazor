@@ -256,6 +256,31 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task RotatingIntegrationCredentialGeneratesAndDisplaysANewKey()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='api-credentials']");
+        var credential = card.Locator(".shadcn-secret-input");
+        var input = credential.Locator("input");
+
+        await credential.GetByRole(AriaRole.Button, new() { Name = "Show API key", Exact = true }).ClickAsync();
+        var originalKey = await input.InputValueAsync();
+        await page.GetByTestId("locale-thai").ClickAsync();
+
+        var rotateButton = card.GetByRole(AriaRole.Button, new() { Name = "เปลี่ยนคีย์", Exact = true });
+        await rotateButton.ClickAsync();
+        await Assertions.Expect(input).Not.ToHaveValueAsync(originalKey);
+        var firstReplacement = await input.InputValueAsync();
+        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", firstReplacement);
+
+        await rotateButton.ClickAsync();
+        await Assertions.Expect(input).Not.ToHaveValueAsync(firstReplacement);
+        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", await input.InputValueAsync());
+        await Assertions.Expect(card.GetByRole(AriaRole.Status)).ToContainTextAsync("คีย์ทดแทนพร้อมใช้งาน");
+    }
+
+    [Fact]
     public async Task CuratedChartSubmitButtonsSwitchAndDropzoneExposeCompleteFeedback()
     {
         await using var context = await NewContextAsync(1569, 1032);

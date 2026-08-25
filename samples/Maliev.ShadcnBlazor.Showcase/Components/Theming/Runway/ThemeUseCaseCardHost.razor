@@ -382,7 +382,7 @@
             break;
         case "api-credentials":
             <p class="theme-use-case-card__description">@T("Production API access for the quotation integration.")</p>
-            <label>@T("Live API key")<ShadcnSecretInput Value="@ApiKey" MaskStart="3" ReadOnly="true" ShowLabel="@T("Show API key")" HideLabel="@T("Hide API key")" /></label>
+            <label>@T("Live API key")<ShadcnSecretInput Value="@_apiKey" MaskStart="3" ReadOnly="true" ShowLabel="@T("Show API key")" HideLabel="@T("Hide API key")" /></label>
             <div class="theme-secret-meta"><span><strong>@T("Scope")</strong><small>quotes:write · drawings:read</small></span><ShadcnBadge Class="theme-status-success">@T("Active")</ShadcnBadge></div>
             <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="RotateApiKey">@T("Rotate key")</ShadcnButton>
             @if (_credentialStatus is not null) { <p class="theme-runway-action-status" role="status">@T(_credentialStatus)</p> }
@@ -525,7 +525,7 @@
         ["orders-2"] = new(T("Polymer")) { Color = "var(--shadcn-chart-4)" }
     };
     private static readonly ShadcnChartSeries[] OrderMixSeries = [new("orders", [12, 8, 5])];
-    private const string ApiKey = "sk-live-maliev-7f2a9c1d";
+    private string _apiKey = "sk-live-maliev-7f2a9c1d";
     private const string MachinePin = "241850";
     private const string WebhookSecret = "whsec_8b14f62a90c3";
     private ShadcnDataTableState _quotationTableState = new() { PageSize = 3 };
@@ -575,7 +575,17 @@
         _replyQuote = null;
     }
     private void TogglePlanReview() => _planReviewOpen = !_planReviewOpen;
-    private void RotateApiKey() => _credentialStatus = "A replacement key is ready; the current key remains active for 24 hours.";
+    private void RotateApiKey()
+    {
+        var previousKey = _apiKey;
+        do
+        {
+            _apiKey = $"sk-live-maliev-{Guid.NewGuid():N}"[..31];
+        }
+        while (string.Equals(_apiKey, previousKey, StringComparison.Ordinal));
+
+        _credentialStatus = "A replacement key is ready; the current key remains active for 24 hours.";
+    }
     private void VerifyMachinePin() => _machineAccessVerified = true;
     private void CopyWebhookSecret() => _webhookCopied = true;
     private void ToggleDrawingDimensions() => _drawingDimensionsVisible = !_drawingDimensionsVisible;
