@@ -252,7 +252,7 @@
 }
 
 .shadcn-dropdown-menu, .shadcn-context-menu, .shadcn-dropdown-menu-sub, .shadcn-context-menu-sub { display: contents; }
-.shadcn-dropdown-menu-content, .shadcn-context-menu-content, .shadcn-dropdown-menu-sub-content, .shadcn-context-menu-sub-content { z-index: var(--shadcn-z-popover, 50); min-width: 8rem; max-height: var(--shadcn-overlay-available-height, calc(100dvh - 1rem)); overflow: auto; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: color-mix(in oklch, var(--shadcn-popover) 95%, transparent); color: var(--shadcn-popover-foreground); padding: calc(0.25rem * var(--shadcn-spacing-multiplier)); box-shadow: var(--shadcn-shadow-md); outline: none; }
+.shadcn-dropdown-menu-content, .shadcn-context-menu-content, .shadcn-dropdown-menu-sub-content, .shadcn-context-menu-sub-content { z-index: var(--shadcn-z-popover, 50); box-sizing: border-box; min-width: 8rem; max-height: var(--shadcn-overlay-available-height, calc(100dvh - 1rem)); overflow: auto; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-md); background: color-mix(in oklch, var(--shadcn-popover) 95%, transparent); background-clip: padding-box; color: var(--shadcn-popover-foreground); padding: max(0.25rem, calc(0.25rem * var(--shadcn-spacing-multiplier))); box-shadow: var(--shadcn-shadow-md); outline: none; }
 .shadcn-dropdown-menu-item, .shadcn-context-menu-item, .shadcn-dropdown-menu-checkbox-item, .shadcn-context-menu-checkbox-item, .shadcn-dropdown-menu-radio-item, .shadcn-context-menu-radio-item, .shadcn-dropdown-menu-sub-trigger, .shadcn-context-menu-sub-trigger { position: relative; display: flex; min-height: 2rem; align-items: center; gap: calc(0.5rem * var(--shadcn-spacing-multiplier)); border-radius: var(--shadcn-radius-sm); padding: calc(0.375rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier)); font-size: 0.875rem; cursor: default; outline: none; user-select: none; }
 .shadcn-dropdown-menu-item:focus, .shadcn-context-menu-item:focus, .shadcn-dropdown-menu-checkbox-item:focus, .shadcn-context-menu-checkbox-item:focus, .shadcn-dropdown-menu-radio-item:focus, .shadcn-context-menu-radio-item:focus, .shadcn-dropdown-menu-sub-trigger:focus, .shadcn-context-menu-sub-trigger:focus { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 [data-slot$="menu-item"][data-variant="destructive"] { color: var(--shadcn-destructive); }
@@ -331,7 +331,7 @@
     max-inline-size: min(22rem, calc(100vw - 1rem));
     overflow-x: hidden;
     overflow-y: auto;
-    background: color-mix(in oklch, var(--shadcn-popover) 97%, transparent);
+    background-color: color-mix(in oklch, var(--shadcn-popover) 97%, transparent);
     transform-origin: var(--shadcn-transform-origin);
     animation: shadcn-dropdown-menu-content-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter);
 }

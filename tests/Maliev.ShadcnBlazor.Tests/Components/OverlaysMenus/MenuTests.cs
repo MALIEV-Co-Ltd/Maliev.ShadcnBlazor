@@ -300,6 +300,8 @@ public sealed class MenuTests : BunitContext
         Assert.Contains(".shadcn-dropdown-menu-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-menubar-content[data-positioned=\"false\"]", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-context-menu-item:hover", css, StringComparison.Ordinal);
+        Assert.Contains("background-clip: padding-box", css, StringComparison.Ordinal);
+        Assert.Contains("max(0.25rem, calc(0.25rem * var(--shadcn-spacing-multiplier)))", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
