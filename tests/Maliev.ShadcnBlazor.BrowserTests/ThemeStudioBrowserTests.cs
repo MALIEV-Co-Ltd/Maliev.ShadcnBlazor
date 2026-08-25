@@ -178,6 +178,12 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var hoveredAvatar = reviewers.Locator("[data-slot='avatar']").Nth(3);
         await hoveredAvatar.HoverAsync();
         Assert.Equal("3", await hoveredAvatar.EvaluateAsync<string>("element => getComputedStyle(element).zIndex"));
+        await Assertions.Expect(reviewers.GetByRole(AriaRole.Button, new() { Name = "Show four more reviewers", Exact = true })).ToBeVisibleAsync(new() { Timeout = 7_000 });
+        await Assertions.Expect(reviewers.Locator("[data-slot='avatar']")).ToHaveCountAsync(3);
+
+        var details = page.Locator("[data-use-case-id='reviewer-details']");
+        await details.GetByRole(AriaRole.Button, new() { Name = "Due 15:30", Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Tooltip)).ToContainTextAsync("45 minutes remaining");
     }
 
     [Fact]
@@ -237,7 +243,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(attachment.GetByRole(AriaRole.Status)).ToContainTextAsync("cancelled");
 
         var navigation = page.Locator("[data-use-case-id='work-order-navigation']");
-        await navigation.GetByRole(AriaRole.Button, new() { Name = "Change process plan 12 operations · revision C", Exact = true }).ClickAsync();
+        await navigation.GetByRole(AriaRole.Button, new() { Name = "Open process editor", Exact = true }).ClickAsync();
         await Assertions.Expect(navigation.GetByRole(AriaRole.Status)).ToContainTextAsync("Process plan opened");
 
         var quotation = page.Locator("[data-use-case-id='quotation-actions']");
@@ -256,8 +262,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(qualityConsole.GetByRole(AriaRole.Status)).ToContainTextAsync("saved as a draft");
 
         var handoffConsole = page.Locator("[data-console='handoff']");
-        await handoffConsole.GetByRole(AriaRole.Option, new() { Name = "Schedule review", Exact = true }).ClickAsync();
-        await Assertions.Expect(handoffConsole.GetByText("Review scheduling opened.", new() { Exact = true })).ToBeVisibleAsync();
+        await handoffConsole.GetByRole(AriaRole.Option, new() { Name = "Confirm recipient", Exact = true }).ClickAsync();
+        await Assertions.Expect(handoffConsole.GetByText("Recipient confirmation opened.", new() { Exact = true })).ToBeVisibleAsync();
         await handoffConsole.GetByRole(AriaRole.Button, new() { Name = "Next", Exact = true }).ClickAsync();
         await Assertions.Expect(handoffConsole.GetByRole(AriaRole.Button, new() { Name = "2", Exact = true })).ToHaveAttributeAsync("aria-current", "page");
     }
@@ -527,10 +533,10 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(consoles.Locator(".shadcn-accordion")).ToHaveCountAsync(3);
         var production = page.Locator("[data-console='production']");
         await production.GetByRole(AriaRole.Tab, new() { Name = "Support", Exact = true }).ClickAsync();
-        var note = production.GetByPlaceholder("Add a handoff note");
+        var note = production.GetByPlaceholder("Add a production note");
         await note.FillAsync("Customer requested inspection photos");
         await production.GetByRole(AriaRole.Button, new() { Name = "Add", Exact = true }).ClickAsync();
-        await Assertions.Expect(production.GetByText("Note added to WO-2418", new() { Exact = true })).ToBeVisibleAsync();
+        await Assertions.Expect(production.GetByText("Production note added to WO-2418", new() { Exact = true })).ToBeVisibleAsync();
     }
 
     [Theory]

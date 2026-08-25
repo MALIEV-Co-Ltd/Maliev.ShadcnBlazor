@@ -8695,10 +8695,11 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-use-case-card[data-bento-size] { vertical-align: top; }
 .theme-use-case-card :where(.shadcn-input, .shadcn-textarea, .shadcn-select-trigger):focus-visible {
     border-color: color-mix(in oklch, var(--shadcn-ring) 72%, var(--shadcn-input));
-    outline: 2px solid color-mix(in oklch, var(--shadcn-ring) 36%, transparent);
+    outline: 1px solid color-mix(in oklch, var(--shadcn-ring) 42%, transparent);
     outline-offset: 1px;
     box-shadow: none;
 }
+.theme-preview-scope:has(:is(.shadcn-dialog-portal, .shadcn-alert-dialog-portal, .shadcn-sheet-portal, .shadcn-drawer-portal)) { container-type: normal; }
 .theme-preview-scope {
     --theme-status-success: oklch(0.47 0.13 151);
     --theme-status-success-foreground: oklch(0.985 0 0);

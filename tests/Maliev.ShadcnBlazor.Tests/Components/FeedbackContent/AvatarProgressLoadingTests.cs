@@ -172,6 +172,18 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
+    public async Task ExpandedAvatarGroupRequestsAutomaticCollapseAfterConfiguredDelay()
+    {
+        var collapsed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cut = Render<ShadcnAvatarGroup>(parameters => parameters
+            .Add(component => component.Expanded, true)
+            .Add(component => component.AutoCollapseAfter, TimeSpan.FromMilliseconds(20))
+            .Add(component => component.OnAutoCollapse, collapsed.SetResult));
+
+        await collapsed.Task.WaitAsync(TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
     public void ProgressLabelParameterFallsBackWhenCompositionHasNoLabelAndExposesValueText()
     {
         var cut = Render<ShadcnProgress>(parameters => parameters

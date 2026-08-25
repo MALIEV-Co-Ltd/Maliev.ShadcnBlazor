@@ -141,9 +141,12 @@
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
   background: var(--shadcn-style-surface, var(--shadcn-card));
   box-shadow: var(--shadcn-style-shadow, none);
-  backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
-  -webkit-backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
   transition: box-shadow var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease;
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) :where(.shadcn-card, .shadcn-alert, .shadcn-calendar, .shadcn-sidebar, [data-slot="card"], [data-slot="alert"], [data-slot="empty"], [data-slot="command"]):not(:has(:is(.shadcn-dialog-portal, .shadcn-sheet-portal, .shadcn-drawer-portal, .shadcn-alert-dialog-portal))) {
+  backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
 }
 
 .shadcn-visual-style-scope :where(
@@ -162,7 +165,7 @@
   border-width: var(--shadcn-style-border-width, 1px);
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
   background: var(--shadcn-style-surface-strong, var(--shadcn-popover));
-  box-shadow: var(--shadcn-style-shadow-hover, var(--shadcn-style-shadow, none));
+  box-shadow: var(--shadcn-shadow-lg), var(--shadcn-style-shadow-hover, var(--shadcn-style-shadow, none));
   backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
   -webkit-backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
 }

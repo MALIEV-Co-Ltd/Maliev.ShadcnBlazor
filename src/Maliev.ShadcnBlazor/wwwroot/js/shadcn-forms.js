@@ -34,15 +34,33 @@ export function observeOtpSelection(input, dotnet, maxLength) {
             : Array.from(beforeCaret).length;
         dotnet.invokeMethodAsync('UpdateOtpSelection', Math.min(count, Math.max(0, maxLength - 1)), document.activeElement === input);
       };
-      for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.addEventListener(eventName, update);
-    otpObservers.set(input, update);
+    const onPointerDown = event => {
+        if (event.button !== 0) return;
+        const root = input.closest('[data-slot="input-otp-root"]');
+        const slots = [...(root?.querySelectorAll('[data-slot="input-otp-slot"]') ?? [])];
+        if (!slots.length) return;
+        const point = event.clientX;
+        let index = slots.findIndex(slot => {
+            const bounds = slot.getBoundingClientRect();
+            return point >= bounds.left && point <= bounds.right;
+        });
+        if (index < 0) index = point < slots[0].getBoundingClientRect().left ? 0 : slots.length - 1;
+        event.preventDefault();
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(index, index);
+        update();
+    };
+    for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.addEventListener(eventName, update);
+    input.addEventListener('pointerdown', onPointerDown);
+    otpObservers.set(input, { update, onPointerDown });
     queueMicrotask(update);
 }
 
 export function disconnectOtpSelection(input) {
-    const update = otpObservers.get(input);
-    if (!update) return;
-      for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.removeEventListener(eventName, update);
+    const observer = otpObservers.get(input);
+    if (!observer) return;
+    for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.removeEventListener(eventName, observer.update);
+    input.removeEventListener('pointerdown', observer.onPointerDown);
     otpObservers.delete(input);
 }
 

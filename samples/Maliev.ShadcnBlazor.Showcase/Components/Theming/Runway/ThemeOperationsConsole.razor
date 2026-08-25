@@ -60,20 +60,20 @@
 
         <ShadcnTabsContent Value="support" ForceMount="true">
             <div class="theme-operations-console__support">
-                <ShadcnCommand Label="Work order actions">
-                    <ShadcnCommandInput Placeholder="Search work-order actions" />
+                <ShadcnCommand Label="@CommandLabel">
+                    <ShadcnCommandInput Placeholder="@CommandPlaceholder" />
                     <ShadcnCommandList>
-                        <ShadcnCommandGroup Heading="Production"><ShadcnCommandItem Value="open-drawing" OnSelect="SelectCommand">Open latest drawing<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review" OnSelect="SelectCommand">Schedule review<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
-                        <ShadcnCommandEmpty>No matching production action.</ShadcnCommandEmpty>
+                        <ShadcnCommandGroup Heading="@CommandHeading"><ShadcnCommandItem Value="open-drawing" OnSelect="SelectCommand">@PrimaryCommand<ShadcnCommandShortcut>⌘O</ShadcnCommandShortcut></ShadcnCommandItem><ShadcnCommandItem Value="schedule-review" OnSelect="SelectCommand">@SecondaryCommand<ShadcnCommandShortcut>⌘R</ShadcnCommandShortcut></ShadcnCommandItem></ShadcnCommandGroup>
+                        <ShadcnCommandEmpty>@CommandEmpty</ShadcnCommandEmpty>
                     </ShadcnCommandList>
                 </ShadcnCommand>
                 <ShadcnResizableGroup Class="theme-operations-console__resizable">
-                    <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>WO-2418</strong></p><p>Revision C is ready for final dimensional review.</p><p>Courier collection remains booked for 16:00.</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
+                    <ShadcnResizablePanel Id="summary" DefaultSize="58"><ShadcnScrollArea Class="theme-operations-console__scroll"><ShadcnScrollAreaViewport><p><strong>@WorkspaceReference</strong></p><p>@WorkspaceSummary</p><p>@WorkspaceDetail</p></ShadcnScrollAreaViewport><ShadcnScrollAreaScrollbar><ShadcnScrollAreaThumb /></ShadcnScrollAreaScrollbar></ShadcnScrollArea></ShadcnResizablePanel>
                     <ShadcnResizableHandle WithHandle="true" />
                     <ShadcnResizablePanel Id="activity" DefaultSize="42"><div class="theme-operations-console__loading"><ShadcnSpinner Label="Refreshing activity" /><div><ShadcnSkeleton Style="width: 80%; height: .75rem" /><ShadcnSkeleton Style="width: 62%; height: .75rem" /></div></div></ShadcnResizablePanel>
                 </ShadcnResizableGroup>
-                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="Add a handoff note" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">Add</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
-                @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">Note added to WO-2418</ShadcnBadge> }
+                <ShadcnInputGroup><ShadcnInput TValue="string" @bind-Value="_note" Placeholder="@NotePlaceholder" /><ShadcnInputGroupAddon Alignment="ShadcnInputGroupAlignment.InlineEnd"><ShadcnInputGroupButton OnClick="@(_ => AddNote())">Add</ShadcnInputGroupButton></ShadcnInputGroupAddon></ShadcnInputGroup>
+                @if (_noteAdded) { <ShadcnBadge Class="theme-status-success">@NoteConfirmation</ShadcnBadge> }
                 @if (_commandStatus is not null) { <p class="theme-runway-action-status" role="status">@_commandStatus</p> }
                 <ShadcnPagination Label="Console pages"><ShadcnPaginationContent><ShadcnPaginationItem><ShadcnPaginationPrevious Disabled="@(_page == 1)" OnClick="PreviousPage" /></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 1)" OnClick="SelectPageOne">1</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationLink Current="@(_page == 2)" OnClick="SelectPageTwo">2</ShadcnPaginationLink></ShadcnPaginationItem><ShadcnPaginationItem><ShadcnPaginationNext Disabled="@(_page == 2)" OnClick="NextPage" /></ShadcnPaginationItem></ShadcnPaginationContent></ShadcnPagination>
             </div>
@@ -101,6 +101,17 @@
     private string ConsoleTitle => Kind switch { "quality" => "Quality release", "handoff" => "Customer handoff", _ => "Production planning" };
     private string StatusTitle => Kind switch { "quality" => "Inspection evidence complete", "handoff" => "Customer handoff confirmed", _ => "Capacity plan is stable" };
     private string StatusDescription => Kind switch { "quality" => "All critical dimensions are within the approved tolerance band.", "handoff" => "The recipient, dock, and courier window have been verified.", _ => "Cell A3 has capacity for the next two scheduled work orders." };
+    private string CommandLabel => Kind switch { "quality" => "Inspection evidence actions", "handoff" => "Customer delivery actions", _ => "Production work-order actions" };
+    private string CommandPlaceholder => Kind switch { "quality" => "Search inspection evidence", "handoff" => "Search delivery actions", _ => "Search work-order actions" };
+    private string CommandHeading => Kind switch { "quality" => "Quality evidence", "handoff" => "Customer delivery", _ => "Production" };
+    private string PrimaryCommand => Kind switch { "quality" => "Open probe report", "handoff" => "Open delivery pack", _ => "Open latest drawing" };
+    private string SecondaryCommand => Kind switch { "quality" => "Assign corrective review", "handoff" => "Confirm recipient", _ => "Schedule review" };
+    private string CommandEmpty => Kind switch { "quality" => "No matching quality evidence.", "handoff" => "No matching delivery action.", _ => "No matching production action." };
+    private string WorkspaceReference => Kind switch { "quality" => "Inspection IR-603", "handoff" => "Delivery DH-118", _ => "WO-2418" };
+    private string WorkspaceSummary => Kind switch { "quality" => "Probe P-08 evidence and the signed dimensional report are ready for approval.", "handoff" => "The delivery pack includes the packing list, recipient details, and courier label.", _ => "Revision C is ready for final dimensional review." };
+    private string WorkspaceDetail => Kind switch { "quality" => "Kanda T. owns the final quality gate.", "handoff" => "Bang Na reception confirmed the 16:00 collection window.", _ => "Courier collection remains booked for 16:00." };
+    private string NotePlaceholder => Kind switch { "quality" => "Add an inspection note", "handoff" => "Add a recipient handoff note", _ => "Add a production note" };
+    private string NoteConfirmation => Kind switch { "quality" => "Inspection note added to IR-603", "handoff" => "Recipient note added to DH-118", _ => "Production note added to WO-2418" };
     private static readonly string[] ChartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
     private static readonly ShadcnChartConfig ChartConfig = new()
     {
@@ -117,7 +128,15 @@
     private void AddNote() { if (!string.IsNullOrWhiteSpace(_note)) { _noteAdded = true; _note = string.Empty; } }
     private void SaveReview() => _releaseStatus = "Release review saved as a draft.";
     private void ApproveRelease() { _releaseApproved = true; _releaseStatus = "Release approved for the selected lane."; }
-    private void SelectCommand(string command) => _commandStatus = command == "open-drawing" ? "Latest drawing opened." : "Review scheduling opened.";
+    private void SelectCommand(string command) => _commandStatus = (Kind, command) switch
+    {
+        ("quality", "open-drawing") => "Probe report opened.",
+        ("quality", _) => "Corrective review assignment opened.",
+        ("handoff", "open-drawing") => "Delivery pack opened.",
+        ("handoff", _) => "Recipient confirmation opened.",
+        (_, "open-drawing") => "Latest drawing opened.",
+        _ => "Review scheduling opened."
+    };
     private void PreviousPage(MouseEventArgs _) => _page = Math.Max(1, _page - 1);
     private void NextPage(MouseEventArgs _) => _page = Math.Min(2, _page + 1);
     private void SelectPageOne(MouseEventArgs _) => _page = 1;

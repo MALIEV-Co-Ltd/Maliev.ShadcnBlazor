@@ -64,7 +64,10 @@ type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarBadge
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarFallback
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroup
+  TimeSpan AutoCollapseAfter
   RenderFragment ChildContent
+  Boolean Expanded
+  EventCallback OnAutoCollapse
   String Overlap
   ShadcnAvatarSize Size
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroupCount

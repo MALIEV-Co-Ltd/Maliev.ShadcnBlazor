@@ -14,7 +14,8 @@
 .shadcn-attachment-description { color: var(--shadcn-muted-foreground); }
 [data-state="error"] > .shadcn-attachment-description { color: var(--shadcn-destructive); }
 .shadcn-attachment-actions { position: relative; z-index: 20; display: flex; min-width: 0; align-items: center; justify-self: end; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
-.shadcn-attachment-action { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; min-height: 2rem; border: 0; border-radius: var(--shadcn-radius-sm); background: transparent; color: inherit; }
+.shadcn-attachment-action { display: inline-flex; width: 2rem; min-width: 2rem; max-width: 2rem; height: 2rem; min-height: 2rem; align-items: center; justify-content: center; overflow: hidden; border: 0; border-radius: var(--shadcn-radius-sm); background: transparent; color: inherit; padding: 0; }
+.shadcn-attachment-action > :is(svg, .shadcn-icon) { width: 1rem; height: 1rem; flex: 0 0 auto; }
 .shadcn-attachment-action:disabled { cursor: not-allowed; opacity: .5; }
 .shadcn-attachment-progress { position: relative; order: 10; grid-row: 2; grid-column: 1 / -1; width: 100%; height: .375rem; overflow: hidden; border-radius: 999px; background: var(--shadcn-muted); }
 .shadcn-attachment-progress > span { position: relative; display: block; height: 100%; overflow: hidden; border-radius: inherit; background: var(--shadcn-primary); }
@@ -99,7 +100,7 @@
 .shadcn-questionnaire-description { color:var(--shadcn-muted-foreground); text-wrap:pretty; }
 .shadcn-questionnaire-choices { display:grid; min-width:0; gap:calc(.5rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-questionnaire-choice { position:relative; display:flex; min-height:2.75rem; cursor:pointer; align-items:flex-start; gap:calc(.625rem * var(--shadcn-spacing-multiplier)); border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); padding:calc(.75rem * var(--shadcn-spacing-multiplier)); text-align:start; transition:background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
-.shadcn-questionnaire-choice:focus-within { outline:var(--shadcn-focus-ring-width) solid var(--shadcn-ring); outline-offset:var(--shadcn-focus-ring-offset); }
+.shadcn-questionnaire-choice:focus-within { border-color: color-mix(in oklch, var(--shadcn-ring) 72%, var(--shadcn-border)); outline: 1px solid color-mix(in oklch, var(--shadcn-ring) 42%, transparent); outline-offset: 1px; }
 .shadcn-questionnaire-choice[data-checked="true"] { border-color:var(--shadcn-primary); background:color-mix(in srgb,var(--shadcn-primary) 8%,transparent); }
 .shadcn-questionnaire-choice[data-disabled="true"] { cursor:not-allowed; opacity:.5; }
 .shadcn-questionnaire-input { width:100%; min-height:var(--shadcn-control-height); border:1px solid var(--shadcn-input); border-radius:var(--shadcn-radius-md); padding-inline:calc(.75rem * var(--shadcn-spacing-multiplier)); background:transparent; color:var(--shadcn-foreground); caret-color:currentColor; }

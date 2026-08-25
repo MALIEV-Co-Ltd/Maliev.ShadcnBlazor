@@ -160,7 +160,7 @@
     --shadcn-control-height-sm: 2rem;
     --shadcn-control-height-lg: 2.5rem;
     --shadcn-spacing-multiplier: 1;
-    --shadcn-focus-ring-width: 3px;
+    --shadcn-focus-ring-width: 2px;
     --shadcn-focus-ring-offset: 0px;
     --shadcn-motion-duration: 150ms;
     --shadcn-motion-duration-fast: 100ms;
