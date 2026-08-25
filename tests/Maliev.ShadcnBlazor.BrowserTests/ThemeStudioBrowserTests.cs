@@ -10,6 +10,20 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     public static TheoryData<int, int> ReleaseViewports => new() { { 1440, 900 }, { 1024, 768 }, { 768, 1024 }, { 390, 844 }, { 320, 568 } };
 
     [Fact]
+    public async Task BentoLayoutStylesheetIsServedAndAppliedAtCompactDesktopWidth()
+    {
+        await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var stylesheet = await page.EvaluateAsync<string>(
+            "async () => await (await fetch('_content/Maliev.ShadcnBlazor/css/shadcn-layout.css?v=1.2.1')).text()");
+        Assert.Contains(".shadcn-bento-grid__layout", stylesheet, StringComparison.Ordinal);
+
+        var layout = page.Locator(".theme-bento__grid [data-slot='bento-grid-layout']");
+        await Assertions.Expect(layout).ToHaveCSSAsync("display", "grid");
+        Assert.Equal(2, await layout.EvaluateAsync<int>("element => getComputedStyle(element).gridTemplateColumns.split(' ').length"));
+    }
+
+    [Fact]
     public async Task BentoUsesOneOrderedScrollableCanvasWithoutMirrorsOrClippedBorders()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
