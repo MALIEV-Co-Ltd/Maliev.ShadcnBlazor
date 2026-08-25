@@ -199,6 +199,14 @@
 .shadcn-context-menu-content,
 .shadcn-dropdown-menu-sub-content,
 .shadcn-context-menu-sub-content { position: fixed; background: var(--shadcn-popover); }
+.shadcn-dropdown-menu-content[popover],
+.shadcn-context-menu-content[popover],
+.shadcn-dropdown-menu-sub-content[popover],
+.shadcn-context-menu-sub-content[popover],
+.shadcn-menubar-content[popover],
+.shadcn-popover-content[popover],
+.shadcn-hover-card-content[popover],
+.shadcn-tooltip-content[popover] { inset: auto; margin: 0; }
 .shadcn-dropdown-menu-content[data-positioned="false"],
 .shadcn-menubar-content[data-positioned="false"] { visibility: hidden; animation: none; }
 .shadcn-context-menu-item:hover,

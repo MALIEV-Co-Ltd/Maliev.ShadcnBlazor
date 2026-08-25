@@ -730,6 +730,31 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.InRange(Math.Abs(actionBoxes[0] - actionBoxes[1]), 0, 1);
     }
 
+    [Fact]
+    public async Task QuotationActionsMenuEscapesTheRevealedCardClippingBoundary()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='quotation-actions']");
+        await card.ScrollIntoViewIfNeededAsync();
+
+        await card.GetByRole(AriaRole.Button, new() { Name = "Actions", Exact = true }).ClickAsync();
+
+        var menu = page.Locator("[data-slot='dropdown-menu-content']");
+        await Assertions.Expect(menu).ToBeVisibleAsync();
+        await Assertions.Expect(menu).ToHaveAttributeAsync("data-positioned", "true");
+        Assert.True(await menu.EvaluateAsync<bool>("element => element.matches(':popover-open')"));
+        Assert.True(await menu.EvaluateAsync<bool>("""
+            element => {
+                const box = element.getBoundingClientRect();
+                const x = Math.min(innerWidth - 2, Math.max(2, box.left + Math.min(12, box.width / 2)));
+                const y = Math.min(innerHeight - 2, Math.max(2, box.bottom - Math.min(12, box.height / 2)));
+                const hit = document.elementFromPoint(x, y);
+                return hit !== null && element.contains(hit);
+            }
+            """));
+    }
+
     [Theory]
     [MemberData(nameof(ReleaseViewports))]
     public async Task EveryCuratedCardContainsItsVisibleControlsAndMaintainsReadableType(int width, int height)

@@ -206,6 +206,7 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     const trigger = document.getElementById(triggerId); if (!trigger) return;
     const focusTarget = document.getElementById(focusTargetId) || trigger;
     const previous = restoreFocusOnDetach ? focusTarget : null;
+    if (content.showPopover) { content.setAttribute('popover', 'manual'); if (!content.matches(':popover-open')) content.showPopover(); }
     const sync = () => placePositioned(content, trigger, side, align, sideOffset, alignOffset, padding);
     acquireLayer(content);
     const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
@@ -217,7 +218,7 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     queueMicrotask(() => { sync(); if (focusContent) (focusable(content)[0] || content).focus({ preventScroll: true }); });
     positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver, restoreFocus: restoreFocusOnDetach });
 }
-export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
+export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (content.matches(':popover-open')) content.hidePopover(); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
 export function isPositionedAttached(content) { return positioned.has(content); }
 
 const hoverCards = new Map();
@@ -309,7 +310,7 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
     const keydown = event => {
         const scope = document.activeElement?.closest('[role="menu"]') || menu;
         const expandedSub = event.key === 'Escape' ? menu.querySelector('[data-slot$="sub-trigger"][aria-expanded="true"]') : null;
-        if (expandedSub) { event.preventDefault(); expandedSub.click(); expandedSub.focus({ preventScroll: true }); return; }
+        if (expandedSub) { event.__shadcnLayerHandled = true; event.preventDefault(); event.stopImmediatePropagation(); expandedSub.click(); expandedSub.focus({ preventScroll: true }); return; }
         if (event.key === 'Escape' && scope !== menu) { event.preventDefault(); const sub = scope.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]'); if (sub?.getAttribute('aria-expanded') === 'true') sub.click(); sub?.focus({ preventScroll: true }); return; }
         const items = enabled(scope), current = items.indexOf(document.activeElement), rtl = getComputedStyle(scope).direction === 'rtl';
         if (event.key === 'ArrowDown') { event.preventDefault(); focusAt(scope, current + 1); }
