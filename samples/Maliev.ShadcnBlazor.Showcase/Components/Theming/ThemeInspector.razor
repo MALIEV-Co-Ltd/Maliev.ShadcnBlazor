@@ -134,7 +134,7 @@
     ];
     private static readonly IReadOnlyList<ThemeStudioIconLibrary> IconLibraries = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).ToArray();
     private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
-    private string ValidationLabel => State.Validation.IsValid ? State.Validation.Warnings.Count > 0 ? $"Valid with {State.Validation.Warnings.Count} warnings" : "Ready to export" : $"{State.Validation.Errors.Count} errors require attention";
+    private string ValidationLabel => ThemeValidationPresentation.StatusLabel(State.Validation.Errors.Count, State.Validation.Warnings.Count);
     private void OpenValidation() { _validationOpen = true; _focusValidation = true; }
     private void SetValidationOpen(bool open) => _validationOpen = open;
     private async Task Shuffle()

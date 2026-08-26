@@ -5,8 +5,8 @@
          data-valid="@(State.Validation.IsValid ? "true" : "false")"
          aria-live="polite"
          aria-atomic="true">
-    <h3>@ValidationHeading</h3>
-    <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count warnings · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
+    <h3>@ThemeValidationPresentation.StatusLabel(State.Validation.Errors.Count, State.Validation.Warnings.Count)</h3>
+    <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count advisories · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
     @if (State.PaletteDiagnostics.Count > 0)
     {
         <ul class="theme-validation-list" aria-label="Palette generation diagnostics">
@@ -27,8 +27,9 @@
     }
     @if (State.Validation.Warnings.Count > 0)
     {
+        <p>Advisories do not block export.</p>
         <details>
-            <summary>Review contrast warnings</summary>
+            <summary>Review contrast advisories</summary>
             <ul class="theme-validation-list">
                 @foreach (var warning in State.Validation.Warnings)
                 {
@@ -50,9 +51,6 @@
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private int PassingContrastCount => State.Validation.ContrastResults.Count(result => result.Passes);
-    private string ValidationHeading => State.Validation.IsValid
-        ? State.Validation.Warnings.Count > 0 ? "Valid with warnings" : "Theme is ready"
-        : "Theme needs attention";
     private static string EditorHref(string path) => path.StartsWith("light.", StringComparison.Ordinal) || path.StartsWith("dark.", StringComparison.Ordinal)
         ? $"#theme-editor-{path.Replace('.', '-')}"
         : "#theme-generator-options-title";

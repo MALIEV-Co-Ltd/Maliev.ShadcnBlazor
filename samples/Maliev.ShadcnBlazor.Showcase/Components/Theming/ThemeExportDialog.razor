@@ -20,7 +20,7 @@
 
         @if (_bundle is not null)
         {
-            <p><strong>@_bundle.Validation.Errors.Count errors</strong> · @_bundle.Validation.Warnings.Count warnings · @_bundle.Validation.ContrastResults.Count(item => item.Passes)/@_bundle.Validation.ContrastResults.Count contrast checks pass</p>
+            <p><strong>@ThemeValidationPresentation.StatusLabel(_bundle.Validation.Errors.Count, _bundle.Validation.Warnings.Count)</strong> · @_bundle.Validation.ContrastResults.Count(item => item.Passes)/@_bundle.Validation.ContrastResults.Count contrast checks pass</p>
             <ul class="theme-bundle-inventory" aria-label="Bundle files">
                 @foreach (var file in _bundle.Files)
                 {
@@ -33,7 +33,7 @@
                     <input type="checkbox"
                            data-testid="theme-export-warning-ack"
                            @bind="_warningsAcknowledged" />
-                    I reviewed the contrast warnings recorded in README.md.
+                    I reviewed the contrast advisories recorded in README.md.
                 </label>
             }
             <button type="button"

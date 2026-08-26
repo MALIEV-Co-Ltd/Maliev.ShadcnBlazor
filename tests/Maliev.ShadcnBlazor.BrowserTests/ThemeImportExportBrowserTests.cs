@@ -26,6 +26,32 @@ public sealed class ThemeImportExportBrowserTests(
     ];
 
     [Fact]
+    public async Task AdvisoryOnlyValidationKeepsExportAvailableAndExplainsItsConsequence()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        await Assertions.Expect(page.GetByTestId("theme-validation-status")).ToContainTextAsync("Ready to export ·");
+        await Assertions.Expect(page.GetByTestId("theme-export-open")).ToBeEnabledAsync();
+        await page.GetByTestId("theme-validation-status").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-validation-summary")).ToContainTextAsync("Advisories do not block export");
+
+        await page.GetByTestId("theme-export-open").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-export-dialog")).ToBeVisibleAsync();
+        var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+        await Assertions.Expect(acknowledgement).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("theme-download")).ToBeDisabledAsync();
+        await acknowledgement.CheckAsync();
+        await Assertions.Expect(page.GetByTestId("theme-download")).ToBeEnabledAsync();
+    }
+
+    [Fact]
     public async Task ExportDownloadsAndInspectsARealDeterministicBundleThenReimportsItsCanonicalJson()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
