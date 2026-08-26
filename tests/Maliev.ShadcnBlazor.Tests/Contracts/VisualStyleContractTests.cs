@@ -112,7 +112,8 @@ public sealed class VisualStyleContractTests
     }
 
     private static string ReadStylesheet() => File.ReadAllText(Path.Combine(
-        FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-visual-styles.css"));
+        FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-visual-styles.css"))
+        .Replace("\r\n", "\n", StringComparison.Ordinal);
 
     private static string FindRoot()
     {
