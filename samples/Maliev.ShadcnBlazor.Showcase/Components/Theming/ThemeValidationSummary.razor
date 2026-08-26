@@ -6,7 +6,7 @@
          aria-live="polite"
          aria-atomic="true">
     <h3>@ThemeValidationPresentation.StatusLabel(State.Validation.Errors.Count, State.Validation.Warnings.Count)</h3>
-    <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count advisories · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
+    <p>@State.Validation.Errors.Count errors · @ThemeValidationPresentation.AdvisoryLabel(State.Validation.Warnings.Count) · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
     @if (State.PaletteDiagnostics.Count > 0)
     {
         <ul class="theme-validation-list" aria-label="Palette generation diagnostics">

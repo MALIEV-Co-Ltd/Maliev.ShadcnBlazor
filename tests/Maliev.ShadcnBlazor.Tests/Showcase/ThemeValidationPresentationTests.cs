@@ -74,6 +74,23 @@ public sealed class ThemeValidationPresentationComponentTests : BunitContext
         Assert.Contains("Contrast warnings", readme, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ValidationSummaryUsesSingularAdvisoryGrammar()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var validation = new ShadcnThemeValidationResult(
+            [],
+            [new ShadcnThemeValidationMessage("low-contrast", "light.foreground", "Contrast needs review.")],
+            []);
+        typeof(ThemeStudioState).GetProperty(nameof(ThemeStudioState.Validation))!.SetValue(state, validation);
+
+        var cut = Render<ThemeValidationSummary>(parameters => parameters
+            .Add(component => component.State, state));
+
+        Assert.Contains("0 errors · 1 advisory ·", cut.Markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 advisories", cut.Markup, StringComparison.Ordinal);
+    }
+
     private sealed class NoOpStorage : IThemeStudioStorage
     {
         public ValueTask<ThemeStudioStorageResult> LoadAsync() => ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
