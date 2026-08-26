@@ -298,6 +298,30 @@
           "Microsoft.AspNetCore.Components.Web": "[10.0.3, )",
           "MudBlazor": "[9.7.0, )"
         }
+      },
+      "maliev.shadcnblazor.icons.hugeicons": {
+        "type": "Project",
+        "dependencies": {
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
+        }
+      },
+      "maliev.shadcnblazor.icons.lucide": {
+        "type": "Project",
+        "dependencies": {
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
+        }
+      },
+      "maliev.shadcnblazor.icons.phosphor": {
+        "type": "Project",
+        "dependencies": {
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
+        }
+      },
+      "maliev.shadcnblazor.icons.tabler": {
+        "type": "Project",
+        "dependencies": {
+          "Maliev.ShadcnBlazor": "[1.2.1, )"
+        }
       }
     },
     "net10.0/browser-wasm": {}
