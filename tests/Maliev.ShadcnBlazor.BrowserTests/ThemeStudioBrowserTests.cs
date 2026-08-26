@@ -826,7 +826,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             }
             """);
 
-        Assert.Contains("gradient", await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        var regionBackground = await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage");
+        Assert.Contains("gradient", regionBackground, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("url(", regionBackground, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("none", await scope.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"));
         Assert.InRange(cardAlpha, .35, .70);
         Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"));
@@ -850,10 +852,13 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var input = page.Locator("[data-use-case-id='operator-profile'] .shadcn-input").First;
 
         await Assertions.Expect(scope).ToHaveAttributeAsync("data-visual-style", "liquid-glass");
-        Assert.Contains("gradient", await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        var regionBackground = await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage");
+        Assert.Contains("gradient", regionBackground, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("url(", regionBackground, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("gradient", await card.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
-        Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"));
+        Assert.Contains("url(", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("gradient", await input.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("url(", await input.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"), StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

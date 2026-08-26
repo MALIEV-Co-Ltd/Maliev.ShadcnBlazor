@@ -24,6 +24,7 @@
   --shadcn-style-control-edge: transparent;
   --shadcn-style-overlay-edge: transparent;
   --shadcn-style-overlay-shadow: var(--shadcn-shadow-lg);
+  --shadcn-style-refraction-filter: none;
   color: var(--shadcn-foreground);
 }
 
@@ -54,17 +55,16 @@
 }
 
 .shadcn-visual-style-scope[data-visual-style="glass"] {
-  --shadcn-style-surface: var(--shadcn-card);
-  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 64%, transparent);
+  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 36%, transparent);
   --shadcn-style-surface-strong: var(--shadcn-popover);
-  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 76%, transparent);
-  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 58%, transparent);
+  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 58%, transparent);
+  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 30%, transparent);
   --shadcn-style-border: transparent;
   --shadcn-style-border-width: 0px;
   --shadcn-style-shadow: 0 .75rem 2.25rem color-mix(in oklch, var(--shadcn-foreground) 10%, transparent), inset 0 1px 0 color-mix(in oklch, white 38%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent);
   --shadcn-style-shadow-hover: 0 1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 color-mix(in oklch, white 46%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
-  --shadcn-style-blur: calc(14px * var(--shadcn-style-blur-scale, 1));
-  --shadcn-style-saturation: 125%;
+  --shadcn-style-blur: calc(18px * var(--shadcn-style-blur-scale, 1));
+  --shadcn-style-saturation: 132%;
   --shadcn-style-radius-factor: 1.15;
 }
 
@@ -85,16 +85,16 @@
     radial-gradient(circle at 88% 18%, color-mix(in oklch, var(--shadcn-chart-2) 20%, transparent) 0 7%, transparent 28%),
     radial-gradient(circle at 48% 92%, color-mix(in oklch, var(--shadcn-chart-4) 16%, transparent) 0 10%, transparent 34%),
     linear-gradient(135deg, color-mix(in oklch, var(--shadcn-background) 96%, var(--shadcn-muted)) 0%, var(--shadcn-background) 48%, color-mix(in oklch, var(--shadcn-background) 88%, var(--shadcn-primary)) 100%);
-  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 58%, transparent);
-  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 76%, transparent);
-  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 54%, transparent);
-  --shadcn-style-overlay-surface: color-mix(in oklch, var(--shadcn-popover) 84%, transparent);
+  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 26%, transparent);
+  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 42%, transparent);
+  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 20%, transparent);
+  --shadcn-style-overlay-surface: color-mix(in oklch, var(--shadcn-popover) 52%, transparent);
   --shadcn-style-specular: color-mix(in oklch, white 72%, transparent);
   --shadcn-style-lowlight: color-mix(in oklch, var(--shadcn-foreground) 11%, transparent);
   --shadcn-style-border: color-mix(in oklch, var(--shadcn-style-specular) 68%, var(--shadcn-border));
-  --shadcn-style-card-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-surface) 82%, white 18%) 0%, var(--shadcn-style-surface) 46%, color-mix(in oklch, var(--shadcn-style-surface) 88%, var(--shadcn-style-lowlight)) 100%);
-  --shadcn-style-control-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-control-surface) 78%, white 22%) 0%, var(--shadcn-style-control-surface) 58%, color-mix(in oklch, var(--shadcn-style-control-surface) 90%, var(--shadcn-style-lowlight)) 100%);
-  --shadcn-style-overlay-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-overlay-surface) 84%, white 16%) 0%, var(--shadcn-style-overlay-surface) 52%, color-mix(in oklch, var(--shadcn-style-overlay-surface) 86%, var(--shadcn-style-lowlight)) 100%);
+  --shadcn-style-card-material: linear-gradient(var(--shadcn-style-surface), var(--shadcn-style-surface));
+  --shadcn-style-control-material: linear-gradient(var(--shadcn-style-control-surface), var(--shadcn-style-control-surface));
+  --shadcn-style-overlay-material: linear-gradient(var(--shadcn-style-overlay-surface), var(--shadcn-style-overlay-surface));
   --shadcn-style-card-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 34%, transparent) 20%, transparent 44%, color-mix(in oklch, var(--shadcn-style-lowlight) 86%, transparent) 76%, color-mix(in oklch, var(--shadcn-style-specular) 42%, transparent) 100%);
   --shadcn-style-control-edge: linear-gradient(135deg, color-mix(in oklch, var(--shadcn-style-specular) 88%, transparent) 0%, color-mix(in oklch, var(--shadcn-style-specular) 28%, transparent) 24%, transparent 48%, color-mix(in oklch, var(--shadcn-style-lowlight) 78%, transparent) 78%, color-mix(in oklch, var(--shadcn-style-specular) 36%, transparent) 100%);
   --shadcn-style-overlay-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 38%, transparent) 18%, transparent 40%, color-mix(in oklch, var(--shadcn-style-lowlight) 92%, transparent) 74%, color-mix(in oklch, var(--shadcn-style-specular) 48%, transparent) 100%);
@@ -107,10 +107,6 @@
   --shadcn-style-saturation: 155%;
   --shadcn-style-radius-factor: 1.55;
   isolation: isolate;
-  background-color: var(--shadcn-background);
-  background-image: var(--shadcn-style-environment, none);
-  background-attachment: local;
-  background-size: cover;
 }
 
 .shadcn-visual-style-scope[data-visual-style="liquid-glass"][data-intensity="strong"] {
@@ -201,6 +197,8 @@
   border-color: transparent;
   background: var(--shadcn-style-card-material) padding-box, var(--shadcn-style-card-edge) border-box;
   box-shadow: var(--shadcn-style-shadow);
+  backdrop-filter: blur(var(--shadcn-style-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
 }
 
 .shadcn-visual-style-scope :where(
@@ -239,8 +237,8 @@
   border-color: transparent;
   background: var(--shadcn-style-overlay-material) padding-box, var(--shadcn-style-overlay-edge) border-box;
   box-shadow: var(--shadcn-style-overlay-shadow);
-  backdrop-filter: blur(var(--shadcn-style-overlay-blur)) saturate(var(--shadcn-style-saturation));
-  -webkit-backdrop-filter: blur(var(--shadcn-style-overlay-blur)) saturate(var(--shadcn-style-saturation));
+  backdrop-filter: blur(var(--shadcn-style-overlay-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-overlay-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
 }
 
 .shadcn-visual-style-scope :where(
@@ -273,8 +271,8 @@
   border-color: transparent;
   background: var(--shadcn-style-control-material) padding-box, var(--shadcn-style-control-edge) border-box;
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
-  backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
-  -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
+  backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
 }
 
 .shadcn-visual-style-scope[data-visual-style="glass"] :where(
@@ -318,6 +316,7 @@
     --shadcn-style-control-blur: 0px;
     --shadcn-style-overlay-blur: 0px;
     --shadcn-style-saturation: 100%;
+    --shadcn-style-refraction-filter: none;
   }
 }
 
@@ -346,6 +345,7 @@
     --shadcn-style-saturation: 100%;
     --shadcn-style-accent-glow: transparent;
     --shadcn-style-environment: none;
+    --shadcn-style-refraction-filter: none;
     background-image: none;
   }
 }

@@ -55,7 +55,7 @@ public sealed class VisualStyleContractTests
     }
 
     [Fact]
-    public void SpatialGlassOwnsAnAmbientFieldAndLayeredMaterialTokens()
+    public void SpatialGlassOwnsRefractionAndLayeredMaterialTokens()
     {
         var css = ReadStylesheet();
 
@@ -64,8 +64,9 @@ public sealed class VisualStyleContractTests
         Assert.Contains("--shadcn-style-lowlight:", css, StringComparison.Ordinal);
         Assert.Contains("--shadcn-style-control-surface:", css, StringComparison.Ordinal);
         Assert.Contains("--shadcn-style-overlay-surface:", css, StringComparison.Ordinal);
-        Assert.Contains("background-image: var(--shadcn-style-environment", css, StringComparison.Ordinal);
-        Assert.Contains("linear-gradient(145deg", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-refraction-filter:", css, StringComparison.Ordinal);
+        Assert.Contains("var(--shadcn-style-refraction-filter)", css, StringComparison.Ordinal);
+        Assert.Contains("var(--shadcn-style-card-edge)", css, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -34,6 +34,39 @@ public sealed class VisualStyleScopeTests : BunitContext
     }
 
     [Fact]
+    public void LiquidGlassOwnsAUniqueBackdropRefractionFilter()
+    {
+        var first = Render<ShadcnVisualStyleScope>(parameters => parameters
+            .Add(component => component.VisualStyle, ShadcnVisualStyle.LiquidGlass));
+        var second = Render<ShadcnVisualStyleScope>(parameters => parameters
+            .Add(component => component.VisualStyle, ShadcnVisualStyle.LiquidGlass));
+
+        var firstFilter = first.Find("filter[data-slot='liquid-glass-refraction-filter']");
+        var secondFilter = second.Find("filter[data-slot='liquid-glass-refraction-filter']");
+        var firstId = firstFilter.GetAttribute("id");
+        var secondId = secondFilter.GetAttribute("id");
+
+        Assert.False(string.IsNullOrWhiteSpace(firstId));
+        Assert.NotEqual(firstId, secondId);
+        Assert.Contains($"--shadcn-style-refraction-filter: url(#{firstId})", first.Find("[data-slot='visual-style-scope']").GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Single(first.FindAll("feDisplacementMap"));
+        Assert.Single(first.FindAll("feImage"));
+        Assert.Empty(first.FindAll("feTurbulence"));
+    }
+
+    [Theory]
+    [InlineData(ShadcnVisualStyle.Inherit)]
+    [InlineData(ShadcnVisualStyle.Glass)]
+    [InlineData(ShadcnVisualStyle.Minimal)]
+    public void NonSpatialTreatmentsDoNotRenderARefractionFilter(ShadcnVisualStyle style)
+    {
+        var cut = Render<ShadcnVisualStyleScope>(parameters => parameters
+            .Add(component => component.VisualStyle, style));
+
+        Assert.Empty(cut.FindAll("filter[data-slot='liquid-glass-refraction-filter']"));
+    }
+
+    [Fact]
     public void ExplicitLayersAndCallerAttributesCoexistWithoutOverridingOwnedAttributes()
     {
         var cut = Render<ShadcnVisualStyleScope>(parameters => parameters

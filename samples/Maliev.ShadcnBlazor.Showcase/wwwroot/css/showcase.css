@@ -8976,11 +8976,12 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-preview-region:has(.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="glass"]) {
     background-color: var(--shadcn-background);
     background-image:
-        radial-gradient(circle at 12% 10%, color-mix(in oklch, var(--shadcn-primary) 13%, transparent) 0 6%, transparent 28%),
-        radial-gradient(circle at 88% 22%, color-mix(in oklch, var(--shadcn-chart-2) 10%, transparent) 0 7%, transparent 30%),
-        linear-gradient(138deg, color-mix(in oklch, var(--shadcn-background) 94%, var(--shadcn-muted)) 0%, var(--shadcn-background) 48%, color-mix(in oklch, var(--shadcn-background) 92%, var(--shadcn-primary)) 100%);
+        linear-gradient(138deg, color-mix(in oklch, var(--shadcn-background) 26%, transparent), color-mix(in oklch, var(--shadcn-background) 16%, var(--shadcn-primary) 7%)),
+        radial-gradient(circle at 12% 10%, color-mix(in oklch, var(--shadcn-primary) 24%, transparent) 0 8%, transparent 34%),
+        url("../images/attachments/office-reference.png");
     background-attachment: local;
-    background-size: cover;
+    background-position: center, center, 56% center;
+    background-size: cover, cover, cover;
 }
 .theme-preview-scope .shadcn-visual-style-scope[data-visual-style="glass"] {
     min-block-size: 100%;
@@ -8992,14 +8993,15 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 }
 .theme-preview-region:has(.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"]) {
     --shadcn-style-environment:
-        radial-gradient(circle at 7% 4%, color-mix(in oklch, var(--shadcn-primary) 30%, transparent) 0 5%, transparent 23%),
-        radial-gradient(circle at 94% 14%, color-mix(in oklch, var(--shadcn-chart-2) 25%, transparent) 0 6%, transparent 24%),
-        radial-gradient(circle at 74% 74%, color-mix(in oklch, var(--shadcn-chart-4) 18%, transparent) 0 8%, transparent 30%),
-        linear-gradient(132deg, color-mix(in oklch, var(--shadcn-background) 90%, var(--shadcn-primary)) 0%, var(--shadcn-background) 42%, color-mix(in oklch, var(--shadcn-background) 86%, var(--shadcn-chart-2)) 100%);
+        linear-gradient(132deg, color-mix(in oklch, var(--shadcn-background) 22%, var(--shadcn-primary) 7%), color-mix(in oklch, var(--shadcn-background) 10%, transparent)),
+        radial-gradient(circle at 7% 4%, color-mix(in oklch, var(--shadcn-primary) 34%, transparent) 0 7%, transparent 28%),
+        radial-gradient(circle at 94% 14%, color-mix(in oklch, var(--shadcn-chart-2) 28%, transparent) 0 8%, transparent 30%),
+        url("../images/attachments/office-reference.png");
     background-color: var(--shadcn-background);
     background-image: var(--shadcn-style-environment);
     background-attachment: local;
-    background-size: cover;
+    background-position: center, center, center, 58% center;
+    background-size: cover, cover, cover, cover;
 }
 .theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"] {
     --shadcn-style-environment: inherit;
