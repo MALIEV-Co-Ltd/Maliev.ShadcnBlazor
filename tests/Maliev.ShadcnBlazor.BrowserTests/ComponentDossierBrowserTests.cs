@@ -81,9 +81,16 @@ public sealed class ComponentDossierBrowserTests(
         await page.ChooseOptionAsync("control-aspect-ratio", "4:3");
         await Assertions.Expect(page.Locator("[data-slot='aspect-ratio']")).ToHaveAttributeAsync("style", new Regex("aspect-ratio: 1.3333333333333333(?:;|$)"));
 
-        var previewSource = page.Locator("#preview").GetByTestId("copy-source");
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
+        var previewSource = source.GetByTestId("copy-source");
         await previewSource.ClickAsync();
-        await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
+        await Assertions.Expect(source.Locator(".component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         var copied = await page.EvaluateAsync<string>("navigator.clipboard.readText()");
         Assert.Contains("<ShadcnAspectRatio", copied, StringComparison.Ordinal);
         Assert.Contains("Ratio=\"@(4d / 3d)\"", copied, StringComparison.Ordinal);
@@ -681,8 +688,16 @@ public sealed class ComponentDossierBrowserTests(
         await page.GetByTestId("component-dossier").WaitForAsync();
 
         await Assertions.Expect(page.GetByTestId("planned-component-notice")).ToHaveCountAsync(0);
+        var preview = page.GetByTestId("component-preview").First;
         await Assertions.Expect(page.GetByTestId("component-preview")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(3);
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        await Assertions.Expect(sourceDisclosure.Locator("[data-slot='code-block']")).ToBeVisibleAsync();
+        await Assertions.Expect(sourceDisclosure.GetByTestId("copy-source")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("#installation").GetByTestId("copy-source")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(2);
         await Assertions.Expect(page.GetByTestId("component-api")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByTestId("evidence-row")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);

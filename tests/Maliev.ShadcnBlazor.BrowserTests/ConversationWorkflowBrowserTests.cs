@@ -76,11 +76,18 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await page.GetByTestId("control-bubble-end").CheckAsync();
         var selectedIncomingBubble = page.Locator("[data-bubble-role='incoming']").Filter(new() { HasTextString = "I can group messages, switch sides, and keep the whole thread easy to scan." });
         await Assertions.Expect(selectedIncomingBubble).ToHaveAttributeAsync("data-align", "end");
-        await page.Locator("#preview .component-code").HoverAsync();
-        var copy = page.Locator("#preview .component-code").GetByTestId("copy-source");
+        var bubblePreview = page.GetByTestId("component-preview").First;
+        var bubbleSourceDisclosure = bubblePreview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(bubbleSourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await bubbleSourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(bubbleSourceDisclosure).ToHaveAttributeAsync("open", "");
+        var bubbleSource = bubbleSourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(bubbleSource).ToBeVisibleAsync();
+        await bubbleSource.HoverAsync();
+        var copy = bubbleSource.GetByTestId("copy-source");
         await copy.ClickAsync();
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "true");
-        await Assertions.Expect(page.Locator("#preview .component-code .code-token-tag")).Not.ToHaveCountAsync(0);
+        await Assertions.Expect(bubbleSource.Locator(".code-token-tag")).Not.ToHaveCountAsync(0);
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "false", new() { Timeout = 3000 });
         await copy.ClickAsync();
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copied", "true");
@@ -202,6 +209,8 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         });
         var page = await context.NewPageAsync();
 
+        // The canonical Bubble preview expresses its numeric count as a quoted Razor
+        // attribute, so the source legitimately has no standalone number token.
         foreach (var (theme, expectedColors) in new[]
         {
             ("light", new Dictionary<string, string>
@@ -209,7 +218,6 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
                 ["tag"] = "rgb(128, 0, 0)",
                 ["string"] = "rgb(163, 21, 21)",
                 ["type"] = "rgb(38, 127, 153)",
-                ["number"] = "rgb(9, 134, 88)",
                 ["directive"] = "rgb(175, 0, 219)"
             }),
             ("dark", new Dictionary<string, string>
@@ -217,14 +225,18 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
                 ["tag"] = "rgb(86, 156, 214)",
                 ["string"] = "rgb(206, 145, 120)",
                 ["type"] = "rgb(78, 201, 176)",
-                ["number"] = "rgb(181, 206, 168)",
                 ["directive"] = "rgb(197, 134, 192)"
             })
         })
         {
             await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/bubble?theme={theme}").ToString());
-            var code = page.Locator("#preview .component-code");
-            await code.WaitForAsync();
+            var preview = page.GetByTestId("component-preview").First;
+            var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+            await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+            await sourceDisclosure.Locator("summary").ClickAsync();
+            await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+            var code = sourceDisclosure.Locator("[data-slot='code-block']");
+            await Assertions.Expect(code).ToBeVisibleAsync();
             if (theme == "dark")
             {
                 await page.GetByTestId("documentation-theme-toggle").ClickAsync();

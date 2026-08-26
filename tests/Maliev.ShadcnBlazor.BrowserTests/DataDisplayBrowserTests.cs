@@ -121,7 +121,14 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.InRange(Math.Abs(centering[0] - centering[1]), 0, 2);
         await page.GetByTestId("control-table-borders").UncheckAsync();
         await Assertions.Expect(table).ToHaveAttributeAsync("data-borders", "false");
-        await Assertions.Expect(page.Locator("section.component-code").First).ToContainTextAsync("Borders=\"false\"");
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
+        await Assertions.Expect(source).ToContainTextAsync("Borders=\"false\"");
         await page.GetByTestId("control-table-selected").CheckAsync();
         await page.GetByTestId("control-table-expanded").CheckAsync();
         var row = page.Locator("#preview tbody [data-slot='table-row']").First;

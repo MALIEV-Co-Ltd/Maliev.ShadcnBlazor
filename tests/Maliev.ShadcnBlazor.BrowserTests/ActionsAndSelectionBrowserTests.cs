@@ -939,8 +939,15 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='false']")).ToHaveCountAsync(0);
 
-        await page.Locator("#preview").GetByTestId("copy-source").ClickAsync();
-        await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
+        await source.GetByTestId("copy-source").ClickAsync();
+        await Assertions.Expect(source.Locator(".component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         Assert.Contains("<Shadcn", await page.EvaluateAsync<string>("navigator.clipboard.readText()"), StringComparison.Ordinal);
     }
 
