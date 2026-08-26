@@ -31,6 +31,7 @@ public sealed class ThemeImportExportBrowserTests(
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
             ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
             ReducedMotion = ReducedMotion.Reduce
         });
         var page = await context.NewPageAsync();
@@ -46,9 +47,18 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-export-dialog")).ToBeVisibleAsync();
         var acknowledgement = page.GetByTestId("theme-export-warning-ack");
         await Assertions.Expect(acknowledgement).ToBeVisibleAsync();
+        await Assertions.Expect(acknowledgement.Locator("xpath=.."))
+            .ToContainTextAsync("contrast warnings recorded in README.md");
         await Assertions.Expect(page.GetByTestId("theme-download")).ToBeDisabledAsync();
         await acknowledgement.CheckAsync();
         await Assertions.Expect(page.GetByTestId("theme-download")).ToBeEnabledAsync();
+        var download = await page.RunAndWaitForDownloadAsync(
+            () => page.GetByTestId("theme-download").ClickAsync());
+        var downloadPath = await download.PathAsync();
+        Assert.NotNull(downloadPath);
+        using var archive = ZipFile.OpenRead(downloadPath);
+        var readme = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("README.md")!));
+        Assert.Contains("Contrast warnings", readme, StringComparison.Ordinal);
     }
 
     [Fact]

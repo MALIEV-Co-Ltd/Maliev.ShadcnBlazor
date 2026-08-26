@@ -464,10 +464,8 @@ public sealed class ThemeImportExportComponentTests : BunitContext
     }
 
     [Fact]
-    public void ExportUsesTheLastValidAppliedThemeWhenEditorLocalTextIsInvalid()
+    public void CurrentValidationErrorBlocksExportEvenWhenTheAppliedThemeRemainsValid()
     {
-        var downloadModule = JSInterop.SetupModule("./js/shadcn-download.js");
-        downloadModule.SetupVoid("downloadBytes", _ => true);
         var state = Services.GetRequiredService<ThemeStudioState>();
         state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
         state.SetToken(ThemeStudioScheme.Light, "primary", "red; background:url(evil)");
@@ -478,17 +476,12 @@ public sealed class ThemeImportExportComponentTests : BunitContext
             .Add(component => component.State, state)
             .Add(component => component.Open, true));
         cut.FindAll("input[data-testid='theme-export-warning-ack']").FirstOrDefault()?.Change(true);
-        cut.Find("button[data-testid='theme-download']").Click();
-        cut.WaitForAssertion(() => Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier == "downloadBytes"));
-        var invocation = Assert.Single(JSInterop.Invocations, invocation => invocation.Identifier == "downloadBytes");
-        var zipBytes = Assert.IsType<byte[]>(invocation.Arguments[2]);
-        using var archive = new ZipArchive(new MemoryStream(zipBytes), ZipArchiveMode.Read);
-        using var reader = new StreamReader(archive.GetEntry("theme.css")!.Open(), new UTF8Encoding(false, true));
-        var css = reader.ReadToEnd();
+        var download = cut.Find("button[data-testid='theme-download']");
 
-        Assert.Contains("Bundle preview ready", cut.Find("[data-testid='theme-export-status']").TextContent, StringComparison.Ordinal);
-        Assert.Contains("#123456", css, StringComparison.Ordinal);
-        Assert.DoesNotContain("background:url(evil)", css, StringComparison.Ordinal);
+        Assert.Contains("Export blocked · 1 error", cut.Markup, StringComparison.Ordinal);
+        Assert.True(download.HasAttribute("disabled"));
+        download.Click();
+        Assert.DoesNotContain(JSInterop.Invocations, invocation => invocation.Identifier == "downloadBytes");
     }
 
     [Fact]
