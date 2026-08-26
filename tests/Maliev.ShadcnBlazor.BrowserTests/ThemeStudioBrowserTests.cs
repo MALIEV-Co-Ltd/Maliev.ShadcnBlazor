@@ -812,15 +812,39 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await SelectOptionAsync(page, "theme-visual-style", "Spatial glass");
         await SelectOptionAsync(page, "theme-depth-treatment", "Floating");
 
+        var region = page.Locator(".theme-preview-region");
         var scope = page.GetByTestId("theme-visual-style-scope");
         var card = page.Locator("[data-use-case-id='production-capacity']");
         var input = page.Locator("[data-use-case-id='operator-profile'] .shadcn-input").First;
 
         await Assertions.Expect(scope).ToHaveAttributeAsync("data-visual-style", "liquid-glass");
-        Assert.Contains("gradient", await scope.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("gradient", await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("gradient", await card.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
         Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"));
         Assert.Contains("gradient", await input.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SpatialGlassFillsPreviewGuttersAndUsesDirectionalOpticalEdges()
+    {
+        await using var context = await NewContextAsync(1900, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+
+        await SelectOptionAsync(page, "theme-visual-style", "Spatial glass");
+        await SelectOptionAsync(page, "theme-depth-treatment", "Spatial");
+
+        var region = page.Locator(".theme-preview-region");
+        var scope = page.GetByTestId("theme-visual-style-scope");
+        var card = page.Locator("[data-use-case-id='production-capacity']");
+
+        Assert.Contains("gradient", await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("none", await scope.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"));
+        Assert.Equal("rgba(0, 0, 0, 0)", await card.EvaluateAsync<string>("element => getComputedStyle(element).borderTopColor"));
+        Assert.True(
+            (await card.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"))
+                .Split("gradient", StringSplitOptions.None).Length >= 3,
+            "Spatial glass cards should layer their material and directional edge gradients.");
+        Assert.Equal("none", await card.EvaluateAsync<string>("element => getComputedStyle(element, '::after').borderTopStyle"));
     }
 
     [Fact]

@@ -8905,13 +8905,25 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-inspector-note { overflow-wrap: anywhere; color: var(--shadcn-muted-foreground); font-size: .6875rem; }
 .theme-preview-stage { position: relative; }
 .theme-preview-scope { display: block; overflow: visible; border: 0; border-radius: 0; background: transparent; font-family: var(--shadcn-font-sans); }
-.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"] {
+.theme-preview-region:has(.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"]) {
     --shadcn-style-environment:
         radial-gradient(circle at 7% 4%, color-mix(in oklch, var(--shadcn-primary) 30%, transparent) 0 5%, transparent 23%),
         radial-gradient(circle at 94% 14%, color-mix(in oklch, var(--shadcn-chart-2) 25%, transparent) 0 6%, transparent 24%),
         radial-gradient(circle at 74% 74%, color-mix(in oklch, var(--shadcn-chart-4) 18%, transparent) 0 8%, transparent 30%),
         linear-gradient(132deg, color-mix(in oklch, var(--shadcn-background) 90%, var(--shadcn-primary)) 0%, var(--shadcn-background) 42%, color-mix(in oklch, var(--shadcn-background) 86%, var(--shadcn-chart-2)) 100%);
+    background-color: var(--shadcn-background);
+    background-image: var(--shadcn-style-environment);
+    background-attachment: local;
+    background-size: cover;
+}
+.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"] {
+    --shadcn-style-environment: inherit;
     min-block-size: 100%;
+    background-color: transparent;
+    background-image: none;
+}
+.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"] .theme-use-case-card::after {
+    border: 0;
 }
 
 @media (max-width: 64rem) {

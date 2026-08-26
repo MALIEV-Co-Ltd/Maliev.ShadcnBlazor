@@ -20,6 +20,9 @@
   --shadcn-style-card-material: var(--shadcn-style-surface);
   --shadcn-style-control-material: var(--shadcn-style-control-surface);
   --shadcn-style-overlay-material: var(--shadcn-style-overlay-surface);
+  --shadcn-style-card-edge: transparent;
+  --shadcn-style-control-edge: transparent;
+  --shadcn-style-overlay-edge: transparent;
   --shadcn-style-overlay-shadow: var(--shadcn-shadow-lg);
   color: var(--shadcn-foreground);
 }
@@ -90,6 +93,9 @@
   --shadcn-style-card-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-surface) 82%, white 18%) 0%, var(--shadcn-style-surface) 46%, color-mix(in oklch, var(--shadcn-style-surface) 88%, var(--shadcn-style-lowlight)) 100%);
   --shadcn-style-control-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-control-surface) 78%, white 22%) 0%, var(--shadcn-style-control-surface) 58%, color-mix(in oklch, var(--shadcn-style-control-surface) 90%, var(--shadcn-style-lowlight)) 100%);
   --shadcn-style-overlay-material: linear-gradient(145deg, color-mix(in oklch, var(--shadcn-style-overlay-surface) 84%, white 16%) 0%, var(--shadcn-style-overlay-surface) 52%, color-mix(in oklch, var(--shadcn-style-overlay-surface) 86%, var(--shadcn-style-lowlight)) 100%);
+  --shadcn-style-card-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 34%, transparent) 20%, transparent 44%, color-mix(in oklch, var(--shadcn-style-lowlight) 86%, transparent) 76%, color-mix(in oklch, var(--shadcn-style-specular) 42%, transparent) 100%);
+  --shadcn-style-control-edge: linear-gradient(135deg, color-mix(in oklch, var(--shadcn-style-specular) 88%, transparent) 0%, color-mix(in oklch, var(--shadcn-style-specular) 28%, transparent) 24%, transparent 48%, color-mix(in oklch, var(--shadcn-style-lowlight) 78%, transparent) 78%, color-mix(in oklch, var(--shadcn-style-specular) 36%, transparent) 100%);
+  --shadcn-style-overlay-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 38%, transparent) 18%, transparent 40%, color-mix(in oklch, var(--shadcn-style-lowlight) 92%, transparent) 74%, color-mix(in oklch, var(--shadcn-style-specular) 48%, transparent) 100%);
   --shadcn-style-shadow: 0 .16rem .35rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent), 0 1rem 2.8rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
   --shadcn-style-shadow-hover: 0 .2rem .45rem color-mix(in oklch, var(--shadcn-foreground) 9%, transparent), 0 1.4rem 3.5rem color-mix(in oklch, var(--shadcn-foreground) 18%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
   --shadcn-style-overlay-shadow: 0 .4rem 1rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), 0 1.75rem 4.5rem color-mix(in oklch, var(--shadcn-foreground) 24%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
@@ -190,7 +196,8 @@
   [data-slot="empty"],
   [data-slot="command"]
 ):not(:has(:is(.shadcn-dialog-portal, .shadcn-sheet-portal, .shadcn-drawer-portal, .shadcn-alert-dialog-portal))) {
-  background: var(--shadcn-style-card-material);
+  border-color: transparent;
+  background: var(--shadcn-style-card-material) padding-box, var(--shadcn-style-card-edge) border-box;
   box-shadow: var(--shadcn-style-shadow);
 }
 
@@ -227,7 +234,8 @@
   .shadcn-tooltip-content,
   .shadcn-toast
 ) {
-  background: var(--shadcn-style-overlay-material);
+  border-color: transparent;
+  background: var(--shadcn-style-overlay-material) padding-box, var(--shadcn-style-overlay-edge) border-box;
   box-shadow: var(--shadcn-style-overlay-shadow);
   backdrop-filter: blur(var(--shadcn-style-overlay-blur)) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-overlay-blur)) saturate(var(--shadcn-style-saturation));
@@ -260,8 +268,8 @@
   .shadcn-button[data-variant="outline"],
   .shadcn-button[data-variant="secondary"]
 ) {
-  border-color: var(--shadcn-style-border);
-  background: var(--shadcn-style-control-material);
+  border-color: transparent;
+  background: var(--shadcn-style-control-material) padding-box, var(--shadcn-style-control-edge) border-box;
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
   backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
