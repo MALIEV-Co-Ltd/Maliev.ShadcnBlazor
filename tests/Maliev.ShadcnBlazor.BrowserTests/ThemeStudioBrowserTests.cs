@@ -1094,8 +1094,34 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.InRange(overflow, 0, 1);
         Assert.Equal(37, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
         Assert.Equal(0, await page.Locator(".theme-bento__grid [data-component-slug]").CountAsync());
-        if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeHiddenAsync(); }
+        if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeVisibleAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
+    }
+
+    [Theory]
+    [InlineData(1440, 900)]
+    [InlineData(390, 844)]
+    public async Task ThemeStudioExplainsAndNavigatesTheEvaluationRunway(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Navigation, new() { Name = "Preview categories" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 2 })).ToBeVisibleAsync();
+        Assert.Equal(37, await page.Locator("[data-use-case-id]").CountAsync());
+
+        var forms = page.GetByRole(AriaRole.Link, new() { Name = "Forms and input" });
+        await forms.ClickAsync();
+        await Assertions.Expect(page.Locator("#theme-category-forms")).ToBeVisibleAsync();
+
+        if (width != 390) return;
+
+        await OpenSettingsAsync(page);
+        await Assertions.Expect(page.GetByTestId("theme-device-controls")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("locale-english")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByTestId("locale-thai")).ToBeVisibleAsync();
+        Assert.True(await page.GetByTestId("theme-preset-status").EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).fontSize)") >= 12);
     }
 
     [Fact]
