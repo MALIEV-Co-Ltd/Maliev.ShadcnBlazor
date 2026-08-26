@@ -5,7 +5,7 @@
 @inject IShadcnToastService Toasts
 @inject IJSRuntime JS
 
-<div @ref="_viewport" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-toast-viewport")" style="@MergeStyle(null)" data-slot="toast-viewport" data-placement="@PlacementValue" data-maximum-visible="@MaximumVisible" data-reduced-motion="@(ReducedMotion ? "true" : null)" data-expanded="@(_expanded ? "true" : "false")" aria-label="@ViewportLabel" tabindex="-1" @onkeydown="HandleKeyDownAsync" @onmouseenter="() => SetExpanded(true)" @onmouseleave="() => SetExpanded(false)" @onfocusin="() => SetExpanded(true)" @onfocusout="() => SetExpanded(false)">
+<div @ref="_viewport" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-toast-viewport")" style="@MergeStyle(null)" data-slot="toast-viewport" data-placement="@PlacementValue" data-maximum-visible="@MaximumVisible" data-reduced-motion="@(ReducedMotion ? "true" : null)" data-expanded="@(_expanded ? "true" : "false")" role="region" aria-label="@ViewportLabel" tabindex="-1" @onkeydown="HandleKeyDownAsync" @onmouseenter="() => SetExpanded(true)" @onmouseleave="() => SetExpanded(false)" @onfocusin="() => SetExpanded(true)" @onfocusout="() => SetExpanded(false)">
     @foreach (var presentation in PresentedItems)
     {
         var item = presentation.Item;
@@ -77,7 +77,7 @@
         .ToArray();
     private sealed record ToastPresentation(ShadcnToastItem Item, bool Limited, int? StackIndex);
     private string PlacementValue => Placement switch { ShadcnToastPlacement.BottomEnd => "bottom-end", ShadcnToastPlacement.BottomStart => "bottom-start", ShadcnToastPlacement.TopEnd => "top-end", ShadcnToastPlacement.TopStart => "top-start", _ => throw new ArgumentOutOfRangeException(nameof(Placement), Placement, "Unknown toast placement.") };
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-placement", "data-maximum-visible", "data-reduced-motion", "aria-label", "tabindex");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-placement", "data-maximum-visible", "data-reduced-motion", "role", "aria-label", "tabindex");
     protected override void OnInitialized() => Toasts.Changed += HandleChanged;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

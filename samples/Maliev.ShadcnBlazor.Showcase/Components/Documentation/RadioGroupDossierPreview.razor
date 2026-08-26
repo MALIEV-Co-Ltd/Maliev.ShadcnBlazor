@@ -17,6 +17,7 @@
                       Disabled="Disabled"
                       ReadOnly="ReadOnly"
                       Invalid="Invalid"
+                      HideIndicator="HideIndicator"
                       Name="review-speed"
                       AdditionalAttributes="GroupAttributes">
         <ShadcnRadioGroupItem TValue="string" Value="@("standard")">
@@ -39,6 +40,7 @@
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public bool Invalid { get; set; }
+    [Parameter] public bool HideIndicator { get; set; }
 
     private string CurrentValue = "priority";
     private string? LastValue;

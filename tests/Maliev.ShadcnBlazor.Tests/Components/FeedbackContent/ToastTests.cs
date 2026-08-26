@@ -234,6 +234,7 @@ public sealed class ToastTests : BunitContext
 
         var cut = Render<ShadcnToaster>();
 
+        Assert.Equal("region", cut.Find("[data-slot='toast-viewport']").GetAttribute("role"));
         Assert.Single(cut.FindAll("[data-slot='toast-icon'] svg[aria-hidden='true']"));
         Assert.Single(cut.FindAll("[data-slot='toast-close'] svg[aria-hidden='true']"));
         Assert.DoesNotContain(">×<", cut.Markup, StringComparison.Ordinal);

@@ -33,8 +33,10 @@
     {
         if (string.Equals(_previousValue, Value, StringComparison.Ordinal)) return;
         _previousValue = Value;
-        _interacted = false;
-        _generation++;
+        if (!_interacted)
+        {
+            _generation++;
+        }
     }
 
     private void Reveal() => _interacted = true;
@@ -42,6 +44,7 @@
     private async Task OnValueChanged(string? value)
     {
         _interacted = true;
+        _previousValue = value ?? string.Empty;
         await ValueChanged.InvokeAsync(value ?? string.Empty);
     }
 }

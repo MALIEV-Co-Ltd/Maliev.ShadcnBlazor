@@ -92,6 +92,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { position: relative; width: fit-content; min-width: 12rem; max-inline-size: 100%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select { display: grid; }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker)[data-open="true"] { z-index: var(--shadcn-z-popover, 50); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger, .shadcn-date-picker-trigger) { display: flex; align-items: center; justify-content: space-between; gap: calc(.375rem * var(--shadcn-spacing-multiplier)); width: 100%; color: var(--shadcn-foreground); text-align: start; white-space: nowrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger, .shadcn-date-picker-trigger) { position: relative; z-index: 1; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-trigger { border-radius: 9999px; padding-block: calc(.5rem * var(--shadcn-spacing-multiplier)); padding-inline-start: calc(.75rem * var(--shadcn-spacing-multiplier)); padding-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; }

@@ -41,14 +41,17 @@
                     if (shape.Kind == "rect") { var shapePoint = shape.PointIndex; <rect data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" x="@F(shape.Values[0])" y="@F(shape.Values[1])" width="@F(shape.Values[2])" height="@F(shape.Values[3])" rx="@BarRadius" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onmouseenter="() => Activate(shapePoint)" @onmousemove:stopPropagation @onmousemove="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "polyline") { <polyline data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="none" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
                     else if (shape.Kind == "area") { <polygon data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="var(--color-@shape.SeriesKey)" fill-opacity="0.25" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
-                    else if (shape.Kind == "arc") { var shapePoint = shape.PointIndex; <path data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" d="@ArcPath(shape.Values)" fill="var(--color-@RadialColorKey(shape.SeriesKey, shapePoint))" @onfocus="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
+                    else if (shape.Kind == "arc") { var shapePoint = shape.PointIndex; <path data-chart-shape="arc" data-series="@shape.SeriesKey" data-point="@shapePoint" data-active="@(_activeIndex == shapePoint ? "true" : null)" style="@RadialOffsetStyle(shape.Values)" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" d="@ArcPath(shape.Values)" transform="@RadialTransform(shape.Values, _activeIndex == shapePoint)" fill="var(--color-@RadialColorKey(shape.SeriesKey, shapePoint))" @onfocus="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "baseline" && ShowAxis) { <line x1="@F(shape.Values[0])" y1="@F(shape.Values[1])" x2="@F(shape.Values[2])" y2="@F(shape.Values[3])" /> }
                 }
             </g>
-            @for (var pointIndex = 0; pointIndex < (VisibleSeries.Count > 0 ? Categories.Count : 0); pointIndex++)
+            @if (Type is ShadcnChartType.Line or ShadcnChartType.Area)
             {
-                var capturedIndex = pointIndex;
-                <circle data-slot="chart-point" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@PointLabel(capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
+                @for (var pointIndex = 0; pointIndex < (VisibleSeries.Count > 0 ? Categories.Count : 0); pointIndex++)
+                {
+                    var capturedIndex = pointIndex;
+                    <circle data-slot="chart-point" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@PointLabel(capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
+                }
             }
             @if (ShowTicks && !IsRadial)
             {
@@ -242,6 +245,19 @@
         if (inner <= 0) return $"M {F(cx)} {F(cy)} L {F(x1)} {F(y1)} A {F(radius)} {F(radius)} 0 {large} 1 {F(x2)} {F(y2)} Z";
         var ix2 = cx + inner * Math.Cos(end); var iy2 = cy + inner * Math.Sin(end); var ix1 = cx + inner * Math.Cos(start); var iy1 = cy + inner * Math.Sin(start);
         return $"M {F(x1)} {F(y1)} A {F(radius)} {F(radius)} 0 {large} 1 {F(x2)} {F(y2)} L {F(ix2)} {F(iy2)} A {F(inner)} {F(inner)} 0 {large} 0 {F(ix1)} {F(iy1)} Z";
+    }
+    private static string? RadialTransform(IReadOnlyList<double> values, bool active)
+    {
+        if (!active) return null;
+        var angle = (values[4] + values[5]) / 2;
+        const double distance = 7;
+        return $"translate({F(distance * Math.Cos(angle))} {F(distance * Math.Sin(angle))})";
+    }
+    private static string RadialOffsetStyle(IReadOnlyList<double> values)
+    {
+        var angle = (values[4] + values[5]) / 2;
+        const double distance = 7;
+        return $"--shadcn-chart-slice-x: {F(distance * Math.Cos(angle))}px; --shadcn-chart-slice-y: {F(distance * Math.Sin(angle))}px";
     }
     public async ValueTask DisposeAsync()
     {

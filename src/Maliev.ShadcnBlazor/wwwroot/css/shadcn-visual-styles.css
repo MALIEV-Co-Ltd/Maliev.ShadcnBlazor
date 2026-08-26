@@ -65,7 +65,7 @@
   --shadcn-style-shadow-hover: 0 1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 color-mix(in oklch, white 46%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
   --shadcn-style-blur: calc(18px * var(--shadcn-style-blur-scale, 1));
   --shadcn-style-saturation: 132%;
-  --shadcn-style-radius-factor: 1.15;
+  --shadcn-style-radius-factor: 1;
 }
 
 .shadcn-visual-style-scope[data-visual-style="neo-brutalist"] {
@@ -105,7 +105,8 @@
   --shadcn-style-control-blur: calc(16px * var(--shadcn-style-blur-scale, 1));
   --shadcn-style-overlay-blur: calc(34px * var(--shadcn-style-blur-scale, 1));
   --shadcn-style-saturation: 155%;
-  --shadcn-style-radius-factor: 1.55;
+  --shadcn-style-radius-factor: 1;
+  --shadcn-style-border-width: 0px;
   isolation: isolate;
 }
 
@@ -273,6 +274,32 @@
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
   backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) {
+  --shadcn-muted-foreground: color-mix(in oklch, var(--shadcn-foreground) 76%, var(--shadcn-muted-foreground));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) :where(
+  [data-slot="attachment"],
+  [data-slot="table-container"],
+  [data-slot="tabs-list"],
+  [data-slot="questionnaire-choice"],
+  [data-slot="input-group"],
+  [data-slot="radio-group-item-root"]
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-control-material, var(--shadcn-style-control-surface));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), 0 .25rem .75rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
+  backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) .shadcn-tabs-trigger[data-state="active"] {
+  border-color: transparent;
+  background: var(--shadcn-primary);
+  color: var(--shadcn-primary-foreground);
+  box-shadow: 0 .25rem .75rem color-mix(in oklch, var(--shadcn-primary) 28%, transparent), inset 0 1px 0 color-mix(in oklch, white 28%, transparent);
 }
 
 .shadcn-visual-style-scope[data-visual-style="glass"] :where(

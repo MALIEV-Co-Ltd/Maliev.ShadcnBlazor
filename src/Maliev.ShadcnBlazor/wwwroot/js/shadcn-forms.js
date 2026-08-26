@@ -47,7 +47,8 @@ export function observeOtpSelection(input, dotnet, maxLength) {
         if (index < 0) index = point < slots[0].getBoundingClientRect().left ? 0 : slots.length - 1;
         event.preventDefault();
         input.focus({ preventScroll: true });
-        input.setSelectionRange(index, index);
+        const end = index < input.value.length ? index + 1 : index;
+        input.setSelectionRange(index, end);
         update();
     };
     for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.addEventListener(eventName, update);

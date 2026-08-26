@@ -1608,6 +1608,7 @@ enum Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupPresentation: Defa
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1
   RenderFragment ChildContent
   Boolean Disabled
+  Boolean HideIndicator
   Boolean Invalid
   String Name
   ShadcnRadioGroupOrientation Orientation

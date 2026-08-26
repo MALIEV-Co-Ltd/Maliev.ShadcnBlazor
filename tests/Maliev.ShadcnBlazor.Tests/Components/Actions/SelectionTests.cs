@@ -212,6 +212,20 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void RadioGroupCanHideTheDecorativeDotWithoutRemovingNativeInputs()
+    {
+        var cut = Render<ShadcnRadioGroup<string>>(parameters => parameters
+            .Add(component => component.Value, "priority")
+            .Add(component => component.HideIndicator, true)
+            .AddChildContent<ShadcnRadioGroupItem<string>>(item => item
+                .Add(component => component.Value, "priority")
+                .Add(component => component.ChildContent, "Priority review")));
+
+        Assert.NotNull(cut.Find("input[type='radio']"));
+        Assert.Empty(cut.FindAll("[data-slot='radio-group-indicator']"));
+    }
+
+    [Fact]
     public void SelectionControlsRejectUnknownEnums()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnSwitch>(p => p.Add(x => x.Size, (ShadcnSwitchSize)999)));

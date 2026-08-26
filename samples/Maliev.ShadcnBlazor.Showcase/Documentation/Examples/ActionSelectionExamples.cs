@@ -232,6 +232,7 @@ internal static class ActionSelectionExamples
         var disabled = false;
         var readOnly = false;
         var invalid = false;
+        var hideIndicator = false;
         RenderFragment preview = builder =>
         {
             builder.OpenComponent<RadioGroupDossierPreview>(0);
@@ -240,6 +241,7 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(3, nameof(RadioGroupDossierPreview.Disabled), disabled);
             builder.AddAttribute(4, nameof(RadioGroupDossierPreview.ReadOnly), readOnly);
             builder.AddAttribute(5, nameof(RadioGroupDossierPreview.Invalid), invalid);
+            builder.AddAttribute(6, nameof(RadioGroupDossierPreview.HideIndicator), hideIndicator);
             builder.CloseComponent();
         };
         string Source() => $$"""
@@ -249,7 +251,7 @@ internal static class ActionSelectionExamples
     <h3 id="review-speed-title">Inspection turnaround</h3>
     <p>Choose how quickly the production drawing should be reviewed.</p>
 
-    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Presentation="ShadcnRadioGroupPresentation.Card" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
+    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Presentation="ShadcnRadioGroupPresentation.Card" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" HideIndicator="{{hideIndicator.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
         <ShadcnRadioGroupItem Value="standard">Standard review · Within 2 business days</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="priority">Priority review · By the next business day</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="same-day" Disabled="true">Same-day review · Unavailable after 2:00 PM</ShadcnRadioGroupItem>
@@ -268,7 +270,8 @@ internal static class ActionSelectionExamples
                 Select("radio-orientation", "Orientation", orientation, value => orientation = value),
                 Toggle("radio-disabled", "Disabled", v => disabled = v),
                 Toggle("radio-readonly", "Read only", v => readOnly = v),
-                Toggle("radio-invalid", "Invalid", v => invalid = v)
+                Toggle("radio-invalid", "Invalid", v => invalid = v),
+                Toggle("radio-hide-indicator", "Hide indicator", v => hideIndicator = v)
             ],
             ["selected", "unselected", "disabled-item", "horizontal", "vertical", "roving-focus", "read-only", "invalid", "form"]) with
         { RazorSourceProvider = Source };

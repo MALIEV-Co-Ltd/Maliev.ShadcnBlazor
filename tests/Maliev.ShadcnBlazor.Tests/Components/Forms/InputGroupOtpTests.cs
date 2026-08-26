@@ -214,6 +214,34 @@ public sealed class InputGroupOtpTests : BunitContext
     }
 
     [Fact]
+    public void OtpReplacementAdvancesFromTheSelectedSlotInsteadOfJumpingToTheEnd()
+    {
+        var cut = Render<ShadcnInputOtp>(parameters => parameters
+            .Add(component => component.Value, "2241")
+            .Add(component => component.MaxLength, 4)
+            .Add(component => component.ValueChanged, _ => { })
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnInputOtpGroup>(0);
+                builder.AddAttribute(1, nameof(ShadcnInputOtpGroup.ChildContent), (RenderFragment)(group =>
+                {
+                    for (var index = 0; index < 4; index++)
+                    {
+                        group.OpenComponent<ShadcnInputOtpSlot>(index * 2);
+                        group.AddAttribute(index * 2 + 1, nameof(ShadcnInputOtpSlot.Index), index);
+                        group.CloseComponent();
+                    }
+                }));
+                builder.CloseComponent();
+            }));
+
+        cut.Instance.UpdateOtpSelection(0, true);
+        cut.Find("input").Input("3241");
+
+        Assert.Equal("true", cut.FindAll("[data-slot='input-otp-slot']")[1].GetAttribute("data-active"));
+    }
+
+    [Fact]
     public void InputOtpDoesNotLetNativeMaxlengthTruncatePasteBeforePatternNormalization()
     {
         var cut = Render<ShadcnInputOtp>(parameters => parameters

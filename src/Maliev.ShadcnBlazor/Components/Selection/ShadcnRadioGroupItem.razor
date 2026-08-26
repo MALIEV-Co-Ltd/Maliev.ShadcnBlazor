@@ -23,7 +23,10 @@
                data-state="@State"
                @onclick:preventDefault="@(Context?.ReadOnly == true)"
                @onchange="HandleChangeAsync" />
-        <span class="shadcn-radio-indicator" data-slot="radio-group-indicator" aria-hidden="true"></span>
+        @if (Context?.HideIndicator != true)
+        {
+            <span class="shadcn-radio-indicator" data-slot="radio-group-indicator" aria-hidden="true"></span>
+        }
     </span>
     @if (ChildContent is not null)
     {

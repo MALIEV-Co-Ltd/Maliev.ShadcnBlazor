@@ -40,7 +40,15 @@ public sealed class ThemeUseCaseRegistry : IThemeUseCaseRegistry
         Use("webhook-secret", 34, ThemeBentoSize.Standard, ThemeUseCaseCategory.Security, "Webhook signing", "การลงนามเว็บฮุก", "ShadcnSecretInput", "ShadcnButton", "ShadcnBadge"),
         Use("drawing-preview", 35, ThemeBentoSize.Wide, ThemeUseCaseCategory.Media, "Drawing comparison", "เปรียบเทียบแบบงาน", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton"),
         Use("inspection-camera", 36, ThemeBentoSize.Standard, ThemeUseCaseCategory.Media, "Inspection camera", "กล้องตรวจสอบ", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton"),
-        Use("customer-proof", 37, ThemeBentoSize.Standard, ThemeUseCaseCategory.Media, "Customer proof", "หลักฐานสำหรับลูกค้า", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton")
+        Use("customer-proof", 37, ThemeBentoSize.Standard, ThemeUseCaseCategory.Media, "Customer proof", "หลักฐานสำหรับลูกค้า", "ShadcnAspectRatio", "ShadcnBadge", "ShadcnButton"),
+        Use("inspection-scheduling", 38, ThemeBentoSize.Wide, ThemeUseCaseCategory.Forms, "Inspection scheduling", "กำหนดเวลาตรวจสอบ", "ShadcnCalendar", "ShadcnDatePicker"),
+        Use("material-routing", 39, ThemeBentoSize.Wide, ThemeUseCaseCategory.Forms, "Material routing", "การกำหนดเส้นทางวัสดุ", "ShadcnCombobox", "ShadcnSelect"),
+        Use("release-adjustments", 40, ThemeBentoSize.Wide, ThemeUseCaseCategory.Forms, "Release adjustments", "การปรับการอนุมัติ", "ShadcnSlider", "ShadcnToggle", "ShadcnToggleGroup"),
+        Use("production-carousel", 41, ThemeBentoSize.Wide, ThemeUseCaseCategory.Media, "Production media carousel", "ภาพขั้นตอนการผลิต", "ShadcnCarousel", "ShadcnAspectRatio"),
+        Use("arabic-work-order", 42, ThemeBentoSize.Standard, ThemeUseCaseCategory.Overview, "Arabic work order", "ใบสั่งงานภาษาอาหรับ", "ShadcnDirectionProvider"),
+        Use("empty-navigation", 43, ThemeBentoSize.Wide, ThemeUseCaseCategory.Overview, "Empty queue navigation", "การนำทางคิวว่าง", "ShadcnEmpty", "ShadcnBreadcrumb", "ShadcnNavigationMenu"),
+        Use("integration-code", 44, ThemeBentoSize.Wide, ThemeUseCaseCategory.Data, "Integration code", "โค้ดการเชื่อมต่อ", "ShadcnCodeBlock"),
+        Use("overlay-feedback-lab", 45, ThemeBentoSize.Wide, ThemeUseCaseCategory.Overlays, "Overlay feedback lab", "ตัวอย่างโอเวอร์เลย์", "ShadcnToaster", "ShadcnAlertDialog", "ShadcnHoverCard", "ShadcnPopover", "ShadcnTooltip")
     ];
 
     private static ThemeUseCaseDefinition Use(string id, int order, ThemeBentoSize size, ThemeUseCaseCategory category, string en, string th, params string[] components) =>

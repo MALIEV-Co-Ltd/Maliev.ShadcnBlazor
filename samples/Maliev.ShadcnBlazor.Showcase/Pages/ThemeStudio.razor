@@ -16,7 +16,7 @@
     <ThemeFontLoader State="State" />
     <div class="theme-studio-workbench" data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
         <ThemeStudioSidebar State="State" />
-        <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
+        <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
             <header class="theme-preview-intro">
                 <h1>Theme Studio</h1>
                 <p>Compare realistic component workflows, then open settings to tune the preview.</p>

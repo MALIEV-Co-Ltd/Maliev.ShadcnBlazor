@@ -26,7 +26,7 @@ else
             <p>
                 @if (Entry.PrimaryType is not null && Entry.Namespace is not null)
                 {
-                    <code>@Entry.Namespace.@Entry.PrimaryType</code>
+                    <code>@Entry.Namespace.@DisplayTypeName(Entry.PrimaryType)</code>
                 }
                 else
                 {
@@ -101,6 +101,7 @@ else
 }
 
 @code {
+    private static string DisplayTypeName(string typeName) => typeName.Split('`')[0];
     [Parameter] public string? Slug { get; set; }
 
     private IReadOnlyList<Maliev.ShadcnBlazor.Showcase.Documentation.Examples.ComponentExampleDefinition> _examples = [];

@@ -31,8 +31,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var bento = page.GetByTestId("theme-bento");
         var cards = bento.Locator("[data-use-case-id]");
         await Assertions.Expect(bento).ToBeVisibleAsync();
-        Assert.Equal(37, await cards.CountAsync());
-        Assert.Equal(37, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(45, await cards.CountAsync());
+        Assert.Equal(45, (await CardIdsAsync(page)).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(0, await bento.Locator("[data-component-slug]").CountAsync());
         await Assertions.Expect(page.Locator("[data-mirror], [data-runway-track]")).ToHaveCountAsync(0);
         var first = cards.First;
@@ -683,7 +683,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var reveals = group.Locator("[data-slot='reveal']");
 
         await Assertions.Expect(group).ToHaveAttributeAsync("data-reveal-reduced-motion", "false");
-        Assert.Equal(37, await reveals.CountAsync());
+        Assert.Equal(45, await reveals.CountAsync());
         await page.WaitForTimeoutAsync(900);
         var revealedBefore = await reveals.EvaluateAllAsync<int>("items => items.filter(item => item.dataset.revealState === 'revealed').length");
         Assert.InRange(revealedBefore, 1, 36);
@@ -1101,7 +1101,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-bento").WaitForAsync();
         var overflow = await page.EvaluateAsync<double>("Math.max(document.documentElement.scrollWidth-document.documentElement.clientWidth,document.body.scrollWidth-document.body.clientWidth)");
         Assert.InRange(overflow, 0, 1);
-        Assert.Equal(37, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
+        Assert.Equal(45, await page.Locator(".theme-bento__grid [data-use-case-id]").CountAsync());
         Assert.Equal(0, await page.Locator(".theme-bento__grid [data-component-slug]").CountAsync());
         if (width <= 640) { await OpenSettingsAsync(page); await Assertions.Expect(page.Locator(".theme-device-options")).ToBeVisibleAsync(); }
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
@@ -1118,7 +1118,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToBeVisibleAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Navigation, new() { Name = "Preview categories" })).ToBeVisibleAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 2 })).ToBeVisibleAsync();
-        Assert.Equal(37, await page.Locator("[data-use-case-id]").CountAsync());
+        Assert.Equal(45, await page.Locator("[data-use-case-id]").CountAsync());
 
         var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
         await profileName.FillAsync("Kanda T.");

@@ -80,7 +80,7 @@
                 <ShadcnCollapsible @bind-Open="_advancedOpen"><ShadcnCollapsibleTrigger>@T("Advanced release controls")</ShadcnCollapsibleTrigger><ShadcnCollapsibleContent>
                     <div class="theme-operations-console__controls">
                         <label>@T("Inspection threshold")<ShadcnSlider Values="@_threshold" ValuesChanged="values => _threshold = values" Minimum="0" Maximum="100" Step="1" /></label>
-                        <ShadcnRadioGroup TValue="string" @bind-Value="_priority" Name="@($"{Kind}-priority")" Presentation="ShadcnRadioGroupPresentation.Card">
+                        <ShadcnRadioGroup TValue="string" @bind-Value="_priority" Name="@($"{Kind}-priority")" Presentation="ShadcnRadioGroupPresentation.Card" HideIndicator="true">
                             <ShadcnRadioGroupItem TValue="string" Value="@("standard")">@T("Standard release")</ShadcnRadioGroupItem>
                             <ShadcnRadioGroupItem TValue="string" Value="@("priority")">@T("Priority dispatch")</ShadcnRadioGroupItem>
                         </ShadcnRadioGroup>

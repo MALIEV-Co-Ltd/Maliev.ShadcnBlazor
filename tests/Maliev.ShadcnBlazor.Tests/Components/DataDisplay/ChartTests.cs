@@ -252,14 +252,14 @@ public sealed class ChartTests : BunitContext
     }
 
     [Fact]
-    public void PointerAndPerPointFocusExposeVisibleActiveTarget()
+    public void PointerAndPerBarFocusExposeVisibleActiveTargetWithoutSyntheticMarker()
     {
         var cut = RenderChart();
-        var point = cut.Find("[data-slot='chart-point'][data-point='1']");
-        Assert.Equal("0", point.GetAttribute("tabindex"));
-        Assert.Contains("Feb", point.GetAttribute("aria-label"));
-        point.PointerEnter(new PointerEventArgs());
-        Assert.Equal("true", cut.Find("[data-slot='chart-point'][data-point='1']").GetAttribute("data-active"));
+        var bar = cut.Find("rect[data-series='desktop'][data-point='1']");
+        Assert.Equal("0", bar.GetAttribute("tabindex"));
+        Assert.Contains("Feb", bar.GetAttribute("aria-label"));
+        bar.PointerEnter(new PointerEventArgs());
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
         Assert.Contains("Feb", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
         Assert.NotNull(cut.Find("[data-slot='chart-tooltip-cursor']"));
         cut.Find("figure").MouseLeave(new MouseEventArgs());
@@ -294,6 +294,32 @@ public sealed class ChartTests : BunitContext
         Assert.Contains("305", tooltip.TextContent);
         cut.Find("figure").MouseLeave(new MouseEventArgs());
         Assert.Empty(cut.FindAll("[data-slot='chart-tooltip-content']"));
+    }
+
+    [Fact]
+    public void BarChartsDoNotRenderSyntheticPointMarkers()
+    {
+        var cut = RenderChart();
+
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
+    }
+
+    [Fact]
+    public void ActiveDonutSliceMovesOutwardWithoutRenderingAPointMarker()
+    {
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Type, ShadcnChartType.Donut)
+            .Add(component => component.Config, Config)
+            .Add(component => component.Categories, new[] { "Jan", "Feb", "Mar" })
+            .Add(component => component.Series, new[] { Series[0] })
+            .Add(component => component.Title, "Visitors"));
+
+        var slice = cut.Find("path[data-point='1']");
+        slice.PointerEnter(new PointerEventArgs());
+
+        Assert.Equal("true", cut.Find("path[data-point='1']").GetAttribute("data-active"));
+        Assert.Contains("translate(", cut.Find("path[data-point='1']").GetAttribute("transform"), StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
     }
 
     [Fact]
