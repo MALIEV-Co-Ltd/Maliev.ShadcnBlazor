@@ -871,6 +871,14 @@ a {
     line-height: 1.65;
 }
 
+.component-accessibility > .documentation-prose-list,
+.component-token-guidance > p,
+.component-token-guidance > .documentation-prose-list,
+.component-reference > p,
+.component-reference > .documentation-prose-list {
+    max-inline-size: min(75ch, 100%);
+}
+
 .component-dossier__preview,
 .component-guide,
 .component-preview,

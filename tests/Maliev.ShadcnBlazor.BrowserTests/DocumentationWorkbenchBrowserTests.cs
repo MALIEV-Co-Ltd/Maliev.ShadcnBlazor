@@ -170,7 +170,23 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await Assertions.Expect(page.Locator("#usage")).ToContainTextAsync("Avoid when");
         await Assertions.Expect(page.Locator("#usage a[href='#preview']")).ToBeVisibleAsync();
 
-        var overMeasure = await page.Locator(".component-dossier__hero > p, .component-dossier__heading p, .component-dossier__planned p, .component-guide > p")
+        var dossierProse = page.Locator("""
+            .component-dossier__hero > p:not(.documentation-eyebrow),
+            .component-dossier__heading p,
+            .component-dossier__planned p,
+            .component-guide > p,
+            .component-accessibility > .documentation-prose-list > li,
+            .component-token-guidance > p,
+            .component-token-guidance > .documentation-prose-list > li,
+            .component-reference > p,
+            .component-reference > .documentation-prose-list > li
+            """);
+        await Assertions.Expect(page.Locator(".component-token-guidance > p")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator(".component-token-guidance > .documentation-prose-list > li")).Not.ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator(".component-reference > p")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator(".component-reference > .documentation-prose-list > li")).Not.ToHaveCountAsync(0);
+
+        var overMeasure = await dossierProse
             .EvaluateAllAsync<string[]>("""
                 elements => elements.flatMap(element => {
                     const probe = document.createElement('span');
@@ -184,6 +200,12 @@ public sealed class DocumentationWorkbenchBrowserTests(
                 })
                 """);
         Assert.True(overMeasure.Length == 0, $"Prose exceeded 75ch: {string.Join(", ", overMeasure)}");
+
+        var proseMaxInlineSize = await page.Locator(".component-token-guidance > p")
+            .EvaluateAsync<string>("element => getComputedStyle(element).maxInlineSize");
+        var nonProseMaxInlineSizes = await page.Locator(".component-code__surface pre, .component-api__table th, .component-api__table td")
+            .EvaluateAllAsync<string[]>("elements => elements.map(element => getComputedStyle(element).maxInlineSize)");
+        Assert.DoesNotContain(proseMaxInlineSize, nonProseMaxInlineSizes);
 
         var apiHeaderContrast = await page.Locator(".component-api__table thead th").First.EvaluateAsync<double>("""
             element => {
