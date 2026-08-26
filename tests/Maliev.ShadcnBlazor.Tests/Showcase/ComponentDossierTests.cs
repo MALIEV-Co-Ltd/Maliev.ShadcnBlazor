@@ -309,6 +309,42 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void CodeExampleRendersCompleteSourceInAClosedNativeDisclosureWhenCollapsible()
+    {
+        Assert.NotNull(typeof(ComponentCodeExample).GetProperty("Collapsible"));
+
+        var cut = Render(builder =>
+        {
+            builder.OpenComponent<ComponentCodeExample>(0);
+            builder.AddAttribute(1, "Title", "Keyboard shortcut");
+            builder.AddAttribute(2, "Source", "<ShadcnKbd>Ctrl</ShadcnKbd>");
+            builder.AddAttribute(3, "Collapsible", true);
+            builder.AddAttribute(4, "Summary", "View complete source");
+            builder.AddAttribute(5, "TestId", "example-source");
+            builder.CloseComponent();
+        });
+
+        var disclosure = cut.Find("details[data-testid='example-source']");
+        Assert.False(disclosure.HasAttribute("open"));
+        Assert.Equal("View complete source", disclosure.QuerySelector("summary")?.TextContent.Trim());
+        Assert.NotNull(disclosure.QuerySelector(".component-code__surface [data-testid='copy-source']"));
+        Assert.Empty(cut.FindAll("section.component-code"));
+    }
+
+    [Fact]
+    public void CodeExampleRemainsAnAlwaysVisibleSectionWhenNotCollapsible()
+    {
+        var cut = Render<ComponentCodeExample>(parameters => parameters
+            .Add(component => component.Title, "Keyboard shortcut")
+            .Add(component => component.Heading, "Razor example")
+            .Add(component => component.Source, "<ShadcnKbd>Ctrl</ShadcnKbd>"));
+
+        Assert.NotNull(cut.Find("section.component-code .component-code__surface"));
+        Assert.Equal("Razor example", cut.Find("section.component-code h2").TextContent.Trim());
+        Assert.Empty(cut.FindAll("details"));
+    }
+
+    [Fact]
     public void CodeExampleShowsCopiedStateAfterTheClipboardWriteSucceeds()
     {
         const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";

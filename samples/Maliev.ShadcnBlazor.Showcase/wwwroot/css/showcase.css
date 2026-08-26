@@ -866,6 +866,7 @@ a {
 .component-dossier__heading p,
 .component-dossier__planned p,
 .component-guide > p {
+    max-inline-size: min(75ch, 100%);
     color: var(--shadcn-muted-foreground);
     line-height: 1.65;
 }
@@ -2016,7 +2017,9 @@ a {
 }
 
 .component-code pre {
-    overflow: auto;
+    max-block-size: none;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin: 0;
     border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-lg);
@@ -2058,6 +2061,7 @@ a {
     border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-lg);
     background: var(--shadcn-background);
+    padding-block-end: 0.75rem;
     box-shadow: var(--shadcn-shadow-sm);
     scrollbar-color: color-mix(in oklch, var(--shadcn-muted-foreground) 35%, transparent) transparent;
 }
@@ -2087,8 +2091,9 @@ a {
     inset-block-start: 0;
     z-index: 1;
     background: color-mix(in oklch, var(--shadcn-muted) 72%, var(--shadcn-background));
-    color: var(--shadcn-muted-foreground);
+    color: color-mix(in oklch, var(--shadcn-foreground) 78%, var(--shadcn-muted-foreground));
     font-size: 0.6875rem;
+    font-weight: 650;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -4306,7 +4311,7 @@ a {
 }
 
 .component-dossier__hero > p:not(.documentation-eyebrow) {
-    max-inline-size: 66ch;
+    max-inline-size: min(75ch, 100%);
     font-size: 1rem;
 }
 
@@ -6960,6 +6965,41 @@ body:has(.theme-studio-provider) {
     min-inline-size: 0;
 }
 
+.component-preview__source {
+    display: grid;
+    min-inline-size: 0;
+    gap: 0.75rem;
+}
+
+.component-preview__source > h3 {
+    font-size: 0.875rem;
+    font-weight: 650;
+}
+
+.component-code-disclosure {
+    display: block;
+    min-inline-size: 0;
+}
+
+.component-code-disclosure > summary {
+    inline-size: fit-content;
+    min-block-size: 2.75rem;
+    align-content: center;
+    color: var(--shadcn-foreground);
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.component-code-disclosure > summary:focus-visible {
+    outline: 2px solid var(--shadcn-ring);
+    outline-offset: 0.25rem;
+}
+
+.component-code-disclosure__content {
+    min-inline-size: 0;
+    padding-block-start: 0.75rem;
+}
+
 .component-code__surface pre {
     min-block-size: 3.25rem;
     padding-block-start: 1.25rem;
@@ -7113,7 +7153,14 @@ body:has(.theme-studio-provider) {
     background: color-mix(in oklch, var(--shadcn-muted) 52%, var(--shadcn-background));
 }
 
+.component-code__surface :is(.shadcn-code-block-language, .shadcn-code-block-copy, .shadcn-code-block-language-select .shadcn-select-trigger) {
+    color: color-mix(in oklch, var(--shadcn-foreground) 78%, var(--shadcn-muted-foreground));
+}
+
 .component-code__surface pre {
+    max-block-size: none;
+    overflow-x: auto;
+    overflow-y: hidden;
     border: 0;
     border-radius: 0;
     background: transparent;

@@ -1,21 +1,36 @@
 @using Maliev.ShadcnBlazor.Components.Typography
 
-<section class="component-code" aria-labelledby="@HeadingId">
-    <div class="component-code__header">
-        @if (Nested)
-        {
-            <h3 id="@HeadingId">@Heading</h3>
-        }
-        else
-        {
-            <h2 id="@HeadingId">@Heading</h2>
-        }
-    </div>
-    <ShadcnCodeBlock Class="component-code__surface"
-                     Source="@Source"
-                     Language="@Language"
-                     Sources="@Sources" />
-</section>
+@if (Collapsible)
+{
+    <details class="component-code component-code-disclosure" data-testid="@TestId">
+        <summary>@Summary</summary>
+        <div class="component-code-disclosure__content">
+            <ShadcnCodeBlock Class="component-code__surface"
+                             Source="@Source"
+                             Language="@Language"
+                             Sources="@Sources" />
+        </div>
+    </details>
+}
+else
+{
+    <section class="component-code" aria-labelledby="@HeadingId">
+        <div class="component-code__header">
+            @if (Nested)
+            {
+                <h3 id="@HeadingId">@Heading</h3>
+            }
+            else
+            {
+                <h2 id="@HeadingId">@Heading</h2>
+            }
+        </div>
+        <ShadcnCodeBlock Class="component-code__surface"
+                         Source="@Source"
+                         Language="@Language"
+                         Sources="@Sources" />
+    </section>
+}
 
 @code {
     [Parameter] public string Title { get; set; } = "Component";
@@ -23,6 +38,12 @@
     [Parameter] public string Heading { get; set; } = "Code";
 
     [Parameter] public bool Nested { get; set; }
+
+    [Parameter] public bool Collapsible { get; set; }
+
+    [Parameter] public string Summary { get; set; } = "View complete source";
+
+    [Parameter] public string? TestId { get; set; }
 
     [Parameter, EditorRequired] public string Source { get; set; } = string.Empty;
 

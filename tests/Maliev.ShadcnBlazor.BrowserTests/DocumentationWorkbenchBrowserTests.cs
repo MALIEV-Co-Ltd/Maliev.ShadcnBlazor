@@ -43,7 +43,8 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await trigger.PressAsync("Enter");
 
         await Assertions.Expect(page.Locator("[data-slot='card']")).ToHaveAttributeAsync("data-size", "sm");
-        await Assertions.Expect(page.Locator("section.component-code").First).ToContainTextAsync("Size=\"ShadcnCardSize.Small\"");
+        await Assertions.Expect(page.GetByTestId("component-preview").First.Locator("details[data-testid='example-source']"))
+            .ToContainTextAsync("Size=\"ShadcnCardSize.Small\"");
         Assert.InRange(await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
         Assert.Equal("solid", await trigger.EvaluateAsync<string>("element => getComputedStyle(element).borderTopStyle"));
     }
@@ -144,6 +145,70 @@ public sealed class DocumentationWorkbenchBrowserTests(
         Assert.NotEqual("true", await today.GetAttributeAsync("aria-disabled"));
         var todayPaint = await today.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return `${style.backgroundColor}|${style.color}|${style.opacity}|${style.getPropertyValue('--shadcn-primary')}|${style.getPropertyValue('--shadcn-muted')}`; }");
         Assert.Equal("oklch(0.205 0 0)|oklch(0.985 0 0)|1|oklch(0.205 0 0)|oklch(0.97 0 0)", todayPaint);
+    }
+
+    [Fact]
+    public async Task ComponentDossierProgressivelyDisclosesSourceAndKeepsReferenceTextReadable()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ColorScheme = ColorScheme.Light
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/button").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var preview = page.GetByTestId("component-preview").First;
+        var source = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(source).Not.ToHaveAttributeAsync("open", "");
+        await source.Locator("summary").ClickAsync();
+        await Assertions.Expect(source).ToHaveAttributeAsync("open", "");
+        Assert.Equal(1, await page.Locator("text=Example source").CountAsync());
+        await Assertions.Expect(page.Locator("#usage")).ToContainTextAsync("Use when");
+        await Assertions.Expect(page.Locator("#usage")).ToContainTextAsync("Avoid when");
+        await Assertions.Expect(page.Locator("#usage a[href='#preview']")).ToBeVisibleAsync();
+
+        var overMeasure = await page.Locator(".component-dossier__hero > p, .component-dossier__heading p, .component-dossier__planned p, .component-guide > p")
+            .EvaluateAllAsync<string[]>("""
+                elements => elements.flatMap(element => {
+                    const probe = document.createElement('span');
+                    const style = getComputedStyle(element);
+                    probe.style.cssText = `position:absolute;visibility:hidden;inline-size:75ch;font:${style.font};`;
+                    document.body.append(probe);
+                    const limit = probe.getBoundingClientRect().width;
+                    probe.remove();
+                    const width = element.getBoundingClientRect().width;
+                    return width <= limit + 1 ? [] : [`${element.textContent.trim().slice(0, 32)}:${width.toFixed(1)}>${limit.toFixed(1)}`];
+                })
+                """);
+        Assert.True(overMeasure.Length == 0, $"Prose exceeded 75ch: {string.Join(", ", overMeasure)}");
+
+        var apiHeaderContrast = await page.Locator(".component-api__table thead th").First.EvaluateAsync<double>("""
+            element => {
+                const parse = color => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = canvas.height = 1;
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
+                    context.fillStyle = color;
+                    context.fillRect(0, 0, 1, 1);
+                    return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+                };
+                const luminance = color => {
+                    const channels = color.map(value => {
+                        const normalized = value / 255;
+                        return normalized <= 0.04045 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+                    });
+                    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+                };
+                const style = getComputedStyle(element);
+                const foreground = luminance(parse(style.color));
+                const background = luminance(parse(style.backgroundColor));
+                return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+            }
+            """);
+        Assert.True(apiHeaderContrast >= 4.5, $"API header contrast was {apiHeaderContrast:F2}:1.");
     }
 
     public static TheoryData<int, int> Viewports => new()
@@ -341,9 +406,9 @@ public sealed class DocumentationWorkbenchBrowserTests(
         Assert.True(int.Parse(activeStyleParts[0], System.Globalization.CultureInfo.InvariantCulture) >= 700);
         Assert.Contains("0, 0, 0, 0", activeStyleParts[1], StringComparison.Ordinal);
         Assert.Contains("0, 0, 0, 0", activeStyleParts[2], StringComparison.Ordinal);
-        await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("@using Maliev.ShadcnBlazor");
-        var usageSource = await content.Locator("#usage pre").InnerTextAsync();
-        Assert.Equal(1, usageSource.Split("@using Maliev.ShadcnBlazor.Components.Content", StringSplitOptions.None).Length - 1);
+        await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("Use when");
+        await Assertions.Expect(content.Locator("#usage")).ToContainTextAsync("Avoid when");
+        await Assertions.Expect(content.Locator("#usage a[href='#preview']")).ToBeVisibleAsync();
         if (width > 1280)
         {
             var catalogBox = await catalog.BoundingBoxAsync();

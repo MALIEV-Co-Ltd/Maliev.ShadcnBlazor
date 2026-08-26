@@ -1,6 +1,5 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
 @using Maliev.ShadcnBlazor.Showcase.Documentation.Api
-@using Maliev.ShadcnBlazor.Showcase.Documentation.Examples
 
 <section id="installation" class="component-guide" aria-labelledby="installation-title">
     <h2 id="installation-title">Installation</h2>
@@ -15,13 +14,10 @@
 
 <section id="usage" class="component-guide" aria-labelledby="usage-title">
     <h2 id="usage-title">Usage</h2>
-    <p>Import the component namespace and compose the primitive directly in Razor.</p>
-    <ComponentCodeExample Title="@($"{Entry.Name} usage")"
-                          Heading="Razor example"
-                          Nested="true"
-                          Language="razor"
-                          Sources="@UsageSources"
-                          Source="@UsageSource" />
+    <p><strong>Use when</strong> you need the documented semantics, states, and theming behavior in an application.</p>
+    <p><strong>Avoid when</strong> a native HTML element already meets the same interaction and accessibility requirements.</p>
+    <p class="component-guide__namespace component-code"><code><span class="code-token-keyword">@@using</span> @Entry.Namespace</code></p>
+    <p><a href="#preview">View the complete preview source</a> before adapting the composition to your project.</p>
 </section>
 
 <section id="composition" class="component-guide" aria-labelledby="composition-title">
@@ -40,19 +36,9 @@
 
     [Parameter, EditorRequired] public IReadOnlyList<ComponentApiDescriptor> Descriptors { get; set; } = [];
 
-    [Parameter] public ComponentExampleDefinition? Example { get; set; }
-
-    private string UsageSource => RazorSourceComposer.Compose(Entry.Namespace ?? throw new InvalidOperationException("A component namespace is required."), Example?.RazorSource ?? $"<{Entry.PrimaryType} />");
-
     private IReadOnlyDictionary<string, string> InstallationSources => new Dictionary<string, string>
     {
         ["bash"] = "dotnet add package Maliev.ShadcnBlazor",
         ["powershell"] = "dotnet add package Maliev.ShadcnBlazor"
-    };
-
-    private IReadOnlyDictionary<string, string> UsageSources => new Dictionary<string, string>
-    {
-        ["razor"] = UsageSource,
-        ["csharp"] = "builder.Services.AddMalievShadcn();"
     };
 }

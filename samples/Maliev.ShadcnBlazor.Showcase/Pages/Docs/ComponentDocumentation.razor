@@ -40,7 +40,6 @@ else
             @foreach (var example in _examples)
             {
                 <ComponentPreview Example="@example" SourceChanged="HandleExampleSourceChanged" />
-                <ComponentCodeExample Title="@example.Title" Heading="Example source" Source="@example.RazorSource" />
             }
         </section>
 
@@ -53,7 +52,7 @@ else
         }
         @if (Entry.PrimaryType is not null && Entry.Namespace is not null)
         {
-            <ComponentConsumptionGuide Entry="@Entry" Descriptors="@_apiDescriptors" Example="@_examples.FirstOrDefault()" />
+            <ComponentConsumptionGuide Entry="@Entry" Descriptors="@_apiDescriptors" />
             <section id="accessibility"><ComponentAccessibilityNotes Entry="@Entry" /></section>
             <section id="api-reference"><ComponentApiTable Descriptors="@_apiDescriptors" /></section>
             <section id="theming" class="component-token-guidance" aria-labelledby="component-token-guidance-title" data-testid="component-token-guidance">
