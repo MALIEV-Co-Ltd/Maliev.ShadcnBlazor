@@ -8905,6 +8905,23 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-inspector-note { overflow-wrap: anywhere; color: var(--shadcn-muted-foreground); font-size: .6875rem; }
 .theme-preview-stage { position: relative; }
 .theme-preview-scope { display: block; overflow: visible; border: 0; border-radius: 0; background: transparent; font-family: var(--shadcn-font-sans); }
+.theme-preview-region:has(.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="glass"]) {
+    background-color: var(--shadcn-background);
+    background-image:
+        radial-gradient(circle at 12% 10%, color-mix(in oklch, var(--shadcn-primary) 13%, transparent) 0 6%, transparent 28%),
+        radial-gradient(circle at 88% 22%, color-mix(in oklch, var(--shadcn-chart-2) 10%, transparent) 0 7%, transparent 30%),
+        linear-gradient(138deg, color-mix(in oklch, var(--shadcn-background) 94%, var(--shadcn-muted)) 0%, var(--shadcn-background) 48%, color-mix(in oklch, var(--shadcn-background) 92%, var(--shadcn-primary)) 100%);
+    background-attachment: local;
+    background-size: cover;
+}
+.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="glass"] {
+    min-block-size: 100%;
+    background-color: transparent;
+    background-image: none;
+}
+.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="glass"] .theme-use-case-card {
+    border-width: 0;
+}
 .theme-preview-region:has(.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"]) {
     --shadcn-style-environment:
         radial-gradient(circle at 7% 4%, color-mix(in oklch, var(--shadcn-primary) 30%, transparent) 0 5%, transparent 23%),
@@ -8922,7 +8939,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     background-color: transparent;
     background-image: none;
 }
-.theme-preview-scope .shadcn-visual-style-scope[data-visual-style="liquid-glass"] .theme-use-case-card::after {
+.theme-preview-scope .shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) .theme-use-case-card::after {
     border: 0;
 }
 

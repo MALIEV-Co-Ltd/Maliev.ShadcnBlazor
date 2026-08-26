@@ -55,12 +55,14 @@
 
 .shadcn-visual-style-scope[data-visual-style="glass"] {
   --shadcn-style-surface: var(--shadcn-card);
-  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 76%, transparent);
+  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 64%, transparent);
   --shadcn-style-surface-strong: var(--shadcn-popover);
-  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 88%, transparent);
-  --shadcn-style-border: color-mix(in oklch, var(--shadcn-border) 65%, var(--shadcn-background));
-  --shadcn-style-shadow: 0 .75rem 2.25rem color-mix(in oklch, var(--shadcn-foreground) 10%, transparent);
-  --shadcn-style-shadow-hover: 0 1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent);
+  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 76%, transparent);
+  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 58%, transparent);
+  --shadcn-style-border: transparent;
+  --shadcn-style-border-width: 0px;
+  --shadcn-style-shadow: 0 .75rem 2.25rem color-mix(in oklch, var(--shadcn-foreground) 10%, transparent), inset 0 1px 0 color-mix(in oklch, white 38%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent);
+  --shadcn-style-shadow-hover: 0 1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 color-mix(in oklch, white 46%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
   --shadcn-style-blur: calc(14px * var(--shadcn-style-blur-scale, 1));
   --shadcn-style-saturation: 125%;
   --shadcn-style-radius-factor: 1.15;
@@ -273,6 +275,24 @@
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
   backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope[data-visual-style="glass"] :where(
+  .shadcn-input,
+  .shadcn-textarea,
+  .shadcn-select-trigger,
+  .shadcn-date-picker-trigger,
+  .shadcn-toggle,
+  .shadcn-tabs-trigger,
+  .shadcn-dropzone,
+  .shadcn-button[data-variant="outline"],
+  .shadcn-button[data-variant="secondary"]
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-control-surface);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent), 0 .3rem .9rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
+  backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
 }
 
 .shadcn-visual-style-scope[data-visual-style="neo-brutalist"] :where(.shadcn-button, .shadcn-toggle, .shadcn-tabs-trigger):is(:hover, :focus-visible) {

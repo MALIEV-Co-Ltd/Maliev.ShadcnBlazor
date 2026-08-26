@@ -804,6 +804,38 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task FrostedGlassRefractsAnAmbientFieldWithoutVisibleBorders()
+    {
+        await using var context = await NewContextAsync(1900, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+
+        await SelectOptionAsync(page, "theme-visual-style", "Frosted glass");
+        await SelectOptionAsync(page, "theme-depth-treatment", "Floating");
+
+        var region = page.Locator(".theme-preview-region");
+        var scope = page.GetByTestId("theme-visual-style-scope");
+        var card = page.Locator("[data-use-case-id='production-capacity']");
+        var input = page.Locator("[data-use-case-id='operator-profile'] .shadcn-input").First;
+        var cardAlpha = await card.EvaluateAsync<double>("""
+            element => {
+                const color = getComputedStyle(element).backgroundColor;
+                const modernAlpha = color.match(/\/\s*([\d.]+)/);
+                if (modernAlpha) return Number(modernAlpha[1]);
+                const legacyAlpha = color.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/);
+                return legacyAlpha ? Number(legacyAlpha[1]) : 1;
+            }
+            """);
+
+        Assert.Contains("gradient", await region.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("none", await scope.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"));
+        Assert.InRange(cardAlpha, .35, .70);
+        Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"));
+        Assert.Equal("0px", await card.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.Equal("none", await card.EvaluateAsync<string>("element => getComputedStyle(element, '::after').borderTopStyle"));
+        Assert.Equal("rgba(0, 0, 0, 0)", await input.EvaluateAsync<string>("element => getComputedStyle(element).borderTopColor"));
+    }
+
+    [Fact]
     public async Task SpatialGlassRendersAnAmbientFieldAndLayeredComponentMaterials()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.NoPreference);
