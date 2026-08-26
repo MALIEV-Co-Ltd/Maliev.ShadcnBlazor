@@ -861,6 +861,25 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void ThemeStudioIntroUsesSingularErrorAndAdvisoryGrammar()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeStudio>();
+        var validation = new ShadcnThemeValidationResult(
+            [new ShadcnThemeValidationMessage("invalid-token", "light.primary", "Token is invalid.")],
+            [new ShadcnThemeValidationMessage("low-contrast", "light.foreground", "Contrast needs review.")],
+            []);
+        typeof(ThemeStudioState).GetProperty(nameof(ThemeStudioState.Validation))!.SetValue(state, validation);
+
+        cut.Render();
+
+        var status = cut.Find(".theme-preview-intro__status").TextContent;
+        Assert.Contains("1 error · 1 advisory", status, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 errors", status, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 advisories", status, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ThemeStudioUsesOnlyTheCuratedBentoPreview()
     {
         var cut = Render<ThemeStudio>();

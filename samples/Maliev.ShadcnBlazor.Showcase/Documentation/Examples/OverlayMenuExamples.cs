@@ -874,7 +874,7 @@ internal static class OverlayMenuExamples
                         <ShadcnMenubarItem>Documentation</ShadcnMenubarItem>
                         <ShadcnMenubarItem>Keyboard shortcuts <ShadcnMenubarShortcut>Ctrl+/</ShadcnMenubarShortcut></ShadcnMenubarItem>
                         <ShadcnMenubarSeparator />
-                        <ShadcnMenubarItem>About Shadcn Blazor</ShadcnMenubarItem>
+                        <ShadcnMenubarItem>About Maliev Shadcn Blazor</ShadcnMenubarItem>
                     </ShadcnMenubarContent>
                 </ShadcnMenubarMenu>
             </ShadcnMenubar>
@@ -1104,7 +1104,7 @@ internal static class OverlayMenuExamples
         AddText<ShadcnMenubarItem>(content, 0, "Documentation");
         AddMenubarItem(content, 10, "Keyboard shortcuts", "Ctrl+/");
         content.OpenComponent<ShadcnMenubarSeparator>(20); content.CloseComponent();
-        AddText<ShadcnMenubarItem>(content, 30, "About Shadcn Blazor");
+        AddText<ShadcnMenubarItem>(content, 30, "About Maliev Shadcn Blazor");
     });
 
     private static void AddMenubarMenu(RenderTreeBuilder b, int sequence, string trigger, RenderFragment content)

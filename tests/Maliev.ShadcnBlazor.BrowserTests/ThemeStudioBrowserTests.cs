@@ -1115,9 +1115,34 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 2 })).ToBeVisibleAsync();
         Assert.Equal(37, await page.Locator("[data-use-case-id]").CountAsync());
 
-        var forms = page.GetByRole(AriaRole.Link, new() { Name = "Forms and input" });
-        await forms.ClickAsync();
-        await Assertions.Expect(page.Locator("#theme-category-forms")).ToBeVisibleAsync();
+        var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
+        await profileName.FillAsync("Kanda T.");
+        var securityTarget = page.Locator("#theme-category-security");
+        var targetTopBeforeNavigation = await securityTarget.EvaluateAsync<double>(
+            "element => element.getBoundingClientRect().top");
+        Assert.True(targetTopBeforeNavigation > height, $"Security target started at {targetTopBeforeNavigation}px in a {height}px viewport.");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Security", Exact = true }).ClickAsync();
+        await page.WaitForFunctionAsync("() => window.location.hash === '#theme-category-security'");
+
+        var uri = new Uri(page.Url);
+        Assert.Equal("/theme", uri.AbsolutePath);
+        Assert.Equal("#theme-category-security", uri.Fragment);
+        var scroll = await securityTarget.EvaluateAsync<double[]>("""
+            element => {
+                const targetTop = element.getBoundingClientRect().top;
+                for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+                    if (ancestor.scrollTop > 0) {
+                        return [ancestor.scrollTop, targetTop, ancestor.getBoundingClientRect().top];
+                    }
+                }
+                return [window.scrollY, targetTop, 0];
+            }
+            """);
+        Assert.True(scroll[0] > 0,
+            $"Expected a nonzero ancestor scroll after category navigation; scrollTop={scroll[0]}, targetTop={scroll[1]}, scrollerTop={scroll[2]}.");
+        Assert.InRange(scroll[1] - scroll[2], -1, 1);
+        await Assertions.Expect(profileName).ToHaveValueAsync("Kanda T.");
 
         if (width != 390) return;
 

@@ -13,9 +13,19 @@ namespace Maliev.ShadcnBlazor.Tests.Showcase;
 public sealed class ThemeValidationPresentationTests
 {
     [Theory]
+    [InlineData(0, "0 errors")]
+    [InlineData(1, "1 error")]
+    [InlineData(2, "2 errors")]
+    public void ErrorLabelUsesCountAwareGrammar(int errors, string expected)
+    {
+        Assert.Equal(expected, ThemeValidationPresentation.ErrorLabel(errors));
+    }
+
+    [Theory]
     [InlineData(0, 0, "Ready to export")]
     [InlineData(0, 1, "Ready to export · 1 advisory")]
     [InlineData(0, 16, "Ready to export · 16 advisories")]
+    [InlineData(1, 0, "Export blocked · 1 error")]
     [InlineData(2, 16, "Export blocked · 2 errors")]
     public void StatusLabelExplainsExportConsequence(int errors, int advisories, string expected)
     {
@@ -75,11 +85,11 @@ public sealed class ThemeValidationPresentationComponentTests : BunitContext
     }
 
     [Fact]
-    public void ValidationSummaryUsesSingularAdvisoryGrammar()
+    public void ValidationSummaryUsesSingularErrorAndAdvisoryGrammar()
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
         var validation = new ShadcnThemeValidationResult(
-            [],
+            [new ShadcnThemeValidationMessage("invalid-token", "light.primary", "Token is invalid.")],
             [new ShadcnThemeValidationMessage("low-contrast", "light.foreground", "Contrast needs review.")],
             []);
         typeof(ThemeStudioState).GetProperty(nameof(ThemeStudioState.Validation))!.SetValue(state, validation);
@@ -87,7 +97,8 @@ public sealed class ThemeValidationPresentationComponentTests : BunitContext
         var cut = Render<ThemeValidationSummary>(parameters => parameters
             .Add(component => component.State, state));
 
-        Assert.Contains("0 errors · 1 advisory ·", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("1 error · 1 advisory ·", cut.Markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 errors", cut.Markup, StringComparison.Ordinal);
         Assert.DoesNotContain("1 advisories", cut.Markup, StringComparison.Ordinal);
     }
 

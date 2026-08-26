@@ -20,7 +20,7 @@
             <header class="theme-preview-intro">
                 <h1>Theme Studio</h1>
                 <p>Compare realistic component workflows, then open settings to tune the preview.</p>
-                <p class="theme-preview-intro__status">Active preset: @State.SelectedPresetId · @State.Validation.Errors.Count errors · @State.Validation.Warnings.Count advisories</p>
+                <p class="theme-preview-intro__status">Active preset: @State.SelectedPresetId · @ThemeValidationPresentation.ErrorLabel(State.Validation.Errors.Count) · @ThemeValidationPresentation.AdvisoryLabel(State.Validation.Warnings.Count)</p>
             </header>
             <div class="theme-preview-stage" data-testid="theme-preview-stage" data-preview-width="@State.Viewport.Width" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
                 <div class="shadcn-scope theme-preview-scope"

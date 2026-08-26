@@ -226,7 +226,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
 
         Assert.Equal(2, cut.FindAll(".documentation-icon-action svg[aria-hidden='true']").Count);
-        Assert.Equal("Shadcn Blazor", cut.Find(".documentation-brand").TextContent.Trim());
+        Assert.Equal("Maliev Shadcn Blazor", cut.Find(".documentation-brand").TextContent.Trim());
         Assert.Single(cut.FindAll(".documentation-brand__mark img"));
         Assert.Contains("images/brand/MALIEV_BLACK.svg", cut.Find(".documentation-brand__mark img").GetAttribute("src"), StringComparison.Ordinal);
         Assert.Equal("Use dark theme", cut.Find("[data-testid='documentation-theme-toggle']").GetAttribute("aria-label"));
