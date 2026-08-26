@@ -804,6 +804,26 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task SpatialGlassRendersAnAmbientFieldAndLayeredComponentMaterials()
+    {
+        await using var context = await NewContextAsync(1280, 900, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+
+        await SelectOptionAsync(page, "theme-visual-style", "Spatial glass");
+        await SelectOptionAsync(page, "theme-depth-treatment", "Floating");
+
+        var scope = page.GetByTestId("theme-visual-style-scope");
+        var card = page.Locator("[data-use-case-id='production-capacity']");
+        var input = page.Locator("[data-use-case-id='operator-profile'] .shadcn-input").First;
+
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-visual-style", "liquid-glass");
+        Assert.Contains("gradient", await scope.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("gradient", await card.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+        Assert.NotEqual("none", await card.EvaluateAsync<string>("element => getComputedStyle(element).backdropFilter"));
+        Assert.Contains("gradient", await input.EvaluateAsync<string>("element => getComputedStyle(element).backgroundImage"), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task RadiusHighContrastAndAnimationControlsAffectThePreviewOnly()
     {
         await using var context = await NewContextAsync(1280, 900, ReducedMotion.Reduce);

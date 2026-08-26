@@ -55,6 +55,51 @@ public sealed class VisualStyleContractTests
     }
 
     [Fact]
+    public void SpatialGlassOwnsAnAmbientFieldAndLayeredMaterialTokens()
+    {
+        var css = ReadStylesheet();
+
+        Assert.Contains("--shadcn-style-environment:", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-specular:", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-lowlight:", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-control-surface:", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-overlay-surface:", css, StringComparison.Ordinal);
+        Assert.Contains("background-image: var(--shadcn-style-environment", css, StringComparison.Ordinal);
+        Assert.Contains("linear-gradient(145deg", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SpatialGlassTreatsCardsControlsAndOverlaysAsDistinctMaterials()
+    {
+        var css = ReadStylesheet();
+
+        Assert.Contains("data-visual-style=\"liquid-glass\"] :where(\n  .shadcn-card", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-style-card-material)", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-style-control-material)", css, StringComparison.Ordinal);
+        Assert.Contains("background: var(--shadcn-style-overlay-material)", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-overlay-shadow:", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SpatialGlassKeepsAOnePixelOpticalEdgeAtStrongIntensity()
+    {
+        var css = ReadStylesheet();
+
+        Assert.Contains("[data-visual-style=\"liquid-glass\"][data-intensity=\"strong\"]", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-border-width: 1px", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ThemeStudioProvidesAThemeAwareEnvironmentBehindSpatialGlass()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+
+        Assert.Contains(".theme-preview-scope .shadcn-visual-style-scope[data-visual-style=\"liquid-glass\"]", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-style-environment:", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ShowcaseAndGeneratedIntegrationLoadTheStyleScopeAsset()
     {
         var root = FindRoot();
