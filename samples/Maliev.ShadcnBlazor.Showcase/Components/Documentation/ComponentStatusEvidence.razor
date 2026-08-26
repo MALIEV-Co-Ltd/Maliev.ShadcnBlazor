@@ -2,6 +2,7 @@
 
 <section class="component-evidence" aria-labelledby="component-evidence-title">
     <h2 id="component-evidence-title">Certification evidence</h2>
+    <p data-testid="certification-explanation">Certification is the reviewed evidence status recorded by this repository for each area below.</p>
     <dl>
         <dt>Status</dt><dd>@Entry.Status</dd>
         <dt>Classification</dt><dd>@Entry.Classification</dd>
@@ -38,7 +39,7 @@
         new("interaction", "Interaction", Entry.Evidence.Interaction),
         new("computed-style", "Computed style", Entry.Evidence.ComputedStyle),
         new("visual", "Visual", Entry.Evidence.Visual),
-        new("integration", "Integration integration", Entry.Evidence.Integration)
+        new("integration", "Integration", Entry.Evidence.Integration)
     ];
 
     private sealed record EvidenceItem(string Id, string Label, bool Complete);

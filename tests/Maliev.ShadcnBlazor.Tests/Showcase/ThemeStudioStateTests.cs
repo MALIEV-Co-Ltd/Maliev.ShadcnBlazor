@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
+using Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 using Maliev.ShadcnBlazor.Showcase.Pages;
@@ -594,6 +595,23 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
             BaseAddress = new Uri("https://showcase.invalid/"),
         });
         Services.AddSingleton<GoogleFontCatalogService>();
+    }
+
+    [Fact]
+    public void PreviewCategoryLinksNavigateToSamePageFragmentsUnderAnyPublishedBasePath()
+    {
+        var cut = Render<ThemeBento>(parameters => parameters
+            .Add(component => component.Paused, true)
+            .Add(component => component.ReducedMotion, true));
+
+        var links = cut.FindAll("nav[aria-label='Preview categories'] a");
+        Assert.NotEmpty(links);
+        foreach (var link in links)
+        {
+            var href = Assert.IsType<string>(link.GetAttribute("href"));
+            Assert.StartsWith("theme#theme-category-", href, StringComparison.Ordinal);
+            Assert.Single(cut.FindAll(href["theme".Length..]));
+        }
     }
 
     [Fact]

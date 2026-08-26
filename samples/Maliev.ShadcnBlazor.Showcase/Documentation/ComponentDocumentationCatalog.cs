@@ -143,7 +143,7 @@ public sealed class ComponentDocumentationCatalog : IComponentDocumentationCatal
                 component.Evidence.ComputedStyle,
                 component.Evidence.Visual,
                 component.Evidence.Integration),
-            $"Documentation for the {name} component.",
+            DescribeComponent(name, slug),
             metadata.Namespace,
             metadata.PrimaryType,
             ToReadOnly(metadata.Aliases),
@@ -154,6 +154,12 @@ public sealed class ComponentDocumentationCatalog : IComponentDocumentationCatal
             RoadmapPhase = component.Plan
         };
     }
+
+    private static string DescribeComponent(string name, string slug) => slug switch
+    {
+        "button" => "Use a Button for an immediate action, such as submitting a form or opening a dialog; use a link when navigation is the outcome.",
+        _ => $"Documentation for the {name} component."
+    };
 
     private static IReadOnlyList<string> ToReadOnly(IReadOnlyList<string>? values) =>
         new ReadOnlyCollection<string>((values ?? []).Where(value => !string.IsNullOrWhiteSpace(value)).ToArray());

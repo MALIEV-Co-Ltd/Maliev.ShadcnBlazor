@@ -371,13 +371,13 @@ public sealed class ComponentApiCatalog
         "Style" => "Additional inline declarations merged with component-owned styles.",
         "AdditionalAttributes" => "Additional HTML attributes forwarded to the component root.",
         _ when name.EndsWith("Changed", StringComparison.Ordinal) => $"Callback raised when {name[..^"Changed".Length]} changes.",
-        _ => $"Configures the {SplitWords(name).ToLowerInvariant()} value."
+        _ => $"Sets the {SplitWords(name).ToLowerInvariant()}."
     };
 
     private static string DescribeConstraints(Type type)
     {
         var underlying = Nullable.GetUnderlyingType(type) ?? type;
-        return underlying.IsEnum ? $"Allowed values: {string.Join(", ", Enum.GetNames(underlying))}." : "None.";
+        return underlying.IsEnum ? $"Allowed values: {string.Join(", ", Enum.GetNames(underlying))}." : "No additional constraints.";
     }
 
     private static string SplitWords(string value) => string.Concat(value.Select((character, index) =>

@@ -1068,10 +1068,14 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var consoles = page.Locator("[data-console]");
         await Assertions.Expect(consoles).ToHaveCountAsync(3);
         await Assertions.Expect(consoles.Locator(".shadcn-tabs")).ToHaveCountAsync(3);
-        await Assertions.Expect(consoles.Locator(".shadcn-chart")).ToHaveCountAsync(3);
-        await Assertions.Expect(consoles.Locator(".shadcn-table")).ToHaveCountAsync(3);
         await Assertions.Expect(consoles.Locator(".shadcn-accordion")).ToHaveCountAsync(3);
         var production = page.Locator("[data-console='production']");
+        var quality = page.Locator("[data-console='quality']");
+        var handoff = page.Locator("[data-console='handoff']");
+        await Assertions.Expect(production.Locator("[data-overview='production'] .shadcn-chart")).ToHaveCountAsync(1);
+        await Assertions.Expect(production.Locator("[data-overview='production'] .shadcn-table")).ToHaveCountAsync(1);
+        await Assertions.Expect(quality.Locator("[data-overview='quality'] [aria-label='Inspection evidence']")).ToHaveCountAsync(1);
+        await Assertions.Expect(handoff.Locator("[data-overview='handoff'] [aria-label='Delivery route']")).ToHaveCountAsync(1);
         await production.GetByRole(AriaRole.Tab, new() { Name = "Support", Exact = true }).ClickAsync();
         var note = production.GetByPlaceholder("Add a production note");
         await note.FillAsync("Customer requested inspection photos");

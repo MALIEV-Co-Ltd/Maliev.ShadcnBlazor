@@ -593,6 +593,28 @@ public sealed class ComponentDossierTests : BunitContext
             [true, true, true, true, true, true, true]);
     }
 
+    [Fact]
+    public void StatusEvidenceNamesTheIntegrationDimensionWithoutDuplicatingTheLabel()
+    {
+        var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug("accordion"));
+        var cut = Render<ComponentStatusEvidence>(parameters => parameters.Add(component => component.Entry, entry));
+
+        var integration = cut.Find("[data-evidence='integration']");
+
+        Assert.Equal("Integration", integration.QuerySelector("th")?.TextContent.Trim());
+    }
+
+    [Fact]
+    public void StatusEvidenceExplainsWhatCertificationMeansInThisRepository()
+    {
+        var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug("accordion"));
+        var cut = Render<ComponentStatusEvidence>(parameters => parameters.Add(component => component.Entry, entry));
+
+        Assert.Equal(
+            "Certification is the reviewed evidence status recorded by this repository for each area below.",
+            cut.Find("[data-testid='certification-explanation']").TextContent.Trim());
+    }
+
     private void AssertEvidence(string slug, IReadOnlyList<bool> expected)
     {
         var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug(slug));
