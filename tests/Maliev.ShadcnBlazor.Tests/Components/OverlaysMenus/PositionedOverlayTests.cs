@@ -282,6 +282,7 @@ public sealed class PositionedOverlayTests : BunitContext
         Assert.Contains(".shadcn-tooltip-content[data-side=\"right\"] .shadcn-tooltip-arrow", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("detachDelayedTrigger(trigger)", tooltipScript, StringComparison.Ordinal);
+        Assert.Contains("dotnet.invokeMethodAsync(\"RequestCloseAsync\")", tooltipScript, StringComparison.Ordinal);
         Assert.Contains("focusTargetId", positionedScript, StringComparison.Ordinal);
         Assert.Contains("event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync')", positionedScript, StringComparison.Ordinal);
     }
