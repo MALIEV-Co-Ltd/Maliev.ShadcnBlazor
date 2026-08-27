@@ -427,7 +427,7 @@
         case "machine-password":
             <p class="theme-use-case-card__description">@T("Authorize maintenance mode for DMG MORI Cell A3.")</p>
             <label>@T("Maintenance PIN")<ShadcnSecretInput Value="@MachinePin" MaskStart="0" ReadOnly="true" ShowLabel="@T("Show maintenance PIN")" HideLabel="@T("Hide maintenance PIN")" /></label>
-            <ShadcnButton Size="ShadcnButtonSize.Small" OnClick="VerifyMachinePin">@T("Verify access")</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Small" Disabled="_machineAccessVerified" OnClick="VerifyMachinePin">@T(_machineAccessVerified ? "Access verified" : "Verify access")</ShadcnButton>
             @if (_machineAccessVerified) { <ShadcnAlert><ShadcnAlertTitle>@T("Access verified")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Maintenance mode is available for 10 minutes.")</ShadcnAlertDescription></ShadcnAlert> }
             break;
         case "webhook-secret":

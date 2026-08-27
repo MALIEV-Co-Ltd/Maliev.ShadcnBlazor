@@ -278,6 +278,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task VerifyingMachineAccessTransitionsTheActionToCompletedState()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='machine-password']");
+        var action = card.GetByRole(AriaRole.Button, new() { Name = "Verify access", Exact = true });
+        await card.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(card.Locator("[data-slot='alert']")).ToHaveCountAsync(0);
+
+        await action.ClickAsync();
+
+        await Assertions.Expect(card.Locator("[data-slot='alert']")).ToContainTextAsync("Maintenance mode is available for 10 minutes.");
+        await Assertions.Expect(card.GetByRole(AriaRole.Button, new() { Name = "Access verified", Exact = true })).ToBeDisabledAsync();
+    }
+
+    [Fact]
     public async Task CuratedChartSubmitButtonsSwitchAndDropzoneExposeCompleteFeedback()
     {
         await using var context = await NewContextAsync(1569, 1032);
