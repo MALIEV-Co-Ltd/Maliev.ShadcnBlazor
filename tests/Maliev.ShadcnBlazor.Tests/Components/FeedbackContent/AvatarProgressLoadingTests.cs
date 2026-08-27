@@ -287,11 +287,11 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
-    public void ProgressIndicatorUsesTransformRatioForLiveValueUpdates()
+    public void ProgressIndicatorUsesIndependentScaleRatioForLiveValueUpdates()
     {
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
-        Assert.Contains("transform: scaleX(var(--shadcn-progress-ratio, 0))", css, StringComparison.Ordinal);
-        Assert.Contains("transition: transform", css, StringComparison.Ordinal);
+        Assert.Contains("scale: var(--shadcn-progress-ratio, 0) 1", css, StringComparison.Ordinal);
+        Assert.Contains("transition: scale", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-progress-indicator { transition: none; }", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-progress-indicator[data-state=\"indeterminate\"] { animation: none;", css, StringComparison.Ordinal);
     }

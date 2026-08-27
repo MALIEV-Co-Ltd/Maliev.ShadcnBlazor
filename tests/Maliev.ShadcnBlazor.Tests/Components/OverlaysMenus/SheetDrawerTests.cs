@@ -1,4 +1,5 @@
 using Bunit;
+using Maliev.ShadcnBlazor.Components.Actions;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -14,6 +15,37 @@ public sealed class SheetDrawerTests : BunitContext
         module.SetupVoid("detachDialog", _ => true);
         module.SetupVoid("attachDrawer", _ => true);
         module.SetupVoid("detachDrawer", _ => true);
+    }
+
+    [Theory]
+    [InlineData(ShadcnButtonVariant.Default, "default")]
+    [InlineData(ShadcnButtonVariant.Destructive, "destructive")]
+    [InlineData(ShadcnButtonVariant.Outline, "outline")]
+    [InlineData(ShadcnButtonVariant.Secondary, "secondary")]
+    [InlineData(ShadcnButtonVariant.Ghost, "ghost")]
+    [InlineData(ShadcnButtonVariant.Link, "link")]
+    public void SheetCloseExposesEveryButtonVariant(ShadcnButtonVariant variant, string expected)
+    {
+        var cut = Render<ShadcnSheet>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnSheetContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnSheetContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnSheetTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnSheetTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Delivery schedule")));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnSheetClose>(10);
+                    content.AddAttribute(11, nameof(ShadcnSheetClose.Variant), variant);
+                    content.AddAttribute(12, nameof(ShadcnSheetClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Save schedule")));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var action = cut.FindAll("[data-slot='sheet-close']").Single(element => element.TextContent.Contains("Save schedule", StringComparison.Ordinal));
+        Assert.Equal(expected, action.GetAttribute("data-variant"));
     }
 
     [Fact]

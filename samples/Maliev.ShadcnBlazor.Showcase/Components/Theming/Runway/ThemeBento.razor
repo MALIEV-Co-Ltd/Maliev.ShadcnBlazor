@@ -1,4 +1,5 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Actions
 @using Maliev.ShadcnBlazor.Components.Layout
 @using Maliev.ShadcnBlazor.Showcase.Theming.Runway
 @inject IThemeUseCaseRegistry Registry
@@ -18,18 +19,28 @@
                    data-animation-paused="@(Paused ? "true" : "false")"
                    data-reduced-motion="@(ReducedMotion ? "true" : "false")">
     <div class="theme-bento__orientation">
-        <h2>Workflow examples</h2>
-        <nav class="theme-bento__categories" aria-label="Preview categories">
-            <ul>
+        <h1>Workflow examples</h1>
+        <div class="theme-bento__category-scroll">
+            <ShadcnToggleGroup TValue="ThemeUseCaseCategory"
+                               Class="theme-bento__categories"
+                               Values="@_selectedCategories"
+                               ValuesChanged="SetSelectedCategories"
+                               Variant="ShadcnToggleVariant.Outline"
+                               Spacing="0.5"
+                               aria-label="Filter workflow examples by category">
                 @foreach (var category in Categories)
                 {
-                    <li><a href="theme#@CategoryAnchorId(category)" data-enhance="false">@CategoryLabel(category)</a></li>
+                    <ShadcnToggleGroupItem TValue="ThemeUseCaseCategory"
+                                           Value="@category"
+                                           data-testid="@CategoryFilterTestId(category)">
+                        @CategoryLabel(category)
+                    </ShadcnToggleGroupItem>
                 }
-            </ul>
-        </nav>
+            </ShadcnToggleGroup>
+        </div>
     </div>
     <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1rem" Masonry="true">
-        @foreach (var card in Registry.All.OrderBy(card => card.Order))
+        @foreach (var card in FilteredCards)
         {
             <ShadcnBentoItem @key="card.Id"
                              ColumnSpan="@ColumnSpan(card.Size)"
@@ -61,11 +72,15 @@
     [Parameter] public bool Paused { get; set; }
     [Parameter] public bool ReducedMotion { get; set; }
     private int _parameterCycle;
+    private IReadOnlyCollection<ThemeUseCaseCategory> _selectedCategories = Array.Empty<ThemeUseCaseCategory>();
     private IReadOnlyList<ThemeUseCaseCategory> Categories => Registry.All
         .OrderBy(card => card.Order)
         .Select(card => card.Category)
         .Distinct()
         .ToArray();
+    private IEnumerable<ThemeUseCaseDefinition> FilteredCards => Registry.All
+        .Where(card => _selectedCategories.Count == 0 || _selectedCategories.Contains(card.Category))
+        .OrderBy(card => card.Order);
     private static readonly HashSet<string> AnimatedCardIds =
     [
         "production-capacity",
@@ -102,6 +117,11 @@
         .Min(candidate => candidate.Order) == card.Order;
 
     private static string CategoryAnchorId(ThemeUseCaseCategory category) => $"theme-category-{category.ToString().ToLowerInvariant()}";
+
+    private static string CategoryFilterTestId(ThemeUseCaseCategory category) => $"theme-category-filter-{category.ToString().ToLowerInvariant()}";
+
+    private void SetSelectedCategories(IReadOnlyCollection<ThemeUseCaseCategory> categories) =>
+        _selectedCategories = categories;
 
     private static string CategoryLabel(ThemeUseCaseCategory category) => category switch
     {

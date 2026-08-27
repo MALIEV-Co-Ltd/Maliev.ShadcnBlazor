@@ -30,7 +30,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge {
     display: inline-flex; width: fit-content; height: 1.25rem; flex: 0 0 auto; align-items: center; justify-content: center;
-    gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px solid transparent; border-radius: 9999px; padding: calc(0.125rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier));
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px solid transparent; border-radius: var(--shadcn-radius-md); padding: calc(0.125rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier));
     font-size: 0.75rem; line-height: 1rem; font-weight: 500; white-space: nowrap; text-decoration: none; outline: none; cursor: default;
     transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
@@ -119,9 +119,9 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress { display: flex; flex-wrap: wrap; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-track { position: relative; display: flex; width: 100%; height: 0.375rem; align-items: center; overflow: hidden; border-radius: 9999px; background: var(--shadcn-muted); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator { width: 100%; height: 100%; background: var(--shadcn-primary); transform: scaleX(var(--shadcn-progress-ratio, 0)); transform-origin: left center; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator { width: 100%; height: 100%; background: var(--shadcn-primary); scale: var(--shadcn-progress-ratio, 0) 1; transform-origin: left center; transition: scale var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope)[dir="rtl"] .shadcn-progress-indicator { transform-origin: right center; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator[data-state="indeterminate"] { width: 40%; animation: shadcn-progress-indeterminate var(--shadcn-motion-duration-slow) ease-in-out infinite; transform: none; transform-origin: center; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-indicator[data-state="indeterminate"] { width: 40%; animation: shadcn-progress-indeterminate var(--shadcn-motion-duration-slow) ease-in-out infinite; scale: none; transform-origin: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-label { font-size: 0.875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-value { margin-inline-start: auto; color: var(--shadcn-muted-foreground); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 @keyframes shadcn-progress-indeterminate { 0% { translate: -150% 0; } 100% { translate: 300% 0; } }
@@ -149,10 +149,10 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-spinner { animation: none; }
 }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel { position: relative; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content { overflow: hidden; touch-action: pan-y pinch-zoom; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel { position: relative; width: 100%; min-inline-size: 0; max-inline-size: 100%; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content { min-inline-size: 0; max-inline-size: 100%; overflow: hidden; touch-action: pan-y pinch-zoom; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] { block-size: var(--shadcn-carousel-viewport-block-size); touch-action: pan-x pinch-zoom; }
-:where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { display: flex; margin-inline-start: calc(-1rem * var(--shadcn-spacing-multiplier)); transition: translate var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { display: flex; width: 100%; min-inline-size: 0; margin-inline-start: calc(-1rem * var(--shadcn-spacing-multiplier)); transition: translate var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="horizontal"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-x"] { transform: translateX(var(--shadcn-carousel-drag-x)); transition: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-orientation="vertical"] [data-slot="carousel-track"][style*="--shadcn-carousel-drag-y"] { transform: translateY(var(--shadcn-carousel-drag-y)); transition: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel[data-reduced-motion="true"] [data-slot="carousel-track"] { transition: none; }
@@ -160,7 +160,8 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { transition: none; }
 }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] > [data-slot="carousel-track"] { block-size: 100%; flex-direction: column; margin-block-start: calc(-1rem * var(--shadcn-spacing-multiplier)); margin-inline-start: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-item { min-width: 0; flex: 0 0 var(--shadcn-carousel-basis, 100%); padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-item { box-sizing: border-box; min-width: 0; max-inline-size: 100%; flex: 0 0 var(--shadcn-carousel-basis, 100%); padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-item > * { min-inline-size: 0; max-inline-size: 100%; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] .shadcn-carousel-item { block-size: var(--shadcn-carousel-viewport-block-size); min-block-size: 0; flex-basis: var(--shadcn-carousel-viewport-block-size); padding-block-start: calc(1rem * var(--shadcn-spacing-multiplier)); padding-inline-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-previous,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-next { appearance: none; position: absolute; inset-block: 0; margin-block: auto; display: inline-flex; width: var(--shadcn-control-height-sm); height: var(--shadcn-control-height-sm); padding: 0; align-items: center; justify-content: center; border: 1px solid var(--shadcn-border); border-radius: 9999px; background: var(--shadcn-background); color: var(--shadcn-foreground); box-shadow: var(--shadcn-shadow-xs); touch-action: manipulation; }
@@ -180,19 +181,17 @@
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport {
-    position: fixed; inset-inline: 1rem; inset-block-end: 1rem; z-index: 50; display: flex; width: auto; max-width: 24rem;
-    margin-inline: auto; flex-direction: column; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); pointer-events: none; outline: none;
+    position: fixed; inset-inline: 1rem; inset-block-start: auto; inset-block-end: 1rem; z-index: 50; display: flex; width: auto; max-width: 24rem; max-block-size: calc(100dvh - 2rem);
+    margin: 0 auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior-block: contain; border: 0; padding: 0; flex-direction: column; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); background: transparent; color: inherit; pointer-events: none; outline: none;
 }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-placement$="end"] { inset-inline-start: auto; inset-inline-end: 1rem; margin-inline: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-placement$="start"] { inset-inline-start: 1rem; inset-inline-end: auto; margin-inline: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-placement^="top"] { inset-block-start: 1rem; inset-block-end: auto; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast { width: 100%; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-2xl); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); pointer-events: auto; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter), opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast { box-sizing: border-box; width: 100%; border: 1px solid var(--shadcn-border); border-radius: var(--shadcn-radius-2xl); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md); pointer-events: auto; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter), opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-swipe="move"] { transition: none; transform: translate(var(--shadcn-toast-swipe-x, 0), var(--shadcn-toast-swipe-y, 0)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-state="closing"] { opacity: 0; transform: translateY(0.75rem) scale(0.96); pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-limited="true"] { position: absolute; visibility: hidden; pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-reduced-motion="true"] .shadcn-toast { transition: none; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport:not([data-expanded="true"]) .shadcn-toast:not(:last-child) { margin-block-end: -3rem; transform: translateY(calc(var(--shadcn-toast-stack-index, 0) * 0.125rem)) scale(0.96); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-expanded="true"] .shadcn-toast { margin-block-end: 0; transform: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-content { display: flex; min-height: 4rem; box-sizing: border-box; align-items: center; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-icon { display: inline-flex; width: 1rem; height: 1rem; flex: 0 0 auto; align-items: center; justify-content: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-toast-icon, .shadcn-toast-close) svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
@@ -217,7 +216,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast[data-type="loading"] .shadcn-toast-icon { animation: none; }
 }
 @media (max-width: 40rem) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport { inset-inline: 1rem; width: auto; max-width: none; margin-inline: 0; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-toast-viewport[data-placement] { inset-inline: 1rem; width: auto; max-width: none; margin-inline: 0; }
 }
 
 @media (forced-colors: active) {

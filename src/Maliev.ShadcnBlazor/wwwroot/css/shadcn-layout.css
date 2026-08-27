@@ -116,7 +116,8 @@
     transform: none;
     transition:
         opacity var(--shadcn-reveal-detail-duration) var(--shadcn-motion-easing-enter),
-        transform var(--shadcn-reveal-detail-transform-duration) var(--shadcn-motion-easing-enter);
+        transform var(--shadcn-reveal-detail-transform-duration) var(--shadcn-motion-easing-enter),
+        scale var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
     transition-delay: calc(var(--shadcn-reveal-delay) + var(--shadcn-reveal-stagger-delay) + 100ms);
 }
 

@@ -34,6 +34,7 @@ function releaseDialog(content, restore = true) {
     if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
     if (state.modal && --modalCount === 0) document.documentElement.style.overflow = documentOverflow;
     if (state.topLayer?.matches(':popover-open')) state.topLayer.hidePopover();
+    state.portal?.removeAttribute('data-shadcn-dialog-ready');
     if (restore && wasTopmost) {
         const restoreFocus = () => {
             const target = state.previous?.isConnected
@@ -73,7 +74,7 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (modalCount++ === 0) documentOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
     }
-    const state = { content, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
+    const state = { content, portal, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
     const keydown = event => {
         content.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
@@ -93,6 +94,12 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
     dialogStack.push(state);
     acquireLayer(content);
     observer.observe(document.body, { childList: true, subtree: true });
+    const reveal = () => {
+        if (!content.isConnected) return;
+        if (!topLayer.showPopover || topLayer.matches(':popover-open')) { portal?.setAttribute('data-shadcn-dialog-ready', ''); return; }
+        requestAnimationFrame(reveal);
+    };
+    queueMicrotask(reveal);
     queueMicrotask(() => (content.querySelector('[data-slot="alert-dialog-cancel"]') || content.querySelector('[autofocus]') || focusable(content)[0] || content).focus({ preventScroll: true }));
 }
 

@@ -598,20 +598,29 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void PreviewCategoryLinksNavigateToSamePageFragmentsUnderAnyPublishedBasePath()
+    public void PreviewCategoryTogglesFilterCardsWithoutNavigation()
     {
         var cut = Render<ThemeBento>(parameters => parameters
             .Add(component => component.Paused, true)
             .Add(component => component.ReducedMotion, true));
 
-        var links = cut.FindAll("nav[aria-label='Preview categories'] a");
-        Assert.NotEmpty(links);
-        foreach (var link in links)
-        {
-            var href = Assert.IsType<string>(link.GetAttribute("href"));
-            Assert.StartsWith("theme#theme-category-", href, StringComparison.Ordinal);
-            Assert.Single(cut.FindAll(href["theme".Length..]));
-        }
+        var filters = cut.FindAll("[aria-label='Filter workflow examples by category'] [data-slot='toggle-group-item']");
+        Assert.Equal(7, filters.Count);
+        Assert.Empty(cut.FindAll(".theme-bento__categories a"));
+        Assert.Equal(45, cut.FindAll("[data-use-case-item]").Count);
+
+        var overlays = cut.Find("[data-testid='theme-category-filter-overlays']");
+        overlays.Click();
+
+        Assert.Equal("true", overlays.GetAttribute("aria-pressed"));
+        Assert.Equal(9, cut.FindAll("[data-use-case-item]").Count);
+        Assert.Single(cut.FindAll("[data-use-case-item='dispatch-confirmation']"));
+        Assert.Empty(cut.FindAll("[data-use-case-item='production-capacity']"));
+
+        overlays.Click();
+
+        Assert.Equal("false", overlays.GetAttribute("aria-pressed"));
+        Assert.Equal(45, cut.FindAll("[data-use-case-item]").Count);
     }
 
     [Fact]
@@ -861,22 +870,12 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void ThemeStudioIntroUsesSingularErrorAndAdvisoryGrammar()
+    public void ThemeStudioStartsWithTheWorkflowFilterWithoutAnIntroPanel()
     {
-        var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<ThemeStudio>();
-        var validation = new ShadcnThemeValidationResult(
-            [new ShadcnThemeValidationMessage("invalid-token", "light.primary", "Token is invalid.")],
-            [new ShadcnThemeValidationMessage("low-contrast", "light.foreground", "Contrast needs review.")],
-            []);
-        typeof(ThemeStudioState).GetProperty(nameof(ThemeStudioState.Validation))!.SetValue(state, validation);
 
-        cut.Render();
-
-        var status = cut.Find(".theme-preview-intro__status").TextContent;
-        Assert.Contains("1 error · 1 advisory", status, StringComparison.Ordinal);
-        Assert.DoesNotContain("1 errors", status, StringComparison.Ordinal);
-        Assert.DoesNotContain("1 advisories", status, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".theme-preview-intro"));
+        Assert.Equal("Workflow examples", cut.Find("#theme-preview h1").TextContent.Trim());
     }
 
     [Fact]

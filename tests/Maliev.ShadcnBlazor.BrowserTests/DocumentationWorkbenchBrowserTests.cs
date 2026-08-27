@@ -256,7 +256,8 @@ public sealed class DocumentationWorkbenchBrowserTests(
         { 1024, 768, false, true },
         { 1024, 768, true, true },
         { 390, 844, false, false },
-        { 390, 844, true, false }
+        { 390, 844, true, false },
+        { 320, 568, false, false }
     };
 
     [Theory]
@@ -332,10 +333,11 @@ public sealed class DocumentationWorkbenchBrowserTests(
             Assert.InRange((await catalogTrigger.BoundingBoxAsync())!.Width, 44, 48);
             Assert.InRange((await outlineTrigger.BoundingBoxAsync())!.Width, 44, 48);
             Assert.InRange((await brand.BoundingBoxAsync())!.Height, 44, 48);
+            Assert.InRange((await page.GetByTestId("documentation-kofi-link").BoundingBoxAsync())!.Width, 40, 48);
             Assert.InRange((await page.GetByTestId("documentation-theme-toggle").BoundingBoxAsync())!.Width, 44, 48);
             Assert.InRange((await page.GetByTestId("documentation-direction-toggle").BoundingBoxAsync())!.Width, 44, 48);
-            var order = await header.Locator("a.documentation-brand, button").EvaluateAllAsync<string[]>("elements => elements.map(element => element.matches('.documentation-brand') ? 'brand' : element.dataset.testid || '')");
-            Assert.Equal(["brand", "catalog-trigger", "outline-trigger", "documentation-theme-toggle", "documentation-direction-toggle"], order);
+            var order = await header.Locator("a.documentation-brand, a.documentation-kofi, button").EvaluateAllAsync<string[]>("elements => elements.map(element => element.matches('.documentation-brand') ? 'brand' : element.dataset.testid || '')");
+            Assert.Equal(["brand", "catalog-trigger", "outline-trigger", "documentation-kofi-link", "documentation-theme-toggle", "documentation-direction-toggle"], order);
         }
 
         var article = page.Locator(".component-dossier");

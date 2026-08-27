@@ -384,7 +384,7 @@ public sealed class ToastTests : BunitContext
     }
 
     [Fact]
-    public void SemanticVariantsAndExpandableStackExposeDistinctStablePresentation()
+    public void SemanticVariantsAndHoverStateExposeAStableBoundedPresentation()
     {
         var service = new ShadcnToastService(new ManualTimeProvider());
         Services.AddSingleton<IShadcnToastService>(service);
@@ -398,6 +398,7 @@ public sealed class ToastTests : BunitContext
         Assert.Equal(["0", "1", "2", "3", "4", "5"], cut.FindAll("[data-slot='toast']").Select(toast => toast.GetAttribute("data-stack-index")));
 
         var viewport = cut.Find("[data-slot='toast-viewport']");
+        Assert.Equal("manual", viewport.GetAttribute("popover"));
         viewport.FocusIn();
         Assert.Equal("true", viewport.GetAttribute("data-expanded"));
         viewport.FocusOut();
@@ -406,8 +407,8 @@ public sealed class ToastTests : BunitContext
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
         foreach (var type in new[] { "success", "info", "warning", "error", "loading" })
             Assert.Contains($".shadcn-toast[data-type=\"{type}\"]", css, StringComparison.Ordinal);
-        Assert.Contains("--shadcn-toast-stack-index", css, StringComparison.Ordinal);
-        Assert.Contains("[data-expanded=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains("max-block-size: calc(100dvh - 2rem)", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("margin-block-end: -3rem", css, StringComparison.Ordinal);
     }
 
     [Fact]

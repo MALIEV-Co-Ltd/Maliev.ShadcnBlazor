@@ -164,6 +164,29 @@ public sealed class ComponentCatalogVisualProofTests(
         await page.GetByTestId("theme-studio").WaitForAsync();
         await Assertions.Expect(page.GetByTestId("theme-bento")).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator("[data-testid='theme-bento'] .theme-use-case-card")).ToHaveCountAsync(45);
+        var settingsToggle = page.GetByTestId("theme-controls-toggle");
+        var settingsWereOpen = string.Equals(
+            await settingsToggle.GetAttributeAsync("aria-expanded"),
+            "true",
+            StringComparison.Ordinal);
+        if (!settingsWereOpen)
+            await settingsToggle.ClickAsync();
+
+        var accessibilitySection = page.GetByTestId("theme-advanced-accessibility");
+        var accessibilityTrigger = accessibilitySection.Locator("button").First;
+        await accessibilityTrigger.ClickAsync();
+        var reducedMotion = accessibilitySection.GetByTestId("preview-reduced-motion");
+        await Assertions.Expect(reducedMotion).ToBeVisibleAsync();
+        if (string.Equals(await reducedMotion.GetAttributeAsync("aria-checked"), "false", StringComparison.Ordinal))
+            await reducedMotion.ClickAsync();
+        await Assertions.Expect(reducedMotion).ToHaveAttributeAsync("aria-checked", "true");
+        await accessibilityTrigger.ClickAsync();
+        await page.GetByTestId("theme-studio-sidebar").Locator(".shadcn-sidebar-content").EvaluateAsync("element => element.scrollTop = 0");
+        if (!settingsWereOpen)
+        {
+            await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
+            await Assertions.Expect(settingsToggle).ToHaveAttributeAsync("aria-expanded", "false");
+        }
         if (mode.StartsWith("mobile", StringComparison.Ordinal))
         {
             var firstCard = page.Locator("[data-testid='theme-bento'] .theme-use-case-card").First;
@@ -177,9 +200,8 @@ public sealed class ComponentCatalogVisualProofTests(
         }
         if (openSettings)
         {
-            var toggle = page.GetByTestId("theme-controls-toggle");
-            if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
-                await toggle.ClickAsync();
+            if (string.Equals(await settingsToggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+                await settingsToggle.ClickAsync();
         }
         var catalogStatus = page.GetByTestId("theme-font-catalog-status");
         if (await catalogStatus.CountAsync() > 0)

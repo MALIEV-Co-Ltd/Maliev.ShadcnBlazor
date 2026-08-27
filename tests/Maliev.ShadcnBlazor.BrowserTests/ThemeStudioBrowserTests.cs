@@ -1,6 +1,8 @@
 using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
 
@@ -92,6 +94,285 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task InspectionSchedulingDatePickerEscapesCardClipping()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='inspection-scheduling']");
+        await card.ScrollIntoViewIfNeededAsync();
+
+        await card.Locator("[data-slot='date-picker-trigger']").ClickAsync();
+        var popup = card.Locator("[data-slot='date-picker-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+
+        Assert.True(
+            await popup.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The date-picker popup must use the browser top layer so clipped ancestors cannot crop it.");
+    }
+
+    [Fact]
+    public async Task InspectionSchedulingCalendarCentersGridAndKeepsMutedTextReadable()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var calendar = page.Locator("[data-use-case-id='inspection-scheduling'] [data-slot='calendar']");
+        await calendar.ScrollIntoViewIfNeededAsync();
+        var navigation = calendar.Locator("[data-slot='calendar-nav']");
+        var navigationOffset = await navigation.EvaluateAsync<double[]>(
+            """
+            element => {
+                const center = node => { const bounds = node.getBoundingClientRect(); return bounds.left + bounds.width / 2; };
+                const buttons = element.querySelectorAll('button');
+                const weekdays = element.closest('[data-slot=calendar]').querySelectorAll('.shadcn-calendar-weekday');
+                return [Math.abs(center(buttons[0]) - center(weekdays[0])), Math.abs(center(buttons[1]) - center(weekdays[6]))];
+            }
+            """);
+        Assert.All(navigationOffset, offset => Assert.InRange(offset, 0, 1));
+
+        var mutedContrast = await calendar.Locator("[data-slot='calendar-weekday']").First.EvaluateAsync<double>(
+            """
+            element => {
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = 1;
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                const channels = value => {
+                    context.clearRect(0, 0, 1, 1);
+                    context.fillStyle = value;
+                    context.fillRect(0, 0, 1, 1);
+                    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3));
+                };
+                const luminance = value => {
+                    const linear = channels(value).map(channel => {
+                        const normalized = channel / 255;
+                        return normalized <= 0.04045 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+                    });
+                    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+                };
+                let surface = element;
+                while (surface && getComputedStyle(surface).backgroundColor === 'rgba(0, 0, 0, 0)') surface = surface.parentElement;
+                const foreground = luminance(getComputedStyle(element).color);
+                const background = luminance(surface ? getComputedStyle(surface).backgroundColor : 'rgb(255, 255, 255)');
+                return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+            }
+            """);
+        Assert.True(mutedContrast >= 7, $"Calendar weekday contrast was {mutedContrast:F2}:1 instead of at least 7:1.");
+    }
+
+    [Fact]
+    public async Task MaterialRoutingSelectUsesOneFocusRingAroundTheCompositeControl()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='select']").First;
+        await root.ScrollIntoViewIfNeededAsync();
+        var trigger = root.Locator("[data-slot='select-trigger']");
+
+        await trigger.FocusAsync();
+
+        Assert.NotEqual("none", await root.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
+        await Assertions.Expect(trigger).ToHaveCSSAsync("box-shadow", "none");
+        await Assertions.Expect(trigger).ToHaveCSSAsync("outline-style", "none");
+    }
+
+    [Fact]
+    public async Task MaterialRoutingSelectEscapesCardClipping()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='select']").First;
+        await root.ScrollIntoViewIfNeededAsync();
+
+        await root.Locator("[data-slot='select-trigger']").ClickAsync();
+        var popup = root.Locator("[data-slot='select-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+        Assert.True(
+            await popup.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The select options must use the browser top layer so clipped ancestors cannot crop them.");
+    }
+
+    [Fact]
+    public async Task InspectorSelectUsesAvailableViewportSpaceWithoutOverlappingItsTrigger()
+    {
+        await using var context = await NewContextAsync(390, 568, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await OpenSettingsAsync(page);
+        var trigger = page.GetByTestId("theme-visual-style");
+        await trigger.EvaluateAsync("element => element.scrollIntoView({ block: 'end' })");
+
+        await trigger.ClickAsync();
+        var popup = page.Locator("[data-slot='select-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+        var geometry = await popup.EvaluateAsync<double[]>(
+            """
+            element => {
+                const popup = element.getBoundingClientRect();
+                const trigger = element.closest('[data-slot=select]').querySelector('[data-slot=select-trigger]').getBoundingClientRect();
+                return [popup.top, popup.bottom, trigger.top, trigger.bottom, innerHeight];
+            }
+            """);
+
+        Assert.True(geometry[1] <= geometry[2] || geometry[0] >= geometry[3], $"Popup overlapped its trigger: {string.Join(", ", geometry)}");
+        Assert.InRange(geometry[0], 8, geometry[4] - 8);
+        Assert.InRange(geometry[1], 8, geometry[4] - 8);
+    }
+
+    [Fact]
+    public async Task MaterialRoutingComboboxHoverFollowsTheCompositeControlRadius()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='combobox']");
+        await root.ScrollIntoViewIfNeededAsync();
+        var inputGroup = root.Locator("[data-slot='input-group']");
+        var trigger = root.Locator("[data-slot='combobox-trigger']");
+
+        await trigger.HoverAsync();
+
+        var radii = await trigger.EvaluateAsync<double[]>(
+            """
+            element => {
+                const triggerStyle = getComputedStyle(element);
+                const groupStyle = getComputedStyle(element.closest('[data-slot=input-group]'));
+                return [
+                    parseFloat(triggerStyle.borderTopRightRadius),
+                    parseFloat(groupStyle.borderTopRightRadius),
+                    parseFloat(triggerStyle.borderBottomRightRadius),
+                    parseFloat(groupStyle.borderBottomRightRadius)
+                ];
+            }
+            """);
+        Assert.Equal(radii[1], radii[0], 2);
+        Assert.Equal(radii[3], radii[2], 2);
+        Assert.NotEqual(
+            "rgba(0, 0, 0, 0)",
+            await trigger.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        await Assertions.Expect(inputGroup).ToHaveCSSAsync("overflow", "visible");
+    }
+
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
+    public async Task OverlayFeedbackToastViewportUsesTheTopLayerAndCapsTheVisibleQueue(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='overlay-feedback-lab']");
+        await card.ScrollIntoViewIfNeededAsync();
+        var trigger = card.GetByRole(AriaRole.Button, new() { Name = "Show toast" });
+
+        await trigger.EvaluateAsync(
+            "element => { for (let index = 0; index < 3; index++) element.dispatchEvent(new MouseEvent('click', { bubbles: true })); }");
+
+        var viewport = card.Locator("[data-slot='toast-viewport']");
+        var toasts = viewport.Locator("[data-slot='toast']");
+        var presentedToasts = viewport.Locator("[data-slot='toast']:not([data-limited='true'])");
+        await Assertions.Expect(toasts).ToHaveCountAsync(3);
+        await Assertions.Expect(presentedToasts).ToHaveCountAsync(2);
+        Assert.True(
+            await viewport.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The toast viewport must use the browser top layer so containing blocks cannot capture fixed positioning.");
+
+        var bounds = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.right, box.bottom, innerWidth, innerHeight]; })");
+        Assert.All(bounds, box =>
+        {
+            Assert.True(box[0] >= 8 && box[2] <= box[4] - 8, $"Toast escaped the horizontal viewport: {string.Join(", ", box)}");
+            Assert.True(box[1] >= 8 && box[3] <= box[5] - 8, $"Toast escaped the vertical viewport: {string.Join(", ", box)}");
+        });
+    }
+
+    [Fact]
+    public async Task OverlayFeedbackToastHoverKeepsTheVisibleStackStationary()
+    {
+        await using var context = await NewContextAsync(900, 720, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='overlay-feedback-lab']");
+        await card.ScrollIntoViewIfNeededAsync();
+        var trigger = card.GetByRole(AriaRole.Button, new() { Name = "Show toast" });
+        await trigger.ClickAsync();
+        await trigger.ClickAsync();
+        var viewport = card.Locator("[data-slot='toast-viewport']");
+        var presentedToasts = viewport.Locator("[data-slot='toast']:not([data-limited='true'])");
+        await Assertions.Expect(presentedToasts).ToHaveCountAsync(2);
+        var before = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.width, box.height]; })");
+
+        await viewport.DispatchEventAsync("mouseenter");
+        await Assertions.Expect(viewport).ToHaveAttributeAsync("data-expanded", "true");
+        var after = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.width, box.height]; })");
+
+        Assert.Equal(before.Length, after.Length);
+        for (var index = 0; index < before.Length; index++)
+        {
+            for (var metric = 0; metric < before[index].Length; metric++)
+                Assert.InRange(Math.Abs(before[index][metric] - after[index][metric]), 0, 1);
+        }
+    }
+
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
+    public async Task ProductionCarouselKeepsEverySelectedSlideWithinItsViewport(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);
+        var page = await OpenAsync(context);
+        var carousel = page.Locator("[data-use-case-id='production-carousel'] [data-slot='carousel']");
+        await carousel.ScrollIntoViewIfNeededAsync();
+        var viewport = carousel.Locator("[data-slot='carousel-content']");
+        var items = carousel.Locator("[data-slot='carousel-item']");
+
+        for (var index = 0; index < 3; index++)
+        {
+            if (index > 0)
+                await carousel.Locator("[data-slot='carousel-next']").ClickAsync();
+
+            var item = items.Nth(index);
+            await Assertions.Expect(item).ToHaveAttributeAsync("data-selected", "true");
+            var sizes = await item.EvaluateAsync<double[]>(
+                """
+                element => {
+                    const item = element.getBoundingClientRect();
+                    const viewport = element.closest('[data-slot=carousel]').querySelector('[data-slot=carousel-content]').getBoundingClientRect();
+                    const stage = element.querySelector('.theme-carousel-stage').getBoundingClientRect();
+                    return [item.width, viewport.width, stage.left - viewport.left, viewport.right - stage.right];
+                }
+                """);
+            Assert.InRange(Math.Abs(sizes[0] - sizes[1]), 0, 1);
+            Assert.True(sizes[2] is >= -1 and <= 1, $"Slide {index + 1} leading inset was {sizes[2]:F2}px. Geometry: {string.Join(", ", sizes)}");
+            Assert.True(sizes[3] is >= 0 and <= 20, $"Slide {index + 1} trailing inset was {sizes[3]:F2}px. Geometry: {string.Join(", ", sizes)}");
+        }
+
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-previous']")).ToHaveAttributeAsync("aria-label", "Previous production stage");
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-next']")).ToHaveAttributeAsync("aria-label", "Next production stage");
+    }
+
+    [Fact]
+    public async Task ProductionCarouselPresentsStageCopyAsSeparateReadableRows()
+    {
+        await using var context = await NewContextAsync(900, 720, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var stage = page.Locator("[data-use-case-id='production-carousel'] .theme-carousel-stage").First;
+        await stage.ScrollIntoViewIfNeededAsync();
+        await stage.Locator("span").First.EvaluateAsync(
+            "element => { document.documentElement.style.fontSize = '200%'; element.textContent = 'InspectionEvidencePackage'.repeat(12); }");
+        var rows = stage.Locator(":scope strong, :scope span, :scope [data-slot='badge']");
+
+        var positions = await rows.EvaluateAllAsync<double[]>("elements => elements.map(element => element.getBoundingClientRect().top)");
+        Assert.Equal(3, positions.Length);
+        Assert.True(positions[0] < positions[1] && positions[1] < positions[2], $"Stage rows were not vertically ordered: {string.Join(", ", positions)}");
+        var overflow = await stage.EvaluateAsync<double[]>(
+            """
+            element => {
+                const body = element.querySelector('.theme-carousel-stage__body');
+                const detail = body.querySelector('span');
+                return [element.clientWidth, element.scrollWidth, body.clientWidth, body.scrollWidth, detail.clientWidth, detail.scrollWidth];
+            }
+            """);
+        Assert.True(overflow[1] <= overflow[0], $"Stage content must wrap without horizontal overflow. Geometry: {string.Join(", ", overflow)}");
+    }
+
+    [Fact]
     public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
@@ -144,20 +425,15 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task ScrolledBentoRevealsClipCardsAndPreservesRoundedBorders()
+    public async Task ScrolledBentoPreservesClipRevealAndRoundedBorders()
     {
         await using var context = await NewContextAsync(1900, 1032, ReducedMotion.NoPreference);
         var page = await OpenAsync(context);
-        var preview = page.Locator(".theme-preview-region");
         var clippedCard = page.Locator("[data-use-case-item='work-order-navigation'] .theme-bento__reveal");
         var ordinaryCard = page.Locator("[data-use-case-item='project-questionnaire'] .theme-bento__reveal");
 
-        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "pending");
-        await preview.EvaluateAsync("element => element.scrollTop = 1000");
-        await Task.Delay(250);
-        await preview.EvaluateAsync("element => element.scrollTop = 1500");
-        await Task.Delay(250);
-        await preview.EvaluateAsync("element => element.scrollTop = 1900");
+        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-effect", "clip");
+        await clippedCard.ScrollIntoViewIfNeededAsync();
         await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "revealed");
         await Assertions.Expect(clippedCard).ToHaveCSSAsync("opacity", "1");
         await Assertions.Expect(ordinaryCard).ToHaveCSSAsync("clip-path", "none");
@@ -266,18 +542,35 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         await credential.GetByRole(AriaRole.Button, new() { Name = "Show API key", Exact = true }).ClickAsync();
         var originalKey = await input.InputValueAsync();
+        Assert.Equal("example-maliev-credential-0001", originalKey);
         await page.GetByTestId("locale-thai").ClickAsync();
 
         var rotateButton = card.GetByRole(AriaRole.Button, new() { Name = "เปลี่ยนคีย์", Exact = true });
         await rotateButton.ClickAsync();
         await Assertions.Expect(input).Not.ToHaveValueAsync(originalKey);
         var firstReplacement = await input.InputValueAsync();
-        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", firstReplacement);
+        Assert.Equal("example-maliev-credential-0002", firstReplacement);
 
         await rotateButton.ClickAsync();
         await Assertions.Expect(input).Not.ToHaveValueAsync(firstReplacement);
-        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", await input.InputValueAsync());
+        Assert.Equal("example-maliev-credential-0003", await input.InputValueAsync());
         await Assertions.Expect(card.GetByRole(AriaRole.Status)).ToContainTextAsync("คีย์ทดแทนพร้อมใช้งาน");
+    }
+
+    [Fact]
+    public async Task VerifyingMachineAccessTransitionsTheActionToCompletedState()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='machine-password']");
+        var action = card.GetByRole(AriaRole.Button, new() { Name = "Verify access", Exact = true });
+        await card.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(card.Locator("[data-slot='alert']")).ToHaveCountAsync(0);
+
+        await action.ClickAsync();
+
+        await Assertions.Expect(card.Locator("[data-slot='alert']")).ToContainTextAsync("Maintenance mode is available for 10 minutes.");
+        await Assertions.Expect(card.GetByRole(AriaRole.Button, new() { Name = "Access verified", Exact = true })).ToBeDisabledAsync();
     }
 
     [Fact]
@@ -305,7 +598,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await confirm.EvaluateAsync("element => element.click()");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirming");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirmed", new() { Timeout = 2_000 });
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 2_000 });
+        await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 4_000 });
 
         var switchControl = page.GetByRole(AriaRole.Switch, new() { Name = "Use quiet hours", Exact = true });
         var switchTrack = switchControl.Locator("xpath=parent::*");
@@ -326,6 +619,159 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await dropzone.GetByRole(AriaRole.Button, new() { Name = "Remove fixture.step", Exact = true }).ClickAsync();
         await Assertions.Expect(dropzone.Locator("[data-slot='attachment']")).ToHaveCountAsync(0);
         await Assertions.Expect(dropzone).ToContainTextAsync("No production drawings selected");
+    }
+
+    [Fact]
+    public async Task CuratedUploadProgressFillMatchesItsLivePercentage()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var progress = page.Locator("[data-use-case-id='quotation-files'] [data-slot='progress']");
+
+        await page.WaitForFunctionAsync("""
+            () => {
+                const progress = document.querySelector("[data-use-case-id='quotation-files'] [data-slot='progress']");
+                const value = Number(progress?.getAttribute('aria-valuenow'));
+                return value >= 5 && value <= 95;
+            }
+            """);
+        var measurement = await progress.EvaluateAsync<double[]>("""
+            element => {
+                const value = Number(element.getAttribute('aria-valuenow'));
+                const track = element.querySelector('[data-slot="progress-track"]').getBoundingClientRect();
+                const indicator = element.querySelector('[data-slot="progress-indicator"]').getBoundingClientRect();
+                return [value / 100, indicator.width / track.width];
+            }
+            """);
+
+        Assert.InRange(measurement[1], measurement[0] - 0.02, measurement[0] + 0.02);
+    }
+
+    [Fact]
+    public async Task MachineCellProgressFillMatchesItsDisplayedSpindleLoad()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='machine-cell']");
+        var progress = card.Locator("[data-slot='progress']");
+
+        await page.WaitForFunctionAsync("""
+            () => {
+                const progress = document.querySelector("[data-use-case-id='machine-cell'] [data-slot='progress']");
+                const value = Number(progress?.getAttribute('aria-valuenow'));
+                return value >= 5 && value <= 95;
+            }
+            """);
+        var measurement = await progress.EvaluateAsync<double[]>("""
+            element => {
+                const value = Number(element.getAttribute('aria-valuenow'));
+                const track = element.querySelector('[data-slot="progress-track"]').getBoundingClientRect();
+                const indicator = element.querySelector('[data-slot="progress-indicator"]').getBoundingClientRect();
+                return [value, indicator.width / track.width];
+            }
+            """);
+        var displayedPercent = double.Parse(
+            (await card.Locator("[data-testid='machine-load-percent']").InnerTextAsync()).TrimEnd('%'),
+            CultureInfo.InvariantCulture);
+
+        Assert.Equal(displayedPercent, measurement[0]);
+        Assert.InRange(measurement[1], measurement[0] / 100 - 0.02, measurement[0] / 100 + 0.02);
+    }
+
+    [Fact]
+    public async Task ReviewerDueTooltipMaintainsReadableContrastInTheThemePreview()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var details = page.Locator("[data-use-case-id='reviewer-details']");
+
+        await details.GetByRole(AriaRole.Button, new() { Name = "Due 15:30", Exact = true }).ClickAsync();
+        var tooltip = page.GetByRole(AriaRole.Tooltip);
+        await Assertions.Expect(tooltip).ToContainTextAsync("45 minutes remaining");
+
+        var colors = await tooltip.EvaluateAsync<string[]>("""
+            element => {
+                const style = getComputedStyle(element);
+                const arrowStyle = getComputedStyle(element.querySelector('[data-slot="tooltip-arrow"]'));
+                return [style.color, style.backgroundColor, arrowStyle.backgroundColor];
+            }
+            """);
+
+        Assert.NotEqual(colors[0], colors[1]);
+        Assert.Equal(colors[1], colors[2]);
+    }
+
+    [Fact]
+    public async Task ProductionContactDialogRemainsHiddenUntilItsPortalIsReady()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+        await page.EvaluateAsync("""
+            () => {
+                window.__contactDialogPresentation = { animationStarts: 0, frames: [] };
+                document.addEventListener('animationstart', event => {
+                    if (event.target.matches("[data-use-case-id='contact-dialog'] [data-slot='dialog-content']"))
+                        window.__contactDialogPresentation.animationStarts++;
+                });
+                const trigger = document.querySelector("[data-use-case-id='contact-dialog'] [data-slot='dialog-trigger']");
+                trigger.addEventListener('click', () => {
+                    const started = performance.now();
+                    const sample = now => {
+                        const content = document.querySelector("[data-use-case-id='contact-dialog'] [data-slot='dialog-content']");
+                        if (content) {
+                            const portal = content.closest("[data-slot='dialog-portal']");
+                            const style = getComputedStyle(content);
+                            const box = content.getBoundingClientRect();
+                            window.__contactDialogPresentation.frames.push({
+                                elapsed: now - started,
+                                visible: style.visibility !== 'hidden' && style.display !== 'none' && style.opacity !== '0' && (!portal || getComputedStyle(portal).opacity !== '0') && box.width > 0 && box.height > 0,
+                                promoted: portal?.matches(':popover-open') ?? false,
+                                portalReady: portal?.hasAttribute('data-shadcn-dialog-ready') ?? false,
+                                portalPopover: portal?.getAttribute('popover') ?? null,
+                                portalOpacity: portal ? getComputedStyle(portal).opacity : null
+                            });
+                        }
+                        if (now - started < 500) requestAnimationFrame(sample);
+                    };
+                    requestAnimationFrame(sample);
+                }, { once: true, capture: true });
+            }
+            """);
+
+        await page.Locator("[data-use-case-id='contact-dialog']")
+            .GetByRole(AriaRole.Button, new() { Name = "Edit contact", Exact = true })
+            .ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        await page.WaitForTimeoutAsync(600);
+        var presentation = await page.EvaluateAsync<string>("""
+            () => {
+                const state = window.__contactDialogPresentation;
+                return JSON.stringify({
+                    animationStarts: state.animationStarts,
+                    unpromotedVisible: state.frames.some(frame => frame.visible && !frame.promoted),
+                    frames: state.frames
+                });
+            }
+            """);
+
+        Assert.False(presentation.Contains("\"unpromotedVisible\":true", StringComparison.Ordinal), presentation);
+        Assert.Contains("\"animationStarts\":1", presentation, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task DrawingAttachmentShowsDeterminateAndIndeterminateUploadProgress()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var attachment = page.Locator("[data-use-case-id='drawing-attachment']");
+        var progress = attachment.Locator("[data-slot='attachment-progress']");
+
+        await Assertions.Expect(progress).ToHaveCountAsync(2);
+        await Assertions.Expect(attachment.Locator("[data-slot='attachment-progress'][data-state='indeterminate']")).ToHaveCountAsync(1);
+        await Assertions.Expect(progress.Nth(0)).ToHaveAttributeAsync("aria-valuenow", new Regex("^[0-9]+(?:\\.[0-9]+)?$"));
+        await Assertions.Expect(progress.Nth(1)).Not.ToHaveAttributeAsync("aria-valuenow", new Regex(".+"));
+        var indeterminateFill = await progress.Nth(1).EvaluateAsync<double>("element => element.firstElementChild.getBoundingClientRect().width / element.getBoundingClientRect().width");
+        Assert.InRange(indeterminateFill, 0.39, 0.41);
     }
 
     [Fact]
@@ -371,6 +817,52 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(input).ToHaveValueAsync("Customer tolerance applies");
         Assert.Null(await questionnaire.Locator("form[data-slot='questionnaire']").GetAttributeAsync("aria-busy"));
         Assert.Equal(0, await page.EvaluateAsync<int>("window.__questionnaireBusyTransitions"));
+    }
+
+    [Fact]
+    public async Task QuestionnaireSeparatesPromptCopyFromItsAnswerChoices()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+
+        var promptGap = await questionnaire.EvaluateAsync<double>("""
+            element => {
+                const description = element.querySelector('[data-slot="questionnaire-description"]').getBoundingClientRect();
+                const choices = element.querySelector('[data-slot="questionnaire-choices"]').getBoundingClientRect();
+                return choices.top - description.bottom;
+            }
+            """);
+
+        Assert.InRange(promptGap, 11, 13);
+    }
+
+    [Fact]
+    public async Task QuestionnaireCompletesWithSubmittedAndSkippedAnswerSummaries()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+
+        await questionnaire.Locator("[data-slot='questionnaire-choice']").Filter(new() { HasText = "Quality" }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-next']").ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-input']").FillAsync("Customer tolerance applies");
+        await questionnaire.Locator("[data-slot='questionnaire-submit']").ClickAsync();
+
+        var summary = questionnaire.GetByRole(AriaRole.Region, new() { Name = "Review submission summary", Exact = true });
+        await Assertions.Expect(summary).ToContainTextAsync("3 / 3");
+        await Assertions.Expect(summary).ToContainTextAsync("Quality");
+        await Assertions.Expect(summary).ToContainTextAsync("Customer tolerance applies");
+        await Assertions.Expect(questionnaire.Locator("form[data-slot='questionnaire']")).ToHaveCountAsync(0);
+
+        await summary.GetByRole(AriaRole.Button, new() { Name = "Start another review", Exact = true }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-choice']").Filter(new() { HasText = "Machining" }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-next']").ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-skip']").ClickAsync();
+
+        summary = questionnaire.GetByRole(AriaRole.Region, new() { Name = "Review submission summary", Exact = true });
+        await Assertions.Expect(summary).ToContainTextAsync("Machining");
+        await Assertions.Expect(summary).ToContainTextAsync("No inspection notes added");
     }
 
     [Fact]
@@ -548,6 +1040,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task HandoffStatusBadgesUseTheThemeRadiusInsteadOfOvalGeometry()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var console = page.Locator("[data-console='handoff']");
+        await console.ScrollIntoViewIfNeededAsync();
+        await console.GetByRole(AriaRole.Tab, new() { Name = "Overview", Exact = true }).ClickAsync();
+        var badge = console.Locator(".theme-handoff-console__timeline .shadcn-badge").First;
+        await Assertions.Expect(badge).ToBeVisibleAsync();
+
+        var geometry = await badge.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); return [parseFloat(style.borderRadius), element.getBoundingClientRect().height]; }");
+
+        Assert.True(geometry[0] < geometry[1] / 2, $"Expected a rounded badge, but its radius {geometry[0]}px made its {geometry[1]}px height fully oval.");
+    }
+
+    [Fact]
     public async Task AnimatedIssueFieldsAndSidebarTypographyControlsRemainReadable()
     {
         await using var context = await NewContextAsync(1569, 1032);
@@ -569,6 +1077,42 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await OpenAdvancedAsync(page, "theme-advanced-typography");
         var weight = page.GetByTestId("theme-role-body-weight");
         Assert.True((await weight.BoundingBoxAsync())!.Width >= 96);
+    }
+
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
+    public async Task AnimatedPrefillFontSizeMatchesTheControlBeforeInteraction(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var animatedControls = page.Locator("[data-animated-input]:has([data-typing-text]), [data-animated-textarea]:has([data-typing-text])");
+        Assert.True(await animatedControls.CountAsync() > 0, "Expected animated prefilled controls in the workflow catalog.");
+
+        foreach (var wrapper in await animatedControls.AllAsync())
+        {
+            var control = wrapper.Locator(":scope > :is(.shadcn-input, .shadcn-textarea)");
+            var ink = wrapper.Locator(":scope > [data-typing-text]");
+            var controlFontSize = await control.EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+
+            await Assertions.Expect(ink).ToHaveCSSAsync("font-size", controlFontSize);
+        }
+
+        var issueDetails = page.Locator("[data-use-case-id='issue-report'] [data-animated-textarea]");
+        var issueDetailsInk = issueDetails.Locator(":scope > [data-typing-text]");
+        await Assertions.Expect(issueDetailsInk).ToHaveCountAsync(1, new() { Timeout = 8000 });
+        var textareaFontSize = await issueDetails.Locator(":scope > .shadcn-textarea")
+            .EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+        await Assertions.Expect(issueDetailsInk).ToHaveCSSAsync("font-size", textareaFontSize);
+
+        var factory = page.Locator("[data-use-case-id='shipping-handoff'] [data-animated-input]").First;
+        var factoryInput = factory.Locator(":scope > .shadcn-input");
+        var fontSizeBeforeInteraction = await factoryInput.EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+
+        await factoryInput.ClickAsync(new() { Force = true });
+
+        await Assertions.Expect(factory.Locator(":scope > [data-typing-text]")).ToHaveCountAsync(0);
+        await Assertions.Expect(factoryInput).ToHaveCSSAsync("font-size", fontSizeBeforeInteraction);
     }
 
     [Fact]
@@ -995,6 +1539,27 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task DeliverySheetActionsCommunicateSecondaryAndPrimaryIntent()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var schedule = page.Locator("[data-use-case-id='delivery-sheet']");
+
+        await schedule.GetByRole(AriaRole.Button, new() { Name = "Open schedule", Exact = true }).ClickAsync();
+
+        var sheet = page.Locator("[data-slot='sheet-content']");
+        var cancel = sheet.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true });
+        var save = sheet.GetByRole(AriaRole.Button, new() { Name = "Save schedule", Exact = true });
+        await Assertions.Expect(cancel).ToHaveAttributeAsync("data-variant", "outline");
+        await Assertions.Expect(save).ToHaveAttributeAsync("data-variant", "default");
+        var backgrounds = await Task.WhenAll(
+            cancel.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"),
+            save.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        Assert.NotEqual(backgrounds[0], backgrounds[1]);
+    }
+
+    [Fact]
     public async Task QuotationActionsMenuEscapesTheRevealedCardClippingBoundary()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
@@ -1110,44 +1675,31 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     [Theory]
     [InlineData(1440, 900)]
     [InlineData(390, 844)]
-    public async Task ThemeStudioExplainsAndNavigatesTheEvaluationRunway(int width, int height)
+    public async Task ThemeStudioFiltersTheEvaluationRunwayWithoutNavigation(int width, int height)
     {
         await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Navigation, new() { Name = "Preview categories" })).ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 2 })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 1 })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Group, new() { Name = "Filter workflow examples by category" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToHaveCountAsync(0);
         Assert.Equal(45, await page.Locator("[data-use-case-id]").CountAsync());
 
-        var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
-        await profileName.FillAsync("Kanda T.");
-        var securityTarget = page.Locator("#theme-category-security");
-        var targetTopBeforeNavigation = await securityTarget.EvaluateAsync<double>(
-            "element => element.getBoundingClientRect().top");
-        Assert.True(targetTopBeforeNavigation > height, $"Security target started at {targetTopBeforeNavigation}px in a {height}px viewport.");
+        var urlBeforeFiltering = page.Url;
+        var overlaysFilter = page.GetByTestId("theme-category-filter-overlays");
+        await overlaysFilter.ClickAsync();
 
-        await page.GetByRole(AriaRole.Link, new() { Name = "Security", Exact = true }).ClickAsync();
-        await page.WaitForFunctionAsync("() => window.location.hash === '#theme-category-security'");
+        await Assertions.Expect(overlaysFilter).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(page.Locator("[data-use-case-id]")).ToHaveCountAsync(9);
+        await Assertions.Expect(page.Locator("[data-use-case-id='dispatch-confirmation']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity']")).ToHaveCountAsync(0);
+        Assert.Equal(urlBeforeFiltering, page.Url);
 
-        var uri = new Uri(page.Url);
-        Assert.Equal("/theme", uri.AbsolutePath);
-        Assert.Equal("#theme-category-security", uri.Fragment);
-        var scroll = await securityTarget.EvaluateAsync<double[]>("""
-            element => {
-                const targetTop = element.getBoundingClientRect().top;
-                for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
-                    if (ancestor.scrollTop > 0) {
-                        return [ancestor.scrollTop, targetTop, ancestor.getBoundingClientRect().top];
-                    }
-                }
-                return [window.scrollY, targetTop, 0];
-            }
-            """);
-        Assert.True(scroll[0] > 0,
-            $"Expected a nonzero ancestor scroll after category navigation; scrollTop={scroll[0]}, targetTop={scroll[1]}, scrollerTop={scroll[2]}.");
-        Assert.InRange(scroll[1] - scroll[2], -1, 1);
-        await Assertions.Expect(profileName).ToHaveValueAsync("Kanda T.");
+        await overlaysFilter.ClickAsync();
+
+        await Assertions.Expect(overlaysFilter).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(page.Locator("[data-use-case-id]")).ToHaveCountAsync(45);
+        Assert.Equal(urlBeforeFiltering, page.Url);
 
         if (width != 390) return;
 

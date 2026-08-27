@@ -7,6 +7,30 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task ContextMenuTriggerUsesTheContextMenuCursorAcrossNestedText()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/context-menu").ToString());
+
+        var trigger = page.Locator("#preview [data-slot='context-menu-trigger']");
+        await trigger.WaitForAsync();
+        var cursors = await trigger.EvaluateAsync<string[]>("""
+            element => [
+                getComputedStyle(element).cursor,
+                getComputedStyle(element.querySelector('p')).cursor
+            ]
+            """);
+
+        Assert.Equal(["context-menu", "context-menu"], cursors);
+    }
+
+    [Fact]
     public async Task ContextMenuSupportsPointerKeyboardSelectionSubmenuDismissalAndFocusRestore()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

@@ -14,14 +14,14 @@ function updateCarousel(root) {
   const align = root.dataset.align || 'start'
   let offset
   if (vertical) {
-    offset = selected.offsetTop - track.offsetTop
+    offset = selected.offsetTop
     if (align === 'center') offset -= (viewport.clientHeight - selected.offsetHeight) / 2
     if (align === 'end') offset -= viewport.clientHeight - selected.offsetHeight
     track.style.translate = `0 ${-offset}px`
   } else {
     offset = rtl
-      ? track.scrollWidth - (selected.offsetLeft - track.offsetLeft + selected.offsetWidth)
-      : selected.offsetLeft - track.offsetLeft
+      ? track.scrollWidth - (selected.offsetLeft + selected.offsetWidth)
+      : selected.offsetLeft
     if (align === 'center') offset -= (viewport.clientWidth - selected.offsetWidth) / 2
     if (align === 'end') offset -= viewport.clientWidth - selected.offsetWidth
     track.style.translate = `${rtl ? offset : -offset}px 0`
@@ -73,9 +73,11 @@ export function attachToaster(viewport, dotnet) {
   document.addEventListener('visibilitychange', visibility)
   reducedMotion.addEventListener('change', motion)
   viewport.addEventListener('pointerdown', capturePointer)
+  const topLayer = typeof viewport.showPopover === 'function'
+  if (topLayer && !viewport.matches(':popover-open')) viewport.showPopover()
   visibility()
   motion()
-  toasters.set(viewport, { visibility, reducedMotion, motion, capturePointer })
+  toasters.set(viewport, { visibility, reducedMotion, motion, capturePointer, topLayer })
 }
 
 export function detachToaster(viewport) {
@@ -84,6 +86,7 @@ export function detachToaster(viewport) {
   document.removeEventListener('visibilitychange', state.visibility)
   state.reducedMotion.removeEventListener('change', state.motion)
   viewport.removeEventListener('pointerdown', state.capturePointer)
+  if (state.topLayer && viewport.matches(':popover-open')) viewport.hidePopover()
   toasters.delete(viewport)
   const index = toasterStack.indexOf(viewport)
   if (index >= 0) toasterStack.splice(index, 1)

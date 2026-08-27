@@ -61,6 +61,16 @@
                 <span>Theme settings</span>
             </button>
         }
+        <a class="documentation-kofi"
+           data-testid="documentation-kofi-link"
+           href="https://ko-fi.com/natthapolv"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Support my work on Ko-fi (opens in a new tab)"
+           title="Support my work on Ko-fi">
+            <img class="documentation-kofi__badge" src="images/brand/kofi-support-blue.png" width="980" height="198" alt="" />
+            <img class="documentation-kofi__cup" src="images/brand/kofi-cup.png" width="1024" height="1024" alt="" />
+        </a>
         <button type="button" class="documentation-icon-action" data-testid="documentation-theme-toggle" aria-label="@(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")" title="@(ThemeState.IsDarkMode ? "Use light theme" : "Use dark theme")" @onclick="ThemeState.ToggleTheme">
             @if (ThemeState.IsDarkMode)
             {

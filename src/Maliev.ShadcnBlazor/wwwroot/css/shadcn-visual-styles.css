@@ -211,7 +211,6 @@
   .shadcn-dropdown-menu-content,
   .shadcn-context-menu-content,
   .shadcn-hover-card-content,
-  .shadcn-tooltip-content,
   .shadcn-toast
 ) {
   border-color: var(--shadcn-style-border, var(--shadcn-border));
@@ -232,7 +231,6 @@
   .shadcn-dropdown-menu-content,
   .shadcn-context-menu-content,
   .shadcn-hover-card-content,
-  .shadcn-tooltip-content,
   .shadcn-toast
 ) {
   border-color: transparent;

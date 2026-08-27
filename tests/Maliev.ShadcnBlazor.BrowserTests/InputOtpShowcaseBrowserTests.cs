@@ -7,6 +7,39 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class InputOtpShowcaseBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task PrefilledCodeAdvancesOneSlotAtATimeWhenCharactersAreReplaced()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/input-otp").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var card = page.GetByTestId("input-otp-dossier-preview");
+        var input = page.GetByTestId("forms-dossier-input-otp");
+        var slots = card.Locator("[data-slot='input-otp-slot']");
+        await input.FillAsync("2141");
+        await slots.Nth(0).EvaluateAsync("slot => { const box = slot.getBoundingClientRect(); const input = slot.closest('[data-slot=input-otp-root]').querySelector('[data-slot=input-otp]'); input.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: box.left + box.width / 2 })); }");
+
+        await input.PressAsync("9");
+
+        await Assertions.Expect(input).ToHaveValueAsync("9141");
+        await Assertions.Expect(slots.Nth(1)).ToHaveAttributeAsync("data-active", "true");
+        var firstSelection = await input.EvaluateAsync<int[]>("element => [element.selectionStart, element.selectionEnd]");
+        Assert.Equal(new[] { 1, 2 }, firstSelection);
+
+        await input.PressAsync("8");
+
+        await Assertions.Expect(input).ToHaveValueAsync("9841");
+        await Assertions.Expect(slots.Nth(2)).ToHaveAttributeAsync("data-active", "true");
+        var secondSelection = await input.EvaluateAsync<int[]>("element => [element.selectionStart, element.selectionEnd]");
+        Assert.Equal(new[] { 2, 3 }, secondSelection);
+    }
+
+    [Fact]
     public async Task VerificationCardSupportsPasteKeyboardValidationAndRepeatedActions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

@@ -70,6 +70,19 @@ public sealed class QuestionnaireTests : BunitContext
     }
 
     [Fact]
+    public void SkippingTheFinalOptionalItemSubmitsTheQuestionnaire()
+    {
+        var cut = Render<Fixtures.QuestionnaireFixture>();
+        cut.Find("input[value='component']").Change(true);
+        cut.Find("button[data-slot='questionnaire-next']").Click();
+        cut.Find("button[data-slot='questionnaire-skip']").Click();
+
+        cut.Find("button[data-slot='questionnaire-skip']").Click();
+
+        Assert.Contains("submitted", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void NativeRadioValueSelectsSingleChoice()
     {
         var cut = Render<Fixtures.QuestionnaireFixture>();

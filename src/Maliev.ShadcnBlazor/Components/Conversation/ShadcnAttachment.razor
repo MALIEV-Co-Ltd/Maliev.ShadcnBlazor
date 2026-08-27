@@ -1,10 +1,10 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment")" style="@MergeStyle(null)"
      data-slot="attachment" data-state="@StateValue" data-size="@SizeValue" data-orientation="@OrientationValue"
-     role="@SemanticRole" aria-live="@LiveMode" aria-label="@AccessibleTitle" aria-description="@ErrorReason">
-    @if (ProgressRole is not null)
+     aria-label="@AccessibleTitle" aria-description="@ErrorReason">
+    @if (ShowsProgress)
     {
-        <div class="shadcn-attachment-progress" data-slot="attachment-progress" role="progressbar" aria-label="@ProgressAccessibleName" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@ProgressValue"><span style="width:@($"{ProgressValue}%")"></span></div>
+        <div class="shadcn-attachment-progress" data-slot="attachment-progress" data-state="@ProgressState" role="progressbar" aria-label="@ProgressAccessibleName" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@ProgressValue"><span style="@ProgressIndicatorStyle"></span></div>
     }
     <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
 </div>
@@ -25,10 +25,9 @@
     private bool _initialized;
     internal ShadcnAttachmentState EffectiveState => StateIsControlled ? State : _effectiveState;
     private bool ShowsProgress => EffectiveState is ShadcnAttachmentState.Uploading or ShadcnAttachmentState.Processing;
-    private string? ProgressRole => ShowsProgress && Progress.HasValue ? "progressbar" : null;
-    private string? SemanticRole => ShowsProgress && ProgressRole is null ? "status" : null;
-    private string? LiveMode => ProgressRole is null && ShowsProgress ? "polite" : null;
-    private string? ProgressValue => ProgressRole is null ? null : Progress!.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    private string ProgressState => Progress.HasValue ? "determinate" : "indeterminate";
+    private string? ProgressValue => Progress?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    private string? ProgressIndicatorStyle => ProgressValue is null ? null : $"width:{ProgressValue}%";
     private string? AccessibleTitle => Title ?? File?.Name;
     private string ProgressAccessibleName => $"{AccessibleTitle ?? "Attachment"} upload progress";
     private string StateValue => EffectiveState switch { ShadcnAttachmentState.Idle => "idle", ShadcnAttachmentState.Uploading => "uploading", ShadcnAttachmentState.Processing => "processing", ShadcnAttachmentState.Error => "error", ShadcnAttachmentState.Done => "done", _ => throw Unknown(nameof(State), EffectiveState) };

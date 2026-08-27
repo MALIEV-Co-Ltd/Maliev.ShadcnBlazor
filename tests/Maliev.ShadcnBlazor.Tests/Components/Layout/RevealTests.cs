@@ -117,6 +117,7 @@ public sealed class RevealTests : BunitContext
         Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", script, StringComparison.Ordinal);
         Assert.Contains("data-reveal-state", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("immediatelyVisible", script, StringComparison.Ordinal);
         Assert.Contains(".shadcn-reveal[data-reveal-state='pending']", css, StringComparison.Ordinal);
         Assert.Contains("[data-reveal-cascade='true'] .shadcn-chart", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);

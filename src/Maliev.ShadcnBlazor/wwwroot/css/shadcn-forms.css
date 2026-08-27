@@ -100,6 +100,9 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] .shadcn-select-trigger-icon { position: absolute; inset-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > :where(.shadcn-select-trigger, .shadcn-select-clear) { grid-area: 1 / 1; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > .shadcn-select-clear { position: relative; inset: auto; align-self: center; justify-self: end; margin-inline-end: calc(2rem * var(--shadcn-spacing-multiplier)); translate: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within { border-radius: 9999px; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within > .shadcn-select-trigger:focus-visible { outline: none; box-shadow: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:has(.shadcn-select-trigger[aria-invalid="true"]):focus-within { box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 38%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger { padding: 0 calc(.625rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger[aria-expanded="true"] { background: var(--shadcn-accent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger-icon, .shadcn-date-picker-trigger svg) { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--shadcn-muted-foreground); }
@@ -107,6 +110,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-clear, .shadcn-combobox [data-slot="combobox-clear"], .shadcn-date-picker [data-slot="date-picker-clear"]) { position: absolute; inset-inline-end: .375rem; inset-block-start: 50%; z-index: 3; display: grid; width: 1.5rem; height: 1.5rem; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--shadcn-muted-foreground); padding: 0; translate: 0 -50%; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-clear, .shadcn-date-picker [data-slot="date-picker-clear"]) { font-weight: 700; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content, .shadcn-date-picker-content) { position: absolute; inset-inline-start: 0; top: calc(100% + .375rem); z-index: 50; min-width: max(100%, 9rem); max-height: 18rem; overflow: auto; border-radius: var(--shadcn-radius-md); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md), 0 0 0 1px color-mix(in oklch, var(--shadcn-foreground) 10%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { position: fixed; inset: auto; left: var(--shadcn-popup-left, 0); top: var(--shadcn-popup-top, 0); width: max-content; min-width: max(var(--shadcn-popup-anchor-width, 9rem), 9rem); max-width: min(calc(100vw - 1rem), 22rem); max-height: min(18rem, var(--shadcn-popup-available-height, 18rem)); margin: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content) { padding: calc(.25rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-label, [data-slot="combobox-label"]) { padding: calc(.375rem * var(--shadcn-spacing-multiplier)) calc(.5rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-item, .shadcn-combobox-item) { position: relative; display: flex; width: 100%; align-items: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); border-radius: var(--shadcn-radius-sm); padding: calc(.375rem * var(--shadcn-spacing-multiplier)) calc(2rem * var(--shadcn-spacing-multiplier)) calc(.375rem * var(--shadcn-spacing-multiplier)) calc(.5rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; cursor: default; user-select: none; }
@@ -122,7 +126,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="combobox-trigger"] svg { width: 1rem; height: 1rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"] { position: static; inset: auto; translate: none; display: grid; flex: 0 0 auto; order: 2; width: 1.75rem; height: 100%; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--shadcn-muted-foreground); padding: 0; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"] svg { width: 1rem; height: 1rem; stroke-width: 2.5; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"] { position: static; order: 3; flex: 0 0 auto; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"] { position: static; order: 3; flex: 0 0 auto; border-start-end-radius: inherit; border-end-end-radius: inherit; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:hover,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:focus-visible { background: transparent; color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"]:hover,
@@ -135,7 +139,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="combobox-empty"] { padding: calc(.5rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); text-align: center; font-size: .875rem; }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar { box-sizing: border-box; width: max-content; max-inline-size: 100%; padding: calc(.75rem * var(--shadcn-spacing-multiplier)); background: var(--shadcn-background); --shadcn-calendar-cell: 2rem; --shadcn-calendar-cell-radius: var(--shadcn-radius-md); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav { display: grid; grid-template-columns: var(--shadcn-calendar-cell) 1fr var(--shadcn-calendar-cell); align-items: center; margin-bottom: calc(.5rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav { display: grid; grid-template-columns: var(--shadcn-calendar-cell) 1fr var(--shadcn-calendar-cell); align-items: center; width: calc(7 * var(--shadcn-calendar-cell)); margin-inline: auto; margin-bottom: calc(.5rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button { display: grid; width: var(--shadcn-calendar-cell); height: var(--shadcn-calendar-cell); place-items: center; border: 0; border-radius: var(--shadcn-calendar-cell-radius); background: transparent; color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button:hover { background: var(--shadcn-accent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-nav > button:focus-visible { outline: none; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 52%, transparent); }
@@ -146,10 +150,12 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-dropdown { min-inline-size: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-dropdown .shadcn-select { min-width: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-dropdown .shadcn-select-trigger { block-size: 2rem; min-block-size: 2rem; border-color: transparent; background: transparent; padding-inline: calc(.5rem * var(--shadcn-spacing-multiplier)) calc(1.75rem * var(--shadcn-spacing-multiplier)); font-weight: 600; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-grid { display: grid; justify-content: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-calendar-weekdays, .shadcn-calendar-week) { display: grid; grid-template-columns: repeat(7, var(--shadcn-calendar-cell)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-week { margin-top: calc(.375rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-grid:has([data-slot="calendar-week-number-header"]) :where(.shadcn-calendar-weekdays, .shadcn-calendar-week) { grid-template-columns: repeat(8, var(--shadcn-calendar-cell)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-calendar-weekday, .shadcn-calendar-week-number) { display: grid; height: var(--shadcn-calendar-cell); place-items: center; color: var(--shadcn-muted-foreground); font-size: .8rem; font-weight: 400; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar:has([data-slot="calendar-week-number-header"]) .shadcn-calendar-nav { width: calc(8 * var(--shadcn-calendar-cell)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-calendar-weekday, .shadcn-calendar-week-number) { display: grid; height: var(--shadcn-calendar-cell); place-items: center; color: color-mix(in oklch, var(--shadcn-foreground) 70%, var(--shadcn-background)); font-size: .8rem; font-weight: 400; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-week-number { border-radius: var(--shadcn-radius-sm); background: var(--shadcn-muted); font-variant-numeric: tabular-nums; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar[aria-invalid="true"] { box-shadow: 0 0 0 1px var(--shadcn-destructive); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-weekday abbr { text-decoration: none; }
@@ -157,7 +163,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button { position: relative; z-index: 1; display: grid; width: 100%; height: 100%; place-items: center; border: 0; border-radius: var(--shadcn-calendar-cell-radius); background: transparent; color: var(--shadcn-foreground); font: inherit; font-size: .875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-today="true"] { background: var(--shadcn-muted); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-outside="true"] { color: var(--shadcn-muted-foreground); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-outside="true"] { color: color-mix(in oklch, var(--shadcn-foreground) 70%, var(--shadcn-background)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[aria-disabled="true"] { opacity: .5; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:focus-visible { outline: none; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 52%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button[data-invalid="true"] { box-shadow: inset 0 0 0 2px var(--shadcn-destructive); }
@@ -175,6 +181,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-card-content, .shadcn-popover-content, .shadcn-date-picker-content) .shadcn-calendar { background: transparent; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [dir="rtl"] .shadcn-calendar-nav > button svg { rotate: 180deg; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content { width: max-content; min-width: 0; max-width: min(100vw - 1rem, 22rem); max-height: none; padding: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content[popover] { position: fixed; inset: auto; left: var(--shadcn-popup-left, 0); top: var(--shadcn-popup-top, 0); max-height: var(--shadcn-popup-available-height, none); margin: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker { display: inline-grid; align-items: start; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker[data-mode="single"] { inline-size: fit-content; min-inline-size: 12rem; max-inline-size: min(18rem, 100%); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker[data-mode="range"] { inline-size: min(24rem, 100%); }
@@ -195,6 +202,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot { width: min(2.25rem, calc((100vw - 4rem) / 6)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { width: 100%; min-width: 0; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content { position: fixed; inset: auto .5rem .5rem; width: auto; max-height: min(70dvh, 32rem); }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { inset: auto; left: var(--shadcn-popup-left, .5rem); top: var(--shadcn-popup-top, .5rem); width: min(var(--shadcn-popup-anchor-width, calc(100vw - 1rem)), calc(100vw - 1rem)); min-width: 0; max-width: none; max-height: min(70dvh, var(--shadcn-popup-available-height, 32rem)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-content { position: absolute; inset: auto; inset-inline-start: 0; top: calc(100% + .375rem); inline-size: 100%; max-inline-size: 100%; max-height: min(50dvh, 18rem); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar { margin-inline: auto; --shadcn-calendar-cell: min(2.75rem, calc((100vw - 3rem) / 7)); }
 }
@@ -207,6 +215,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input::file-selector-button { color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot[data-active="true"] { outline: 2px solid Highlight; outline-offset: 2px; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp[data-invalid="true"] .shadcn-input-otp-slot { border-color: Mark; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within { outline: 2px solid Highlight; outline-offset: 2px; box-shadow: none; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"]::before { forced-color-adjust: none; background: Highlight; }
