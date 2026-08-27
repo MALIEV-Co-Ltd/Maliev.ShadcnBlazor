@@ -74,7 +74,7 @@
             foreach (var plugin in Plugins) { plugin.Initialize(this); _initializedPlugins.Add(plugin); }
             _pluginsInitialized = true;
         }
-        _module ??= await JS.InvokeAsync<Microsoft.JSInterop.IJSObjectReference>("import", "/_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js");
+        _module ??= await JS.InvokeAsync<Microsoft.JSInterop.IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js");
         if (_module is not null) await _module.InvokeVoidAsync("syncCarousel", Root);
     }
     internal void NotifyItemsChanged() => _itemsChanged = true;

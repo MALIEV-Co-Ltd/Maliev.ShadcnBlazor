@@ -25,6 +25,19 @@ public sealed class CarouselTests : BunitContext
     }
 
     [Fact]
+    public void CarouselImportsRuntimeRelativeToTheApplicationBasePath()
+    {
+        _ = RenderCarousel(new ShadcnCarouselOptions(), 0);
+
+        Assert.Contains(JSInterop.Invocations, invocation =>
+            invocation.Identifier == "import" &&
+            invocation.Arguments.Any(argument => string.Equals(
+                argument?.ToString(),
+                "./_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js",
+                StringComparison.Ordinal)));
+    }
+
+    [Fact]
     public async Task NextPreviousAndGoToClampAndRaiseControlledSelection()
     {
         var changes = new List<int>();

@@ -9,6 +9,22 @@ namespace Maliev.ShadcnBlazor.Tests.Components.FeedbackContent;
 public sealed class ToastTests : BunitContext
 {
     public ToastTests() => JSInterop.Mode = JSRuntimeMode.Loose;
+
+    [Fact]
+    public void ToasterImportsRuntimeRelativeToTheApplicationBasePath()
+    {
+        Services.AddSingleton<IShadcnToastService>(new ShadcnToastService(new ManualTimeProvider()));
+
+        _ = Render<ShadcnToaster>();
+
+        Assert.Contains(JSInterop.Invocations, invocation =>
+            invocation.Identifier == "import" &&
+            invocation.Arguments.Any(argument => string.Equals(
+                argument?.ToString(),
+                "./_content/Maliev.ShadcnBlazor/js/shadcn-feedback-content.js",
+                StringComparison.Ordinal)));
+    }
+
     [Fact]
     public void ShowUsesStableIdsFifoAndTypedAnnouncements()
     {
