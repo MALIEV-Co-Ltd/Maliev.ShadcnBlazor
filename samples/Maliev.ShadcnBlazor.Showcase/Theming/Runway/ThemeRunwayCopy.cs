@@ -26,6 +26,8 @@ public static class ThemeRunwayCopy
         ["Saved"] = "บันทึกแล้ว",
         ["Save profile"] = "บันทึกโปรไฟล์",
         ["8.4 MB · STEP · uploading"] = "8.4 MB · STEP · กำลังอัปโหลด",
+        ["Preparing secure upload…"] = "กำลังเตรียมการอัปโหลดที่ปลอดภัย…",
+        ["Cancel surface scan upload"] = "ยกเลิกการอัปโหลดข้อมูลสแกนพื้นผิว",
         ["1.2 MB · ready for review"] = "1.2 MB · พร้อมตรวจสอบ",
         ["Cancel drawing upload"] = "ยกเลิกการอัปโหลดแบบ",
         ["Remove inspection plan"] = "นำแผนการตรวจสอบออก",

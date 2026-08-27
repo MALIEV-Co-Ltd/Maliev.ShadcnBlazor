@@ -149,11 +149,20 @@ public sealed class AttachmentTests : BunitContext
     }
 
     [Fact]
-    public void IndeterminateProcessingAndPolymorphicTriggerRemainSemantic()
+    public void IndeterminateProcessingRendersAnUnboundedProgressbar()
     {
         var processing = Render<ShadcnAttachment>(p => p.Add(c => c.State, ShadcnAttachmentState.Processing).AddChildContent("processing"));
-        Assert.Equal("status", processing.Find("[data-slot='attachment']").GetAttribute("role"));
-        Assert.Equal("polite", processing.Find("[data-slot='attachment']").GetAttribute("aria-live"));
+
+        var progress = processing.Find("[data-slot='attachment-progress']");
+        Assert.Equal("progressbar", progress.GetAttribute("role"));
+        Assert.Equal("indeterminate", progress.GetAttribute("data-state"));
+        Assert.Null(progress.GetAttribute("aria-valuenow"));
+        Assert.Null(processing.Find("[data-slot='attachment']").GetAttribute("role"));
+    }
+
+    [Fact]
+    public void AttachmentTriggerRemainsPolymorphic()
+    {
         var link = Render<ShadcnAttachment>(p => p.AddChildContent<ShadcnAttachmentTrigger>(trigger => trigger.Add(c => c.AccessibleName, "Open drawing").Add(c => c.Href, "/drawing/1").AddChildContent("Open")));
         Assert.Equal("/drawing/1", link.Find("a[data-slot='attachment-trigger']").GetAttribute("href"));
         var dialog = Render<ShadcnAttachment>(p => p.AddChildContent<ShadcnAttachmentTrigger>(trigger => trigger.Add(c => c.AccessibleName, "Preview drawing").Add(c => c.DialogTarget, "drawing-dialog").AddChildContent("Preview")));

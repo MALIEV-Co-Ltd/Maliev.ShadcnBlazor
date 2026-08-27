@@ -1,6 +1,7 @@
 using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
 
@@ -347,6 +348,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             """);
 
         Assert.InRange(measurement[1], measurement[0] - 0.02, measurement[0] + 0.02);
+    }
+
+    [Fact]
+    public async Task DrawingAttachmentShowsDeterminateAndIndeterminateUploadProgress()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var attachment = page.Locator("[data-use-case-id='drawing-attachment']");
+        var progress = attachment.Locator("[data-slot='attachment-progress']");
+
+        await Assertions.Expect(progress).ToHaveCountAsync(2);
+        await Assertions.Expect(attachment.Locator("[data-slot='attachment-progress'][data-state='indeterminate']")).ToHaveCountAsync(1);
+        await Assertions.Expect(progress.Nth(0)).ToHaveAttributeAsync("aria-valuenow", new Regex("^[0-9]+(?:\\.[0-9]+)?$"));
+        await Assertions.Expect(progress.Nth(1)).Not.ToHaveAttributeAsync("aria-valuenow", new Regex(".+"));
+        var indeterminateFill = await progress.Nth(1).EvaluateAsync<double>("element => element.firstElementChild.getBoundingClientRect().width / element.getBoundingClientRect().width");
+        Assert.InRange(indeterminateFill, 0.39, 0.41);
     }
 
     [Fact]
