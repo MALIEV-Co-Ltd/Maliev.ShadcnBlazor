@@ -126,7 +126,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="combobox-trigger"] svg { width: 1rem; height: 1rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"] { position: static; inset: auto; translate: none; display: grid; flex: 0 0 auto; order: 2; width: 1.75rem; height: 100%; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--shadcn-muted-foreground); padding: 0; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"] svg { width: 1rem; height: 1rem; stroke-width: 2.5; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"] { position: static; order: 3; flex: 0 0 auto; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"] { position: static; order: 3; flex: 0 0 auto; border-start-end-radius: inherit; border-end-end-radius: inherit; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:hover,
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-clear"]:focus-visible { background: transparent; color: var(--shadcn-foreground); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-input [data-slot="combobox-trigger"]:hover,

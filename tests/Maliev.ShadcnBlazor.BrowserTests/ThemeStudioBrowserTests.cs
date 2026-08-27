@@ -191,6 +191,39 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task MaterialRoutingComboboxHoverFollowsTheCompositeControlRadius()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='combobox']");
+        await root.ScrollIntoViewIfNeededAsync();
+        var inputGroup = root.Locator("[data-slot='input-group']");
+        var trigger = root.Locator("[data-slot='combobox-trigger']");
+
+        await trigger.HoverAsync();
+
+        var radii = await trigger.EvaluateAsync<double[]>(
+            """
+            element => {
+                const triggerStyle = getComputedStyle(element);
+                const groupStyle = getComputedStyle(element.closest('[data-slot=input-group]'));
+                return [
+                    parseFloat(triggerStyle.borderTopRightRadius),
+                    parseFloat(groupStyle.borderTopRightRadius),
+                    parseFloat(triggerStyle.borderBottomRightRadius),
+                    parseFloat(groupStyle.borderBottomRightRadius)
+                ];
+            }
+            """);
+        Assert.Equal(radii[1], radii[0], 2);
+        Assert.Equal(radii[3], radii[2], 2);
+        Assert.NotEqual(
+            "rgba(0, 0, 0, 0)",
+            await trigger.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        await Assertions.Expect(inputGroup).ToHaveCSSAsync("overflow", "visible");
+    }
+
+    [Fact]
     public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
