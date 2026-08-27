@@ -15,7 +15,7 @@ public sealed class ComponentCatalogVisualProofTests(
         var slugs = ComponentCatalogProof.LoadCompleted(root);
         var baselineDirectory = VisualProof.BaselineDirectory(root);
 
-        Assert.Equal(66, slugs.Count);
+        Assert.Equal(69, slugs.Count);
         if (VisualProof.UpdateEnabled)
             return;
 
@@ -123,7 +123,8 @@ public sealed class ComponentCatalogVisualProofTests(
             await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/{slug}").ToString());
             await page.GetByTestId("component-dossier").WaitForAsync();
             await Assertions.Expect(page.GetByTestId("planned-component-notice")).ToHaveCountAsync(0);
-            await Assertions.Expect(page.GetByTestId("component-preview-canvas")).ToHaveCountAsync(1);
+            var canvas = page.GetByTestId("component-preview-canvas").First;
+            await Assertions.Expect(canvas).ToBeVisibleAsync();
 
             if (mode.Dark)
             {
@@ -145,7 +146,6 @@ public sealed class ComponentCatalogVisualProofTests(
                         })));
                 }
                 """);
-            var canvas = page.GetByTestId("component-preview-canvas");
             await canvas.ScrollIntoViewIfNeededAsync();
             var actual = await canvas.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });
             await VisualProof.CompareOrUpdateAsync(page, slug, mode.Name, actual);
