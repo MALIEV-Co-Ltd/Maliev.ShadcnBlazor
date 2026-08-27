@@ -324,6 +324,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task CuratedUploadProgressFillMatchesItsLivePercentage()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var progress = page.Locator("[data-use-case-id='quotation-files'] [data-slot='progress']");
+
+        await page.WaitForFunctionAsync("""
+            () => {
+                const progress = document.querySelector("[data-use-case-id='quotation-files'] [data-slot='progress']");
+                const value = Number(progress?.getAttribute('aria-valuenow'));
+                return value >= 5 && value <= 95;
+            }
+            """);
+        var measurement = await progress.EvaluateAsync<double[]>("""
+            element => {
+                const value = Number(element.getAttribute('aria-valuenow'));
+                const track = element.querySelector('[data-slot="progress-track"]').getBoundingClientRect();
+                const indicator = element.querySelector('[data-slot="progress-indicator"]').getBoundingClientRect();
+                return [value / 100, indicator.width / track.width];
+            }
+            """);
+
+        Assert.InRange(measurement[1], measurement[0] - 0.02, measurement[0] + 0.02);
+    }
+
+    [Fact]
     public async Task ComplexCuratedWorkflowsReceiveWideSpansWithoutNestedFrames()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
