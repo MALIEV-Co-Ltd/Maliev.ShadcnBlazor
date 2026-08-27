@@ -718,7 +718,7 @@ public sealed class ActionsAndSelectionBrowserTests(
             "checkbox" => new[] { "16px", "16px", "4px", "1px", "true" },
             "radio-group" => new[] { "16px", "16px", "50%", "1px", "true" },
             "slider" => new[] { "6px", "6px", "160px", "0.5", "true", "true" },
-            "switch" => new[] { "32px", "18.3906px", "24px", "14px", "true", "true" },
+            "switch" => new[] { "36px", "20px", "24px", "14px", "true", "true" },
             "toggle" => new[] { "36px", "36px", "32px", "40px", "true", "true" },
             "toggle-group" => new[] { "8px", "0px", "column" },
             _ => throw new InvalidOperationException(slug)
@@ -1085,10 +1085,10 @@ public sealed class ActionsAndSelectionBrowserTests(
             case "toggle":
                 await Assertions.Expect(page.GetByTestId("control-toggle-pressed")).ToHaveCountAsync(0);
                 await Assertions.Expect(page.GetByTestId("toggle-dossier-preview")).ToBeVisibleAsync();
-                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold enabled");
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold on · Italic off · Underline off");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "false");
-                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold disabled");
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold off · Italic off · Underline off");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "true");
                 await page.ChooseOptionAsync("control-toggle-variant", "Default");

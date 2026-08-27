@@ -188,7 +188,7 @@ public sealed class ComponentCatalogVisualProofTests(
         await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
         var actual = await page.ScreenshotAsync(new()
         {
-            Animations = ScreenshotAnimations.Allow,
+            Animations = ScreenshotAnimations.Disabled,
             FullPage = false
         });
         await VisualProof.CompareOrUpdateAsync(page, "theme-studio", mode, actual);
