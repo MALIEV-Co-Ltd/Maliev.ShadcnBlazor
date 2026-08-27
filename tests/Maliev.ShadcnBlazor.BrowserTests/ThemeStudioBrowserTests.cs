@@ -144,20 +144,15 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task ScrolledBentoRevealsClipCardsAndPreservesRoundedBorders()
+    public async Task ScrolledBentoPreservesClipRevealAndRoundedBorders()
     {
         await using var context = await NewContextAsync(1900, 1032, ReducedMotion.NoPreference);
         var page = await OpenAsync(context);
-        var preview = page.Locator(".theme-preview-region");
         var clippedCard = page.Locator("[data-use-case-item='work-order-navigation'] .theme-bento__reveal");
         var ordinaryCard = page.Locator("[data-use-case-item='project-questionnaire'] .theme-bento__reveal");
 
-        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "pending");
-        await preview.EvaluateAsync("element => element.scrollTop = 1000");
-        await Task.Delay(250);
-        await preview.EvaluateAsync("element => element.scrollTop = 1500");
-        await Task.Delay(250);
-        await preview.EvaluateAsync("element => element.scrollTop = 1900");
+        await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-effect", "clip");
+        await clippedCard.ScrollIntoViewIfNeededAsync();
         await Assertions.Expect(clippedCard).ToHaveAttributeAsync("data-reveal-state", "revealed");
         await Assertions.Expect(clippedCard).ToHaveCSSAsync("opacity", "1");
         await Assertions.Expect(ordinaryCard).ToHaveCSSAsync("clip-path", "none");
@@ -1110,44 +1105,31 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     [Theory]
     [InlineData(1440, 900)]
     [InlineData(390, 844)]
-    public async Task ThemeStudioExplainsAndNavigatesTheEvaluationRunway(int width, int height)
+    public async Task ThemeStudioFiltersTheEvaluationRunwayWithoutNavigation(int width, int height)
     {
         await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Navigation, new() { Name = "Preview categories" })).ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 2 })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 1 })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Group, new() { Name = "Filter workflow examples by category" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Theme Studio", Level = 1 })).ToHaveCountAsync(0);
         Assert.Equal(45, await page.Locator("[data-use-case-id]").CountAsync());
 
-        var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
-        await profileName.FillAsync("Kanda T.");
-        var securityTarget = page.Locator("#theme-category-security");
-        var targetTopBeforeNavigation = await securityTarget.EvaluateAsync<double>(
-            "element => element.getBoundingClientRect().top");
-        Assert.True(targetTopBeforeNavigation > height, $"Security target started at {targetTopBeforeNavigation}px in a {height}px viewport.");
+        var urlBeforeFiltering = page.Url;
+        var overlaysFilter = page.GetByTestId("theme-category-filter-overlays");
+        await overlaysFilter.ClickAsync();
 
-        await page.GetByRole(AriaRole.Link, new() { Name = "Security", Exact = true }).ClickAsync();
-        await page.WaitForFunctionAsync("() => window.location.hash === '#theme-category-security'");
+        await Assertions.Expect(overlaysFilter).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(page.Locator("[data-use-case-id]")).ToHaveCountAsync(9);
+        await Assertions.Expect(page.Locator("[data-use-case-id='dispatch-confirmation']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id='production-capacity']")).ToHaveCountAsync(0);
+        Assert.Equal(urlBeforeFiltering, page.Url);
 
-        var uri = new Uri(page.Url);
-        Assert.Equal("/theme", uri.AbsolutePath);
-        Assert.Equal("#theme-category-security", uri.Fragment);
-        var scroll = await securityTarget.EvaluateAsync<double[]>("""
-            element => {
-                const targetTop = element.getBoundingClientRect().top;
-                for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
-                    if (ancestor.scrollTop > 0) {
-                        return [ancestor.scrollTop, targetTop, ancestor.getBoundingClientRect().top];
-                    }
-                }
-                return [window.scrollY, targetTop, 0];
-            }
-            """);
-        Assert.True(scroll[0] > 0,
-            $"Expected a nonzero ancestor scroll after category navigation; scrollTop={scroll[0]}, targetTop={scroll[1]}, scrollerTop={scroll[2]}.");
-        Assert.InRange(scroll[1] - scroll[2], -1, 1);
-        await Assertions.Expect(profileName).ToHaveValueAsync("Kanda T.");
+        await overlaysFilter.ClickAsync();
+
+        await Assertions.Expect(overlaysFilter).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(page.Locator("[data-use-case-id]")).ToHaveCountAsync(45);
+        Assert.Equal(urlBeforeFiltering, page.Url);
 
         if (width != 390) return;
 

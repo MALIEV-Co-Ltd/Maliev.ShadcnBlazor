@@ -51,7 +51,8 @@ public sealed class ThemeBentoContractTests
         var root = FindRoot();
         var bento = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeBento.razor");
         Assert.Contains("IThemeUseCaseRegistry", bento, StringComparison.Ordinal);
-        Assert.Contains("Registry.All.OrderBy", bento, StringComparison.Ordinal);
+        Assert.Contains("@foreach (var card in FilteredCards)", bento, StringComparison.Ordinal);
+        Assert.Contains("FilteredCards => Registry.All", bento, StringComparison.Ordinal);
         Assert.Contains("<ThemeUseCaseCardHost", bento, StringComparison.Ordinal);
         Assert.DoesNotContain("IThemeScenarioRegistry", bento, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeScenarioBentoCard", bento, StringComparison.Ordinal);
