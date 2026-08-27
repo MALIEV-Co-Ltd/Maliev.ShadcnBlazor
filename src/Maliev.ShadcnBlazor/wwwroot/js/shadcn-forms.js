@@ -120,11 +120,17 @@ function promoteAnchoredPopup(root, kind) {
         const left = Math.min(
             Math.max(viewportGap, alignedLeft),
             Math.max(viewportGap, window.innerWidth - popupBounds.width - viewportGap));
-        const top = triggerBounds.bottom + triggerGap;
+        const spaceBelow = window.innerHeight - triggerBounds.bottom - triggerGap - viewportGap;
+        const spaceAbove = triggerBounds.top - triggerGap - viewportGap;
+        const opensAbove = popupBounds.height > spaceBelow && spaceAbove > spaceBelow;
+        const availableHeight = Math.max(8, opensAbove ? spaceAbove : spaceBelow);
+        const top = opensAbove
+            ? Math.max(viewportGap, triggerBounds.top - triggerGap - Math.min(popupBounds.height, availableHeight))
+            : triggerBounds.bottom + triggerGap;
         popup.style.setProperty('--shadcn-popup-left', `${left}px`);
         popup.style.setProperty('--shadcn-popup-top', `${top}px`);
         popup.style.setProperty('--shadcn-popup-anchor-width', `${triggerBounds.width}px`);
-        popup.style.setProperty('--shadcn-popup-available-height', `${Math.max(8, window.innerHeight - top - viewportGap)}px`);
+        popup.style.setProperty('--shadcn-popup-available-height', `${availableHeight}px`);
     };
 
     popup.showPopover();

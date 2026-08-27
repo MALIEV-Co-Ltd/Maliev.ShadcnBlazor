@@ -191,6 +191,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task InspectorSelectUsesAvailableViewportSpaceWithoutOverlappingItsTrigger()
+    {
+        await using var context = await NewContextAsync(390, 568, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await OpenSettingsAsync(page);
+        var trigger = page.GetByTestId("theme-visual-style");
+        await trigger.EvaluateAsync("element => element.scrollIntoView({ block: 'end' })");
+
+        await trigger.ClickAsync();
+        var popup = page.Locator("[data-slot='select-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+        var geometry = await popup.EvaluateAsync<double[]>(
+            """
+            element => {
+                const popup = element.getBoundingClientRect();
+                const trigger = element.closest('[data-slot=select]').querySelector('[data-slot=select-trigger]').getBoundingClientRect();
+                return [popup.top, popup.bottom, trigger.top, trigger.bottom, innerHeight];
+            }
+            """);
+
+        Assert.True(geometry[1] <= geometry[2] || geometry[0] >= geometry[3], $"Popup overlapped its trigger: {string.Join(", ", geometry)}");
+        Assert.InRange(geometry[0], 8, geometry[4] - 8);
+        Assert.InRange(geometry[1], 8, geometry[4] - 8);
+    }
+
+    [Fact]
     public async Task MaterialRoutingComboboxHoverFollowsTheCompositeControlRadius()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
@@ -698,8 +724,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
                             const box = content.getBoundingClientRect();
                             window.__contactDialogPresentation.frames.push({
                                 elapsed: now - started,
-                                visible: style.visibility !== 'hidden' && style.display !== 'none' && style.opacity !== '0' && box.width > 0 && box.height > 0,
-                                promoted: portal?.matches(':popover-open') ?? false
+                                visible: style.visibility !== 'hidden' && style.display !== 'none' && style.opacity !== '0' && (!portal || getComputedStyle(portal).opacity !== '0') && box.width > 0 && box.height > 0,
+                                promoted: portal?.matches(':popover-open') ?? false,
+                                portalReady: portal?.hasAttribute('data-shadcn-dialog-ready') ?? false,
+                                portalPopover: portal?.getAttribute('popover') ?? null,
+                                portalOpacity: portal ? getComputedStyle(portal).opacity : null
                             });
                         }
                         if (now - started < 500) requestAnimationFrame(sample);

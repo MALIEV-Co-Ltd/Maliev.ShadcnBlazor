@@ -319,7 +319,8 @@ public sealed class ComponentDossierBrowserTests(
         await select.FocusAsync();
         await select.PressAsync("ArrowDown");
         await Assertions.Expect(select).ToHaveAttributeAsync("aria-expanded", "true");
-        Assert.NotEqual("none", await select.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+        Assert.NotEqual("none", await select.EvaluateAsync<string>("element => getComputedStyle(element.closest('[data-slot=select]')).outlineStyle"));
+        await Assertions.Expect(select).ToHaveCSSAsync("outline-style", "none");
     }
 
     [Fact]

@@ -202,7 +202,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot { width: min(2.25rem, calc((100vw - 4rem) / 6)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { width: 100%; min-width: 0; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content { position: fixed; inset: auto .5rem .5rem; width: auto; max-height: min(70dvh, 32rem); }
-    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { inset: auto .5rem .5rem; width: auto; min-width: 0; max-width: none; max-height: min(70dvh, 32rem); }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { inset: auto; left: var(--shadcn-popup-left, .5rem); top: var(--shadcn-popup-top, .5rem); width: min(var(--shadcn-popup-anchor-width, calc(100vw - 1rem)), calc(100vw - 1rem)); min-width: 0; max-width: none; max-height: min(70dvh, var(--shadcn-popup-available-height, 32rem)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-content { position: absolute; inset: auto; inset-inline-start: 0; top: calc(100% + .375rem); inline-size: 100%; max-inline-size: 100%; max-height: min(50dvh, 18rem); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar { margin-inline: auto; --shadcn-calendar-cell: min(2.75rem, calc((100vw - 3rem) / 7)); }
 }

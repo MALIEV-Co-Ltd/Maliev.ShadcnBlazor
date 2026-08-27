@@ -125,8 +125,9 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "copied");
         await Assertions.Expect(firstCopy).ToHaveAttributeAsync("aria-label", "Copied");
         await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "idle", new() { Timeout = 3000 });
+        await page.EvaluateAsync("navigator.clipboard.writeText('before-repeat')");
         await firstCopy.ClickAsync();
-        await Assertions.Expect(firstCopy).ToHaveAttributeAsync("data-copy-state", "copied");
+        await page.WaitForFunctionAsync("expected => navigator.clipboard.readText().then(value => value === expected)", "ตรวจสอบไฟล์แล้ว 3 รายการ");
 
         await page.GetByTestId("message-reply").First.ClickAsync();
         var quote = page.GetByTestId("message-reply-quote");
