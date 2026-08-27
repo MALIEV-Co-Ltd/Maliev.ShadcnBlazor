@@ -430,6 +430,34 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task QuestionnaireCompletesWithSubmittedAndSkippedAnswerSummaries()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+
+        await questionnaire.Locator("[data-slot='questionnaire-choice']").Filter(new() { HasText = "Quality" }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-next']").ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-input']").FillAsync("Customer tolerance applies");
+        await questionnaire.Locator("[data-slot='questionnaire-submit']").ClickAsync();
+
+        var summary = questionnaire.GetByRole(AriaRole.Region, new() { Name = "Review submission summary", Exact = true });
+        await Assertions.Expect(summary).ToContainTextAsync("3 / 3");
+        await Assertions.Expect(summary).ToContainTextAsync("Quality");
+        await Assertions.Expect(summary).ToContainTextAsync("Customer tolerance applies");
+        await Assertions.Expect(questionnaire.Locator("form[data-slot='questionnaire']")).ToHaveCountAsync(0);
+
+        await summary.GetByRole(AriaRole.Button, new() { Name = "Start another review", Exact = true }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-choice']").Filter(new() { HasText = "Machining" }).ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-next']").ClickAsync();
+        await questionnaire.Locator("[data-slot='questionnaire-skip']").ClickAsync();
+
+        summary = questionnaire.GetByRole(AriaRole.Region, new() { Name = "Review submission summary", Exact = true });
+        await Assertions.Expect(summary).ToContainTextAsync("Machining");
+        await Assertions.Expect(summary).ToContainTextAsync("No inspection notes added");
+    }
+
+    [Fact]
     public async Task QuotationTableShowsItsActivePageSizeAndKeepsOneDataColumnVisible()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);

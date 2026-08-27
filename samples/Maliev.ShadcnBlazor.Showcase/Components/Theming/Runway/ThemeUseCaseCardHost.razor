@@ -205,26 +205,37 @@
             </div>
             break;
         case "project-questionnaire":
-            <ShadcnQuestionnaire Items="QuestionnaireItems" DefaultItem="scope" Shortcuts="ShadcnQuestionnaireShortcutMode.Numbers" AccessibleName="@T("Production review questionnaire")" OnSubmit="SubmitQuestionnaire">
-                <ShadcnQuestionnaireProgress AccessibleName="@T("Questionnaire progress")" />
-                <ShadcnQuestionnaireItem Name="scope">
-                    <ShadcnQuestionnaireTitle>@T("Choose the review scope")</ShadcnQuestionnaireTitle>
-                    <ShadcnQuestionnaireDescription>@T("Select the team that should inspect WO-2418.")</ShadcnQuestionnaireDescription>
-                    <ShadcnQuestionnaireChoices>
-                        <ShadcnQuestionnaireChoice Value="machining" HideIndicator="true">@T("Machining")<ShadcnQuestionnaireChoiceDescription>@T("Toolpath and surface finish")</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
-                        <ShadcnQuestionnaireChoice Value="quality" HideIndicator="true">@T("Quality")<ShadcnQuestionnaireChoiceDescription>@T("Dimensions and inspection evidence")</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
-                    </ShadcnQuestionnaireChoices>
-                    <ShadcnQuestionnaireError />
-                </ShadcnQuestionnaireItem>
-                <ShadcnQuestionnaireItem Name="notes">
-                    <ShadcnQuestionnaireTitle>@T("Add inspection notes")</ShadcnQuestionnaireTitle>
-                    <ShadcnQuestionnaireDescription>@T("Include the customer-specific acceptance criteria.")</ShadcnQuestionnaireDescription>
-                    <ShadcnQuestionnaireInput AccessibleName="@T("Inspection notes")" />
-                    <ShadcnQuestionnaireError />
-                </ShadcnQuestionnaireItem>
-                <ShadcnQuestionnaireActions><ShadcnQuestionnairePrevious>@T("Back")</ShadcnQuestionnairePrevious><ShadcnQuestionnaireSkip>@T("Skip")</ShadcnQuestionnaireSkip><ShadcnQuestionnaireNext>@T("Next")</ShadcnQuestionnaireNext><ShadcnQuestionnaireSubmit>@T("Submit review")</ShadcnQuestionnaireSubmit></ShadcnQuestionnaireActions>
-            </ShadcnQuestionnaire>
-            @if (_questionnaireSubmitted) { <p class="theme-runway-action-status" role="status">@T("Review submitted to the inspection team.")</p> }
+            @if (_questionnaireResult is null)
+            {
+                <ShadcnQuestionnaire @key="_questionnaireVersion" Items="QuestionnaireItems" DefaultItem="scope" Shortcuts="ShadcnQuestionnaireShortcutMode.Numbers" AccessibleName="@T("Production review questionnaire")" OnSubmit="SubmitQuestionnaire">
+                    <ShadcnQuestionnaireProgress AccessibleName="@T("Questionnaire progress")" />
+                    <ShadcnQuestionnaireItem Name="scope">
+                        <ShadcnQuestionnaireTitle>@T("Choose the review scope")</ShadcnQuestionnaireTitle>
+                        <ShadcnQuestionnaireDescription>@T("Select the team that should inspect WO-2418.")</ShadcnQuestionnaireDescription>
+                        <ShadcnQuestionnaireChoices>
+                            <ShadcnQuestionnaireChoice Value="machining" HideIndicator="true">@T("Machining")<ShadcnQuestionnaireChoiceDescription>@T("Toolpath and surface finish")</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
+                            <ShadcnQuestionnaireChoice Value="quality" HideIndicator="true">@T("Quality")<ShadcnQuestionnaireChoiceDescription>@T("Dimensions and inspection evidence")</ShadcnQuestionnaireChoiceDescription></ShadcnQuestionnaireChoice>
+                        </ShadcnQuestionnaireChoices>
+                        <ShadcnQuestionnaireError />
+                    </ShadcnQuestionnaireItem>
+                    <ShadcnQuestionnaireItem Name="notes">
+                        <ShadcnQuestionnaireTitle>@T("Add inspection notes")</ShadcnQuestionnaireTitle>
+                        <ShadcnQuestionnaireDescription>@T("Include the customer-specific acceptance criteria.")</ShadcnQuestionnaireDescription>
+                        <ShadcnQuestionnaireInput AccessibleName="@T("Inspection notes")" />
+                        <ShadcnQuestionnaireError />
+                    </ShadcnQuestionnaireItem>
+                    <ShadcnQuestionnaireActions><ShadcnQuestionnairePrevious>@T("Back")</ShadcnQuestionnairePrevious><ShadcnQuestionnaireSkip>@T("Skip")</ShadcnQuestionnaireSkip><ShadcnQuestionnaireNext>@T("Next")</ShadcnQuestionnaireNext><ShadcnQuestionnaireSubmit>@T("Submit review")</ShadcnQuestionnaireSubmit></ShadcnQuestionnaireActions>
+                </ShadcnQuestionnaire>
+            }
+            else
+            {
+                <section class="theme-questionnaire-completion" role="region" aria-label="@T("Review submission summary")">
+                    <span class="shadcn-questionnaire-progress">3 / 3</span>
+                    <div class="theme-questionnaire-completion__intro"><h3>@T("Review submitted")</h3><p role="status">@T("Your answers are ready for the inspection team.")</p></div>
+                    <dl class="theme-runway-summary"><div><dt>@T("Review scope")</dt><dd>@QuestionnaireScope</dd></div><div><dt>@T("Inspection notes")</dt><dd>@QuestionnaireNotes</dd></div></dl>
+                    <ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="RestartQuestionnaire">@T("Start another review")</ShadcnButton>
+                </section>
+            }
             break;
         case "issue-report":
             <ShadcnAlert Variant="@(Frame.FormStep == 3 ? ShadcnAlertVariant.Destructive : ShadcnAlertVariant.Default)"><ShadcnAlertTitle>@T(Frame.FormStep == 3 ? "Drawing revision required" : "Report a production issue")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Quality receives the machine, work order, and validation context.")</ShadcnAlertDescription></ShadcnAlert>
@@ -534,7 +545,8 @@
     private bool _dueTooltipOpen;
     private IReadOnlyCollection<string> _openWorkflowSections = ["process"];
     private bool _issueSubmitted;
-    private bool _questionnaireSubmitted;
+    private ShadcnQuestionnaireState? _questionnaireResult;
+    private int _questionnaireVersion;
     private string _contactName = "Narin S.";
     private string _contactPhone = "+66 81 555 2418";
     private string? _contactStatus;
@@ -834,7 +846,17 @@
         };
     }
     private void SubmitIssue() => _issueSubmitted = true;
-    private void SubmitQuestionnaire(ShadcnQuestionnaireState _) => _questionnaireSubmitted = true;
+    private string QuestionnaireScope => _questionnaireResult?.Answers["scope"].SelectedValues.FirstOrDefault() switch
+    {
+        "machining" => T("Machining"),
+        "quality" => T("Quality"),
+        _ => T("Not selected")
+    };
+    private string QuestionnaireNotes => _questionnaireResult?.Answers["notes"] is { Status: ShadcnQuestionnaireItemStatus.Answered, InputValue: { Length: > 0 } notes }
+        ? notes
+        : T("No inspection notes added");
+    private void SubmitQuestionnaire(ShadcnQuestionnaireState state) => _questionnaireResult = state;
+    private void RestartQuestionnaire() { _questionnaireResult = null; _questionnaireVersion++; }
     private void ShowReleaseToast() => Toasts.Show(new ShadcnToastOptions(
         T("Release saved"),
         Description: T("WO-2418 is ready for the 16:00 courier collection."),

@@ -8847,6 +8847,10 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-process-editor { inline-size:min(calc(100vw - 2rem),36rem); }
 .theme-process-editor__steps { display:grid; gap:.75rem; }
 .theme-use-case-card .shadcn-questionnaire-choice { border:1px solid var(--shadcn-border); }
+.theme-questionnaire-completion { display:grid; min-width:0; gap:calc(.875rem * var(--shadcn-spacing-multiplier)); }
+.theme-questionnaire-completion__intro { display:grid; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); }
+.theme-questionnaire-completion__intro :is(h3,p) { margin:0; }
+.theme-questionnaire-completion > .shadcn-button { justify-self:start; }
 .theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start; gap: .75rem; text-align: start; }
 .theme-runway-profile > :last-child { display: grid; min-inline-size: 0; max-inline-size: 100%; justify-items: start; gap: .125rem; overflow-wrap: anywhere; text-align: start; }
 .theme-runway-profile :where(strong, span, a) { text-align: start; }
