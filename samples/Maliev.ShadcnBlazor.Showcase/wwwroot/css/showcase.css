@@ -8856,14 +8856,18 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-runway-profile span,
 .theme-runway-machine span { display: block; color: var(--shadcn-muted-foreground); font-size: .75rem; }
 .theme-runway-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
-.theme-animated-input { position: relative; min-inline-size: 0; }
-.theme-animated-input > .shadcn-input { inline-size: 100%; }
+.theme-animated-input,
+.theme-animated-textarea { --theme-animated-control-font-size: 1rem; position: relative; min-inline-size: 0; }
+.theme-animated-input > .shadcn-input { inline-size: 100%; font-size: var(--theme-animated-control-font-size); }
 .theme-animated-input[data-interacted="false"] > .shadcn-input { color: transparent; caret-color: transparent; }
-.theme-animated-input__ink { position: absolute; inset-block: 0; inset-inline: .75rem; display: flex; min-inline-size: 0; align-items: center; overflow: hidden; color: var(--shadcn-foreground); white-space: nowrap; pointer-events: none; }
-.theme-animated-textarea { position: relative; min-inline-size: 0; }
-.theme-animated-textarea > .shadcn-textarea { inline-size: 100%; }
+.theme-animated-input__ink { position: absolute; inset-block: 0; inset-inline: .75rem; display: flex; min-inline-size: 0; align-items: center; overflow: hidden; color: var(--shadcn-foreground); font-size: var(--theme-animated-control-font-size); white-space: nowrap; pointer-events: none; }
+.theme-animated-textarea > .shadcn-textarea { inline-size: 100%; font-size: var(--theme-animated-control-font-size); }
 .theme-animated-textarea[data-interacted="false"] > .shadcn-textarea { color: transparent; caret-color: transparent; }
-.theme-animated-textarea__ink { position: absolute; inset: .75rem; overflow: hidden; color: var(--shadcn-foreground); line-height: 1.45; white-space: pre-wrap; pointer-events: none; }
+.theme-animated-textarea__ink { position: absolute; inset: .75rem; overflow: hidden; color: var(--shadcn-foreground); font-size: var(--theme-animated-control-font-size); line-height: 1.45; white-space: pre-wrap; pointer-events: none; }
+@media (min-width: 48rem) {
+    .theme-animated-input,
+    .theme-animated-textarea { --theme-animated-control-font-size: .875rem; }
+}
 .theme-runway-check { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
 .theme-runway-check small { display: block; margin-block-start: .125rem; color: var(--shadcn-muted-foreground); font-size: .6875rem; font-weight: 400; }
 .theme-runway-summary { display: grid; gap: .5rem; margin: 0; }

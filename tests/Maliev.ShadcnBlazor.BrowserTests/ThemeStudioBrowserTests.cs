@@ -566,6 +566,42 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.True((await weight.BoundingBoxAsync())!.Width >= 96);
     }
 
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
+    public async Task AnimatedPrefillFontSizeMatchesTheControlBeforeInteraction(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var animatedControls = page.Locator("[data-animated-input]:has([data-typing-text]), [data-animated-textarea]:has([data-typing-text])");
+        Assert.True(await animatedControls.CountAsync() > 0, "Expected animated prefilled controls in the workflow catalog.");
+
+        foreach (var wrapper in await animatedControls.AllAsync())
+        {
+            var control = wrapper.Locator(":scope > :is(.shadcn-input, .shadcn-textarea)");
+            var ink = wrapper.Locator(":scope > [data-typing-text]");
+            var controlFontSize = await control.EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+
+            await Assertions.Expect(ink).ToHaveCSSAsync("font-size", controlFontSize);
+        }
+
+        var issueDetails = page.Locator("[data-use-case-id='issue-report'] [data-animated-textarea]");
+        var issueDetailsInk = issueDetails.Locator(":scope > [data-typing-text]");
+        await Assertions.Expect(issueDetailsInk).ToHaveCountAsync(1, new() { Timeout = 8000 });
+        var textareaFontSize = await issueDetails.Locator(":scope > .shadcn-textarea")
+            .EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+        await Assertions.Expect(issueDetailsInk).ToHaveCSSAsync("font-size", textareaFontSize);
+
+        var factory = page.Locator("[data-use-case-id='shipping-handoff'] [data-animated-input]").First;
+        var factoryInput = factory.Locator(":scope > .shadcn-input");
+        var fontSizeBeforeInteraction = await factoryInput.EvaluateAsync<string>("element => getComputedStyle(element).fontSize");
+
+        await factoryInput.ClickAsync(new() { Force = true });
+
+        await Assertions.Expect(factory.Locator(":scope > [data-typing-text]")).ToHaveCountAsync(0);
+        await Assertions.Expect(factoryInput).ToHaveCSSAsync("font-size", fontSizeBeforeInteraction);
+    }
+
     [Fact]
     public async Task ConversationAcceptsUserMessagesAndRevealsEachAssistantReplyForwardOnce()
     {
