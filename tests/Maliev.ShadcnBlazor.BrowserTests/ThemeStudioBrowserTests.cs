@@ -263,17 +263,18 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         await credential.GetByRole(AriaRole.Button, new() { Name = "Show API key", Exact = true }).ClickAsync();
         var originalKey = await input.InputValueAsync();
+        Assert.Equal("example-maliev-credential-0001", originalKey);
         await page.GetByTestId("locale-thai").ClickAsync();
 
         var rotateButton = card.GetByRole(AriaRole.Button, new() { Name = "เปลี่ยนคีย์", Exact = true });
         await rotateButton.ClickAsync();
         await Assertions.Expect(input).Not.ToHaveValueAsync(originalKey);
         var firstReplacement = await input.InputValueAsync();
-        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", firstReplacement);
+        Assert.Equal("example-maliev-credential-0002", firstReplacement);
 
         await rotateButton.ClickAsync();
         await Assertions.Expect(input).Not.ToHaveValueAsync(firstReplacement);
-        Assert.Matches("^sk-live-maliev-[0-9a-f]{16}$", await input.InputValueAsync());
+        Assert.Equal("example-maliev-credential-0003", await input.InputValueAsync());
         await Assertions.Expect(card.GetByRole(AriaRole.Status)).ToContainTextAsync("คีย์ทดแทนพร้อมใช้งาน");
     }
 

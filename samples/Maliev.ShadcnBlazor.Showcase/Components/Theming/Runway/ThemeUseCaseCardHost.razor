@@ -665,7 +665,8 @@
         ["orders-2"] = new(T("Polymer")) { Color = "var(--shadcn-chart-4)" }
     };
     private static readonly ShadcnChartSeries[] OrderMixSeries = [new("orders", [12, 8, 5])];
-    private string _apiKey = "sk-live-maliev-7f2a9c1d";
+    private int _apiKeyRevision = 1;
+    private string _apiKey = "example-maliev-credential-0001";
     private const string MachinePin = "241850";
     private const string WebhookSecret = "whsec_8b14f62a90c3";
     private ShadcnDataTableState _quotationTableState = new() { PageSize = 3 };
@@ -717,13 +718,7 @@
     private void TogglePlanReview() => _planReviewOpen = !_planReviewOpen;
     private void RotateApiKey()
     {
-        var previousKey = _apiKey;
-        do
-        {
-            _apiKey = $"sk-live-maliev-{Guid.NewGuid():N}"[..31];
-        }
-        while (string.Equals(_apiKey, previousKey, StringComparison.Ordinal));
-
+        _apiKey = $"example-maliev-credential-{++_apiKeyRevision:0000}";
         _credentialStatus = "A replacement key is ready; the current key remains active for 24 hours.";
     }
     private void VerifyMachinePin() => _machineAccessVerified = true;
