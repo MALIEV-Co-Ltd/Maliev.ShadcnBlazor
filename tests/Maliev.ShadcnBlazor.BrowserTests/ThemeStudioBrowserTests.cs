@@ -741,6 +741,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task HandoffStatusBadgesUseTheThemeRadiusInsteadOfOvalGeometry()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var console = page.Locator("[data-console='handoff']");
+        await console.ScrollIntoViewIfNeededAsync();
+        await console.GetByRole(AriaRole.Tab, new() { Name = "Overview", Exact = true }).ClickAsync();
+        var badge = console.Locator(".theme-handoff-console__timeline .shadcn-badge").First;
+        await Assertions.Expect(badge).ToBeVisibleAsync();
+
+        var geometry = await badge.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); return [parseFloat(style.borderRadius), element.getBoundingClientRect().height]; }");
+
+        Assert.True(geometry[0] < geometry[1] / 2, $"Expected a rounded badge, but its radius {geometry[0]}px made its {geometry[1]}px height fully oval.");
+    }
+
+    [Fact]
     public async Task AnimatedIssueFieldsAndSidebarTypographyControlsRemainReadable()
     {
         await using var context = await NewContextAsync(1569, 1032);

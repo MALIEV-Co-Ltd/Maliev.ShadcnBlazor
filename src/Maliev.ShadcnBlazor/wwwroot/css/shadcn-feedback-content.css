@@ -30,7 +30,7 @@
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge {
     display: inline-flex; width: fit-content; height: 1.25rem; flex: 0 0 auto; align-items: center; justify-content: center;
-    gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px solid transparent; border-radius: 9999px; padding: calc(0.125rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier));
+    gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px solid transparent; border-radius: var(--shadcn-radius-md); padding: calc(0.125rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier));
     font-size: 0.75rem; line-height: 1rem; font-weight: 500; white-space: nowrap; text-decoration: none; outline: none; cursor: default;
     transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
