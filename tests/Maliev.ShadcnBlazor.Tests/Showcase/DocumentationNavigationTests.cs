@@ -234,8 +234,8 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("Support my work on Ko-fi (opens in a new tab)", sponsor.GetAttribute("aria-label"));
         Assert.NotNull(badge);
         Assert.NotNull(cup);
-        Assert.Contains("images/brand/kofi-support-blue.avif", badge.GetAttribute("src"), StringComparison.Ordinal);
-        Assert.Contains("images/brand/kofi-cup.avif", cup.GetAttribute("src"), StringComparison.Ordinal);
+        Assert.Contains("images/brand/kofi-support-blue.png", badge.GetAttribute("src"), StringComparison.Ordinal);
+        Assert.Contains("images/brand/kofi-cup.png", cup.GetAttribute("src"), StringComparison.Ordinal);
     }
 
     [Fact]
