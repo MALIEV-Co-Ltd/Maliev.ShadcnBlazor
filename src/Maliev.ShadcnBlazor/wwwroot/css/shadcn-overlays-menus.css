@@ -265,6 +265,7 @@
 .shadcn-dropdown-menu-shortcut, .shadcn-context-menu-shortcut { margin-inline-start: auto; color: var(--shadcn-muted-foreground); font-size: 0.75rem; }
 [data-slot$="checkbox-item-indicator"], [data-slot$="radio-item-indicator"] { display: inline-flex; width: 1rem; justify-content: center; }
 
+.shadcn-context-menu-trigger { cursor: context-menu; }
 .shadcn-context-menu-trigger:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
 .shadcn-context-menu-content,
 .shadcn-context-menu-sub-content { box-sizing: border-box; min-inline-size: 12rem; max-inline-size: min(20rem, calc(100vw - 1rem)); transform-origin: var(--shadcn-transform-origin); animation: shadcn-context-menu-content-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
