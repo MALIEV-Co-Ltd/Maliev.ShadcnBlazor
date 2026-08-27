@@ -427,7 +427,7 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(onlineBadge).ToHaveAttributeAsync("aria-label", "Online");
         Assert.True(await onlineBadge.EvaluateAsync<bool>("element => { const color = getComputedStyle(element).backgroundColor; if (color.startsWith('oklch')) return color.includes('145'); const channels = color.match(/[\\d.]+/g)?.slice(0, 3).map(Number); return channels?.length === 3 && channels[1] > channels[0] && channels[1] > channels[2]; }"));
         await page.GetByTestId("control-avatar-group").CheckAsync();
-        await Assertions.Expect(avatarDemo.Locator("[data-testid='avatar-group-preview'] [data-slot='avatar']")).ToHaveCountAsync(3);
+        await Assertions.Expect(avatarDemo.Locator("[data-testid='avatar-group-preview'] [data-slot='avatar']")).ToHaveCountAsync(4);
         var groupedAvatarSources = await avatarDemo.Locator("img").EvaluateAllAsync<string[]>("elements => elements.map(element => element.getAttribute('src'))");
         Assert.Equal(4, groupedAvatarSources.Distinct(StringComparer.Ordinal).Count());
         Assert.Contains(groupedAvatarSources, source => source?.Contains("reviewer-thai.png", StringComparison.Ordinal) == true);
