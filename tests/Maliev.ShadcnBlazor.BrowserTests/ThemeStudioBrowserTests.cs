@@ -226,6 +226,67 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     [Theory]
     [InlineData(1569, 1032)]
     [InlineData(390, 844)]
+    public async Task OverlayFeedbackToastViewportUsesTheTopLayerAndCapsTheVisibleQueue(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='overlay-feedback-lab']");
+        await card.ScrollIntoViewIfNeededAsync();
+        var trigger = card.GetByRole(AriaRole.Button, new() { Name = "Show toast" });
+
+        await trigger.EvaluateAsync(
+            "element => { for (let index = 0; index < 3; index++) element.dispatchEvent(new MouseEvent('click', { bubbles: true })); }");
+
+        var viewport = card.Locator("[data-slot='toast-viewport']");
+        var toasts = viewport.Locator("[data-slot='toast']");
+        var presentedToasts = viewport.Locator("[data-slot='toast']:not([data-limited='true'])");
+        await Assertions.Expect(toasts).ToHaveCountAsync(3);
+        await Assertions.Expect(presentedToasts).ToHaveCountAsync(2);
+        Assert.True(
+            await viewport.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The toast viewport must use the browser top layer so containing blocks cannot capture fixed positioning.");
+
+        var bounds = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.right, box.bottom, innerWidth, innerHeight]; })");
+        Assert.All(bounds, box =>
+        {
+            Assert.True(box[0] >= 8 && box[2] <= box[4] - 8, $"Toast escaped the horizontal viewport: {string.Join(", ", box)}");
+            Assert.True(box[1] >= 8 && box[3] <= box[5] - 8, $"Toast escaped the vertical viewport: {string.Join(", ", box)}");
+        });
+    }
+
+    [Fact]
+    public async Task OverlayFeedbackToastHoverKeepsTheVisibleStackStationary()
+    {
+        await using var context = await NewContextAsync(900, 720, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='overlay-feedback-lab']");
+        await card.ScrollIntoViewIfNeededAsync();
+        var trigger = card.GetByRole(AriaRole.Button, new() { Name = "Show toast" });
+        await trigger.ClickAsync();
+        await trigger.ClickAsync();
+        var viewport = card.Locator("[data-slot='toast-viewport']");
+        var presentedToasts = viewport.Locator("[data-slot='toast']:not([data-limited='true'])");
+        await Assertions.Expect(presentedToasts).ToHaveCountAsync(2);
+        var before = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.width, box.height]; })");
+
+        await viewport.DispatchEventAsync("mouseenter");
+        await Assertions.Expect(viewport).ToHaveAttributeAsync("data-expanded", "true");
+        var after = await presentedToasts.EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.width, box.height]; })");
+
+        Assert.Equal(before.Length, after.Length);
+        for (var index = 0; index < before.Length; index++)
+        {
+            for (var metric = 0; metric < before[index].Length; metric++)
+                Assert.InRange(Math.Abs(before[index][metric] - after[index][metric]), 0, 1);
+        }
+    }
+
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
     public async Task ProductionCarouselKeepsEverySelectedSlideWithinItsViewport(int width, int height)
     {
         await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);

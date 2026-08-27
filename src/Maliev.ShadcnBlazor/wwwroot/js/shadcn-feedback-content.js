@@ -73,9 +73,11 @@ export function attachToaster(viewport, dotnet) {
   document.addEventListener('visibilitychange', visibility)
   reducedMotion.addEventListener('change', motion)
   viewport.addEventListener('pointerdown', capturePointer)
+  const topLayer = typeof viewport.showPopover === 'function'
+  if (topLayer && !viewport.matches(':popover-open')) viewport.showPopover()
   visibility()
   motion()
-  toasters.set(viewport, { visibility, reducedMotion, motion, capturePointer })
+  toasters.set(viewport, { visibility, reducedMotion, motion, capturePointer, topLayer })
 }
 
 export function detachToaster(viewport) {
@@ -84,6 +86,7 @@ export function detachToaster(viewport) {
   document.removeEventListener('visibilitychange', state.visibility)
   state.reducedMotion.removeEventListener('change', state.motion)
   viewport.removeEventListener('pointerdown', state.capturePointer)
+  if (state.topLayer && viewport.matches(':popover-open')) viewport.hidePopover()
   toasters.delete(viewport)
   const index = toasterStack.indexOf(viewport)
   if (index >= 0) toasterStack.splice(index, 1)
