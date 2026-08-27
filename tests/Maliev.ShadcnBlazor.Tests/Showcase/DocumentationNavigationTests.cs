@@ -221,6 +221,24 @@ public sealed class DocumentationNavigationTests : BunitContext
     }
 
     [Fact]
+    public void HeaderSponsorLinkUsesOfficialKofiAssets()
+    {
+        var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
+        var sponsor = cut.Find("[data-testid='documentation-kofi-link']");
+        var badge = sponsor.QuerySelector(".documentation-kofi__badge");
+        var cup = sponsor.QuerySelector(".documentation-kofi__cup");
+
+        Assert.Equal("https://ko-fi.com/natthapolv", sponsor.GetAttribute("href"));
+        Assert.Equal("_blank", sponsor.GetAttribute("target"));
+        Assert.Equal("noopener noreferrer", sponsor.GetAttribute("rel"));
+        Assert.Equal("Support my work on Ko-fi (opens in a new tab)", sponsor.GetAttribute("aria-label"));
+        Assert.NotNull(badge);
+        Assert.NotNull(cup);
+        Assert.Contains("images/brand/kofi-support-blue.avif", badge.GetAttribute("src"), StringComparison.Ordinal);
+        Assert.Contains("images/brand/kofi-cup.avif", cup.GetAttribute("src"), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HeaderThemeAndDirectionActionsUseAccessibleIconGlyphs()
     {
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
