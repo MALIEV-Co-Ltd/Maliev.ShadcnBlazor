@@ -26,6 +26,15 @@ const otpObservers = new WeakMap();
 
 export function observeOtpSelection(input, dotnet, maxLength) {
     disconnectOtpSelection(input);
+    const nextGraphemeOffset = offset => {
+        const tail = input.value.slice(offset);
+        if (!tail) return offset;
+        if (typeof Intl.Segmenter === 'function') {
+            const segment = new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(tail)[Symbol.iterator]().next().value;
+            return offset + segment.segment.length;
+        }
+        return offset + Array.from(tail)[0].length;
+    };
     const update = () => {
         const offset = input.selectionStart ?? input.value.length;
         const beforeCaret = input.value.slice(0, offset);
@@ -33,7 +42,19 @@ export function observeOtpSelection(input, dotnet, maxLength) {
             ? [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(beforeCaret)].length
             : Array.from(beforeCaret).length;
         dotnet.invokeMethodAsync('UpdateOtpSelection', Math.min(count, Math.max(0, maxLength - 1)), document.activeElement === input);
-      };
+    };
+    const onInput = event => {
+        const start = input.selectionStart;
+        const shouldSelectNext = event.inputType?.startsWith('insert') && start !== null && start === input.selectionEnd && start < input.value.length;
+        const end = shouldSelectNext ? nextGraphemeOffset(start) : start;
+        if (shouldSelectNext) input.setSelectionRange(start, end);
+        update();
+        if (shouldSelectNext) requestAnimationFrame(() => {
+            if (document.activeElement !== input) return;
+            input.setSelectionRange(start, Math.min(end, input.value.length));
+            update();
+        });
+    };
     const onPointerDown = event => {
         if (event.button !== 0) return;
         const root = input.closest('[data-slot="input-otp-root"]');
@@ -51,16 +72,18 @@ export function observeOtpSelection(input, dotnet, maxLength) {
         input.setSelectionRange(index, end);
         update();
     };
-    for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.addEventListener(eventName, update);
+    input.addEventListener('input', onInput);
+    for (const eventName of ['keyup', 'click', 'select', 'focus', 'blur']) input.addEventListener(eventName, update);
     input.addEventListener('pointerdown', onPointerDown);
-    otpObservers.set(input, { update, onPointerDown });
+    otpObservers.set(input, { update, onInput, onPointerDown });
     queueMicrotask(update);
 }
 
 export function disconnectOtpSelection(input) {
     const observer = otpObservers.get(input);
     if (!observer) return;
-    for (const eventName of ['input', 'keyup', 'click', 'select', 'focus', 'blur']) input.removeEventListener(eventName, observer.update);
+    input.removeEventListener('input', observer.onInput);
+    for (const eventName of ['keyup', 'click', 'select', 'focus', 'blur']) input.removeEventListener(eventName, observer.update);
     input.removeEventListener('pointerdown', observer.onPointerDown);
     otpObservers.delete(input);
 }

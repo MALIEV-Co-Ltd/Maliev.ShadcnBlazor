@@ -214,7 +214,7 @@ public sealed class InputGroupOtpTests : BunitContext
     }
 
     [Fact]
-    public void OtpReplacementAdvancesFromTheSelectedSlotInsteadOfJumpingToTheEnd()
+    public void OtpReplacementPreservesTheSelectionReportedByTheNativeInputObserver()
     {
         var cut = Render<ShadcnInputOtp>(parameters => parameters
             .Add(component => component.Value, "2241")
@@ -237,6 +237,7 @@ public sealed class InputGroupOtpTests : BunitContext
 
         cut.Instance.UpdateOtpSelection(0, true);
         cut.Find("input").Input("3241");
+        cut.Instance.UpdateOtpSelection(1, true);
 
         Assert.Equal("true", cut.FindAll("[data-slot='input-otp-slot']")[1].GetAttribute("data-active"));
     }

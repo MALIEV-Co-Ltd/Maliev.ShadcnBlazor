@@ -32,17 +32,10 @@
     private bool IsFocused;
     private bool IsComplete => StringInfo.ParseCombiningCharacters(Value ?? string.Empty).Length == MaxLength;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "data-pattern", "type", "name", "value", "maxlength", "inputmode", "autocomplete", "pattern", "spellcheck", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
-    protected override void OnParametersSet() { base.OnParametersSet(); if (MaxLength <= 0) throw new ArgumentOutOfRangeException(nameof(MaxLength)); Context.Update(Value ?? string.Empty, null); }
+    protected override void OnParametersSet() { base.OnParametersSet(); if (MaxLength <= 0) throw new ArgumentOutOfRangeException(nameof(MaxLength)); Context.Update(Value ?? string.Empty, IsFocused ? ActiveIndex : null); }
     private async Task HandleInputAsync(ChangeEventArgs args)
     {
         var value = Normalize(args.Value?.ToString() ?? string.Empty);
-        var previousLength = StringInfo.ParseCombiningCharacters(Value ?? string.Empty).Length;
-        var nextLength = StringInfo.ParseCombiningCharacters(value).Length;
-        if (!string.Equals(value, Value, StringComparison.Ordinal))
-        {
-            var advance = Math.Max(1, nextLength - previousLength);
-            ActiveIndex = Math.Min(ActiveIndex + advance, MaxLength - 1);
-        }
         Context.Update(value, IsFocused ? ActiveIndex : null);
         await SetCurrentValueFromStringAsync(value);
     }
@@ -57,8 +50,10 @@
     [JSInvokable]
     public void UpdateOtpSelection(int graphemeIndex, bool focused)
     {
+        var nextIndex = Math.Clamp(graphemeIndex, 0, MaxLength - 1);
+        if (IsFocused == focused && ActiveIndex == nextIndex) return;
         IsFocused = focused;
-        ActiveIndex = Math.Clamp(graphemeIndex, 0, MaxLength - 1);
+        ActiveIndex = nextIndex;
         Context.Update(Value ?? string.Empty, focused ? ActiveIndex : null);
         _ = InvokeAsync(StateHasChanged);
     }
