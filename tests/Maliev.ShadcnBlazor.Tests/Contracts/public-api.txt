@@ -1542,6 +1542,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetClose
   Boolean Disabled
   String Label
   EventCallback<MouseEventArgs> OnClick
+  ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetContent
   RenderFragment ChildContent
   String CloseLabel

@@ -1224,6 +1224,27 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task DeliverySheetActionsCommunicateSecondaryAndPrimaryIntent()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var schedule = page.Locator("[data-use-case-id='delivery-sheet']");
+
+        await schedule.GetByRole(AriaRole.Button, new() { Name = "Open schedule", Exact = true }).ClickAsync();
+
+        var sheet = page.Locator("[data-slot='sheet-content']");
+        var cancel = sheet.GetByRole(AriaRole.Button, new() { Name = "Cancel", Exact = true });
+        var save = sheet.GetByRole(AriaRole.Button, new() { Name = "Save schedule", Exact = true });
+        await Assertions.Expect(cancel).ToHaveAttributeAsync("data-variant", "outline");
+        await Assertions.Expect(save).ToHaveAttributeAsync("data-variant", "default");
+        var backgrounds = await Task.WhenAll(
+            cancel.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"),
+            save.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        Assert.NotEqual(backgrounds[0], backgrounds[1]);
+    }
+
+    [Fact]
     public async Task QuotationActionsMenuEscapesTheRevealedCardClippingBoundary()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
