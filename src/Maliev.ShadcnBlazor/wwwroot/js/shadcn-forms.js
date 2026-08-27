@@ -89,6 +89,50 @@ export function disconnectOtpSelection(input) {
 }
 
 const popupObservers = new WeakMap();
+const datePickerPopups = new WeakMap();
+
+export function promoteDatePickerPopup(root) {
+    disconnectDatePickerPopup(root);
+    const trigger = root?.querySelector?.('[data-slot="date-picker-trigger"]');
+    const popup = root?.querySelector?.('[data-slot="date-picker-content"]');
+    if (!trigger || !popup) return;
+    if (!popup.showPopover) {
+        popup.removeAttribute('popover');
+        return;
+    }
+
+    const position = () => {
+        const triggerBounds = trigger.getBoundingClientRect();
+        const popupBounds = popup.getBoundingClientRect();
+        const viewportGap = 8;
+        const triggerGap = 6;
+        const alignedLeft = getComputedStyle(root).direction === 'rtl'
+            ? triggerBounds.right - popupBounds.width
+            : triggerBounds.left;
+        const left = Math.min(
+            Math.max(viewportGap, alignedLeft),
+            Math.max(viewportGap, window.innerWidth - popupBounds.width - viewportGap));
+        const top = triggerBounds.bottom + triggerGap;
+        popup.style.setProperty('--shadcn-date-picker-left', `${left}px`);
+        popup.style.setProperty('--shadcn-date-picker-top', `${top}px`);
+        popup.style.setProperty('--shadcn-date-picker-available-height', `${Math.max(8, window.innerHeight - top - viewportGap)}px`);
+    };
+
+    popup.showPopover();
+    position();
+    window.addEventListener('resize', position);
+    window.addEventListener('scroll', position, true);
+    datePickerPopups.set(root, { popup, position });
+}
+
+function disconnectDatePickerPopup(root) {
+    const state = datePickerPopups.get(root);
+    if (!state) return;
+    window.removeEventListener('resize', state.position);
+    window.removeEventListener('scroll', state.position, true);
+    if (state.popup.matches(':popover-open')) state.popup.hidePopover();
+    datePickerPopups.delete(root);
+}
 
 export function observePopupDismissal(root, dotnet, kind) {
     disconnectPopupDismissal(root);
@@ -108,6 +152,7 @@ export function observePopupDismissal(root, dotnet, kind) {
 }
 
 export function disconnectPopupDismissal(root) {
+    disconnectDatePickerPopup(root);
     const observer = popupObservers.get(root);
     if (!observer) return;
     document.removeEventListener('pointerdown', observer.onPointerDown, true);

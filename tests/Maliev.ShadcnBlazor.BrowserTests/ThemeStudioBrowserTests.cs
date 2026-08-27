@@ -94,6 +94,71 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task InspectionSchedulingDatePickerEscapesCardClipping()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='inspection-scheduling']");
+        await card.ScrollIntoViewIfNeededAsync();
+
+        await card.Locator("[data-slot='date-picker-trigger']").ClickAsync();
+        var popup = card.Locator("[data-slot='date-picker-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+
+        Assert.True(
+            await popup.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The date-picker popup must use the browser top layer so clipped ancestors cannot crop it.");
+    }
+
+    [Fact]
+    public async Task InspectionSchedulingCalendarCentersGridAndKeepsMutedTextReadable()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var calendar = page.Locator("[data-use-case-id='inspection-scheduling'] [data-slot='calendar']");
+        await calendar.ScrollIntoViewIfNeededAsync();
+        var navigation = calendar.Locator("[data-slot='calendar-nav']");
+        var navigationOffset = await navigation.EvaluateAsync<double[]>(
+            """
+            element => {
+                const center = node => { const bounds = node.getBoundingClientRect(); return bounds.left + bounds.width / 2; };
+                const buttons = element.querySelectorAll('button');
+                const weekdays = element.closest('[data-slot=calendar]').querySelectorAll('.shadcn-calendar-weekday');
+                return [Math.abs(center(buttons[0]) - center(weekdays[0])), Math.abs(center(buttons[1]) - center(weekdays[6]))];
+            }
+            """);
+        Assert.All(navigationOffset, offset => Assert.InRange(offset, 0, 1));
+
+        var mutedContrast = await calendar.Locator("[data-slot='calendar-weekday']").First.EvaluateAsync<double>(
+            """
+            element => {
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = 1;
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                const channels = value => {
+                    context.clearRect(0, 0, 1, 1);
+                    context.fillStyle = value;
+                    context.fillRect(0, 0, 1, 1);
+                    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3));
+                };
+                const luminance = value => {
+                    const linear = channels(value).map(channel => {
+                        const normalized = channel / 255;
+                        return normalized <= 0.04045 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+                    });
+                    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+                };
+                let surface = element;
+                while (surface && getComputedStyle(surface).backgroundColor === 'rgba(0, 0, 0, 0)') surface = surface.parentElement;
+                const foreground = luminance(getComputedStyle(element).color);
+                const background = luminance(surface ? getComputedStyle(surface).backgroundColor : 'rgb(255, 255, 255)');
+                return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+            }
+            """);
+        Assert.True(mutedContrast >= 7, $"Calendar weekday contrast was {mutedContrast:F2}:1 instead of at least 7:1.");
+    }
+
+    [Fact]
     public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
