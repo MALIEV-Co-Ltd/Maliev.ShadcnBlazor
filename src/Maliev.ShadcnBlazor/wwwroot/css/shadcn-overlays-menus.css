@@ -4,6 +4,8 @@
 .shadcn-alert-dialog-portal,
 .shadcn-sheet-portal,
 .shadcn-drawer-portal { width: auto; height: auto; margin: 0; border: 0; background: transparent; padding: 0; color: inherit; }
+:where(.shadcn-dialog-portal, .shadcn-alert-dialog-portal, .shadcn-sheet-portal):not([data-shadcn-dialog-ready]) { opacity: 0; }
+:where(.shadcn-dialog-portal, .shadcn-alert-dialog-portal, .shadcn-sheet-portal):not([data-shadcn-dialog-ready]) :where(.shadcn-dialog-overlay, .shadcn-alert-dialog-overlay, .shadcn-sheet-overlay, .shadcn-dialog-content, .shadcn-alert-dialog-content, .shadcn-sheet-content) { animation: none; }
 .shadcn-dialog-overlay,
 .shadcn-alert-dialog-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / 10%); pointer-events: auto; animation: shadcn-overlay-in var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }
 .shadcn-dialog-content,

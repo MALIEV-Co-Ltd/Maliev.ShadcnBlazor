@@ -406,6 +406,60 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ProductionContactDialogRemainsHiddenUntilItsPortalIsReady()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+        await page.EvaluateAsync("""
+            () => {
+                window.__contactDialogPresentation = { animationStarts: 0, frames: [] };
+                document.addEventListener('animationstart', event => {
+                    if (event.target.matches("[data-use-case-id='contact-dialog'] [data-slot='dialog-content']"))
+                        window.__contactDialogPresentation.animationStarts++;
+                });
+                const trigger = document.querySelector("[data-use-case-id='contact-dialog'] [data-slot='dialog-trigger']");
+                trigger.addEventListener('click', () => {
+                    const started = performance.now();
+                    const sample = now => {
+                        const content = document.querySelector("[data-use-case-id='contact-dialog'] [data-slot='dialog-content']");
+                        if (content) {
+                            const portal = content.closest("[data-slot='dialog-portal']");
+                            const style = getComputedStyle(content);
+                            const box = content.getBoundingClientRect();
+                            window.__contactDialogPresentation.frames.push({
+                                elapsed: now - started,
+                                visible: style.visibility !== 'hidden' && style.display !== 'none' && style.opacity !== '0' && box.width > 0 && box.height > 0,
+                                promoted: portal?.matches(':popover-open') ?? false
+                            });
+                        }
+                        if (now - started < 500) requestAnimationFrame(sample);
+                    };
+                    requestAnimationFrame(sample);
+                }, { once: true, capture: true });
+            }
+            """);
+
+        await page.Locator("[data-use-case-id='contact-dialog']")
+            .GetByRole(AriaRole.Button, new() { Name = "Edit contact", Exact = true })
+            .ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        await page.WaitForTimeoutAsync(600);
+        var presentation = await page.EvaluateAsync<string>("""
+            () => {
+                const state = window.__contactDialogPresentation;
+                return JSON.stringify({
+                    animationStarts: state.animationStarts,
+                    unpromotedVisible: state.frames.some(frame => frame.visible && !frame.promoted),
+                    frames: state.frames
+                });
+            }
+            """);
+
+        Assert.False(presentation.Contains("\"unpromotedVisible\":true", StringComparison.Ordinal), presentation);
+        Assert.Contains("\"animationStarts\":1", presentation, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task DrawingAttachmentShowsDeterminateAndIndeterminateUploadProgress()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
