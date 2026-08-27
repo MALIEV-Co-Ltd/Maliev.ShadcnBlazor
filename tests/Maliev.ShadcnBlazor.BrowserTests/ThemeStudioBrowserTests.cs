@@ -1,6 +1,7 @@
 using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
@@ -348,6 +349,37 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             """);
 
         Assert.InRange(measurement[1], measurement[0] - 0.02, measurement[0] + 0.02);
+    }
+
+    [Fact]
+    public async Task MachineCellProgressFillMatchesItsDisplayedSpindleLoad()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='machine-cell']");
+        var progress = card.Locator("[data-slot='progress']");
+
+        await page.WaitForFunctionAsync("""
+            () => {
+                const progress = document.querySelector("[data-use-case-id='machine-cell'] [data-slot='progress']");
+                const value = Number(progress?.getAttribute('aria-valuenow'));
+                return value >= 5 && value <= 95;
+            }
+            """);
+        var measurement = await progress.EvaluateAsync<double[]>("""
+            element => {
+                const value = Number(element.getAttribute('aria-valuenow'));
+                const track = element.querySelector('[data-slot="progress-track"]').getBoundingClientRect();
+                const indicator = element.querySelector('[data-slot="progress-indicator"]').getBoundingClientRect();
+                return [value, indicator.width / track.width];
+            }
+            """);
+        var displayedPercent = double.Parse(
+            (await card.Locator("[data-testid='machine-load-percent']").InnerTextAsync()).TrimEnd('%'),
+            CultureInfo.InvariantCulture);
+
+        Assert.Equal(displayedPercent, measurement[0]);
+        Assert.InRange(measurement[1], measurement[0] / 100 - 0.02, measurement[0] / 100 + 0.02);
     }
 
     [Fact]
