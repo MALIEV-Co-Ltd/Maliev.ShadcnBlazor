@@ -18,6 +18,9 @@ internal static class SemanticFoundationExamples
     {
         "direction" => [Direction()],
         "aspect-ratio" => [AspectRatio()],
+        "bento-grid" => BentoGrid(),
+        "motion-reveal" => MotionReveal(),
+        "visual-style-scope" => VisualStyleScopeExamples.Create(),
         "code-block" => CodeBlock(),
         "typography" => [Typography()],
         "label" => [Label()],
@@ -221,6 +224,122 @@ public async Task SaveAsync(CancellationToken cancellationToken)
         { RazorSourceProvider = Source };
     }
 
+    private static IReadOnlyList<ComponentExampleDefinition> BentoGrid()
+    {
+        return
+        [
+            BentoExample(
+                "bento-grid-featured",
+                "Production overview",
+                "Give the primary production summary two tracks while supporting work stays compact.",
+                4,
+                2,
+                [("Capacity plan", 2, 1), ("Quality holds", 1, 1), ("Dispatch queue", 1, 1), ("Machine status", 1, 1)]),
+            BentoExample(
+                "bento-grid-mixed",
+                "Mixed operational spans",
+                "Combine standard, wide, and tall regions without changing their source order.",
+                4,
+                2,
+                [("Inspection results", 2, 1), ("Reviewer activity", 1, 2), ("Revision notes", 1, 1), ("Release checklist", 2, 1)],
+                masonry: true),
+            BentoExample(
+                "bento-grid-reflow",
+                "Narrow container reflow",
+                "Let a two-track handoff layout collapse safely when its container becomes narrow.",
+                2,
+                1,
+                [("Delivery address", 2, 1), ("Carrier", 1, 1), ("Collection window", 1, 1)])
+        ];
+    }
+
+    private static IReadOnlyList<ComponentExampleDefinition> MotionReveal() =>
+    [
+        RevealExample("motion-reveal-primary", "Production queue reveal", "Reveal stable queue cards as they enter the viewport, with a reduced-motion-safe fallback.", ShadcnRevealEffect.Rise, true, false)
+    ];
+
+    private static ComponentExampleDefinition RevealExample(
+        string id,
+        string title,
+        string description,
+        ShadcnRevealEffect effect,
+        bool cascade,
+        bool reducedMotion)
+    {
+        RenderFragment preview = builder =>
+        {
+            builder.OpenComponent<ShadcnRevealGroup>(0);
+            builder.AddAttribute(1, nameof(ShadcnRevealGroup.ReducedMotion), reducedMotion);
+            builder.AddAttribute(2, nameof(ShadcnRevealGroup.ChildContent), (RenderFragment)(content =>
+            {
+                content.OpenComponent<ShadcnReveal>(0);
+                content.AddAttribute(1, nameof(ShadcnReveal.Effect), effect);
+                content.AddAttribute(2, nameof(ShadcnReveal.Cascade), cascade);
+                content.AddAttribute(3, nameof(ShadcnReveal.ChildContent), (RenderFragment)(item =>
+                {
+                    item.OpenElement(0, "article");
+                    item.AddAttribute(1, "class", "showcase-bento-example__card");
+                    item.OpenElement(2, "strong");
+                    item.AddContent(3, title);
+                    item.CloseElement();
+                    item.OpenElement(4, "p");
+                    item.AddContent(5, description);
+                    item.CloseElement();
+                    item.CloseElement();
+                }));
+                content.CloseComponent();
+            }));
+            builder.CloseComponent();
+        };
+        var source = $"<ShadcnRevealGroup ReducedMotion=\"{reducedMotion.ToString().ToLowerInvariant()}\"><ShadcnReveal Effect=\"ShadcnRevealEffect.{effect}\" Cascade=\"{cascade.ToString().ToLowerInvariant()}\">...</ShadcnReveal></ShadcnRevealGroup>";
+        return new(id, title, description, source, preview, [], ["intersection", "motion", reducedMotion ? "reduced-motion" : "animated"]);
+    }
+
+    private static ComponentExampleDefinition BentoExample(
+        string id,
+        string title,
+        string description,
+        int columns,
+        int mediumColumns,
+        IReadOnlyList<(string Title, int ColumnSpan, int RowSpan)> items,
+        bool masonry = false)
+    {
+        RenderFragment preview = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "showcase-bento-example");
+            builder.OpenComponent<ShadcnBentoGrid>(2);
+            builder.AddAttribute(3, nameof(ShadcnBentoGrid.Columns), columns);
+            builder.AddAttribute(4, nameof(ShadcnBentoGrid.MediumColumns), mediumColumns);
+            builder.AddAttribute(5, nameof(ShadcnBentoGrid.Masonry), masonry);
+            builder.AddAttribute(6, nameof(ShadcnBentoGrid.ChildContent), (RenderFragment)(content =>
+            {
+                var sequence = 0;
+                foreach (var item in items)
+                {
+                    content.OpenComponent<ShadcnBentoItem>(sequence++);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.ColumnSpan), item.ColumnSpan);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.RowSpan), item.RowSpan);
+                    content.AddAttribute(sequence++, nameof(ShadcnBentoItem.ChildContent), BentoExampleCard(item.Title));
+                    content.CloseComponent();
+                }
+            }));
+            builder.CloseComponent();
+            builder.CloseElement();
+        };
+        var itemSource = string.Join(Environment.NewLine, items.Select(item =>
+            $"    <ShadcnBentoItem ColumnSpan=\"{item.ColumnSpan}\" RowSpan=\"{item.RowSpan}\"><article>{item.Title}</article></ShadcnBentoItem>"));
+        var masonryAttribute = masonry ? " Masonry=\"true\"" : string.Empty;
+        var source = $"""
+<ShadcnBentoGrid Columns="{columns}" MediumColumns="{mediumColumns}"{masonryAttribute}>
+{itemSource}
+</ShadcnBentoGrid>
+""";
+        return new(id, title, description, source, preview, [], masonry
+            ? ["responsive", "container-query", "spans", "source-order", "masonry"]
+            : ["responsive", "container-query", "spans", "source-order"]);
+    }
+
     private static ComponentExampleDefinition Typography()
     {
         var variant = ShadcnTypographyVariant.H2;
@@ -410,21 +529,23 @@ public async Task SaveAsync(CancellationToken cancellationToken)
                 <ShadcnFieldSet Disabled="{{disabled.ToString().ToLowerInvariant()}}">
                     <ShadcnFieldLegend Variant="ShadcnFieldLegendVariant.{{legendVariant}}">Card details</ShadcnFieldLegend>
                     <ShadcnFieldGroup>
-                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="cardholder-help">
-                            <ShadcnFieldLabel For="cardholder">Name on card</ShadcnFieldLabel>
-                            <ShadcnInput TValue="string" id="cardholder" Name="cardholder" AutoComplete="cc-name" @bind-Value="cardholder" />
-                            <ShadcnFieldDescription Id="cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
-                        </ShadcnField>
+                        <div class="payment-card-row">
+                            <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="cardholder-help">
+                                <ShadcnFieldLabel For="cardholder">Name on card</ShadcnFieldLabel>
+                                <ShadcnInput TValue="string" id="cardholder" Name="cardholder" AutoComplete="cc-name" @bind-Value="cardholder" />
+                                <ShadcnFieldDescription Id="cardholder-help">Enter the name exactly as it appears on the card.</ShadcnFieldDescription>
+                            </ShadcnField>
 
-                        <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
-                            <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
-                            <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
-                            <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
-                            @if (invalid)
-                            {
-                                <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
-                            }
-                        </ShadcnField>
+                            <ShadcnField Orientation="ShadcnFieldOrientation.{{orientation}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" DescriptionId="card-number-help" ErrorId="card-number-error">
+                                <ShadcnFieldLabel For="card-number">Card number</ShadcnFieldLabel>
+                                <ShadcnInput TValue="string" id="card-number" Name="card-number" InputMode="numeric" AutoComplete="cc-number" @bind-Value="cardNumber" />
+                                <ShadcnFieldDescription Id="card-number-help" dir="auto">Use the 16-digit number printed on the card.</ShadcnFieldDescription>
+                                @if (invalid)
+                                {
+                                    <ShadcnFieldError Id="card-number-error">Check the card number and try again.</ShadcnFieldError>
+                                }
+                            </ShadcnField>
+                        </div>
 
                         <div class="payment-security-row">
                             <ShadcnField>
@@ -742,6 +863,19 @@ public async Task SaveAsync(CancellationToken cancellationToken)
         new($"{slug}-primary", title, description, source, preview, controls, stateTags);
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
+
+    private static RenderFragment BentoExampleCard(string title) => builder =>
+    {
+        builder.OpenElement(0, "article");
+        builder.AddAttribute(1, "class", "showcase-bento-example__card");
+        builder.OpenElement(2, "strong");
+        builder.AddContent(3, title);
+        builder.CloseElement();
+        builder.OpenElement(4, "span");
+        builder.AddContent(5, "Live package layout item");
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 
     private static RenderFragment DirectionContent(bool isRightToLeft) => builder =>
     {

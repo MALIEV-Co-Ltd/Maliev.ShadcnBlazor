@@ -104,7 +104,13 @@ public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal("none", styles.AnimationName);
 
         await page.Keyboard.PressAsync("Escape");
-        var source = page.Locator("#preview [data-slot='code-block']").First;
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
         var sourceText = await source.InnerTextAsync();
         Assert.Contains("<ShadcnContextMenuCheckboxItem", sourceText, StringComparison.Ordinal);
         Assert.Contains("<ShadcnContextMenuRadioGroup", sourceText, StringComparison.Ordinal);

@@ -66,6 +66,7 @@ public sealed class TableTests : BunitContext
         var container = cut.Find("[data-slot='table-container']");
         var table = cut.Find("table[data-slot='table']");
         Assert.Equal(container, table.ParentElement);
+        Assert.Equal("0", container.GetAttribute("tabindex"));
         Assert.Equal("orders-help", table.GetAttribute("aria-describedby"));
         Assert.Contains("consumer-table", table.ClassList);
         Assert.Contains("min-width: 42rem", table.GetAttribute("style"));

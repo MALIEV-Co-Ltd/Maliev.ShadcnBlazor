@@ -1,19 +1,32 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using Maliev.ShadcnBlazor.Components.Disclosure
+@using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Components.Styling
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
 
 <div class="theme-inspector" id="theme-controls" aria-labelledby="theme-inspector-title" data-testid="theme-inspector">
-    <div class="theme-inspector__sticky-heading"><h2 id="theme-inspector-title">Theme controls</h2><span class="theme-dirty-indicator" data-dirty="@(State.IsDirty ? "true" : "false")">@(State.IsDirty ? "Custom" : "Curated")</span></div>
-    <nav class="theme-inspector-nav" aria-label="Theme settings sections">
-        @foreach (var item in Sections)
-        {
-            <button type="button" aria-current="@(State.Workbench.ActiveSection == item.Id ? "location" : null)" @onclick="() => SelectSection(item.Id)">@item.Label</button>
-        }
-    </nav>
+    <div class="theme-inspector__sticky-heading">
+        <h2 id="theme-inspector-title">Theme controls</h2>
+        <div class="theme-inspector-completion">
+            <button type="button"
+                    class="theme-validation-status"
+                    data-testid="theme-validation-status"
+                    aria-expanded="@_validationOpen"
+                    aria-controls="theme-settings-validation"
+                    @onclick="OpenValidation">
+                @ValidationLabel
+            </button>
+            <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export</ShadcnButton>
+        </div>
+    </div>
+
     <section class="theme-inspector-group" id="theme-settings-preview" data-testid="theme-device-controls">
-        <div class="theme-inspector-group__heading"><div><h3>Preview device</h3><p>Choose the centered runway size without consuming preview space.</p></div></div>
+        <div class="theme-inspector-group__heading"><div><h3>Preview</h3><p>Set the viewport and language for the curated workflow canvas.</p></div></div>
         <div class="theme-device-options" role="group" aria-label="Preview device">
             @foreach (var viewport in ThemeStudioViewport.All)
             {
-                <ShadcnButton Class="@($"theme-device-choice theme-device-choice--{viewport.Id}")" Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Viewport == viewport ? "true" : "false")" data-testid="@($"viewport-{viewport.Id}")" OnClick="() => State.SetViewport(viewport)">@viewport.DisplayName <span aria-hidden="true">@viewport.Width</span></ShadcnButton>
+                <ShadcnButton Class="@($"theme-device-choice theme-device-choice--{viewport.Id}")" Variant="@(State.Viewport == viewport ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-label="@($"Preview at {viewport.DisplayName} width, {viewport.Width} pixels")" title="@($"{viewport.DisplayName} · {viewport.Width}px")" aria-pressed="@(State.Viewport == viewport ? "true" : "false")" data-testid="@($"viewport-{viewport.Id}")" OnClick="() => State.SetViewport(viewport)"><ShadcnIcon Icon="@DeviceIcon(viewport)" Size="16" /><span>@viewport.DisplayName</span></ShadcnButton>
             }
         </div>
         <div class="theme-locale-options" role="group" aria-label="Preview language">
@@ -21,28 +34,53 @@
             <ShadcnButton Variant="@(State.Locale == ThemeStudioLocale.Thai ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.Locale == ThemeStudioLocale.Thai ? "true" : "false")" data-testid="locale-thai" OnClick="() => State.SetLocale(ThemeStudioLocale.Thai)">ไทย</ShadcnButton>
         </div>
     </section>
+
     <section class="theme-inspector-group" id="theme-settings-preset">
-        <div class="theme-inspector-group__heading"><div><h3>Curated preset</h3><p>Shuffle changes only reviewed configuration. Card order and content stay fixed.</p></div></div>
-        <label class="theme-inspector-select"><span>Preset</span><ShadcnSelect TValue="string" Value="State.SelectedPresetId" ValueChanged="ApplyPreset" Open="_presetOpen" OpenChanged="SetPresetOpen" Options="PresetOptions" Size="ShadcnControlSize.Small" aria-label="Curated theme preset" data-testid="theme-preset" /></label>
-        <div class="theme-history-actions"><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Shuffle" data-testid="theme-preset-shuffle">Shuffle preset</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" OnClick="() => State.Undo()">Undo</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" OnClick="() => State.Redo()">Redo</ShadcnButton></div>
+        <div class="theme-inspector-group__heading"><div><h3>Theme preset</h3><p>Card order and content stay fixed while reviewed theme values change.</p></div></div>
+        <div class="theme-inspector-select"><span>Preset</span><ShadcnSelect TValue="string" Value="State.SelectedPresetId" ValueChanged="ApplyPreset" Open="_presetOpen" OpenChanged="SetPresetOpen" Options="PresetOptions" Size="ShadcnControlSize.Small" aria-label="Curated theme preset" data-testid="theme-preset" /></div>
+        <div class="theme-inspector-select"><span>Border radius</span><ShadcnSelect TValue="ThemeStudioRadiusPreset" Value="State.RadiusPreset" ValueChanged="State.SetRadiusPreset" Options="RadiusOptions" Size="ShadcnControlSize.Small" aria-label="Preview border radius" data-testid="theme-radius-select" /></div>
+        <div class="theme-history-actions" aria-label="Theme history">
+            <ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" OnClick="Shuffle" aria-label="Shuffle preset" title="Shuffle preset" data-testid="theme-preset-shuffle"><ShadcnIcon Icon="@ShuffleIcon" Size="16" />Shuffle</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanUndo)" OnClick="Undo" aria-label="Undo theme change" title="Undo"><ShadcnIcon Icon="@UndoIcon" Size="16" />Undo</ShadcnButton>
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" Disabled="@(!State.CanRedo)" OnClick="Redo" aria-label="Redo theme change" title="Redo"><ShadcnIcon Icon="@RedoIcon" Size="16" />Redo</ShadcnButton>
+        </div>
+        <p class="theme-preset-status" role="status" aria-live="polite" data-testid="theme-preset-status">@_presetStatus</p>
     </section>
-    <section class="theme-inspector-group" id="theme-settings-typography"><ThemeTypographyEditor State="State" /></section>
-    <section class="theme-inspector-group" id="theme-settings-icons">
-        <div class="theme-inspector-group__heading"><div><h3>Icon library</h3><p>Preview one of four optional, licensed companion packages.</p></div></div>
-        <ShadcnSelect TValue="ThemeStudioIconLibrary" Value="State.IconLibrary" ValueChanged="State.SetIconLibrary" Options="IconOptions" Size="ShadcnControlSize.Small" aria-label="Preview icon library" data-testid="theme-icon-library-select" />
-        <p class="theme-inspector-note">Package: <code>@IconPackage</code></p>
+
+    <section class="theme-inspector-group" id="theme-settings-visual-treatment" data-testid="theme-visual-treatment-controls">
+        <div class="theme-inspector-group__heading"><div><h3>Visual treatment</h3><p>Compose surface, color, depth, motion, and intensity inside the preview only.</p></div></div>
+        <div class="theme-inspector-select"><span>Surface style</span><ShadcnSelect TValue="ShadcnVisualStyle" Value="State.VisualStyle" ValueChanged="State.SetVisualStyle" Open="_visualStyleOpen" OpenChanged="SetVisualStyleOpen" Options="VisualStyleOptions" Size="ShadcnControlSize.Small" aria-label="Preview surface style" data-testid="theme-visual-style" /></div>
+        <div class="theme-inspector-select"><span>Color treatment</span><ShadcnSelect TValue="ShadcnColorTreatment" Value="State.ColorTreatment" ValueChanged="State.SetColorTreatment" Open="_colorTreatmentOpen" OpenChanged="SetColorTreatmentOpen" Options="ColorTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview color treatment" data-testid="theme-color-treatment" /></div>
+        <div class="theme-inspector-select"><span>Depth</span><ShadcnSelect TValue="ShadcnDepthTreatment" Value="State.DepthTreatment" ValueChanged="State.SetDepthTreatment" Open="_depthTreatmentOpen" OpenChanged="SetDepthTreatmentOpen" Options="DepthTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview depth treatment" data-testid="theme-depth-treatment" /></div>
+        <div class="theme-inspector-select"><span>Motion</span><ShadcnSelect TValue="ShadcnMotionTreatment" Value="State.MotionTreatment" ValueChanged="State.SetMotionTreatment" Open="_motionTreatmentOpen" OpenChanged="SetMotionTreatmentOpen" Options="MotionTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview motion treatment" data-testid="theme-motion-treatment" /></div>
+        <div class="theme-inspector-select"><span>Intensity</span><ShadcnSelect TValue="ShadcnStyleIntensity" Value="State.StyleIntensity" ValueChanged="State.SetStyleIntensity" Open="_styleIntensityOpen" OpenChanged="SetStyleIntensityOpen" Options="StyleIntensityOptions" Size="ShadcnControlSize.Small" aria-label="Preview style intensity" data-testid="theme-style-intensity" /></div>
     </section>
-    <section class="theme-inspector-group" id="theme-settings-accessibility">
-        <div class="theme-inspector-group__heading"><div><h3>Accessibility and motion</h3><p>Motion pauses automatically while a user interacts with the runway.</p></div></div>
-        <label class="theme-toggle-row"><span>Pause runway</span><ShadcnSwitch Value="State.Workbench.RunwayPaused" ValueChanged="State.Workbench.SetRunwayPaused" aria-label="Pause automatic runway" data-testid="runway-pause" /></label>
-        <label class="theme-toggle-row"><span>Reduce preview motion</span><ShadcnSwitch Value="State.Workbench.ReducedMotion" ValueChanged="State.Workbench.SetReducedMotion" aria-label="Reduce preview motion" data-testid="preview-reduced-motion" /></label>
-        <label class="theme-toggle-row"><span>High contrast preview</span><ShadcnSwitch Value="State.Workbench.HighContrastPreview" ValueChanged="State.Workbench.SetHighContrastPreview" aria-label="Use high contrast preview" data-testid="preview-high-contrast" /></label>
-    </section>
-    <ThemeValidationSummary State="State" />
-    <section class="theme-transfer-section" id="theme-settings-transfer" aria-labelledby="theme-transfer-title">
-        <h3 id="theme-transfer-title">Import and export</h3><p>Move this exact curated or imported theme into a consuming project.</p>
-        <div class="theme-transfer-actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-import-open" aria-haspopup="dialog" OnClick="@(() => _importOpen = true)">Import JSON</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-code-open" aria-haspopup="dialog" OnClick="@(() => _codeOpen = true)">Get code</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export bundle</ShadcnButton></div>
-    </section>
+
+    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" id="theme-settings-typography" data-testid="theme-typography-section">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Typography</strong><small>Families, weights, and semantic roles</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><ThemeTypographyEditor State="State" ShowHeading="false" /></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+
+    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-icons">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Icon library</strong><small>Licensed companion packages</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><section class="theme-inspector-group" id="theme-settings-icons"><div class="theme-icon-options" role="group" aria-label="Preview icon library">@foreach (var library in IconLibraries) { <ShadcnButton Variant="@(State.IconLibrary == library ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)" Size="ShadcnButtonSize.Small" aria-pressed="@(State.IconLibrary == library ? "true" : "false")" data-testid="@($"theme-icon-library-{library.ToString().ToLowerInvariant()}")" OnClick="@(() => State.SetIconLibrary(library))">@library</ShadcnButton> }</div><p class="theme-inspector-note">Package: <code>@IconPackage</code></p></section></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+
+    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-accessibility">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Accessibility and motion</strong><small>Pause, reduced motion, and contrast</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><section class="theme-inspector-group" id="theme-settings-accessibility"><p>Motion settings affect animated examples inside the curated preview only.</p><label class="theme-toggle-row"><span>Pause preview animations</span><ShadcnSwitch Value="State.Workbench.RunwayPaused" ValueChanged="State.Workbench.SetRunwayPaused" aria-label="Pause preview animations" data-testid="preview-animation-pause" /></label><label class="theme-toggle-row"><span>Reduce preview motion</span><ShadcnSwitch Value="State.Workbench.ReducedMotion" ValueChanged="State.Workbench.SetReducedMotion" aria-label="Reduce preview motion" data-testid="preview-reduced-motion" /></label><label class="theme-toggle-row"><span>High contrast preview</span><ShadcnSwitch Value="State.Workbench.HighContrastPreview" ValueChanged="State.Workbench.SetHighContrastPreview" aria-label="Use high contrast preview" data-testid="preview-high-contrast" /></label></section></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+
+    <ShadcnCollapsible Open="_validationOpen" OpenChanged="SetValidationOpen" Class="theme-inspector-disclosure" data-testid="theme-advanced-validation">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Validation</strong><small>@ValidationLabel</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><div id="theme-settings-validation" tabindex="-1" @ref="_validationTarget"><ThemeValidationSummary State="State" /></div></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+
+    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-transfer">
+        <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Import and export</strong><small>Move the exact theme into a project</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
+        <ShadcnCollapsibleContent><section class="theme-transfer-section" id="theme-settings-transfer" aria-labelledby="theme-transfer-title"><h3 id="theme-transfer-title">Theme files and code</h3><p>Import a reviewed theme or export this exact configuration.</p><div class="theme-transfer-actions"><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-import-open" aria-haspopup="dialog" OnClick="@(() => _importOpen = true)">Import JSON</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Outline" Size="ShadcnButtonSize.Small" data-testid="theme-code-open" aria-haspopup="dialog" OnClick="@(() => _codeOpen = true)">Get code</ShadcnButton><ShadcnButton Variant="ShadcnButtonVariant.Default" Size="ShadcnButtonSize.Small" data-testid="theme-export-open-secondary" aria-haspopup="dialog" OnClick="@(() => _exportOpen = true)">Export bundle</ShadcnButton></div></section></ShadcnCollapsibleContent>
+    </ShadcnCollapsible>
+
     <ThemeImportDialog State="State" @bind-Open="_importOpen" /><ThemeCodeDialog State="State" @bind-Open="_codeOpen" /><ThemeExportDialog State="State" @bind-Open="_exportOpen" />
 </div>
 
@@ -50,18 +88,94 @@
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
     private bool _presetOpen;
-    private static readonly (string Id, string Label)[] Sections = [("preview", "Preview"), ("preset", "Preset"), ("typography", "Typography"), ("icons", "Icons"), ("accessibility", "Accessibility"), ("transfer", "Import / export")];
+    private bool _visualStyleOpen;
+    private bool _colorTreatmentOpen;
+    private bool _depthTreatmentOpen;
+    private bool _motionTreatmentOpen;
+    private bool _styleIntensityOpen;
+    private bool _validationOpen;
+    private bool _focusValidation;
+    private ElementReference _validationTarget;
+    private string _presetStatus = "Ready to compare a reviewed preset.";
     private static readonly IReadOnlyList<ShadcnSelectOption<string>> PresetOptions = new ThemeStudioPresetCatalog().All.Select(preset => new ShadcnSelectOption<string>(preset.Id, preset.DisplayName)).ToArray();
-    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioIconLibrary>> IconOptions = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).Select(value => new ShadcnSelectOption<ThemeStudioIconLibrary>(value, value.ToString())).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ThemeStudioRadiusPreset>> RadiusOptions = ThemeStudioGeneratorCatalog.Radii.Select(value => new ShadcnSelectOption<ThemeStudioRadiusPreset>(value.Preset, value.DisplayName)).ToArray();
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnVisualStyle>> VisualStyleOptions =
+    [
+        new(ShadcnVisualStyle.Minimal, "Clean minimal"),
+        new(ShadcnVisualStyle.Glass, "Frosted glass"),
+        new(ShadcnVisualStyle.NeoBrutalist, "Bold frame"),
+        new(ShadcnVisualStyle.LiquidGlass, "Spatial glass")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnColorTreatment>> ColorTreatmentOptions =
+    [
+        new(ShadcnColorTreatment.Inherit, "Theme colors"),
+        new(ShadcnColorTreatment.VibrantDark, "Vibrant night")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnDepthTreatment>> DepthTreatmentOptions =
+    [
+        new(ShadcnDepthTreatment.Inherit, "Theme depth"),
+        new(ShadcnDepthTreatment.Flat, "Flat"),
+        new(ShadcnDepthTreatment.Raised, "Raised"),
+        new(ShadcnDepthTreatment.Floating, "Floating"),
+        new(ShadcnDepthTreatment.Spatial, "Spatial")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnMotionTreatment>> MotionTreatmentOptions =
+    [
+        new(ShadcnMotionTreatment.Inherit, "Theme motion"),
+        new(ShadcnMotionTreatment.Calm, "Calm"),
+        new(ShadcnMotionTreatment.Expressive, "Expressive"),
+        new(ShadcnMotionTreatment.None, "None")
+    ];
+    private static readonly IReadOnlyList<ShadcnSelectOption<ShadcnStyleIntensity>> StyleIntensityOptions =
+    [
+        new(ShadcnStyleIntensity.Subtle, "Subtle"),
+        new(ShadcnStyleIntensity.Default, "Standard"),
+        new(ShadcnStyleIntensity.Strong, "Strong")
+    ];
+    private static readonly IReadOnlyList<ThemeStudioIconLibrary> IconLibraries = Enum.GetValues<ThemeStudioIconLibrary>().Where(value => value != ThemeStudioIconLibrary.Custom).ToArray();
     private string IconPackage => $"Maliev.ShadcnBlazor.Icons.{State.IconLibrary}";
-    private void Shuffle() => State.ShufflePreset();
-    private async Task ApplyPreset(string presetId)
+    private string ValidationLabel => ThemeValidationPresentation.StatusLabel(State.Validation.Errors.Count, State.Validation.Warnings.Count);
+    private void OpenValidation() { _validationOpen = true; _focusValidation = true; }
+    private void SetValidationOpen(bool open) => _validationOpen = open;
+    private async Task Shuffle()
     {
-        State.ApplyPreset(presetId);
-        await Task.Yield();
-        _presetOpen = false;
+        _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+        var position = await _module.InvokeAsync<PreviewScrollPosition>("capturePreviewScroll");
+        State.ShufflePreset();
+        _presetStatus = $"Applied {SelectedPresetName}. The preview position was preserved.";
         await InvokeAsync(StateHasChanged);
+        await _module.InvokeVoidAsync("restorePreviewScroll", position);
     }
+    private void Undo() { if (State.Undo()) _presetStatus = "Undid the previous theme change."; }
+    private void Redo() { if (State.Redo()) _presetStatus = "Restored the next theme change."; }
+    private async Task ApplyPreset(string presetId) { State.ApplyPreset(presetId); _presetStatus = $"Applied {SelectedPresetName}."; await Task.Yield(); _presetOpen = false; await InvokeAsync(StateHasChanged); }
+    private string SelectedPresetName => PresetOptions.First(option => string.Equals(option.Value, State.SelectedPresetId, StringComparison.Ordinal)).Text;
     private Task SetPresetOpen(bool open) { _presetOpen = open; return InvokeAsync(StateHasChanged); }
-    private void SelectSection(string id) => State.Workbench.SetActiveSection(id);
+    private Task SetVisualStyleOpen(bool open) { _visualStyleOpen = open; return InvokeAsync(StateHasChanged); }
+    private Task SetColorTreatmentOpen(bool open) { _colorTreatmentOpen = open; return InvokeAsync(StateHasChanged); }
+    private Task SetDepthTreatmentOpen(bool open) { _depthTreatmentOpen = open; return InvokeAsync(StateHasChanged); }
+    private Task SetMotionTreatmentOpen(bool open) { _motionTreatmentOpen = open; return InvokeAsync(StateHasChanged); }
+    private Task SetStyleIntensityOpen(bool open) { _styleIntensityOpen = open; return InvokeAsync(StateHasChanged); }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusValidation) return;
+        _focusValidation = false;
+        await _validationTarget.FocusAsync();
+    }
+    private static ShadcnIconData DeviceIcon(ThemeStudioViewport viewport) => viewport.Id switch { "desktop" => DesktopIcon, "tablet" => TabletIcon, _ => MobileIcon };
+    private static readonly ShadcnIconData DesktopIcon = new("lucide", "monitor", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><path d=\"M8 21h8m-4-4v4\"/></g>");
+    private static readonly ShadcnIconData TabletIcon = new("lucide", "tablet", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"16\" height=\"20\" x=\"4\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></g>");
+    private static readonly ShadcnIconData MobileIcon = new("lucide", "smartphone", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></g>");
+    private static readonly ShadcnIconData ShuffleIcon = new("lucide", "shuffle", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"m18 14 4 4-4 4M18 2l4 4-4 4M2 18h1.4c1.2 0 2.3-.6 3-1.7L11.6 7.7c.7-1.1 1.8-1.7 3-1.7H22M2 6h1.9c1.4 0 2.6.8 3.2 2M22 18h-6.1c-1.4 0-2.6-.8-3.2-2l-.5-.8\"/></g>");
+    private static readonly ShadcnIconData UndoIcon = new("lucide", "undo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/></g>");
+    private static readonly ShadcnIconData RedoIcon = new("lucide", "redo-2", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/></g>");
+    private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-down", "0 0 24 24", "<path d=\"m6 9 6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+    private IJSObjectReference? _module;
+    private sealed record PreviewScrollPosition(double Top, double Left);
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
 }

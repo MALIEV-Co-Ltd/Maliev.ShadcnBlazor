@@ -1,0 +1,20 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Showcase.Theming
+@using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+@inject ThemeRunwayState AnimationState
+@implements IDisposable
+
+<ThemeUseCaseCardHost Definition="Definition"
+                          Frame="AnimationState.Frame"
+                          Locale="Locale" />
+
+@code {
+    [Parameter, EditorRequired] public ThemeUseCaseDefinition Definition { get; set; } = default!;
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+
+    protected override void OnInitialized() => AnimationState.Changed += OnChanged;
+
+    private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AnimationState.Changed -= OnChanged;
+}

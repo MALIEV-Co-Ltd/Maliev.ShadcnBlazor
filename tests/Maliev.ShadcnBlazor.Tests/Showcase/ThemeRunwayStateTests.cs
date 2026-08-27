@@ -2,22 +2,26 @@ using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
-public sealed class ThemeRunwayStateTests
+public sealed class ThemePreviewAnimationStateTests
 {
     [Fact]
-    public void RegistryHasTwelveFixedBilingualRealisticCardsSplitEvenly()
+    public void RegistryHasOrderedBilingualRealisticBentoCardsIncludingOverlays()
     {
         var cards = new ThemeUseCaseRegistry().All;
-        Assert.Equal(12, cards.Count);
-        Assert.Equal(Enumerable.Range(1, 12), cards.Select(card => card.Order));
-        Assert.Equal(6, cards.Count(card => card.Track == ThemeRunwayTrack.Left));
-        Assert.Equal(6, cards.Count(card => card.Track == ThemeRunwayTrack.Right));
-        Assert.Equal(12, cards.Select(card => card.Id).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(45, cards.Count);
+        Assert.Equal(Enumerable.Range(1, 45), cards.Select(card => card.Order));
+        Assert.Contains(cards, card => card.Size == ThemeBentoSize.Wide);
+        Assert.Equal(45, cards.Select(card => card.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.All(cards, card =>
         {
             Assert.NotEqual(card.EnglishTitle, card.ThaiTitle);
-            Assert.True(card.ComponentTypes.Count >= 3);
+            Assert.NotEmpty(card.ComponentTypes);
         });
+        Assert.Contains(cards, card => card.ComponentTypes.Contains("ShadcnDialog", StringComparer.Ordinal));
+        Assert.Contains(cards, card => card.ComponentTypes.Contains("ShadcnContextMenu", StringComparer.Ordinal));
+        Assert.True(cards.Count(card => card.ComponentTypes.Contains("ShadcnChart", StringComparer.Ordinal) && !card.Id.EndsWith("-suite", StringComparison.Ordinal)) >= 3);
+        Assert.True(cards.Count(card => card.ComponentTypes.Contains("ShadcnSecretInput", StringComparer.Ordinal)) >= 3);
+        Assert.True(cards.Count(card => card.ComponentTypes.Contains("ShadcnAspectRatio", StringComparer.Ordinal)) >= 3);
     }
 
     [Fact]

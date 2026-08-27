@@ -1,0 +1,50 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+
+<div class="theme-animated-input"
+     data-animated-input
+     data-interacted="@(_interacted ? "true" : "false")"
+     @onpointerdown="Reveal"
+     @onfocusin="Reveal">
+    <ShadcnInput TValue="string"
+                 id="@Id"
+                 Value="@Value"
+                 ValueChanged="OnValueChanged"
+                 Placeholder="@Placeholder"
+                 ReadOnly="@ReadOnly"
+                 Disabled="@Disabled" />
+    @if (!_interacted && !string.IsNullOrEmpty(Value))
+    {
+        <ThemeTypingText @key="_generation" Class="theme-animated-input__ink" Text="@Value" />
+    }
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    private string _previousValue = string.Empty;
+    private bool _interacted;
+    private int _generation;
+
+    protected override void OnParametersSet()
+    {
+        if (string.Equals(_previousValue, Value, StringComparison.Ordinal)) return;
+        _previousValue = Value;
+        if (!_interacted)
+        {
+            _generation++;
+        }
+    }
+
+    private void Reveal() => _interacted = true;
+
+    private async Task OnValueChanged(string? value)
+    {
+        _interacted = true;
+        _previousValue = value ?? string.Empty;
+        await ValueChanged.InvokeAsync(value ?? string.Empty);
+    }
+}

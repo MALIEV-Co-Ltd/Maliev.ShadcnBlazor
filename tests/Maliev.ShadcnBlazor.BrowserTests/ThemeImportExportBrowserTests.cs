@@ -26,6 +26,42 @@ public sealed class ThemeImportExportBrowserTests(
     ];
 
     [Fact]
+    public async Task AdvisoryOnlyValidationKeepsExportAvailableAndExplainsItsConsequence()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+
+        await Assertions.Expect(page.GetByTestId("theme-validation-status")).ToContainTextAsync("Ready to export ·");
+        await Assertions.Expect(page.GetByTestId("theme-export-open")).ToBeEnabledAsync();
+        await page.GetByTestId("theme-validation-status").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-validation-summary")).ToContainTextAsync("Advisories do not block export");
+
+        await page.GetByTestId("theme-export-open").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-export-dialog")).ToBeVisibleAsync();
+        var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+        await Assertions.Expect(acknowledgement).ToBeVisibleAsync();
+        await Assertions.Expect(acknowledgement.Locator("xpath=.."))
+            .ToContainTextAsync("contrast warnings recorded in README.md");
+        await Assertions.Expect(page.GetByTestId("theme-download")).ToBeDisabledAsync();
+        await acknowledgement.CheckAsync();
+        await Assertions.Expect(page.GetByTestId("theme-download")).ToBeEnabledAsync();
+        var download = await page.RunAndWaitForDownloadAsync(
+            () => page.GetByTestId("theme-download").ClickAsync());
+        var downloadPath = await download.PathAsync();
+        Assert.NotNull(downloadPath);
+        using var archive = ZipFile.OpenRead(downloadPath);
+        var readme = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("README.md")!));
+        Assert.Contains("Contrast warnings", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ExportDownloadsAndInspectsARealDeterministicBundleThenReimportsItsCanonicalJson()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
@@ -45,8 +81,10 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("locale-thai").ClickAsync();
         await page.GetByTestId("theme-preset").ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = "Cobalt Precision", Exact = true }).ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-typography-section");
         await page.GetByTestId("theme-font-search").FillAsync("DM Sans");
         await page.GetByTestId("theme-font-result-dm-sans").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-typography");
         var headingScale = page.GetByTestId("theme-role-heading-1-scale");
         await headingScale.FillAsync("2.5");
         await headingScale.PressAsync("Tab");
@@ -103,8 +141,9 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await page.GetByTestId("locale-english").ClickAsync();
         await page.GetByTestId("theme-preset").ClickAsync();
-        await page.GetByRole(AriaRole.Option, new() { Name = "Base / Vega / Neutral", Exact = true }).ClickAsync();
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "MALIEV Precision", Exact = true }).ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
         await page.GetByTestId("theme-import-file").SetInputFilesAsync(new FilePayload
         {
             Name = "theme.json",
@@ -115,16 +154,19 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
+        await Assertions.Expect(page.Locator(".theme-studio-provider")).ToHaveAttributeAsync("data-shadcn-theme", "light");
+        await Assertions.Expect(page.Locator(".theme-studio-provider")).ToHaveAttributeAsync("dir", "ltr");
         await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
         await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2')?.includes('\\\"schemaVersion\\\": 2')");
         await page.ReloadAsync();
         await page.GetByTestId("theme-studio").WaitForAsync();
-        await Assertions.Expect(page.GetByTestId("theme-preset-dock")).ToContainTextAsync("Cobalt Precision");
+        await Assertions.Expect(page.GetByTestId("theme-preset")).ToContainTextAsync("Cobalt Precision");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
-        var restoredTypography = await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style");
+        var restoredTypography = await page.GetByTestId("theme-preview-scope").GetAttributeAsync("style");
         Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", restoredTypography, StringComparison.Ordinal);
+        Assert.Null(await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style"));
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
     }
 
@@ -145,7 +187,8 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-preset")).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(page.Locator("[data-testid='theme-preset'] + [data-slot='select-content']")).ToHaveCountAsync(0);
         var primary = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
 
         foreach (var payload in new[]
         {
@@ -179,8 +222,11 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
         await OpenSettingsIfClosedAsync(page);
+        if (string.Equals(openerTestId, "theme-import-open", StringComparison.Ordinal))
+            await OpenCollapsibleAsync(page, "theme-advanced-transfer");
         var opener = page.GetByTestId(openerTestId);
 
+        await opener.ScrollIntoViewIfNeededAsync();
         await opener.ClickAsync();
         await Assertions.Expect(page.GetByTestId(dialogTestId)).ToBeVisibleAsync();
         await page.Keyboard.PressAsync("Escape");
@@ -210,7 +256,8 @@ public sealed class ThemeImportExportBrowserTests(
         await page.GetByTestId("theme-studio").WaitForAsync();
         await OpenSettingsIfClosedAsync(page);
 
-        await page.GetByTestId("theme-import-open").ClickAsync();
+        await OpenCollapsibleAsync(page, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(page, "theme-import-open");
         await Assertions.Expect(page.GetByTestId("theme-import-dialog")).ToBeVisibleAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
         await page.Locator("main").WaitForAsync();
@@ -237,6 +284,20 @@ public sealed class ThemeImportExportBrowserTests(
         var toggle = page.GetByTestId("theme-controls-toggle");
         if (string.Equals(await toggle.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
             await toggle.ClickAsync();
+    }
+
+    private static async Task ClickInspectorControlAsync(IPage page, string testId)
+    {
+        var control = page.GetByTestId(testId);
+        await control.ScrollIntoViewIfNeededAsync();
+        await control.ClickAsync();
+    }
+
+    private static async Task OpenCollapsibleAsync(IPage page, string testId)
+    {
+        var trigger = page.GetByTestId(testId).Locator(":scope > [data-slot='collapsible-trigger']");
+        if (string.Equals(await trigger.GetAttributeAsync("aria-expanded"), "false", StringComparison.Ordinal))
+            await trigger.ClickAsync();
     }
 
     private static bool IsOptionalGoogleFontFailure(IConsoleMessage message)

@@ -37,7 +37,8 @@ public sealed class ToggleGroupShowcaseBrowserTests(ShowcaseServerFixture server
         await page.ChooseOptionAsync("control-toggle-group-size", "Large");
         await page.GetByTestId("control-toggle-group-invalid").CheckAsync();
         var group = page.GetByTestId("action-toggle-group");
-        await Assertions.Expect(group).ToHaveAttributeAsync("aria-orientation", "vertical");
+        await Assertions.Expect(group).ToHaveAttributeAsync("data-orientation", "vertical");
+        await Assertions.Expect(group).Not.ToHaveAttributeAsync("aria-orientation", "vertical");
         await Assertions.Expect(group).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(group).ToHaveCSSAsync("gap", "0px");
         await Assertions.Expect(notes).ToHaveCSSAsync("height", "40px");

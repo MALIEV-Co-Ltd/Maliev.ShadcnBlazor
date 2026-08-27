@@ -1,12 +1,16 @@
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnButton
+  String BusyText
   ShadcnButtonType ButtonType
   RenderFragment ChildContent
   Boolean Disabled
   String Href
   RenderFragment LeadingIcon
   EventCallback<MouseEventArgs> OnClick
+  Nullable<Boolean> OperationFeedback
   Boolean PointerCursor
   ShadcnButtonSize Size
+  TimeSpan SuccessDuration
+  String SuccessText
   RenderFragment TrailingIcon
   ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroup
@@ -60,11 +64,17 @@ type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarBadge
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarFallback
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroup
+  TimeSpan AutoCollapseAfter
   RenderFragment ChildContent
+  Boolean Expanded
+  EventCallback OnAutoCollapse
   String Overlap
   ShadcnAvatarSize Size
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarGroupCount
   RenderFragment ChildContent
+  String ExpandLabel
+  Boolean Expanded
+  EventCallback<MouseEventArgs> OnClick
   Nullable<ShadcnAvatarSize> Size
 type Maliev.ShadcnBlazor.Components.Content.ShadcnAvatarImage
   String Alt
@@ -227,6 +237,16 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleContent
   EventCallback OnActivate
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleGroup
   RenderFragment ChildContent
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReaction
+  String AccessibleName
+  String Fallback
+  String Source
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
+  String AccessibleName
+  RenderFragment ChildContent
+  Int32 Count
+  Boolean DefaultExpanded
+  EventCallback<Boolean> ExpandedChanged
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactions
   String AccessibleName
   ShadcnLogicalAlign Align
@@ -360,6 +380,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireActions
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireAnswer
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoice
   RenderFragment ChildContent
+  Boolean HideIndicator
   String Value
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDefinition
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireChoiceDescription
@@ -455,6 +476,8 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartSeries
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartShape
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTheme
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnChartTooltipContent
+  Double AnchorXPercent
+  Double AnchorY
   String Category
   ShadcnChartConfig Config
   Boolean HideIndicator
@@ -888,6 +911,16 @@ type Maliev.ShadcnBlazor.Components.Layout.IShadcnResizableStateStore
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio
   RenderFragment ChildContent
   Double Ratio
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid
+  RenderFragment ChildContent
+  Int32 Columns
+  String Gap
+  Boolean Masonry
+  Int32 MediumColumns
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem
+  RenderFragment ChildContent
+  Int32 ColumnSpan
+  Int32 RowSpan
 enum Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableDirection: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizableGroup
   RenderFragment ChildContent
@@ -910,6 +943,25 @@ type Maliev.ShadcnBlazor.Components.Layout.ShadcnResizablePanel
   String Id
   Double MaximumSize
   Double MinimumSize
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnReveal
+  Boolean Cascade
+  RenderFragment ChildContent
+  Int32 Delay
+  Boolean Disabled
+  Int32 Duration
+  ShadcnRevealEffect Effect
+  String Tag
+enum Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealEffect: Fade, Rise, Scale, Clip, None
+type Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealGroup
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Once
+  Boolean Paused
+  Boolean ReducedMotion
+  String RootMargin
+  Int32 Stagger
+  String Tag
+  Double Threshold
 type Maliev.ShadcnBlazor.Components.Layout.ShadcnScrollArea
   RenderFragment ChildContent
   Int32 HideDelay
@@ -1255,6 +1307,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogClose
   RenderFragment ChildContent
   Boolean Disabled
   String Label
+  EventCallback<MouseEventArgs> OnClick
   ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogContent
   RenderFragment ChildContent
@@ -1285,6 +1338,8 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawer
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerClose
   RenderFragment ChildContent
   Boolean Disabled
+  EventCallback<MouseEventArgs> OnClick
+  ShadcnButtonVariant Variant
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerDescription
@@ -1486,6 +1541,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetClose
   RenderFragment ChildContent
   Boolean Disabled
   String Label
+  EventCallback<MouseEventArgs> OnClick
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetContent
   RenderFragment ChildContent
   String CloseLabel
@@ -1552,6 +1608,7 @@ enum Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupPresentation: Defa
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1
   RenderFragment ChildContent
   Boolean Disabled
+  Boolean HideIndicator
   Boolean Invalid
   String Name
   ShadcnRadioGroupOrientation Orientation
@@ -1606,6 +1663,18 @@ type Maliev.ShadcnBlazor.Components.ShadcnThemeProvider
   String Style
   EventCallback<Boolean> SystemDarkModeChanged
   ShadcnTheme Theme
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnColorTreatment: Inherit, VibrantDark
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnDepthTreatment: Inherit, Flat, Raised, Floating, Spatial
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnMotionTreatment: Inherit, Calm, Expressive, None
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnStyleIntensity: Subtle, Default, Strong
+enum Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle: Inherit, Minimal, Glass, NeoBrutalist, LiquidGlass
+type Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope
+  RenderFragment ChildContent
+  ShadcnColorTreatment ColorTreatment
+  ShadcnDepthTreatment Depth
+  ShadcnStyleIntensity Intensity
+  ShadcnMotionTreatment Motion
+  ShadcnVisualStyle VisualStyle
 type Maliev.ShadcnBlazor.Components.Typography.ShadcnCodeBlock
   String Language
   String Source

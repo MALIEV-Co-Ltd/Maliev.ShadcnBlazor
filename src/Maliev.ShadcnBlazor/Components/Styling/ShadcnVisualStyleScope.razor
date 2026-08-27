@@ -1,0 +1,134 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-visual-style-scope")"
+     style="@MergeStyle(RefractionStyle)"
+     data-slot="visual-style-scope"
+     data-visual-style="@VisualStyleValue"
+     data-color-treatment="@ColorTreatmentValue"
+     data-depth="@DepthValue"
+     data-motion="@MotionValue"
+     data-intensity="@IntensityValue">
+    @ChildContent
+    @if (VisualStyle == ShadcnVisualStyle.LiquidGlass)
+    {
+        <svg data-slot="liquid-glass-refraction-definitions"
+             aria-hidden="true"
+             focusable="false"
+             width="0"
+             height="0"
+             style="position: absolute; inline-size: 0; block-size: 0; overflow: hidden; pointer-events: none;">
+            <defs>
+                <filter id="@_refractionFilterId"
+                        data-slot="liquid-glass-refraction-filter"
+                        x="-8%"
+                        y="-8%"
+                        width="116%"
+                        height="116%"
+                        filterUnits="objectBoundingBox"
+                        primitiveUnits="objectBoundingBox"
+                        color-interpolation-filters="sRGB">
+                    <feImage x="0"
+                             y="0"
+                             width="1"
+                             height="1"
+                             preserveAspectRatio="none"
+                             href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%20preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient%20id='x'%20x1='0'%20y1='0'%20x2='1'%20y2='0'%3E%3Cstop%20offset='0'%20stop-color='%23000000'/%3E%3Cstop%20offset='.12'%20stop-color='%23800000'/%3E%3Cstop%20offset='.88'%20stop-color='%23800000'/%3E%3Cstop%20offset='1'%20stop-color='%23ff0000'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='y'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%23000000'/%3E%3Cstop%20offset='.12'%20stop-color='%23008000'/%3E%3Cstop%20offset='.88'%20stop-color='%23008000'/%3E%3Cstop%20offset='1'%20stop-color='%2300ff00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width='100'%20height='100'%20fill='url(%23x)'/%3E%3Crect%20width='100'%20height='100'%20fill='url(%23y)'%20style='mix-blend-mode:screen'/%3E%3C/svg%3E"
+                             result="refractionMap" />
+                    <feGaussianBlur in="SourceGraphic"
+                                    stdDeviation="0.008"
+                                    result="softenedBackdrop" />
+                    <feDisplacementMap in="softenedBackdrop"
+                                       in2="refractionMap"
+                                       scale="0.12"
+                                       xChannelSelector="R"
+                                       yChannelSelector="G" />
+                </filter>
+            </defs>
+        </svg>
+    }
+</div>
+
+@code {
+    private readonly string _refractionFilterId = $"shadcn-liquid-glass-{Guid.NewGuid():N}";
+
+    /// <summary>Gets or sets the surface and control treatment.</summary>
+    [Parameter]
+    public ShadcnVisualStyle VisualStyle { get; set; } = ShadcnVisualStyle.Inherit;
+
+    /// <summary>Gets or sets an optional color treatment.</summary>
+    [Parameter]
+    public ShadcnColorTreatment ColorTreatment { get; set; } = ShadcnColorTreatment.Inherit;
+
+    /// <summary>Gets or sets the perceived surface depth.</summary>
+    [Parameter]
+    public ShadcnDepthTreatment Depth { get; set; } = ShadcnDepthTreatment.Inherit;
+
+    /// <summary>Gets or sets the decorative motion treatment.</summary>
+    [Parameter]
+    public ShadcnMotionTreatment Motion { get; set; } = ShadcnMotionTreatment.Inherit;
+
+    /// <summary>Gets or sets the bounded strength of the selected treatments.</summary>
+    [Parameter]
+    public ShadcnStyleIntensity Intensity { get; set; } = ShadcnStyleIntensity.Default;
+
+    /// <summary>Gets or sets the content rendered inside the scope.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string VisualStyleValue => VisualStyle switch
+    {
+        ShadcnVisualStyle.Inherit => "inherit",
+        ShadcnVisualStyle.Minimal => "minimal",
+        ShadcnVisualStyle.Glass => "glass",
+        ShadcnVisualStyle.NeoBrutalist => "neo-brutalist",
+        ShadcnVisualStyle.LiquidGlass => "liquid-glass",
+        _ => throw new ArgumentOutOfRangeException(nameof(VisualStyle), VisualStyle, "Unsupported visual style.")
+    };
+
+    private string ColorTreatmentValue => ColorTreatment switch
+    {
+        ShadcnColorTreatment.Inherit => "inherit",
+        ShadcnColorTreatment.VibrantDark => "vibrant-dark",
+        _ => throw new ArgumentOutOfRangeException(nameof(ColorTreatment), ColorTreatment, "Unsupported color treatment.")
+    };
+
+    private string DepthValue => Depth switch
+    {
+        ShadcnDepthTreatment.Inherit => "inherit",
+        ShadcnDepthTreatment.Flat => "flat",
+        ShadcnDepthTreatment.Raised => "raised",
+        ShadcnDepthTreatment.Floating => "floating",
+        ShadcnDepthTreatment.Spatial => "spatial",
+        _ => throw new ArgumentOutOfRangeException(nameof(Depth), Depth, "Unsupported depth treatment.")
+    };
+
+    private string MotionValue => Motion switch
+    {
+        ShadcnMotionTreatment.Inherit => "inherit",
+        ShadcnMotionTreatment.Calm => "calm",
+        ShadcnMotionTreatment.Expressive => "expressive",
+        ShadcnMotionTreatment.None => "none",
+        _ => throw new ArgumentOutOfRangeException(nameof(Motion), Motion, "Unsupported motion treatment.")
+    };
+
+    private string IntensityValue => Intensity switch
+    {
+        ShadcnStyleIntensity.Subtle => "subtle",
+        ShadcnStyleIntensity.Default => "default",
+        ShadcnStyleIntensity.Strong => "strong",
+        _ => throw new ArgumentOutOfRangeException(nameof(Intensity), Intensity, "Unsupported style intensity.")
+    };
+
+    private string? RefractionStyle => VisualStyle == ShadcnVisualStyle.LiquidGlass
+        ? $"--shadcn-style-refraction-filter: url(#{_refractionFilterId})"
+        : null;
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot",
+        "data-visual-style",
+        "data-color-treatment",
+        "data-depth",
+        "data-motion",
+        "data-intensity");
+}

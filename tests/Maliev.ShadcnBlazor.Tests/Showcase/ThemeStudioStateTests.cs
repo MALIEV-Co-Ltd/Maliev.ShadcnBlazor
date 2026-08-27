@@ -1,12 +1,16 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
+using Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway;
+using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 using Maliev.ShadcnBlazor.Showcase.Pages;
 using Maliev.ShadcnBlazor.Showcase.MockSites;
 using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
+using Maliev.ShadcnBlazor.Showcase.ThemeScenarios;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -196,7 +200,7 @@ public sealed class ThemeStudioStateTests
     public void PresetsAreIsolatedAndResetScopesRestoreOnlyTheirOwnedValues()
     {
         var state = CreateState();
-        var defaults = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var defaults = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with { Name = "MALIEV Precision" };
         state.SetToken(ThemeStudioScheme.Light, "primary", "#123456");
         state.SetToken(ThemeStudioScheme.Light, "secondary", "#abcdef");
         state.SetMetric("radiusRem", "1.25");
@@ -272,6 +276,18 @@ public sealed class ThemeStudioStateTests
         Assert.Equal(ThemeStudioMenuColor.Translucent, restored.MenuColor);
         Assert.Equal(ThemeStudioRadiusPreset.Relaxed, restored.RadiusPreset);
         Assert.False(restored.IsDirty);
+    }
+
+    [Fact]
+    public void SharpRadiusPresetAppliesAZeroRadius()
+    {
+        var state = CreateState();
+
+        state.SetRadiusPreset(ThemeStudioRadiusPreset.Sharp);
+
+        Assert.Equal(0, state.Draft.Metrics.RadiusRem);
+        Assert.Equal(0, state.Applied.Metrics.RadiusRem);
+        Assert.Equal(ThemeStudioRadiusPreset.Sharp, state.RadiusPreset);
     }
 
     [Fact]
@@ -564,6 +580,14 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Services.AddSingleton<ShowcaseState>();
         Services.AddSingleton<IThemeStudioPresetCatalog, ThemeStudioPresetCatalog>();
         Services.AddSingleton<IThemeUseCaseRegistry, ThemeUseCaseRegistry>();
+        Services.AddSingleton<IComponentDocumentationCatalog, ComponentDocumentationCatalog>();
+        Services.AddSingleton<IComponentExampleRegistry, ComponentExampleRegistry>();
+        Services.AddSingleton<IThemeScenarioRegistry>(services =>
+        {
+            var documentation = services.GetRequiredService<IComponentDocumentationCatalog>();
+            var scenarios = ThemeScenarioCatalog.Load(documentation);
+            return ThemeScenarioRegistry.Create(scenarios, ThemeScenarioFactoryCatalog.Create(documentation, scenarios));
+        });
         Services.AddSingleton<ThemeRunwayState>();
         Services.AddSingleton<MockSiteState>();
         Services.AddSingleton(new HttpClient(new MissingCatalogHandler())
@@ -571,6 +595,23 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
             BaseAddress = new Uri("https://showcase.invalid/"),
         });
         Services.AddSingleton<GoogleFontCatalogService>();
+    }
+
+    [Fact]
+    public void PreviewCategoryLinksNavigateToSamePageFragmentsUnderAnyPublishedBasePath()
+    {
+        var cut = Render<ThemeBento>(parameters => parameters
+            .Add(component => component.Paused, true)
+            .Add(component => component.ReducedMotion, true));
+
+        var links = cut.FindAll("nav[aria-label='Preview categories'] a");
+        Assert.NotEmpty(links);
+        foreach (var link in links)
+        {
+            var href = Assert.IsType<string>(link.GetAttribute("href"));
+            Assert.StartsWith("theme#theme-category-", href, StringComparison.Ordinal);
+            Assert.Single(cut.FindAll(href["theme".Length..]));
+        }
     }
 
     [Fact]
@@ -585,9 +626,37 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal(9, cut.FindAll("fieldset[data-testid^='theme-role-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-preset-shuffle']"));
-        Assert.NotEmpty(cut.FindAll("[data-testid='theme-icon-library-select']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-visual-treatment-controls']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-visual-style']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-color-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-depth-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-motion-treatment']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-style-intensity']"));
+        Assert.Equal(4, cut.FindAll("[data-testid^='theme-icon-library-']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-device-controls']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-validation-summary']"));
+        Assert.Empty(cut.FindAll("[data-testid^='preview-surface-']"));
+        Assert.All(cut.FindAll("[data-testid^='theme-advanced-'] [data-slot='collapsible-trigger']"), trigger =>
+            Assert.Equal("false", trigger.GetAttribute("aria-expanded")));
+    }
+
+    [Fact]
+    public void ValidationStatusRevealsItsInspectorSectionWithoutNavigatingAway()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+
+        var status = cut.Find("[data-testid='theme-validation-status']");
+        Assert.Equal("BUTTON", status.TagName);
+        Assert.False(status.HasAttribute("href"));
+
+        status.Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal("open", cut.Find("[data-testid='theme-advanced-validation']").GetAttribute("data-state"));
+            Assert.Equal("true", cut.Find("[data-testid='theme-advanced-validation'] [data-slot='collapsible-trigger']").GetAttribute("aria-expanded"));
+        });
     }
 
     [Fact]
@@ -595,6 +664,14 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     {
         var state = Services.GetRequiredService<ThemeStudioState>();
         var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+        var typographyTrigger = cut.Find("[data-testid='theme-typography-section'] > [data-slot='collapsible-trigger']");
+        Assert.Equal("false", typographyTrigger.GetAttribute("aria-expanded"));
+        typographyTrigger.Click();
+        Assert.Equal("Recommended font families", cut.Find("[data-testid='theme-font-results']").GetAttribute("aria-label"));
+        Assert.Equal(3, cut.FindAll("[data-testid='theme-font-results'] li").Count);
+        Assert.Contains("3 recommended families shown", cut.Find("[data-testid='theme-font-catalog-status']").TextContent, StringComparison.Ordinal);
+
+        cut.Find("[data-testid='theme-font-search']").Input("DM Sans");
         cut.WaitForElement("[data-testid='theme-font-result-dm-sans']");
 
         cut.Find("[data-testid='theme-font-result-dm-sans']").Click();
@@ -607,6 +684,26 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal("INPUT", cut.Find("[data-testid='theme-font-search']").TagName);
         Assert.Equal(2, cut.FindAll(".theme-font-filters [data-slot='checkbox']").Count);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-font-result-dm-sans']"));
+    }
+
+    [Fact]
+    public void TypographySectionCanCollapseAndReopenWithoutLosingItsCatalog()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+        var trigger = cut.Find("[data-testid='theme-typography-section'] > [data-slot='collapsible-trigger']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+
+        trigger.Click();
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        var fallbackCount = cut.FindAll("[data-testid='theme-font-results'] li").Count;
+
+        trigger.Click();
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+
+        trigger.Click();
+        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal(fallbackCount, cut.FindAll("[data-testid='theme-font-results'] li").Count);
     }
 
     [Fact]
@@ -649,9 +746,11 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         var inspector = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset']"));
+        Assert.Contains("MALIEV Precision", inspector.Markup, StringComparison.Ordinal);
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-preset-shuffle']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-icon-library-select']"));
-        Assert.NotEmpty(inspector.FindAll("[data-testid='runway-pause']"));
+        Assert.NotEmpty(inspector.FindAll("[data-testid='theme-radius-select']"));
+        Assert.Equal(4, inspector.FindAll("[data-testid^='theme-icon-library-']").Count);
+        Assert.NotEmpty(inspector.FindAll("[data-testid='preview-animation-pause']"));
         Assert.NotEmpty(inspector.FindAll("[data-testid='theme-code-open']"));
         Assert.Empty(inspector.FindAll("[data-testid='theme-generator-options']"));
         Assert.Empty(inspector.FindAll("[data-testid='theme-palette-seed']"));
@@ -747,17 +846,63 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Contains("Generated by Maliev.ShadcnBlazor Theme Studio", cut.Find("[data-testid='theme-code-content']").TextContent, StringComparison.Ordinal);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-code-tab-csharp']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-code-tab-json']"));
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-code-tab-visual-style']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-json-download']"));
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-generator-import-file']"));
     }
 
     [Fact]
-    public void ThemeStudioUsesTheFixedRunwayInsteadOfMockSites()
+    public void ThemeStudioUsesTheBentoPreviewInsteadOfMockSites()
     {
         var cut = Render<ThemeStudio>();
-        Assert.Single(cut.FindAll("[data-testid='theme-runway']"));
-        Assert.Equal(36, cut.FindAll("[data-use-case-id]").Count);
+        Assert.Single(cut.FindAll("[data-testid='theme-bento']"));
+        Assert.Equal(45, cut.FindAll("[data-use-case-id]").Count);
         Assert.Empty(cut.FindAll("[data-testid$='-mock']"));
+    }
+
+    [Fact]
+    public void ThemeStudioIntroUsesSingularErrorAndAdvisoryGrammar()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        var cut = Render<ThemeStudio>();
+        var validation = new ShadcnThemeValidationResult(
+            [new ShadcnThemeValidationMessage("invalid-token", "light.primary", "Token is invalid.")],
+            [new ShadcnThemeValidationMessage("low-contrast", "light.foreground", "Contrast needs review.")],
+            []);
+        typeof(ThemeStudioState).GetProperty(nameof(ThemeStudioState.Validation))!.SetValue(state, validation);
+
+        cut.Render();
+
+        var status = cut.Find(".theme-preview-intro__status").TextContent;
+        Assert.Contains("1 error · 1 advisory", status, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 errors", status, StringComparison.Ordinal);
+        Assert.DoesNotContain("1 advisories", status, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ThemeStudioUsesOnlyTheCuratedBentoPreview()
+    {
+        var cut = Render<ThemeStudio>();
+
+        Assert.Single(cut.FindAll("[data-testid='theme-bento']"));
+        Assert.Empty(cut.FindAll("[data-testid='theme-scenario-browser']"));
+        Assert.Empty(cut.FindAll("[data-testid^='preview-surface-']"));
+    }
+
+    [Fact]
+    public void ThemeStudioAppliesVisualTreatmentsOnlyInsideThePreviewScope()
+    {
+        var state = Services.GetRequiredService<ThemeStudioState>();
+        state.SetVisualStyle(Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle.Glass);
+        state.SetDepthTreatment(Maliev.ShadcnBlazor.Components.Styling.ShadcnDepthTreatment.Floating);
+
+        var cut = Render<ThemeStudio>();
+        var scope = cut.Find("[data-testid='theme-visual-style-scope']");
+
+        Assert.Equal("glass", scope.GetAttribute("data-visual-style"));
+        Assert.Equal("floating", scope.GetAttribute("data-depth"));
+        Assert.NotNull(scope.ParentElement?.Closest("[data-testid='theme-preview-scope']"));
+        Assert.Empty(cut.FindAll("[data-testid='theme-studio'] > [data-slot='visual-style-scope']"));
     }
 
     [Fact]

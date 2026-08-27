@@ -155,6 +155,7 @@ public sealed class CarouselTests : BunitContext
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
         Assert.Contains("block-size: var(--shadcn-carousel-viewport-block-size)", css, StringComparison.Ordinal);
         Assert.Contains("flex-basis: var(--shadcn-carousel-viewport-block-size)", css, StringComparison.Ordinal);
+        Assert.Contains("[data-slot=\"carousel-track\"] { block-size: 100%", css, StringComparison.Ordinal);
     }
 
     [Theory]

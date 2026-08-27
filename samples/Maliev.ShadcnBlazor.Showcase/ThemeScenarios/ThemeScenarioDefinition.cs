@@ -60,5 +60,3 @@ public sealed record ThemeScenarioDefinition
 }
 
 public sealed record ThemeScenarioRenderContext(ThemeScenarioDefinition Scenario, CultureInfo Culture, RenderFragment Preview);
-
-public sealed record ThemeScenarioSelection(string ComponentSlug, string ScenarioId);

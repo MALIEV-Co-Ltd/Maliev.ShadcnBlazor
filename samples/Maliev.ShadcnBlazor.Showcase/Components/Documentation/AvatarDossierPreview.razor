@@ -16,7 +16,7 @@
 
     @if (Group)
     {
-        <section class="showcase-avatar-group-preview" data-testid="avatar-group-preview" aria-label="Recently active team members">
+        <section class="showcase-avatar-group-preview" data-expanded="@_groupExpanded.ToString().ToLowerInvariant()" data-testid="avatar-group-preview" aria-label="Recently active team members">
             <div class="showcase-avatar-group-preview__header">
                 <strong>Recently active</strong>
                 <span>4 teammates</span>
@@ -25,7 +25,11 @@
                 @Avatar("images/avatars/operator-thai.png", "Thai CNC operator", "NT", Failed, Badge)
                 @Avatar("images/avatars/reviewer-thai.png", "Thai quality reviewer", "QR", false, false)
                 @Avatar("images/avatars/assistant-thai.png", "Thai support assistant", "SA", false, false)
-                <ShadcnAvatarGroupCount Size="Size">+1</ShadcnAvatarGroupCount>
+                <ShadcnAvatar Size="Size" Class="showcase-avatar-group-preview__overflow" aria-hidden="@(!_groupExpanded)">
+                    <ShadcnAvatarImage Source="images/avatars/coordinator-thai.png" Alt="Thai project coordinator" />
+                    <ShadcnAvatarFallback>PC</ShadcnAvatarFallback>
+                </ShadcnAvatar>
+                <ShadcnAvatarGroupCount Size="Size" Expanded="_groupExpanded" ExpandLabel="@(_groupExpanded ? "Collapse teammate list" : "Show one more teammate")" OnClick="ToggleGroup">@(_groupExpanded ? "−" : "+1")</ShadcnAvatarGroupCount>
             </ShadcnAvatarGroup>
         </section>
     }
@@ -38,6 +42,9 @@
     [Parameter] public bool Group { get; set; }
 
     private const string BrokenAvatarSource = "images/avatars/missing-avatar.png";
+    private bool _groupExpanded;
+
+    private void ToggleGroup(MouseEventArgs _) => _groupExpanded = !_groupExpanded;
 
     private RenderFragment Profile(string? source, string name, string role, string? fallbackText, bool failed, bool badge, bool fallbackOnly = false) => @<div class="showcase-avatar-profile" data-testid="avatar-profile">
         <ShadcnAvatar Size="Size">

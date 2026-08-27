@@ -1,4 +1,5 @@
 @using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Icons
 
 <section class="showcase-toggle-dossier" data-testid="toggle-dossier-preview" aria-label="Inspection note editor">
     <header class="showcase-toggle-dossier__header">
@@ -7,7 +8,7 @@
             <span dir="auto">Revision C · autosaved</span>
         </div>
         <span class="showcase-toggle-dossier__state" dir="auto" aria-live="polite" data-testid="toggle-format-state">
-            @(CurrentPressed ? "Bold enabled" : "Bold disabled")
+            @FormattingState
         </span>
     </header>
     <div class="showcase-toggle-dossier__toolbar" role="toolbar" aria-label="Text formatting">
@@ -19,15 +20,17 @@
                       PointerCursor="true"
                       AdditionalAttributes="Attributes">
             <LeadingIcon>
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 4h8a4 4 0 0 1 0 8H6z" />
-                    <path d="M6 12h9a4 4 0 0 1 0 8H6z" />
-                </svg>
+                <ShadcnIcon Icon="BoldIcon" Size="18" />
             </LeadingIcon>
-            <ChildContent>Bold</ChildContent>
+        </ShadcnToggle>
+        <ShadcnToggle Pressed="_italic" PressedChanged="SetItalic" Variant="Variant" Size="Size" Disabled="Disabled" PointerCursor="true" aria-label="Toggle italic emphasis" title="Italic">
+            <LeadingIcon><ShadcnIcon Icon="ItalicIcon" Size="18" /></LeadingIcon>
+        </ShadcnToggle>
+        <ShadcnToggle Pressed="_underline" PressedChanged="SetUnderline" Variant="Variant" Size="Size" Disabled="Disabled" PointerCursor="true" aria-label="Toggle underline emphasis" title="Underline">
+            <LeadingIcon><ShadcnIcon Icon="UnderlineIcon" Size="18" /></LeadingIcon>
         </ShadcnToggle>
     </div>
-    <p class="showcase-toggle-dossier__copy" dir="auto" data-emphasis="@(CurrentPressed ? "bold" : "regular")">
+    <p class="showcase-toggle-dossier__copy" dir="auto" data-bold="@CurrentPressed.ToString().ToLowerInvariant()" data-italic="@_italic.ToString().ToLowerInvariant()" data-underline="@_underline.ToString().ToLowerInvariant()">
         Confirm the enclosure edge is deburred before final inspection.
     </p>
 </section>
@@ -41,6 +44,15 @@
 
     private bool CurrentPressed;
     private bool LastPressed;
+    private bool _italic;
+    private bool _underline;
+    private string FormattingState => $"Bold {(CurrentPressed ? "on" : "off")} · Italic {(_italic ? "on" : "off")} · Underline {(_underline ? "on" : "off")}";
+
+    // Lucide MIT glyphs are inlined in the host-only preview to preserve the Showcase's package-isolation contract.
+    // The copyable example below demonstrates consuming the licensed Maliev.ShadcnBlazor.Icons.Lucide package directly.
+    private static readonly ShadcnIconData BoldIcon = new("lucide", "bold", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8\" /></g>");
+    private static readonly ShadcnIconData ItalicIcon = new("lucide", "italic", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><line x1=\"19\" x2=\"10\" y1=\"4\" y2=\"4\" /><line x1=\"14\" x2=\"5\" y1=\"20\" y2=\"20\" /><line x1=\"15\" x2=\"9\" y1=\"4\" y2=\"20\" /></g>");
+    private static readonly ShadcnIconData UnderlineIcon = new("lucide", "underline", "0 0 24 24", "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M6 4v6a6 6 0 0 0 12 0V4\" /><line x1=\"4\" x2=\"20\" y1=\"20\" y2=\"20\" /></g>");
 
     protected override void OnParametersSet()
     {
@@ -55,6 +67,9 @@
         CurrentPressed = value;
         return Task.CompletedTask;
     }
+
+    private Task SetItalic(bool value) { _italic = value; return Task.CompletedTask; }
+    private Task SetUnderline(bool value) { _underline = value; return Task.CompletedTask; }
 
     private IReadOnlyDictionary<string, object> Attributes => new Dictionary<string, object>
     {

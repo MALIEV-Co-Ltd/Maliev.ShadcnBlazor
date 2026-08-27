@@ -1,0 +1,80 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+@Element
+
+@code {
+    private static readonly HashSet<string> AllowedTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "div", "article", "section", "li"
+    };
+
+    /// <summary>Gets or sets the semantic HTML element rendered by the reveal item.</summary>
+    [Parameter]
+    public string Tag { get; set; } = "div";
+
+    /// <summary>Gets or sets the entrance effect.</summary>
+    [Parameter]
+    public ShadcnRevealEffect Effect { get; set; } = ShadcnRevealEffect.Rise;
+
+    /// <summary>Gets or sets the entrance delay in milliseconds.</summary>
+    [Parameter]
+    public int Delay { get; set; }
+
+    /// <summary>Gets or sets the entrance duration in milliseconds.</summary>
+    [Parameter]
+    public int Duration { get; set; } = 480;
+
+    /// <summary>Gets or sets whether supported descendant components use coordinated choreography.</summary>
+    [Parameter]
+    public bool Cascade { get; set; }
+
+    /// <summary>Gets or sets whether reveal behavior is disabled for this item.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Gets or sets the content rendered by the reveal item.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, Tag);
+        builder.AddMultipleAttributes(1, AttributesExcept(
+            "data-slot", "data-reveal-effect", "data-reveal-cascade", "data-reveal-disabled"));
+        builder.AddAttribute(2, "class", MergeClass("shadcn-reveal"));
+        builder.AddAttribute(3, "style", MergeStyle(BuildMotionStyle()));
+        builder.AddAttribute(4, "data-slot", "reveal");
+        if (Disabled)
+        {
+            builder.AddAttribute(5, "data-reveal-disabled", "true");
+        }
+        else
+        {
+            builder.AddAttribute(5, "data-reveal-effect", Effect.ToString().ToLowerInvariant());
+            if (Cascade)
+                builder.AddAttribute(6, "data-reveal-cascade", "true");
+        }
+        builder.AddContent(7, ChildContent);
+        builder.CloseElement();
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Tag) || !AllowedTags.Contains(Tag))
+            throw new ArgumentOutOfRangeException(nameof(Tag), Tag, "Reveal tag must be div, article, section, or li.");
+        if (Delay is < 0 or > 5000)
+            throw new ArgumentOutOfRangeException(nameof(Delay), Delay, "Reveal delay must be between zero and 5000 milliseconds.");
+        if (Duration is < 100 or > 5000)
+            throw new ArgumentOutOfRangeException(nameof(Duration), Duration, "Reveal duration must be between 100 and 5000 milliseconds.");
+
+        Tag = Tag.ToLowerInvariant();
+    }
+
+    private string BuildMotionStyle() => string.Join("; ", new[]
+    {
+        $"--shadcn-reveal-delay: {Delay.ToString(CultureInfo.InvariantCulture)}ms",
+        $"--shadcn-reveal-duration: {Duration.ToString(CultureInfo.InvariantCulture)}ms"
+    });
+}

@@ -1,0 +1,82 @@
+@using Maliev.ShadcnBlazor.Components.Actions
+@using Maliev.ShadcnBlazor.Components.Content
+@using Maliev.ShadcnBlazor.Components.DataDisplay
+@using Maliev.ShadcnBlazor.Components.Forms
+@using Maliev.ShadcnBlazor.Components.Layout
+@using Maliev.ShadcnBlazor.Components.Overlays
+@using Maliev.ShadcnBlazor.Components.Styling
+
+<ShadcnVisualStyleScope VisualStyle="VisualStyle"
+                        ColorTreatment="ColorTreatment"
+                        Depth="EffectiveDepth"
+                        Motion="EffectiveMotion"
+                        Intensity="Intensity"
+                        Class="showcase-visual-style-dossier"
+                        aria-label="Modern visual style example">
+    @if (Mode == "approval")
+    {
+        <ShadcnCard>
+            <ShadcnCardHeader><ShadcnCardTitle>Approve revision C</ShadcnCardTitle></ShadcnCardHeader>
+            <ShadcnCardContent>
+                <p>WO-2418 · CNC enclosure</p>
+                <p>Final bore: 24.982 mm · tolerance verified</p>
+            </ShadcnCardContent>
+            <ShadcnCardFooter><ShadcnButton>Approve release</ShadcnButton></ShadcnCardFooter>
+        </ShadcnCard>
+    }
+    else if (Mode == "scheduling")
+    {
+        <ShadcnBentoGrid Columns="2" MediumColumns="2" Gap="1rem">
+            <ShadcnBentoItem>
+                <ShadcnCard>
+                    <ShadcnCardHeader><ShadcnCardTitle>Dispatch schedule</ShadcnCardTitle></ShadcnCardHeader>
+                    <ShadcnCardContent><ShadcnInput TValue="string" Value="@ScheduleValue" aria-label="Dispatch time" /></ShadcnCardContent>
+                </ShadcnCard>
+            </ShadcnBentoItem>
+            <ShadcnBentoItem>
+                <ShadcnChart Id="style-scope-utilization" Title="Cell utilization" Description="Three-day machining load" Config="ChartConfig" Categories="Days" Series="Series" InitialHeight="@ChartHeight" ShowLegend="@false" />
+            </ShadcnBentoItem>
+        </ShadcnBentoGrid>
+    }
+    else
+    {
+        <ShadcnCard>
+            <ShadcnCardHeader><ShadcnCardTitle>Night operations</ShadcnCardTitle></ShadcnCardHeader>
+            <ShadcnCardContent><ShadcnInput TValue="string" Value="@MachineValue" aria-label="Machine cell" /></ShadcnCardContent>
+            <ShadcnCardFooter>
+                <ShadcnButton Disabled="@true">Maintenance hold</ShadcnButton>
+                <ShadcnDialog @bind-Open="dialogOpen">
+                    <ShadcnDialogTrigger>Review cell status</ShadcnDialogTrigger>
+                    <ShadcnDialogContent>
+                        <ShadcnDialogTitle>Cell status</ShadcnDialogTitle>
+                        <ShadcnDialogDescription>Spindle load is stable and the inspection report is ready.</ShadcnDialogDescription>
+                    </ShadcnDialogContent>
+                </ShadcnDialog>
+            </ShadcnCardFooter>
+        </ShadcnCard>
+    }
+</ShadcnVisualStyleScope>
+
+@code {
+    [Parameter] public string Mode { get; set; } = "approval";
+    [Parameter] public ShadcnVisualStyle VisualStyle { get; set; } = ShadcnVisualStyle.Minimal;
+    [Parameter] public ShadcnColorTreatment ColorTreatment { get; set; } = ShadcnColorTreatment.Inherit;
+    [Parameter] public ShadcnStyleIntensity Intensity { get; set; } = ShadcnStyleIntensity.Default;
+
+    private bool dialogOpen;
+    private const string ScheduleValue = "Friday, 16:00";
+    private const string MachineValue = "DMG MORI DMU 50";
+    private const double ChartHeight = 180d;
+    private ShadcnDepthTreatment EffectiveDepth => Mode switch
+    {
+        "approval" when VisualStyle == ShadcnVisualStyle.NeoBrutalist => ShadcnDepthTreatment.Raised,
+        "approval" => ShadcnDepthTreatment.Flat,
+        "scheduling" when VisualStyle == ShadcnVisualStyle.LiquidGlass => ShadcnDepthTreatment.Spatial,
+        "scheduling" => ShadcnDepthTreatment.Floating,
+        _ => ShadcnDepthTreatment.Raised
+    };
+    private ShadcnMotionTreatment EffectiveMotion => Mode == "operations" ? ShadcnMotionTreatment.Expressive : ShadcnMotionTreatment.Calm;
+    private static ShadcnChartConfig ChartConfig { get; } = new() { ["load"] = new("Load") { Color = "var(--shadcn-chart-1)" } };
+    private static IReadOnlyList<string> Days { get; } = ["Wed", "Thu", "Fri"];
+    private static IReadOnlyList<ShadcnChartSeries> Series { get; } = [new("load", [68, 82, 74])];
+}

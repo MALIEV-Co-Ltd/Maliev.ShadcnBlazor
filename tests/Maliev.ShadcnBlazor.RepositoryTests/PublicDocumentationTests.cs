@@ -2,6 +2,10 @@ namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class PublicDocumentationTests
 {
+    private static readonly System.Text.RegularExpressions.Regex IncompleteProductDisplayName = new(
+        "(?<!Maliev )\\bShadcn Blazor\\b",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
     private static readonly string[] RequiredFiles =
     [
         "README.md",
@@ -49,6 +53,37 @@ public sealed class PublicDocumentationTests
         Assert.Contains("SHADCN_UPDATE_VISUAL_BASELINES=1", components, StringComparison.Ordinal);
         Assert.Contains("do not update baselines", components, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("inspect", components, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ShowcasePublicCopyUsesTheFullDisplayNameWhileDottedIdentifiersStayStable()
+    {
+        var root = RepositoryRoot.Find();
+        var showcase = Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase");
+        var publicSourceExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".cs", ".html", ".razor"
+        };
+
+        var offenders = Directory
+            .EnumerateFiles(showcase, "*", SearchOption.AllDirectories)
+            .Where(path => publicSourceExtensions.Contains(Path.GetExtension(path)))
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .SelectMany(path => File.ReadLines(path).Select((line, index) => new { path, line, number = index + 1 }))
+            .Where(candidate => IncompleteProductDisplayName.IsMatch(candidate.line))
+            .Select(candidate => $"{Path.GetRelativePath(root, candidate.path)}:{candidate.number}")
+            .ToArray();
+
+        Assert.Empty(offenders);
+
+        var consumptionGuide = File.ReadAllText(Path.Combine(
+            showcase,
+            "Components",
+            "Documentation",
+            "ComponentConsumptionGuide.razor"));
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", consumptionGuide, StringComparison.Ordinal);
+        Assert.DoesNotMatch(IncompleteProductDisplayName, "Maliev.ShadcnBlazor");
     }
 
     [Fact]

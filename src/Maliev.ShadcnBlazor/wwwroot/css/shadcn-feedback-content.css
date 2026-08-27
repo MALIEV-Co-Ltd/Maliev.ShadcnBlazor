@@ -31,9 +31,10 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge {
     display: inline-flex; width: fit-content; height: 1.25rem; flex: 0 0 auto; align-items: center; justify-content: center;
     gap: calc(0.25rem * var(--shadcn-spacing-multiplier)); overflow: hidden; border: 1px solid transparent; border-radius: 9999px; padding: calc(0.125rem * var(--shadcn-spacing-multiplier)) calc(0.5rem * var(--shadcn-spacing-multiplier));
-    font-size: 0.75rem; line-height: 1rem; font-weight: 500; white-space: nowrap; text-decoration: none; outline: none;
+    font-size: 0.75rem; line-height: 1rem; font-weight: 500; white-space: nowrap; text-decoration: none; outline: none; cursor: default;
     transition: color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), border-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
+:where(.shadcn-scope, .shadcn-overlay-scope) a.shadcn-badge { cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge > svg { width: 0.75rem; height: 0.75rem; pointer-events: none; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge:has(> [data-icon="inline-start"]) { padding-inline-start: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-badge:has(> [data-icon="inline-end"]) { padding-inline-end: calc(0.375rem * var(--shadcn-spacing-multiplier)); }
@@ -69,7 +70,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card[data-size="sm"] .shadcn-card-title { font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-description { overflow-wrap: anywhere; color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-action { grid-column: 2; grid-row: 1 / span 2; align-self: start; justify-self: end; }
-:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-card-content, .shadcn-card-footer) { padding-inline: var(--shadcn-card-spacing); }
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-card-content, .shadcn-card-footer) { min-inline-size: 0; box-sizing: border-box; padding-inline: var(--shadcn-card-spacing); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card-footer { display: flex; align-items: center; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); flex-wrap: wrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card:has(> img:first-child) { padding-block-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-card:has(> img:last-child) { padding-block-end: 0; }
@@ -95,17 +96,26 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-avatar-image, .shadcn-avatar-fallback) { clip-path: inset(0 round 9999px); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-image { display: block; max-inline-size: none; object-fit: cover; object-position: center; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-image:is([data-state="loading"], [data-state="error"]) { visibility: hidden; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--shadcn-muted); color: var(--shadcn-foreground); font-size: 0.875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-fallback[data-state="hidden"] { visibility: hidden; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-badge { position: absolute; inset-inline-end: 0; inset-block-end: 0; z-index: 1; display: inline-flex; width: 0.625rem; height: 0.625rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--shadcn-background); border-radius: 9999px; background: var(--shadcn-success, oklch(0.72 0.18 145)); color: var(--shadcn-success-foreground, oklch(0.24 0.08 145)); box-shadow: 0 0 0 1px color-mix(in oklch, var(--shadcn-background) 80%, transparent); font-size: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar[data-size="sm"] .shadcn-avatar-badge { width: 0.5rem; height: 0.5rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar[data-size="lg"] .shadcn-avatar-badge { width: 0.75rem; height: 0.75rem; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group { --shadcn-avatar-overlap: 0.5rem; display: flex; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group { --shadcn-avatar-overlap: 0.5rem; display: flex; isolation: isolate; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > * + * { margin-inline-start: calc(-1 * var(--shadcn-avatar-overlap)); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > :where([data-slot="avatar"], [data-slot="avatar-group-count"]) { box-shadow: 0 0 0 2px var(--shadcn-background); }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count { display: inline-flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-muted-foreground); font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > :where([data-slot="avatar"], [data-slot="avatar-group-count"]) { position: relative; box-shadow: 0 0 0 2px var(--shadcn-background); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > .shadcn-avatar[data-slot="avatar"] { position: relative; z-index: 1; transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), box-shadow var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > .shadcn-avatar[data-slot="avatar"] > :is(.shadcn-avatar-image, .shadcn-avatar-fallback) { transition: transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within, [data-raised="true"]) > :is(.shadcn-avatar-image, .shadcn-avatar-fallback) { transform: scale(1.03); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within, [data-raised="true"]) { position: relative; z-index: 3 !important; transform: translateY(-0.125rem) scale(1.04); box-shadow: 0 0 0 2px var(--shadcn-background), 0 .25rem .75rem color-mix(in oklch, var(--shadcn-foreground) 16%, transparent); }
+.shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within, [data-raised="true"]) { position: relative; z-index: 3 !important; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count { z-index: 2; display: inline-flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; border-radius: 9999px; background: var(--shadcn-muted); color: var(--shadcn-foreground); padding: 0; font: inherit; font-size: 0.875rem; }
+:where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count { cursor: pointer; transition: background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), scale var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
+:where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count:hover { background: var(--shadcn-accent); color: var(--shadcn-accent-foreground); scale: 1.04; }
+:where(.shadcn-scope, .shadcn-overlay-scope) button.shadcn-avatar-group-count:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="sm"] { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group-count[data-size="lg"] { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) { :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"] { transition: none; } :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-avatar-group > [data-slot="avatar"]:is(:hover, :focus-within, [data-raised="true"]) { transform: none; } }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress { display: flex; flex-wrap: wrap; gap: calc(0.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-progress-track { position: relative; display: flex; width: 100%; height: 0.375rem; align-items: center; overflow: hidden; border-radius: 9999px; background: var(--shadcn-muted); }
@@ -149,7 +159,7 @@
 @media (prefers-reduced-motion: reduce) {
     :where(.shadcn-scope, .shadcn-overlay-scope) [data-slot="carousel-track"] { transition: none; }
 }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] > [data-slot="carousel-track"] { flex-direction: column; margin-block-start: calc(-1rem * var(--shadcn-spacing-multiplier)); margin-inline-start: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] > [data-slot="carousel-track"] { block-size: 100%; flex-direction: column; margin-block-start: calc(-1rem * var(--shadcn-spacing-multiplier)); margin-inline-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-item { min-width: 0; flex: 0 0 var(--shadcn-carousel-basis, 100%); padding-inline-start: calc(1rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-content[data-orientation="vertical"] .shadcn-carousel-item { block-size: var(--shadcn-carousel-viewport-block-size); min-block-size: 0; flex-basis: var(--shadcn-carousel-viewport-block-size); padding-block-start: calc(1rem * var(--shadcn-spacing-multiplier)); padding-inline-start: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-carousel-previous,

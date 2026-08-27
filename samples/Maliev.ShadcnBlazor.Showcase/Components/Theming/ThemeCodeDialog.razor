@@ -17,10 +17,11 @@
             </div>
             <button type="button" class="theme-transfer-dialog__close" aria-label="Close generated code" @onclick="CloseAsync">×</button>
         </div>
-        <p class="theme-code-dialog__intro">Save the JSON as a source-of-truth file, or copy the C# class directly into a Blazor app.</p>
+        <p class="theme-code-dialog__intro">Save the portable theme, copy the C# configuration, or wrap a feature in the selected visual treatment.</p>
         <div class="theme-code-dialog__tabs" role="tablist" aria-label="Generated output format">
             <button type="button" role="tab" aria-selected="@(_activeTab == ThemeCodeTab.CSharp)" data-testid="theme-code-tab-csharp" @onclick="() => _activeTab = ThemeCodeTab.CSharp">C# configuration</button>
             <button type="button" role="tab" aria-selected="@(_activeTab == ThemeCodeTab.Json)" data-testid="theme-code-tab-json" @onclick="() => _activeTab = ThemeCodeTab.Json">Portable JSON</button>
+            <button type="button" role="tab" aria-selected="@(_activeTab == ThemeCodeTab.VisualStyle)" data-testid="theme-code-tab-visual-style" @onclick="() => _activeTab = ThemeCodeTab.VisualStyle">Visual style wrapper</button>
         </div>
         <pre class="theme-code-dialog__code" data-testid="theme-code-content" tabindex="0"><code>@CurrentContent</code></pre>
         <div class="theme-code-dialog__actions">
@@ -44,7 +45,7 @@
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
-    private enum ThemeCodeTab { CSharp, Json }
+    private enum ThemeCodeTab { CSharp, Json, VisualStyle }
     private ThemeCodeTab _activeTab = ThemeCodeTab.CSharp;
     private string _status = string.Empty;
     private IJSObjectReference? _dialogModule;
@@ -54,10 +55,13 @@
     private bool _disposed;
     private const long MaxImportBytes = ShadcnThemeDocumentLoader.MaxDocumentBytes;
 
-    private string _activeTabLabel => _activeTab == ThemeCodeTab.CSharp ? "C#" : "JSON";
-    private string CurrentContent => _activeTab == ThemeCodeTab.CSharp
-        ? ThemeStudioCodeGenerator.WriteCSharp(State.CreateDocument())
-        : ThemeStudioCodeGenerator.WriteJson(State.CreateDocument());
+    private string _activeTabLabel => _activeTab switch { ThemeCodeTab.CSharp => "C#", ThemeCodeTab.Json => "JSON", _ => "visual style wrapper" };
+    private string CurrentContent => _activeTab switch
+    {
+        ThemeCodeTab.CSharp => ThemeStudioCodeGenerator.WriteCSharp(State.CreateDocument()),
+        ThemeCodeTab.Json => ThemeStudioCodeGenerator.WriteJson(State.CreateDocument()),
+        _ => ThemeStudioCodeGenerator.WriteVisualStyleSnippet(State.VisualStyle, State.ColorTreatment, State.DepthTreatment, State.MotionTreatment, State.StyleIntensity)
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

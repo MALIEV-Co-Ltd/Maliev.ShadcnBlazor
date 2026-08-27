@@ -1,0 +1,121 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using Maliev.ShadcnBlazor.Components.Layout
+@using Maliev.ShadcnBlazor.Showcase.Theming.Runway
+@inject IThemeUseCaseRegistry Registry
+@inject ThemeRunwayState AnimationState
+
+<ShadcnRevealGroup Tag="section"
+                   Class="theme-bento"
+                   Paused="Paused"
+                   ReducedMotion="ReducedMotion"
+                   Threshold="0.08"
+                   RootMargin="32px 0px"
+                   Stagger="60"
+                   Once="true"
+                   aria-label="Curated realistic component use cases"
+                   data-testid="theme-bento"
+                   data-render-cycle="@_parameterCycle"
+                   data-animation-paused="@(Paused ? "true" : "false")"
+                   data-reduced-motion="@(ReducedMotion ? "true" : "false")">
+    <div class="theme-bento__orientation">
+        <h2>Workflow examples</h2>
+        <nav class="theme-bento__categories" aria-label="Preview categories">
+            <ul>
+                @foreach (var category in Categories)
+                {
+                    <li><a href="theme#@CategoryAnchorId(category)" data-enhance="false">@CategoryLabel(category)</a></li>
+                }
+            </ul>
+        </nav>
+    </div>
+    <ShadcnBentoGrid Class="theme-bento__grid" Columns="4" MediumColumns="2" Gap="1rem" Masonry="true">
+        @foreach (var card in Registry.All.OrderBy(card => card.Order))
+        {
+            <ShadcnBentoItem @key="card.Id"
+                             ColumnSpan="@ColumnSpan(card.Size)"
+                             RowSpan="@RowSpan(card.Size)"
+                             id="@(IsFirstInCategory(card) ? CategoryAnchorId(card.Category) : null)"
+                             data-use-case-item="@card.Id">
+                <ShadcnReveal @key="card.Id"
+                              Class="theme-bento__reveal"
+                              Effect="@RevealEffect(card.Order)"
+                              Cascade="true">
+                    @if (AnimatedCardIds.Contains(card.Id))
+                    {
+                        <ThemeAnimatedUseCaseCardHost Definition="card" Locale="Locale" />
+                    }
+                    else
+                    {
+                        <ThemeUseCaseCardHost Definition="card"
+                                              Frame="AnimationState.Frame"
+                                              Locale="Locale" />
+                    }
+                </ShadcnReveal>
+            </ShadcnBentoItem>
+        }
+    </ShadcnBentoGrid>
+</ShadcnRevealGroup>
+
+@code {
+    [Parameter] public ThemeStudioLocale Locale { get; set; }
+    [Parameter] public bool Paused { get; set; }
+    [Parameter] public bool ReducedMotion { get; set; }
+    private int _parameterCycle;
+    private IReadOnlyList<ThemeUseCaseCategory> Categories => Registry.All
+        .OrderBy(card => card.Order)
+        .Select(card => card.Category)
+        .Distinct()
+        .ToArray();
+    private static readonly HashSet<string> AnimatedCardIds =
+    [
+        "production-capacity",
+        "quotation-files",
+        "drawing-attachment",
+        "machine-cell",
+        "issue-report"
+    ];
+
+    protected override void OnInitialized()
+    {
+        ApplyMotionSettings();
+        AnimationState.Start();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _parameterCycle++;
+        ApplyMotionSettings();
+    }
+
+    private void ApplyMotionSettings()
+    {
+        AnimationState.SetPersistentPaused(Paused);
+        AnimationState.SetReducedMotion(ReducedMotion);
+    }
+
+    private static int ColumnSpan(ThemeBentoSize size) => size == ThemeBentoSize.Wide ? 2 : 1;
+
+    private static int RowSpan(ThemeBentoSize size) => size == ThemeBentoSize.Tall ? 2 : 1;
+
+    private bool IsFirstInCategory(ThemeUseCaseDefinition card) => Registry.All
+        .Where(candidate => candidate.Category == card.Category)
+        .Min(candidate => candidate.Order) == card.Order;
+
+    private static string CategoryAnchorId(ThemeUseCaseCategory category) => $"theme-category-{category.ToString().ToLowerInvariant()}";
+
+    private static string CategoryLabel(ThemeUseCaseCategory category) => category switch
+    {
+        ThemeUseCaseCategory.Forms => "Forms and input",
+        ThemeUseCaseCategory.Data => "Data and reporting",
+        _ => category.ToString()
+    };
+
+    private static ShadcnRevealEffect RevealEffect(int order) => (order % 5) switch
+    {
+        1 => ShadcnRevealEffect.Clip,
+        2 => ShadcnRevealEffect.Scale,
+        3 => ShadcnRevealEffect.Fade,
+        _ => ShadcnRevealEffect.Rise
+    };
+
+}

@@ -3,13 +3,12 @@
 
 <ShadcnSidebarProvider id="theme-studio-sidebar-region" Open="State.Workbench.SidebarOpen" OpenChanged="SetOpen" MobileOpen="State.Workbench.SidebarOpen" MobileOpenChanged="SetOpen" Width="20rem" MobileWidth="min(22rem, 92vw)" ToggleLabel="Toggle theme settings" CloseLabel="Close theme settings" Class="theme-studio-sidebar-provider">
     <ShadcnSidebar Id="theme-settings-navigation" Label="Theme settings" Variant="ShadcnSidebarVariant.Sidebar" Collapsible="ShadcnSidebarCollapsible.OffCanvas" Class="theme-studio-sidebar" data-testid="theme-studio-sidebar" data-focus-return-id="theme-settings-toggle">
-    <ShadcnSidebarHeader><div class="theme-studio-sidebar__mobile-heading">
+    <ShadcnSidebarHeader><div class="theme-studio-sidebar__heading">
         <strong>Theme settings</strong>
-        <ShadcnSidebarTrigger TargetId="theme-settings-navigation" Class="theme-studio-sidebar__close" data-testid="theme-settings-close">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
-        </ShadcnSidebarTrigger>
+        <ShadcnSidebarTrigger TargetId="theme-settings-navigation" Class="theme-studio-sidebar__collapse" data-testid="theme-sidebar-collapse" />
     </div></ShadcnSidebarHeader>
     <ShadcnSidebarContent><ThemeInspector State="State" /></ShadcnSidebarContent>
+    <ShadcnSidebarRail TargetId="theme-settings-navigation" />
     </ShadcnSidebar>
 </ShadcnSidebarProvider>
 

@@ -40,6 +40,7 @@ Load the stylesheets in this order:
 <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
+<link href="_content/Maliev.ShadcnBlazor/css/shadcn-layout.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-disclosure-navigation.css" rel="stylesheet" />

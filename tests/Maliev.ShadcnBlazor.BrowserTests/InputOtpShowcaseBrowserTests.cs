@@ -39,6 +39,9 @@ public sealed class InputOtpShowcaseBrowserTests(ShowcaseServerFixture server, P
         await input.PressAsync("ArrowRight");
         await Assertions.Expect(slots.Nth(5)).ToHaveAttributeAsync("data-active", "true");
 
+        await slots.Nth(0).EvaluateAsync("slot => { const box = slot.getBoundingClientRect(); const input = slot.closest('[data-slot=input-otp-root]').querySelector('[data-slot=input-otp]'); input.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: box.left + box.width / 2 })); }");
+        await Assertions.Expect(slots.Nth(0)).ToHaveAttributeAsync("data-active", "true");
+
         var verify = page.GetByTestId("input-otp-verify");
         await Assertions.Expect(verify).ToBeEnabledAsync();
         await verify.ClickAsync();

@@ -30,14 +30,18 @@ public sealed class ComponentDossierTests : BunitContext
         Assert.NotEmpty(complete);
         foreach (var entry in complete)
         {
-            var example = Assert.Single(registry.GetBySlug(entry.Slug));
-            Assert.Equal($"{entry.Slug}-primary", example.Id);
-            Assert.False(string.IsNullOrWhiteSpace(example.RazorSource));
-            Assert.Contains(entry.PrimaryType!.Split('`')[0], example.RazorSource, StringComparison.Ordinal);
-            Assert.NotEmpty(example.StateTags);
+            var examples = registry.GetBySlug(entry.Slug);
+            if (entry.Slug is "bento-grid" or "visual-style-scope") Assert.Equal(3, examples.Count);
+            else Assert.Equal($"{entry.Slug}-primary", Assert.Single(examples).Id);
+            foreach (var example in examples)
+            {
+                Assert.False(string.IsNullOrWhiteSpace(example.RazorSource));
+                Assert.Contains(entry.PrimaryType!.Split('`')[0], example.RazorSource, StringComparison.Ordinal);
+                Assert.NotEmpty(example.StateTags);
 
-            var preview = Render(example.Preview);
-            Assert.NotEmpty(preview.FindAll("[data-slot]"));
+                var preview = Render(example.Preview);
+                Assert.NotEmpty(preview.FindAll("[data-slot]"));
+            }
         }
 
         var actionSlugs = new HashSet<string>(["button", "button-group", "checkbox", "radio-group", "slider", "switch", "toggle", "toggle-group"], StringComparer.Ordinal);
@@ -59,14 +63,15 @@ public sealed class ComponentDossierTests : BunitContext
 
         foreach (var entry in _documentation.All.Where(entry => entry.Status == ComponentDocumentationStatus.Complete))
         {
-            var example = Assert.Single(registry.GetBySlug(entry.Slug));
-            var markup = Render(example.Preview).Markup;
             var expectedSlot = expectedSlots.GetValueOrDefault(entry.Slug, entry.Slug);
-
-            Assert.Contains(
-                $"data-slot=\"{expectedSlot}\"",
-                markup,
-                StringComparison.Ordinal);
+            foreach (var example in registry.GetBySlug(entry.Slug))
+            {
+                var markup = Render(example.Preview).Markup;
+                Assert.Contains(
+                    $"data-slot=\"{expectedSlot}\"",
+                    markup,
+                    StringComparison.Ordinal);
+            }
         }
     }
 
@@ -304,6 +309,42 @@ public sealed class ComponentDossierTests : BunitContext
     }
 
     [Fact]
+    public void CodeExampleRendersCompleteSourceInAClosedNativeDisclosureWhenCollapsible()
+    {
+        Assert.NotNull(typeof(ComponentCodeExample).GetProperty("Collapsible"));
+
+        var cut = Render(builder =>
+        {
+            builder.OpenComponent<ComponentCodeExample>(0);
+            builder.AddAttribute(1, "Title", "Keyboard shortcut");
+            builder.AddAttribute(2, "Source", "<ShadcnKbd>Ctrl</ShadcnKbd>");
+            builder.AddAttribute(3, "Collapsible", true);
+            builder.AddAttribute(4, "Summary", "View complete source");
+            builder.AddAttribute(5, "TestId", "example-source");
+            builder.CloseComponent();
+        });
+
+        var disclosure = cut.Find("details[data-testid='example-source']");
+        Assert.False(disclosure.HasAttribute("open"));
+        Assert.Equal("View complete source", disclosure.QuerySelector("summary")?.TextContent.Trim());
+        Assert.NotNull(disclosure.QuerySelector(".component-code__surface [data-testid='copy-source']"));
+        Assert.Empty(cut.FindAll("section.component-code"));
+    }
+
+    [Fact]
+    public void CodeExampleRemainsAnAlwaysVisibleSectionWhenNotCollapsible()
+    {
+        var cut = Render<ComponentCodeExample>(parameters => parameters
+            .Add(component => component.Title, "Keyboard shortcut")
+            .Add(component => component.Heading, "Razor example")
+            .Add(component => component.Source, "<ShadcnKbd>Ctrl</ShadcnKbd>"));
+
+        Assert.NotNull(cut.Find("section.component-code .component-code__surface"));
+        Assert.Equal("Razor example", cut.Find("section.component-code h2").TextContent.Trim());
+        Assert.Empty(cut.FindAll("details"));
+    }
+
+    [Fact]
     public void CodeExampleShowsCopiedStateAfterTheClipboardWriteSucceeds()
     {
         const string source = "<ShadcnKbd>Ctrl</ShadcnKbd>";
@@ -395,6 +436,58 @@ public sealed class ComponentDossierTests : BunitContext
 
         cut.SelectControl("field-legend-variant", "Label");
         Assert.Equal("label", cut.Find("[data-slot='field-legend']").GetAttribute("data-variant"));
+    }
+
+    [Fact]
+    public void FieldAndActionExamplesUseCompactRealisticCompositions()
+    {
+        var field = RenderPreview("field");
+        Assert.Equal(2, field.FindAll(".showcase-field-dossier__card-row > [data-slot='field']").Count);
+        Assert.Contains("class=\"payment-card-row\"", GetExample("field").RazorSource, StringComparison.Ordinal);
+
+        var slider = RenderPreview("slider");
+        Assert.All(slider.FindAll("input[data-slot='slider-thumb']"), thumb => Assert.Equal("1", thumb.GetAttribute("step")));
+        Assert.Contains("Step=\"1\"", GetExample("slider").RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Step=\"5\"", GetExample("slider").RazorSource, StringComparison.Ordinal);
+
+        var toggle = RenderPreview("toggle");
+        var tools = toggle.FindAll("[role='toolbar'] button[data-slot='toggle']");
+        Assert.Equal(3, tools.Count);
+        Assert.Equal(["Toggle bold emphasis", "Toggle italic emphasis", "Toggle underline emphasis"], tools.Select(tool => tool.GetAttribute("aria-label")));
+        Assert.All(tools, tool => Assert.NotNull(tool.QuerySelector("[data-slot='icon']")));
+        Assert.Contains("LucideIconCatalog.Instance.Get", GetExample("toggle").RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SinglePreviewControlAndThemeProfileUseIntrinsicStartAlignedLayout()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        Assert.Contains(".component-preview__controls:has(> .component-preview__control:only-child)", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway-profile { display: flex; min-inline-size: 0; align-items: center; justify-content: flex-start", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AvatarGroupOverflowExpandsAndCollapsesWithTheCountTrigger()
+    {
+        var source = GetExample("avatar");
+        source.Controls.Single(control => control.Id == "avatar-group").Apply("true");
+        Assert.Contains("Expanded=\"groupExpanded\"", source.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("OnClick=\"_ => groupExpanded = !groupExpanded\"", source.RazorSource, StringComparison.Ordinal);
+
+        var avatar = RenderPreview("avatar");
+        avatar.Find("[data-testid='control-avatar-group']").Change(true);
+        var group = avatar.Find("[data-testid='avatar-group-preview']");
+        Assert.Equal("false", group.GetAttribute("data-expanded"));
+        Assert.True(group.QuerySelector(".showcase-avatar-group-preview__overflow")?.HasAttribute("aria-hidden"));
+
+        group.QuerySelector("button[data-slot='avatar-group-count']")!.Click();
+
+        avatar.WaitForAssertion(() =>
+        {
+            group = avatar.Find("[data-testid='avatar-group-preview']");
+            Assert.Equal("true", group.GetAttribute("data-expanded"));
+            Assert.False(group.QuerySelector(".showcase-avatar-group-preview__overflow")?.HasAttribute("aria-hidden"));
+        });
     }
 
     [Fact]
@@ -500,6 +593,28 @@ public sealed class ComponentDossierTests : BunitContext
             [true, true, true, true, true, true, true]);
     }
 
+    [Fact]
+    public void StatusEvidenceNamesTheIntegrationDimensionWithoutDuplicatingTheLabel()
+    {
+        var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug("accordion"));
+        var cut = Render<ComponentStatusEvidence>(parameters => parameters.Add(component => component.Entry, entry));
+
+        var integration = cut.Find("[data-evidence='integration']");
+
+        Assert.Equal("Integration", integration.QuerySelector("th")?.TextContent.Trim());
+    }
+
+    [Fact]
+    public void StatusEvidenceExplainsWhatCertificationMeansInThisRepository()
+    {
+        var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug("accordion"));
+        var cut = Render<ComponentStatusEvidence>(parameters => parameters.Add(component => component.Entry, entry));
+
+        Assert.Equal(
+            "Certification is the reviewed evidence status recorded by this repository for each area below.",
+            cut.Find("[data-testid='certification-explanation']").TextContent.Trim());
+    }
+
     private void AssertEvidence(string slug, IReadOnlyList<bool> expected)
     {
         var entry = Assert.IsType<ComponentDocumentationEntry>(_documentation.FindBySlug(slug));
@@ -527,9 +642,12 @@ public sealed class ComponentDossierTests : BunitContext
 
     private IRenderedComponent<ComponentPreview> RenderPreview(string slug)
     {
-        var example = Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug(slug));
+        var example = GetExample(slug);
         return Render<ComponentPreview>(parameters => parameters.Add(component => component.Example, example));
     }
+
+    private ComponentExampleDefinition GetExample(string slug) =>
+        Assert.Single(new ComponentExampleRegistry(_documentation).GetBySlug(slug));
 
     private static string[] OptionValues(IRenderedComponent<ComponentPreview> cut, string testId) =>
         cut.SelectControlOptions(testId["control-".Length..]);

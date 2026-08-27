@@ -33,9 +33,15 @@ export function attachDelayedTrigger(trigger, dotnet, openDelay, closeDelay, con
     };
     const keydown = event => {
         if (event.key !== "Escape" || !document.getElementById(contentId)) return;
+        event.__shadcnLayerHandled = true;
+        event.preventDefault();
+        event.stopImmediatePropagation();
         suppressFocusOpen = true;
         clearTimeout(suppressionTimer);
         suppressionTimer = setTimeout(() => { suppressFocusOpen = false; }, Math.max(closeDelay, openDelay, 100));
+        const focusTarget = trigger.querySelector('[data-slot="tooltip-trigger"]:not(:disabled)') || trigger;
+        focusTarget.focus({ preventScroll: true });
+        dotnet.invokeMethodAsync("RequestCloseAsync");
     };
 
     trigger.addEventListener("pointerenter", enter);

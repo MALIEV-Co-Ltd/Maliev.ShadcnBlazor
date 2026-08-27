@@ -69,8 +69,13 @@ public sealed class TooltipBrowserTests(ShowcaseServerFixture server, Playwright
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/tooltip").ToString());
 
-        var source = page.Locator("#preview [data-slot='code-block']").First;
-        await source.WaitForAsync();
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
         var sourceText = await source.InnerTextAsync();
         Assert.Contains("<ShadcnTooltipProvider", sourceText, StringComparison.Ordinal);
         Assert.Contains("OpenDelay=\"@(TimeSpan.FromMilliseconds(200))\"", sourceText, StringComparison.Ordinal);

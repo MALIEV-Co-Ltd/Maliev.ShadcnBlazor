@@ -14,11 +14,13 @@ public sealed class ThemeStudioWorkbenchContractTests
 
         Assert.Contains("<DocumentationHeader", layout, StringComparison.Ordinal);
         Assert.Contains("<ThemeStudioSidebar", page, StringComparison.Ordinal);
-        Assert.Contains("<ThemeRunway", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemeBento", page, StringComparison.Ordinal);
         Assert.Contains("aria-label=\"Theme preview\"", page, StringComparison.Ordinal);
         Assert.Contains("images/brand/MALIEV_BLACK.svg", header, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSidebarProvider", sidebar, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSidebar", sidebar, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnSidebarRail", sidebar, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-sidebar-collapse\"", sidebar, StringComparison.Ordinal);
         Assert.Contains("<ShadcnSelect", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("<Mud", header + sidebar + inspector, StringComparison.Ordinal);
         Assert.Contains("Label=\"Theme settings\"", sidebar, StringComparison.Ordinal);
@@ -34,13 +36,20 @@ public sealed class ThemeStudioWorkbenchContractTests
         var inspector = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeInspector.razor");
         var combined = page + inspector;
 
-        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "runway-pause", "theme-icon-library-select" })
+        foreach (var hook in new[] { "preview-reduced-motion", "preview-high-contrast", "preview-animation-pause" })
             Assert.Contains($"data-testid=\"{hook}\"", combined, StringComparison.Ordinal);
+        Assert.Contains("theme-icon-library-{library.ToString().ToLowerInvariant()}", inspector, StringComparison.Ordinal);
 
         Assert.Contains("viewport-{viewport.Id}", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("<PreviewToolbar", page, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeColorGroup", inspector, StringComparison.Ordinal);
         Assert.DoesNotContain("ThemeGeneratorOptions", inspector, StringComparison.Ordinal);
+        Assert.DoesNotContain("theme-inspector-nav", inspector, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-radius-select\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@DeviceIcon(viewport)\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@ShuffleIcon\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@UndoIcon\"", inspector, StringComparison.Ordinal);
+        Assert.Contains("Icon=\"@RedoIcon\"", inspector, StringComparison.Ordinal);
 
         foreach (var section in new[] { "preview", "preset", "typography", "icons", "accessibility", "transfer" })
             Assert.Contains($"id=\"theme-settings-{section}\"", inspector, StringComparison.Ordinal);
@@ -52,14 +61,41 @@ public sealed class ThemeStudioWorkbenchContractTests
         var root = FindRoot();
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Contains(".theme-studio-provider[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
-        Assert.Contains(".theme-studio-provider[data-preview-high-contrast=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-reduced-motion=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-preview-scope[data-preview-high-contrast=\"true\"] .theme-bento", css, StringComparison.Ordinal);
+        Assert.Contains(".documentation-trigger--theme-settings", css, StringComparison.Ordinal);
+        Assert.Contains("padding-block: 0", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-sidebar-backdrop", css, StringComparison.Ordinal);
         Assert.Contains("position: fixed", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: clip", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TypographyUsesSelectableWeightsWithoutDuplicatingASettingsSpecimen()
+    {
+        var root = FindRoot();
+        var typography = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeTypographyEditor.razor");
+
+        Assert.DoesNotContain("theme-typography-specimen", typography, StringComparison.Ordinal);
+        Assert.Contains("ShadcnSelect TValue=\"int\"", typography, StringComparison.Ordinal);
+        Assert.Contains("State.SetTypographyRole", typography, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreviewThemeNeverMutatesTheCompanyShell()
+    {
+        var root = FindRoot();
+        var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
+        var typography = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemeTypographyEditor.razor");
+
+        Assert.Contains("data-shadcn-theme=\"@(State.EffectiveDarkMode", page, StringComparison.Ordinal);
+        Assert.Contains("dir=\"@(State.Direction", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShellState.SetTheme", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShellState.SetDirection", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("style=\"@TypographyStyle\"", typography, StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] segments) =>

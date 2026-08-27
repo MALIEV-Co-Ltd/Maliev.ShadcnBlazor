@@ -1,4 +1,5 @@
 using Maliev.ShadcnBlazor.Showcase.Documentation;
+using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
 using System.Text.Json;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
@@ -12,12 +13,12 @@ public sealed class DocumentationCatalogTests
         var ledger = ReadLedger();
         var catalog = new ComponentDocumentationCatalog();
 
-        Assert.Equal(66, catalog.All.Count);
+        Assert.Equal(69, catalog.All.Count);
         Assert.Empty(catalog.All.GroupBy(x => x.Slug).Where(x => x.Count() > 1));
         Assert.Equal(ledger.Keys.Order(), catalog.All.Select(x => x.Slug).Order());
         Assert.All(catalog.All, entry => Assert.Equal(ledger[entry.Slug].Status, entry.Status.ToString().ToLowerInvariant()));
         Assert.All(catalog.All, entry => Assert.Equal($"docs/components/{entry.Slug}", entry.DocumentationUrl));
-        Assert.Equal(66, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(69, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(catalog.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
     }
 
@@ -113,6 +114,39 @@ public sealed class DocumentationCatalogTests
         Assert.Contains(shortcutResults, entry => entry.Slug == "kbd");
         Assert.Contains(keyboardResults, entry => entry.Slug == "kbd");
         Assert.Contains(keyboardResults, entry => entry.Slug == "command");
+    }
+
+    [Fact]
+    public void ReflectedParameterFallbacksDescribeTheOutcomeAndAbsenceOfAdditionalConstraints()
+    {
+        var descriptors = new ComponentApiCatalog().All;
+        var parameters = descriptors.SelectMany(descriptor => descriptor.Parameters).ToArray();
+        var button = descriptors.Single(descriptor => descriptor.FullTypeName.EndsWith(".ShadcnButton", StringComparison.Ordinal));
+
+        Assert.DoesNotContain(parameters, parameter => parameter.Description.StartsWith("Configures the", StringComparison.Ordinal));
+        Assert.Equal("Sets the pointer cursor.", button.Parameters.Single(parameter => parameter.Name == "PointerCursor").Description);
+        Assert.Equal("No additional constraints.", button.Parameters.Single(parameter => parameter.Name == "PointerCursor").Constraints);
+    }
+
+    [Fact]
+    public void ReflectedEnumConstraintsStillEnumerateEveryAllowedValue()
+    {
+        var button = new ComponentApiCatalog().All
+            .Single(descriptor => descriptor.FullTypeName.EndsWith(".ShadcnButton", StringComparison.Ordinal));
+
+        Assert.Equal(
+            "Allowed values: Default, Destructive, Outline, Secondary, Ghost, Link.",
+            button.Parameters.Single(parameter => parameter.Name == "Variant").Constraints);
+    }
+
+    [Fact]
+    public void ButtonSummaryExplainsWhenToChooseAButtonInsteadOfALink()
+    {
+        var button = Assert.IsType<ComponentDocumentationEntry>(new ComponentDocumentationCatalog().FindBySlug("button"));
+
+        Assert.Equal(
+            "Use a Button for an immediate action, such as submitting a form or opening a dialog; use a link when navigation is the outcome.",
+            button.Summary);
     }
 
     private static IReadOnlyDictionary<string, LedgerEntry> ReadLedger()

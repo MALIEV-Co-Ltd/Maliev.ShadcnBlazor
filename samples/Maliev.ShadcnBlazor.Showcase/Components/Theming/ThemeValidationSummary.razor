@@ -5,8 +5,8 @@
          data-valid="@(State.Validation.IsValid ? "true" : "false")"
          aria-live="polite"
          aria-atomic="true">
-    <h3>@(State.Validation.IsValid ? "Theme is valid" : "Theme is invalid")</h3>
-    <p>@State.Validation.Errors.Count errors · @State.Validation.Warnings.Count warnings · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
+    <h3>@ThemeValidationPresentation.StatusLabel(State.Validation.Errors.Count, State.Validation.Warnings.Count)</h3>
+    <p>@ThemeValidationPresentation.ErrorLabel(State.Validation.Errors.Count) · @ThemeValidationPresentation.AdvisoryLabel(State.Validation.Warnings.Count) · @PassingContrastCount/@State.Validation.ContrastResults.Count contrast checks pass</p>
     @if (State.PaletteDiagnostics.Count > 0)
     {
         <ul class="theme-validation-list" aria-label="Palette generation diagnostics">
@@ -27,8 +27,9 @@
     }
     @if (State.Validation.Warnings.Count > 0)
     {
+        <p>Advisories do not block export.</p>
         <details>
-            <summary>Review contrast warnings</summary>
+            <summary>Review contrast advisories</summary>
             <ul class="theme-validation-list">
                 @foreach (var warning in State.Validation.Warnings)
                 {

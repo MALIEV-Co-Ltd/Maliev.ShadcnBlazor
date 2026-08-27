@@ -43,6 +43,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-trigger { min-inline-size: 0; min-block-size: 2rem; overflow: hidden; border-color: transparent; border-radius: var(--shadcn-radius-sm); padding-block: calc(.2rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(.375rem * var(--shadcn-spacing-multiplier)); background: transparent; font-family: var(--shadcn-font-mono); font-size: .6875rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language-select .shadcn-select-trigger-icon { margin-inline-start: calc(.25rem * var(--shadcn-spacing-multiplier)); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-language { min-inline-size: 0; overflow: hidden; color: var(--shadcn-muted-foreground); font-family: var(--shadcn-font-mono); font-size: .6875rem; line-height: 2rem; text-overflow: ellipsis; white-space: nowrap; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy { display: inline-flex; flex: 0 0 2rem; inline-size: 2rem; min-inline-size: 2rem; block-size: 2rem; margin-inline-start: auto; padding: 0; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--shadcn-radius-sm); background: transparent; color: var(--shadcn-muted-foreground); opacity: 1; transition: color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-code-block-copy[data-copied="true"] {
     opacity: 1;
@@ -159,7 +160,7 @@
     --shadcn-control-height-sm: 2rem;
     --shadcn-control-height-lg: 2.5rem;
     --shadcn-spacing-multiplier: 1;
-    --shadcn-focus-ring-width: 3px;
+    --shadcn-focus-ring-width: 2px;
     --shadcn-focus-ring-offset: 0px;
     --shadcn-motion-duration: 150ms;
     --shadcn-motion-duration-fast: 100ms;

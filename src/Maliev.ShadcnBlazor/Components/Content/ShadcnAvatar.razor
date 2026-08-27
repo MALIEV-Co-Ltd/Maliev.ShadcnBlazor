@@ -1,12 +1,13 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <CascadingValue Value="Context" IsFixed="true">
-    <span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar")" style="@MergeStyle(null)" data-slot="avatar" data-size="@SizeValue">@ChildContent</span>
+    <span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar")" style="@MergeStyle(null)" data-slot="avatar" data-size="@SizeValue" data-raised="@(_raised ? "true" : null)" @onmouseenter="Raise" @onmouseleave="Lower">@ChildContent</span>
 </CascadingValue>
 
 @code {
     [Parameter] public ShadcnAvatarSize Size { get; set; } = ShadcnAvatarSize.Default;
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    private bool _raised;
     private ShadcnAvatarContext Context { get; set; } = default!;
     private string SizeValue => Size switch
     {
@@ -20,4 +21,6 @@
         if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn avatar size.");
     }
     private Task ImageStateChangedAsync(bool _) => InvokeAsync(StateHasChanged);
+    private void Raise() => _raised = true;
+    private void Lower() => _raised = false;
 }

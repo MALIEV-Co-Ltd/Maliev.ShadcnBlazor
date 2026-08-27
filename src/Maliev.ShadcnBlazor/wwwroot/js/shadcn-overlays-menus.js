@@ -33,7 +33,7 @@ function releaseDialog(content, restore = true) {
     const wasTopmost = stackIndex === dialogStack.length - 1;
     if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
     if (state.modal && --modalCount === 0) document.documentElement.style.overflow = documentOverflow;
-    if (content.matches(':popover-open')) content.hidePopover();
+    if (state.topLayer?.matches(':popover-open')) state.topLayer.hidePopover();
     if (restore && wasTopmost) {
         const restoreFocus = () => {
             const target = state.previous?.isConnected
@@ -52,7 +52,8 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
     const previous = document.activeElement;
     const focusOwner = previous?.closest?.('[data-slot="dialog"]');
     const portal = content.closest('[data-slot$="-portal"]');
-    if (content.showPopover) { content.setAttribute('popover', 'manual'); content.showPopover(); }
+    const topLayer = portal?.showPopover ? portal : content;
+    if (topLayer.showPopover) { topLayer.setAttribute('popover', 'manual'); topLayer.showPopover(); }
     const inerted = new Set();
     if (modal) {
         let branch = portal || content;
@@ -72,8 +73,9 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (modalCount++ === 0) documentOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
     }
-    const state = { content, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
+    const state = { content, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
     const keydown = event => {
+        content.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
         if (event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); releaseDialog(content); dotnet.invokeMethodAsync('RequestCloseAsync'); return; }
         if (!trapFocus || event.key !== 'Tab') return;
@@ -176,7 +178,7 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
     drawers.set(content, { down, move, up, cancel, resize, outside, modal, snapObserver });
     content.dataset.drawerReady = 'true';
 }
-export function detachDrawer(content) { content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
+export function detachDrawer(content) { if (!content) return; content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
 
 const positioned = new WeakMap();
 function placePositioned(content, trigger, preferredSide, align, sideOffset, alignOffset, padding) {
@@ -204,6 +206,7 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     const trigger = document.getElementById(triggerId); if (!trigger) return;
     const focusTarget = document.getElementById(focusTargetId) || trigger;
     const previous = restoreFocusOnDetach ? focusTarget : null;
+    if (content.showPopover) { content.setAttribute('popover', 'manual'); if (!content.matches(':popover-open')) content.showPopover(); }
     const sync = () => placePositioned(content, trigger, side, align, sideOffset, alignOffset, padding);
     acquireLayer(content);
     const keydown = event => { if (!event.__shadcnLayerHandled && isTopLayer(content) && event.key === 'Escape' && closeOnEscape) { event.__shadcnLayerHandled=true;event.preventDefault(); event.stopImmediatePropagation(); focusTarget.focus({ preventScroll: true }); dotnet.invokeMethodAsync('RequestCloseAsync'); } };
@@ -215,7 +218,7 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     queueMicrotask(() => { sync(); if (focusContent) (focusable(content)[0] || content).focus({ preventScroll: true }); });
     positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver, restoreFocus: restoreFocusOnDetach });
 }
-export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
+export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (content.matches(':popover-open')) content.hidePopover(); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
 export function isPositionedAttached(content) { return positioned.has(content); }
 
 const hoverCards = new Map();
@@ -299,7 +302,7 @@ export function detachHoverCardContent(content) {
 }
 
 const menus = new WeakMap();
-export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
+export function attachMenu(menu, triggerId, dotnet = null, loop = true, focusOnHover = true) {
     acquireLayer(menu);
     const enabled = scope => [...scope.querySelectorAll('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')].filter(item => item.closest('[role="menu"]') === scope && item.getAttribute('aria-disabled') !== 'true');
     let buffer = '', timer = 0;
@@ -307,7 +310,7 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
     const keydown = event => {
         const scope = document.activeElement?.closest('[role="menu"]') || menu;
         const expandedSub = event.key === 'Escape' ? menu.querySelector('[data-slot$="sub-trigger"][aria-expanded="true"]') : null;
-        if (expandedSub) { event.preventDefault(); expandedSub.click(); expandedSub.focus({ preventScroll: true }); return; }
+        if (expandedSub) { event.__shadcnLayerHandled = true; event.preventDefault(); event.stopImmediatePropagation(); expandedSub.click(); expandedSub.focus({ preventScroll: true }); return; }
         if (event.key === 'Escape' && scope !== menu) { event.preventDefault(); const sub = scope.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]'); if (sub?.getAttribute('aria-expanded') === 'true') sub.click(); sub?.focus({ preventScroll: true }); return; }
         const items = enabled(scope), current = items.indexOf(document.activeElement), rtl = getComputedStyle(scope).direction === 'rtl';
         if (event.key === 'ArrowDown') { event.preventDefault(); focusAt(scope, current + 1); }
@@ -321,13 +324,23 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
         else if ((event.key === 'ArrowLeft' && !rtl) || (event.key === 'ArrowRight' && rtl)) { if (scope !== menu) { event.preventDefault(); const sub = scope.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]'); if (sub?.getAttribute('aria-expanded') === 'true') sub.click(); sub?.focus({ preventScroll: true }); } }
         else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) { clearTimeout(timer); const key = event.key.toLocaleLowerCase(); buffer += key; timer = setTimeout(() => buffer = '', 700); const search = [...buffer].every(value => value === key) ? key : buffer; const ordered = [...items.slice(Math.max(0, current + 1)), ...items.slice(0, Math.max(0, current + 1))]; const match = ordered.find(item => (item.dataset.textValue || item.textContent || '').trim().toLocaleLowerCase().startsWith(search)); if (match) { event.preventDefault(); match.focus({ preventScroll: true }); } }
     };
+    const documentEscape = event => {
+        if (event.__shadcnLayerHandled || event.key !== 'Escape' || !isTopLayer(menu) || menu.contains(event.target)) return;
+        event.__shadcnLayerHandled = true;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const trigger = document.getElementById(triggerId);
+        trigger?.focus({ preventScroll: true });
+        const closing = dotnet?.invokeMethodAsync('RequestCloseAsync');
+        closing?.then(() => requestAnimationFrame(() => trigger?.focus({ preventScroll: true })));
+    };
     const outside = event => { if (isTopLayer(menu) && !menu.contains(event.target) && !document.getElementById(triggerId)?.contains(event.target)) dotnet?.invokeMethodAsync('RequestCloseAsync'); };
     let hoverTimer = 0;
-    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
+    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const item = event.target.closest?.('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]'); if (item && item.closest('[role="menu"]') === menu && item.getAttribute('aria-disabled') !== 'true') { menu.querySelectorAll('[data-pointer-highlighted="true"]').forEach(value => value.removeAttribute('data-pointer-highlighted')); item.setAttribute('data-pointer-highlighted', 'true'); if (focusOnHover && document.activeElement !== item) item.focus({ preventScroll: true }); } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
     const out = event => { const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || trigger.parentElement?.contains(event.relatedTarget)) return; hoverTimer = setTimeout(() => { if (trigger.getAttribute('aria-expanded') === 'true') trigger.click(); }, 300); };
-    menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
+    menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('keydown', documentEscape); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, documentEscape, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
 }
-export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('pointerdown', value.outside); menus.delete(menu); }
+export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('keydown', value.documentEscape); document.removeEventListener('pointerdown', value.outside); menus.delete(menu); }
 export function isMenuAttached(menu) { return menus.has(menu); }
 export function focusFirstMenuItem(menu) { requestAnimationFrame(() => menu.querySelector('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')?.focus({ preventScroll: true })); }
 export function focusSubTrigger(menu) { menu.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]')?.focus({ preventScroll: true }); }
@@ -372,7 +385,7 @@ export function placeContextMenu(menu, padding = 8) {
 export function attachContextMenu(menu, triggerId, dotnet, padding = 8) {
     menu.dataset.positioned = 'false';
     placeContextMenu(menu, padding);
-    attachMenu(menu, triggerId, dotnet);
+    attachMenu(menu, triggerId, dotnet, true, false);
 }
 
 const contextMenuSubmenus = new WeakMap();

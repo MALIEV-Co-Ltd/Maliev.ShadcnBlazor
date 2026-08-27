@@ -718,7 +718,7 @@ public sealed class ActionsAndSelectionBrowserTests(
             "checkbox" => new[] { "16px", "16px", "4px", "1px", "true" },
             "radio-group" => new[] { "16px", "16px", "50%", "1px", "true" },
             "slider" => new[] { "6px", "6px", "160px", "0.5", "true", "true" },
-            "switch" => new[] { "32px", "18.3906px", "24px", "14px", "true", "true" },
+            "switch" => new[] { "36px", "20px", "24px", "14px", "true", "true" },
             "toggle" => new[] { "36px", "36px", "32px", "40px", "true", "true" },
             "toggle-group" => new[] { "8px", "0px", "column" },
             _ => throw new InvalidOperationException(slug)
@@ -939,8 +939,15 @@ public sealed class ActionsAndSelectionBrowserTests(
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='false']")).ToHaveCountAsync(0);
 
-        await page.Locator("#preview").GetByTestId("copy-source").ClickAsync();
-        await Assertions.Expect(page.Locator("#preview .component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var source = sourceDisclosure.Locator("[data-slot='code-block']");
+        await Assertions.Expect(source).ToBeVisibleAsync();
+        await source.GetByTestId("copy-source").ClickAsync();
+        await Assertions.Expect(source.Locator(".component-code__announcement")).ToHaveTextAsync("Source copied to clipboard.");
         Assert.Contains("<Shadcn", await page.EvaluateAsync<string>("navigator.clipboard.readText()"), StringComparison.Ordinal);
     }
 
@@ -1078,10 +1085,10 @@ public sealed class ActionsAndSelectionBrowserTests(
             case "toggle":
                 await Assertions.Expect(page.GetByTestId("control-toggle-pressed")).ToHaveCountAsync(0);
                 await Assertions.Expect(page.GetByTestId("toggle-dossier-preview")).ToBeVisibleAsync();
-                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold enabled");
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold on · Italic off · Underline off");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "false");
-                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold disabled");
+                await Assertions.Expect(page.GetByTestId("toggle-format-state")).ToHaveTextAsync("Bold off · Italic off · Underline off");
                 await page.GetByTestId("action-toggle").ClickAsync();
                 await Assertions.Expect(page.GetByTestId("action-toggle")).ToHaveAttributeAsync("aria-pressed", "true");
                 await page.ChooseOptionAsync("control-toggle-variant", "Default");

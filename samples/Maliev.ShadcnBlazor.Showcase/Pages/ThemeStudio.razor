@@ -6,6 +6,7 @@
 @inject ShowcaseState ShellState
 @inject ILogger<ThemeStudio> Logger
 @inject IJSRuntime JavaScript
+@using Maliev.ShadcnBlazor.Components.Styling
 
 <PageTitle>Theme Studio - Maliev Shadcn Blazor</PageTitle>
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
@@ -15,24 +16,37 @@
     <ThemeFontLoader State="State" />
     <div class="theme-studio-workbench" data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
         <ThemeStudioSidebar State="State" />
-        <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview">
+        <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
+            <header class="theme-preview-intro">
+                <h1>Theme Studio</h1>
+                <p>Compare realistic component workflows, then open settings to tune the preview.</p>
+                <p class="theme-preview-intro__status">Active preset: @State.SelectedPresetId · @ThemeValidationPresentation.ErrorLabel(State.Validation.Errors.Count) · @ThemeValidationPresentation.AdvisoryLabel(State.Validation.Warnings.Count)</p>
+            </header>
             <div class="theme-preview-stage" data-testid="theme-preview-stage" data-preview-width="@State.Viewport.Width" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
                 <div class="shadcn-scope theme-preview-scope"
                      style="@TypographyStyle"
                      data-shadcn-scope
-                     data-shadcn-theme="@(ShellState.IsDarkMode ? "dark" : "light")"
+                     data-shadcn-theme="@(State.EffectiveDarkMode ? "dark" : "light")"
                      data-shadcn-reduced-motion="@(State.Workbench.ReducedMotion ? "always" : "system")"
-                     dir="@(ShellState.Direction == ShadcnDirection.RightToLeft ? "rtl" : "ltr")"
+                     dir="@(State.Direction == ShadcnDirection.RightToLeft ? "rtl" : "ltr")"
                      data-testid="theme-preview-scope"
                      data-theme-style="@State.StyleId"
                      data-theme-base-color="@State.BaseColorId"
                      data-theme-icon-library="@State.IconLibrary.ToString().ToLowerInvariant()"
                      data-preview-reduced-motion="@(State.Workbench.ReducedMotion ? "true" : "false")"
                      data-preview-high-contrast="@(State.Workbench.HighContrastPreview ? "true" : "false")">
-                    <CascadingValue Value="PreviewContext">
-                        <ThemeRunway Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
-                        <ThemePresetDock State="State" />
-                    </CascadingValue>
+                    <ShadcnVisualStyleScope VisualStyle="State.VisualStyle"
+                                            ColorTreatment="State.ColorTreatment"
+                                            Depth="State.DepthTreatment"
+                                            Motion="State.MotionTreatment"
+                                            Intensity="State.StyleIntensity"
+                                            data-testid="theme-visual-style-scope">
+                        <CascadingValue Value="PreviewContext">
+                            <CascadingValue Name="ThemeStudioIconLibrary" Value="State.IconLibrary">
+                                <ThemeBento Locale="State.Locale" Paused="State.Workbench.RunwayPaused" ReducedMotion="State.Workbench.ReducedMotion" />
+                            </CascadingValue>
+                        </CascadingValue>
+                    </ShadcnVisualStyleScope>
                 </div>
             </div>
         </section>
@@ -44,27 +58,24 @@
     private bool _persisting;
     private bool _persistRequested;
     private bool _disposed;
-    private bool _syncingShell;
     private Task _persistenceTask = Task.CompletedTask;
     private IJSObjectReference? _module;
     private string LocaleCode => State.Locale == ThemeStudioLocale.Thai ? "th" : "en";
-    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, ShellState.IsDarkMode);
-    private ShadcnContext PreviewContext => new(ShellState.IsDarkMode, ShellState.Direction);
-
+    private string TypographyStyle => ShadcnThemeCssWriter.WriteProperties(State.Document, State.EffectiveDarkMode);
+    private ShadcnContext PreviewContext => new(State.EffectiveDarkMode, State.Direction);
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
         ShellState.Changed += OnShellChanged;
-        await State.InitializeAsync();
-        if (_disposed) return;
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
+        await State.InitializeAsync();
+        if (_disposed) return;
         _initialized = true;
     }
 
     private void OnShellChanged(object? sender, EventArgs args)
     {
-        if (_syncingShell) { _ = InvokeAsync(StateHasChanged); return; }
         State.SetDirection(ShellState.Direction);
         State.SetMode(ShellState.IsDarkMode ? ThemeStudioMode.Dark : ThemeStudioMode.Light);
         _ = InvokeAsync(StateHasChanged);
@@ -73,14 +84,6 @@
     private void OnStateChanged(object? sender, EventArgs args)
     {
         if (_disposed) return;
-        _syncingShell = true;
-        try
-        {
-            if (State.Mode != ThemeStudioMode.System)
-                ShellState.SetTheme(State.Mode == ThemeStudioMode.Dark);
-            ShellState.SetDirection(State.Direction);
-        }
-        finally { _syncingShell = false; }
         _persistenceTask = ObservePersistenceAsync(_initialized);
     }
 
@@ -123,6 +126,7 @@
         {
             _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
             if (await _module.InvokeAsync<bool>("isDesktopWorkbench")) State.Workbench.OpenSidebar();
+            await _module.InvokeVoidAsync("resetInitialPreviewScroll");
         }
     }
 

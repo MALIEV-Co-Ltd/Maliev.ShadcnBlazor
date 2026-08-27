@@ -124,6 +124,19 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void SwitchStylesKeepAPronouncedPillTrackAndContainedThumb()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+        var switchRules = string.Join('\n', css.Split('\n').Where(line => line.Contains("shadcn-switch", StringComparison.Ordinal)));
+
+        Assert.Contains("width: 2.25rem", switchRules, StringComparison.Ordinal);
+        Assert.Contains("height: 1.25rem", switchRules, StringComparison.Ordinal);
+        Assert.Contains("border-radius: 999px", switchRules, StringComparison.Ordinal);
+        Assert.Contains("inset-inline-start: 0.125rem", switchRules, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ControlledSwitchKeepsCallerOwnedValueUntilParametersChange()
     {
         var requested = false;
@@ -199,10 +212,33 @@ public sealed class SelectionTests : BunitContext
     }
 
     [Fact]
+    public void RadioGroupCanHideTheDecorativeDotWithoutRemovingNativeInputs()
+    {
+        var cut = Render<ShadcnRadioGroup<string>>(parameters => parameters
+            .Add(component => component.Value, "priority")
+            .Add(component => component.HideIndicator, true)
+            .AddChildContent<ShadcnRadioGroupItem<string>>(item => item
+                .Add(component => component.Value, "priority")
+                .Add(component => component.ChildContent, "Priority review")));
+
+        Assert.NotNull(cut.Find("input[type='radio']"));
+        Assert.Empty(cut.FindAll("[data-slot='radio-group-indicator']"));
+    }
+
+    [Fact]
     public void SelectionControlsRejectUnknownEnums()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnSwitch>(p => p.Add(x => x.Size, (ShadcnSwitchSize)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnRadioGroup<string>>(p => p.Add(x => x.Orientation, (ShadcnRadioGroupOrientation)999)));
         Assert.ThrowsAny<Exception>(() => Render<ShadcnRadioGroup<string>>(p => p.Add(x => x.Presentation, (ShadcnRadioGroupPresentation)999)));
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root was not found.");
     }
 }

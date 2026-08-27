@@ -1,0 +1,378 @@
+/* Composable, subtree-local visual treatments for Maliev.ShadcnBlazor components. */
+.shadcn-visual-style-scope {
+  --shadcn-style-surface: var(--shadcn-card);
+  --shadcn-style-surface-strong: var(--shadcn-popover);
+  --shadcn-style-border: var(--shadcn-border);
+  --shadcn-style-border-width: 1px;
+  --shadcn-style-shadow: none;
+  --shadcn-style-shadow-hover: none;
+  --shadcn-style-blur: 0px;
+  --shadcn-style-saturation: 100%;
+  --shadcn-style-radius-factor: 1;
+  --shadcn-style-control-offset: 0px;
+  --shadcn-style-transition-duration: var(--shadcn-motion-duration, 150ms);
+  --shadcn-style-accent-glow: transparent;
+  --shadcn-style-environment: none;
+  --shadcn-style-specular: transparent;
+  --shadcn-style-lowlight: transparent;
+  --shadcn-style-control-surface: var(--shadcn-background);
+  --shadcn-style-overlay-surface: var(--shadcn-popover);
+  --shadcn-style-card-material: var(--shadcn-style-surface);
+  --shadcn-style-control-material: var(--shadcn-style-control-surface);
+  --shadcn-style-overlay-material: var(--shadcn-style-overlay-surface);
+  --shadcn-style-card-edge: transparent;
+  --shadcn-style-control-edge: transparent;
+  --shadcn-style-overlay-edge: transparent;
+  --shadcn-style-overlay-shadow: var(--shadcn-shadow-lg);
+  --shadcn-style-refraction-filter: none;
+  color: var(--shadcn-foreground);
+}
+
+.shadcn-visual-style-scope[data-intensity="subtle"] {
+  --shadcn-style-blur-scale: .65;
+  --shadcn-style-shadow-scale: .65;
+  --shadcn-style-border-width: 1px;
+}
+
+.shadcn-visual-style-scope[data-intensity="default"] {
+  --shadcn-style-blur-scale: 1;
+  --shadcn-style-shadow-scale: 1;
+}
+
+.shadcn-visual-style-scope[data-intensity="strong"] {
+  --shadcn-style-blur-scale: 1.25;
+  --shadcn-style-shadow-scale: 1.2;
+  --shadcn-style-border-width: 2px;
+}
+
+.shadcn-visual-style-scope[data-visual-style="minimal"] {
+  --shadcn-style-surface: var(--shadcn-background);
+  --shadcn-style-surface-strong: var(--shadcn-card);
+  --shadcn-style-border: color-mix(in oklch, var(--shadcn-border) 72%, transparent);
+  --shadcn-style-shadow: none;
+  --shadcn-style-shadow-hover: none;
+  --shadcn-style-radius-factor: .82;
+}
+
+.shadcn-visual-style-scope[data-visual-style="glass"] {
+  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 36%, transparent);
+  --shadcn-style-surface-strong: var(--shadcn-popover);
+  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 58%, transparent);
+  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 30%, transparent);
+  --shadcn-style-border: transparent;
+  --shadcn-style-border-width: 0px;
+  --shadcn-style-shadow: 0 .75rem 2.25rem color-mix(in oklch, var(--shadcn-foreground) 10%, transparent), inset 0 1px 0 color-mix(in oklch, white 38%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent);
+  --shadcn-style-shadow-hover: 0 1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 color-mix(in oklch, white 46%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
+  --shadcn-style-blur: calc(18px * var(--shadcn-style-blur-scale, 1));
+  --shadcn-style-saturation: 132%;
+  --shadcn-style-radius-factor: 1;
+}
+
+.shadcn-visual-style-scope[data-visual-style="neo-brutalist"] {
+  --shadcn-style-surface: var(--shadcn-card);
+  --shadcn-style-surface-strong: var(--shadcn-popover);
+  --shadcn-style-border: var(--shadcn-foreground);
+  --shadcn-style-border-width: 2px;
+  --shadcn-style-shadow: .3rem .3rem 0 var(--shadcn-foreground);
+  --shadcn-style-shadow-hover: .16rem .16rem 0 var(--shadcn-foreground);
+  --shadcn-style-radius-factor: .28;
+  --shadcn-style-control-offset: 2px;
+}
+
+.shadcn-visual-style-scope[data-visual-style="liquid-glass"] {
+  --shadcn-style-environment:
+    radial-gradient(circle at 12% 8%, color-mix(in oklch, var(--shadcn-primary) 24%, transparent) 0 8%, transparent 30%),
+    radial-gradient(circle at 88% 18%, color-mix(in oklch, var(--shadcn-chart-2) 20%, transparent) 0 7%, transparent 28%),
+    radial-gradient(circle at 48% 92%, color-mix(in oklch, var(--shadcn-chart-4) 16%, transparent) 0 10%, transparent 34%),
+    linear-gradient(135deg, color-mix(in oklch, var(--shadcn-background) 96%, var(--shadcn-muted)) 0%, var(--shadcn-background) 48%, color-mix(in oklch, var(--shadcn-background) 88%, var(--shadcn-primary)) 100%);
+  --shadcn-style-surface: color-mix(in oklch, var(--shadcn-card) 26%, transparent);
+  --shadcn-style-surface-strong: color-mix(in oklch, var(--shadcn-popover) 42%, transparent);
+  --shadcn-style-control-surface: color-mix(in oklch, var(--shadcn-background) 20%, transparent);
+  --shadcn-style-overlay-surface: color-mix(in oklch, var(--shadcn-popover) 52%, transparent);
+  --shadcn-style-specular: color-mix(in oklch, white 72%, transparent);
+  --shadcn-style-lowlight: color-mix(in oklch, var(--shadcn-foreground) 11%, transparent);
+  --shadcn-style-border: color-mix(in oklch, var(--shadcn-style-specular) 68%, var(--shadcn-border));
+  --shadcn-style-card-material: linear-gradient(var(--shadcn-style-surface), var(--shadcn-style-surface));
+  --shadcn-style-control-material: linear-gradient(var(--shadcn-style-control-surface), var(--shadcn-style-control-surface));
+  --shadcn-style-overlay-material: linear-gradient(var(--shadcn-style-overlay-surface), var(--shadcn-style-overlay-surface));
+  --shadcn-style-card-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 34%, transparent) 20%, transparent 44%, color-mix(in oklch, var(--shadcn-style-lowlight) 86%, transparent) 76%, color-mix(in oklch, var(--shadcn-style-specular) 42%, transparent) 100%);
+  --shadcn-style-control-edge: linear-gradient(135deg, color-mix(in oklch, var(--shadcn-style-specular) 88%, transparent) 0%, color-mix(in oklch, var(--shadcn-style-specular) 28%, transparent) 24%, transparent 48%, color-mix(in oklch, var(--shadcn-style-lowlight) 78%, transparent) 78%, color-mix(in oklch, var(--shadcn-style-specular) 36%, transparent) 100%);
+  --shadcn-style-overlay-edge: linear-gradient(135deg, var(--shadcn-style-specular) 0%, color-mix(in oklch, var(--shadcn-style-specular) 38%, transparent) 18%, transparent 40%, color-mix(in oklch, var(--shadcn-style-lowlight) 92%, transparent) 74%, color-mix(in oklch, var(--shadcn-style-specular) 48%, transparent) 100%);
+  --shadcn-style-shadow: 0 .16rem .35rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent), 0 1rem 2.8rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
+  --shadcn-style-shadow-hover: 0 .2rem .45rem color-mix(in oklch, var(--shadcn-foreground) 9%, transparent), 0 1.4rem 3.5rem color-mix(in oklch, var(--shadcn-foreground) 18%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
+  --shadcn-style-overlay-shadow: 0 .4rem 1rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent), 0 1.75rem 4.5rem color-mix(in oklch, var(--shadcn-foreground) 24%, transparent), inset 0 1px 0 var(--shadcn-style-specular), inset 0 -1px 0 var(--shadcn-style-lowlight);
+  --shadcn-style-blur: calc(28px * var(--shadcn-style-blur-scale, 1));
+  --shadcn-style-control-blur: calc(16px * var(--shadcn-style-blur-scale, 1));
+  --shadcn-style-overlay-blur: calc(34px * var(--shadcn-style-blur-scale, 1));
+  --shadcn-style-saturation: 155%;
+  --shadcn-style-radius-factor: 1;
+  --shadcn-style-border-width: 0px;
+  isolation: isolate;
+}
+
+.shadcn-visual-style-scope[data-visual-style="liquid-glass"][data-intensity="strong"] {
+  --shadcn-style-border-width: 1px;
+}
+
+.shadcn-visual-style-scope[data-color-treatment="vibrant-dark"] {
+  color-scheme: dark;
+  --shadcn-background: oklch(.12 .018 264);
+  --shadcn-foreground: oklch(.97 .01 264);
+  --shadcn-card: oklch(.17 .022 264);
+  --shadcn-card-foreground: oklch(.97 .01 264);
+  --shadcn-popover: oklch(.19 .026 264);
+  --shadcn-popover-foreground: oklch(.97 .01 264);
+  --shadcn-muted: oklch(.23 .025 264);
+  --shadcn-muted-foreground: oklch(.74 .025 264);
+  --shadcn-border: oklch(.34 .035 264);
+  --shadcn-input: oklch(.3 .035 264);
+  --shadcn-style-accent-glow: color-mix(in oklch, var(--shadcn-primary) 42%, transparent);
+}
+
+.shadcn-visual-style-scope[data-depth="flat"] {
+  --shadcn-style-shadow: none;
+  --shadcn-style-shadow-hover: none;
+}
+
+.shadcn-visual-style-scope[data-depth="raised"] {
+  --shadcn-style-shadow: 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 9%, transparent);
+  --shadcn-style-shadow-hover: 0 .55rem 1.4rem color-mix(in oklch, var(--shadcn-foreground) 12%, transparent);
+}
+
+.shadcn-visual-style-scope[data-depth="floating"] {
+  --shadcn-style-shadow: 0 .8rem 2.4rem color-mix(in oklch, var(--shadcn-foreground) 14%, transparent);
+  --shadcn-style-shadow-hover: 0 1.1rem 3rem color-mix(in oklch, var(--shadcn-foreground) 17%, transparent);
+}
+
+.shadcn-visual-style-scope[data-depth="spatial"] {
+  --shadcn-style-shadow: 0 1.2rem 3.2rem color-mix(in oklch, var(--shadcn-foreground) 18%, transparent), inset 0 1px 0 color-mix(in oklch, white 38%, transparent);
+  --shadcn-style-shadow-hover: 0 1.6rem 4rem color-mix(in oklch, var(--shadcn-foreground) 22%, transparent), inset 0 1px 0 color-mix(in oklch, white 48%, transparent);
+}
+
+.shadcn-visual-style-scope[data-motion="calm"] {
+  --shadcn-style-transition-duration: 220ms;
+}
+
+.shadcn-visual-style-scope[data-motion="expressive"] {
+  --shadcn-style-transition-duration: 360ms;
+}
+
+.shadcn-visual-style-scope[data-motion="none"] {
+  --shadcn-style-transition-duration: 0ms;
+  --shadcn-style-control-offset: 0px;
+}
+
+.shadcn-visual-style-scope :where(
+  .shadcn-card,
+  .shadcn-alert,
+  .shadcn-calendar,
+  .shadcn-sidebar,
+  [data-slot="card"],
+  [data-slot="alert"],
+  [data-slot="empty"],
+  [data-slot="command"]
+) {
+  border-color: var(--shadcn-style-border, var(--shadcn-border));
+  border-width: var(--shadcn-style-border-width, 1px);
+  border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
+  background: var(--shadcn-style-surface, var(--shadcn-card));
+  box-shadow: var(--shadcn-style-shadow, none);
+  transition: box-shadow var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease;
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) :where(.shadcn-card, .shadcn-alert, .shadcn-calendar, .shadcn-sidebar, [data-slot="card"], [data-slot="alert"], [data-slot="empty"], [data-slot="command"]):not(:has(:is(.shadcn-dialog-portal, .shadcn-sheet-portal, .shadcn-drawer-portal, .shadcn-alert-dialog-portal))) {
+  backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope[data-visual-style="liquid-glass"] :where(
+  .shadcn-card,
+  .shadcn-alert,
+  .shadcn-calendar,
+  .shadcn-sidebar,
+  [data-slot="card"],
+  [data-slot="alert"],
+  [data-slot="empty"],
+  [data-slot="command"]
+):not(:has(:is(.shadcn-dialog-portal, .shadcn-sheet-portal, .shadcn-drawer-portal, .shadcn-alert-dialog-portal))) {
+  border-color: transparent;
+  background: var(--shadcn-style-card-material) padding-box, var(--shadcn-style-card-edge) border-box;
+  box-shadow: var(--shadcn-style-shadow);
+  backdrop-filter: blur(var(--shadcn-style-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope :where(
+  .shadcn-dialog-content,
+  .shadcn-alert-dialog-content,
+  .shadcn-drawer-content,
+  .shadcn-sheet-content,
+  .shadcn-popover-content,
+  .shadcn-dropdown-menu-content,
+  .shadcn-context-menu-content,
+  .shadcn-hover-card-content,
+  .shadcn-tooltip-content,
+  .shadcn-toast
+) {
+  border-color: var(--shadcn-style-border, var(--shadcn-border));
+  border-width: var(--shadcn-style-border-width, 1px);
+  border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
+  background: var(--shadcn-style-surface-strong, var(--shadcn-popover));
+  box-shadow: var(--shadcn-shadow-lg), var(--shadcn-style-shadow-hover, var(--shadcn-style-shadow, none));
+  backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
+}
+
+.shadcn-visual-style-scope[data-visual-style="liquid-glass"] :where(
+  .shadcn-dialog-content,
+  .shadcn-alert-dialog-content,
+  .shadcn-drawer-content,
+  .shadcn-sheet-content,
+  .shadcn-popover-content,
+  .shadcn-dropdown-menu-content,
+  .shadcn-context-menu-content,
+  .shadcn-hover-card-content,
+  .shadcn-tooltip-content,
+  .shadcn-toast
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-overlay-material) padding-box, var(--shadcn-style-overlay-edge) border-box;
+  box-shadow: var(--shadcn-style-overlay-shadow);
+  backdrop-filter: blur(var(--shadcn-style-overlay-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-overlay-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope :where(
+  .shadcn-button,
+  .shadcn-input,
+  .shadcn-textarea,
+  .shadcn-select-trigger,
+  .shadcn-date-picker-trigger,
+  .shadcn-toggle,
+  .shadcn-tabs-trigger,
+  .shadcn-checkbox,
+  .shadcn-radio-group-item,
+  .shadcn-dropzone
+) {
+  border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
+  transition: transform var(--shadcn-style-transition-duration) ease, box-shadow var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease;
+}
+
+.shadcn-visual-style-scope[data-visual-style="liquid-glass"] :where(
+  .shadcn-input,
+  .shadcn-textarea,
+  .shadcn-select-trigger,
+  .shadcn-date-picker-trigger,
+  .shadcn-toggle,
+  .shadcn-tabs-trigger,
+  .shadcn-dropzone,
+  .shadcn-button[data-variant="outline"],
+  .shadcn-button[data-variant="secondary"]
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-control-material) padding-box, var(--shadcn-style-control-edge) border-box;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
+  backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) {
+  --shadcn-muted-foreground: color-mix(in oklch, var(--shadcn-foreground) 76%, var(--shadcn-muted-foreground));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) :where(
+  [data-slot="attachment"],
+  [data-slot="table-container"],
+  [data-slot="tabs-list"],
+  [data-slot="questionnaire-choice"],
+  [data-slot="input-group"],
+  [data-slot="radio-group-item-root"]
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-control-material, var(--shadcn-style-control-surface));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), 0 .25rem .75rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
+  backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope:is([data-visual-style="glass"], [data-visual-style="liquid-glass"]) .shadcn-tabs-trigger[data-state="active"] {
+  border-color: transparent;
+  background: var(--shadcn-primary);
+  color: var(--shadcn-primary-foreground);
+  box-shadow: 0 .25rem .75rem color-mix(in oklch, var(--shadcn-primary) 28%, transparent), inset 0 1px 0 color-mix(in oklch, white 28%, transparent);
+}
+
+.shadcn-visual-style-scope[data-visual-style="glass"] :where(
+  .shadcn-input,
+  .shadcn-textarea,
+  .shadcn-select-trigger,
+  .shadcn-date-picker-trigger,
+  .shadcn-toggle,
+  .shadcn-tabs-trigger,
+  .shadcn-dropzone,
+  .shadcn-button[data-variant="outline"],
+  .shadcn-button[data-variant="secondary"]
+) {
+  border-color: transparent;
+  background: var(--shadcn-style-control-surface);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent), 0 .3rem .9rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
+  backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+  -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
+}
+
+.shadcn-visual-style-scope[data-visual-style="neo-brutalist"] :where(.shadcn-button, .shadcn-toggle, .shadcn-tabs-trigger):is(:hover, :focus-visible) {
+  transform: translate(var(--shadcn-style-control-offset, 0px), var(--shadcn-style-control-offset, 0px));
+  box-shadow: var(--shadcn-style-shadow-hover);
+}
+
+.shadcn-visual-style-scope[data-color-treatment="vibrant-dark"] :where(:focus-visible, .shadcn-input:focus, .shadcn-textarea:focus, .shadcn-select-trigger:focus-visible) {
+  box-shadow: 0 0 0 var(--shadcn-focus-ring-width, 3px) var(--shadcn-style-accent-glow);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .shadcn-visual-style-scope[data-visual-style="glass"],
+  .shadcn-visual-style-scope[data-visual-style="liquid-glass"] {
+    --shadcn-style-surface: var(--shadcn-card);
+    --shadcn-style-surface-strong: var(--shadcn-popover);
+    --shadcn-style-control-surface: var(--shadcn-background);
+    --shadcn-style-overlay-surface: var(--shadcn-popover);
+    --shadcn-style-card-material: var(--shadcn-card);
+    --shadcn-style-control-material: var(--shadcn-background);
+    --shadcn-style-overlay-material: var(--shadcn-popover);
+    --shadcn-style-blur: 0px;
+    --shadcn-style-control-blur: 0px;
+    --shadcn-style-overlay-blur: 0px;
+    --shadcn-style-saturation: 100%;
+    --shadcn-style-refraction-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .shadcn-visual-style-scope {
+    --shadcn-style-border: currentColor;
+    --shadcn-style-border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shadcn-visual-style-scope {
+    --shadcn-style-transition-duration: 0ms;
+    --shadcn-style-control-offset: 0px;
+  }
+}
+
+@media (forced-colors: active) {
+  .shadcn-visual-style-scope {
+    --shadcn-style-surface: Canvas;
+    --shadcn-style-surface-strong: Canvas;
+    --shadcn-style-border: CanvasText;
+    --shadcn-style-shadow: none;
+    --shadcn-style-shadow-hover: none;
+    --shadcn-style-blur: 0px;
+    --shadcn-style-saturation: 100%;
+    --shadcn-style-accent-glow: transparent;
+    --shadcn-style-environment: none;
+    --shadcn-style-refraction-filter: none;
+    background-image: none;
+  }
+}

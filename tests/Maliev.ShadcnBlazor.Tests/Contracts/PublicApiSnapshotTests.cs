@@ -30,6 +30,7 @@ public sealed class PublicApiSnapshotTests
         "Maliev.ShadcnBlazor.Components.Overlays",
         "Maliev.ShadcnBlazor.Components.Primitives",
         "Maliev.ShadcnBlazor.Components.Selection",
+        "Maliev.ShadcnBlazor.Components.Styling",
         "Maliev.ShadcnBlazor.Components.Typography"
     ];
 

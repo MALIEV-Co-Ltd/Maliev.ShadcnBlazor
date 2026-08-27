@@ -1,7 +1,7 @@
 @using Maliev.ShadcnBlazor.Components.Selection
 
 <div data-testid="slider-dossier-preview">
-    <ShadcnSlider Values="CurrentValues" ValuesChanged="HandleChanged" Minimum="0" Maximum="100" Step="5" Orientation="Orientation" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="budget" Form="dossier-slider-form" Required="true" AdditionalAttributes="Attributes" />
+    <ShadcnSlider Values="CurrentValues" ValuesChanged="HandleChanged" Minimum="0" Maximum="100" Step="1" Orientation="Orientation" Disabled="Disabled" ReadOnly="ReadOnly" Invalid="Invalid" Name="budget" Form="dossier-slider-form" Required="true" AdditionalAttributes="Attributes" />
     <form id="dossier-slider-form"></form>
     <output class="showcase-slider-values" aria-live="polite">@string.Join(" – ", CurrentValues.Select(value => value.ToString("0")))</output>
 </div>

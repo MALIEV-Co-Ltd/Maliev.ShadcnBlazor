@@ -1,0 +1,45 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
+@using System.Globalization
+
+<span class="@Class" data-typing-text aria-hidden="true">
+    @foreach (var glyph in _glyphs)
+    {
+        <span class="theme-typing-glyph" style="@GlyphStyle(glyph.Index)">@glyph.Value</span>
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+    [Parameter] public string? Class { get; set; }
+
+    private string _renderedText = string.Empty;
+    private IReadOnlyList<TypingGlyph> _glyphs = [];
+
+    protected override void OnParametersSet()
+    {
+        if (string.Equals(_renderedText, Text, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _renderedText = Text;
+        _glyphs = SplitTextElements(Text);
+    }
+
+    private static IReadOnlyList<TypingGlyph> SplitTextElements(string text)
+    {
+        var glyphs = new List<TypingGlyph>();
+        var elements = StringInfo.GetTextElementEnumerator(text);
+
+        while (elements.MoveNext())
+        {
+            glyphs.Add(new TypingGlyph(glyphs.Count, elements.GetTextElement()));
+        }
+
+        return glyphs;
+    }
+
+    private static string GlyphStyle(int index) => $"--theme-typing-index: {index.ToString(CultureInfo.InvariantCulture)}";
+
+    private sealed record TypingGlyph(int Index, string Value);
+}

@@ -1,4 +1,5 @@
 using Maliev.ShadcnBlazor.Theming;
+using Maliev.ShadcnBlazor.Components.Styling;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
@@ -16,8 +17,18 @@ public sealed record ThemeStudioSnapshot(
     ThemeStudioIconLibrary IconLibrary,
     ThemeStudioMenuAccent MenuAccent,
     ThemeStudioMenuColor MenuColor,
+    ShadcnVisualStyle VisualStyle,
+    ShadcnColorTreatment ColorTreatment,
+    ShadcnDepthTreatment DepthTreatment,
+    ShadcnMotionTreatment MotionTreatment,
+    ShadcnStyleIntensity StyleIntensity,
     string BaselineStyleId,
     string BaselineBaseColorId,
     ThemeStudioIconLibrary BaselineIconLibrary,
     ThemeStudioMenuAccent BaselineMenuAccent,
-    ThemeStudioMenuColor BaselineMenuColor);
+    ThemeStudioMenuColor BaselineMenuColor,
+    ShadcnVisualStyle BaselineVisualStyle,
+    ShadcnColorTreatment BaselineColorTreatment,
+    ShadcnDepthTreatment BaselineDepthTreatment,
+    ShadcnMotionTreatment BaselineMotionTreatment,
+    ShadcnStyleIntensity BaselineStyleIntensity);

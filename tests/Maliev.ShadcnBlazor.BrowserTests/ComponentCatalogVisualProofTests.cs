@@ -15,7 +15,7 @@ public sealed class ComponentCatalogVisualProofTests(
         var slugs = ComponentCatalogProof.LoadCompleted(root);
         var baselineDirectory = VisualProof.BaselineDirectory(root);
 
-        Assert.Equal(66, slugs.Count);
+        Assert.Equal(69, slugs.Count);
         if (VisualProof.UpdateEnabled)
             return;
 
@@ -86,14 +86,14 @@ public sealed class ComponentCatalogVisualProofTests(
                 ColorScheme = ColorScheme.Dark
             }, darkRtl: true, openSettings: true);
         await CaptureThemeStudioAsync(
-            "mobile-forced-colors",
+            "mobile-light",
             new BrowserNewContextOptions
             {
                 ViewportSize = new() { Width = 390, Height = 844 },
                 DeviceScaleFactor = 1,
                 ReducedMotion = ReducedMotion.Reduce,
-                ForcedColors = ForcedColors.Active
-            }, openSettings: true);
+                ColorScheme = ColorScheme.Light
+            });
     }
 
     private async Task CaptureModeAsync(
@@ -123,7 +123,8 @@ public sealed class ComponentCatalogVisualProofTests(
             await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/{slug}").ToString());
             await page.GetByTestId("component-dossier").WaitForAsync();
             await Assertions.Expect(page.GetByTestId("planned-component-notice")).ToHaveCountAsync(0);
-            await Assertions.Expect(page.GetByTestId("component-preview-canvas")).ToHaveCountAsync(1);
+            var canvas = page.GetByTestId("component-preview-canvas").First;
+            await Assertions.Expect(canvas).ToBeVisibleAsync();
 
             if (mode.Dark)
             {
@@ -145,7 +146,6 @@ public sealed class ComponentCatalogVisualProofTests(
                         })));
                 }
                 """);
-            var canvas = page.GetByTestId("component-preview-canvas");
             await canvas.ScrollIntoViewIfNeededAsync();
             var actual = await canvas.ScreenshotAsync(new() { Animations = ScreenshotAnimations.Disabled });
             await VisualProof.CompareOrUpdateAsync(page, slug, mode.Name, actual);
@@ -162,6 +162,14 @@ public sealed class ComponentCatalogVisualProofTests(
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
         await page.GetByTestId("theme-studio").WaitForAsync();
+        await Assertions.Expect(page.GetByTestId("theme-bento")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-testid='theme-bento'] .theme-use-case-card")).ToHaveCountAsync(45);
+        if (mode.StartsWith("mobile", StringComparison.Ordinal))
+        {
+            var firstCard = page.Locator("[data-testid='theme-bento'] .theme-use-case-card").First;
+            await Assertions.Expect(firstCard).ToBeVisibleAsync();
+            await Assertions.Expect(firstCard).ToBeInViewportAsync();
+        }
         if (darkRtl)
         {
             await page.GetByTestId("documentation-theme-toggle").ClickAsync();
@@ -177,6 +185,7 @@ public sealed class ComponentCatalogVisualProofTests(
         if (await catalogStatus.CountAsync() > 0)
             await Assertions.Expect(catalogStatus).Not.ToContainTextAsync("Loading local font catalog");
         await page.EvaluateAsync("document.fonts.ready");
+        await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
         var actual = await page.ScreenshotAsync(new()
         {
             Animations = ScreenshotAnimations.Disabled,

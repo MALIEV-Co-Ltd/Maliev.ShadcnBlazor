@@ -132,7 +132,9 @@ public sealed class CalendarDatePickerTests : BunitContext
         single.Find("[data-day='2026-08-18']").Click();
 
         Assert.Equal("true", single.Find("[data-day='2026-08-18']").GetAttribute("data-selected-single"));
-        Assert.Equal("true", single.Find("[data-day='2026-08-18']").GetAttribute("aria-selected"));
+        var selectedDay = single.Find("[data-day='2026-08-18']");
+        Assert.Null(selectedDay.GetAttribute("aria-selected"));
+        Assert.Equal("true", selectedDay.ParentElement?.GetAttribute("aria-selected"));
 
         var range = Render<ShadcnCalendar>(parameters => parameters
             .Add(component => component.Mode, ShadcnCalendarSelectionMode.Range)

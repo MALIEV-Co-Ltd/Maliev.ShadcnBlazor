@@ -114,6 +114,52 @@ public sealed class ButtonTests : BunitContext
     }
 
     [Fact]
+    public async Task SubmitFeedbackPreventsReentryAndTransitionsThroughBusyAndSuccessStates()
+    {
+        var calls = 0;
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cut = Render<ShadcnButton>(parameters => parameters
+            .Add(component => component.ButtonType, ShadcnButtonType.Submit)
+            .Add(component => component.BusyText, "Saving")
+            .Add(component => component.SuccessText, "Saved")
+            .Add(component => component.SuccessDuration, TimeSpan.FromMilliseconds(40))
+            .Add(component => component.OnClick, EventCallback.Factory.Create<MouseEventArgs>(this, async () =>
+            {
+                calls++;
+                await completion.Task;
+            }))
+            .AddChildContent("Save profile"));
+
+        var firstClick = cut.Find("button").ClickAsync(new MouseEventArgs());
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal("busy", cut.Find("button").GetAttribute("data-operation-state"));
+            Assert.Equal("true", cut.Find("button").GetAttribute("aria-busy"));
+            Assert.Equal("Saving", cut.Find("button").TextContent.Trim());
+            Assert.True(cut.Find("button").HasAttribute("disabled"));
+        });
+
+        cut.Find("button").Click();
+        Assert.Equal(1, calls);
+        completion.SetResult();
+        cut.WaitForAssertion(() => Assert.Equal("Saved", cut.Find("button").TextContent.Trim()));
+        await firstClick;
+        cut.WaitForAssertion(() => Assert.Equal("Save profile", cut.Find("button").TextContent.Trim()), TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
+    public void BadgeStylesUseDefaultCursorUnlessTheBadgeIsALink()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
+
+        Assert.Contains(".shadcn-badge {", css, StringComparison.Ordinal);
+        Assert.Contains("cursor: default", css, StringComparison.Ordinal);
+        Assert.Contains("a.shadcn-badge", css, StringComparison.Ordinal);
+        Assert.Contains("cursor: pointer", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ButtonGroupCompositionUsesExpectedSemantics()
     {
         var cut = Render<ShadcnButtonGroup>(p => p
@@ -149,6 +195,15 @@ public sealed class ButtonTests : BunitContext
         Assert.Contains("border-block-start-width: 0", groupRules, StringComparison.Ordinal);
         Assert.DoesNotContain("border-left-width", groupRules, StringComparison.Ordinal);
         Assert.DoesNotContain(":has(> [data-slot=\"button-group\"])", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BusySpinnerUsesCalmComponentScopedTiming()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
+
+        Assert.Contains("--shadcn-button-spinner-duration, var(--shadcn-motion-duration-slow)", css, StringComparison.Ordinal);
     }
 
     [Fact]

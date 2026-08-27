@@ -10,6 +10,7 @@
     <ShadcnFieldSet Disabled="@Disabled">
         <ShadcnFieldLegend Variant="@LegendVariant">Card details</ShadcnFieldLegend>
         <ShadcnFieldGroup>
+            <div class="showcase-field-dossier__card-row">
             <ShadcnField Orientation="@Orientation" Disabled="@Disabled" DescriptionId="field-cardholder-help">
                 <ShadcnFieldLabel For="field-cardholder">Name on card</ShadcnFieldLabel>
                 <ShadcnInput TValue="string"
@@ -40,6 +41,7 @@
                     <ShadcnFieldError Id="field-card-number-error">Check the card number and try again.</ShadcnFieldError>
                 }
             </ShadcnField>
+            </div>
 
             <div class="showcase-field-dossier__security-row">
                 <ShadcnField Disabled="@Disabled">

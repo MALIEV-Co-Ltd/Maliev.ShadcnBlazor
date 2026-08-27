@@ -149,6 +149,8 @@ public sealed class InputGroupOtpTests : BunitContext
         Assert.Contains(".shadcn-input-group-button[data-size=\"icon-xs\"] { width: 1.5rem; height: 1.5rem;", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-input-group-addon[data-align=\"inline-end\"]:has(> button) { margin-inline-end: -.4rem;", css, StringComparison.Ordinal);
         Assert.Contains(":has(> [data-slot=\"input-group-control\"][aria-invalid=\"true\"])", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group > :where(.shadcn-input, .shadcn-textarea):focus-visible { outline: none; box-shadow: none; }", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-input-group:focus-within { border-color: var(--shadcn-ring); box-shadow: 0 0 0 1px", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -209,6 +211,34 @@ public sealed class InputGroupOtpTests : BunitContext
         locked.Find("input").Input("999");
         Assert.Equal(0, calls);
         Assert.True(locked.Find("input").HasAttribute("readonly"));
+    }
+
+    [Fact]
+    public void OtpReplacementAdvancesFromTheSelectedSlotInsteadOfJumpingToTheEnd()
+    {
+        var cut = Render<ShadcnInputOtp>(parameters => parameters
+            .Add(component => component.Value, "2241")
+            .Add(component => component.MaxLength, 4)
+            .Add(component => component.ValueChanged, _ => { })
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnInputOtpGroup>(0);
+                builder.AddAttribute(1, nameof(ShadcnInputOtpGroup.ChildContent), (RenderFragment)(group =>
+                {
+                    for (var index = 0; index < 4; index++)
+                    {
+                        group.OpenComponent<ShadcnInputOtpSlot>(index * 2);
+                        group.AddAttribute(index * 2 + 1, nameof(ShadcnInputOtpSlot.Index), index);
+                        group.CloseComponent();
+                    }
+                }));
+                builder.CloseComponent();
+            }));
+
+        cut.Instance.UpdateOtpSelection(0, true);
+        cut.Find("input").Input("3241");
+
+        Assert.Equal("true", cut.FindAll("[data-slot='input-otp-slot']")[1].GetAttribute("data-active"));
     }
 
     [Fact]

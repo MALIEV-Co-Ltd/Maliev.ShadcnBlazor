@@ -16,6 +16,7 @@
     [CascadingParameter] private ShadcnDialogContext Context { get; set; } = default!;
     [Parameter] public string Label { get; set; } = "Close";
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public ShadcnButtonVariant Variant { get; set; } = ShadcnButtonVariant.Outline;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private string VariantValue => ChildContent is null
@@ -41,5 +42,12 @@
         builder.CloseElement();
     };
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-icon-only", "data-variant", "type", "aria-label", "disabled");
-    private async Task CloseAsync() { if (!Disabled) await Context.Owner.SetOpenAsync(false); }
+    private async Task CloseAsync(MouseEventArgs args)
+    {
+        if (Disabled)
+            return;
+
+        await OnClick.InvokeAsync(args);
+        await Context.Owner.SetOpenAsync(false);
+    }
 }

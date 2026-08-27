@@ -60,6 +60,15 @@
     <div class="component-preview__canvas" data-testid="component-preview-canvas">
         @Example.Preview
     </div>
+
+    <section class="component-preview__source" aria-labelledby="@SourceHeadingId">
+        <h3 id="@SourceHeadingId">Example source</h3>
+        <ComponentCodeExample Title="@Example.Title"
+                              Source="@Example.RazorSource"
+                              Collapsible="true"
+                              Summary="View complete source"
+                              TestId="example-source" />
+    </section>
 </section>
 
 @code {
@@ -68,6 +77,8 @@
     [Parameter] public EventCallback SourceChanged { get; set; }
 
     private string HeadingId => $"{Example.Id}-title";
+
+    private string SourceHeadingId => $"{Example.Id}-source-title";
 
     private static IReadOnlyList<ShadcnSelectOption<string>> SelectOptions(ComponentParameterControl control) =>
         control.Options.Select(option => new ShadcnSelectOption<string>(option, option)).ToArray();

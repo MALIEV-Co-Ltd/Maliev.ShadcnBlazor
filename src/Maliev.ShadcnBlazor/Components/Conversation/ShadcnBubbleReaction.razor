@@ -1,0 +1,37 @@
+@using Maliev.ShadcnBlazor.Components.Content
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<span @attributes="ForwardedAttributes"
+      class="@MergeClass("shadcn-bubble-reaction")"
+      style="@MergeStyle(null)"
+      data-slot="bubble-reaction"
+      role="img"
+      aria-label="@AccessibleName">
+    <ShadcnAvatar Size="ShadcnAvatarSize.Small">
+        @if (!string.IsNullOrWhiteSpace(Source))
+        {
+            <ShadcnAvatarImage Source="@Source" Alt="" />
+        }
+        <ShadcnAvatarFallback>@Fallback</ShadcnAvatarFallback>
+    </ShadcnAvatar>
+</span>
+
+@code {
+    [CascadingParameter] private ShadcnBubbleReactions? Owner { get; set; }
+    [Parameter, EditorRequired] public string AccessibleName { get; set; } = string.Empty;
+    [Parameter] public string? Source { get; set; }
+    [Parameter, EditorRequired] public string Fallback { get; set; } = string.Empty;
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes
+        => AttributesExcept("data-slot", "role", "aria-label");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null)
+            throw new InvalidOperationException("ShadcnBubbleReaction must be inside ShadcnBubbleReactions.");
+        if (string.IsNullOrWhiteSpace(AccessibleName))
+            throw new InvalidOperationException("ShadcnBubbleReaction requires an accessible name describing the reactor and reaction.");
+        if (string.IsNullOrWhiteSpace(Fallback))
+            throw new InvalidOperationException("ShadcnBubbleReaction requires fallback content.");
+    }
+}

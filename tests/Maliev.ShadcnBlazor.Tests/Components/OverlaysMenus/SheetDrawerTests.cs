@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Overlays;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.OverlaysMenus;
 
@@ -63,6 +64,7 @@ public sealed class SheetDrawerTests : BunitContext
     [Fact]
     public void UncontrolledSheetOpensFromItsTriggerAndClosesFromItsCloseAction()
     {
+        var saveCalls = 0;
         var cut = Render<ShadcnSheet>(parameters => parameters.AddChildContent(builder =>
         {
             builder.OpenComponent<ShadcnSheetTrigger>(0);
@@ -76,6 +78,7 @@ public sealed class SheetDrawerTests : BunitContext
                 content.CloseComponent();
                 content.OpenComponent<ShadcnSheetClose>(10);
                 content.AddAttribute(11, nameof(ShadcnSheetClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Save schedule")));
+                content.AddAttribute(12, nameof(ShadcnSheetClose.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, () => saveCalls++));
                 content.CloseComponent();
             }));
             builder.CloseComponent();
@@ -87,6 +90,7 @@ public sealed class SheetDrawerTests : BunitContext
         Assert.NotEmpty(cut.FindAll("[data-slot='sheet-content']"));
 
         cut.Find("[data-slot='sheet-close']").Click();
+        Assert.Equal(1, saveCalls);
         Assert.Equal("false", cut.Find("[data-slot='sheet-trigger']").GetAttribute("aria-expanded"));
         Assert.Empty(cut.FindAll("[data-slot='sheet-content']"));
     }
@@ -116,6 +120,7 @@ public sealed class SheetDrawerTests : BunitContext
         Assert.Equal(2, closes.Count);
         var textClose = closes.Single(close => close.TextContent.Contains("Cancel", StringComparison.Ordinal));
         Assert.DoesNotContain("shadcn-sheet-close-icon", textClose.ClassList);
+        Assert.Null(textClose.GetAttribute("aria-label"));
         var iconClose = closes.Single(close => close.QuerySelector("svg") is not null);
         Assert.Contains("shadcn-sheet-close-icon", iconClose.ClassList);
         Assert.Equal("Close", iconClose.GetAttribute("aria-label"));
@@ -177,6 +182,7 @@ public sealed class SheetDrawerTests : BunitContext
     [Fact]
     public void UncontrolledDrawerTriggerAndCloseSupportRepeatedInteraction()
     {
+        var closeCalls = 0;
         var cut = Render<ShadcnDrawer>(parameters => parameters.AddChildContent(builder =>
         {
             builder.OpenComponent<ShadcnDrawerTrigger>(0);
@@ -193,6 +199,7 @@ public sealed class SheetDrawerTests : BunitContext
                 content.CloseComponent();
                 content.OpenComponent<ShadcnDrawerClose>(4);
                 content.AddAttribute(5, nameof(ShadcnDrawerClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Cancel")));
+                content.AddAttribute(6, nameof(ShadcnDrawerClose.OnClick), EventCallback.Factory.Create<MouseEventArgs>(this, () => closeCalls++));
                 content.CloseComponent();
             }));
             builder.CloseComponent();
@@ -206,11 +213,38 @@ public sealed class SheetDrawerTests : BunitContext
         Assert.Equal("dialog", cut.Find("[data-slot='drawer-content']").GetAttribute("role"));
 
         cut.Find("[data-slot='drawer-close']").Click();
+        Assert.Equal(1, closeCalls);
         Assert.Empty(cut.FindAll("[data-slot='drawer-content']"));
         Assert.Equal("false", cut.Find("[data-slot='drawer-trigger']").GetAttribute("aria-expanded"));
 
         cut.Find("[data-slot='drawer-trigger']").Click();
         Assert.Single(cut.FindAll("[data-slot='drawer-content']"));
+    }
+
+    [Fact]
+    public void DrawerCloseUsesTheRequestedButtonVariant()
+    {
+        var cut = Render<ShadcnDrawer>(parameters => parameters
+            .Add(component => component.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnDrawerContent>(0);
+                builder.AddAttribute(1, nameof(ShadcnDrawerContent.ChildContent), (RenderFragment)(content =>
+                {
+                    content.OpenComponent<ShadcnDrawerTitle>(0);
+                    content.AddAttribute(1, nameof(ShadcnDrawerTitle.ChildContent), (RenderFragment)(title => title.AddContent(0, "Dispatch")));
+                    content.CloseComponent();
+                    content.OpenComponent<ShadcnDrawerClose>(2);
+                    content.AddAttribute(3, nameof(ShadcnDrawerClose.Variant), Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonVariant.Default);
+                    content.AddAttribute(4, nameof(ShadcnDrawerClose.ChildContent), (RenderFragment)(close => close.AddContent(0, "Confirm dispatch")));
+                    content.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }));
+
+        var close = cut.Find("[data-slot='drawer-close']");
+        Assert.Contains("shadcn-drawer-close", close.ClassList);
+        Assert.Equal("default", close.GetAttribute("data-variant"));
     }
 
     [Theory]
@@ -249,6 +283,8 @@ public sealed class SheetDrawerTests : BunitContext
         var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-overlays-menus.js"));
         var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css"));
 
+        Assert.Contains("export function detachDrawer(content) { if (!content) return;", script, StringComparison.Ordinal);
+        Assert.Contains("content.querySelectorAll('[data-pointer-highlighted=\"true\"]')", script, StringComparison.Ordinal);
         Assert.Contains("content.removeAttribute('data-drawer-ready')", script, StringComparison.Ordinal);
         Assert.Contains("content.dataset.drawerReady = 'true'", script, StringComparison.Ordinal);
         Assert.Contains("button,a,input,textarea,select,[data-no-drag]", script, StringComparison.Ordinal);

@@ -103,6 +103,9 @@ public sealed class ChartTests : BunitContext
         Assert.Contains("requestAnimationFrame", source, StringComparison.Ordinal);
         Assert.Contains("invokeMethodAsync", source, StringComparison.Ordinal);
         Assert.Contains("OnChartResize", source, StringComparison.Ordinal);
+        Assert.Contains("[data-slot=\"chart-surface\"]", source, StringComparison.Ordinal);
+        Assert.Contains("(surface ?? element).getBoundingClientRect()", source, StringComparison.Ordinal);
+        Assert.Contains("observer.observe(surface ?? element)", source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -222,21 +225,110 @@ public sealed class ChartTests : BunitContext
         Assert.Equal(6, cut.FindAll("[data-slot='chart-legend-item']").Count);
         Assert.Contains("Jan เดสก์ท็อป", cut.Find("[data-slot='chart-legend']").TextContent);
         Assert.Contains("Mar มือถือ", cut.Find("[data-slot='chart-legend']").TextContent);
+        Assert.Equal("xMidYMid meet", cut.Find("svg[data-slot='chart-surface']").GetAttribute("preserveAspectRatio"));
     }
 
     [Fact]
-    public void PointerAndPerPointFocusExposeVisibleActiveTarget()
+    public void RadialCategoriesCanOwnDistinctThemeColors()
+    {
+        var config = new ShadcnChartConfig
+        {
+            ["orders"] = new("Scheduled jobs") { Color = "red" },
+            ["orders-0"] = new("Aluminum") { Color = "blue" },
+            ["orders-1"] = new("Stainless") { Color = "green" },
+            ["orders-2"] = new("Polymer") { Color = "orange" }
+        };
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Type, ShadcnChartType.Donut)
+            .Add(component => component.Config, config)
+            .Add(component => component.Categories, new[] { "Aluminum", "Stainless", "Polymer" })
+            .Add(component => component.Series, new[] { new ShadcnChartSeries("orders", new double?[] { 12, 8, 5 }) })
+            .Add(component => component.Title, "Order mix")
+            .Add(component => component.ShowLegend, true));
+
+        Assert.Equal(new[] { "var(--color-orders-0)", "var(--color-orders-1)", "var(--color-orders-2)" },
+            cut.FindAll("path[data-series='orders']").Select(path => path.GetAttribute("fill")));
+        Assert.Equal(3, cut.FindAll("[data-slot='chart-legend-item']").Count);
+    }
+
+    [Fact]
+    public void PointerAndPerBarFocusExposeVisibleActiveTargetWithoutSyntheticMarker()
     {
         var cut = RenderChart();
-        var point = cut.Find("[data-slot='chart-point'][data-point='1']");
-        Assert.Equal("0", point.GetAttribute("tabindex"));
-        Assert.Contains("Feb", point.GetAttribute("aria-label"));
-        point.PointerEnter(new PointerEventArgs());
-        Assert.Equal("true", cut.Find("[data-slot='chart-point'][data-point='1']").GetAttribute("data-active"));
+        var bar = cut.Find("rect[data-series='desktop'][data-point='1']");
+        Assert.Equal("0", bar.GetAttribute("tabindex"));
+        Assert.Contains("Feb", bar.GetAttribute("aria-label"));
+        bar.PointerEnter(new PointerEventArgs());
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
         Assert.Contains("Feb", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
         Assert.NotNull(cut.Find("[data-slot='chart-tooltip-cursor']"));
-        point.PointerLeave(new PointerEventArgs());
+        cut.Find("figure").MouseLeave(new MouseEventArgs());
         Assert.Empty(cut.FindAll("[data-slot='chart-tooltip-content']"));
+    }
+
+    [Fact]
+    public void PointerTooltipIsAnchoredToTheActiveDatum()
+    {
+        var cut = RenderChart();
+        var firstBar = cut.Find("rect[data-series='desktop'][data-point='0']");
+
+        firstBar.MouseEnter();
+
+        var tooltip = cut.Find("[data-slot='chart-tooltip-content']");
+        Assert.Equal("0", tooltip.GetAttribute("data-active-point"));
+        Assert.Contains("--shadcn-chart-tooltip-x:", tooltip.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Contains("--shadcn-chart-tooltip-y:", tooltip.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Contains("Jan", tooltip.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BarHoverDirectlyExposesTheCategoryAndSeriesValues()
+    {
+        var cut = RenderChart();
+        var bar = cut.Find("rect[data-series='desktop'][data-point='1']");
+
+        bar.PointerEnter(new PointerEventArgs());
+
+        var tooltip = cut.Find("[data-slot='chart-tooltip-content']");
+        Assert.Contains("Feb", tooltip.TextContent);
+        Assert.Contains("305", tooltip.TextContent);
+        cut.Find("figure").MouseLeave(new MouseEventArgs());
+        Assert.Empty(cut.FindAll("[data-slot='chart-tooltip-content']"));
+    }
+
+    [Fact]
+    public void BarChartsDoNotRenderSyntheticPointMarkers()
+    {
+        var cut = RenderChart();
+
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
+    }
+
+    [Fact]
+    public void ActiveDonutSliceMovesOutwardWithoutRenderingAPointMarker()
+    {
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Type, ShadcnChartType.Donut)
+            .Add(component => component.Config, Config)
+            .Add(component => component.Categories, new[] { "Jan", "Feb", "Mar" })
+            .Add(component => component.Series, new[] { Series[0] })
+            .Add(component => component.Title, "Visitors"));
+
+        var slice = cut.Find("path[data-point='1']");
+        slice.PointerEnter(new PointerEventArgs());
+
+        Assert.Equal("true", cut.Find("path[data-point='1']").GetAttribute("data-active"));
+        Assert.Contains("translate(", cut.Find("path[data-point='1']").GetAttribute("transform"), StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
+    }
+
+    [Fact]
+    public void PointerMovementAcrossThePlotExposesTheHoveredCategory()
+    {
+        var cut = RenderChart();
+        cut.Find("svg").MouseMove(new MouseEventArgs { OffsetX = 90 });
+
+        Assert.Contains("Jan", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
     }
 
     [Fact]

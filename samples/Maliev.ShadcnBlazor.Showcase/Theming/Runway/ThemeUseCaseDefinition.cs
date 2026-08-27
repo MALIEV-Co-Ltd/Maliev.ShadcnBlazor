@@ -1,11 +1,23 @@
 namespace Maliev.ShadcnBlazor.Showcase.Theming.Runway;
 
-public enum ThemeRunwayTrack { Left, Right }
+public enum ThemeBentoSize { Standard, Wide, Tall }
+
+public enum ThemeUseCaseCategory
+{
+    Overview,
+    Forms,
+    Data,
+    Communication,
+    Overlays,
+    Security,
+    Media
+}
 
 public sealed record ThemeUseCaseDefinition(
     string Id,
     int Order,
-    ThemeRunwayTrack Track,
+    ThemeBentoSize Size,
+    ThemeUseCaseCategory Category,
     string EnglishTitle,
     string ThaiTitle,
     IReadOnlyList<string> ComponentTypes);

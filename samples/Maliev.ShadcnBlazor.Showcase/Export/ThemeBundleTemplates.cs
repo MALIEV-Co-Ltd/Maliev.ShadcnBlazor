@@ -48,6 +48,7 @@ public static class ThemeBundleTemplates
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
+        <link href="_content/Maliev.ShadcnBlazor/css/shadcn-visual-styles.css" rel="stylesheet" />
         <link href="theme.css" rel="stylesheet" />
         ```
 

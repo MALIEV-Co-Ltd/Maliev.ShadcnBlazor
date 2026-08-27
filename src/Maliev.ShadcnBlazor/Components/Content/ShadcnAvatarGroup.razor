@@ -1,12 +1,46 @@
 @using Maliev.ShadcnBlazor.Components.Primitives
 @inherits ShadcnComponentBase
+@implements IAsyncDisposable
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-group")" style="@GroupStyle" data-slot="avatar-group"><CascadingValue Value="Size" IsFixed="true">@ChildContent</CascadingValue></div>
 @code {
     [Parameter] public ShadcnAvatarSize Size { get; set; } = ShadcnAvatarSize.Default;
     [Parameter] public string? Overlap { get; set; }
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public TimeSpan AutoCollapseAfter { get; set; }
+    [Parameter] public EventCallback OnAutoCollapse { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private string? NormalizedOverlap { get; set; }
+    private bool _lastExpanded;
+    private CancellationTokenSource? _collapseCancellation;
     private string? GroupStyle => MergeStyle(NormalizedOverlap is null ? null : $"--shadcn-avatar-overlap: {NormalizedOverlap}");
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
-    protected override void OnParametersSet() { if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size)); NormalizedOverlap = ShadcnCssValue.OptionalSingleDeclarationValue(Overlap, nameof(Overlap)); }
+    protected override void OnParametersSet()
+    {
+        if (!Enum.IsDefined(Size)) throw new ArgumentOutOfRangeException(nameof(Size));
+        if (AutoCollapseAfter < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(AutoCollapseAfter));
+        NormalizedOverlap = ShadcnCssValue.OptionalSingleDeclarationValue(Overlap, nameof(Overlap));
+        if (Expanded != _lastExpanded)
+        {
+            _lastExpanded = Expanded;
+            CancelAutoCollapse();
+            if (Expanded && AutoCollapseAfter > TimeSpan.Zero) BeginAutoCollapse();
+        }
+    }
+    private void BeginAutoCollapse()
+    {
+        _collapseCancellation = new CancellationTokenSource();
+        _ = AutoCollapseAsync(_collapseCancellation);
+    }
+    private async Task AutoCollapseAsync(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(AutoCollapseAfter, cancellation.Token);
+            if (!cancellation.IsCancellationRequested) await InvokeAsync(OnAutoCollapse.InvokeAsync);
+        }
+        catch (OperationCanceledException) { }
+        finally { if (ReferenceEquals(_collapseCancellation, cancellation)) _collapseCancellation = null; cancellation.Dispose(); }
+    }
+    private void CancelAutoCollapse() { _collapseCancellation?.Cancel(); _collapseCancellation?.Dispose(); _collapseCancellation = null; }
+    public ValueTask DisposeAsync() { CancelAutoCollapse(); return ValueTask.CompletedTask; }
 }

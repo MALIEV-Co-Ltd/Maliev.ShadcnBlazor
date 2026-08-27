@@ -175,6 +175,35 @@ public sealed class DataTableTests : BunitContext
     }
 
     [Fact]
+    public void PageSizeSelectorIncludesTheActivePageSizeWhenOptionsOmitIt()
+    {
+        var cut = RenderTable(new ShadcnDataTableState { PageSize = 3 });
+
+        var selector = cut.Find("select[data-slot='data-table-page-size']");
+        Assert.Equal("3", selector.QuerySelector("option[value='3']")?.TextContent);
+    }
+
+    [Fact]
+    public void LastVisibleDataColumnCannotBeHidden()
+    {
+        var states = new List<ShadcnDataTableState>();
+        var state = new ShadcnDataTableState
+        {
+            HiddenColumnKeys = new HashSet<string>(["status", "email"], StringComparer.Ordinal)
+        };
+        var cut = RenderTable(state, next => states.Add(next));
+
+        var lastVisibleToggle = cut.Find("input[data-column-visibility='amount']");
+        Assert.True(lastVisibleToggle.HasAttribute("disabled"));
+        Assert.Single(cut.FindAll("th[data-column]"));
+
+        lastVisibleToggle.Change(false);
+
+        Assert.Empty(states);
+        Assert.Single(cut.FindAll("th[data-column]"));
+    }
+
+    [Fact]
     public void ColumnFiltersAndShiftSortPreserveCallerOwnedMultiSort()
     {
         var states = new List<ShadcnDataTableState>();

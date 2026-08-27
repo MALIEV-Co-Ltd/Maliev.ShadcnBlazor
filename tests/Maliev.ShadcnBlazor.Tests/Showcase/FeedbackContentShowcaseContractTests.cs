@@ -43,7 +43,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
             Assert.NotEmpty(example.StateTags);
             Assert.NotEmpty(Render(example.Preview).FindAll("[data-slot]"));
         }
-        Assert.Equal(66, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
+        Assert.Equal(69, catalog.All.Count(entry => entry.Status == ComponentDocumentationStatus.Complete));
         Assert.DoesNotContain(catalog.All, entry => entry.Status == ComponentDocumentationStatus.Planned);
     }
 
@@ -282,7 +282,7 @@ public sealed class FeedbackContentShowcaseContractTests : BunitContext
         var avatarCut = Render(avatar.Preview);
         Assert.Equal(4, avatarCut.FindAll("[data-testid='avatar-gallery'] > [data-testid='avatar-profile']").Count);
         Assert.NotNull(avatarCut.Find("[data-testid='avatar-gallery'] [data-slot='avatar-fallback'] svg"));
-        Assert.Equal(3, avatarCut.FindAll("[data-testid='avatar-group-preview'] [data-slot='avatar']").Count);
+        Assert.Equal(4, avatarCut.FindAll("[data-testid='avatar-group-preview'] [data-slot='avatar']").Count);
         var presence = avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar'] > [data-slot='avatar-badge']");
         Assert.Equal("Online", presence.GetAttribute("aria-label"));
         Assert.NotNull(avatarCut.Find("[data-slot='avatar-group'] > [data-slot='avatar-group-count']"));

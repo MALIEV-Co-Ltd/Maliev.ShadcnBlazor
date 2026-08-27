@@ -83,7 +83,8 @@ public sealed class ToggleGroupBehaviorTests : BunitContext
             .AddChildContent(builder => AddItem(builder, 0, "dimensions", "Dimensions")));
 
         var group = cut.Find("[data-slot='toggle-group']");
-        Assert.Equal("vertical", group.GetAttribute("aria-orientation"));
+        Assert.Null(group.GetAttribute("aria-orientation"));
+        Assert.Equal("vertical", group.GetAttribute("data-orientation"));
         Assert.Equal("true", group.GetAttribute("aria-disabled"));
         Assert.Equal("true", group.GetAttribute("aria-invalid"));
         Assert.True(cut.Find("button").HasAttribute("disabled"));

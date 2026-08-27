@@ -76,7 +76,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var state = new DocumentationNavigationState();
         var cut = Render<DocumentationCatalogRail>(parameters => parameters.Add(component => component.State, state));
 
-        Assert.Equal(66, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(69, cut.FindAll(".documentation-component-list a").Count);
         Assert.Equal(
             new[] { "Composition", "Data", "Feedback", "Forms", "Foundation", "Layout", "Overlays" },
             cut.FindAll(".documentation-category h3").Select(heading => heading.TextContent.Trim()));
@@ -86,7 +86,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("No components found", cut.Find("[role='status']").TextContent.Trim());
         Assert.Equal("Clear search", cut.Find("[data-testid='clear-component-search']").TextContent.Trim());
         cut.Find("[data-testid='clear-component-search']").Click();
-        Assert.Equal(66, cut.FindAll(".documentation-component-list a").Count);
+        Assert.Equal(69, cut.FindAll(".documentation-component-list a").Count);
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
 
         Assert.Equal(2, cut.FindAll(".documentation-icon-action svg[aria-hidden='true']").Count);
-        Assert.Equal("Shadcn Blazor", cut.Find(".documentation-brand").TextContent.Trim());
+        Assert.Equal("Maliev Shadcn Blazor", cut.Find(".documentation-brand").TextContent.Trim());
         Assert.Single(cut.FindAll(".documentation-brand__mark img"));
         Assert.Contains("images/brand/MALIEV_BLACK.svg", cut.Find(".documentation-brand__mark img").GetAttribute("src"), StringComparison.Ordinal);
         Assert.Equal("Use dark theme", cut.Find("[data-testid='documentation-theme-toggle']").GetAttribute("aria-label"));
@@ -234,6 +234,23 @@ public sealed class DocumentationNavigationTests : BunitContext
         var directionIcon = cut.Find("[data-testid='documentation-direction-toggle'] [data-slot='icon']");
         Assert.Equal("tabler", directionIcon.GetAttribute("data-library"));
         Assert.Equal("text-direction-rtl", directionIcon.GetAttribute("data-icon"));
+    }
+
+    [Fact]
+    public void ThemeStudioMobileActionsUseDistinctLibraryIcons()
+    {
+        var cut = Render<DocumentationHeader>(parameters => parameters
+            .Add(component => component.State, new DocumentationNavigationState())
+            .Add(component => component.StudioMode, true));
+
+        var catalogIcon = cut.Find("[data-testid='catalog-trigger'] [data-slot='icon']");
+        var settingsIcon = cut.Find("[data-testid='theme-controls-toggle'] [data-slot='icon']");
+
+        Assert.Equal("lucide", catalogIcon.GetAttribute("data-library"));
+        Assert.Equal("layout-grid", catalogIcon.GetAttribute("data-icon"));
+        Assert.Equal("lucide", settingsIcon.GetAttribute("data-library"));
+        Assert.Equal("sliders-horizontal", settingsIcon.GetAttribute("data-icon"));
+        Assert.NotEqual(catalogIcon.OuterHtml, settingsIcon.OuterHtml);
     }
 
     private IRenderedComponent<DocumentationLayout> RenderDocumentationLayout() => Render<DocumentationLayout>(parameters => parameters

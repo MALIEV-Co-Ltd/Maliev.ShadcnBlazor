@@ -22,7 +22,7 @@ public sealed class TokenContractTests
         Assert.Equal("0.625rem", root.GetRequiredDeclaration("--shadcn-radius"));
         Assert.Equal("2.25rem", root.GetRequiredDeclaration("--shadcn-control-height"));
         Assert.Equal("1", root.GetRequiredDeclaration("--shadcn-spacing-multiplier"));
-        Assert.Equal("3px", root.GetRequiredDeclaration("--shadcn-focus-ring-width"));
+        Assert.Equal("2px", root.GetRequiredDeclaration("--shadcn-focus-ring-width"));
         Assert.Equal("0px", root.GetRequiredDeclaration("--shadcn-focus-ring-offset"));
         Assert.Equal("150ms", root.GetRequiredDeclaration("--shadcn-motion-duration"));
         Assert.Equal("100ms", root.GetRequiredDeclaration("--shadcn-motion-duration-fast"));

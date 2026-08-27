@@ -141,6 +141,49 @@ public sealed class AvatarProgressLoadingTests : BunitContext
     }
 
     [Fact]
+    public void AvatarExposesRaisedStateWhilePointerIsOverIt()
+    {
+        var cut = Render<ShadcnAvatar>();
+        var avatar = cut.Find("[data-slot='avatar']");
+
+        avatar.MouseEnter();
+        Assert.Equal("true", avatar.GetAttribute("data-raised"));
+
+        avatar.MouseLeave();
+        Assert.Null(avatar.GetAttribute("data-raised"));
+    }
+
+    [Fact]
+    public void AvatarGroupCountCanActAsAnAccessibleExpansionTrigger()
+    {
+        var expanded = false;
+        var cut = Render<ShadcnAvatarGroupCount>(parameters => parameters
+            .Add(component => component.Expanded, expanded)
+            .Add(component => component.ExpandLabel, "Show one more teammate")
+            .Add(component => component.OnClick, _ => expanded = true)
+            .AddChildContent("+1"));
+
+        var trigger = cut.Find("button[data-slot='avatar-group-count']");
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal("Show one more teammate", trigger.GetAttribute("aria-label"));
+
+        trigger.Click();
+        Assert.True(expanded);
+    }
+
+    [Fact]
+    public async Task ExpandedAvatarGroupRequestsAutomaticCollapseAfterConfiguredDelay()
+    {
+        var collapsed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cut = Render<ShadcnAvatarGroup>(parameters => parameters
+            .Add(component => component.Expanded, true)
+            .Add(component => component.AutoCollapseAfter, TimeSpan.FromMilliseconds(20))
+            .Add(component => component.OnAutoCollapse, collapsed.SetResult));
+
+        await collapsed.Task.WaitAsync(TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
     public void ProgressLabelParameterFallsBackWhenCompositionHasNoLabelAndExposesValueText()
     {
         var cut = Render<ShadcnProgress>(parameters => parameters

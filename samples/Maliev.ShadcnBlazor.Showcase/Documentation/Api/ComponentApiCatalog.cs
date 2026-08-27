@@ -27,6 +27,7 @@ public sealed class ComponentApiCatalog
         "Maliev.ShadcnBlazor.Components.Overlays",
         "Maliev.ShadcnBlazor.Components.Primitives",
         "Maliev.ShadcnBlazor.Components.Selection",
+        "Maliev.ShadcnBlazor.Components.Styling",
         "Maliev.ShadcnBlazor.Components.Typography"
     ];
 
@@ -34,6 +35,12 @@ public sealed class ComponentApiCatalog
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio.Ratio"] = "Width divided by height for the rendered content frame.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Columns"] = "Maximum track count used when the grid container is wide.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.MediumColumns"] = "Track count used when the grid container reaches its intermediate size.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Gap"] = "Optional non-negative CSS length between Bento items.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Masonry"] = "Measures item content so later cards densely fill available vertical space while preserving responsive column spans.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem.ColumnSpan"] = "Maximum number of responsive tracks occupied by this item.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem.RowSpan"] = "Number of automatic grid rows occupied by this item.",
             ["Maliev.ShadcnBlazor.Components.Direction.ShadcnDirectionProvider.Direction"] = "Reading direction applied to this subtree; inherits the parent direction when omitted.",
             ["Maliev.ShadcnBlazor.Components.Content.ShadcnSeparator.Decorative"] = "When true, hides the separator from assistive technology.",
             ["Maliev.ShadcnBlazor.Components.Selection.ShadcnCheckbox.Value"] = "Controlled checked state; null renders the indeterminate state.",
@@ -44,6 +51,12 @@ public sealed class ComponentApiCatalog
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["Maliev.ShadcnBlazor.Components.Layout.ShadcnAspectRatio.Ratio"] = "Must be positive and finite.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Columns"] = "Allowed values: 1 through 4.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.MediumColumns"] = "Allowed values: 1 through the configured maximum column count.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Gap"] = "Must be a non-negative CSS length without additional declarations.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid.Masonry"] = "Requires browser JavaScript for content measurement; server-rendered content remains visible before enhancement.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem.ColumnSpan"] = "Allowed values: 1 through 4.",
+            ["Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem.RowSpan"] = "Allowed values: 1 through 4.",
             ["Maliev.ShadcnBlazor.Components.Typography.ShadcnTypeset.Tag"] = "Allowed values: div, article, section.",
             ["Maliev.ShadcnBlazor.Components.Selection.ShadcnSlider.Step"] = "Must be positive and align values within the minimum and maximum range.",
             ["Maliev.ShadcnBlazor.Components.Selection.ShadcnSlider.Values"] = "One value creates a single thumb; two values create a range."
@@ -52,6 +65,20 @@ public sealed class ComponentApiCatalog
     private static readonly IReadOnlyDictionary<string, IReadOnlySet<string>> ExplicitComponentTypes =
         new ReadOnlyDictionary<string, IReadOnlySet<string>>(new Dictionary<string, IReadOnlySet<string>>(StringComparer.Ordinal)
         {
+            ["bento-grid"] = Types(
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoGrid",
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnBentoItem"),
+            ["motion-reveal"] = Types(
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealGroup",
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnReveal",
+                "Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealEffect"),
+            ["visual-style-scope"] = Types(
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnColorTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnDepthTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnMotionTreatment",
+                "Maliev.ShadcnBlazor.Components.Styling.ShadcnStyleIntensity"),
             ["accordion"] = Types(
                 "Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordion",
                 "Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionItem",
@@ -344,13 +371,13 @@ public sealed class ComponentApiCatalog
         "Style" => "Additional inline declarations merged with component-owned styles.",
         "AdditionalAttributes" => "Additional HTML attributes forwarded to the component root.",
         _ when name.EndsWith("Changed", StringComparison.Ordinal) => $"Callback raised when {name[..^"Changed".Length]} changes.",
-        _ => $"Configures the {SplitWords(name).ToLowerInvariant()} value."
+        _ => $"Sets the {SplitWords(name).ToLowerInvariant()}."
     };
 
     private static string DescribeConstraints(Type type)
     {
         var underlying = Nullable.GetUnderlyingType(type) ?? type;
-        return underlying.IsEnum ? $"Allowed values: {string.Join(", ", Enum.GetNames(underlying))}." : "None.";
+        return underlying.IsEnum ? $"Allowed values: {string.Join(", ", Enum.GetNames(underlying))}." : "No additional constraints.";
     }
 
     private static string SplitWords(string value) => string.Concat(value.Select((character, index) =>

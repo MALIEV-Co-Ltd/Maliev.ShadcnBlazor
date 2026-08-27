@@ -267,7 +267,7 @@ public sealed class ActionsSelectionParityTests : BunitContext
     {
         var css = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
 
-        Assert.Contains("--shadcn-switch-travel: 0.875rem", css, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-switch-travel: 1rem", css, StringComparison.Ordinal);
         Assert.Contains("--shadcn-switch-travel: 0.625rem", css, StringComparison.Ordinal);
         Assert.Contains("translateX(var(--shadcn-switch-travel))", css, StringComparison.Ordinal);
         Assert.Contains("translateX(calc(var(--shadcn-switch-travel) * -1))", css, StringComparison.Ordinal);

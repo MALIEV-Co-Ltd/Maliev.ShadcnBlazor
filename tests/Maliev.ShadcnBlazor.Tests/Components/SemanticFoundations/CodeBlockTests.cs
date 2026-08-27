@@ -62,18 +62,18 @@ public sealed class CodeBlockTests : BunitContext
     }
 
     [Fact]
-    public void ToolbarAlwaysPlacesACompactLanguageSelectorBeforeTheStableCopyAction()
+    public void ToolbarUsesAStaticLanguageLabelWhenThereIsOnlyOneSource()
     {
         var cut = Render<ShadcnCodeBlock>(parameters => parameters
             .Add(component => component.Source, "dotnet add package Maliev.ShadcnBlazor")
             .Add(component => component.Language, "bash"));
 
         var toolbar = cut.Find("[data-slot='code-block-toolbar']");
-        var selector = toolbar.QuerySelector(".shadcn-code-block-language-select");
-        Assert.NotNull(selector);
-        Assert.Equal("copy-source", selector.NextElementSibling?.GetAttribute("data-testid"));
-        Assert.Equal("bash", toolbar.QuerySelector("[data-slot='select-value']")?.TextContent.Trim());
-        Assert.Null(toolbar.QuerySelector(".shadcn-code-block-language"));
+        var label = toolbar.QuerySelector(".shadcn-code-block-language");
+        Assert.NotNull(label);
+        Assert.Equal("copy-source", label.NextElementSibling?.GetAttribute("data-testid"));
+        Assert.Equal("bash", label.TextContent.Trim());
+        Assert.Null(toolbar.QuerySelector("[data-slot='select-trigger']"));
     }
 
     [Fact]

@@ -1,0 +1,135 @@
+@using System.Globalization
+@using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Components.Rendering
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+@Element
+
+@code {
+    private static readonly HashSet<string> AllowedTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "div", "main", "section", "article", "ul", "ol"
+    };
+
+    private static readonly Regex RootMarginPattern = new(
+        @"^-?(?:0|(?:\d+(?:\.\d+)?|\.\d+)(?:px|%))(?:\s+-?(?:0|(?:\d+(?:\.\d+)?|\.\d+)(?:px|%))){0,3}$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>Gets or sets the semantic HTML element rendered by the reveal boundary.</summary>
+    [Parameter]
+    public string Tag { get; set; } = "div";
+
+    /// <summary>Gets or sets the visible-area ratio required to reveal an item.</summary>
+    [Parameter]
+    public double Threshold { get; set; } = 0.08;
+
+    /// <summary>Gets or sets the IntersectionObserver root margin.</summary>
+    [Parameter]
+    public string RootMargin { get; set; } = "32px 0px";
+
+    /// <summary>Gets or sets the delay increment between consecutively revealed items.</summary>
+    [Parameter]
+    public int Stagger { get; set; } = 60;
+
+    /// <summary>Gets or sets whether each item reveals only once.</summary>
+    [Parameter]
+    public bool Once { get; set; } = true;
+
+    /// <summary>Gets or sets whether observer-driven reveals are paused.</summary>
+    [Parameter]
+    public bool Paused { get; set; }
+
+    /// <summary>Gets or sets whether motion is explicitly reduced.</summary>
+    [Parameter]
+    public bool ReducedMotion { get; set; }
+
+    /// <summary>Gets or sets whether all reveal enhancement is disabled.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Gets or sets the reveal items rendered inside the boundary.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _controller;
+
+    private RenderFragment Element => builder =>
+    {
+        builder.OpenElement(0, Tag);
+        builder.AddMultipleAttributes(1, AttributesExcept(
+            "data-slot", "data-reveal-threshold", "data-reveal-root-margin", "data-reveal-stagger",
+            "data-reveal-once", "data-reveal-paused", "data-reveal-reduced-motion", "data-reveal-disabled"));
+        builder.AddAttribute(2, "class", MergeClass("shadcn-reveal-group"));
+        builder.AddAttribute(3, "style", MergeStyle(null));
+        builder.AddAttribute(4, "data-slot", "motion-reveal");
+        builder.AddAttribute(5, "data-reveal-threshold", Threshold.ToString("0.##", CultureInfo.InvariantCulture));
+        builder.AddAttribute(6, "data-reveal-root-margin", RootMargin);
+        builder.AddAttribute(7, "data-reveal-stagger", Stagger.ToString(CultureInfo.InvariantCulture));
+        builder.AddAttribute(8, "data-reveal-once", Once ? "true" : "false");
+        builder.AddAttribute(9, "data-reveal-paused", Paused ? "true" : "false");
+        builder.AddAttribute(10, "data-reveal-reduced-motion", ReducedMotion ? "true" : "false");
+        builder.AddAttribute(11, "data-reveal-disabled", Disabled ? "true" : "false");
+        builder.AddElementReferenceCapture(12, reference => _root = reference);
+        builder.AddContent(13, ChildContent);
+        builder.CloseElement();
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Tag) || !AllowedTags.Contains(Tag))
+            throw new ArgumentOutOfRangeException(nameof(Tag), Tag, "Reveal group tag must be div, main, section, article, ul, or ol.");
+        if (Threshold is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(Threshold), Threshold, "Reveal threshold must be between zero and one.");
+        if (Stagger is < 0 or > 240)
+            throw new ArgumentOutOfRangeException(nameof(Stagger), Stagger, "Reveal stagger must be between zero and 240 milliseconds.");
+        if (string.IsNullOrWhiteSpace(RootMargin) || !RootMarginPattern.IsMatch(RootMargin.Trim()))
+            throw new ArgumentException("Reveal root margin must contain one to four px or percentage lengths.", nameof(RootMargin));
+
+        Tag = Tag.ToLowerInvariant();
+        RootMargin = RootMargin.Trim();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Disabled || ReducedMotion)
+        {
+            await DetachAsync();
+            return;
+        }
+
+        if (_controller is null)
+        {
+            _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-reveal.js");
+            _controller = await _module.InvokeAsync<IJSObjectReference>("attachRevealGroup", _root);
+        }
+        else
+        {
+            await _controller.InvokeVoidAsync("refresh");
+        }
+    }
+
+    private async ValueTask DetachAsync()
+    {
+        if (_controller is null) return;
+        try
+        {
+            await _controller.InvokeVoidAsync("dispose");
+            await _controller.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        _controller = null;
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await DetachAsync();
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

@@ -31,15 +31,17 @@
             <ShadcnAlertDialog Open="_open" OpenChanged="SetOpenAsync">
                 <ShadcnAlertDialogTrigger Class="showcase-alert-dialog-trigger">Delete saved quotation</ShadcnAlertDialogTrigger>
                 <ShadcnAlertDialogContent Size="@(Compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default)">
-                    <ShadcnAlertDialogMedia>
-                        <span class="showcase-alert-dialog-warning" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2.8 19h18.4z" /><path d="M12 9v4M12 17h.01" /></svg>
-                        </span>
-                    </ShadcnAlertDialogMedia>
-                    <ShadcnAlertDialogHeader>
-                        <ShadcnAlertDialogTitle>Delete quotation?</ShadcnAlertDialogTitle>
-                        <ShadcnAlertDialogDescription>This permanently removes Q-2847 and its saved pricing notes. This action cannot be undone.</ShadcnAlertDialogDescription>
-                    </ShadcnAlertDialogHeader>
+                    <div class="showcase-alert-dialog-heading">
+                        <ShadcnAlertDialogMedia>
+                            <span class="showcase-alert-dialog-warning" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2.8 19h18.4z" /><path d="M12 9v4M12 17h.01" /></svg>
+                            </span>
+                        </ShadcnAlertDialogMedia>
+                        <ShadcnAlertDialogHeader>
+                            <ShadcnAlertDialogTitle>Delete quotation?</ShadcnAlertDialogTitle>
+                            <ShadcnAlertDialogDescription>This permanently removes Q-2847 and its saved pricing notes. This action cannot be undone.</ShadcnAlertDialogDescription>
+                        </ShadcnAlertDialogHeader>
+                    </div>
                     <ShadcnAlertDialogFooter>
                         <ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel>
                         <ShadcnAlertDialogAction Class="showcase-alert-dialog-action--destructive" OnClick="DeleteAsync">Delete quotation</ShadcnAlertDialogAction>

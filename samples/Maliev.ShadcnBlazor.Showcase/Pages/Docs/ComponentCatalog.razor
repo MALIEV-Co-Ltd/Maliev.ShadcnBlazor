@@ -58,7 +58,7 @@
                     {
                         <a class="documentation-catalog-card" href="@component.DocumentationUrl">
                             <span class="documentation-catalog-card__name">@component.Name</span>
-                            <span class="documentation-catalog-card__summary">@component.PrimaryType</span>
+                            <span class="documentation-catalog-card__summary">@DisplayTypeName(component.PrimaryType)</span>
                             <span class="documentation-catalog-card__status">@component.Status</span>
                         </a>
                     }
@@ -69,5 +69,6 @@
 </section>
 
 @code {
+    private static string? DisplayTypeName(string? typeName) => typeName?.Split('`')[0];
     private static string Slugify(string value) => value.ToLowerInvariant().Replace(' ', '-');
 }

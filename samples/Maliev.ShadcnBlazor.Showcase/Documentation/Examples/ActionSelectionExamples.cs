@@ -232,6 +232,7 @@ internal static class ActionSelectionExamples
         var disabled = false;
         var readOnly = false;
         var invalid = false;
+        var hideIndicator = false;
         RenderFragment preview = builder =>
         {
             builder.OpenComponent<RadioGroupDossierPreview>(0);
@@ -240,6 +241,7 @@ internal static class ActionSelectionExamples
             builder.AddAttribute(3, nameof(RadioGroupDossierPreview.Disabled), disabled);
             builder.AddAttribute(4, nameof(RadioGroupDossierPreview.ReadOnly), readOnly);
             builder.AddAttribute(5, nameof(RadioGroupDossierPreview.Invalid), invalid);
+            builder.AddAttribute(6, nameof(RadioGroupDossierPreview.HideIndicator), hideIndicator);
             builder.CloseComponent();
         };
         string Source() => $$"""
@@ -249,7 +251,7 @@ internal static class ActionSelectionExamples
     <h3 id="review-speed-title">Inspection turnaround</h3>
     <p>Choose how quickly the production drawing should be reviewed.</p>
 
-    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Presentation="ShadcnRadioGroupPresentation.Card" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
+    <ShadcnRadioGroup TValue="string" @bind-Value="ReviewSpeed" Orientation="ShadcnRadioGroupOrientation.{{orientation}}" Presentation="ShadcnRadioGroupPresentation.Card" Disabled="{{disabled.ToString().ToLowerInvariant()}}" ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}" Invalid="{{invalid.ToString().ToLowerInvariant()}}" HideIndicator="{{hideIndicator.ToString().ToLowerInvariant()}}" Name="review-speed" aria-label="Inspection turnaround">
         <ShadcnRadioGroupItem Value="standard">Standard review · Within 2 business days</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="priority">Priority review · By the next business day</ShadcnRadioGroupItem>
         <ShadcnRadioGroupItem Value="same-day" Disabled="true">Same-day review · Unavailable after 2:00 PM</ShadcnRadioGroupItem>
@@ -268,7 +270,8 @@ internal static class ActionSelectionExamples
                 Select("radio-orientation", "Orientation", orientation, value => orientation = value),
                 Toggle("radio-disabled", "Disabled", v => disabled = v),
                 Toggle("radio-readonly", "Read only", v => readOnly = v),
-                Toggle("radio-invalid", "Invalid", v => invalid = v)
+                Toggle("radio-invalid", "Invalid", v => invalid = v),
+                Toggle("radio-hide-indicator", "Hide indicator", v => hideIndicator = v)
             ],
             ["selected", "unselected", "disabled-item", "horizontal", "vertical", "roving-focus", "read-only", "invalid", "form"]) with
         { RazorSourceProvider = Source };
@@ -298,7 +301,7 @@ internal static class ActionSelectionExamples
 <ShadcnSlider @bind-Values="SliderValues"
               Minimum="0"
               Maximum="100"
-              Step="5"
+              Step="1"
               Orientation="ShadcnSliderOrientation.{{orientation}}"
               Disabled="{{disabled.ToString().ToLowerInvariant()}}"
               ReadOnly="{{readOnly.ToString().ToLowerInvariant()}}"
@@ -412,13 +415,16 @@ internal static class ActionSelectionExamples
             builder.CloseComponent();
         };
         string Source() => $$"""
+            @using Maliev.ShadcnBlazor.Components.Icons
+            @using Maliev.ShadcnBlazor.Icons.Lucide
+
             <section class="inspection-note" aria-label="Inspection note editor">
                 <header>
                     <div>
                         <strong dir="auto">Inspection note</strong>
                         <span dir="auto">Revision C · autosaved</span>
                     </div>
-                    <span dir="auto" aria-live="polite">@(Bold ? "Bold enabled" : "Bold disabled")</span>
+                    <span dir="auto" aria-live="polite">@FormattingState</span>
                 </header>
 
                 <div role="toolbar" aria-label="Text formatting">
@@ -430,22 +436,30 @@ internal static class ActionSelectionExamples
                                   aria-invalid="{{invalid.ToString().ToLowerInvariant()}}"
                                   aria-label="Toggle bold emphasis">
                         <LeadingIcon>
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 4h8a4 4 0 0 1 0 8H6z" />
-                                <path d="M6 12h9a4 4 0 0 1 0 8H6z" />
-                            </svg>
+                            <ShadcnIcon Icon="BoldIcon" Size="18" />
                         </LeadingIcon>
-                        <ChildContent>Bold</ChildContent>
+                    </ShadcnToggle>
+                    <ShadcnToggle @bind-Pressed="Italic" Variant="ShadcnToggleVariant.{{variant}}" Size="ShadcnToggleSize.{{size}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" PointerCursor="true" aria-label="Toggle italic emphasis" title="Italic">
+                        <LeadingIcon><ShadcnIcon Icon="ItalicIcon" Size="18" /></LeadingIcon>
+                    </ShadcnToggle>
+                    <ShadcnToggle @bind-Pressed="Underline" Variant="ShadcnToggleVariant.{{variant}}" Size="ShadcnToggleSize.{{size}}" Disabled="{{disabled.ToString().ToLowerInvariant()}}" PointerCursor="true" aria-label="Toggle underline emphasis" title="Underline">
+                        <LeadingIcon><ShadcnIcon Icon="UnderlineIcon" Size="18" /></LeadingIcon>
                     </ShadcnToggle>
                 </div>
 
-                <p dir="auto" data-emphasis="@(Bold ? "bold" : "regular")">
+                <p dir="auto" data-bold="@Bold" data-italic="@Italic" data-underline="@Underline">
                     Confirm the enclosure edge is deburred before final inspection.
                 </p>
             </section>
 
             @code {
                 private bool Bold { get; set; } = true;
+                private bool Italic { get; set; }
+                private bool Underline { get; set; }
+                private string FormattingState => $"Bold {(Bold ? "on" : "off")} · Italic {(Italic ? "on" : "off")} · Underline {(Underline ? "on" : "off")}";
+                private static readonly ShadcnIconData BoldIcon = LucideIconCatalog.Instance.Get(LucideIconNames.Bold);
+                private static readonly ShadcnIconData ItalicIcon = LucideIconCatalog.Instance.Get(LucideIconNames.Italic);
+                private static readonly ShadcnIconData UnderlineIcon = LucideIconCatalog.Instance.Get(LucideIconNames.Underline);
             }
             """;
         return Example("toggle", "Inspection note emphasis", "Use the button itself to test pressed state, then compare every supported visual and validation state.",

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Security.Cryptography;
 using Maliev.ShadcnBlazor.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
+using Maliev.ShadcnBlazor.Components.Styling;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
@@ -113,6 +114,27 @@ public static partial class ThemeStudioMetadata
 public sealed class ThemeStudioState
 {
     private const int HistoryLimit = 50;
+    private static readonly IReadOnlyList<ShadcnFontSelection> BodyShuffleFonts =
+    [
+        BodyFont("Geist", bundled: true),
+        BodyFont("Inter", "inter"),
+        BodyFont("DM Sans", "dm-sans"),
+        BodyFont("Manrope", "manrope"),
+        BodyFont("Plus Jakarta Sans", "plus-jakarta-sans")
+    ];
+    private static readonly IReadOnlyList<ShadcnFontSelection> ThaiShuffleFonts =
+    [
+        ThaiFont("Noto Sans Thai", bundled: true),
+        ThaiFont("Prompt", "prompt"),
+        ThaiFont("Sarabun", "sarabun")
+    ];
+    private static readonly IReadOnlyList<ShadcnFontSelection> CodeShuffleFonts =
+    [
+        CodeFont("JetBrains Mono", bundled: true),
+        CodeFont("IBM Plex Mono", "ibm-plex-mono"),
+        CodeFont("Source Code Pro", "source-code-pro"),
+        CodeFont("Fira Code", "fira-code")
+    ];
     private readonly IThemeStudioStorage storage;
     private readonly IThemeStudioPresetCatalog presetCatalog;
     private readonly List<ThemeStudioSnapshot> _undo = [];
@@ -125,6 +147,11 @@ public sealed class ThemeStudioState
     private ThemeStudioIconLibrary _baselineIconLibrary = ThemeStudioIconLibrary.Lucide;
     private ThemeStudioMenuAccent _baselineMenuAccent = ThemeStudioMenuAccent.Default;
     private ThemeStudioMenuColor _baselineMenuColor = ThemeStudioMenuColor.Default;
+    private ShadcnVisualStyle _baselineVisualStyle = ShadcnVisualStyle.Minimal;
+    private ShadcnColorTreatment _baselineColorTreatment = ShadcnColorTreatment.Inherit;
+    private ShadcnDepthTreatment _baselineDepthTreatment = ShadcnDepthTreatment.Flat;
+    private ShadcnMotionTreatment _baselineMotionTreatment = ShadcnMotionTreatment.Calm;
+    private ShadcnStyleIntensity _baselineStyleIntensity = ShadcnStyleIntensity.Default;
     private string? _pointerMutationKey;
     private bool _pointerSnapshotCaptured;
     private bool _suppressWorkbenchChanged;
@@ -168,12 +195,20 @@ public sealed class ThemeStudioState
     public ThemeStudioIconLibrary IconLibrary { get; private set; } = ThemeStudioIconLibrary.Lucide;
     public ThemeStudioMenuAccent MenuAccent { get; private set; } = ThemeStudioMenuAccent.Default;
     public ThemeStudioMenuColor MenuColor { get; private set; } = ThemeStudioMenuColor.Default;
+    public ShadcnVisualStyle VisualStyle { get; private set; } = ShadcnVisualStyle.Minimal;
+    public ShadcnColorTreatment ColorTreatment { get; private set; } = ShadcnColorTreatment.Inherit;
+    public ShadcnDepthTreatment DepthTreatment { get; private set; } = ShadcnDepthTreatment.Flat;
+    public ShadcnMotionTreatment MotionTreatment { get; private set; } = ShadcnMotionTreatment.Calm;
+    public ShadcnStyleIntensity StyleIntensity { get; private set; } = ShadcnStyleIntensity.Default;
     public ThemeStudioRadiusPreset RadiusPreset => ThemeStudioGeneratorCatalog.RadiusPreset(Draft.Metrics.RadiusRem);
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
     public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline ||
         StyleId != _baselineStyleId || BaseColorId != _baselineBaseColorId || IconLibrary != _baselineIconLibrary ||
-        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || !PaletteEquals(_documentTemplate.Palette, _baselineDocumentTemplate.Palette) ||
+        MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || VisualStyle != _baselineVisualStyle ||
+        ColorTreatment != _baselineColorTreatment || DepthTreatment != _baselineDepthTreatment ||
+        MotionTreatment != _baselineMotionTreatment || StyleIntensity != _baselineStyleIntensity ||
+        !PaletteEquals(_documentTemplate.Palette, _baselineDocumentTemplate.Palette) ||
         !TypographyEquals(_documentTemplate.Typography, _baselineDocumentTemplate.Typography);
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public IReadOnlyList<ShadcnThemeValidationMessage> PaletteDiagnostics { get; private set; } = [];
@@ -298,11 +333,62 @@ public sealed class ThemeStudioState
 
     public string ShufflePreset()
     {
+        var previousTypography = Typography;
         var candidates = presetCatalog.All.Where(item => !string.Equals(item.Id, SelectedPresetId, StringComparison.Ordinal)).ToArray();
         var selected = candidates[RandomNumberGenerator.GetInt32(candidates.Length)];
         ApplyCuratedPreset(selected, captureHistory: true);
+        ApplyShuffledTypography(previousTypography);
         return selected.Id;
     }
+
+    private void ApplyShuffledTypography(ShadcnTypographyScale previous)
+    {
+        var typography = _documentTemplate.Typography with
+        {
+            Body = SelectDifferentFont(previous.Body, BodyShuffleFonts),
+            ThaiFallback = SelectDifferentFont(previous.ThaiFallback, ThaiShuffleFonts),
+            Code = SelectDifferentFont(previous.Code, CodeShuffleFonts)
+        };
+        var metrics = Draft.Metrics with
+        {
+            FontFamily = typography.Body.Family,
+            MonospaceFontFamily = typography.Code.Family
+        };
+        var theme = Draft with { Metrics = metrics };
+        EnsureTypographyValid(theme, typography);
+
+        _documentTemplate = _documentTemplate with { Typography = typography };
+        _baselineDocumentTemplate = _baselineDocumentTemplate with { Typography = typography };
+        Draft = theme;
+        Applied = Clone(theme);
+        _baseline = Clone(theme);
+        RevalidateAndApply();
+    }
+
+    private static ShadcnFontSelection SelectDifferentFont(
+        ShadcnFontSelection current,
+        IReadOnlyList<ShadcnFontSelection> candidates)
+    {
+        var available = candidates
+            .Where(candidate => !string.Equals(candidate.Family, current.Family, StringComparison.Ordinal))
+            .ToArray();
+        return available[RandomNumberGenerator.GetInt32(available.Length)];
+    }
+
+    private static ShadcnFontSelection BodyFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        $"'{family}', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+        "ui-sans-serif, system-ui, sans-serif",
+        bundled ? null : googleFontsId);
+
+    private static ShadcnFontSelection ThaiFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        family == "Noto Sans Thai" ? "'Noto Sans Thai', sans-serif" : $"'{family}', 'Noto Sans Thai', sans-serif",
+        "'Noto Sans Thai', sans-serif",
+        bundled ? null : googleFontsId);
+
+    private static ShadcnFontSelection CodeFont(string family, string? googleFontsId = null, bool bundled = false) => new(
+        $"'{family}', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        "ui-monospace, monospace",
+        bundled ? null : googleFontsId);
 
     public IReadOnlyList<ThemeStudioPresetDefinition> CuratedPresets => presetCatalog.All;
 
@@ -327,11 +413,21 @@ public sealed class ThemeStudioState
         IconLibrary = preset.IconLibrary;
         MenuAccent = ParseOption<ThemeStudioMenuAccent>(document.Application.MenuAccent);
         MenuColor = ParseOption<ThemeStudioMenuColor>(document.Application.MenuColor);
+        VisualStyle = preset.VisualStyle;
+        ColorTreatment = preset.ColorTreatment;
+        DepthTreatment = preset.DepthTreatment;
+        MotionTreatment = preset.MotionTreatment;
+        StyleIntensity = preset.StyleIntensity;
         _baselineStyleId = StyleId;
         _baselineBaseColorId = BaseColorId;
         _baselineIconLibrary = IconLibrary;
         _baselineMenuAccent = MenuAccent;
         _baselineMenuColor = MenuColor;
+        _baselineVisualStyle = VisualStyle;
+        _baselineColorTreatment = ColorTreatment;
+        _baselineDepthTreatment = DepthTreatment;
+        _baselineMotionTreatment = MotionTreatment;
+        _baselineStyleIntensity = StyleIntensity;
         RevalidateAndApply();
     }
 
@@ -395,6 +491,11 @@ public sealed class ThemeStudioState
         IconLibrary = _baselineIconLibrary;
         MenuAccent = _baselineMenuAccent;
         MenuColor = _baselineMenuColor;
+        VisualStyle = _baselineVisualStyle;
+        ColorTreatment = _baselineColorTreatment;
+        DepthTreatment = _baselineDepthTreatment;
+        MotionTreatment = _baselineMotionTreatment;
+        StyleIntensity = _baselineStyleIntensity;
         RevalidateAndApply();
     }
 
@@ -727,6 +828,21 @@ public sealed class ThemeStudioState
         SetMetric("radiusRem", ThemeStudioGeneratorCatalog.RadiusRem(radiusPreset).ToString("G17", CultureInfo.InvariantCulture));
     }
 
+    public void SetVisualStyle(ShadcnVisualStyle value) => SetVisualTreatment(value, VisualStyle, "visual-style", next => VisualStyle = next);
+    public void SetColorTreatment(ShadcnColorTreatment value) => SetVisualTreatment(value, ColorTreatment, "color-treatment", next => ColorTreatment = next);
+    public void SetDepthTreatment(ShadcnDepthTreatment value) => SetVisualTreatment(value, DepthTreatment, "depth-treatment", next => DepthTreatment = next);
+    public void SetMotionTreatment(ShadcnMotionTreatment value) => SetVisualTreatment(value, MotionTreatment, "motion-treatment", next => MotionTreatment = next);
+    public void SetStyleIntensity(ShadcnStyleIntensity value) => SetVisualTreatment(value, StyleIntensity, "style-intensity", next => StyleIntensity = next);
+
+    private void SetVisualTreatment<T>(T value, T current, string key, Action<T> assign) where T : struct, Enum
+    {
+        ValidateWorkspaceValue(value, key);
+        if (EqualityComparer<T>.Default.Equals(value, current)) return;
+        CaptureHistory($"visual.{key}");
+        assign(value);
+        RaiseChanged();
+    }
+
     public void SetViewport(ThemeStudioViewport viewport)
         => Workbench.SetViewport(viewport);
 
@@ -885,11 +1001,21 @@ public sealed class ThemeStudioState
         IconLibrary,
         MenuAccent,
         MenuColor,
+        VisualStyle,
+        ColorTreatment,
+        DepthTreatment,
+        MotionTreatment,
+        StyleIntensity,
         _baselineStyleId,
         _baselineBaseColorId,
         _baselineIconLibrary,
         _baselineMenuAccent,
-        _baselineMenuColor);
+        _baselineMenuColor,
+        _baselineVisualStyle,
+        _baselineColorTreatment,
+        _baselineDepthTreatment,
+        _baselineMotionTreatment,
+        _baselineStyleIntensity);
 
     private void Restore(ThemeStudioSnapshot snapshot)
     {
@@ -904,11 +1030,21 @@ public sealed class ThemeStudioState
         IconLibrary = snapshot.IconLibrary;
         MenuAccent = snapshot.MenuAccent;
         MenuColor = snapshot.MenuColor;
+        VisualStyle = snapshot.VisualStyle;
+        ColorTreatment = snapshot.ColorTreatment;
+        DepthTreatment = snapshot.DepthTreatment;
+        MotionTreatment = snapshot.MotionTreatment;
+        StyleIntensity = snapshot.StyleIntensity;
         _baselineStyleId = snapshot.BaselineStyleId;
         _baselineBaseColorId = snapshot.BaselineBaseColorId;
         _baselineIconLibrary = snapshot.BaselineIconLibrary;
         _baselineMenuAccent = snapshot.BaselineMenuAccent;
         _baselineMenuColor = snapshot.BaselineMenuColor;
+        _baselineVisualStyle = snapshot.BaselineVisualStyle;
+        _baselineColorTreatment = snapshot.BaselineColorTreatment;
+        _baselineDepthTreatment = snapshot.BaselineDepthTreatment;
+        _baselineMotionTreatment = snapshot.BaselineMotionTreatment;
+        _baselineStyleIntensity = snapshot.BaselineStyleIntensity;
         _tokenEditorValues.Clear();
         foreach (var pair in snapshot.TokenEditorValues)
             _tokenEditorValues[pair.Key] = pair.Value;

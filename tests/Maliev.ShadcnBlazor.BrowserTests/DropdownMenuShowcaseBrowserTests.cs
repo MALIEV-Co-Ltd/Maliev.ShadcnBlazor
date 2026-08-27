@@ -1,6 +1,7 @@
 using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
+using System.Text.Json;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
 
@@ -94,5 +95,53 @@ public sealed class DropdownMenuShowcaseBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
         await Assertions.Expect(content).ToHaveCSSAsync("border-top-style", "solid");
         Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    [Fact]
+    public async Task PointerHoverMovesTheSingleActiveHighlightAndKeepsItemsInsideTheRoundedSurface()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/dropdown-menu").ToString());
+
+        var dossier = page.GetByTestId("dropdown-menu-dossier-preview");
+        await dossier.Locator("[data-slot='dropdown-menu-trigger']").ClickAsync();
+        var content = page.Locator("[data-slot='dropdown-menu-content']");
+        var enabledItems = content.Locator("[role='menuitem']:not([aria-disabled='true'])");
+        await Assertions.Expect(content).ToBeVisibleAsync();
+        await enabledItems.First.FocusAsync();
+        await Assertions.Expect(enabledItems.First).ToBeFocusedAsync();
+
+        await enabledItems.Nth(1).HoverAsync();
+
+        await Assertions.Expect(enabledItems.Nth(1)).ToBeFocusedAsync();
+        Assert.Equal(1, await content.EvaluateAsync<int>("""
+            menu => new Set([
+                ...menu.querySelectorAll('[data-pointer-highlighted="true"]'),
+                ...(menu.contains(document.activeElement) ? [document.activeElement] : [])
+            ]).size
+            """));
+        var geometry = await content.EvaluateAsync<string>("""
+            menu => {
+                const style = getComputedStyle(menu);
+                const box = menu.getBoundingClientRect();
+                const borderInline = parseFloat(style.borderInlineStartWidth) + parseFloat(style.borderInlineEndWidth);
+                const paddingInline = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd);
+                const items = [...menu.querySelectorAll(':scope > [role^="menuitem"], :scope > [role="group"] > [role^="menuitem"]')];
+                const inset = items.map(item => {
+                    const itemBox = item.getBoundingClientRect();
+                    return { left: itemBox.left - box.left, right: box.right - itemBox.right };
+                });
+                const valid = style.backgroundClip === 'padding-box'
+                    && paddingInline >= 8
+                    && inset.every(value => value.left >= borderInline / 2 + 3 && value.right >= borderInline / 2 + 3);
+                return JSON.stringify({ valid, backgroundClip: style.backgroundClip, paddingInline, borderInline, inset });
+            }
+            """);
+        Assert.True(JsonDocument.Parse(geometry).RootElement.GetProperty("valid").GetBoolean(), geometry);
     }
 }

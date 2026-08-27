@@ -1,7 +1,7 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-bubble")" style="@MergeStyle(null)" data-slot="bubble" data-variant="@VariantValue" data-align="@AlignValue"><CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue></div>
 @code {
- [Parameter] public ShadcnBubbleVariant Variant { get; set; }
+ [Parameter] public ShadcnBubbleVariant Variant { get; set; } = ShadcnBubbleVariant.Ghost;
  [Parameter] public ShadcnLogicalAlign Align { get; set; }
  [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
  private string VariantValue => Variant switch { ShadcnBubbleVariant.Default=>"default",ShadcnBubbleVariant.Secondary=>"secondary",ShadcnBubbleVariant.Muted=>"muted",ShadcnBubbleVariant.Tinted=>"tinted",ShadcnBubbleVariant.Outline=>"outline",ShadcnBubbleVariant.Ghost=>"ghost",ShadcnBubbleVariant.Destructive=>"destructive",_=>throw new ArgumentOutOfRangeException(nameof(Variant))};

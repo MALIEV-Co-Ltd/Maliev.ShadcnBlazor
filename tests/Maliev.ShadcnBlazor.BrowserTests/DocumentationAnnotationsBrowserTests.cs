@@ -20,7 +20,18 @@ public sealed class DocumentationAnnotationsBrowserTests(
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
 
-        var source = await page.Locator("#usage pre").InnerTextAsync();
+        var usage = page.Locator("#usage");
+        await Assertions.Expect(usage).ToContainTextAsync("@using Maliev.ShadcnBlazor.Components.Conversation");
+        await Assertions.Expect(usage.Locator("pre")).ToHaveCountAsync(0);
+
+        var preview = page.GetByTestId("component-preview").First;
+        var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
+        await Assertions.Expect(sourceDisclosure).Not.ToHaveAttributeAsync("open", "");
+        await sourceDisclosure.Locator("summary").ClickAsync();
+        await Assertions.Expect(sourceDisclosure).ToHaveAttributeAsync("open", "");
+        var sourceBlock = sourceDisclosure.Locator("pre");
+        await Assertions.Expect(sourceBlock).ToBeVisibleAsync();
+        var source = await sourceBlock.InnerTextAsync();
         Assert.Equal(
             1,
             source.Split("@using Maliev.ShadcnBlazor.Components.Conversation", StringSplitOptions.None).Length - 1);
@@ -28,9 +39,9 @@ public sealed class DocumentationAnnotationsBrowserTests(
             1,
             source.Split("@using Maliev.ShadcnBlazor.Components.Content", StringSplitOptions.None).Length - 1);
 
-        var tagColors = await page.Locator("#usage .shadcn-code-token-tag").EvaluateAllAsync<string[]>(
+        var tagColors = await sourceDisclosure.Locator(".shadcn-code-token-tag").EvaluateAllAsync<string[]>(
             "tokens => tokens.map(token => getComputedStyle(token).color)");
-        Assert.True(tagColors.Length >= 6, "The Message usage source should exercise a full Razor component tree.");
+        Assert.True(tagColors.Length >= 6, "The canonical Message preview source should exercise a full Razor component tree.");
         Assert.Single(tagColors.Distinct(StringComparer.Ordinal));
     }
 
