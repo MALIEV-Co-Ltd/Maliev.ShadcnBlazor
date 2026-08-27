@@ -223,6 +223,68 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(inputGroup).ToHaveCSSAsync("overflow", "visible");
     }
 
+    [Theory]
+    [InlineData(1569, 1032)]
+    [InlineData(390, 844)]
+    public async Task ProductionCarouselKeepsEverySelectedSlideWithinItsViewport(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 768);
+        var page = await OpenAsync(context);
+        var carousel = page.Locator("[data-use-case-id='production-carousel'] [data-slot='carousel']");
+        await carousel.ScrollIntoViewIfNeededAsync();
+        var viewport = carousel.Locator("[data-slot='carousel-content']");
+        var items = carousel.Locator("[data-slot='carousel-item']");
+
+        for (var index = 0; index < 3; index++)
+        {
+            if (index > 0)
+                await carousel.Locator("[data-slot='carousel-next']").ClickAsync();
+
+            var item = items.Nth(index);
+            await Assertions.Expect(item).ToHaveAttributeAsync("data-selected", "true");
+            var sizes = await item.EvaluateAsync<double[]>(
+                """
+                element => {
+                    const item = element.getBoundingClientRect();
+                    const viewport = element.closest('[data-slot=carousel]').querySelector('[data-slot=carousel-content]').getBoundingClientRect();
+                    const stage = element.querySelector('.theme-carousel-stage').getBoundingClientRect();
+                    return [item.width, viewport.width, stage.left - viewport.left, viewport.right - stage.right];
+                }
+                """);
+            Assert.InRange(Math.Abs(sizes[0] - sizes[1]), 0, 1);
+            Assert.True(sizes[2] is >= -1 and <= 1, $"Slide {index + 1} leading inset was {sizes[2]:F2}px. Geometry: {string.Join(", ", sizes)}");
+            Assert.True(sizes[3] is >= 0 and <= 20, $"Slide {index + 1} trailing inset was {sizes[3]:F2}px. Geometry: {string.Join(", ", sizes)}");
+        }
+
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-previous']")).ToHaveAttributeAsync("aria-label", "Previous production stage");
+        await Assertions.Expect(carousel.Locator("[data-slot='carousel-next']")).ToHaveAttributeAsync("aria-label", "Next production stage");
+    }
+
+    [Fact]
+    public async Task ProductionCarouselPresentsStageCopyAsSeparateReadableRows()
+    {
+        await using var context = await NewContextAsync(900, 720, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var stage = page.Locator("[data-use-case-id='production-carousel'] .theme-carousel-stage").First;
+        await stage.ScrollIntoViewIfNeededAsync();
+        await stage.Locator("span").First.EvaluateAsync(
+            "element => { document.documentElement.style.fontSize = '200%'; element.textContent = 'InspectionEvidencePackage'.repeat(12); }");
+        var rows = stage.Locator(":scope strong, :scope span, :scope [data-slot='badge']");
+
+        var positions = await rows.EvaluateAllAsync<double[]>("elements => elements.map(element => element.getBoundingClientRect().top)");
+        Assert.Equal(3, positions.Length);
+        Assert.True(positions[0] < positions[1] && positions[1] < positions[2], $"Stage rows were not vertically ordered: {string.Join(", ", positions)}");
+        var overflow = await stage.EvaluateAsync<double[]>(
+            """
+            element => {
+                const body = element.querySelector('.theme-carousel-stage__body');
+                const detail = body.querySelector('span');
+                return [element.clientWidth, element.scrollWidth, body.clientWidth, body.scrollWidth, detail.clientWidth, detail.scrollWidth];
+            }
+            """);
+        Assert.True(overflow[1] <= overflow[0], $"Stage content must wrap without horizontal overflow. Geometry: {string.Join(", ", overflow)}");
+    }
+
     [Fact]
     public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
     {

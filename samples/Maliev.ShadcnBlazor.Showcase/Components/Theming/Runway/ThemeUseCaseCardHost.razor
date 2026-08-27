@@ -484,17 +484,25 @@
             </ShadcnToggleGroup>
             break;
         case "production-carousel":
-            <ShadcnCarousel Label="@T("Production stage gallery")" SelectedIndex="_carouselIndex" SelectedIndexChanged="value => _carouselIndex = value" Options="CarouselOptions">
+            <ShadcnCarousel Label="@T("Production stage gallery")" PreviousLabel="@T("Previous production stage")" NextLabel="@T("Next production stage")" SelectedIndex="_carouselIndex" SelectedIndexChanged="value => _carouselIndex = value" Options="CarouselOptions">
                 <ShadcnCarouselContent>
                     @for (var index = 0; index < ProductionStages.Length; index++)
                     {
                         var stage = ProductionStages[index];
                         var stageNumber = index + 1;
-                        <ShadcnCarouselItem Index="index" Label="@T(stage.Title)"><ShadcnAspectRatio Ratio="@(16d / 9d)" Class="theme-carousel-stage"><div><strong>@T(stage.Title)</strong><span>@T(stage.Detail)</span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@stageNumber / @ProductionStages.Length</ShadcnBadge></div></ShadcnAspectRatio></ShadcnCarouselItem>
+                        <ShadcnCarouselItem Index="index" Label="@T(stage.Title)">
+                            <ShadcnAspectRatio Ratio="@(16d / 9d)" Class="theme-carousel-stage">
+                                <div class="theme-carousel-stage__body">
+                                    <strong>@T(stage.Title)</strong>
+                                    <span>@T(stage.Detail)</span>
+                                    <ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@stageNumber / @ProductionStages.Length</ShadcnBadge>
+                                </div>
+                            </ShadcnAspectRatio>
+                        </ShadcnCarouselItem>
                     }
                 </ShadcnCarouselContent>
-                <ShadcnCarouselPrevious Label="@T("Previous production stage")" />
-                <ShadcnCarouselNext Label="@T("Next production stage")" />
+                <ShadcnCarouselPrevious />
+                <ShadcnCarouselNext />
             </ShadcnCarousel>
             break;
         case "arabic-work-order":

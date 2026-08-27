@@ -14,14 +14,14 @@ function updateCarousel(root) {
   const align = root.dataset.align || 'start'
   let offset
   if (vertical) {
-    offset = selected.offsetTop - track.offsetTop
+    offset = selected.offsetTop
     if (align === 'center') offset -= (viewport.clientHeight - selected.offsetHeight) / 2
     if (align === 'end') offset -= viewport.clientHeight - selected.offsetHeight
     track.style.translate = `0 ${-offset}px`
   } else {
     offset = rtl
-      ? track.scrollWidth - (selected.offsetLeft - track.offsetLeft + selected.offsetWidth)
-      : selected.offsetLeft - track.offsetLeft
+      ? track.scrollWidth - (selected.offsetLeft + selected.offsetWidth)
+      : selected.offsetLeft
     if (align === 'center') offset -= (viewport.clientWidth - selected.offsetWidth) / 2
     if (align === 'end') offset -= viewport.clientWidth - selected.offsetWidth
     track.style.translate = `${rtl ? offset : -offset}px 0`

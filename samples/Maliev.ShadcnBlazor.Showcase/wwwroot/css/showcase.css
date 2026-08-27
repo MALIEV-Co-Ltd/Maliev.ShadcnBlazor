@@ -8927,8 +8927,9 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
 .theme-component-stack { display: grid; align-content: start; gap: .75rem; }
 .theme-component-pair :where(.showcase-calendar-dossier, .shadcn-calendar) { inline-size: 100%; }
 .theme-carousel-stage { overflow: clip; border-radius: var(--shadcn-radius-lg); background: color-mix(in oklch, var(--shadcn-muted) 52%, transparent); }
-.theme-carousel-stage > div { display: grid; block-size: 100%; place-content: center; justify-items: center; gap: .5rem; padding: 1rem; text-align: center; }
-.theme-carousel-stage > div > :is(strong, span) { display: block; }
+.theme-carousel-stage__body { display: grid; width: 100%; min-inline-size: 0; block-size: 100%; grid-template-columns: minmax(0, 1fr); place-content: center; justify-items: center; gap: .5rem; box-sizing: border-box; padding: 1rem; text-align: center; overflow-wrap: anywhere; }
+.theme-carousel-stage__body > * { min-inline-size: 0; max-inline-size: 100%; }
+.theme-carousel-stage__body > :is(strong, span) { display: block; }
 .theme-carousel-stage span { color: var(--shadcn-muted-foreground); }
 .theme-use-case-card[data-use-case-id="production-carousel"] .shadcn-carousel { padding-inline: calc(2.75rem * var(--shadcn-spacing-multiplier)); }
 .theme-use-case-card[data-use-case-id="production-carousel"] .shadcn-carousel-previous { inset-inline-start: 0; }
