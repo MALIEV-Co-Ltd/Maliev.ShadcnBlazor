@@ -302,7 +302,7 @@ export function detachHoverCardContent(content) {
 }
 
 const menus = new WeakMap();
-export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
+export function attachMenu(menu, triggerId, dotnet = null, loop = true, focusOnHover = true) {
     acquireLayer(menu);
     const enabled = scope => [...scope.querySelectorAll('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')].filter(item => item.closest('[role="menu"]') === scope && item.getAttribute('aria-disabled') !== 'true');
     let buffer = '', timer = 0;
@@ -336,7 +336,7 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true) {
     };
     const outside = event => { if (isTopLayer(menu) && !menu.contains(event.target) && !document.getElementById(triggerId)?.contains(event.target)) dotnet?.invokeMethodAsync('RequestCloseAsync'); };
     let hoverTimer = 0;
-    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const item = event.target.closest?.('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]'); if (item && item.closest('[role="menu"]') === menu && item.getAttribute('aria-disabled') !== 'true') { menu.querySelectorAll('[data-pointer-highlighted="true"]').forEach(value => value.removeAttribute('data-pointer-highlighted')); item.setAttribute('data-pointer-highlighted', 'true'); } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
+    const over = event => { const submenu = event.target.closest?.('[data-slot$="sub-content"]'); if (submenu && menu.contains(submenu)) { clearTimeout(hoverTimer); return; } const item = event.target.closest?.('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]'); if (item && item.closest('[role="menu"]') === menu && item.getAttribute('aria-disabled') !== 'true') { menu.querySelectorAll('[data-pointer-highlighted="true"]').forEach(value => value.removeAttribute('data-pointer-highlighted')); item.setAttribute('data-pointer-highlighted', 'true'); if (focusOnHover && document.activeElement !== item) item.focus({ preventScroll: true }); } const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || !menu.contains(trigger) || trigger.getAttribute('aria-disabled') === 'true') return; clearTimeout(hoverTimer); const open = () => { if (trigger.getAttribute('aria-expanded') !== 'true') trigger.click(); }; if (trigger.matches('[data-slot="dropdown-menu-sub-trigger"]')) hoverTimer = setTimeout(open, 100); else open(); };
     const out = event => { const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || trigger.parentElement?.contains(event.relatedTarget)) return; hoverTimer = setTimeout(() => { if (trigger.getAttribute('aria-expanded') === 'true') trigger.click(); }, 300); };
     menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('keydown', documentEscape); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, documentEscape, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
 }
@@ -385,7 +385,7 @@ export function placeContextMenu(menu, padding = 8) {
 export function attachContextMenu(menu, triggerId, dotnet, padding = 8) {
     menu.dataset.positioned = 'false';
     placeContextMenu(menu, padding);
-    attachMenu(menu, triggerId, dotnet);
+    attachMenu(menu, triggerId, dotnet, true, false);
 }
 
 const contextMenuSubmenus = new WeakMap();
