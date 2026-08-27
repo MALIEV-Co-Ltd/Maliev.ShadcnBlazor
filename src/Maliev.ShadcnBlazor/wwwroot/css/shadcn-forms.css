@@ -100,6 +100,9 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] .shadcn-select-trigger-icon { position: absolute; inset-inline-end: calc(.75rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > :where(.shadcn-select-trigger, .shadcn-select-clear) { grid-area: 1 / 1; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select[data-clearable="true"] > .shadcn-select-clear { position: relative; inset: auto; align-self: center; justify-self: end; margin-inline-end: calc(2rem * var(--shadcn-spacing-multiplier)); translate: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within { border-radius: 9999px; box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-ring) 38%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within > .shadcn-select-trigger:focus-visible { outline: none; box-shadow: none; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:has(.shadcn-select-trigger[aria-invalid="true"]):focus-within { box-shadow: 0 0 0 2px color-mix(in oklch, var(--shadcn-destructive) 38%, transparent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger { padding: 0 calc(.625rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; font-weight: 500; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-trigger[aria-expanded="true"] { background: var(--shadcn-accent); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-trigger-icon, .shadcn-date-picker-trigger svg) { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--shadcn-muted-foreground); }
@@ -107,6 +110,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-clear, .shadcn-combobox [data-slot="combobox-clear"], .shadcn-date-picker [data-slot="date-picker-clear"]) { position: absolute; inset-inline-end: .375rem; inset-block-start: 50%; z-index: 3; display: grid; width: 1.5rem; height: 1.5rem; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--shadcn-muted-foreground); padding: 0; translate: 0 -50%; cursor: pointer; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-clear, .shadcn-date-picker [data-slot="date-picker-clear"]) { font-weight: 700; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content, .shadcn-date-picker-content) { position: absolute; inset-inline-start: 0; top: calc(100% + .375rem); z-index: 50; min-width: max(100%, 9rem); max-height: 18rem; overflow: auto; border-radius: var(--shadcn-radius-md); background: var(--shadcn-popover); color: var(--shadcn-popover-foreground); box-shadow: var(--shadcn-shadow-md), 0 0 0 1px color-mix(in oklch, var(--shadcn-foreground) 10%, transparent); }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { position: fixed; inset: auto; left: var(--shadcn-popup-left, 0); top: var(--shadcn-popup-top, 0); width: max-content; min-width: max(var(--shadcn-popup-anchor-width, 9rem), 9rem); max-width: min(calc(100vw - 1rem), 22rem); max-height: min(18rem, var(--shadcn-popup-available-height, 18rem)); margin: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-content, .shadcn-combobox-content) { padding: calc(.25rem * var(--shadcn-spacing-multiplier)); }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-label, [data-slot="combobox-label"]) { padding: calc(.375rem * var(--shadcn-spacing-multiplier)) calc(.5rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: .75rem; }
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select-item, .shadcn-combobox-item) { position: relative; display: flex; width: 100%; align-items: center; gap: calc(.5rem * var(--shadcn-spacing-multiplier)); border-radius: var(--shadcn-radius-sm); padding: calc(.375rem * var(--shadcn-spacing-multiplier)) calc(2rem * var(--shadcn-spacing-multiplier)) calc(.375rem * var(--shadcn-spacing-multiplier)) calc(.5rem * var(--shadcn-spacing-multiplier)); font-size: .875rem; cursor: default; user-select: none; }
@@ -177,7 +181,7 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-card-content, .shadcn-popover-content, .shadcn-date-picker-content) .shadcn-calendar { background: transparent; }
 :where(.shadcn-scope, .shadcn-overlay-scope) [dir="rtl"] .shadcn-calendar-nav > button svg { rotate: 180deg; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content { width: max-content; min-width: 0; max-width: min(100vw - 1rem, 22rem); max-height: none; padding: 0; }
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content[popover] { position: fixed; inset: auto; left: var(--shadcn-date-picker-left, 0); top: var(--shadcn-date-picker-top, 0); max-height: var(--shadcn-date-picker-available-height, none); margin: 0; }
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker-content[popover] { position: fixed; inset: auto; left: var(--shadcn-popup-left, 0); top: var(--shadcn-popup-top, 0); max-height: var(--shadcn-popup-available-height, none); margin: 0; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker { display: inline-grid; align-items: start; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker[data-mode="single"] { inline-size: fit-content; min-inline-size: 12rem; max-inline-size: min(18rem, 100%); }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-date-picker[data-mode="range"] { inline-size: min(24rem, 100%); }
@@ -198,6 +202,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot { width: min(2.25rem, calc((100vw - 4rem) / 6)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-select, .shadcn-combobox, .shadcn-date-picker) { width: 100%; min-width: 0; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content { position: fixed; inset: auto .5rem .5rem; width: auto; max-height: min(70dvh, 32rem); }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select-content[popover] { inset: auto .5rem .5rem; width: auto; min-width: 0; max-width: none; max-height: min(70dvh, 32rem); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-combobox-content { position: absolute; inset: auto; inset-inline-start: 0; top: calc(100% + .375rem); inline-size: 100%; max-inline-size: 100%; max-height: min(50dvh, 18rem); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar { margin-inline: auto; --shadcn-calendar-cell: min(2.75rem, calc((100vw - 3rem) / 7)); }
 }
@@ -210,6 +215,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input::file-selector-button { color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot[data-active="true"] { outline: 2px solid Highlight; outline-offset: 2px; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp[data-invalid="true"] .shadcn-input-otp-slot { border-color: Mark; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within { outline: 2px solid Highlight; outline-offset: 2px; box-shadow: none; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"]::before { forced-color-adjust: none; background: Highlight; }

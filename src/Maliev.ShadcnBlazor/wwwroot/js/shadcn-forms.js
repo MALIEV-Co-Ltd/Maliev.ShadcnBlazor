@@ -89,12 +89,20 @@ export function disconnectOtpSelection(input) {
 }
 
 const popupObservers = new WeakMap();
-const datePickerPopups = new WeakMap();
+const promotedPopups = new WeakMap();
 
 export function promoteDatePickerPopup(root) {
-    disconnectDatePickerPopup(root);
-    const trigger = root?.querySelector?.('[data-slot="date-picker-trigger"]');
-    const popup = root?.querySelector?.('[data-slot="date-picker-content"]');
+    promoteAnchoredPopup(root, 'date-picker');
+}
+
+export function promoteSelectPopup(root) {
+    promoteAnchoredPopup(root, 'select');
+}
+
+function promoteAnchoredPopup(root, kind) {
+    disconnectPromotedPopup(root);
+    const trigger = root?.querySelector?.(`[data-slot="${kind}-trigger"]`);
+    const popup = root?.querySelector?.(`[data-slot="${kind}-content"]`);
     if (!trigger || !popup) return;
     if (!popup.showPopover) {
         popup.removeAttribute('popover');
@@ -113,25 +121,26 @@ export function promoteDatePickerPopup(root) {
             Math.max(viewportGap, alignedLeft),
             Math.max(viewportGap, window.innerWidth - popupBounds.width - viewportGap));
         const top = triggerBounds.bottom + triggerGap;
-        popup.style.setProperty('--shadcn-date-picker-left', `${left}px`);
-        popup.style.setProperty('--shadcn-date-picker-top', `${top}px`);
-        popup.style.setProperty('--shadcn-date-picker-available-height', `${Math.max(8, window.innerHeight - top - viewportGap)}px`);
+        popup.style.setProperty('--shadcn-popup-left', `${left}px`);
+        popup.style.setProperty('--shadcn-popup-top', `${top}px`);
+        popup.style.setProperty('--shadcn-popup-anchor-width', `${triggerBounds.width}px`);
+        popup.style.setProperty('--shadcn-popup-available-height', `${Math.max(8, window.innerHeight - top - viewportGap)}px`);
     };
 
     popup.showPopover();
     position();
     window.addEventListener('resize', position);
     window.addEventListener('scroll', position, true);
-    datePickerPopups.set(root, { popup, position });
+    promotedPopups.set(root, { popup, position });
 }
 
-function disconnectDatePickerPopup(root) {
-    const state = datePickerPopups.get(root);
+function disconnectPromotedPopup(root) {
+    const state = promotedPopups.get(root);
     if (!state) return;
     window.removeEventListener('resize', state.position);
     window.removeEventListener('scroll', state.position, true);
     if (state.popup.matches(':popover-open')) state.popup.hidePopover();
-    datePickerPopups.delete(root);
+    promotedPopups.delete(root);
 }
 
 export function observePopupDismissal(root, dotnet, kind) {
@@ -152,7 +161,7 @@ export function observePopupDismissal(root, dotnet, kind) {
 }
 
 export function disconnectPopupDismissal(root) {
-    disconnectDatePickerPopup(root);
+    disconnectPromotedPopup(root);
     const observer = popupObservers.get(root);
     if (!observer) return;
     document.removeEventListener('pointerdown', observer.onPointerDown, true);

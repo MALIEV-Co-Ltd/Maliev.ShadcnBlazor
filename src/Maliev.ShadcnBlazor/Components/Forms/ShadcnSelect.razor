@@ -17,7 +17,7 @@
     }
     @if (EffectiveOpen)
     {
-        <div class="shadcn-select-content" data-slot="select-content">
+        <div class="shadcn-select-content" data-slot="select-content" popover="manual">
             <div id="@ListboxId" role="listbox" tabindex="-1">
                 @foreach (var group in GroupedOptions)
                 {
@@ -139,6 +139,7 @@
             Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
             SelfReference ??= DotNetObjectReference.Create(this);
             await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "select");
+            await Module.InvokeVoidAsync("promoteSelectPopup", Root);
             IsObserving = true;
         }
         else if (!EffectiveOpen && IsObserving && Module is not null)

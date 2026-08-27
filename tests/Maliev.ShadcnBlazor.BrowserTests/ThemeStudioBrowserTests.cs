@@ -159,6 +159,38 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task MaterialRoutingSelectUsesOneFocusRingAroundTheCompositeControl()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='select']").First;
+        await root.ScrollIntoViewIfNeededAsync();
+        var trigger = root.Locator("[data-slot='select-trigger']");
+
+        await trigger.FocusAsync();
+
+        Assert.NotEqual("none", await root.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
+        await Assertions.Expect(trigger).ToHaveCSSAsync("box-shadow", "none");
+        await Assertions.Expect(trigger).ToHaveCSSAsync("outline-style", "none");
+    }
+
+    [Fact]
+    public async Task MaterialRoutingSelectEscapesCardClipping()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var root = page.Locator("[data-use-case-id='material-routing'] [data-slot='select']").First;
+        await root.ScrollIntoViewIfNeededAsync();
+
+        await root.Locator("[data-slot='select-trigger']").ClickAsync();
+        var popup = root.Locator("[data-slot='select-content']");
+        await Assertions.Expect(popup).ToBeVisibleAsync();
+        Assert.True(
+            await popup.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The select options must use the browser top layer so clipped ancestors cannot crop them.");
+    }
+
+    [Fact]
     public async Task BentoMasonryReclaimsRowsAfterInteractiveContentShrinks()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
