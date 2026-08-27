@@ -332,6 +332,25 @@ public sealed class ChartTests : BunitContext
     }
 
     [Fact]
+    public void LineHoverShowsAnActiveMarkerForEveryVisibleSeries()
+    {
+        var cut = Render<ShadcnChart>(parameters => parameters
+            .Add(component => component.Id, "line-markers")
+            .Add(component => component.Type, ShadcnChartType.Line)
+            .Add(component => component.Config, Config)
+            .Add(component => component.Categories, new[] { "Jan", "Feb", "Mar" })
+            .Add(component => component.Series, Series)
+            .Add(component => component.Title, "Visitors"));
+
+        cut.Find("svg").MouseMove(new MouseEventArgs { OffsetX = 178 });
+
+        var markers = cut.FindAll("[data-slot='chart-point'][data-point='1'][data-active='true']");
+        Assert.Equal(2, markers.Count);
+        Assert.Equal(new[] { "desktop", "mobile" }, markers.Select(marker => marker.GetAttribute("data-series")));
+        Assert.Equal(2, markers.Select(marker => marker.GetAttribute("cy")).Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
     public void RtlKeyboardTraversalUsesLogicalHorizontalDirection()
     {
         var cut = RenderChart(direction: ShadcnDirection.RightToLeft);

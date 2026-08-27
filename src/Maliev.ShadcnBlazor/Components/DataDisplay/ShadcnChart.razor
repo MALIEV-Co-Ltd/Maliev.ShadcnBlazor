@@ -50,7 +50,10 @@
                 @for (var pointIndex = 0; pointIndex < (VisibleSeries.Count > 0 ? Categories.Count : 0); pointIndex++)
                 {
                     var capturedIndex = pointIndex;
-                    <circle data-slot="chart-point" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@PointLabel(capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
+                    @foreach (var series in VisibleSeries.Where(item => item.Values[capturedIndex].HasValue))
+                    {
+                        <circle data-slot="chart-point" data-series="@series.Key" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@SeriesPointLabel(series, capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(series, capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
+                    }
                 }
             }
             @if (ShowTicks && !IsRadial)
@@ -184,10 +187,16 @@
     {
         var arc = Geometry.Shapes.FirstOrDefault(shape => shape.Kind == "arc" && shape.PointIndex == index);
         if (arc is not null) return arc.Values[1] + (arc.Values[2] + arc.Values[3]) / 2 * Math.Sin((arc.Values[4] + arc.Values[5]) / 2);
-        var value = VisibleSeries.Select(item => item.Values[index]).FirstOrDefault(item => item.HasValue) ?? 0;
+        var series = VisibleSeries.FirstOrDefault(item => item.Values[index].HasValue);
+        return series is null ? _height / 2 : PointY(series, index);
+    }
+    private double PointY(ShadcnChartSeries series, int index)
+    {
+        var value = series.Values[index] ?? 0;
         return 12 + (Geometry.Maximum - value) / (Geometry.Maximum - Geometry.Minimum) * Math.Max(1, _height - 40);
     }
     private string PointLabel(int index) => $"{Categories[index]}: {string.Join(", ", VisibleSeries.Select(item => $"{SeriesLabel(item.Key)} {Format(item.Values[index])}"))}";
+    private string SeriesPointLabel(ShadcnChartSeries series, int index) => $"{Categories[index]}: {SeriesLabel(series.Key)} {Format(series.Values[index])}";
     private string TooltipLabel(int index) => Config.TryGetValue(LabelKey ?? string.Empty, out var label) ? label.Label : Categories[index];
     private double TooltipXPercent => Math.Clamp(PointX(_activeIndex) / Math.Max(1, _width) * 100, 0, 100);
     private double TooltipY => Math.Max(12, PointY(_activeIndex) - 92);
