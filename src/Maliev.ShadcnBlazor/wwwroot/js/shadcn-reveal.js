@@ -98,13 +98,6 @@ export function attachRevealGroup(root) {
             return;
         }
 
-        const rect = item.getBoundingClientRect();
-        const immediatelyVisible = rect.bottom >= 0 && rect.top <= window.innerHeight + 32;
-        if (immediatelyVisible) {
-            show(item);
-            return;
-        }
-
         item.setAttribute("data-reveal-state", "pending");
         observe(item);
     };

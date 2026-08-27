@@ -598,7 +598,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await confirm.EvaluateAsync("element => element.click()");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirming");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirmed", new() { Timeout = 2_000 });
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 2_000 });
+        await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 4_000 });
 
         var switchControl = page.GetByRole(AriaRole.Switch, new() { Name = "Use quiet hours", Exact = true });
         var switchTrack = switchControl.Locator("xpath=parent::*");

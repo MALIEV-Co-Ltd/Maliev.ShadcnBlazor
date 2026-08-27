@@ -100,7 +100,7 @@
             <label>@T("Factory")<ThemeAnimatedInput Value="@FactoryValue" ReadOnly="true" /></label>
             <div class="theme-runway-fields"><label>@T("Dock")<ThemeAnimatedInput Value="@DockValue" ReadOnly="true" /></label><label>@T("Reference")<ThemeAnimatedInput Value="@ReferenceValue" ReadOnly="true" /></label></div>
             <label class="theme-runway-check"><ShadcnCheckbox Value="@_saveAddress" ValueChanged="value => _saveAddress = value ?? false" /> @T("Save as production handoff")</label>
-            <ShadcnButton Size="ShadcnButtonSize.Small" ButtonType="ShadcnButtonType.Submit" BusyText="@T("Confirming")" SuccessText="@T("Confirmed")" OnClick="ConfirmHandoffAsync"><span class="theme-workflow-inline-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="15" /></span>@T("Confirm address")</ShadcnButton>
+            <ShadcnButton Size="ShadcnButtonSize.Small" ButtonType="ShadcnButtonType.Submit" BusyText="@T("Confirming")" SuccessText="@T("Confirmed")" SuccessDuration="@TimeSpan.FromSeconds(3)" OnClick="ConfirmHandoffAsync"><span class="theme-workflow-inline-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="15" /></span>@T("Confirm address")</ShadcnButton>
             @if (_handoffSaved) { <p class="theme-runway-action-status" role="status">@T("Handoff saved for dispatch.")</p> }
             break;
         case "quotation-data-table":

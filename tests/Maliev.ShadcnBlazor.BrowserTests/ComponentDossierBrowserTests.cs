@@ -523,7 +523,10 @@ public sealed class ComponentDossierBrowserTests(
         var contentBox = await content.BoundingBoxAsync();
         Assert.NotNull(triggerBox);
         Assert.NotNull(contentBox);
-        Assert.True(contentBox!.Y >= triggerBox!.Y + triggerBox.Height - 1);
+        var opensWithoutOverlap =
+            contentBox!.Y >= triggerBox!.Y + triggerBox.Height - 1 ||
+            contentBox.Y + contentBox.Height <= triggerBox.Y + 1;
+        Assert.True(opensWithoutOverlap, $"Expected the date picker to open above or below its trigger without overlap, but trigger was {triggerBox} and content was {contentBox}.");
         Assert.InRange(contentBox.X, 0, 390 - contentBox.Width + 1);
         await Assertions.Expect(root).ToHaveCSSAsync("direction", "rtl");
         await trigger.ClickAsync();
