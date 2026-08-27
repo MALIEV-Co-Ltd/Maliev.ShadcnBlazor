@@ -383,6 +383,29 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task ReviewerDueTooltipMaintainsReadableContrastInTheThemePreview()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var details = page.Locator("[data-use-case-id='reviewer-details']");
+
+        await details.GetByRole(AriaRole.Button, new() { Name = "Due 15:30", Exact = true }).ClickAsync();
+        var tooltip = page.GetByRole(AriaRole.Tooltip);
+        await Assertions.Expect(tooltip).ToContainTextAsync("45 minutes remaining");
+
+        var colors = await tooltip.EvaluateAsync<string[]>("""
+            element => {
+                const style = getComputedStyle(element);
+                const arrowStyle = getComputedStyle(element.querySelector('[data-slot="tooltip-arrow"]'));
+                return [style.color, style.backgroundColor, arrowStyle.backgroundColor];
+            }
+            """);
+
+        Assert.NotEqual(colors[0], colors[1]);
+        Assert.Equal(colors[1], colors[2]);
+    }
+
+    [Fact]
     public async Task DrawingAttachmentShowsDeterminateAndIndeterminateUploadProgress()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
