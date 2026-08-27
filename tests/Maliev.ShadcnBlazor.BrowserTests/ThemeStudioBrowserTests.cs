@@ -412,6 +412,24 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task QuestionnaireSeparatesPromptCopyFromItsAnswerChoices()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var questionnaire = page.Locator("[data-use-case-id='project-questionnaire']");
+
+        var promptGap = await questionnaire.EvaluateAsync<double>("""
+            element => {
+                const description = element.querySelector('[data-slot="questionnaire-description"]').getBoundingClientRect();
+                const choices = element.querySelector('[data-slot="questionnaire-choices"]').getBoundingClientRect();
+                return choices.top - description.bottom;
+            }
+            """);
+
+        Assert.InRange(promptGap, 11, 13);
+    }
+
+    [Fact]
     public async Task QuotationTableShowsItsActivePageSizeAndKeepsOneDataColumnVisible()
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);

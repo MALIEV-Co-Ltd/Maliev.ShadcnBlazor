@@ -101,7 +101,7 @@
 .shadcn-questionnaire-item { min-width:0; border:0; padding:0; outline:none; }
 .shadcn-questionnaire-title { font-size:1.25rem; font-weight:600; text-wrap:pretty; }
 .shadcn-questionnaire-description { color:var(--shadcn-muted-foreground); text-wrap:pretty; }
-.shadcn-questionnaire-choices { display:grid; min-width:0; gap:calc(.5rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-questionnaire-choices { display:grid; min-width:0; gap:calc(.5rem * var(--shadcn-spacing-multiplier)); margin-block-start:calc(.75rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-questionnaire-choice { position:relative; display:flex; min-height:2.75rem; cursor:pointer; align-items:flex-start; gap:calc(.625rem * var(--shadcn-spacing-multiplier)); border:1px solid var(--shadcn-border); border-radius:var(--shadcn-radius-md); padding:calc(.75rem * var(--shadcn-spacing-multiplier)); text-align:start; transition:background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 .shadcn-questionnaire-choice:focus-within { border-color: color-mix(in oklch, var(--shadcn-ring) 72%, var(--shadcn-border)); outline: 1px solid color-mix(in oklch, var(--shadcn-ring) 42%, transparent); outline-offset: 1px; }
 .shadcn-questionnaire-choice[data-checked="true"] { border-color:var(--shadcn-primary); background:color-mix(in srgb,var(--shadcn-primary) 8%,transparent); }
