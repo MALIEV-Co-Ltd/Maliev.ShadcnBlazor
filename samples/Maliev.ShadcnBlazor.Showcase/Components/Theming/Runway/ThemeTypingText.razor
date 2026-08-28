@@ -1,10 +1,16 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming.Runway
 @using System.Globalization
+@using System.Text.RegularExpressions
 
 <span class="@Class" data-typing-text aria-hidden="true">
-    @foreach (var glyph in _glyphs)
+    @foreach (var token in _tokens)
     {
-        <span class="theme-typing-glyph" style="@GlyphStyle(glyph.Index)">@glyph.Value</span>
+        <span class="@(token.KeepTogether ? "theme-typing-word" : "theme-typing-flow")">
+            @foreach (var glyph in token.Glyphs)
+            {
+                <span class="theme-typing-glyph" style="@GlyphStyle(glyph.Index)">@glyph.Value</span>
+            }
+        </span>
     }
 </span>
 
@@ -13,7 +19,7 @@
     [Parameter] public string? Class { get; set; }
 
     private string _renderedText = string.Empty;
-    private IReadOnlyList<TypingGlyph> _glyphs = [];
+    private IReadOnlyList<TypingToken> _tokens = [];
 
     protected override void OnParametersSet()
     {
@@ -23,23 +29,27 @@
         }
 
         _renderedText = Text;
-        _glyphs = SplitTextElements(Text);
+        _tokens = Tokenize(Text);
     }
 
-    private static IReadOnlyList<TypingGlyph> SplitTextElements(string text)
+    private static IReadOnlyList<TypingToken> Tokenize(string text)
     {
-        var glyphs = new List<TypingGlyph>();
-        var elements = StringInfo.GetTextElementEnumerator(text);
-
-        while (elements.MoveNext())
+        var tokens = new List<TypingToken>();
+        var index = 0;
+        foreach (var segment in Regex.Split(text, "(\\s+)"))
         {
-            glyphs.Add(new TypingGlyph(glyphs.Count, elements.GetTextElement()));
+            if (segment.Length == 0) continue;
+            var glyphs = new List<TypingGlyph>();
+            var elements = StringInfo.GetTextElementEnumerator(segment);
+            while (elements.MoveNext()) glyphs.Add(new TypingGlyph(index++, elements.GetTextElement()));
+            var latinWord = !string.IsNullOrWhiteSpace(segment) && segment.All(character => character <= '\u024f');
+            tokens.Add(new TypingToken(latinWord, glyphs));
         }
-
-        return glyphs;
+        return tokens;
     }
 
     private static string GlyphStyle(int index) => $"--theme-typing-index: {index.ToString(CultureInfo.InvariantCulture)}";
 
     private sealed record TypingGlyph(int Index, string Value);
+    private sealed record TypingToken(bool KeepTogether, IReadOnlyList<TypingGlyph> Glyphs);
 }

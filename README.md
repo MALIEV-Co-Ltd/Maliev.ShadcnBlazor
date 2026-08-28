@@ -56,6 +56,25 @@ See the [getting started guide](docs/getting-started.md) for provider setup,
 asset selection, and a first component. The repository Showcase demonstrates
 every component family.
 
+## Agent-ready integration
+
+This repository includes portable Agent Skills for both package consumers and
+library maintainers. Install them with the open `skills` CLI:
+
+```bash
+npx skills add MALIEV-Co-Ltd/Maliev.ShadcnBlazor \
+  --skill maliev-shadcnblazor \
+  --skill maliev-shadcnblazor-maintainer
+```
+
+Use `$maliev-shadcnblazor` to integrate the released package into an
+application. Use `$maliev-shadcnblazor-maintainer` only when changing this
+repository. Agents that support repository-local discovery can use the skills
+directly from `.agents/skills/` without a global install.
+
+See [Agent Skills](docs/agent-skills.md) for Codex installation, project versus
+global scope, prompts, package contents, and safety boundaries.
+
 ## Highlights
 
 - Native Blazor components with strongly typed parameters and callbacks.
@@ -85,6 +104,7 @@ minor line.
 - Getting started: [docs/getting-started.md](docs/getting-started.md)
 - Component catalog: [docs/components.md](docs/components.md)
 - Theming: [docs/theming.md](docs/theming.md)
+- Agent Skills: [docs/agent-skills.md](docs/agent-skills.md)
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Support: [SUPPORT.md](SUPPORT.md)
 - Security policy: [SECURITY.md](SECURITY.md)

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Maliev ShadcnBlazor Maintainer"
+  short_description: "Extend and verify the component library"
+  brand_color: "#111827"
+  default_prompt: "Use $maliev-shadcnblazor-maintainer to implement and verify a repository component change."
+
+policy:
+  allow_implicit_invocation: true

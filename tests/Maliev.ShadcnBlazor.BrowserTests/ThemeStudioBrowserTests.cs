@@ -12,6 +12,26 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     public static TheoryData<int, int> ReleaseViewports => new() { { 1440, 900 }, { 1024, 768 }, { 768, 1024 }, { 390, 844 }, { 320, 568 } };
 
     [Fact]
+    public async Task MobileHeaderBrandMarkMatchesCompactActionGeometry()
+    {
+        await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var brandMark = page.Locator(".documentation-brand__mark");
+        var catalogTrigger = page.GetByTestId("catalog-trigger");
+        var brandBox = await brandMark.BoundingBoxAsync();
+        var triggerBox = await catalogTrigger.BoundingBoxAsync();
+
+        Assert.NotNull(brandBox);
+        Assert.NotNull(triggerBox);
+        Assert.InRange(Math.Abs(brandBox.Width - triggerBox.Width), 0, 0.5);
+        Assert.InRange(Math.Abs(brandBox.Height - triggerBox.Height), 0, 0.5);
+        Assert.InRange(
+            Math.Abs((brandBox.Y + brandBox.Height / 2) - (triggerBox.Y + triggerBox.Height / 2)),
+            0,
+            0.5);
+    }
+
+    [Fact]
     public async Task BentoLayoutStylesheetIsServedAndAppliedAtCompactDesktopWidth()
     {
         await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
@@ -172,6 +192,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.NotEqual("none", await root.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
         await Assertions.Expect(trigger).ToHaveCSSAsync("box-shadow", "none");
         await Assertions.Expect(trigger).ToHaveCSSAsync("outline-style", "none");
+        var radius = await trigger.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); return [parseFloat(style.borderRadius), element.getBoundingClientRect().height]; }");
+        Assert.True(radius[0] < radius[1] / 2, $"Select radius {radius[0]}px should not create a pill inside a {radius[1]}px control.");
     }
 
     [Fact]
@@ -246,7 +268,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.NotEqual(
             "rgba(0, 0, 0, 0)",
             await trigger.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
-        await Assertions.Expect(inputGroup).ToHaveCSSAsync("overflow", "visible");
+        await Assertions.Expect(inputGroup).ToHaveCSSAsync("overflow", "clip");
+        var control = root.Locator("[data-slot='combobox-input']");
+        await control.FocusAsync();
+        await Assertions.Expect(control).ToHaveCSSAsync("border-top-width", "0px");
+        await Assertions.Expect(control).ToHaveCSSAsync("box-shadow", "none");
     }
 
     [Theory]
@@ -587,18 +613,20 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var profile = page.Locator("[data-use-case-id='operator-profile']");
         var save = profile.Locator("button[data-operation-state]");
         await Assertions.Expect(save).ToHaveTextAsync("Save profile");
+        await RecordOperationStatesAsync(save);
         await save.EvaluateAsync("element => element.click()");
-        await Assertions.Expect(save).ToContainTextAsync("Saving");
-        await Assertions.Expect(save).ToContainTextAsync("Saved", new() { Timeout = 2_000 });
+        await Assertions.Expect(profile.GetByRole(AriaRole.Status)).ToContainTextAsync("Profile saved");
         await Assertions.Expect(save).ToContainTextAsync("Save profile", new() { Timeout = 2_000 });
+        await AssertOperationStatesAsync(save);
 
         var handoff = page.Locator("[data-use-case-id='shipping-handoff']");
         var confirm = handoff.Locator("button[data-operation-state]");
         await Assertions.Expect(confirm).ToHaveTextAsync("Confirm address");
+        await RecordOperationStatesAsync(confirm);
         await confirm.EvaluateAsync("element => element.click()");
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirming");
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirmed", new() { Timeout = 2_000 });
+        await Assertions.Expect(handoff.GetByRole(AriaRole.Status)).ToContainTextAsync("Handoff saved for dispatch.");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 4_000 });
+        await AssertOperationStatesAsync(confirm);
 
         var switchControl = page.GetByRole(AriaRole.Switch, new() { Name = "Use quiet hours", Exact = true });
         var switchTrack = switchControl.Locator("xpath=parent::*");
@@ -619,6 +647,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await dropzone.GetByRole(AriaRole.Button, new() { Name = "Remove fixture.step", Exact = true }).ClickAsync();
         await Assertions.Expect(dropzone.Locator("[data-slot='attachment']")).ToHaveCountAsync(0);
         await Assertions.Expect(dropzone).ToContainTextAsync("No production drawings selected");
+    }
+
+    private static Task RecordOperationStatesAsync(ILocator button) => button.EvaluateAsync("""
+        element => {
+            element.__operationStates = [element.getAttribute('data-operation-state')];
+            new MutationObserver(records => {
+                for (const record of records) {
+                    if (record.attributeName === 'data-operation-state') {
+                        element.__operationStates.push(record.oldValue);
+                    }
+                }
+                element.__operationStates.push(element.getAttribute('data-operation-state'));
+            }).observe(element, {
+                attributes: true,
+                attributeFilter: ['data-operation-state'],
+                attributeOldValue: true
+            });
+        }
+        """);
+
+    private static async Task AssertOperationStatesAsync(ILocator button)
+    {
+        var states = await button.EvaluateAsync<string[]>("element => element.__operationStates");
+        Assert.Contains("busy", states);
+        Assert.Contains("success", states);
+        Assert.Equal("idle", states[^1]);
     }
 
     [Fact]
@@ -887,6 +941,61 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(finalVisibleToggle).ToBeDisabledAsync();
         await Assertions.Expect(table.Locator("th[data-column]")).ToHaveCountAsync(1);
         await Assertions.Expect(table.Locator("tbody tr[data-row-key] td[data-column]")).ToHaveCountAsync(3);
+
+        await Assertions.Expect(table).ToContainTextAsync("Page 1 of 3");
+        await table.GetByRole(AriaRole.Button, new() { Name = "Next", Exact = true }).ClickAsync();
+        await Assertions.Expect(table).ToContainTextAsync("Page 2 of 3");
+        await Assertions.Expect(table.Locator("tbody tr[data-row-key]")).ToHaveCountAsync(3);
+    }
+
+    [Fact]
+    public async Task ReportedWorkflowExamplesUseTheirAvailableSpaceAndRemainEditableAndReadable()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+
+        var chart = page.Locator("[data-use-case-id='production-analytics'] .theme-production-chart");
+        await chart.ScrollIntoViewIfNeededAsync();
+        var chartRatio = await chart.EvaluateAsync<double>("element => { const content = element.closest('[data-slot=card-content]'); const style = getComputedStyle(content); const available = content.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight); return element.getBoundingClientRect().width / available; }");
+        Assert.True(chartRatio >= .98, $"Production chart used only {chartRatio:P0} of the available card content width.");
+
+        var issue = page.Locator("[data-use-case-id='issue-report']");
+        var subject = issue.Locator("input");
+        var details = issue.Locator("textarea");
+        await subject.FillAsync("Surface finish evidence missing");
+        await details.FillAsync("Attach the latest three-trace measurement before release.");
+        await Assertions.Expect(subject).ToHaveValueAsync("Surface finish evidence missing");
+        await Assertions.Expect(details).ToHaveValueAsync("Attach the latest three-trace measurement before release.");
+
+        var marker = page.Locator("[data-use-case-id='conversation-marker']");
+        await Assertions.Expect(marker.Locator(".theme-marker-conversation [data-slot='bubble']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("[data-use-case-id='quality-alert'] .theme-quality-checklist li")).ToHaveCountAsync(2);
+
+        var reviewerLabel = page.Locator("[data-use-case-id='assigned-reviewers'] .theme-runway-reviewers li > span").First;
+        await Assertions.Expect(reviewerLabel).ToHaveCSSAsync("white-space", "nowrap");
+        var destination = page.Locator("[data-use-case-id='dispatch-confirmation'] .theme-runway-summary dt").First;
+        await Assertions.Expect(destination).ToHaveCSSAsync("white-space", "nowrap");
+
+        var typingWords = page.Locator("[data-use-case-id='assistant-conversation'] .theme-typing-word");
+        Assert.True(await typingWords.CountAsync() > 5);
+        Assert.True(await typingWords.EvaluateAllAsync<bool>("elements => elements.every(element => { const glyphs = [...element.children]; return glyphs.length < 2 || glyphs.every(glyph => Math.abs(glyph.getBoundingClientRect().top - glyphs[0].getBoundingClientRect().top) < 1); })"));
+    }
+
+    [Fact]
+    public async Task GuidanceTooltipShowsItsArrowWithoutAnInternalScrollbar()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var guidance = page.Locator("[data-use-case-id='tooltip-guidance']");
+        var trigger = guidance.GetByRole(AriaRole.Button, new() { Name = "Diameter", Exact = true });
+        await trigger.ScrollIntoViewIfNeededAsync();
+        await trigger.HoverAsync();
+
+        var tooltip = page.GetByRole(AriaRole.Tooltip);
+        await Assertions.Expect(tooltip).ToBeVisibleAsync();
+        var result = await tooltip.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); const arrow = element.querySelector('[data-slot=tooltip-arrow]').getBoundingClientRect(); return [style.overflowY === 'visible' ? 1 : 0, element.scrollHeight - element.clientHeight, arrow.width, arrow.height]; }");
+        Assert.Equal(1, result[0]);
+        Assert.True(result[2] > 0 && result[3] > 0, "Tooltip arrow must render with measurable geometry.");
     }
 
     [Fact]

@@ -31,8 +31,10 @@
     {
         if (string.Equals(_previousValue, Value, StringComparison.Ordinal)) return;
         _previousValue = Value;
-        _interacted = false;
-        _generation++;
+        if (!_interacted)
+        {
+            _generation++;
+        }
     }
 
     private void Reveal() => _interacted = true;

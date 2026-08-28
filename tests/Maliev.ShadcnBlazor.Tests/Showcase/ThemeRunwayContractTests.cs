@@ -165,6 +165,33 @@ public sealed class ThemeBentoContractTests
     }
 
     [Fact]
+    public void ReportedThemeExamplesKeepResponsiveContentAndInteractiveControls()
+    {
+        var root = FindRoot();
+        var card = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeUseCaseCardHost.razor");
+        var typing = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "Runway", "ThemeTypingText.razor");
+        var showcaseCss = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+        var formsCss = Read(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-forms.css");
+        var overlaysCss = Read(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css");
+
+        Assert.Contains("InitialWidth=\"960\"", card, StringComparison.Ordinal);
+        Assert.True(card.Split("new(\"Q-", StringSplitOptions.None).Length - 1 >= 9);
+        Assert.Contains("theme-quality-checklist", card, StringComparison.Ordinal);
+        Assert.Contains("theme-marker-conversation", card, StringComparison.Ordinal);
+        Assert.Contains("_issueSubject", card, StringComparison.Ordinal);
+        Assert.Contains("_issueDetails", card, StringComparison.Ordinal);
+        Assert.Contains("Value=\"@_issueSubject\" ValueChanged=\"value => _issueSubject = value\"", card, StringComparison.Ordinal);
+        Assert.Contains("Value=\"@_issueDetails\" ValueChanged=\"value => _issueDetails = value\"", card, StringComparison.Ordinal);
+        Assert.Contains("theme-typing-word", typing, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: break-word", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains("word-break: normal", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains(".theme-runway-reviewers li > span:first-child { white-space: nowrap; }", showcaseCss, StringComparison.Ordinal);
+        Assert.Contains("border-radius: var(--shadcn-radius-md)", formsCss, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-combobox-control:focus-visible", formsCss, StringComparison.Ordinal);
+        Assert.Contains("overflow: visible", overlaysCss, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ThemeOverlaysHaveResponsiveDrawerGeometryAndPointerHoverFeedback()
     {
         var css = Read(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-overlays-menus.css");

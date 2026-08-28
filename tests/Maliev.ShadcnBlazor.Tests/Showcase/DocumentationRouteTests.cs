@@ -81,14 +81,40 @@ public sealed class DocumentationRouteTests : BunitContext
     }
 
     [Fact]
-    public void CatalogLandingIntroducesTheLibraryAndKeepsEveryComponentDiscoverable()
+    public void DocsOverviewProvidesATaskOrientedFiveMinuteQuickstart()
     {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        Services.AddMalievShadcn();
+
+        var cut = Render<DocsOverview>();
+
+        Assert.Contains("Get a themed Blazor interface running in five minutes", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Prerequisites", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Find("#install").TextContent, StringComparison.Ordinal);
+        Assert.Contains("AddMalievShadcn", cut.Find("#register").TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnThemeProvider", cut.Find("#compose").TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnButton", cut.Find("#compose").TextContent, StringComparison.Ordinal);
+        Assert.Contains("Core concepts", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Troubleshooting", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "docs/components");
+        Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "theme");
+    }
+
+    [Fact]
+    public void CatalogLandingIntroducesTheLibraryAndUsesAProgressiveDirectory()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        Services.AddMalievShadcn();
         var cut = Render<ComponentCatalog>();
 
         Assert.Contains("Build accessible Blazor interfaces with shadcn primitives", cut.Markup, StringComparison.Ordinal);
-        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("dotnet add package Maliev.ShadcnBlazor", cut.Find(".documentation-landing__installation").TextContent, StringComparison.Ordinal);
         Assert.Contains("Interactive, typed, and themeable", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal(69, cut.FindAll(".documentation-catalog-card").Count);
+        Assert.Single(cut.FindAll("[data-testid='component-directory-search']"));
+        Assert.NotEmpty(cut.FindAll(".documentation-directory-group"));
+        Assert.Equal(69, cut.FindAll(".documentation-directory-link").Count);
+        Assert.Empty(cut.FindAll(".documentation-catalog-card"));
+        Assert.Equal("docs/components#component-directory", cut.Find(".documentation-landing__actions a").GetAttribute("href"));
         Assert.Contains(cut.FindAll(".documentation-landing__actions a"), link => link.GetAttribute("href") == "theme");
     }
 

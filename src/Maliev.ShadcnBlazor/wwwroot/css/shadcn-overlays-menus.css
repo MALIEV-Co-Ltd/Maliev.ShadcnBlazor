@@ -170,7 +170,7 @@
 .shadcn-hover-card-trigger:focus-visible { border-radius: var(--shadcn-radius-sm); outline: 2px solid var(--shadcn-ring); outline-offset: 3px; }
 .shadcn-hover-card-content { box-sizing: border-box; width: min(20rem, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow: auto; padding: calc(1rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-hover-card-content[data-positioned="false"] { visibility: hidden; animation: none; }
-.shadcn-tooltip-content { width: fit-content; max-width: 20rem; border-color: var(--shadcn-foreground); background: var(--shadcn-foreground); color: var(--shadcn-background); padding: calc(0.375rem * var(--shadcn-spacing-multiplier)) calc(0.625rem * var(--shadcn-spacing-multiplier)); font-size: 0.75rem; pointer-events: none; }
+.shadcn-tooltip-content { box-sizing: border-box; width: fit-content; max-width: min(20rem, calc(100vw - 1rem)); overflow: visible; border-color: var(--shadcn-foreground); background: var(--shadcn-foreground); color: var(--shadcn-background); padding: calc(0.375rem * var(--shadcn-spacing-multiplier)) calc(0.625rem * var(--shadcn-spacing-multiplier)); font-size: 0.75rem; line-height: 1.4; overflow-wrap: break-word; word-break: normal; pointer-events: none; }
 .shadcn-tooltip-arrow { position: absolute; width: 0.5rem; height: 0.5rem; rotate: 45deg; background: var(--shadcn-foreground); }
 .shadcn-tooltip-content[data-side="top"] .shadcn-tooltip-arrow { inset-block-end: -0.25rem; inset-inline-start: calc(50% - 0.25rem); }
 .shadcn-tooltip-content[data-side="bottom"] .shadcn-tooltip-arrow { inset-block-start: -0.25rem; inset-inline-start: calc(50% - 0.25rem); }

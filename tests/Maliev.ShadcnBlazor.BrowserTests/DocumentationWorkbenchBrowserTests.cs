@@ -118,6 +118,34 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await Assertions.Expect(page.GetByText("Build accessible Blazor interfaces with shadcn primitives")).ToBeVisibleAsync();
     }
 
+    [Theory]
+    [InlineData(1440, 900)]
+    [InlineData(390, 844)]
+    public async Task DocumentationLandingRoutesSeparateLearningFromComponentDiscovery(int width, int height)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = width, Height = height },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Get a themed Blazor interface running in five minutes" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".documentation-topnav a[href='docs']")).ToHaveAttributeAsync("aria-current", "page");
+        await Assertions.Expect(page.GetByTestId("outline-trigger")).ToHaveCountAsync(0);
+        Assert.InRange(await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
+
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components").ToString());
+        await Assertions.Expect(page.Locator(".documentation-topnav a[href='docs/components']")).ToHaveAttributeAsync("aria-current", "page");
+        await Assertions.Expect(page.GetByTestId("outline-trigger")).ToHaveCountAsync(0);
+        var search = page.GetByTestId("component-directory-search");
+        await search.FillAsync("tooltip");
+        await Assertions.Expect(page.Locator(".documentation-directory-link").Filter(new() { HasText = "Tooltip" })).ToHaveCountAsync(1);
+        Assert.InRange(await page.Locator(".documentation-directory-link").CountAsync(), 1, 4);
+        Assert.InRange(await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
+    }
+
     [Fact]
     public async Task CalendarPreviewKeepsAnIntrinsicSquareSurface()
     {
