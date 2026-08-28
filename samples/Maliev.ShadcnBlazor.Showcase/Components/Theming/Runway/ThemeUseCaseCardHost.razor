@@ -37,7 +37,7 @@
             @if (_planReviewOpen) { <div class="theme-inline-detail" role="region" aria-label="@T("Capacity plan review")">@T("Cell A3 can accept two additional work orders before Friday.")</div> }
             break;
         case "production-analytics":
-            <ShadcnChart Class="theme-production-chart" Id="theme-production-analytics" Title="@T("Completed operations")" Description="@T("Six-week output by production cell")" CategoryLabel="@T("Category")" Type="ShadcnChartType.Bar" Config="LocalizedProductionChartConfig" Categories="ProductionChartCategories" Series="ProductionChartSeries" ShowGrid="true" ShowMajorGrid="true" ShowMinorGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" LegendInteractive="true" InitialWidth="520" InitialHeight="230" />
+            <ShadcnChart Class="theme-production-chart" Id="theme-production-analytics" Title="@T("Completed operations")" Description="@T("Six-week output by production cell")" CategoryLabel="@T("Category")" Type="ShadcnChartType.Bar" Config="LocalizedProductionChartConfig" Categories="ProductionChartCategories" Series="ProductionChartSeries" ShowGrid="true" ShowMajorGrid="true" ShowMinorGrid="true" ShowPrimaryYAxis="true" ShowLegend="true" LegendInteractive="true" InitialWidth="960" InitialHeight="280" />
             break;
         case "operator-profile":
             <div class="theme-runway-profile"><ShadcnAvatar><ShadcnAvatarImage Source="images/avatars/operator-thai.png" Alt="Narin S., Thai CNC engineer" /><ShadcnAvatarFallback>NS</ShadcnAvatarFallback></ShadcnAvatar><div><strong>Narin S.</strong><span>@T("CNC engineer · Samut Prakan")</span></div></div>
@@ -104,7 +104,7 @@
             @if (_handoffSaved) { <p class="theme-runway-action-status" role="status">@T("Handoff saved for dispatch.")</p> }
             break;
         case "quotation-data-table":
-            <div class="theme-runway-table-summary"><span><strong>@T("Quotation review queue")</strong><small>@T("Three active requests awaiting production decisions")</small></span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@T("3 active")</ShadcnBadge></div>
+            <div class="theme-runway-table-summary"><span><strong>@T("Quotation review queue")</strong><small>@T("Active requests awaiting production decisions")</small></span><ShadcnBadge Variant="ShadcnBadgeVariant.Secondary">@T("9 active")</ShadcnBadge></div>
             <ShadcnDataTable TItem="QuotationRow" Items="LocalizedQuotationRows" Columns="LocalizedQuotationColumns" RowKey="@(row => row.Id)" State="_quotationTableState" StateChanged="OnQuotationTableStateChanged" Selectable="true" FilterPlaceholder="@T("Search quotations")" EmptyText="@T("No quotations found")" />
             break;
         case "inspection-alerts":
@@ -118,8 +118,11 @@
             break;
         case "quality-alert":
             <ShadcnAlert Variant="ShadcnAlertVariant.Destructive"><ShadcnAlertTitle>@T("Inspection hold")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Bore 4 is 0.012 mm below the lower tolerance. Review the probe result before machining resumes.")</ShadcnAlertDescription><ShadcnAlertAction><ShadcnButton Size="ShadcnButtonSize.Small" Variant="ShadcnButtonVariant.Outline" OnClick="ToggleInspectionReport">@T(_inspectionReportOpen ? "Close report" : "Open report")</ShadcnButton></ShadcnAlertAction></ShadcnAlert>
-            @if (_inspectionReportOpen) { <div class="theme-inline-detail" role="region" aria-label="@T("Inspection report")"><strong>@T("Bore 4 probe report")</strong><span>@T("Measured 24.988 mm · lower limit 24.990 mm · hold active")</span></div> }
-            <ShadcnAlert><ShadcnAlertTitle>@T("Calibration current")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Probe P-08 was calibrated today at 08:10.")</ShadcnAlertDescription></ShadcnAlert>
+            <ul class="theme-quality-checklist" aria-label="@T("Inspection evidence")">
+                <li><span><strong>@T("Bore 4 probe")</strong><small>@T("Measured 24.988 mm · limit 24.990 mm")</small></span><ShadcnBadge Variant="ShadcnBadgeVariant.Destructive">@T("Hold")</ShadcnBadge></li>
+                <li><span><strong>@T("Calibration")</strong><small>@T("Probe P-08 calibrated today at 08:10")</small></span><ShadcnBadge Class="theme-status-success">@T("Current")</ShadcnBadge></li>
+            </ul>
+            @if (_inspectionReportOpen) { <div class="theme-inline-detail" role="region" aria-label="@T("Inspection report")"><strong>@T("Recommended next action")</strong><span>@T("Re-seat Probe P-08, repeat Bore 4, and record the result before releasing machining.")</span></div> }
             break;
         case "deposit-approval":
             <div class="theme-runway-amount"><span>@T("Manufacturing deposit")</span><strong>฿48,500.00</strong></div>
@@ -135,6 +138,10 @@
             @if (_reviewerManagerOpen) { <div class="theme-inline-detail" role="region" aria-label="@T("Reviewer management")"><strong>@T("Reviewer coverage")</strong><span>@T("Machining, Quality, and Logistics are assigned. Four alternates are available.")</span></div> }
             break;
         case "conversation-marker":
+            <div class="theme-marker-conversation" aria-label="@T("Conversation before inspection milestone")">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost"><ShadcnBubbleContent>@T("Machining is complete. Bore 4 is ready for final inspection.")</ShadcnBubbleContent></ShadcnBubble>
+                <ShadcnBubble Align="ShadcnLogicalAlign.End"><ShadcnBubbleContent>@T("Probe result received. I am uploading the signed report now.")</ShadcnBubbleContent></ShadcnBubble>
+            </div>
             <ShadcnMarker Variant="ShadcnMarkerVariant.Separator"><ShadcnMarkerContent>14:32 · WO-2418</ShadcnMarkerContent></ShadcnMarker>
             <div class="theme-runway-activity"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Kanda, Thai quality reviewer" /><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><span><strong>@T("Final inspection uploaded")</strong><small>@T("Kanda attached the signed dimensional report.")</small></span><ShadcnBadge Class="theme-status-success">@T("Ready")</ShadcnBadge></div>
             <ShadcnMarker Variant="ShadcnMarkerVariant.Default" Live="true"><ShadcnMarkerIcon><span class="shadcn-marker-loader" aria-hidden="true"></span></ShadcnMarkerIcon><ShadcnMarkerContent Streaming="true">@T("Dispatch team is preparing the Bangkok handoff")</ShadcnMarkerContent></ShadcnMarker>
@@ -239,8 +246,8 @@
             break;
         case "issue-report":
             <ShadcnAlert Variant="@(Frame.FormStep == 3 ? ShadcnAlertVariant.Destructive : ShadcnAlertVariant.Default)"><ShadcnAlertTitle>@T(Frame.FormStep == 3 ? "Drawing revision required" : "Report a production issue")</ShadcnAlertTitle><ShadcnAlertDescription>@T("Quality receives the machine, work order, and validation context.")</ShadcnAlertDescription></ShadcnAlert>
-            <label>@T("Subject")<ThemeAnimatedInput Value="@(Frame.FormStep > 0 ? T("Tolerance mismatch on bore 4") : string.Empty)" Placeholder="@T("Describe the issue")" ReadOnly="true" /></label>
-            <label>@T("Details")<ThemeAnimatedTextarea Value="@(Frame.FormStep > 1 ? T("Measured 24.982 mm against 25.000 ±0.010 mm.") : string.Empty)" Placeholder="@T("Add inspection evidence")" ReadOnly="true" /></label>
+            <label>@T("Subject")<ThemeAnimatedInput Value="@_issueSubject" ValueChanged="value => _issueSubject = value" Placeholder="@T("Describe the issue")" /></label>
+            <label>@T("Details")<ThemeAnimatedTextarea Value="@_issueDetails" ValueChanged="value => _issueDetails = value" Placeholder="@T("Add inspection evidence")" /></label>
             <ShadcnButton Size="ShadcnButtonSize.Small" OnClick="SubmitIssue">@T("Submit issue")</ShadcnButton>
             @if (_issueSubmitted) { <p class="theme-runway-action-status" role="status">@T("Issue sent to Quality.")</p> }
             break;
@@ -543,6 +550,8 @@
     [Parameter] public ThemeStudioLocale Locale { get; set; }
     [CascadingParameter(Name = "ThemeStudioIconLibrary")] public ThemeStudioIconLibrary IconLibrary { get; set; }
     private string? _profileName;
+    private string _issueSubject = "Tolerance mismatch on bore 4";
+    private string _issueDetails = "Measured 24.982 mm against 25.000 ±0.010 mm.";
     private bool _saveAddress = true;
     private bool _handoffSaved;
     private bool _depositApproved;
@@ -605,7 +614,13 @@
     [
         new("Q-2847", "Siam Motion", "Review", 97000),
         new("Q-2851", "Apex Robotics", "Approved", 148500),
-        new("Q-2854", "Thai Aero Parts", "Draft", 64200)
+        new("Q-2854", "Thai Aero Parts", "Draft", 64200),
+        new("Q-2858", "Bangkok Precision", "Review", 118400),
+        new("Q-2860", "Eastern Tooling", "Approved", 82500),
+        new("Q-2863", "Chonburi Automation", "Draft", 173900),
+        new("Q-2868", "Ayutthaya Motion", "Review", 56600),
+        new("Q-2871", "Samut Systems", "Approved", 209000),
+        new("Q-2875", "Rayong Fixtures", "Draft", 91400)
     ];
     private IReadOnlyList<QuotationRow> LocalizedQuotationRows => QuotationRows.Select(row => row with { Status = T(row.Status) }).ToArray();
     private ShadcnDataTableColumn<QuotationRow>[] LocalizedQuotationColumns =>

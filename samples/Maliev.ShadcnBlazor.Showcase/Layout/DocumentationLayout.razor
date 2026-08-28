@@ -2,12 +2,13 @@
 @inherits LayoutComponentBase
 @inject ShowcaseState ThemeState
 @inject DocumentationPageState PageState
+@inject NavigationManager Navigation
 @inject IJSRuntime JavaScript
 @implements IDisposable
 @implements IAsyncDisposable
 
 <ShadcnThemeProvider IsDarkMode="@ThemeState.IsDarkMode" Direction="@ThemeState.Direction" Class="documentation-root">
-    <div class="documentation-shell" data-testid="documentation-workbench" @onkeydown="HandleKeyDown">
+    <div class="documentation-shell" data-testid="documentation-workbench" data-documentation-route="@RouteKind" @onkeydown="HandleKeyDown">
         <a class="documentation-skip-link"
            href="#documentation-catalog"
            @onclick="OpenCatalogFromSkipLink"
@@ -64,6 +65,16 @@
     private bool _outlineAttached;
     private IJSObjectReference? _drawerModule;
     private bool AnyDrawerOpen => NavigationState.CatalogOpen || NavigationState.OutlineOpen;
+    private string RouteKind
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
+            if (string.Equals(path, "docs", StringComparison.OrdinalIgnoreCase)) return "overview";
+            if (string.Equals(path, "docs/components", StringComparison.OrdinalIgnoreCase)) return "catalog";
+            return "detail";
+        }
+    }
 
     public DocumentationNavigationState NavigationState { get; } = new();
 
@@ -71,6 +82,7 @@
     {
         NavigationState.Changed += OnChanged;
         ThemeState.Changed += OnChanged;
+        Navigation.LocationChanged += OnLocationChanged;
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs args)
@@ -148,11 +160,13 @@
     }
 
     private void OnChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
         NavigationState.Changed -= OnChanged;
         ThemeState.Changed -= OnChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     public async ValueTask DisposeAsync()

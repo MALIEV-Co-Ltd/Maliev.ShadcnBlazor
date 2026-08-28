@@ -5,70 +5,68 @@
 
 <section class="documentation-landing" aria-labelledby="component-catalog-title">
     <div class="documentation-landing__hero">
-        <p class="documentation-landing__eyebrow">Maliev Shadcn Blazor</p>
         <h1 id="component-catalog-title">Component catalog</h1>
         <p class="documentation-landing__lead">Build accessible Blazor interfaces with shadcn primitives: native semantics, typed APIs, and a theme system you can own.</p>
         <div class="documentation-landing__actions">
-            <a class="documentation-button documentation-button--primary" href="docs/components/button">Browse components</a>
+            <a class="documentation-button documentation-button--primary" href="docs/components#component-directory">Browse components</a>
             <a class="documentation-button" href="theme">Open Theme Studio</a>
         </div>
     </div>
 
     <div class="documentation-landing__principles" aria-label="Library principles">
-        <article>
-            <span class="documentation-landing__principle-icon" aria-hidden="true">✦</span>
-            <h2>Interactive, typed, and themeable</h2>
-            <p>Compose Razor primitives with strongly typed parameters, callbacks, and semantic design tokens.</p>
-        </article>
-        <article>
-            <span class="documentation-landing__principle-icon" aria-hidden="true">↗</span>
-            <h2>Accessible by default</h2>
-            <p>Keyboard behavior, focus states, RTL, reduced motion, and forced colors are part of each component contract.</p>
-        </article>
-        <article>
-            <span class="documentation-landing__principle-icon" aria-hidden="true">◌</span>
-            <h2>Designed for real products</h2>
-            <p>Use the live examples, copy the package command, and keep ownership of your markup and application state.</p>
-        </article>
+        <article><h2>Interactive, typed, and themeable</h2><p>Compose strongly typed Razor primitives with semantic design tokens.</p></article>
+        <article><h2>Accessible by default</h2><p>Keyboard behavior, focus, RTL, reduced motion, and forced colors are component contracts.</p></article>
+        <article><h2>Designed for real products</h2><p>Start with live examples and keep ownership of your markup and application state.</p></article>
     </div>
 
     <section class="documentation-landing__installation" aria-labelledby="installation-title">
-        <div>
-            <p class="documentation-landing__eyebrow">Start here</p>
-            <h2 id="installation-title">Install once, compose anywhere</h2>
-            <p>Add the package to a Blazor app, register the theme services, and then use only the primitives your product needs.</p>
-        </div>
-        <pre><code>dotnet add package Maliev.ShadcnBlazor</code></pre>
+        <div><h2 id="installation-title">Install once, compose anywhere</h2><p>Add the package, register its services, and use only the primitives your product needs.</p></div>
+        <ShadcnCodeBlock Source="dotnet add package Maliev.ShadcnBlazor" Language="bash" />
     </section>
 
-    <section aria-labelledby="component-catalog-browse-title">
+    <section id="component-directory" class="documentation-directory" aria-labelledby="component-directory-title">
         <div class="documentation-landing__section-heading">
-            <div>
-                <p class="documentation-landing__eyebrow">Explore the library</p>
-                <h2 id="component-catalog-browse-title">Browse @Catalog.All.Count components</h2>
-            </div>
-            <span class="documentation-landing__status">Live examples and API references</span>
+            <div><h2 id="component-directory-title">Find a component</h2><p>Search by component, capability, or category.</p></div>
+            <span class="documentation-landing__status" role="status" aria-live="polite">@Filtered.Count of @Catalog.All.Count components</span>
         </div>
-        @foreach (var group in Catalog.All.GroupBy(component => component.Category).OrderBy(group => group.Key))
+        <div class="documentation-directory__controls">
+            <label class="documentation-field"><span>Search components</span><input data-testid="component-directory-search" type="search" value="@_query" placeholder="Button, overlay, forms…" autocomplete="off" @oninput="OnQueryChanged" /></label>
+            <label class="documentation-field"><span>Category</span><select value="@_category" @onchange="OnCategoryChanged"><option value="">All categories</option>@foreach (var category in Categories) { <option value="@category">@category</option> }</select></label>
+        </div>
+
+        @if (Filtered.Count == 0)
         {
-            <section class="documentation-catalog-group" aria-labelledby="catalog-group-@Slugify(group.Key)">
-                <h3 id="catalog-group-@Slugify(group.Key)">@group.Key</h3>
-                <div class="documentation-catalog-grid">
+            <div class="documentation-directory__empty"><h3>No matching components</h3><p>Try a component name, capability, or another category.</p><button type="button" class="documentation-button" @onclick="ClearFilters">Clear filters</button></div>
+        }
+        else
+        {
+            @foreach (var group in Groups)
+            {
+                <details class="documentation-directory-group" open="@(!string.IsNullOrWhiteSpace(_query) || !string.IsNullOrWhiteSpace(_category))">
+                    <summary><span>@group.Key</span><span>@group.Count()</span></summary>
+                    <ul>
                     @foreach (var component in group)
                     {
-                        <a class="documentation-catalog-card" href="@component.DocumentationUrl">
-                            <span class="documentation-catalog-card__name">@component.Name</span>
-                            <span class="documentation-catalog-card__summary">@DisplayTypeName(component.PrimaryType)</span>
-                            <span class="documentation-catalog-card__status">@component.Status</span>
-                        </a>
+                        <li><a class="documentation-directory-link" href="@component.DocumentationUrl"><span><strong>@component.Name</strong><small>@component.Summary</small></span><span aria-hidden="true">→</span></a></li>
                     }
-                </div>
-            </section>
+                    </ul>
+                </details>
+            }
         }
     </section>
 </section>
 
 @code {
-    private static string? DisplayTypeName(string? typeName) => typeName?.Split('`')[0];
-    private static string Slugify(string value) => value.ToLowerInvariant().Replace(' ', '-');
+    private string _query = string.Empty;
+    private string _category = string.Empty;
+    private IReadOnlyList<string> Categories => Catalog.All.Select(item => item.Category).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+    private IReadOnlyList<Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry> Filtered => Catalog.All
+        .Where(item => string.IsNullOrWhiteSpace(_category) || string.Equals(item.Category, _category, StringComparison.Ordinal))
+        .Where(item => string.IsNullOrWhiteSpace(_query) || SearchText(item).Contains(_query.Trim(), StringComparison.OrdinalIgnoreCase))
+        .ToArray();
+    private IEnumerable<IGrouping<string, Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry>> Groups => Filtered.GroupBy(item => item.Category, StringComparer.Ordinal).OrderBy(group => group.Key, StringComparer.Ordinal);
+    private static string SearchText(Maliev.ShadcnBlazor.Showcase.Documentation.ComponentDocumentationEntry item) => $"{item.Name} {item.Category} {item.Summary} {string.Join(' ', item.Capabilities)}";
+    private void OnQueryChanged(ChangeEventArgs args) => _query = args.Value?.ToString() ?? string.Empty;
+    private void OnCategoryChanged(ChangeEventArgs args) => _category = args.Value?.ToString() ?? string.Empty;
+    private void ClearFilters() { _query = string.Empty; _category = string.Empty; }
 }

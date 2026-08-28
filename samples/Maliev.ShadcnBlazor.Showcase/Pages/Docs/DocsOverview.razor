@@ -3,8 +3,81 @@
 
 <PageTitle>Maliev Shadcn Blazor documentation</PageTitle>
 
-<section aria-labelledby="docs-overview-title">
-    <h1 id="docs-overview-title">Maliev Shadcn Blazor documentation</h1>
-    <p>Browse the checked-in component catalog. Certification status always follows the component ledger.</p>
-    <p><a href="docs/components">Explore @Catalog.All.Count components</a></p>
-</section>
+<article class="documentation-guide" aria-labelledby="docs-overview-title">
+    <header class="documentation-guide__hero">
+        <h1 id="docs-overview-title">Get a themed Blazor interface running in five minutes</h1>
+        <p>Install Maliev Shadcn Blazor, register its services, and render your first accessible component without adopting a generated application shell.</p>
+        <div class="documentation-landing__actions">
+            <a class="documentation-button documentation-button--primary" href="#install">Start the quickstart</a>
+            <a class="documentation-button" href="docs/components">Browse @Catalog.All.Count components</a>
+        </div>
+    </header>
+
+    <section id="prerequisites" class="documentation-guide__section" aria-labelledby="prerequisites-title">
+        <h2 id="prerequisites-title">Prerequisites</h2>
+        <ul class="documentation-prose-list">
+            <li>A Blazor Web App or WebAssembly project targeting the supported .NET version.</li>
+            <li>Access to the app's service registration and root layout.</li>
+            <li>No Tailwind build step is required for the packaged component styles.</li>
+        </ul>
+    </section>
+
+    <section id="install" class="documentation-guide__section documentation-guide__step" aria-labelledby="install-title">
+        <span class="documentation-guide__step-number" aria-hidden="true">1</span>
+        <div><h2 id="install-title">Install the package</h2><p>Add the library to the project that renders your Razor components.</p><ShadcnCodeBlock Source="dotnet add package Maliev.ShadcnBlazor" Language="bash" /></div>
+    </section>
+
+    <section id="register" class="documentation-guide__section documentation-guide__step" aria-labelledby="register-title">
+        <span class="documentation-guide__step-number" aria-hidden="true">2</span>
+        <div><h2 id="register-title">Register services and styles</h2><p>Register the component services once and load the packaged stylesheet from your app host.</p><ShadcnCodeBlock Source="@RegistrationSource" Language="csharp" /></div>
+    </section>
+
+    <section id="compose" class="documentation-guide__section documentation-guide__step" aria-labelledby="compose-title">
+        <span class="documentation-guide__step-number" aria-hidden="true">3</span>
+        <div><h2 id="compose-title">Compose your first component</h2><p>Place the provider at the application boundary, then use typed components in ordinary Razor markup.</p><ShadcnCodeBlock Source="@FirstComponentSource" Language="razor" /></div>
+    </section>
+
+    <section id="concepts" class="documentation-guide__section" aria-labelledby="concepts-title">
+        <h2 id="concepts-title">Core concepts</h2>
+        <div class="documentation-guide__concepts">
+            <article><h3>Composition</h3><p>Small primitives keep state and product behavior in your Blazor application.</p></article>
+            <article><h3>Semantic tokens</h3><p>Theme variables coordinate color, radius, typography, spacing, and motion without component forks.</p></article>
+            <article><h3>Accessible contracts</h3><p>Keyboard interaction, focus, reduced motion, RTL, and forced-color behavior are part of the component API.</p></article>
+        </div>
+    </section>
+
+    <section id="next-steps" class="documentation-guide__section" aria-labelledby="next-steps-title">
+        <h2 id="next-steps-title">Choose your next step</h2>
+        <div class="documentation-guide__links">
+            <a href="docs/components"><strong>Component directory</strong><span>Find a component, inspect its API, and copy a working example.</span></a>
+            <a href="theme"><strong>Theme Studio</strong><span>Compare tokens against realistic workflows and export a preset.</span></a>
+            <a href="docs/components/button"><strong>First component guide</strong><span>Start with Button's installation, composition, accessibility, and theming notes.</span></a>
+        </div>
+    </section>
+
+    <section id="troubleshooting" class="documentation-guide__section" aria-labelledby="troubleshooting-title">
+        <h2 id="troubleshooting-title">Troubleshooting</h2>
+        <details><summary>Components render without styling</summary><p>Confirm the packaged stylesheet is loaded after your app styles and that the component tree is inside <code>ShadcnThemeProvider</code>.</p></details>
+        <details><summary>An overlay is clipped</summary><p>Use the package overlay components as composed. Their content is promoted to the browser top layer and should not be placed inside a custom overflow container.</p></details>
+        <details><summary>A component is hard to discover</summary><p>Use the searchable <a href="docs/components#component-directory">component directory</a> and filter by workflow category.</p></details>
+    </section>
+</article>
+
+@code {
+    private const string RegistrationSource = """
+        builder.Services.AddMalievShadcn();
+
+        // wwwroot/index.html or Components/App.razor
+        <link rel="stylesheet" href="_content/Maliev.ShadcnBlazor/css/shadcn.css" />
+        """;
+
+    private const string FirstComponentSource = """
+        <ShadcnThemeProvider>
+            <ShadcnButton @onclick="Save">Save changes</ShadcnButton>
+        </ShadcnThemeProvider>
+
+        @code {
+            private Task Save() => Task.CompletedTask;
+        }
+        """;
+}

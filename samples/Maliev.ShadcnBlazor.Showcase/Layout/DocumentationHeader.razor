@@ -1,6 +1,8 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
 @using Maliev.ShadcnBlazor.Components.Icons
 @inject ShowcaseState ThemeState
+@inject NavigationManager Navigation
+@inject DocumentationPageState PageState
 @implements IDisposable
 
 <header class="documentation-header">
@@ -34,13 +36,13 @@
         }
     </div>
     <nav class="documentation-topnav" aria-label="Primary documentation navigation">
-        <a href="docs">Docs</a>
-        <a href="docs/components" aria-current="@(!StudioMode ? "page" : null)">Components</a>
+        <a href="docs" aria-current="@(!StudioMode && IsDocsOverview ? "page" : null)">Docs</a>
+        <a href="docs/components" aria-current="@(!StudioMode && IsComponentsRoute ? "page" : null)">Components</a>
         <a href="theme" aria-current="@(StudioMode ? "page" : null)">Theme</a>
         <a href="https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor" target="_blank" rel="noreferrer">GitHub</a>
     </nav>
     <div class="documentation-header__actions" role="group" aria-label="Documentation actions">
-        @if (!StudioMode)
+        @if (!StudioMode && PageState.Sections.Count > 0)
         {
         <button @ref="_outlineTrigger"
                 type="button"
@@ -110,6 +112,9 @@
     private ShadcnIconData DirectionIcon => ThemeState.Direction == ShadcnDirection.LeftToRight
         ? RightToLeftIcon
         : LeftToRightIcon;
+    private string CurrentPath => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
+    private bool IsDocsOverview => string.Equals(CurrentPath, "docs", StringComparison.OrdinalIgnoreCase);
+    private bool IsComponentsRoute => CurrentPath.StartsWith("docs/components", StringComparison.OrdinalIgnoreCase);
 
     [Parameter, EditorRequired]
     public DocumentationNavigationState State { get; set; } = null!;
@@ -125,9 +130,20 @@
 
     private void ToggleOutline() => State.OutlineOpen = !State.OutlineOpen;
 
-    protected override void OnInitialized() => ThemeState.Changed += OnThemeChanged;
+    protected override void OnInitialized()
+    {
+        ThemeState.Changed += OnThemeChanged;
+        PageState.Changed += OnThemeChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
 
     private void OnThemeChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
+    public void Dispose()
+    {
+        ThemeState.Changed -= OnThemeChanged;
+        PageState.Changed -= OnThemeChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 }

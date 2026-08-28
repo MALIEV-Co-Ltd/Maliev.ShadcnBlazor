@@ -172,6 +172,7 @@ public sealed class DocumentationNavigationTests : BunitContext
     [Fact]
     public void Layout_CloseButtonsRestoreFocusThroughTheMatchingHeaderTrigger()
     {
+        Services.GetRequiredService<DocumentationPageState>().SetSections([new("overview", "Overview")]);
         var cut = RenderDocumentationLayout();
         var navigation = cut.FindComponent<DocumentationHeader>().Instance.State;
 
@@ -194,6 +195,7 @@ public sealed class DocumentationNavigationTests : BunitContext
     public void NavigationInteractionsNeverMutateThemeState()
     {
         var theme = Services.GetRequiredService<ShowcaseState>();
+        Services.GetRequiredService<DocumentationPageState>().SetSections([new("overview", "Overview")]);
         var state = new DocumentationNavigationState();
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(x => x.State, state));
 
