@@ -12,6 +12,26 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     public static TheoryData<int, int> ReleaseViewports => new() { { 1440, 900 }, { 1024, 768 }, { 768, 1024 }, { 390, 844 }, { 320, 568 } };
 
     [Fact]
+    public async Task MobileHeaderBrandMarkMatchesCompactActionGeometry()
+    {
+        await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var brandMark = page.Locator(".documentation-brand__mark");
+        var catalogTrigger = page.GetByTestId("catalog-trigger");
+        var brandBox = await brandMark.BoundingBoxAsync();
+        var triggerBox = await catalogTrigger.BoundingBoxAsync();
+
+        Assert.NotNull(brandBox);
+        Assert.NotNull(triggerBox);
+        Assert.InRange(Math.Abs(brandBox.Width - triggerBox.Width), 0, 0.5);
+        Assert.InRange(Math.Abs(brandBox.Height - triggerBox.Height), 0, 0.5);
+        Assert.InRange(
+            Math.Abs((brandBox.Y + brandBox.Height / 2) - (triggerBox.Y + triggerBox.Height / 2)),
+            0,
+            0.5);
+    }
+
+    [Fact]
     public async Task BentoLayoutStylesheetIsServedAndAppliedAtCompactDesktopWidth()
     {
         await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);

@@ -4637,12 +4637,22 @@ a {
 }
 
 @media (max-width: 40rem) {
+    .documentation-header {
+        --documentation-compact-control-size: 2.75rem;
+    }
+
     .documentation-brand {
         display: inline-flex;
-        inline-size: 2.75rem;
-        min-inline-size: 2.75rem;
-        min-block-size: 2.75rem;
+        inline-size: var(--documentation-compact-control-size);
+        min-inline-size: var(--documentation-compact-control-size);
+        block-size: var(--documentation-compact-control-size);
+        min-block-size: var(--documentation-compact-control-size);
         justify-content: center;
+    }
+
+    .documentation-brand .documentation-brand__mark {
+        inline-size: var(--documentation-compact-control-size);
+        block-size: var(--documentation-compact-control-size);
     }
 
     .documentation-brand > span:last-child,
@@ -4653,9 +4663,10 @@ a {
 
     .documentation-trigger,
     .documentation-icon-action {
-        inline-size: 2.75rem;
-        min-inline-size: 2.75rem;
-        min-block-size: 2.75rem;
+        inline-size: var(--documentation-compact-control-size);
+        min-inline-size: var(--documentation-compact-control-size);
+        block-size: var(--documentation-compact-control-size);
+        min-block-size: var(--documentation-compact-control-size);
     }
 
     .documentation-panel-header {
