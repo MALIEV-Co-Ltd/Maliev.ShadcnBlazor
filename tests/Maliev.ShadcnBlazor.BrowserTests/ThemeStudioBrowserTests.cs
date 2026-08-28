@@ -613,18 +613,20 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var profile = page.Locator("[data-use-case-id='operator-profile']");
         var save = profile.Locator("button[data-operation-state]");
         await Assertions.Expect(save).ToHaveTextAsync("Save profile");
+        await RecordOperationStatesAsync(save);
         await save.EvaluateAsync("element => element.click()");
-        await Assertions.Expect(save).ToContainTextAsync("Saving");
-        await Assertions.Expect(save).ToContainTextAsync("Saved", new() { Timeout = 2_000 });
+        await Assertions.Expect(profile.GetByRole(AriaRole.Status)).ToContainTextAsync("Profile saved");
         await Assertions.Expect(save).ToContainTextAsync("Save profile", new() { Timeout = 2_000 });
+        await AssertOperationStatesAsync(save);
 
         var handoff = page.Locator("[data-use-case-id='shipping-handoff']");
         var confirm = handoff.Locator("button[data-operation-state]");
         await Assertions.Expect(confirm).ToHaveTextAsync("Confirm address");
+        await RecordOperationStatesAsync(confirm);
         await confirm.EvaluateAsync("element => element.click()");
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirming");
-        await Assertions.Expect(confirm).ToContainTextAsync("Confirmed", new() { Timeout = 2_000 });
+        await Assertions.Expect(handoff.GetByRole(AriaRole.Status)).ToContainTextAsync("Handoff saved for dispatch.");
         await Assertions.Expect(confirm).ToContainTextAsync("Confirm address", new() { Timeout = 4_000 });
+        await AssertOperationStatesAsync(confirm);
 
         var switchControl = page.GetByRole(AriaRole.Switch, new() { Name = "Use quiet hours", Exact = true });
         var switchTrack = switchControl.Locator("xpath=parent::*");
@@ -645,6 +647,32 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await dropzone.GetByRole(AriaRole.Button, new() { Name = "Remove fixture.step", Exact = true }).ClickAsync();
         await Assertions.Expect(dropzone.Locator("[data-slot='attachment']")).ToHaveCountAsync(0);
         await Assertions.Expect(dropzone).ToContainTextAsync("No production drawings selected");
+    }
+
+    private static Task RecordOperationStatesAsync(ILocator button) => button.EvaluateAsync("""
+        element => {
+            element.__operationStates = [element.getAttribute('data-operation-state')];
+            new MutationObserver(records => {
+                for (const record of records) {
+                    if (record.attributeName === 'data-operation-state') {
+                        element.__operationStates.push(record.oldValue);
+                    }
+                }
+                element.__operationStates.push(element.getAttribute('data-operation-state'));
+            }).observe(element, {
+                attributes: true,
+                attributeFilter: ['data-operation-state'],
+                attributeOldValue: true
+            });
+        }
+        """);
+
+    private static async Task AssertOperationStatesAsync(ILocator button)
+    {
+        var states = await button.EvaluateAsync<string[]>("element => element.__operationStates");
+        Assert.Contains("busy", states);
+        Assert.Contains("success", states);
+        Assert.Equal("idle", states[^1]);
     }
 
     [Fact]
