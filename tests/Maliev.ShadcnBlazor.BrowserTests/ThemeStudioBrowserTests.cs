@@ -1673,6 +1673,40 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Theory]
+    [InlineData(1264, 1032, 64, 84)]
+    [InlineData(390, 844, 40, 48)]
+    public async Task ThemePreviewClearsTheAppBarAndSponsorActionStaysCompact(int width, int height, double minimumSponsorWidth, double maximumSponsorWidth)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var headerBox = await page.Locator(".documentation-header").BoundingBoxAsync();
+        var headingBox = await page.GetByRole(AriaRole.Heading, new() { Name = "Workflow examples", Level = 1 }).BoundingBoxAsync();
+        var sponsor = page.GetByTestId("documentation-kofi-link");
+        var sponsorBox = await sponsor.BoundingBoxAsync();
+
+        Assert.NotNull(headerBox);
+        Assert.NotNull(headingBox);
+        Assert.NotNull(sponsorBox);
+        Assert.InRange(headingBox.Y - (headerBox.Y + headerBox.Height), 16, 32);
+        Assert.InRange(sponsorBox.Width, minimumSponsorWidth, maximumSponsorWidth);
+        Assert.InRange(sponsorBox.Height, 40, 48);
+        await Assertions.Expect(sponsor).ToHaveAccessibleNameAsync("Support my work on Ko-fi (opens in a new tab)");
+        await Assertions.Expect(sponsor.Locator(".documentation-kofi__cup")).ToBeVisibleAsync();
+        await Assertions.Expect(sponsor.Locator(".documentation-kofi__badge")).ToHaveCountAsync(0);
+        if (width > 768)
+        {
+            await Assertions.Expect(sponsor.Locator(".documentation-kofi__label")).ToBeVisibleAsync();
+        }
+        else
+        {
+            await Assertions.Expect(sponsor.Locator(".documentation-kofi__label")).ToBeHiddenAsync();
+        }
+
+        var headerAccessibility = await page.Locator(".documentation-header").RunAxe();
+        Assert.DoesNotContain(headerAccessibility.Violations, violation => violation.Impact is "serious" or "critical");
+    }
+
+    [Theory]
     [InlineData(1440, 900)]
     [InlineData(390, 844)]
     public async Task ThemeStudioFiltersTheEvaluationRunwayWithoutNavigation(int width, int height)

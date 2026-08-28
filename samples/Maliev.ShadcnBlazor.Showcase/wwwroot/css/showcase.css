@@ -4161,32 +4161,33 @@ a {
 }
 
 .documentation-kofi {
-    display: inline-grid;
+    display: inline-flex;
     min-block-size: 2.5rem;
-    place-items: center;
+    align-items: center;
+    gap: 0.375rem;
+    border: 1px solid var(--shadcn-border);
     border-radius: var(--shadcn-radius-md);
-    padding-inline: 0.25rem;
+    background: var(--shadcn-background);
+    color: var(--shadcn-foreground);
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 650;
+    line-height: 1;
     text-decoration: none;
+    white-space: nowrap;
+    transition: border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
 
-.documentation-kofi__badge,
 .documentation-kofi__cup {
     display: block;
     object-fit: contain;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
 }
 
-.documentation-kofi__badge {
-    inline-size: auto;
-    block-size: 1.75rem;
-}
-
-.documentation-kofi__cup {
-    display: none;
-}
-
-.documentation-kofi:hover .documentation-kofi__badge,
-.documentation-kofi:hover .documentation-kofi__cup {
-    filter: brightness(0.96);
+.documentation-kofi:hover {
+    border-color: color-mix(in oklch, var(--shadcn-border) 72%, var(--shadcn-foreground));
+    background: var(--shadcn-accent);
 }
 
 .documentation-workbench {
@@ -4617,17 +4618,12 @@ a {
 
     .documentation-kofi {
         inline-size: 2.5rem;
+        justify-content: center;
         padding-inline: 0;
     }
 
-    .documentation-kofi__badge {
+    .documentation-kofi__label {
         display: none;
-    }
-
-    .documentation-kofi__cup {
-        display: block;
-        inline-size: 1.75rem;
-        block-size: 1.75rem;
     }
 
     .documentation-content {
@@ -8773,6 +8769,7 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="outline"]
     container-type: inline-size;
     min-inline-size: 0;
     overflow: visible;
+    padding-block-start: clamp(1rem, 2vw, 1.5rem);
 }
 
 .theme-bento__grid {
