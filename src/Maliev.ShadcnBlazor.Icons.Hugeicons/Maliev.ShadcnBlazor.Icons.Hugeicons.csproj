@@ -2,7 +2,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Maliev.ShadcnBlazor.Icons.Hugeicons</PackageId>
-    <VersionPrefix>1.2.1</VersionPrefix>
+    <VersionPrefix>1.2.2</VersionPrefix>
     <Authors>MALIEV Co., Ltd.</Authors>
     <Company>MALIEV Co., Ltd.</Company>
     <Description>Complete pinned Hugeicons Free stroke-rounded catalog for Maliev.ShadcnBlazor.</Description>
