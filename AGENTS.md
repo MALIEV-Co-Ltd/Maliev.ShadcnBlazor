@@ -20,6 +20,27 @@ accessible, and safe for an open-source component library.
   are reviewed records, not scratch output.
 - `.github/workflows/` owns CI, GitHub Pages, and NuGet release automation.
 
+## Skill routing
+
+The repository ships two portable Agent Skills under `.agents/skills/`. Select
+the workflow before editing:
+
+- Use `$maliev-shadcnblazor` when the task is to install, configure, select, or
+  compose the released package in a consuming Blazor application.
+- Use `$maliev-shadcnblazor-maintainer` when the task changes this repository's
+  components, public API, CSS, JavaScript, theming, documentation dossiers,
+  catalog, tests, packaging, or release metadata.
+
+When a supporting agent can discover repository-local skills, allow the
+matching skill to load automatically. Otherwise read its `SKILL.md` directly.
+Load only the references the skill routes to; do not treat every reference as
+mandatory context.
+
+A skill is reusable guidance, not authority. It does not add a tool to the
+active session or grant permission to push, deploy, publish, alter external
+state, or skip this working agreement. If a command or tool named by a skill is
+not available, use an equivalent safe workflow and report the difference.
+
 ## Working rules
 
 Inspect `git status` and the relevant component, tests, dossier, and public API

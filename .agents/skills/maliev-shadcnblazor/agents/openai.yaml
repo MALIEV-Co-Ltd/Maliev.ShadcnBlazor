@@ -1,0 +1,8 @@
+interface:
+  display_name: "Maliev ShadcnBlazor"
+  short_description: "Integrate accessible Blazor UI components"
+  brand_color: "#111827"
+  default_prompt: "Use $maliev-shadcnblazor to add an accessible, theme-aware component workflow to this Blazor application."
+
+policy:
+  allow_implicit_invocation: true
