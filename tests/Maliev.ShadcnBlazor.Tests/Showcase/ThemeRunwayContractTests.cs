@@ -14,6 +14,9 @@ public sealed class ThemeBentoContractTests
     {
         foreach (var workflow in new[] { "production-analytics", "quality-alert", "inspection-camera", "api-credentials", "quotation-data-table", "drawing-attachment", "machine-cell", "assistant-conversation", "operator-profile", "project-questionnaire", "shipping-handoff", "assigned-reviewers", "quotation-files" })
             Assert.Equal(expectedLibrary, ThemeStudioIconResolver.Resolve(library, workflow).Library);
+
+        foreach (var semantic in new[] { "file", "close", "delete", "download", "send" })
+            Assert.Equal(expectedLibrary, ThemeStudioIconResolver.ResolveSemantic(library, semantic).Library);
     }
 
     [Fact]

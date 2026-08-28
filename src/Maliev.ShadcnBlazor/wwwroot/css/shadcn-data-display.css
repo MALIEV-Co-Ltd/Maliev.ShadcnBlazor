@@ -54,7 +54,7 @@
 .shadcn-table-head > input[type="checkbox"][aria-checked="mixed"]::before { width: .55rem; height: .125rem; scale: 1; clip-path: none; }
 .shadcn-table-head > input[type="checkbox"]:focus-visible, .shadcn-table-cell > input[type="checkbox"]:focus-visible, .shadcn-data-table-visibility input[type="checkbox"]:focus-visible { outline: none; box-shadow: 0 0 0 var(--shadcn-focus-ring-width) var(--shadcn-ring); }
 .shadcn-table-head > input[type="checkbox"]:disabled, .shadcn-table-cell > input[type="checkbox"]:disabled, .shadcn-data-table-visibility input[type="checkbox"]:disabled { cursor: not-allowed; opacity: .5; }
-.shadcn-table-caption { padding-block: calc(0.75rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: 0.8125rem; text-align: start; }
+.shadcn-table-caption { padding-block: calc(0.75rem * var(--shadcn-spacing-multiplier)); padding-inline: calc(0.75rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-size: 0.8125rem; line-height: 1.5; text-align: start; }
 .shadcn-table code { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
 
 @media (prefers-reduced-motion: reduce) { .shadcn-table-row, .shadcn-table-head > input[type="checkbox"]::before, .shadcn-table-cell > input[type="checkbox"]::before, .shadcn-data-table-visibility input[type="checkbox"]::before { transition: none; } }

@@ -7,6 +7,19 @@
 
 <header class="documentation-header">
     <div class="documentation-header__leading">
+        @if (StudioMode)
+        {
+        <button id="theme-settings-toggle"
+                type="button"
+                class="documentation-icon-action documentation-sidebar-toggle"
+                data-testid="theme-controls-toggle"
+                aria-label="Toggle theme settings"
+                aria-controls="theme-studio-sidebar-region"
+                aria-expanded="@SettingsOpen.ToString().ToLowerInvariant()"
+                @onclick="ToggleSettings">
+            <ShadcnIcon Icon="@ThemeSettingsIcon" Size="20" Class="documentation-icon-action__icon" />
+        </button>
+        }
         <a class="documentation-brand" href="@(StudioMode ? "theme" : "docs")" aria-label="@(StudioMode ? "Theme Studio home" : "Maliev Shadcn Blazor documentation home")">
             <span class="documentation-brand__mark" aria-hidden="true">
                 <img src="images/brand/MALIEV_BLACK.svg" alt="" />
@@ -55,13 +68,6 @@
             <svg class="documentation-trigger__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none" /><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none" /></svg>
             <span>On This Page</span>
         </button>
-        }
-        else
-        {
-            <button id="theme-settings-toggle" type="button" class="documentation-trigger documentation-trigger--outline documentation-trigger--theme-settings" data-testid="theme-controls-toggle" aria-label="Toggle theme settings" aria-controls="theme-studio-sidebar-region" aria-expanded="@SettingsOpen.ToString().ToLowerInvariant()" @onclick="ToggleSettings">
-                <ShadcnIcon Icon="@ThemeSettingsIcon" Size="20" Class="documentation-trigger__icon" />
-                <span>Theme settings</span>
-            </button>
         }
         <a class="documentation-kofi"
            data-testid="documentation-kofi-link"

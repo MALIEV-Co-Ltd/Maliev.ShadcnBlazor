@@ -32,6 +32,91 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task DesktopSettingsCollapseToAnIconRailThatPreviewsOnHoverAndPinsOnClick()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var provider = page.GetByTestId("theme-studio-sidebar").Locator("..");
+        var sidebar = page.GetByTestId("theme-studio-sidebar");
+        var preview = page.Locator(".theme-preview-region");
+        var appBarToggle = page.GetByTestId("theme-controls-toggle");
+
+        await Assertions.Expect(appBarToggle).ToBeHiddenAsync();
+        await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-state", "collapsed");
+        await Assertions.Expect(page.GetByTestId("theme-sidebar-compact-menu")).ToBeVisibleAsync();
+
+        var collapsedProvider = await provider.BoundingBoxAsync();
+        var collapsedPreview = await preview.BoundingBoxAsync();
+        Assert.NotNull(collapsedProvider);
+        Assert.NotNull(collapsedPreview);
+        Assert.InRange(collapsedProvider.Width, 48, 72);
+
+        await provider.HoverAsync();
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-preview-expanded", "true");
+        var hoveredSidebar = await sidebar.BoundingBoxAsync();
+        var hoveredProvider = await provider.BoundingBoxAsync();
+        var hoveredPreview = await preview.BoundingBoxAsync();
+        Assert.NotNull(hoveredSidebar);
+        Assert.NotNull(hoveredProvider);
+        Assert.NotNull(hoveredPreview);
+        Assert.True(hoveredSidebar.Width >= 300, $"Expected the hover preview to expand to at least 300px, but it was {hoveredSidebar.Width}px.");
+        Assert.InRange(hoveredProvider.Width, 48, 72);
+        Assert.InRange(Math.Abs(hoveredPreview.X - collapsedPreview.X), 0, 0.5);
+
+        await preview.HoverAsync(new() { Position = new() { X = 200, Y = 100 } });
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-preview-expanded", "false");
+        await page.GetByTestId("theme-sidebar-rail-toggle").ClickAsync();
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-state", "expanded");
+        Assert.True((await provider.BoundingBoxAsync())!.Width >= 300);
+    }
+
+    [Fact]
+    public async Task MobileSettingsTogglePrecedesTheBrandAndControlsTheOffCanvasSidebar()
+    {
+        await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var toggle = page.GetByTestId("theme-controls-toggle");
+        var leading = page.Locator(".documentation-header__leading");
+
+        await Assertions.Expect(toggle).ToBeVisibleAsync();
+        Assert.True(await leading.EvaluateAsync<bool>("element => element.firstElementChild?.dataset.testid === 'theme-controls-toggle'"));
+        await toggle.ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToBeVisibleAsync();
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "true");
+
+        await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.Locator(".documentation-header")).Not.ToHaveAttributeAsync("inert", "");
+        await toggle.ClickAsync();
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task FilteringKeepsSidebarAndPreviewAlignedAndCategoryTabsScrollWithoutAVisibleTrack()
+    {
+        await using var context = await NewContextAsync(1025, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var provider = page.GetByTestId("theme-studio-sidebar").Locator("..");
+        var preview = page.Locator(".theme-preview-region");
+        var categories = page.Locator(".theme-bento__category-scroll");
+
+        await page.GetByTestId("theme-category-filter-security").ClickAsync();
+        await Assertions.Expect(page.Locator("[data-use-case-id]")).ToHaveCountAsync(3);
+        var providerBox = await provider.BoundingBoxAsync();
+        var previewBox = await preview.BoundingBoxAsync();
+        Assert.NotNull(providerBox);
+        Assert.NotNull(previewBox);
+        Assert.InRange(Math.Abs(providerBox.Y - previewBox.Y), 0, 0.5);
+
+        Assert.Equal("auto", await categories.EvaluateAsync<string>("element => getComputedStyle(element).overflowX"));
+        Assert.Equal("none", await categories.EvaluateAsync<string>("element => getComputedStyle(element).scrollbarWidth"));
+        Assert.True(await categories.EvaluateAsync<bool>("element => element.scrollWidth > element.clientWidth"));
+        await categories.EvaluateAsync("element => element.scrollLeft = 120");
+        Assert.True(Math.Abs(await categories.EvaluateAsync<double>("element => element.scrollLeft")) > 0);
+    }
+
+    [Fact]
     public async Task BentoLayoutStylesheetIsServedAndAppliedAtCompactDesktopWidth()
     {
         await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
@@ -492,6 +577,11 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         foreach (var useCase in new[] { "production-capacity", "operator-profile", "quotation-files", "shipping-handoff", "quotation-actions", "inspection-camera" })
             await Assertions.Expect(page.Locator($"[data-use-case-id='{useCase}'] [data-theme-workflow-icon]").First).ToBeVisibleAsync();
         await Assertions.Expect(icons.First).ToHaveAttributeAsync("data-library", "lucide");
+        var semanticIcons = page.Locator("[data-theme-semantic-icon] [data-slot='icon']");
+        await Assertions.Expect(semanticIcons.First).ToBeVisibleAsync();
+        Assert.True(await semanticIcons.CountAsync() >= 8);
+        await Assertions.Expect(page.Locator("[data-use-case-id='drawing-attachment'] [data-theme-semantic-icon='file']").First).ToBeVisibleAsync();
+        await Assertions.Expect(semanticIcons.First).ToHaveAttributeAsync("data-library", "lucide");
 
         var profileName = page.Locator("[data-use-case-id='operator-profile'] input").First;
         await profileName.FillAsync("Kanda T.");
@@ -499,6 +589,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("theme-icon-library-phosphor").ClickAsync();
 
         await Assertions.Expect(icons.First).ToHaveAttributeAsync("data-library", "phosphor");
+        await Assertions.Expect(semanticIcons.First).ToHaveAttributeAsync("data-library", "phosphor");
+        Assert.True(await semanticIcons.EvaluateAllAsync<bool>("nodes => nodes.every(node => node.dataset.library === 'phosphor')"));
         await Assertions.Expect(profileName).ToHaveValueAsync("Kanda T.");
         Assert.Equal("phosphor", await page.GetByTestId("theme-preview-scope").GetAttributeAsync("data-theme-icon-library"));
     }
@@ -1537,6 +1629,57 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal("none", await card.EvaluateAsync<string>("element => getComputedStyle(element, '::after').borderTopStyle"));
     }
 
+    [Theory]
+    [InlineData("Frosted glass", "glass")]
+    [InlineData("Spatial glass", "liquid-glass")]
+    public async Task GlassMaterialsFillCardsAndControlsWithoutRevealFilterFlicker(string option, string expectedStyle)
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.NoPreference);
+        var page = await OpenAsync(context);
+        await SelectOptionAsync(page, "theme-visual-style", option);
+        await page.GetByTestId("locale-thai").ClickAsync();
+
+        var scope = page.GetByTestId("theme-visual-style-scope");
+        var card = page.Locator("[data-use-case-id='quotation-files']");
+        var dropzone = card.Locator(".shadcn-dropzone");
+        var reveal = card.Locator("..");
+        await card.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-visual-style", expectedStyle);
+        await Assertions.Expect(reveal).ToHaveCSSAsync("transform", "none");
+        Assert.DoesNotContain("transform", await reveal.EvaluateAsync<string>("element => getComputedStyle(element).transitionProperty"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("border-box", await card.EvaluateAsync<string>("element => getComputedStyle(element).backgroundOrigin"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("border-box", await dropzone.EvaluateAsync<string>("element => getComputedStyle(element).backgroundOrigin"), StringComparison.OrdinalIgnoreCase);
+        Assert.NotEqual("fixed", await page.Locator(".theme-preview-region").EvaluateAsync<string>("element => getComputedStyle(element).backgroundAttachment"));
+    }
+
+    [Fact]
+    public async Task ThaiInspectionCaptionHasReadableInsetAndLineBoxAlignment()
+    {
+        await using var context = await NewContextAsync(1569, 1032, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("locale-thai").ClickAsync();
+        var caption = page.Locator("[data-use-case-id='inspection-table'] .shadcn-table-caption");
+        await caption.ScrollIntoViewIfNeededAsync();
+
+        Assert.True(await caption.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).paddingInlineStart)") >= 12);
+        Assert.True(await caption.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).lineHeight)") >= 18);
+        Assert.Equal("start", await caption.EvaluateAsync<string>("element => getComputedStyle(element).textAlign"));
+    }
+
+    [Fact]
+    public async Task TransferActionsKeepTextClearOfEdgesAtCompactSidebarWidth()
+    {
+        await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await OpenAdvancedAsync(page, "theme-advanced-transfer");
+        var actions = page.Locator(".theme-transfer-actions");
+        var buttons = actions.Locator(".shadcn-button");
+        await Assertions.Expect(buttons).ToHaveCountAsync(3);
+
+        Assert.True(await buttons.EvaluateAllAsync<bool>("nodes => nodes.every(node => { const style = getComputedStyle(node); return parseFloat(style.paddingInlineStart) >= 12 && parseFloat(style.paddingInlineEnd) >= 12 && node.scrollWidth <= node.clientWidth; })"));
+        Assert.True(await actions.EvaluateAsync<bool>("element => getComputedStyle(element).gridTemplateColumns.split(' ').length <= 2"));
+    }
+
     [Fact]
     public async Task RadiusHighContrastAndAnimationControlsAffectThePreviewOnly()
     {
@@ -1854,14 +1997,16 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task MobileSettingsRestoresFocusAndPreviewHasNoSeriousAxeViolations()
+    public async Task MobileSettingsEscapeClosesTheDrawerAndPreviewHasNoSeriousAxeViolations()
     {
         await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         var toggle = page.GetByTestId("theme-controls-toggle");
         await toggle.ClickAsync();
-        await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
-        await Assertions.Expect(toggle).ToBeFocusedAsync();
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToHaveAttributeAsync("data-focus-return-id", "theme-settings-toggle");
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(toggle).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.GetByTestId("theme-studio-sidebar")).ToBeHiddenAsync();
         foreach (var card in await page.Locator("[data-use-case-id]").AllAsync())
         {
             var axe = await card.RunAxe();
