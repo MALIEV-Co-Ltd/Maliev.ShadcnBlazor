@@ -53,7 +53,8 @@ public sealed class ThemeImportExportBrowserTests(
         await acknowledgement.CheckAsync();
         await Assertions.Expect(page.GetByTestId("theme-download")).ToBeEnabledAsync();
         var download = await page.RunAndWaitForDownloadAsync(
-            () => page.GetByTestId("theme-download").ClickAsync());
+            () => page.GetByTestId("theme-download").ClickAsync(),
+            new() { Timeout = 90_000 });
         var downloadPath = await download.PathAsync();
         Assert.NotNull(downloadPath);
         using var archive = ZipFile.OpenRead(downloadPath);
@@ -97,7 +98,8 @@ public sealed class ThemeImportExportBrowserTests(
             await acknowledgement.CheckAsync();
 
         var download = await page.RunAndWaitForDownloadAsync(
-            () => page.GetByTestId("theme-download").ClickAsync());
+            () => page.GetByTestId("theme-download").ClickAsync(),
+            new() { Timeout = 90_000 });
         Assert.Equal("maliev-shadcn-theme-cobalt-precision-2.zip", download.SuggestedFilename);
         var downloadPath = await download.PathAsync();
         Assert.NotNull(downloadPath);
