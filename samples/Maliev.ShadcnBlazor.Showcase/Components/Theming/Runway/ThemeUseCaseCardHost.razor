@@ -47,19 +47,19 @@
             break;
         case "drawing-attachment":
             <ShadcnAttachment Title="housing-rev-d.step" State="ShadcnAttachmentState.Uploading" Progress="@ClampPercent(Frame.UploadPercent)">
-                <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
+                <ShadcnAttachmentMedia data-theme-semantic-icon="file"><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>housing-rev-d.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>@T("8.4 MB · STEP · uploading")</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="@T("Cancel drawing upload")" OnAction="HandleAttachmentAction"><ShadcnIcon Icon="@XIcon" Size="16" /></ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="@T("Cancel drawing upload")" OnAction="HandleAttachmentAction"><span data-theme-semantic-icon="close"><ShadcnIcon Icon="@XIcon" Size="16" /></span></ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             <ShadcnAttachment Title="surface-scan.zip" State="ShadcnAttachmentState.Uploading">
-                <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
+                <ShadcnAttachmentMedia data-theme-semantic-icon="file"><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>surface-scan.zip</ShadcnAttachmentTitle><ShadcnAttachmentDescription>@T("Preparing secure upload…")</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="@T("Cancel surface scan upload")" OnAction="HandleAttachmentAction"><ShadcnIcon Icon="@XIcon" Size="16" /></ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Cancel" AccessibleName="@T("Cancel surface scan upload")" OnAction="HandleAttachmentAction"><span data-theme-semantic-icon="close"><ShadcnIcon Icon="@XIcon" Size="16" /></span></ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             <ShadcnAttachment Title="inspection-plan.pdf" State="ShadcnAttachmentState.Done">
-                <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
+                <ShadcnAttachmentMedia data-theme-semantic-icon="file"><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>inspection-plan.pdf</ShadcnAttachmentTitle><ShadcnAttachmentDescription>@T("1.2 MB · ready for review")</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="@T("Remove inspection plan")" OnAction="HandleAttachmentAction"><ShadcnIcon Icon="@TrashIcon" Size="16" /></ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="@T("Remove inspection plan")" OnAction="HandleAttachmentAction"><span data-theme-semantic-icon="delete"><ShadcnIcon Icon="@TrashIcon" Size="16" /></span></ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             break;
         case "quotation-files":
@@ -70,13 +70,13 @@
                     @foreach (var file in _dropzoneFiles)
                     {
                         <ShadcnAttachment @key="file.Id" Title="@file.Name" State="@FileState(file)" Progress="@FileProgress(file)">
-                            <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="18" /></ShadcnAttachmentMedia>
+                            <ShadcnAttachmentMedia data-theme-semantic-icon="file"><ShadcnIcon Icon="@FileIcon" Size="18" /></ShadcnAttachmentMedia>
                             <ShadcnAttachmentContent>
                                 <ShadcnAttachmentTitle>@file.Name</ShadcnAttachmentTitle>
                                 <ShadcnAttachmentDescription>@FormatFileSize(file.Size) · @T(file.Status)</ShadcnAttachmentDescription>
                             </ShadcnAttachmentContent>
                             <ShadcnAttachmentActions>
-                                <ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="@T("Remove {0}", file.Name)" OnAction="_ => RemoveUploadedFile(file.Id)"><ShadcnIcon Icon="@TrashIcon" Size="16" /></ShadcnAttachmentAction>
+                                <ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Remove" AccessibleName="@T("Remove {0}", file.Name)" OnAction="_ => RemoveUploadedFile(file.Id)"><span data-theme-semantic-icon="delete"><ShadcnIcon Icon="@TrashIcon" Size="16" /></span></ShadcnAttachmentAction>
                             </ShadcnAttachmentActions>
                         </ShadcnAttachment>
                     }
@@ -290,9 +290,9 @@
             break;
         case "file-context":
             <ShadcnAttachment Title="enclosure-rev-c.step" State="ShadcnAttachmentState.Done">
-                <ShadcnAttachmentMedia><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
+                <ShadcnAttachmentMedia data-theme-semantic-icon="file"><ShadcnIcon Icon="@FileIcon" Size="20" /></ShadcnAttachmentMedia>
                 <ShadcnAttachmentContent><ShadcnAttachmentTitle>enclosure-rev-c.step</ShadcnAttachmentTitle><ShadcnAttachmentDescription>@T("Revision C · STEP · 8.4 MB")</ShadcnAttachmentDescription></ShadcnAttachmentContent>
-                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Download" AccessibleName="@T("Download revision C")" OnAction="HandleAttachmentAction"><ShadcnIcon Icon="@DownloadIcon" Size="16" /></ShadcnAttachmentAction></ShadcnAttachmentActions>
+                <ShadcnAttachmentActions><ShadcnAttachmentAction Action="ShadcnAttachmentActionKind.Download" AccessibleName="@T("Download revision C")" OnAction="HandleAttachmentAction"><span data-theme-semantic-icon="download"><ShadcnIcon Icon="@DownloadIcon" Size="16" /></span></ShadcnAttachmentAction></ShadcnAttachmentActions>
             </ShadcnAttachment>
             <ShadcnContextMenu>
                 <ShadcnContextMenuTrigger Class="theme-bento-context-target">
@@ -604,11 +604,10 @@
     private int _conversationSequence = 2;
     private string Title => Locale == ThemeStudioLocale.Thai ? Definition.ThaiTitle : Definition.EnglishTitle;
     private ShadcnIconData WorkflowIcon => ThemeStudioIconResolver.Resolve(IconLibrary, Definition.Id);
-    private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-right", "0 0 24 24", "<path d=\"m9 18 6-6-6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
-    private static readonly ShadcnIconData FileIcon = new("lucide", "file", "0 0 24 24", "<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/><path d=\"M14 2v6h6\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
-    private static readonly ShadcnIconData XIcon = new("lucide", "x", "0 0 24 24", "<path d=\"M18 6 6 18M6 6l12 12\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\"/>");
-    private static readonly ShadcnIconData TrashIcon = new("lucide", "trash-2", "0 0 24 24", "<path d=\"M3 6h18M8 6V4h8v2m-9 0 1 15h8l1-15M10 11v6m4-6v6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
-    private static readonly ShadcnIconData DownloadIcon = new("lucide", "download", "0 0 24 24", "<path d=\"M12 3v12m0 0 5-5m-5 5-5-5M5 21h14\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
+    private ShadcnIconData FileIcon => ThemeStudioIconResolver.ResolveSemantic(IconLibrary, "file");
+    private ShadcnIconData XIcon => ThemeStudioIconResolver.ResolveSemantic(IconLibrary, "close");
+    private ShadcnIconData TrashIcon => ThemeStudioIconResolver.ResolveSemantic(IconLibrary, "delete");
+    private ShadcnIconData DownloadIcon => ThemeStudioIconResolver.ResolveSemantic(IconLibrary, "download");
     private sealed record QuotationRow(string Id, string Customer, string Status, double Amount);
     private static readonly QuotationRow[] QuotationRows =
     [

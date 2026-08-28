@@ -25,12 +25,16 @@ public static class ThemeStudioIconResolver
         ["camera"] = ["camera", "camera", "camera", "camera-01"],
         ["credentials"] = ["key-round", "key", "key", "key-01"],
         ["data"] = ["database", "database", "database", "database"],
+        ["delete"] = ["trash-2", "trash", "trash", "delete-02"],
+        ["download"] = ["download", "download-simple", "download", "download-01"],
         ["file"] = ["file", "file", "file", "file-01"],
         ["machine"] = ["factory", "factory", "building-factory", "factory"],
         ["message"] = ["message-circle", "chat-circle", "message-circle", "message-01"],
         ["profile"] = ["user", "user", "user", "user"],
         ["review"] = ["clipboard-check", "clipboard", "clipboard-check", "clipboard"],
         ["shipping"] = ["truck", "truck", "truck-delivery", "truck-delivery"],
+        ["close"] = ["x", "x", "x", "cancel-01"],
+        ["send"] = ["send", "paper-plane", "send", "sent"],
         ["team"] = ["users", "users-three", "users", "user-group"],
         ["upload"] = ["upload", "upload-simple", "file-upload", "file-upload"]
     };
@@ -38,7 +42,18 @@ public static class ThemeStudioIconResolver
     /// <summary>Gets an icon for a curated workflow without leaking package-specific names to cards.</summary>
     public static ShadcnIconData Resolve(ThemeStudioIconLibrary library, string workflowId)
     {
-        var semantic = SemanticFor(workflowId);
+        return ResolveSemantic(library, SemanticFor(workflowId));
+    }
+
+    /// <summary>Gets an icon for a semantic UI action from the selected companion package.</summary>
+    public static ShadcnIconData ResolveSemantic(ThemeStudioIconLibrary library, string semantic)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(semantic);
+        if (!Names.TryGetValue(semantic, out var names))
+        {
+            throw new ArgumentOutOfRangeException(nameof(semantic), semantic, "Unknown Theme Studio icon semantic.");
+        }
+
         var packageIndex = library switch
         {
             ThemeStudioIconLibrary.Phosphor => 1,
@@ -47,7 +62,7 @@ public static class ThemeStudioIconResolver
             _ => 0
         };
         var effectiveLibrary = Catalogs.ContainsKey(library) ? library : ThemeStudioIconLibrary.Lucide;
-        return Catalogs[effectiveLibrary].Get(Names[semantic][packageIndex]);
+        return Catalogs[effectiveLibrary].Get(names[packageIndex]);
     }
 
     private static string SemanticFor(string workflowId) => workflowId switch

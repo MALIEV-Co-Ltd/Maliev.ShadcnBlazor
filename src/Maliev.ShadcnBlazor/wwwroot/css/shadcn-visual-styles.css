@@ -176,6 +176,7 @@
   border-width: var(--shadcn-style-border-width, 1px);
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
   background: var(--shadcn-style-surface, var(--shadcn-card));
+  background-origin: border-box;
   box-shadow: var(--shadcn-style-shadow, none);
   transition: box-shadow var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease;
 }
@@ -217,6 +218,7 @@
   border-width: var(--shadcn-style-border-width, 1px);
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
   background: var(--shadcn-style-surface-strong, var(--shadcn-popover));
+  background-origin: border-box;
   box-shadow: var(--shadcn-shadow-lg), var(--shadcn-style-shadow-hover, var(--shadcn-style-shadow, none));
   backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
   -webkit-backdrop-filter: blur(var(--shadcn-style-blur, 0px)) saturate(var(--shadcn-style-saturation, 100%));
@@ -253,6 +255,7 @@
   .shadcn-dropzone
 ) {
   border-radius: calc(var(--shadcn-radius) * var(--shadcn-style-radius-factor, 1));
+  background-origin: border-box;
   transition: transform var(--shadcn-style-transition-duration) ease, box-shadow var(--shadcn-style-transition-duration) ease, background-color var(--shadcn-style-transition-duration) ease, border-color var(--shadcn-style-transition-duration) ease;
 }
 
@@ -269,6 +272,7 @@
 ) {
   border-color: transparent;
   background: var(--shadcn-style-control-material) padding-box, var(--shadcn-style-control-edge) border-box;
+  background-origin: border-box;
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shadcn-style-specular) 76%, transparent), 0 .35rem 1rem color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
   backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur)) var(--shadcn-style-refraction-filter) saturate(var(--shadcn-style-saturation));
@@ -288,6 +292,7 @@
 ) {
   border-color: transparent;
   background: var(--shadcn-style-control-material, var(--shadcn-style-control-surface));
+  background-origin: border-box;
   box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), 0 .25rem .75rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
   backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-control-blur, var(--shadcn-style-blur))) saturate(var(--shadcn-style-saturation));
@@ -313,6 +318,7 @@
 ) {
   border-color: transparent;
   background: var(--shadcn-style-control-surface);
+  background-origin: border-box;
   box-shadow: inset 0 1px 0 color-mix(in oklch, white 34%, transparent), inset 0 -1px 0 color-mix(in oklch, var(--shadcn-foreground) 5%, transparent), 0 .3rem .9rem color-mix(in oklch, var(--shadcn-foreground) 7%, transparent);
   backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));
   -webkit-backdrop-filter: blur(var(--shadcn-style-blur)) saturate(var(--shadcn-style-saturation));

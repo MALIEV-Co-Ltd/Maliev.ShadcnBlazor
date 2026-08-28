@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-08-28
+
+### Added
+
+- Added composable visual-style scopes, Bento Grid and Reveal primitives, and
+  agent-ready consumer and maintainer skill packages.
+- Added a complete five-minute documentation quickstart and separated the
+  component catalog into a focused, navigable reference experience.
+
+### Changed
+
+- Refined Theme Studio navigation with a compact desktop settings rail,
+  temporary hover expansion, a mobile off-canvas drawer, a compact Ko-fi
+  action, and responsive category navigation.
+- Extended Theme Studio workflow icons to follow the selected Lucide, Tabler,
+  Phosphor, or Hugeicons companion package.
+
+### Fixed
+
+- Corrected GitHub Pages module resolution, Theme Studio form and overlay
+  interactions, chart and carousel rendering, sequential OTP entry, and
+  responsive text wrapping.
+- Hardened sidebar overlay cleanup, glass-material coverage and flicker,
+  table-caption alignment, transfer-action spacing, and reviewed visual
+  behavior across desktop, mobile, dark, and RTL modes.
+
 ## [1.2.1] - 2026-08-23
 
 ### Added
@@ -239,7 +265,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.0...v1.1.1

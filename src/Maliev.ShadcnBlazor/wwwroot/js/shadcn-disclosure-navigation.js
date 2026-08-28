@@ -195,6 +195,7 @@ export function detachSidebarProvider(root) { const value = sidebarProviders.get
 const sidebarOverlays = new WeakMap();
 function releaseSidebarOverlay(aside, restoreFocus = true) { const value = sidebarOverlays.get(aside); if (!value) return; aside.removeEventListener('keydown', value.keydown); value.inerted.forEach(({ element, inert, ariaHidden }) => { element.inert = inert; if (ariaHidden === null) element.removeAttribute('aria-hidden'); else element.setAttribute('aria-hidden', ariaHidden); }); if (restoreFocus) value.previous?.focus?.({ preventScroll: true }); sidebarOverlays.delete(aside); }
 export function attachSidebarOverlay(aside, dotnet) {
+    if (sidebarOverlays.has(aside)) return;
     const returnFocusId = aside.dataset.focusReturnId;
     const previous = returnFocusId ? document.getElementById(returnFocusId) : document.activeElement;
     const inerted = []; let branch = aside;
