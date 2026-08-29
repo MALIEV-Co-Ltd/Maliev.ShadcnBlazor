@@ -13,6 +13,7 @@ type Maliev.ShadcnBlazor.Components.Actions.ShadcnButton
   String SuccessText
   RenderFragment TrailingIcon
   ShadcnButtonVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnButtonGroup
   RenderFragment ChildContent
   ShadcnButtonGroupOrientation Orientation
@@ -35,12 +36,14 @@ type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggle
   ShadcnToggleSize Size
   RenderFragment TrailingIcon
   ShadcnToggleVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroupItem`1
   RenderFragment ChildContent
   Boolean Disabled
   RenderFragment LeadingIcon
   RenderFragment TrailingIcon
   TValue Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroupOrientation: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroup`1
   RenderFragment ChildContent
@@ -52,6 +55,7 @@ type Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleGroup`1
   IReadOnlyCollection<TValue> Values
   EventCallback<IReadOnlyCollection<TValue>> ValuesChanged
   ShadcnToggleVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleSize: Default, Small, Large
 enum Maliev.ShadcnBlazor.Components.Actions.ShadcnToggleVariant: Default, Outline
 type Maliev.ShadcnBlazor.Components.Content.IShadcnCarouselApi
@@ -127,9 +131,11 @@ type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselItem
   Int32 Index
   String Label
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselNext
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselOptions
 enum Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselOrientation: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Content.ShadcnCarouselPrevious
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Content.ShadcnEmpty
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Content.ShadcnEmptyContent
@@ -195,6 +201,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentAction
   RenderFragment ChildContent
   Boolean Disabled
   EventCallback<ShadcnAttachmentActionKind> OnAction
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentActionKind: None, Remove, Retry, Cancel, Download, Custom
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentActions
   RenderFragment ChildContent
@@ -223,6 +230,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentTrigger
   Boolean Disabled
   String Href
   EventCallback OnActivate
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationError
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationOptions
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachmentValidationResult
@@ -287,6 +295,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageCopyAction
   String Label
   EventCallback OnCopied
   String Text
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageDefaultScrollPosition: Start, End, LastAnchor
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageFooter
   RenderFragment ChildContent
@@ -299,6 +308,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageReplyAction
   String Label
   EventCallback<String> OnReply
   String Quote
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageReplyQuote
   String DismissLabel
   String Label
@@ -319,6 +329,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerButton
   ShadcnMessageScrollBehavior Behavior
   RenderFragment ChildContent
   ShadcnMessageScrollDirection Direction
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageScrollerContent
   String AriaLive
   RenderFragment ChildContent
@@ -403,17 +414,21 @@ enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireItemStatus: 
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireNavigationResult
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireNext
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnairePrevious
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireProgress
   String AccessibleName
   RenderFragment ChildContent
 enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireShortcutMode: None, Letters, Numbers
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireSkip
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireState
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireSubmit
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireTitle
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnQuestionnaireValidate
@@ -573,6 +588,7 @@ type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordion
   ShadcnAccordionOrientation Orientation
   IReadOnlyCollection<String> Values
   EventCallback<IReadOnlyCollection<String>> ValuesChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionItem
@@ -582,6 +598,7 @@ type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionItem
 enum Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionOrientation: Vertical, Horizontal
 type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnAccordionTrigger
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsible
   RenderFragment ChildContent
   Boolean Disabled
@@ -591,6 +608,7 @@ type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsibleContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Disclosure.ShadcnCollapsibleTrigger
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Feedback.ShadcnAlert
   ShadcnAlertRole AlertRole
   RenderFragment ChildContent
@@ -678,6 +696,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendar
   EventCallback<DateOnly> VisibleMonthChanged
   String WeekLabel
   String YearSelectLabel
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarCaptionLayout: Label, Dropdown
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendarSelectionMode: Single, Range
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnComboboxOption`1
@@ -706,6 +725,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnCombobox`1
   IReadOnlyList<TValue> Values
   EventCallback<IReadOnlyList<TValue>> ValuesChanged
   Expression<Func<IReadOnlyList<TValue>>> ValuesExpression
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnControlSize: Default, Small
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   Boolean AllowTextInput
@@ -743,6 +763,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   Expression<Func<Nullable<DateOnly>>> ValueExpression
   DateOnly VisibleMonth
   EventCallback<DateOnly> VisibleMonthChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDateRange
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzone
   String Accept
@@ -831,6 +852,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtp
   String InputMode
   Int32 MaxLength
   String Pattern
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpContext
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnInputOtpGroup
   RenderFragment ChildContent
@@ -846,6 +868,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnInput`1
   Boolean Multiple
   String Placeholder
   String Type
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnLabel
   RenderFragment ChildContent
   String For
@@ -862,6 +885,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnNativeSelect`1
   String ControlClass
   String ControlStyle
   ShadcnControlSize Size
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnSecretInput
   String AutoComplete
   Boolean Disabled
@@ -890,9 +914,11 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelect`1
   IReadOnlyList<ShadcnSelectOption<TValue>> Options
   String Placeholder
   ShadcnControlSize Size
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnTextarea`1
   String Placeholder
   Nullable<Int32> Rows
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Icons.IShadcnIconCatalog
   String Library
   IReadOnlyList<String> Names
@@ -989,6 +1015,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbLink
   String Href
   EventCallback<MouseEventArgs> OnClick
   String Target
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbList
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnBreadcrumbPage
@@ -1005,6 +1032,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenu
   ShadcnNavigationMenuOrientation Orientation
   String Value
   EventCallback<String> ValueChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuIndicator
@@ -1018,11 +1046,13 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuLink
   String Href
   EventCallback<MouseEventArgs> OnClick
   String Target
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuList
   RenderFragment ChildContent
 enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuOrientation: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuTrigger
   RenderFragment ChildContent
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnNavigationMenuViewport
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPagination
   RenderFragment ChildContent
@@ -1040,12 +1070,14 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationLink
   String Href
   EventCallback<MouseEventArgs> OnClick
   ShadcnPaginationLinkSize Size
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationLinkSize: Default, Icon
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationNext
   Boolean Disabled
   String Href
   String Label
   EventCallback<MouseEventArgs> OnClick
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPages
   Int32 CurrentPage
   EventCallback<Int32> CurrentPageChanged
@@ -1061,6 +1093,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnPaginationPrevious
   String Href
   String Label
   EventCallback<MouseEventArgs> OnClick
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabs
   ShadcnTabsActivationMode ActivationMode
   RenderFragment ChildContent
@@ -1069,6 +1102,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabs
   ShadcnTabsOrientation Orientation
   String Value
   EventCallback<String> ValueChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsActivationMode: Automatic, Manual
 type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsContent
   RenderFragment ChildContent
@@ -1084,6 +1118,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.ShadcnTabsTrigger
   RenderFragment ChildContent
   Boolean Disabled
   String Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.IShadcnSidebarStateStore
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebar
   RenderFragment ChildContent
@@ -1104,6 +1139,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupAction
   Boolean Disabled
   String Label
   EventCallback<MouseEventArgs> OnClick
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarGroupLabel
@@ -1117,6 +1153,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarInput
   String Type
   String Value
   EventCallback<String> ValueChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarInset
   RenderFragment ChildContent
   String Role
@@ -1128,6 +1165,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuAction
   String Label
   EventCallback<MouseEventArgs> OnClick
   Boolean ShowOnHover
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuBadge
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButton
@@ -1140,6 +1178,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButton
   String Target
   String Tooltip
   ShadcnSidebarMenuButtonVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButtonSize: Small, Default, Large
 enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuButtonVariant: Default, Outline
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuItem
@@ -1153,6 +1192,7 @@ type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSubButto
   RenderFragment ChildContent
   Boolean Disabled
   String Href
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarMenuSubItem
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarProvider
@@ -1178,6 +1218,7 @@ enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarSide: Left, 
 type Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarTrigger
   RenderFragment ChildContent
   String TargetId
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Navigation.Sidebar.ShadcnSidebarVariant: Sidebar, Floating, Inset
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialog
   RenderFragment ChildContent
@@ -1188,10 +1229,12 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogAction
   RenderFragment ChildContent
   Boolean Disabled
   EventCallback<MouseEventArgs> OnClick
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogCancel
   RenderFragment ChildContent
   Boolean Disabled
   EventCallback<MouseEventArgs> OnClick
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogContent
   RenderFragment ChildContent
   ShadcnAlertDialogSize Size
@@ -1209,11 +1252,13 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogTitle
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnAlertDialogTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommand
   RenderFragment ChildContent
   String Label
   Boolean Loop
   Boolean ShouldFilter
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandDialog
   RenderFragment ChildContent
   String Description
@@ -1233,6 +1278,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandInput
   String Placeholder
   String Value
   EventCallback<String> ValueChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandItem
   RenderFragment ChildContent
   Boolean Disabled
@@ -1240,6 +1286,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandItem
   EventCallback<String> OnSelect
   String TextValue
   String Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandList
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnCommandSeparator
@@ -1254,6 +1301,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuCheckboxItem
   EventCallback<Boolean> CheckedChanged
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuGroup
@@ -1266,6 +1314,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuItem
   EventCallback<MouseEventArgs> OnSelect
   String TextValue
   ShadcnMenuItemVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuLabel
   RenderFragment ChildContent
   Boolean Inset
@@ -1279,6 +1328,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuRadioItem
   RenderFragment ChildContent
   Boolean Disabled
   String Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSeparator
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuShortcut
   Boolean AriaHidden
@@ -1293,9 +1343,11 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuSubTrigger
   RenderFragment ChildContent
   Boolean Disabled
   Boolean Inset
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnContextMenuTrigger
   RenderFragment ChildContent
   Boolean Focusable
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialog
   RenderFragment ChildContent
   Boolean CloseOnEscape
@@ -1309,6 +1361,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogClose
   String Label
   EventCallback<MouseEventArgs> OnClick
   ShadcnButtonVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogContent
   RenderFragment ChildContent
   String CloseLabel
@@ -1324,6 +1377,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogTitle
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDialogTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawer
   RenderFragment ChildContent
   Boolean DisablePointerDismissal
@@ -1340,6 +1394,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerClose
   Boolean Disabled
   EventCallback<MouseEventArgs> OnClick
   ShadcnButtonVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerContent
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerDescription
@@ -1359,6 +1414,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerTitle
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDrawerTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenu
   RenderFragment ChildContent
   Boolean Loop
@@ -1371,6 +1427,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuCheckboxItem
   Boolean CloseOnSelect
   Boolean Disabled
   Boolean Inset
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuContent
   ShadcnOverlayAlign Align
   Double AlignOffset
@@ -1387,6 +1444,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuItem
   EventCallback<MouseEventArgs> OnSelect
   String TextValue
   ShadcnMenuItemVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuLabel
   RenderFragment ChildContent
   Boolean Inset
@@ -1402,6 +1460,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuRadioItem
   Boolean Disabled
   Boolean Inset
   String Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSeparator
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuShortcut
   Boolean AriaHidden
@@ -1420,9 +1479,11 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuSubTrigger
   RenderFragment ChildContent
   Boolean Disabled
   Boolean Inset
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnDropdownMenuTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCard
   RenderFragment ChildContent
   TimeSpan CloseDelay
@@ -1439,11 +1500,13 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCardContent
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnHoverCardTrigger
   RenderFragment ChildContent
   String Href
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenuItemVariant: Default, Destructive
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubar
   RenderFragment ChildContent
   String Label
   Boolean Loop
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarCheckboxItem
   Boolean Checked
   EventCallback<Boolean> CheckedChanged
@@ -1451,6 +1514,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarCheckboxItem
   Boolean CloseOnSelect
   Boolean Disabled
   Boolean Inset
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarContent
   ShadcnOverlayAlign Align
   Double AlignOffset
@@ -1467,6 +1531,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarItem
   EventCallback<MouseEventArgs> OnSelect
   String TextValue
   ShadcnMenuItemVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarLabel
   RenderFragment ChildContent
   Boolean Inset
@@ -1486,6 +1551,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarRadioItem
   Boolean Disabled
   Boolean Inset
   String Value
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSeparator
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarShortcut
   RenderFragment ChildContent
@@ -1503,10 +1569,12 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarSubTrigger
   RenderFragment ChildContent
   Boolean Disabled
   Boolean Inset
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnMenubarTrigger
   RenderFragment ChildContent
   Boolean Disabled
   String TextValue
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnOverlayAlign: Start, Center, End
 enum Maliev.ShadcnBlazor.Components.Overlays.ShadcnOverlaySide: Top, Right, Bottom, Left
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopover
@@ -1531,6 +1599,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverTitle
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnPopoverTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheet
   RenderFragment ChildContent
   Boolean CloseOnEscape
@@ -1543,6 +1612,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetClose
   String Label
   EventCallback<MouseEventArgs> OnClick
   ShadcnButtonVariant Variant
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetContent
   RenderFragment ChildContent
   String CloseLabel
@@ -1560,6 +1630,7 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetTitle
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnSheetTrigger
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltip
   RenderFragment ChildContent
   Nullable<TimeSpan> CloseDelay
@@ -1581,10 +1652,15 @@ type Maliev.ShadcnBlazor.Components.Overlays.ShadcnTooltipTrigger
   String AccessibleLabel
   RenderFragment ChildContent
   Boolean Disabled
+  method ValueTask FocusAsync(Boolean preventScroll)
+type Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
   IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]
   String Class
   String Style
+type Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Primitives.ShadcnStateTransition
   Boolean Active
   RenderFragment ActiveContent
@@ -1600,6 +1676,7 @@ type Maliev.ShadcnBlazor.Components.Selection.ShadcnCheckbox
   Nullable<Boolean> Value
   EventCallback<Nullable<Boolean>> ValueChanged
   Expression<Func<Nullable<Boolean>>> ValueExpression
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroupItem`1
   RenderFragment ChildContent
   Boolean Disabled
@@ -1618,6 +1695,7 @@ type Maliev.ShadcnBlazor.Components.Selection.ShadcnRadioGroup`1
   TValue Value
   EventCallback<TValue> ValueChanged
   Expression<Func<TValue>> ValueExpression
+  method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnSlider
   Boolean Disabled
   String Form
@@ -1634,6 +1712,8 @@ type Maliev.ShadcnBlazor.Components.Selection.ShadcnSlider
   Expression<Func<IReadOnlyList<Double>>> ValueExpression
   IReadOnlyList<Double> Values
   EventCallback<IReadOnlyList<Double>> ValuesChanged
+  method ValueTask FocusAsync(Boolean preventScroll)
+  method ValueTask FocusThumbAsync(Int32 index, Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Selection.ShadcnSliderOrientation: Horizontal, Vertical
 type Maliev.ShadcnBlazor.Components.Selection.ShadcnSliderThumbAttributes
   IReadOnlyDictionary<String, Object> AdditionalAttributes
@@ -1653,6 +1733,7 @@ type Maliev.ShadcnBlazor.Components.Selection.ShadcnSwitch
   Boolean Value
   EventCallback<Boolean> ValueChanged
   Expression<Func<Boolean>> ValueExpression
+  method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Selection.ShadcnSwitchSize: Default, Small
 type Maliev.ShadcnBlazor.Components.ShadcnThemeProvider
   IReadOnlyDictionary<String, Object> AdditionalAttributes [CaptureUnmatchedValues]

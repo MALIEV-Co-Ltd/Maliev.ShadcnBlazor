@@ -6,6 +6,7 @@
         <li>Use a visible label or accessible name whenever this component accepts interaction.</li>
         <li>Preserve native keyboard, focus, disabled, and read-only behavior in composed examples.</li>
         <li>Validate rendered roles, names, relationships, and state attributes in browser tests.</li>
+        <li>Focusable components implement <code>IShadcnFocusable</code>; capture the component with <code>@@ref</code> and call <code>FocusAsync(preventScroll)</code> instead of querying package DOM.</li>
         @if (Entry.Slug == "direction")
         {
             <li>Keep the document language independent from reading direction and test both LTR and RTL content.</li>
@@ -31,10 +32,12 @@
         else if (Entry.Slug == "radio-group")
         {
             <li>Provide a radiogroup name; Arrow keys, Home, and End use one roving tab stop and skip disabled choices.</li>
+            <li><code>FocusAsync</code> enters at the selected enabled radio, then the current roving item, then the first enabled radio.</li>
         }
         else if (Entry.Slug == "slider")
         {
             <li>Name every thumb, expose minimum, maximum, and current values, and test horizontal, vertical, and RTL keyboard behavior.</li>
+            <li><code>FocusAsync</code> targets the first thumb; use <code>FocusThumbAsync(index)</code> for an explicit thumb.</li>
         }
         else if (Entry.Slug == "switch")
         {
@@ -47,6 +50,7 @@
         else if (Entry.Slug == "toggle-group")
         {
             <li>Name the group; Arrow keys, Home, and End move the single tab stop without activating disabled items.</li>
+            <li><code>FocusAsync</code> targets a selected enabled item, then the roving item, then the first enabled item.</li>
         }
         else if (Entry.Slug is "input" or "textarea" or "native-select" or "input-group")
         {
@@ -70,10 +74,15 @@
         else if (Entry.Slug == "calendar")
         {
             <li>Maintain exactly one enabled roving tab stop in the labelled date grid and reconcile it whenever bounds or disabled-date rules change.</li>
+            <li><code>FocusAsync</code> targets the current roving date or the nearest enabled date; an empty enabled set is a no-op.</li>
         }
         else if (Entry.Slug == "date-picker")
         {
             <li>Name the trigger and text input, associate parse errors with the active form context, and restore trigger focus when the calendar dialog closes.</li>
+        }
+        else if (Entry.Slug is "tabs" or "accordion" or "navigation-menu" or "menubar")
+        {
+            <li><code>FocusAsync</code> targets the selected or open enabled trigger, then the current roving trigger, then the first enabled trigger.</li>
         }
     </ul>
 </section>
