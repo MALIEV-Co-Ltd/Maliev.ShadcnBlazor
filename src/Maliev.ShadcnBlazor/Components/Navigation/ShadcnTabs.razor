@@ -1,6 +1,7 @@
 @using Microsoft.JSInterop
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 
 <CascadingValue Value="Context" IsFixed="true"><div @ref="_root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs")" style="@MergeStyle(null)" data-slot="tabs" data-orientation="@OrientationValue" data-activation="@ActivationValue" data-loop="@(Loop ? "true" : "false")" data-disabled="@(Disabled ? "true" : null)">@ChildContent</div></CascadingValue>
@@ -64,7 +65,7 @@
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
         var keys = Orientation == ShadcnTabsOrientation.Horizontal ? new[] { "Home", "End", "ArrowLeft", "ArrowRight" } : new[] { "Home", "End", "ArrowUp", "ArrowDown" };
         var signature = string.Join('|', keys);
-        if (_guardSignature != signature) { if (_guardSignature is not null) await _module.InvokeVoidAsync("detachKeyGuard", _root); await _module.InvokeVoidAsync("attachKeyGuard", _root, keys); _guardSignature = signature; }
+        if (_guardSignature != signature) { if (_guardSignature is not null) await _module.InvokeVoidAsync("detachKeyGuard", _root); await _module.InvokeVoidAsync("attachKeyGuard", _root, keys, "[data-slot='tabs-trigger']", "[data-slot='tabs']"); _guardSignature = signature; }
 
     }
 
@@ -106,6 +107,18 @@
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
         await _module.InvokeVoidAsync("focusById", enabled[target].TriggerId);
         if (ActivationMode == ShadcnTabsActivationMode.Automatic) await ActivateAsync(enabled[target].Value, false);
+    }
+
+    /// <summary>Focuses the selected tab, then the current roving tab, then the first enabled tab.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        var enabled = Context.Items.Where(item => !Disabled && !item.Disabled).ToArray();
+        var target = enabled.FirstOrDefault(item => item.Value == EffectiveValue)
+            ?? enabled.FirstOrDefault(item => item.Value == FocusedValue)
+            ?? enabled.FirstOrDefault();
+        if (target is null) return;
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
+        await _module.InvokeVoidAsync("focusById", target.TriggerId, preventScroll);
     }
 
     public async ValueTask DisposeAsync()

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
@@ -149,6 +150,17 @@
         await ValuesChanged.InvokeAsync(next);
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+
+    /// <summary>Focuses the first enabled slider thumb.</summary>
+    public ValueTask FocusAsync(bool preventScroll = false) => FocusThumbAsync(0, preventScroll);
+
+    /// <summary>Focuses the slider thumb at the specified zero-based index.</summary>
+    public async ValueTask FocusThumbAsync(int index, bool preventScroll = false)
+    {
+        if (index < 0 || index >= Values.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("focusSliderThumb", RootReference, index, preventScroll);
     }
 
     public async ValueTask DisposeAsync()

@@ -2,6 +2,7 @@
 @using Maliev.ShadcnBlazor.Theming
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
@@ -289,6 +290,14 @@
         PendingFocus = null;
         Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
         await Module.InvokeVoidAsync("focusCalendarDay", Root, target.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+    }
+    /// <summary>Focuses the current roving day, falling back to the nearest enabled day.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        if (Disabled) return;
+        var target = FindEnabled(FocusedDate, 1);
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+        await Module.InvokeVoidAsync("focusCalendarDay", Root, target.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), preventScroll);
     }
     public async ValueTask DisposeAsync() { if (Module is not null) try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } }
 }
