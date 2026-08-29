@@ -81,7 +81,22 @@ public sealed class FeedbackContentBrowserTests(ShowcaseServerFixture server, Pl
         await page.GotoAsync(new Uri(server.BaseUri, "/components/feedback-and-content?theme=dark&dir=rtl").ToString());
         await page.GetByTestId("feedback-content-fixture").WaitForAsync();
         await page.EvaluateAsync("document.documentElement.style.zoom = '2'");
-        Assert.True(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1"));
+        var viewportFits = await page.EvaluateAsync<bool>("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+        var overflowDiagnostics = await page.EvaluateAsync<string>("""
+            () => JSON.stringify({
+              viewport: { clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth },
+              elements: [...document.querySelectorAll('body *')]
+                .map(element => ({
+                  selector: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.classList.length ? `.${[...element.classList].join('.')}` : ''}`,
+                  left: element.getBoundingClientRect().left,
+                  right: element.getBoundingClientRect().right,
+                  width: element.getBoundingClientRect().width
+                }))
+                .filter(element => element.left < -1 || element.right > document.documentElement.clientWidth + 1)
+                .slice(0, 20)
+            })
+            """);
+        Assert.True(viewportFits, overflowDiagnostics);
 
         var carousel = page.Locator("[data-component='carousel'] [data-slot='carousel']");
         await carousel.Locator("[data-slot='carousel-next']").FocusAsync();
