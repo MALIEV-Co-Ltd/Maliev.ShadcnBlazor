@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -720,9 +721,9 @@ public sealed class ThemeStudioState
     private bool TryApplyPaletteRecipe(ShadcnPaletteRecipe recipe, string mutationKey)
     {
         var result = ShadcnPaletteGenerator.Generate(Applied, recipe);
-        PaletteDiagnostics = result.Errors.Concat(result.Warnings).ToArray();
         if (!result.IsValid)
         {
+            PaletteDiagnostics = result.Errors.Concat(result.Warnings).ToArray();
             RaiseChanged();
             return false;
         }
@@ -1111,6 +1112,7 @@ public sealed class ThemeStudioState
         Clone(_baseline),
         _documentTemplate,
         _baselineDocumentTemplate,
+        ImmutableArray.CreateRange(PaletteDiagnostics),
         new Dictionary<string, string>(_tokenEditorValues, StringComparer.Ordinal),
         new Dictionary<string, string>(_metricEditorValues, StringComparer.Ordinal),
         SelectedPresetId,
@@ -1169,7 +1171,7 @@ public sealed class ThemeStudioState
         _metricEditorValues.Clear();
         foreach (var pair in snapshot.MetricEditorValues)
             _metricEditorValues[pair.Key] = pair.Value;
-        PaletteDiagnostics = RestorePaletteDiagnostics(snapshot);
+        PaletteDiagnostics = snapshot.PaletteDiagnostics;
         RevalidateAndApply(applyWhenValid: false);
     }
 
@@ -1309,14 +1311,6 @@ public sealed class ThemeStudioState
         ShadcnPaletteAnchorRole.DataB => "datab",
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown palette anchor role.")
     };
-
-    private static IReadOnlyList<ShadcnThemeValidationMessage> RestorePaletteDiagnostics(ThemeStudioSnapshot snapshot)
-    {
-        if (!snapshot.DocumentTemplate.Palette.IsVersion2)
-            return [];
-        var result = ShadcnPaletteGenerator.Generate(snapshot.Applied, snapshot.DocumentTemplate.Palette);
-        return result.Errors.Concat(result.Warnings).ToArray();
-    }
 
     private static bool TypographyEquals(ShadcnTypographyScale first, ShadcnTypographyScale second) =>
         first.Body == second.Body && first.ThaiFallback == second.ThaiFallback && first.Code == second.Code &&

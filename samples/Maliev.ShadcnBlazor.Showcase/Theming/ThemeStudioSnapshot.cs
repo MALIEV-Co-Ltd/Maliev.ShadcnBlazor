@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Maliev.ShadcnBlazor.Theming;
 using Maliev.ShadcnBlazor.Components.Styling;
 
@@ -9,6 +10,7 @@ public sealed record ThemeStudioSnapshot(
     ShadcnTheme Baseline,
     ShadcnThemeDocument DocumentTemplate,
     ShadcnThemeDocument BaselineDocumentTemplate,
+    ImmutableArray<ShadcnThemeValidationMessage> PaletteDiagnostics,
     IReadOnlyDictionary<string, string> TokenEditorValues,
     IReadOnlyDictionary<string, string> MetricEditorValues,
     string SelectedPresetId,

@@ -973,6 +973,63 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void SemanticLockUndoRedoRestoresExactCapturedDiagnosticsAndPaletteState()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        var generatedDocument = state.SerializeDocument();
+        var generatedTheme = state.Applied;
+        var generatedDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.NotEmpty(generatedDiagnostics);
+
+        state.SetPaletteLock(ThemeStudioScheme.Light, "background", true);
+        var lockedDocument = state.SerializeDocument();
+        var lockedTheme = state.Applied;
+        var lockedDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.Empty(lockedDiagnostics);
+        Assert.Contains("light.background", state.Document.Palette.LockedTokens);
+
+        Assert.True(state.Undo());
+        Assert.Equal(generatedDocument, state.SerializeDocument());
+        Assert.Equal(generatedTheme, state.Applied);
+        Assert.DoesNotContain("light.background", state.Document.Palette.LockedTokens);
+        Assert.Equal(generatedDiagnostics, state.PaletteDiagnostics);
+
+        Assert.True(state.Redo());
+        Assert.Equal(lockedDocument, state.SerializeDocument());
+        Assert.Equal(lockedTheme, state.Applied);
+        Assert.Contains("light.background", state.Document.Palette.LockedTokens);
+        Assert.Equal(lockedDiagnostics, state.PaletteDiagnostics);
+    }
+
+    [Fact]
+    public void SuccessfulPaletteMutationCapturesPreviousDiagnosticsBeforeApplyingCandidate()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        Assert.False(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Support, "not-a-color"));
+        var beforeDocument = state.SerializeDocument();
+        var beforeTheme = state.Applied;
+        var beforeDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.Contains(beforeDiagnostics, message => message.Code == "palette-invalid-anchor");
+
+        Assert.True(state.SetPaletteHarmony(ShadcnPaletteHarmony.Triadic));
+        var afterDocument = state.SerializeDocument();
+        var afterTheme = state.Applied;
+        var afterDiagnostics = state.PaletteDiagnostics.ToArray();
+
+        Assert.True(state.Undo());
+        Assert.Equal(beforeDocument, state.SerializeDocument());
+        Assert.Equal(beforeTheme, state.Applied);
+        Assert.Equal(beforeDiagnostics, state.PaletteDiagnostics);
+
+        Assert.True(state.Redo());
+        Assert.Equal(afterDocument, state.SerializeDocument());
+        Assert.Equal(afterTheme, state.Applied);
+        Assert.Equal(afterDiagnostics, state.PaletteDiagnostics);
+    }
+
+    [Fact]
     public void UndoRedoRestoresPaletteRecipeLocksDiagnosticsAndPreviewTogether()
     {
         var state = new ThemeStudioState(new NoOpStorage());
@@ -983,9 +1040,9 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.True(state.SetPaletteHarmony(ShadcnPaletteHarmony.Analogous));
         var valid = state.SerializeDocument();
         var validPreview = state.Applied;
-        var validDiagnostics = state.PaletteDiagnostics.ToArray();
         Assert.False(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Support, "not-a-color"));
-        Assert.NotEmpty(state.PaletteDiagnostics);
+        var invalidDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.NotEmpty(invalidDiagnostics);
 
         Assert.True(state.Undo());
         Assert.NotEqual(valid, state.SerializeDocument());
@@ -1001,7 +1058,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal(validPreview, state.Applied);
         Assert.Equal(ShadcnPaletteHarmony.Analogous, state.PaletteHarmony);
         Assert.Contains(ShadcnPaletteAnchorRole.Brand, state.Document.Palette.LockedAnchors!);
-        Assert.Equal(validDiagnostics, state.PaletteDiagnostics);
+        Assert.Equal(invalidDiagnostics, state.PaletteDiagnostics);
     }
 
     [Fact]
