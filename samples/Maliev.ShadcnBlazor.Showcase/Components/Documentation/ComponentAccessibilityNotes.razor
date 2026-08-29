@@ -18,6 +18,7 @@
         {
             <li>Use button content as the accessible name; icon-only sizes require an explicit <code>aria-label</code>.</li>
             <li>Use the native button root for actions and the link root only for navigation.</li>
+            <li>After render, capture <code>ShadcnButton</code> with <code>@@ref</code> and call <code>FocusAsync</code> for restoration or managed focus; both button and link modes target their rendered native element.</li>
         }
         else if (Entry.Slug == "button-group")
         {
