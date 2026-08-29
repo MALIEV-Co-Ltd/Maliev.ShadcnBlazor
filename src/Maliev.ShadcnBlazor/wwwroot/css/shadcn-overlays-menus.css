@@ -67,7 +67,7 @@
     .shadcn-alert-dialog-overlay { background: Canvas; color: CanvasText; opacity: 0.5; }
     .shadcn-dialog-trigger,
     .shadcn-dialog-close,
-    .shadcn-alert-dialog-action { border-color: ButtonText; background: ButtonFace; color: ButtonText; }
+    .shadcn-alert-dialog-action { forced-color-adjust: none; border-color: ButtonText; background: ButtonFace; color: ButtonText; }
 }
 @keyframes shadcn-overlay-in { from { opacity: 0; } }
 @keyframes shadcn-dialog-in { from { opacity: 0; scale: 0.96; } }

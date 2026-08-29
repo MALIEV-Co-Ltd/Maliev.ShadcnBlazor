@@ -1894,9 +1894,6 @@ type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocumentSerializer
   method String Serialize(ShadcnThemeDocument document)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeDocumentValidator
   method ShadcnThemeValidationResult Validate(ShadcnThemeDocument document)
-type Maliev.ShadcnBlazor.Theming.ShadcnThemeFactory
-  method MudTheme Create(ShadcnOptions options)
-  method MudTheme Create(ShadcnTheme theme)
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeMetrics
   Double ControlHeightLargeRem
   Double ControlHeightRem

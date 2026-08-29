@@ -99,7 +99,6 @@ public sealed class TokenContractTests
         var root = FindRoot();
         var actions = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-actions.css"));
         var semantic = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-semantic-foundations.css"));
-        var mud = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-mudblazor.css"));
 
         Assert.Contains("gap: calc(0.5rem * var(--shadcn-spacing-multiplier))", actions, StringComparison.Ordinal);
         Assert.Contains("gap: calc(var(--shadcn-toggle-group-gap) * 0.25rem * var(--shadcn-spacing-multiplier))", actions, StringComparison.Ordinal);
@@ -116,11 +115,10 @@ public sealed class TokenContractTests
         Assert.DoesNotContain("font-size: 3rem", semantic, StringComparison.Ordinal);
         Assert.Matches(@"\.shadcn-typography\s*\{[^}]*overflow-wrap:\s*anywhere", semantic);
         Assert.Contains("font-family: var(--shadcn-font-mono)", semantic, StringComparison.Ordinal);
-        Assert.Contains("padding-inline: calc(0.625rem * var(--shadcn-spacing-multiplier))", mud, StringComparison.Ordinal);
         Assert.Contains("height: var(--shadcn-control-height)", actions, StringComparison.Ordinal);
         Assert.Contains("border-radius: var(--shadcn-radius-md)", actions, StringComparison.Ordinal);
         Assert.Contains("box-shadow: var(--shadcn-shadow-xs)", actions, StringComparison.Ordinal);
-        Assert.All(new[] { actions, semantic, mud }, css =>
+        Assert.All(new[] { actions, semantic }, css =>
         {
             Assert.Contains("var(--shadcn-focus-ring", css, StringComparison.Ordinal);
             Assert.Contains("var(--shadcn-motion-duration", css, StringComparison.Ordinal);

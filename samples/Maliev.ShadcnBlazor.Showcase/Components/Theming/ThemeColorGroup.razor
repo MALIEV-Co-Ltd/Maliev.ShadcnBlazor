@@ -6,11 +6,11 @@
             <h3>@Title</h3>
             <p>@Description</p>
         </div>
-        <MudButton Variant="Variant.Text"
-                   Size="Size.Small"
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                   Size="ShadcnButtonSize.Small"
                    aria-label="@($"Reset {Title}")"
                    data-testid="@ResetGroupTestId"
-                   OnClick="ResetGroup">Reset group</MudButton>
+                   OnClick="ResetGroup">Reset group</ShadcnButton>
     </div>
     <div class="theme-control-grid">
         @foreach (var token in Tokens)
@@ -19,16 +19,15 @@
             var label = $"{SchemeName} {token.Label}";
             var mutationKey = $"{SchemeId}.{token.Name}";
             <div class="theme-token-control" id="@($"theme-editor-{SchemeId}-{token.Name}")">
-                <MudTextField T="string"
-                              Value="@State.GetTokenValue(Scheme, token.Name)"
-                              ValueChanged="value => State.SetToken(Scheme, token.Name, value ?? string.Empty)"
-                              Immediate="false"
-                              Label="@label"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              aria-label="@label"
-                              data-theme-token="@($"{SchemeId}.{token.Name}")"
-                              data-testid="@testId" />
+                <label class="theme-native-control">
+                    <span>@label</span>
+                    <input class="shadcn-input"
+                           value="@State.GetTokenValue(Scheme, token.Name)"
+                           aria-label="@label"
+                           data-theme-token="@($"{SchemeId}.{token.Name}")"
+                           data-testid="@testId"
+                           @onchange="args => State.SetToken(Scheme, token.Name, args.Value?.ToString() ?? string.Empty)" />
+                </label>
                 @if (token.Group == ThemeStudioGroup.Colors)
                 {
                     <input class="theme-color-picker"
