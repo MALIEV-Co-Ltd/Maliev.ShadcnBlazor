@@ -344,6 +344,41 @@ public sealed class ShadcnThemeDocumentTests
     }
 
     [Fact]
+    public void VersionTwoFactoryRejectsUndefinedHarmony()
+    {
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            (ShadcnPaletteHarmony)99,
+            [ShadcnPaletteAnchorRole.Brand]));
+
+        Assert.Equal("harmony", exception.ParamName);
+        Assert.StartsWith("Unknown palette harmony.", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ValidatorRejectsUndefinedVersionTwoHarmony()
+    {
+        var recipe = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            (ShadcnPaletteHarmony)99,
+            [ShadcnPaletteAnchorRole.Brand]);
+
+        var validation = ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = recipe });
+
+        Assert.Contains(validation.Errors, error =>
+            error.Code == "invalid-palette-harmony" &&
+            error.Path == "palette.harmony" &&
+            error.Message == "Palette harmony must be a supported value.");
+    }
+
+    [Fact]
     public void DuplicateVersionTwoAnchorLocksAreRejectedByDocumentValidation()
     {
         var recipe = new ShadcnPaletteRecipe(

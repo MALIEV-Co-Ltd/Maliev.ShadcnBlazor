@@ -96,6 +96,8 @@ public static class ShadcnThemeDocumentValidator
                 errors.Add(new("invalid-palette-anchors", "palette.anchors", "Palette anchors must define all five non-null string values."));
             if (palette.Harmony is null)
                 errors.Add(new("required-palette-harmony", "palette.harmony", "Palette harmony is required for algorithm version 2."));
+            else if (!Enum.IsDefined(palette.Harmony.Value))
+                errors.Add(new("invalid-palette-harmony", "palette.harmony", "Palette harmony must be a supported value."));
             if (palette.LockedAnchors is null ||
                 palette.LockedAnchors.Any(role => !Enum.IsDefined(role)) ||
                 palette.LockedAnchors.Distinct().Count() != palette.LockedAnchors.Count)

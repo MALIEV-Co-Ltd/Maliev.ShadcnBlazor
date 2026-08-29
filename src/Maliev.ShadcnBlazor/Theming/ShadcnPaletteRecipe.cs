@@ -91,7 +91,7 @@ public sealed record ShadcnPaletteRecipe
     /// <param name="lockedAnchors">The version-two palette anchors that must remain unchanged.</param>
     /// <returns>A version-two portable palette recipe.</returns>
     /// <exception cref="ArgumentNullException">Thrown when a required collection or anchor set is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="lockedAnchors"/> contains an unsupported role.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="harmony"/> or <paramref name="lockedAnchors"/> is unsupported.</exception>
     public static ShadcnPaletteRecipe CreateV2(
         ulong seed,
         string baseColor,
@@ -103,6 +103,8 @@ public sealed record ShadcnPaletteRecipe
         ArgumentNullException.ThrowIfNull(lockedTokens);
         ArgumentNullException.ThrowIfNull(anchors);
         ArgumentNullException.ThrowIfNull(lockedAnchors);
+        if (!Enum.IsDefined(harmony))
+            throw new ArgumentOutOfRangeException(nameof(harmony), harmony, "Unknown palette harmony.");
 
         var anchorSnapshot = lockedAnchors.ToArray();
         foreach (var role in anchorSnapshot)
