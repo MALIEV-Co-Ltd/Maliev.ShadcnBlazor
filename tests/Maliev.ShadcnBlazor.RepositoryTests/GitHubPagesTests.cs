@@ -38,6 +38,9 @@ public sealed class GitHubPagesTests
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("<base href=\"/Maliev.ShadcnBlazor/\" />", fixture.Read("index.html"), StringComparison.Ordinal);
         Assert.Equal(fixture.Read("index.html"), fixture.Read("404.html"));
+        Assert.Equal(fixture.Read("index.html"), fixture.Read(Path.Combine("theme", "index.html")));
+        Assert.Equal(fixture.Read("index.html"), fixture.Read(Path.Combine("docs", "index.html")));
+        Assert.Equal(fixture.Read("index.html"), fixture.Read(Path.Combine("docs", "components", "index.html")));
         Assert.True(fixture.Exists(".nojekyll"));
         Assert.Equal(fixture.OriginalSourceIndex, fixture.ReadSourceIndex());
     }

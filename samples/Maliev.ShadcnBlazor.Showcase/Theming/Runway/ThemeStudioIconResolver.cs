@@ -9,14 +9,7 @@ namespace Maliev.ShadcnBlazor.Showcase.Theming.Runway;
 /// <summary>Resolves stable workflow meanings through the icon package selected in Theme Studio.</summary>
 public static class ThemeStudioIconResolver
 {
-    private static readonly IReadOnlyDictionary<ThemeStudioIconLibrary, IShadcnIconCatalog> Catalogs =
-        new Dictionary<ThemeStudioIconLibrary, IShadcnIconCatalog>
-        {
-            [ThemeStudioIconLibrary.Lucide] = LucideIconCatalog.Instance,
-            [ThemeStudioIconLibrary.Phosphor] = PhosphorIconCatalog.Instance,
-            [ThemeStudioIconLibrary.Tabler] = TablerIconCatalog.Instance,
-            [ThemeStudioIconLibrary.Hugeicons] = HugeiconsIconCatalog.Instance
-        };
+    private static readonly ThemeStudioIconCatalogCache Catalogs = new();
 
     private static readonly IReadOnlyDictionary<string, string[]> Names = new Dictionary<string, string[]>(StringComparer.Ordinal)
     {
@@ -61,8 +54,7 @@ public static class ThemeStudioIconResolver
             ThemeStudioIconLibrary.Hugeicons => 3,
             _ => 0
         };
-        var effectiveLibrary = Catalogs.ContainsKey(library) ? library : ThemeStudioIconLibrary.Lucide;
-        return Catalogs[effectiveLibrary].Get(names[packageIndex]);
+        return Catalogs.Get(library).Get(names[packageIndex]);
     }
 
     private static string SemanticFor(string workflowId) => workflowId switch
@@ -82,4 +74,39 @@ public static class ThemeStudioIconResolver
         "quotation-files" => "upload",
         _ => "review"
     };
+}
+
+internal sealed class ThemeStudioIconCatalogCache
+{
+    private readonly IReadOnlyDictionary<ThemeStudioIconLibrary, Lazy<IShadcnIconCatalog>> catalogs;
+
+    public ThemeStudioIconCatalogCache()
+        : this(new Dictionary<ThemeStudioIconLibrary, Func<IShadcnIconCatalog>>
+        {
+            [ThemeStudioIconLibrary.Lucide] = () => LucideIconCatalog.Instance,
+            [ThemeStudioIconLibrary.Tabler] = () => TablerIconCatalog.Instance,
+            [ThemeStudioIconLibrary.Phosphor] = () => PhosphorIconCatalog.Instance,
+            [ThemeStudioIconLibrary.Hugeicons] = () => HugeiconsIconCatalog.Instance
+        })
+    {
+    }
+
+    internal ThemeStudioIconCatalogCache(IReadOnlyDictionary<ThemeStudioIconLibrary, Func<IShadcnIconCatalog>> factories)
+    {
+        ArgumentNullException.ThrowIfNull(factories);
+        catalogs = factories.ToDictionary(
+            pair => pair.Key,
+            pair => new Lazy<IShadcnIconCatalog>(pair.Value, LazyThreadSafetyMode.ExecutionAndPublication));
+    }
+
+    internal IReadOnlyList<ThemeStudioIconLibrary> LoadedLibraries => catalogs
+        .Where(pair => pair.Value.IsValueCreated)
+        .Select(pair => pair.Key)
+        .ToArray();
+
+    public IShadcnIconCatalog Get(ThemeStudioIconLibrary library)
+    {
+        var effectiveLibrary = catalogs.ContainsKey(library) ? library : ThemeStudioIconLibrary.Lucide;
+        return catalogs[effectiveLibrary].Value;
+    }
 }

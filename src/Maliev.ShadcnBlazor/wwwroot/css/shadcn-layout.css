@@ -54,12 +54,21 @@
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-row-span="3"] { grid-row: span 3; }
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-item[data-row-span="4"] { grid-row: span 4; }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"] .shadcn-bento-grid__layout {
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"]:not([data-masonry-ready="true"]) .shadcn-bento-grid__layout {
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"]:not([data-masonry-ready="true"]) .shadcn-bento-item {
+    grid-row: auto;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"][data-masonry-ready="true"] .shadcn-bento-grid__layout {
     grid-auto-flow: dense;
     grid-auto-rows: 1px;
 }
 
-:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"] .shadcn-bento-item {
+:where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-bento-grid[data-layout="masonry"][data-masonry-ready="true"] .shadcn-bento-item {
     grid-row: span var(--shadcn-bento-masonry-span, 1);
 }
 

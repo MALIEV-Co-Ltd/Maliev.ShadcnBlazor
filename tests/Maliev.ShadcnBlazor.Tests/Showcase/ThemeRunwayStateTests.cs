@@ -1,3 +1,5 @@
+using Maliev.ShadcnBlazor.Components.Icons;
+using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Runway;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
@@ -40,5 +42,41 @@ public sealed class ThemePreviewAnimationStateTests
         var reduced = state.Frame;
         state.AdvanceForTest();
         Assert.Equal(reduced, state.Frame);
+    }
+
+    [Fact]
+    public void IconCatalogCacheCreatesOnlyTheSelectedLibrary()
+    {
+        var created = new List<ThemeStudioIconLibrary>();
+        var factories = Enum.GetValues<ThemeStudioIconLibrary>()
+            .Where(library => library != ThemeStudioIconLibrary.Custom)
+            .ToDictionary(
+                library => library,
+                library => (Func<IShadcnIconCatalog>)(() =>
+                {
+                    created.Add(library);
+                    return new StubIconCatalog(library.ToString().ToLowerInvariant());
+                }));
+        var cache = new ThemeStudioIconCatalogCache(factories);
+
+        var lucide = cache.Get(ThemeStudioIconLibrary.Lucide);
+        var lucideAgain = cache.Get(ThemeStudioIconLibrary.Lucide);
+
+        Assert.Same(lucide, lucideAgain);
+        Assert.Equal([ThemeStudioIconLibrary.Lucide], created);
+        Assert.Equal([ThemeStudioIconLibrary.Lucide], cache.LoadedLibraries);
+
+        _ = cache.Get(ThemeStudioIconLibrary.Phosphor);
+
+        Assert.Equal([ThemeStudioIconLibrary.Lucide, ThemeStudioIconLibrary.Phosphor], created);
+        Assert.Equal([ThemeStudioIconLibrary.Lucide, ThemeStudioIconLibrary.Phosphor], cache.LoadedLibraries);
+    }
+
+    private sealed class StubIconCatalog(string library) : IShadcnIconCatalog
+    {
+        public string Library { get; } = library;
+        public IReadOnlyList<string> Names { get; } = [];
+        public bool TryGet(string name, out ShadcnIconData? icon) { icon = null; return false; }
+        public ShadcnIconData Get(string name) => throw new KeyNotFoundException(name);
     }
 }

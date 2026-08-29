@@ -56,9 +56,9 @@
         <div class="theme-inspector-select"><span>Intensity</span><ShadcnSelect TValue="ShadcnStyleIntensity" Value="State.StyleIntensity" ValueChanged="State.SetStyleIntensity" Open="_styleIntensityOpen" OpenChanged="SetStyleIntensityOpen" Options="StyleIntensityOptions" Size="ShadcnControlSize.Small" aria-label="Preview style intensity" data-testid="theme-style-intensity" /></div>
     </section>
 
-    <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" id="theme-settings-typography" data-testid="theme-typography-section">
+    <ShadcnCollapsible Open="_typographyOpen" OpenChanged="SetTypographyOpen" Class="theme-inspector-disclosure" id="theme-settings-typography" data-testid="theme-typography-section">
         <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Typography</strong><small>Families, weights, and semantic roles</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
-        <ShadcnCollapsibleContent><ThemeTypographyEditor State="State" ShowHeading="false" /></ShadcnCollapsibleContent>
+        <ShadcnCollapsibleContent>@if (_typographyMounted) { <ThemeTypographyEditor State="State" ShowHeading="false" /> }</ShadcnCollapsibleContent>
     </ShadcnCollapsible>
 
     <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-icons">
@@ -87,6 +87,8 @@
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
+    private bool _typographyOpen;
+    private bool _typographyMounted;
     private bool _presetOpen;
     private bool _visualStyleOpen;
     private bool _colorTreatmentOpen;
@@ -156,6 +158,11 @@
     private Task SetDepthTreatmentOpen(bool open) { _depthTreatmentOpen = open; return InvokeAsync(StateHasChanged); }
     private Task SetMotionTreatmentOpen(bool open) { _motionTreatmentOpen = open; return InvokeAsync(StateHasChanged); }
     private Task SetStyleIntensityOpen(bool open) { _styleIntensityOpen = open; return InvokeAsync(StateHasChanged); }
+    private void SetTypographyOpen(bool open)
+    {
+        _typographyOpen = open;
+        _typographyMounted |= open;
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_focusValidation) return;
