@@ -1,6 +1,7 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming;
+using Maliev.ShadcnBlazor.Showcase.Theming.Fonts;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,11 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
     {
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMalievShadcn();
+        Services.AddSingleton(new HttpClient(new FontCatalogHandler())
+        {
+            BaseAddress = new Uri("https://showcase.invalid/"),
+        });
+        Services.AddSingleton<GoogleFontCatalogService>();
     }
 
     [Fact]
@@ -22,6 +28,8 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
 
         var summary = cut.Find("[data-testid='theme-palette-summary']");
+        Assert.Equal("theme-visual-treatment-controls", summary.ParentElement?.GetAttribute("data-testid"));
+        Assert.NotNull(summary.PreviousElementSibling?.QuerySelector("[data-testid='theme-color-treatment']"));
         Assert.Equal(5, summary.QuerySelectorAll("[data-palette-summary-swatch]").Length);
         Assert.Contains("Active palette", summary.TextContent, StringComparison.Ordinal);
         Assert.Contains("Contrast ready", summary.TextContent, StringComparison.Ordinal);
@@ -150,6 +158,20 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
             thaiDiagnostics,
             StringComparison.Ordinal);
         Assert.DoesNotContain("Contrast between", thaiDiagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void UnknownDiagnosticThatLooksLikeContrastUsesTheLocalizedSafeFallback()
+    {
+        var diagnostic = new ShadcnThemeValidationMessage(
+            "palette-unknown-diagnostic",
+            "light.synthetic",
+            "Contrast between light.syntheticForeground and light.synthetic is 1:1; 4.5:1 is required.");
+
+        var message = ThemeStudioPaletteCopy.Thai.DiagnosticMessage(diagnostic);
+
+        Assert.Equal("ข้อผิดพลาดของชุดสี: light.synthetic", message);
+        Assert.DoesNotContain("คอนทราสต์ระหว่าง", message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -327,5 +349,12 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
 
         public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) =>
             ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
+    }
+
+    private sealed class FontCatalogHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.NotFound));
     }
 }

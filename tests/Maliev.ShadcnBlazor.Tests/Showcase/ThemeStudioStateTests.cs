@@ -668,7 +668,9 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
 
         Assert.Empty(cut.FindAll("[data-theme-token]"));
         Assert.Empty(cut.FindAll("[data-theme-metric]"));
-        Assert.Empty(cut.FindAll("[data-testid='theme-typography-editor']"));
+        Assert.Single(cut.FindAll("[data-testid='theme-typography-editor']"));
+        Assert.Single(cut.FindAll("[data-testid='theme-font-slot-body']"));
+        Assert.Equal(3, cut.FindAll("[data-testid^='theme-font-slot-']").Count);
         cut.Find("[data-testid='theme-typography-section'] > [data-slot='collapsible-trigger']").Click();
         Assert.Equal(3, cut.FindAll("[data-testid^='theme-font-slot-']").Count);
         Assert.Equal(9, cut.FindAll("fieldset[data-testid^='theme-role-']").Count);

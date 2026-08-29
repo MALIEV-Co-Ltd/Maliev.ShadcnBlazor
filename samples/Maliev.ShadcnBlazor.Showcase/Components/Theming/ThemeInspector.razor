@@ -47,12 +47,11 @@
         <p class="theme-preset-status" role="status" aria-live="polite" data-testid="theme-preset-status">@_presetStatus</p>
     </section>
 
-    <ThemePaletteSummary State="State" />
-
     <section class="theme-inspector-group" id="theme-settings-visual-treatment" data-testid="theme-visual-treatment-controls">
         <div class="theme-inspector-group__heading"><div><h3>Visual treatment</h3><p>Compose surface, color, depth, motion, and intensity inside the preview only.</p></div></div>
         <div class="theme-inspector-select"><span>Surface style</span><ShadcnSelect TValue="ShadcnVisualStyle" Value="State.VisualStyle" ValueChanged="State.SetVisualStyle" Open="_visualStyleOpen" OpenChanged="SetVisualStyleOpen" Options="VisualStyleOptions" Size="ShadcnControlSize.Small" aria-label="Preview surface style" data-testid="theme-visual-style" /></div>
         <div class="theme-inspector-select"><span>Color treatment</span><ShadcnSelect TValue="ShadcnColorTreatment" Value="State.ColorTreatment" ValueChanged="State.SetColorTreatment" Open="_colorTreatmentOpen" OpenChanged="SetColorTreatmentOpen" Options="ColorTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview color treatment" data-testid="theme-color-treatment" /></div>
+        <ThemePaletteSummary State="State" />
         <div class="theme-inspector-select"><span>Depth</span><ShadcnSelect TValue="ShadcnDepthTreatment" Value="State.DepthTreatment" ValueChanged="State.SetDepthTreatment" Open="_depthTreatmentOpen" OpenChanged="SetDepthTreatmentOpen" Options="DepthTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview depth treatment" data-testid="theme-depth-treatment" /></div>
         <div class="theme-inspector-select"><span>Motion</span><ShadcnSelect TValue="ShadcnMotionTreatment" Value="State.MotionTreatment" ValueChanged="State.SetMotionTreatment" Open="_motionTreatmentOpen" OpenChanged="SetMotionTreatmentOpen" Options="MotionTreatmentOptions" Size="ShadcnControlSize.Small" aria-label="Preview motion treatment" data-testid="theme-motion-treatment" /></div>
         <div class="theme-inspector-select"><span>Intensity</span><ShadcnSelect TValue="ShadcnStyleIntensity" Value="State.StyleIntensity" ValueChanged="State.SetStyleIntensity" Open="_styleIntensityOpen" OpenChanged="SetStyleIntensityOpen" Options="StyleIntensityOptions" Size="ShadcnControlSize.Small" aria-label="Preview style intensity" data-testid="theme-style-intensity" /></div>
@@ -60,7 +59,7 @@
 
     <ShadcnCollapsible Open="_typographyOpen" OpenChanged="SetTypographyOpen" Class="theme-inspector-disclosure" id="theme-settings-typography" data-testid="theme-typography-section">
         <ShadcnCollapsibleTrigger Class="theme-inspector-disclosure__trigger"><span><strong>Typography</strong><small>Families, weights, and semantic roles</small></span><ShadcnIcon Icon="@ChevronIcon" Size="16" /></ShadcnCollapsibleTrigger>
-        <ShadcnCollapsibleContent>@if (_typographyMounted) { <ThemeTypographyEditor State="State" ShowHeading="false" /> }</ShadcnCollapsibleContent>
+        <ShadcnCollapsibleContent><ThemeTypographyEditor State="State" ShowHeading="false" /></ShadcnCollapsibleContent>
     </ShadcnCollapsible>
 
     <ShadcnCollapsible Open="false" Class="theme-inspector-disclosure" data-testid="theme-advanced-icons">
@@ -90,7 +89,6 @@
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     private bool _importOpen; private bool _codeOpen; private bool _exportOpen;
     private bool _typographyOpen;
-    private bool _typographyMounted;
     private bool _presetOpen;
     private bool _visualStyleOpen;
     private bool _colorTreatmentOpen;
@@ -163,7 +161,6 @@
     private void SetTypographyOpen(bool open)
     {
         _typographyOpen = open;
-        _typographyMounted |= open;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

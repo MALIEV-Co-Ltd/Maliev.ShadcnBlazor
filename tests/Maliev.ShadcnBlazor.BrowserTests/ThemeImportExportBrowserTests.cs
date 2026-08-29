@@ -260,6 +260,96 @@ public sealed class ThemeImportExportBrowserTests(
     }
 
     [Fact]
+    public async Task NativeColorPickerGestureUpdatesPreviewAndPersistsOneNormalizedExportableHistoryEntry()
+    {
+        const string storageKey = "maliev.shadcn.theme-studio.document.v2";
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        await context.AddInitScriptAsync($$"""
+            (() => {
+                const originalSetItem = Storage.prototype.setItem;
+                window.__themeStudioPaletteWriteCount = 0;
+                Storage.prototype.setItem = function(key, value) {
+                    if (key === '{{storageKey}}')
+                        window.__themeStudioPaletteWriteCount++;
+                    return originalSetItem.call(this, key, value);
+                };
+            })();
+            """);
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await page.GetByTestId("theme-studio").WaitForAsync();
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        await page.WaitForFunctionAsync($"() => localStorage.getItem('{storageKey}') !== null");
+        await Task.Delay(100);
+
+        var editor = page.GetByTestId("theme-palette-anchor-brand");
+        var picker = editor.Locator("input[type='color']");
+        var anchor = editor.Locator("input[type='text']");
+        var preview = page.GetByTestId("theme-preview-scope");
+        var undo = page.GetByRole(AriaRole.Button, new() { Name = "Undo theme change", Exact = true });
+        var originalAnchor = await anchor.InputValueAsync();
+        var originalStorage = await page.EvaluateAsync<string>($"localStorage.getItem('{storageKey}')");
+        var previousPrimary = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        await Assertions.Expect(undo).ToBeDisabledAsync();
+        await page.EvaluateAsync("() => window.__themeStudioPaletteWriteCount = 0");
+
+        await picker.EvaluateAsync("input => input.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, buttons: 1 }))");
+        foreach (var value in new[] { "#dc2626", "#1d4ed8", "#2563eb" })
+        {
+            await picker.EvaluateAsync(
+                "(input, value) => { input.value = value; input.dispatchEvent(new Event('input', { bubbles: true, composed: true })); }",
+                value);
+            await page.WaitForFunctionAsync(
+                "before => getComputedStyle(document.querySelector('[data-testid=theme-preview-scope]')).getPropertyValue('--shadcn-primary').trim() !== before",
+                previousPrimary);
+            previousPrimary = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+            await Assertions.Expect(page.GetByTestId("theme-studio")).ToHaveAttributeAsync("data-pointer-interaction-active", "true");
+        }
+
+        Assert.Equal(originalStorage, await page.EvaluateAsync<string>($"localStorage.getItem('{storageKey}')"));
+        Assert.Equal(0, await page.EvaluateAsync<int>("() => window.__themeStudioPaletteWriteCount"));
+        await Assertions.Expect(undo).ToBeEnabledAsync();
+
+        await picker.EvaluateAsync("input => input.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true }))");
+        await Assertions.Expect(page.GetByTestId("theme-studio")).ToHaveAttributeAsync("data-pointer-interaction-active", "false");
+        await page.WaitForFunctionAsync(
+            $"before => localStorage.getItem('{storageKey}') !== before",
+            originalStorage);
+        await Task.Delay(100);
+        Assert.Equal(1, await page.EvaluateAsync<int>("() => window.__themeStudioPaletteWriteCount"));
+        var normalizedAnchor = await anchor.InputValueAsync();
+        Assert.StartsWith("oklch(", normalizedAnchor, StringComparison.Ordinal);
+        var persistedJson = await page.EvaluateAsync<string>($"localStorage.getItem('{storageKey}')");
+        using (var persisted = JsonDocument.Parse(persistedJson))
+            Assert.Equal(normalizedAnchor, persisted.RootElement.GetProperty("palette").GetProperty("anchors").GetProperty("brand").GetString());
+
+        await page.GetByTestId("theme-palette-close").ClickAsync();
+        await page.GetByTestId("theme-export-open").ClickAsync();
+        var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+        if (await acknowledgement.CountAsync() > 0)
+            await acknowledgement.CheckAsync();
+        var download = await page.RunAndWaitForDownloadAsync(
+            () => page.GetByTestId("theme-download").ClickAsync(),
+            new() { Timeout = 90_000 });
+        var downloadPath = await download.PathAsync();
+        Assert.NotNull(downloadPath);
+        using (var archive = ZipFile.OpenRead(downloadPath))
+        using (var exported = JsonDocument.Parse(await ReadBytesAsync(archive.GetEntry("theme.json")!)))
+            Assert.Equal(normalizedAnchor, exported.RootElement.GetProperty("palette").GetProperty("anchors").GetProperty("brand").GetString());
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Close theme export" }).ClickAsync();
+        await undo.ClickAsync();
+        await Assertions.Expect(undo).ToBeDisabledAsync();
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        Assert.Equal(originalAnchor, await page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']").InputValueAsync());
+    }
+
+    [Fact]
     public async Task CorruptFutureAndOversizedImportsNeverChangeTheAppliedTheme()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

@@ -122,6 +122,8 @@ public sealed record ThemeStudioPaletteCopy(
             return diagnostic.Message;
         if (diagnostic.Code == "palette-invalid-anchor")
             return InvalidAnchorValue;
+        if (diagnostic.Code is not ("palette-locked-constraint" or "palette-constraint-unsatisfied"))
+            return $"{ErrorPrefix}: {diagnostic.Path}";
 
         var contrast = ContrastDiagnosticPattern.Match(diagnostic.Message);
         return contrast.Success

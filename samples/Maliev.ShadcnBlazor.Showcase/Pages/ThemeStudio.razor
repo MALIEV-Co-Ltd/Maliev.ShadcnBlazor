@@ -12,7 +12,7 @@
 <a class="documentation-skip-link" href="#theme-preview">Skip to theme preview</a>
 <a class="documentation-skip-link" href="#theme-controls">Skip to theme controls</a>
 
-<div class="theme-studio" data-testid="theme-studio" data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")" lang="@LocaleCode" @onkeydown="HandleWorkbenchKeyDownAsync">
+<div class="theme-studio" data-testid="theme-studio" data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")" data-pointer-interaction-active="@(State.IsPointerInteractionActive ? "true" : "false")" lang="@LocaleCode" @onkeydown="HandleWorkbenchKeyDownAsync">
     <ThemeFontLoader State="State" />
     <div class="theme-studio-workbench"
          data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
