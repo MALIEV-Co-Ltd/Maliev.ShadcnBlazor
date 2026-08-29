@@ -76,7 +76,7 @@ public static class ShadcnPaletteGenerator
             errors.Add(new(
                 locked ? "palette-locked-constraint" : "palette-constraint-unsatisfied",
                 foregroundPath,
-                ContrastMessage(foregroundPath, backgroundPath, failure)));
+                $"Contrast against {failure.BackgroundToken} is {failure.Ratio:0.###}:1; {failure.RequiredRatio:0.###}:1 is required."));
         }
 
         return Result(candidate, errors, validation.Warnings);

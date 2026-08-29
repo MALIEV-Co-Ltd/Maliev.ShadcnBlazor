@@ -382,8 +382,13 @@ public sealed class ShadcnPaletteGeneratorTests
             new(1, 5, "neutral", ["light.primary", "light.primaryForeground"]));
 
         Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, error =>
-            error.Code == "palette-locked-constraint" && error.Path == "light.primaryForeground");
+        var error = Assert.Single(result.Errors);
+        Assert.Equal("palette-locked-constraint", error.Code);
+        Assert.Equal("light.primaryForeground", error.Path);
+        Assert.Equal("Contrast against primary is 1:1; 4.5:1 is required.", error.Message);
+        Assert.Equal(source.Light.Primary, result.Theme.Light.Primary);
+        Assert.Equal(source.Light.PrimaryForeground, result.Theme.Light.PrimaryForeground);
+        Assert.Equal(source.Metrics, result.Theme.Metrics);
         Assert.Equal(before, ShadcnThemeSerializer.Serialize(source));
     }
 
