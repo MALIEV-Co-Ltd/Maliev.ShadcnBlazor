@@ -5,6 +5,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 <span class="shadcn-checkbox-root" data-slot="checkbox-root" data-state="@State">
     <input @ref="InputReference"
@@ -77,6 +78,10 @@
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
     }
+
+    /// <summary>Moves focus to the rendered native checkbox after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused checkbox into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => InputReference.FocusAsync(preventScroll);
 
     public async ValueTask DisposeAsync()
     {

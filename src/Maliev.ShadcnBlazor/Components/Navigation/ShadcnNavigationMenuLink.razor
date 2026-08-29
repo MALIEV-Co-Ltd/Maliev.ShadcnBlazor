@@ -1,5 +1,5 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-link")" style="@MergeStyle(null)" data-slot="navigation-menu-link" data-active="@(Current ? "true" : null)" data-disabled="@(Disabled ? "true" : null)" href="@Href" target="@Target" aria-current="@(Current ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync" @onclick:preventDefault="Disabled">@ChildContent</a>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<a @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-link")" style="@MergeStyle(null)" data-slot="navigation-menu-link" data-active="@(Current ? "true" : null)" data-disabled="@(Disabled ? "true" : null)" href="@Href" target="@Target" aria-current="@(Current ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync" @onclick:preventDefault="Disabled">@ChildContent</a>
 @code {
     [CascadingParameter] private ShadcnNavigationMenuContext Menu { get; set; } = default!;
     [CascadingParameter] private ShadcnNavigationMenuItemContext? Item { get; set; }

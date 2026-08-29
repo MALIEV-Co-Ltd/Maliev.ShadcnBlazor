@@ -1,8 +1,8 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 @if (Href is not null)
-{ <a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment-trigger")" style="@MergeStyle(null)" data-slot="attachment-trigger" aria-label="@AccessibleName" href="@Href">@ChildContent</a> }
+{ <a @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment-trigger")" style="@MergeStyle(null)" data-slot="attachment-trigger" aria-label="@AccessibleName" href="@Href">@ChildContent</a> }
 else
-{ <button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment-trigger")" style="@MergeStyle(null)" data-slot="attachment-trigger" type="button" aria-label="@AccessibleName" aria-haspopup="@(DialogTarget is null?null:"dialog")" aria-controls="@DialogTarget" disabled="@Disabled" @onclick="HandleActivateAsync">@ChildContent</button> }
+{ <button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-attachment-trigger")" style="@MergeStyle(null)" data-slot="attachment-trigger" type="button" aria-label="@AccessibleName" aria-haspopup="@(DialogTarget is null?null:"dialog")" aria-controls="@DialogTarget" disabled="@Disabled" @onclick="HandleActivateAsync">@ChildContent</button> }
 @code {
     [CascadingParameter] private ShadcnAttachment? Owner { get; set; }
     [Parameter, EditorRequired] public string? AccessibleName { get; set; }

@@ -3,6 +3,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inherits ShadcnFormComponentBase<TValue>
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 <div class="@MergeClass("shadcn-native-select-wrapper")" style="@MergeStyle()" data-slot="native-select-wrapper" data-size="@SizeValue" data-readonly="@(ReadOnly ? "true" : null)" data-disabled="@(EffectiveDisabled ? "true" : null)">
     <select @ref="SelectElement" @attributes="ForwardedAttributes"
@@ -56,6 +57,10 @@
         }
         await SetCurrentValueFromStringAsync(args.Value?.ToString());
     }
+
+    /// <summary>Moves focus to the rendered native select after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused select into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => SelectElement.FocusAsync(preventScroll);
 
     public async ValueTask DisposeAsync()
     {

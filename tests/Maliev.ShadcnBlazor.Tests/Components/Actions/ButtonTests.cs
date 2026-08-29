@@ -1,5 +1,6 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Actions;
+using Maliev.ShadcnBlazor.Components.Primitives;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -125,6 +126,7 @@ public sealed class ButtonTests : BunitContext
         var cut = Render<ShadcnButton>(parameters => parameters
             .Add(component => component.Href, href)
             .AddChildContent("Focusable action"));
+        Assert.IsAssignableFrom<IShadcnFocusable>(cut.Instance);
 
         if (preventScroll)
             await cut.Instance.FocusAsync(preventScroll: true);

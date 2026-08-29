@@ -1,5 +1,5 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-trigger")" style="@MergeStyle(null)" data-slot="navigation-menu-trigger" data-state="@(Item.Open ? "open" : "closed")" id="@Item.Registration.TriggerId" type="button" disabled="@Item.Disabled" aria-expanded="@(Item.Open ? "true" : "false")" aria-controls="@Item.Registration.ContentId" @onclick="ToggleAsync" @onkeydown="HandleKeyAsync" @onmouseenter="OpenDelayedAsync" @onmouseleave="CloseDelayedAsync">@ChildContent<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg></button>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu-trigger")" style="@MergeStyle(null)" data-slot="navigation-menu-trigger" data-state="@(Item.Open ? "open" : "closed")" id="@Item.Registration.TriggerId" type="button" disabled="@Item.Disabled" aria-expanded="@(Item.Open ? "true" : "false")" aria-controls="@Item.Registration.ContentId" @onclick="ToggleAsync" @onkeydown="HandleKeyAsync" @onmouseenter="OpenDelayedAsync" @onmouseleave="CloseDelayedAsync">@ChildContent<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg></button>
 @code {
     [CascadingParameter] private ShadcnNavigationMenuItemContext Item { get; set; } = default!;
     [Parameter] public RenderFragment? ChildContent { get; set; }
