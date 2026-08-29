@@ -1,6 +1,6 @@
 # Maliev.ShadcnBlazor
 
-Reusable Shadcn Base/Vega/Neutral components for .NET 10 Blazor, backed by MudBlazor 9.7.0.
+Reusable Shadcn Base/Vega/Neutral components for .NET 10 Blazor with no transitive UI-framework dependency.
 
 ## Register
 
@@ -16,13 +16,12 @@ builder.Services.AddMalievShadcn(options =>
 });
 ```
 
-The configured font family is applied to both MudBlazor typography and the scoped
-`--shadcn-font-sans` semantic token. Provider parameters override the configured defaults.
+The configured font family is applied to the scoped `--shadcn-font-sans` semantic
+token. Provider parameters override the configured defaults.
 
 ## Load assets in this order
 
 ```html
-<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-layout.css" rel="stylesheet" />
@@ -30,11 +29,9 @@ The configured font family is applied to both MudBlazor typography and the scope
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-forms.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-feedback-content.css" rel="stylesheet" />
-<link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
 ```
 
-## Provide theme and portals
+## Provide theme context
 
 Add the component and theme namespaces to the consuming application's `_Imports.razor`:
 
@@ -54,7 +51,7 @@ Then wrap the application content at its root:
 Set `IsDarkMode` or `Direction` on the provider when an application needs to override either
 configured default dynamically.
 
-Do not also render `MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`, or `MudSnackbarProvider` in the same application root.
+Package-owned overlays require no external root provider.
 
 ## Semantic foundations
 
@@ -113,6 +110,8 @@ Review the live family fixture at `/components/actions-and-selection` and each c
 at `/docs/components/{slug}`. Use `/theme` to customize semantic tokens and export the complete
 CSS/C# integration bundle.
 
-## MudBlazor version boundary
+## Migrating from the former MudBlazor integration
 
-`Maliev.ShadcnBlazor` is built against MudBlazor **9.7.0** and its adapter selectors, state classes, and portal markup are supported only within the MudBlazor 9.7 line. Keep the consuming application on MudBlazor 9.7.x (the package pins 9.7.0); upgrading MudBlazor requires revalidating the adapter contracts and browser inventory before adoption.
+The core package no longer registers Mud services, renders Mud providers, or ships
+Mud adapter APIs/assets. Applications that intentionally use MudBlazor must reference
+and register it directly. See the repository migration guide for the removed APIs.

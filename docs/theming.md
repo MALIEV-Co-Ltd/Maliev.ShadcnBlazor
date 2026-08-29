@@ -1,8 +1,8 @@
 # Theming
 
 `ShadcnThemeProvider` scopes semantic color, typography, radius, spacing, and
-motion tokens to its rendered subtree. It also coordinates the compatible
-MudBlazor theme and overlay providers.
+motion tokens to its rendered subtree. Optional system color-scheme observation
+uses a package-owned `matchMedia` module and is disposed with the provider.
 
 The default typography stack uses the bundled Geist, Noto Sans Thai, and
 JetBrains Mono web fonts. Latin text uses Geist, Thai text switches to Noto
