@@ -54,7 +54,11 @@
                     <ul>
                         @foreach (var diagnostic in State.PaletteDiagnostics)
                         {
-                            <li><span>@Copy.NeedsReview</span><code>@diagnostic.Path</code></li>
+                            <li>
+                                <span>@Copy.NeedsReview</span>
+                                <code>@diagnostic.Path</code>
+                                <span>@Copy.DiagnosticMessage(diagnostic)</span>
+                            </li>
                         }
                     </ul>
                 }
@@ -205,10 +209,9 @@
 
     private async Task GenerateAsync()
     {
-        State.GenerateNewPalette();
-        _announcement = State.PaletteDiagnostics.Any(item => item.Code.Contains("invalid", StringComparison.Ordinal))
-            ? Copy.ErrorPrefix
-            : Copy.GeneratedStatus;
+        _announcement = State.GenerateNewPalette(out _)
+            ? Copy.GeneratedStatus
+            : Copy.ErrorPrefix;
         await InvokeAsync(StateHasChanged);
     }
 

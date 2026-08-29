@@ -117,6 +117,39 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Contains("กรอกค่าสี", error.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Enter a color as", error.TextContent, StringComparison.Ordinal);
         Assert.NotEmpty(cut.FindAll("[data-testid='theme-palette-workbench'] .theme-palette-workbench__diagnostics li"));
+        Assert.DoesNotContain("Brand must", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RejectedPaletteGenerationAnnouncesAnErrorWithoutChangingTheDocument()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.SetToken(ThemeStudioScheme.Light, "primary", state.Applied.Light.Background);
+        state.SetToken(ThemeStudioScheme.Light, "primaryForeground", state.Applied.Light.Background);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primary", true);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primaryForeground", true);
+        var before = state.SerializeDocument();
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+
+        cut.Find("[data-testid='theme-palette-generate']").Click();
+
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.Equal("Palette error", cut.Find("[data-testid='theme-palette-status']").TextContent);
+        Assert.Contains(state.PaletteDiagnostics, message => message.Code == "palette-locked-constraint");
+        Assert.Contains(
+            "Contrast between light.primaryForeground and light.primary is 1:1; 4.5:1 is required.",
+            cut.Find("[data-testid='theme-palette-workbench'] .theme-palette-workbench__diagnostics").TextContent,
+            StringComparison.Ordinal);
+
+        state.SetLocale(ThemeStudioLocale.Thai);
+        cut.Render();
+        var thaiDiagnostics = cut.Find("[data-testid='theme-palette-workbench'] .theme-palette-workbench__diagnostics").TextContent;
+        Assert.Contains(
+            "คอนทราสต์ระหว่าง light.primaryForeground และ light.primary เท่ากับ 1:1 โดยต้องมีอย่างน้อย 4.5:1",
+            thaiDiagnostics,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("Contrast between", thaiDiagnostics, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -598,11 +598,16 @@ public sealed class ThemeStudioState
 
     public ulong GenerateNewPalette()
     {
+        GenerateNewPalette(out var seed);
+        return seed;
+    }
+
+    public bool GenerateNewPalette(out ulong seed)
+    {
         Span<byte> bytes = stackalloc byte[sizeof(ulong)];
         RandomNumberGenerator.Fill(bytes);
-        var seed = BitConverter.ToUInt64(bytes);
-        GeneratePalette(seed);
-        return seed;
+        seed = BitConverter.ToUInt64(bytes);
+        return GeneratePalette(seed);
     }
 
     public bool IsPaletteLocked(ThemeStudioScheme scheme, string token) =>

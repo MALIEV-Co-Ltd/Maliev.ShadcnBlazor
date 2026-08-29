@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Maliev.ShadcnBlazor.Theming;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
@@ -28,6 +29,10 @@ public sealed record ThemeStudioPaletteCopy(
     string ValidationSummary,
     string ErrorPrefix)
 {
+    private static readonly Regex ContrastDiagnosticPattern = new(
+        @"^Contrast between (?<first>[A-Za-z0-9.]+) and (?<second>[A-Za-z0-9.]+) is (?<measured>[0-9.]+):1; (?<required>[0-9.]+):1 is required\.$",
+        RegexOptions.CultureInvariant);
+
     public string AnchorValue => ReferenceEquals(this, Thai) ? "ค่าสี" : "Color value";
     public string InvalidAnchorValue => ReferenceEquals(this, Thai)
         ? "กรอกค่าสีเป็น #rgb, #rrggbb หรือ oklch(L C H)"
@@ -110,4 +115,17 @@ public sealed record ThemeStudioPaletteCopy(
         ShadcnPaletteAnchorRole.DataB => AnchorDataB,
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown palette anchor role.")
     };
+
+    public string DiagnosticMessage(ShadcnThemeValidationMessage diagnostic)
+    {
+        if (!ReferenceEquals(this, Thai))
+            return diagnostic.Message;
+        if (diagnostic.Code == "palette-invalid-anchor")
+            return InvalidAnchorValue;
+
+        var contrast = ContrastDiagnosticPattern.Match(diagnostic.Message);
+        return contrast.Success
+            ? $"คอนทราสต์ระหว่าง {contrast.Groups["first"].Value} และ {contrast.Groups["second"].Value} เท่ากับ {contrast.Groups["measured"].Value}:1 โดยต้องมีอย่างน้อย {contrast.Groups["required"].Value}:1"
+            : $"{ErrorPrefix}: {diagnostic.Path}";
+    }
 }
