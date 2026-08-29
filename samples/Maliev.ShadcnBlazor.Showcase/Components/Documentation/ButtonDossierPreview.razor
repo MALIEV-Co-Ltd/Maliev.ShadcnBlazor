@@ -46,7 +46,7 @@
     </section>
     <section class="showcase-button-dossier__section" aria-labelledby="button-focus-title">
         <h3 id="button-focus-title">Programmatic focus</h3>
-        <p>Capture the component with <code>@@ref</code>, then request focus without assigning or querying a DOM ID.</p>
+        <p dir="auto">Capture the component with <code>@@ref</code>, then request focus without assigning or querying a DOM ID.</p>
         <div class="showcase-button-dossier__focus-actions">
             <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="Disabled" OnClick="@(_ => FocusPrimaryActionAsync())" data-testid="button-focus-request">Move focus to primary action</ShadcnButton>
             <ShadcnButton @ref="_primaryAction" Disabled="Disabled" data-testid="button-focus-target">Primary action</ShadcnButton>
