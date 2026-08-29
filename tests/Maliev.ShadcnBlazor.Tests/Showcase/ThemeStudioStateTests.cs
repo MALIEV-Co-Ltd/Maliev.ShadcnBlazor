@@ -793,7 +793,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.True(state.GeneratePalette(42));
 
         Assert.Equal(1, changes);
-        Assert.Equal(ShadcnPaletteRecipe.CurrentAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
         Assert.Equal(42UL, state.Document.Palette.Seed);
         Assert.NotEqual(before.Theme.Light.Primary, state.Applied.Light.Primary);
         Assert.True(state.CanUndo);

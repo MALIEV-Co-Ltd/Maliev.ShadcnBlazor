@@ -66,7 +66,9 @@ public static class ShadcnThemeDocumentValidator
             return;
         }
 
-        if (palette.AlgorithmVersion is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and not ShadcnPaletteRecipe.CurrentAlgorithmVersion)
+        if (palette.AlgorithmVersion is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and
+            not ShadcnPaletteRecipe.LegacyAlgorithmVersion and
+            not ShadcnPaletteRecipe.CurrentAlgorithmVersion)
             errors.Add(new("invalid-palette-algorithm", "palette.algorithmVersion", "Palette algorithm version must identify materialized values or a supported deterministic algorithm."));
         ValidateIdentifier(palette.BaseColor, "palette.baseColor", errors);
         if (palette.LockedTokens is null)
@@ -83,6 +85,22 @@ public static class ShadcnThemeDocumentValidator
                     !ShadcnPaletteGenerator.SupportsLock(token))
                     errors.Add(new("invalid-locked-token", "palette.lockedTokens", "Locked tokens must be unique semantic token paths."));
             }
+        }
+
+        if (palette.IsVersion2)
+        {
+            if (palette.Anchors is null)
+                errors.Add(new("required-palette-anchors", "palette.anchors", "Palette anchors are required for algorithm version 2."));
+            if (palette.Harmony is null)
+                errors.Add(new("required-palette-harmony", "palette.harmony", "Palette harmony is required for algorithm version 2."));
+            if (palette.LockedAnchors is null ||
+                palette.LockedAnchors.Any(role => !Enum.IsDefined(role)) ||
+                palette.LockedAnchors.Distinct().Count() != palette.LockedAnchors.Count)
+                errors.Add(new("invalid-locked-anchor", "palette.lockedAnchors", "Locked anchors must be unique supported roles."));
+        }
+        else if (palette.Anchors is not null || palette.Harmony is not null || palette.LockedAnchors is not null)
+        {
+            errors.Add(new("unexpected-palette-v2-field", "palette", "Version-two palette fields are not allowed on materialized or version-one recipes."));
         }
     }
 

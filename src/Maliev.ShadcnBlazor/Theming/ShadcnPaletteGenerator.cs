@@ -6,7 +6,7 @@ namespace Maliev.ShadcnBlazor.Theming;
 public static class ShadcnPaletteGenerator
 {
     /// <summary>Gets the current deterministic palette algorithm version.</summary>
-    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.CurrentAlgorithmVersion;
+    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.LegacyAlgorithmVersion;
 
     private static readonly IReadOnlyDictionary<string, (double Hue, double Chroma)> BaseColors =
         new Dictionary<string, (double, double)>(StringComparer.Ordinal)

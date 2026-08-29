@@ -69,7 +69,7 @@ public sealed class ThemeStudioPresetCatalog : IThemeStudioPresetCatalog
             Name = entry.DisplayName,
             Theme = theme,
             Application = new ShadcnThemeApplication(entry.Id, entry.Style, entry.BaseColor, entry.IconLibrary, entry.MenuAccent, entry.MenuColor, false, ShadcnDirection.LeftToRight, "en", theme.Metrics.ReducedMotionBehavior),
-            Palette = new ShadcnPaletteRecipe(ShadcnPaletteRecipe.CurrentAlgorithmVersion, entry.Seed, entry.BaseColor, [])
+            Palette = new ShadcnPaletteRecipe(ShadcnPaletteRecipe.LegacyAlgorithmVersion, entry.Seed, entry.BaseColor, [])
         };
         var validation = ShadcnThemeDocumentValidator.Validate(document);
         if (!validation.IsValid)

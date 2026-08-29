@@ -1755,6 +1755,15 @@ type Maliev.ShadcnBlazor.Theming.ShadcnOptions
   ShadcnTheme Theme
   TimeSpan ToastDuration
   TimeSpan ToastExitDuration
+enum Maliev.ShadcnBlazor.Theming.ShadcnPaletteAnchorRole: Brand, Support, Highlight, DataA, DataB
+type Maliev.ShadcnBlazor.Theming.ShadcnPaletteAnchors
+  String Brand
+  String DataA
+  String DataB
+  String Highlight
+  String Support
+  method String Get(ShadcnPaletteAnchorRole role)
+  method ShadcnPaletteAnchors Set(ShadcnPaletteAnchorRole role, String value)
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
   IReadOnlyList<ShadcnThemeValidationMessage> Errors
   Boolean IsValid
@@ -1763,13 +1772,20 @@ type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerator
   const Int32 CurrentAlgorithmVersion
   method ShadcnPaletteGenerationResult Generate(ShadcnTheme source, ShadcnPaletteRecipe recipe)
+enum Maliev.ShadcnBlazor.Theming.ShadcnPaletteHarmony: Free, Analogous, Complementary, Triadic
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe
   const Int32 CurrentAlgorithmVersion
+  const Int32 LegacyAlgorithmVersion
   const Int32 MaterializedAlgorithmVersion
   Int32 AlgorithmVersion
+  ShadcnPaletteAnchors Anchors
   String BaseColor
+  Nullable<ShadcnPaletteHarmony> Harmony
+  Boolean IsVersion2
+  IReadOnlyList<ShadcnPaletteAnchorRole> LockedAnchors
   IReadOnlyList<String> LockedTokens
   UInt64 Seed
+  method ShadcnPaletteRecipe CreateV2(UInt64 seed, String baseColor, IReadOnlyList<String> lockedTokens, ShadcnPaletteAnchors anchors, ShadcnPaletteHarmony harmony, IEnumerable<ShadcnPaletteAnchorRole> lockedAnchors)
 enum Maliev.ShadcnBlazor.Theming.ShadcnReducedMotionBehavior: RespectSystemPreference, AlwaysReduce
 type Maliev.ShadcnBlazor.Theming.ShadcnTheme
   const Int32 CurrentSchemaVersion

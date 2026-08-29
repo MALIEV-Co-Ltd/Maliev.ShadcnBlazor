@@ -300,6 +300,39 @@ public sealed class ShadcnThemeDocumentTests
     }
 
     [Fact]
+    public void VersionOneRecipeSerializationRemainsByteIdentical()
+    {
+        var recipe = new ShadcnPaletteRecipe(1, 42, "neutral", ["light.primary"]);
+        var document = CreateDocument() with { Palette = recipe };
+
+        var json = ShadcnThemeDocumentSerializer.Serialize(document);
+
+        Assert.DoesNotContain("\"anchors\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"harmony\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"lockedAnchors\"", json, StringComparison.Ordinal);
+        Assert.Equal(json, ShadcnThemeDocumentSerializer.Serialize(
+            ShadcnThemeDocumentSerializer.Deserialize(json)));
+    }
+
+    [Fact]
+    public void VersionTwoRecipeTakesDefensiveAnchorLockSnapshotAndRoundTrips()
+    {
+        var locks = new[] { ShadcnPaletteAnchorRole.Brand };
+        var anchors = new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899");
+        var recipe = ShadcnPaletteRecipe.CreateV2(42, "neutral", [], anchors,
+            ShadcnPaletteHarmony.Triadic, locks);
+        locks[0] = ShadcnPaletteAnchorRole.DataB;
+
+        var restored = ShadcnThemeDocumentSerializer.Deserialize(
+            ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe })).Palette;
+
+        Assert.Equal(2, restored.AlgorithmVersion);
+        Assert.Equal(anchors, restored.Anchors);
+        Assert.Equal(ShadcnPaletteHarmony.Triadic, restored.Harmony);
+        Assert.Equal([ShadcnPaletteAnchorRole.Brand], restored.LockedAnchors);
+    }
+
+    [Fact]
     public void TypographyScaleTakesAnImmutableSnapshotOfRoleStyles()
     {
         var source = new Dictionary<ShadcnTypographyRole, ShadcnTypographyRoleStyle>

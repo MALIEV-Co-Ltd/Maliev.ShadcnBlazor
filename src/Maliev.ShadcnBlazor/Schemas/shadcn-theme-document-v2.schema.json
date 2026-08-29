@@ -31,11 +31,44 @@
       "additionalProperties": false,
       "required": ["algorithmVersion", "seed", "baseColor", "lockedTokens"],
       "properties": {
-        "algorithmVersion": { "type": "integer", "minimum": 1 },
+        "algorithmVersion": { "enum": [0, 1, 2] },
         "seed": { "type": "integer", "minimum": 0 },
         "baseColor": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "lockedTokens": { "type": "array", "maxItems": 128, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } }
-      }
+        "lockedTokens": { "type": "array", "maxItems": 128, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "anchors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["brand", "support", "highlight", "dataA", "dataB"],
+          "properties": {
+            "brand": { "type": "string" },
+            "support": { "type": "string" },
+            "highlight": { "type": "string" },
+            "dataA": { "type": "string" },
+            "dataB": { "type": "string" }
+          }
+        },
+        "harmony": { "enum": ["free", "analogous", "complementary", "triadic"] },
+        "lockedAnchors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["brand", "support", "highlight", "dataA", "dataB"] }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "algorithmVersion": { "const": 2 } } },
+          "then": { "required": ["anchors", "harmony", "lockedAnchors"] },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["anchors"] },
+                { "required": ["harmony"] },
+                { "required": ["lockedAnchors"] }
+              ]
+            }
+          }
+        }
+      ]
     },
     "typography": {
       "type": "object",

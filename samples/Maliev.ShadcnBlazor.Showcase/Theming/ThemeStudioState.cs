@@ -566,7 +566,7 @@ public sealed class ThemeStudioState
     public bool GeneratePalette(ulong seed)
     {
         var recipe = new ShadcnPaletteRecipe(
-            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            ShadcnPaletteRecipe.LegacyAlgorithmVersion,
             seed,
             BaseColorId,
             _documentTemplate.Palette.LockedTokens);

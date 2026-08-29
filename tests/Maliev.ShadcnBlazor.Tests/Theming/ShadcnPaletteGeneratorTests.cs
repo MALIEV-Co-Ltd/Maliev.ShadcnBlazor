@@ -11,7 +11,8 @@ public sealed class ShadcnPaletteGeneratorTests
     public void AlgorithmVersionsDistinguishMaterializedDocumentsFromDeterministicGeneration()
     {
         Assert.Equal(0, ShadcnPaletteRecipe.MaterializedAlgorithmVersion);
-        Assert.Equal(1, ShadcnPaletteRecipe.CurrentAlgorithmVersion);
+        Assert.Equal(1, ShadcnPaletteRecipe.LegacyAlgorithmVersion);
+        Assert.Equal(2, ShadcnPaletteRecipe.CurrentAlgorithmVersion);
         Assert.Equal(1, ShadcnPaletteGenerator.CurrentAlgorithmVersion);
 
         var legacy = ShadcnThemeDocumentSerializer.Deserialize(
