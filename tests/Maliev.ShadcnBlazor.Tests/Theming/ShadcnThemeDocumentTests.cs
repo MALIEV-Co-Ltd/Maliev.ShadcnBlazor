@@ -408,6 +408,49 @@ public sealed class ShadcnThemeDocumentTests
             exception.Message);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CanonicalVersionTwoRejectsMissingOrNullAnchorMembersFromRawJson(bool removeMember)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        var anchors = root["palette"]!.AsObject()["anchors"]!.AsObject();
+        if (removeMember)
+            anchors.Remove("dataB");
+        else
+            anchors["dataB"] = null;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: invalid-palette-anchors at palette.anchors: Palette anchors must define all five non-null string values.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void CanonicalVersionTwoRejectsNonStringAnchorMembersFromRawJson()
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["anchors"]!.AsObject()["dataB"] = 42;
+
+        Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+    }
+
     [Fact]
     public void TypographyScaleTakesAnImmutableSnapshotOfRoleStyles()
     {

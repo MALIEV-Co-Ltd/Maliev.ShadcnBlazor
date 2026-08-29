@@ -91,6 +91,9 @@ public static class ShadcnThemeDocumentValidator
         {
             if (palette.Anchors is null)
                 errors.Add(new("required-palette-anchors", "palette.anchors", "Palette anchors are required for algorithm version 2."));
+            else if (palette.Anchors.Brand is null || palette.Anchors.Support is null ||
+                     palette.Anchors.Highlight is null || palette.Anchors.DataA is null || palette.Anchors.DataB is null)
+                errors.Add(new("invalid-palette-anchors", "palette.anchors", "Palette anchors must define all five non-null string values."));
             if (palette.Harmony is null)
                 errors.Add(new("required-palette-harmony", "palette.harmony", "Palette harmony is required for algorithm version 2."));
             if (palette.LockedAnchors is null ||
