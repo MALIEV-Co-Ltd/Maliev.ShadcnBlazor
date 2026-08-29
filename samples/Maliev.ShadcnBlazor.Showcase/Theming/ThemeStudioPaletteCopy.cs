@@ -118,12 +118,12 @@ public sealed record ThemeStudioPaletteCopy(
 
     public string DiagnosticMessage(ShadcnThemeValidationMessage diagnostic)
     {
-        if (!ReferenceEquals(this, Thai))
-            return diagnostic.Message;
         if (diagnostic.Code == "palette-invalid-anchor")
-            return InvalidAnchorValue;
+            return ReferenceEquals(this, Thai) ? InvalidAnchorValue : diagnostic.Message;
         if (diagnostic.Code is not ("palette-locked-constraint" or "palette-constraint-unsatisfied"))
             return $"{ErrorPrefix}: {diagnostic.Path}";
+        if (!ReferenceEquals(this, Thai))
+            return diagnostic.Message;
 
         var contrast = ContrastDiagnosticPattern.Match(diagnostic.Message);
         return contrast.Success

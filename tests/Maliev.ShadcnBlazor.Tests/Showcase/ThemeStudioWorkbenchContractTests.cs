@@ -168,10 +168,13 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
             "light.synthetic",
             "Contrast between light.syntheticForeground and light.synthetic is 1:1; 4.5:1 is required.");
 
-        var message = ThemeStudioPaletteCopy.Thai.DiagnosticMessage(diagnostic);
+        var englishMessage = ThemeStudioPaletteCopy.English.DiagnosticMessage(diagnostic);
+        var thaiMessage = ThemeStudioPaletteCopy.Thai.DiagnosticMessage(diagnostic);
 
-        Assert.Equal("ข้อผิดพลาดของชุดสี: light.synthetic", message);
-        Assert.DoesNotContain("คอนทราสต์ระหว่าง", message, StringComparison.Ordinal);
+        Assert.Equal("Palette error: light.synthetic", englishMessage);
+        Assert.DoesNotContain("Contrast between", englishMessage, StringComparison.Ordinal);
+        Assert.Equal("ข้อผิดพลาดของชุดสี: light.synthetic", thaiMessage);
+        Assert.DoesNotContain("คอนทราสต์ระหว่าง", thaiMessage, StringComparison.Ordinal);
     }
 
     [Fact]
