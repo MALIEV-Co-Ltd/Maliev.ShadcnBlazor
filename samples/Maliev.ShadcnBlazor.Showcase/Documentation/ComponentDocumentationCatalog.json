@@ -12,7 +12,7 @@
     { "slug": "badge", "namespace": "Maliev.ShadcnBlazor.Components.Content", "primaryType": "ShadcnBadge", "aliases": ["status label"], "capabilities": ["variants", "link rendering"] },
     { "slug": "breadcrumb", "namespace": "Maliev.ShadcnBlazor.Components.Navigation", "primaryType": "ShadcnBreadcrumb", "aliases": ["path navigation"], "capabilities": ["composed landmarks", "custom separators", "collapsed paths"] },
     { "slug": "bubble", "namespace": "Maliev.ShadcnBlazor.Components.Conversation", "primaryType": "ShadcnBubble", "aliases": ["chat bubble"], "capabilities": ["ghost default", "seven variants", "alignment", "avatar reactions", "expandable reaction overflow", "interactive content"] },
-    { "slug": "button", "namespace": "Maliev.ShadcnBlazor.Components.Actions", "primaryType": "ShadcnButton", "aliases": ["action", "link button"], "capabilities": ["variants", "sizes", "form action"] },
+    { "slug": "button", "namespace": "Maliev.ShadcnBlazor.Components.Actions", "primaryType": "ShadcnButton", "aliases": ["action", "link button"], "capabilities": ["variants", "sizes", "form action", "programmatic focus"] },
     { "slug": "button-group", "namespace": "Maliev.ShadcnBlazor.Components.Actions", "primaryType": "ShadcnButtonGroup", "aliases": ["action group"], "capabilities": ["composition", "orientation"] },
     { "slug": "calendar", "namespace": "Maliev.ShadcnBlazor.Components.Forms", "primaryType": "ShadcnCalendar", "aliases": ["date grid"], "capabilities": ["single selection", "range selection", "culture", "keyboard navigation"] },
     { "slug": "card", "namespace": "Maliev.ShadcnBlazor.Components.Content", "primaryType": "ShadcnCard", "aliases": ["panel"], "capabilities": ["sizes", "header action", "composed regions"] },

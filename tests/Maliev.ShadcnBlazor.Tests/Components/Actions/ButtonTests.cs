@@ -113,6 +113,33 @@ public sealed class ButtonTests : BunitContext
         Assert.Equal("_blank", cut.Find("a").GetAttribute("target"));
     }
 
+    [Theory]
+    [InlineData(null, false, "BUTTON")]
+    [InlineData("/customers", true, "A")]
+    public async Task FocusAsyncTargetsRenderedButtonOrLinkAndForwardsPreventScroll(
+        string? href,
+        bool preventScroll,
+        string expectedTagName)
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<ShadcnButton>(parameters => parameters
+            .Add(component => component.Href, href)
+            .AddChildContent("Focusable action"));
+
+        if (preventScroll)
+            await cut.Instance.FocusAsync(preventScroll: true);
+        else
+            await cut.Instance.FocusAsync();
+
+        Assert.Equal(expectedTagName, cut.Find("[data-slot='button']").TagName);
+        var invocation = Assert.Single(
+            JSInterop.Invocations,
+            candidate => candidate.Identifier == "Blazor._internal.domWrapper.focus");
+        var element = Assert.IsType<ElementReference>(invocation.Arguments[0]);
+        Assert.False(string.IsNullOrWhiteSpace(element.Id));
+        Assert.Equal(preventScroll, invocation.Arguments[1]);
+    }
+
     [Fact]
     public async Task SubmitFeedbackPreventsReentryAndTransitionsThroughBusyAndSuccessStates()
     {

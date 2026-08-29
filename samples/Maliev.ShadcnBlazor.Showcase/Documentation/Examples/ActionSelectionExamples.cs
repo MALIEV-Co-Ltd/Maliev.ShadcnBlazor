@@ -107,11 +107,24 @@ internal static class ActionSelectionExamples
         </div>
     </section>
 
+    <section aria-labelledby="focus-title">
+        <h4 id="focus-title">Programmatic focus</h4>
+        <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="{{disabledValue}}" OnClick="@FocusPrimaryActionAsync">Move focus to primary action</ShadcnButton>
+        <ShadcnButton @ref="_primaryAction" Disabled="{{disabledValue}}">Primary action</ShadcnButton>
+    </section>
+
     <p role="status" aria-live="polite">@(_lastAction ?? "Choose an enabled action to try it")</p>
 </section>
 
 @code {
+    private ShadcnButton? _primaryAction;
     private string? _lastAction;
+
+    private async Task FocusPrimaryActionAsync()
+    {
+        if (_primaryAction is not null)
+            await _primaryAction.FocusAsync(preventScroll: true);
+    }
 
     private void Announce(string action) => _lastAction = $"{action} pressed";
 }
@@ -120,7 +133,7 @@ internal static class ActionSelectionExamples
         return Example("button", "Button variants and sizes", "Compare every supported treatment at once, scan the size scale, and try each action in a production-order context.",
             Source(), preview,
             [Toggle("button-disabled", "Disabled", value => disabled = value)],
-            ["variants", "sizes", "icons", "link", "disabled"]) with
+            ["variants", "sizes", "icons", "link", "disabled", "programmatic focus"]) with
         { RazorSourceProvider = Source };
     }
 

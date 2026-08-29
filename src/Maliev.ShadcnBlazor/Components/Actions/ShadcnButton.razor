@@ -20,6 +20,7 @@
     [Parameter] public RenderFragment? TrailingIcon { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
+    private ElementReference _element;
     private ButtonOperationState _operationState;
     private bool HasOperationFeedback => OperationFeedback ?? ButtonType == ShadcnButtonType.Submit;
     private bool EffectiveDisabled => Disabled || _operationState == ButtonOperationState.Busy;
@@ -83,6 +84,7 @@
             builder.AddAttribute(sequence++, "disabled", EffectiveDisabled);
         }
         builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, HandleClickAsync));
+        builder.AddElementReferenceCapture(sequence++, reference => _element = reference);
         if (_operationState == ButtonOperationState.Busy)
         {
             builder.OpenElement(sequence++, "span");
@@ -123,6 +125,15 @@
         }
         builder.CloseElement();
     };
+
+    /// <summary>
+    /// Requests focus for the rendered native button or anchor element.
+    /// </summary>
+    /// <param name="preventScroll">
+    /// <see langword="true" /> to prevent the browser from scrolling the focused element into view.
+    /// </param>
+    /// <remarks>Call this method after the component has rendered.</remarks>
+    public ValueTask FocusAsync(bool preventScroll = false) => _element.FocusAsync(preventScroll);
 
     protected override void OnParametersSet()
     {

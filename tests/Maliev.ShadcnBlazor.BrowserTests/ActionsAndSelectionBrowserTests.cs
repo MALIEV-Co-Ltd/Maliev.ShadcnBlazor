@@ -984,7 +984,7 @@ public sealed class ActionsAndSelectionBrowserTests(
                 await Assertions.Expect(iconSizes).ToHaveCountAsync(4);
                 await page.GetByTestId("control-button-disabled").CheckAsync();
                 await Assertions.Expect(variants).ToHaveCountAsync(6);
-                await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator("button[data-slot='button']:disabled")).ToHaveCountAsync(13);
+                await Assertions.Expect(page.GetByTestId("button-dossier-preview").Locator("button[data-slot='button']:disabled")).ToHaveCountAsync(15);
                 await Assertions.Expect(page.GetByTestId("button-variant-link")).ToHaveAttributeAsync("aria-disabled", "true");
                 break;
             case "button-group":

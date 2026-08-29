@@ -2,11 +2,29 @@ using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Components.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
 public sealed class ButtonShowcaseTests : BunitContext
 {
+    [Fact]
+    public async Task FocusExampleRequestsFocusThroughTheComponentReference()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<ButtonDossierPreview>();
+
+        await cut.Find("[data-testid='button-focus-request']").ClickAsync(new MouseEventArgs());
+
+        var invocation = Assert.Single(
+            JSInterop.Invocations,
+            candidate => candidate.Identifier == "Blazor._internal.domWrapper.focus");
+        var element = Assert.IsType<ElementReference>(invocation.Arguments[0]);
+        Assert.False(string.IsNullOrWhiteSpace(element.Id));
+        Assert.Equal(true, invocation.Arguments[1]);
+    }
+
     [Fact]
     public void PreviewRendersAllVariantsAndSizesWithAnAccessibleStatusRegion()
     {
@@ -40,6 +58,8 @@ public sealed class ButtonShowcaseTests : BunitContext
         Assert.Contains("ShadcnButtonSize.IconExtraSmall", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Href=\"#usage\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("PointerCursor=\"true\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("@ref=\"_primaryAction\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("FocusAsync(preventScroll: true)", example.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("<input type=\"checkbox\"", example.RazorSource, StringComparison.Ordinal);
 
         Assert.Single(example.Controls).Apply("true");

@@ -30,9 +30,13 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
         await defaultButton.ClickAsync();
         await Assertions.Expect(dossier.GetByTestId("button-last-action")).ToContainTextAsync("Save changes pressed");
 
+        var focusTarget = dossier.GetByTestId("button-focus-target");
+        await dossier.GetByTestId("button-focus-request").ClickAsync();
+        await Assertions.Expect(focusTarget).ToBeFocusedAsync();
+
         await page.GetByTestId("control-button-disabled").CheckAsync();
         await Assertions.Expect(defaultButton).ToBeDisabledAsync();
-        await Assertions.Expect(dossier.Locator("button[data-slot='button']:disabled")).ToHaveCountAsync(13);
+        await Assertions.Expect(dossier.Locator("button[data-slot='button']:disabled")).ToHaveCountAsync(15);
         await Assertions.Expect(dossier.GetByTestId("button-variant-link")).ToHaveAttributeAsync("aria-disabled", "true");
         await Assertions.Expect(dossier.GetByTestId("button-variant-link")).Not.ToHaveAttributeAsync("href", "#usage");
         await Assertions.Expect(dossier.GetByTestId("button-last-action")).ToContainTextAsync("Save changes pressed");
@@ -86,6 +90,8 @@ public sealed class ButtonShowcaseBrowserTests(ShowcaseServerFixture server, Pla
             "ShadcnButtonSize.IconLarge",
             "Href=\"#usage\"",
             "Disabled=\"false\"",
+            "@ref=\"_primaryAction\"",
+            "FocusAsync(preventScroll: true)",
             "aria-live=\"polite\""
         })
         {
