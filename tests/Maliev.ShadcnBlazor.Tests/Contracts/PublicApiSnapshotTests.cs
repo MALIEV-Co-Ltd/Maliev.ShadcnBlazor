@@ -91,10 +91,13 @@ public sealed class PublicApiSnapshotTests
                 lines.Add($"  {FriendlyName(property.PropertyType)} {property.Name}{suffix}");
             }
 
-            if (isContractApi)
+            if (isContractApi || typeof(IShadcnFocusable).IsAssignableFrom(type))
             {
-                foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                var methodFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance |
+                                  (isContractApi ? BindingFlags.DeclaredOnly : BindingFlags.FlattenHierarchy);
+                foreach (var method in type.GetMethods(methodFlags)
                              .Where(method => !method.IsSpecialName &&
+                                              (isContractApi || method.Name is "FocusAsync" or "FocusThumbAsync") &&
                                               method.GetCustomAttribute<CompilerGeneratedAttribute>() is null)
                              .OrderBy(method => method.Name, StringComparer.Ordinal)
                              .ThenBy(method => string.Join(',', method.GetParameters().Select(parameter => parameter.ParameterType.FullName)), StringComparer.Ordinal))

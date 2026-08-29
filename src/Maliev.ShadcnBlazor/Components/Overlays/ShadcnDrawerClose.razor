@@ -1,6 +1,6 @@
 @using Maliev.ShadcnBlazor.Components.Actions
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="Forwarded" class="@MergeClass("shadcn-drawer-close")" style="@MergeStyle(null)" data-slot="drawer-close" data-variant="@VariantValue" type="button" disabled="@Disabled" @onclick="CloseAsync">@ChildContent</button>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<button @ref="FocusElement" @attributes="Forwarded" class="@MergeClass("shadcn-drawer-close")" style="@MergeStyle(null)" data-slot="drawer-close" data-variant="@VariantValue" type="button" disabled="@Disabled" @onclick="CloseAsync">@ChildContent</button>
 @code {
     [CascadingParameter] private ShadcnDrawerContext Context { get; set; } = default!;
     [Parameter] public bool Disabled { get; set; }

@@ -1,5 +1,6 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<input @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-input")" style="@MergeStyle(null)" data-slot="sidebar-input" type="@Type" value="@Value" placeholder="@Placeholder" aria-label="@Label" disabled="@Disabled" @oninput="HandleInputAsync" />
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
+<input @ref="InputElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-sidebar-input")" style="@MergeStyle(null)" data-slot="sidebar-input" type="@Type" value="@Value" placeholder="@Placeholder" aria-label="@Label" disabled="@Disabled" @oninput="HandleInputAsync" />
 @code {
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
@@ -7,6 +8,11 @@
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public bool Disabled { get; set; }
+    private ElementReference InputElement;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "type", "value", "placeholder", "aria-label", "disabled");
     private Task HandleInputAsync(ChangeEventArgs args) => Disabled ? Task.CompletedTask : ValueChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+
+    /// <summary>Moves focus to the rendered native sidebar input after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused input into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => InputElement.FocusAsync(preventScroll);
 }

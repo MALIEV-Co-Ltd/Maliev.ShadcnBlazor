@@ -2,6 +2,7 @@
 @using System.Globalization
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
@@ -104,6 +105,13 @@
 
     private static bool SequenceEqual(IReadOnlyCollection<TValue> left, IReadOnlyCollection<TValue> right) =>
         left.Count == right.Count && left.SequenceEqual(right, EqualityComparer<TValue>.Default);
+
+    /// <summary>Focuses the selected roving item, or the first enabled item.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("focusRovingItem", GroupReference, "toggle", preventScroll);
+    }
 
     public async ValueTask DisposeAsync()
     {

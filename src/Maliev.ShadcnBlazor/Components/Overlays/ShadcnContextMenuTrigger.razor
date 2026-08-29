@@ -1,5 +1,6 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JavaScript
 <div @ref="_element" @attributes="Forwarded" id="@Context.Owner.TriggerId" class="@MergeClass("shadcn-context-menu-trigger")" style="@MergeStyle(null)" data-slot="context-menu-trigger" tabindex="@(Focusable?"0":null)" role="@(Focusable?"button":null)" aria-haspopup="menu" aria-expanded="@(Context.Owner.EffectiveOpen?"true":"false")" aria-controls="@(Context.Owner.EffectiveOpen?Context.Owner.ContentId:null)" @oncontextmenu="OpenAsync" @oncontextmenu:preventDefault>@ChildContent</div>
 @code {
@@ -17,6 +18,8 @@
         _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
         await _module.InvokeVoidAsync("attachContextMenuTrigger", _element);
     }
+    /// <summary>Focuses the context-menu trigger when <see cref="Focusable"/> is enabled.</summary>
+    public ValueTask FocusAsync(bool preventScroll = false) => Focusable ? _element.FocusAsync(preventScroll) : ValueTask.CompletedTask;
     public async ValueTask DisposeAsync()
     {
         if (_module is null) return;

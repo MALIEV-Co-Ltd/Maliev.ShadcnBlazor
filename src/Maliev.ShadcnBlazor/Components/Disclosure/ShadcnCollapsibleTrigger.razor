@@ -1,6 +1,6 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-collapsible-trigger")" style="@MergeStyle(null)" data-slot="collapsible-trigger" data-state="@(Context.Open ? "open" : "closed")" id="@Context.TriggerId" type="button" disabled="@Context.Owner.Disabled" aria-expanded="@(Context.Open ? "true" : "false")" aria-controls="@Context.ContentId" @onclick="ToggleAsync">@ChildContent</button>
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-collapsible-trigger")" style="@MergeStyle(null)" data-slot="collapsible-trigger" data-state="@(Context.Open ? "open" : "closed")" id="@Context.TriggerId" type="button" disabled="@Context.Owner.Disabled" aria-expanded="@(Context.Open ? "true" : "false")" aria-controls="@Context.ContentId" @onclick="ToggleAsync">@ChildContent</button>
 
 @code {
     [CascadingParameter] private ShadcnCollapsibleContext Context { get; set; } = default!;

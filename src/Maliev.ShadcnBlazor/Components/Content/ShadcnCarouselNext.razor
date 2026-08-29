@@ -1,6 +1,6 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 @implements IDisposable
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-next")" style="@MergeStyle(null)" data-slot="carousel-next" type="button" aria-label="@Context?.NextLabel" disabled="@Disabled" @onclick="HandleClickAsync"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-carousel-next")" style="@MergeStyle(null)" data-slot="carousel-next" type="button" aria-label="@Context?.NextLabel" disabled="@Disabled" @onclick="HandleClickAsync"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
 @code {
     [CascadingParameter] private ShadcnCarouselContext? Context { get; set; }
     private ShadcnCarouselContext? _observedContext;

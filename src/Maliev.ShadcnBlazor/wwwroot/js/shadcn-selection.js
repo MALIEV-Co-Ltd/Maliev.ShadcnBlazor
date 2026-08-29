@@ -6,6 +6,20 @@ export function setIndeterminate(element, value) {
 
 const listeners = new WeakMap()
 
+export function focusRovingItem(root, kind, preventScroll = false) {
+    const slot = kind === "radio" ? "radio-group-item" : "toggle-group-item"
+    const items = Array.from(root?.querySelectorAll?.(`[data-slot='${slot}']`) ?? [])
+        .filter(item => !item.disabled && item.getAttribute("aria-disabled") !== "true")
+    const target = items.find(item => kind === "radio" ? item.checked : item.getAttribute("aria-pressed") === "true")
+        ?? items.find(item => item.tabIndex === 0)
+        ?? items[0]
+    target?.focus?.({ preventScroll })
+}
+
+export function focusSliderThumb(root, index, preventScroll = false) {
+    root?.querySelector?.(`[data-slot='slider-thumb'][data-index='${index}']:not(:disabled)`)?.focus?.({ preventScroll })
+}
+
 export function attachRovingGroup(root, kind, orientation, readOnly) {
     if (!root) return
 

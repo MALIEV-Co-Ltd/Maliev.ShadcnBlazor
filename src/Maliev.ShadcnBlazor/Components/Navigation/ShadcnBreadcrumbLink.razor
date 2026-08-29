@@ -1,5 +1,5 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-breadcrumb-link")" style="@MergeStyle(null)" data-slot="breadcrumb-link" href="@Href" target="@Target" @onclick="HandleClickAsync">@ChildContent</a>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<a @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-breadcrumb-link")" style="@MergeStyle(null)" data-slot="breadcrumb-link" href="@Href" target="@Target" @onclick="HandleClickAsync">@ChildContent</a>
 @code {
     [Parameter] public string? Href { get; set; }
     [Parameter] public string? Target { get; set; }

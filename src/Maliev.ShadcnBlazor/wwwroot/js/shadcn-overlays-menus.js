@@ -1,4 +1,7 @@
 const dialogs = new WeakMap();
+export function focusCompositeTarget(root, selector, preventScroll = false) {
+    root?.querySelector?.(selector)?.focus?.({ preventScroll });
+}
 const dialogStack = [];
 const layerStack = [];
 const layerRefs = new WeakMap();

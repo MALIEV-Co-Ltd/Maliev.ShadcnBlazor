@@ -167,6 +167,8 @@ public sealed class ComponentDossierTests : BunitContext
                 continue;
 
             var declaration = line.Trim().Replace(" [CaptureUnmatchedValues]", string.Empty, StringComparison.Ordinal);
+            if (declaration.StartsWith("method ", StringComparison.Ordinal) || declaration.StartsWith("const ", StringComparison.Ordinal))
+                continue;
             var separator = declaration.LastIndexOf(' ');
             var expectedType = declaration[..separator];
             var expectedName = declaration[(separator + 1)..];

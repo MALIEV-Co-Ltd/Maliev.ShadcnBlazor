@@ -1,6 +1,6 @@
 @using Maliev.ShadcnBlazor.Components.Actions
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="Forwarded" class="@MergeClass(ChildContent is null ? "shadcn-sheet-close shadcn-sheet-close-icon" : "shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" data-variant="@VariantValue" type="button" aria-label="@(ChildContent is null ? Label : null)" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<button @ref="FocusElement" @attributes="Forwarded" class="@MergeClass(ChildContent is null ? "shadcn-sheet-close shadcn-sheet-close-icon" : "shadcn-sheet-close")" style="@MergeStyle(null)" data-slot="sheet-close" data-variant="@VariantValue" type="button" aria-label="@(ChildContent is null ? Label : null)" disabled="@Disabled" @onclick="CloseAsync">@(ChildContent??DefaultContent)</button>
 @code {
     [CascadingParameter] private ShadcnSheetContext Context { get; set; } = default!;
     [Parameter] public string Label { get; set; } = "Close";

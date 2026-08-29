@@ -2,6 +2,7 @@
 @using Maliev.ShadcnBlazor.Components.Forms
 @using Microsoft.AspNetCore.Components.Forms
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 <span class="shadcn-switch-root"
       data-slot="switch-root"
@@ -10,7 +11,8 @@
       data-disabled="@(EffectiveDisabled ? "true" : null)"
       data-readonly="@(ReadOnly ? "true" : null)"
       data-invalid="@(EffectiveInvalid ? "true" : null)">
-    <input @attributes="ForwardedAttributes"
+    <input @ref="InputReference"
+           @attributes="ForwardedAttributes"
            id="@EffectiveId"
            class="@MergeClass("shadcn-switch")"
            style="@MergeStyle(null)"
@@ -49,6 +51,7 @@
     private bool CurrentValue;
     private bool LastParameterValue;
     private bool Initialized;
+    private ElementReference InputReference;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
     private string State => CurrentValue ? "checked" : "unchecked";
@@ -83,4 +86,8 @@
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
     }
+
+    /// <summary>Moves focus to the rendered native switch input after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused switch into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => InputReference.FocusAsync(preventScroll);
 }

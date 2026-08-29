@@ -1,7 +1,7 @@
 @using Microsoft.AspNetCore.Components.Web
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 
-<button @attributes="ForwardedAttributes"
+<button @ref="FocusElement" @attributes="ForwardedAttributes"
         class="@MergeClass("shadcn-toggle")"
         style="@MergeStyle(null)"
         type="button"

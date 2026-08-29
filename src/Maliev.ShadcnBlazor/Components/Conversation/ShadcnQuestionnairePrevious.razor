@@ -1,3 +1,3 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-questionnaire-navigation")" style="@MergeStyle(null)" data-slot="questionnaire-previous" data-variant="outline" type="button" disabled="@(Owner!.State.Current==1||Owner.Busy)" @onclick="Owner.PreviousAsync">@ChildContent</button>
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-questionnaire-navigation")" style="@MergeStyle(null)" data-slot="questionnaire-previous" data-variant="outline" type="button" disabled="@(Owner!.State.Current==1||Owner.Busy)" @onclick="Owner.PreviousAsync">@ChildContent</button>
 @code { [CascadingParameter] private ShadcnQuestionnaire? Owner{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot","type","disabled"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("QuestionnairePrevious must be inside a questionnaire.");} }

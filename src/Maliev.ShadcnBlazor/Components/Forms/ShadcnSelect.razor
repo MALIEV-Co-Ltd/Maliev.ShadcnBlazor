@@ -1,6 +1,7 @@
 @typeparam TValue
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits ShadcnFormComponentBase<TValue>
 
@@ -40,6 +41,8 @@
 </div>
 
 @code {
+    /// <summary>Focuses the select trigger.</summary>
+    public ValueTask FocusAsync(bool preventScroll = false) => Trigger.FocusAsync(preventScroll);
     [Parameter] public IReadOnlyList<ShadcnSelectOption<TValue>> Options { get; set; } = [];
     [Parameter] public string Placeholder { get; set; } = "Select an option";
     [Parameter] public bool Open { get; set; }
