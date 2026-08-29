@@ -29,7 +29,7 @@
                 <small>Last edited 12 minutes ago</small>
             </span>
             <ShadcnAlertDialog Open="_open" OpenChanged="SetOpenAsync">
-                <ShadcnAlertDialogTrigger Class="showcase-alert-dialog-trigger">Delete saved quotation</ShadcnAlertDialogTrigger>
+                <ShadcnAlertDialogTrigger @key="_triggerVersion" Class="showcase-alert-dialog-trigger">Delete saved quotation</ShadcnAlertDialogTrigger>
                 <ShadcnAlertDialogContent Size="@(Compact ? ShadcnAlertDialogSize.Small : ShadcnAlertDialogSize.Default)">
                     <div class="showcase-alert-dialog-heading">
                         <ShadcnAlertDialogMedia>
@@ -56,8 +56,9 @@
     [Parameter] public bool Compact { get; set; }
     private bool _open;
     private bool _deleted;
+    private int _triggerVersion;
 
-    private Task SetOpenAsync(bool value) { _open = value; return Task.CompletedTask; }
+    private Task SetOpenAsync(bool value) { _open = value; if (!value) _triggerVersion++; return Task.CompletedTask; }
     private Task DeleteAsync(MouseEventArgs _) { _deleted = true; _open = false; return Task.CompletedTask; }
     private Task ResetAsync(MouseEventArgs _) { _deleted = false; return Task.CompletedTask; }
 }
