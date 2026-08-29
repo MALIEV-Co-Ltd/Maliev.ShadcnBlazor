@@ -1,0 +1,39 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+
+<section class="theme-palette-summary"
+         data-testid="theme-palette-summary"
+         aria-labelledby="theme-palette-summary-title">
+    <div class="theme-palette-summary__copy">
+        <strong id="theme-palette-summary-title">@Copy.ActivePalette</strong>
+        <span data-palette-contrast="@(ContrastReady ? "ready" : "review")">
+            @(ContrastReady ? Copy.ContrastReady : Copy.NeedsReview)
+        </span>
+    </div>
+    <div class="theme-palette-summary__swatches" aria-hidden="true">
+        @foreach (var role in Roles)
+        {
+            <span class="theme-palette-summary__swatch"
+                  data-palette-summary-swatch="@RoleKey(role)"
+                  style="@SwatchStyle(role)"></span>
+        }
+    </div>
+    <ShadcnButton id="theme-palette-customize"
+                  Variant="ShadcnButtonVariant.Outline"
+                  Size="ShadcnButtonSize.Small"
+                  aria-haspopup="dialog"
+                  aria-expanded="@(State.Workbench.PaletteWorkbenchOpen ? "true" : "false")"
+                  data-testid="theme-palette-customize"
+                  OnClick="State.Workbench.OpenPaletteWorkbench">
+        @Copy.CustomizePalette
+    </ShadcnButton>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+
+    private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
+    private bool ContrastReady => State.Validation.IsValid && State.PaletteDiagnostics.Count == 0;
+    private static readonly IReadOnlyList<ShadcnPaletteAnchorRole> Roles = Enum.GetValues<ShadcnPaletteAnchorRole>();
+    private string SwatchStyle(ShadcnPaletteAnchorRole role) => $"background-color: {State.PaletteAnchors.Get(role)}";
+    private static string RoleKey(ShadcnPaletteAnchorRole role) => role.ToString().ToLowerInvariant();
+}

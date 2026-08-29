@@ -173,6 +173,92 @@ public sealed class ThemeImportExportBrowserTests(
     }
 
     [Fact]
+    public async Task PaletteWorkbenchExportsAndReimportsFiveNormalizedAnchorsAndHarmony()
+    {
+        string themeJson;
+        string[] displayedAnchors;
+        await using (var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
+            ReducedMotion = ReducedMotion.Reduce
+        }))
+        {
+            var page = await context.NewPageAsync();
+            await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+            await page.GetByTestId("theme-studio").WaitForAsync();
+            await page.GetByTestId("theme-palette-customize").ClickAsync();
+            var roleKeys = new[] { "brand", "support", "highlight", "dataa", "datab" };
+            var anchorInputs = new[] { "#2563eb", "#0f766e", "#b45309", "#7c3aed", "#8b5cf6" };
+            for (var index = 0; index < roleKeys.Length; index++)
+            {
+                var editor = page.GetByTestId($"theme-palette-anchor-{roleKeys[index]}");
+                await editor.Locator("input[type='text']").FillAsync(anchorInputs[index]);
+                var lockButton = editor.Locator("[data-palette-lock]");
+                await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+            }
+            await page.GetByTestId("theme-palette-harmony").ClickAsync();
+            await page.GetByRole(AriaRole.Option, new() { Name = "Triadic", Exact = true }).ClickAsync();
+            await page.GetByTestId("theme-palette-generate").ClickAsync();
+
+            displayedAnchors = new string[roleKeys.Length];
+            for (var index = 0; index < roleKeys.Length; index++)
+            {
+                displayedAnchors[index] = await page.GetByTestId($"theme-palette-anchor-{roleKeys[index]}")
+                    .Locator("input[type='text']")
+                    .InputValueAsync();
+                var liveToken = await page.GetByTestId("theme-preview-scope").EvaluateAsync<string>(
+                    $"element => getComputedStyle(element).getPropertyValue('--shadcn-chart-{index + 1}').trim()");
+                Assert.Equal(displayedAnchors[index], liveToken);
+            }
+
+            await page.GetByTestId("theme-palette-close").ClickAsync();
+            await page.GetByTestId("theme-export-open").ClickAsync();
+            var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+            if (await acknowledgement.CountAsync() > 0)
+                await acknowledgement.CheckAsync();
+            var download = await page.RunAndWaitForDownloadAsync(
+                () => page.GetByTestId("theme-download").ClickAsync(),
+                new() { Timeout = 90_000 });
+            var downloadPath = await download.PathAsync();
+            Assert.NotNull(downloadPath);
+            using var archive = ZipFile.OpenRead(downloadPath);
+            themeJson = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.json")!));
+            using var document = JsonDocument.Parse(themeJson);
+            var palette = document.RootElement.GetProperty("palette");
+            var anchors = palette.GetProperty("anchors");
+            var jsonKeys = new[] { "brand", "support", "highlight", "dataA", "dataB" };
+            for (var index = 0; index < jsonKeys.Length; index++)
+                Assert.Equal(displayedAnchors[index], anchors.GetProperty(jsonKeys[index]).GetString());
+            Assert.Equal("triadic", palette.GetProperty("harmony").GetString());
+        }
+
+        await using var freshContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var freshPage = await freshContext.NewPageAsync();
+        await freshPage.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
+        await freshPage.GetByTestId("theme-studio").WaitForAsync();
+        await OpenCollapsibleAsync(freshPage, "theme-advanced-transfer");
+        await ClickInspectorControlAsync(freshPage, "theme-import-open");
+        await freshPage.GetByTestId("theme-import-file").SetInputFilesAsync(new FilePayload
+        {
+            Name = "theme.json",
+            MimeType = "application/json",
+            Buffer = Encoding.UTF8.GetBytes(themeJson)
+        });
+        await Assertions.Expect(freshPage.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
+        await freshPage.GetByRole(AriaRole.Button, new() { Name = "Close theme import" }).ClickAsync();
+        await freshPage.GetByTestId("theme-palette-customize").ClickAsync();
+        var importedRoleKeys = new[] { "brand", "support", "highlight", "dataa", "datab" };
+        for (var index = 0; index < importedRoleKeys.Length; index++)
+            Assert.Equal(displayedAnchors[index], await freshPage.GetByTestId($"theme-palette-anchor-{importedRoleKeys[index]}").Locator("input[type='text']").InputValueAsync());
+        await Assertions.Expect(freshPage.GetByTestId("theme-palette-harmony")).ToContainTextAsync("Triadic");
+    }
+
+    [Fact]
     public async Task CorruptFutureAndOversizedImportsNeverChangeTheAppliedTheme()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

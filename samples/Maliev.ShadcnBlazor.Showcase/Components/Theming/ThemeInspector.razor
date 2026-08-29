@@ -47,6 +47,8 @@
         <p class="theme-preset-status" role="status" aria-live="polite" data-testid="theme-preset-status">@_presetStatus</p>
     </section>
 
+    <ThemePaletteSummary State="State" />
+
     <section class="theme-inspector-group" id="theme-settings-visual-treatment" data-testid="theme-visual-treatment-controls">
         <div class="theme-inspector-group__heading"><div><h3>Visual treatment</h3><p>Compose surface, color, depth, motion, and intensity inside the preview only.</p></div></div>
         <div class="theme-inspector-select"><span>Surface style</span><ShadcnSelect TValue="ShadcnVisualStyle" Value="State.VisualStyle" ValueChanged="State.SetVisualStyle" Open="_visualStyleOpen" OpenChanged="SetVisualStyleOpen" Options="VisualStyleOptions" Size="ShadcnControlSize.Small" aria-label="Preview surface style" data-testid="theme-visual-style" /></div>

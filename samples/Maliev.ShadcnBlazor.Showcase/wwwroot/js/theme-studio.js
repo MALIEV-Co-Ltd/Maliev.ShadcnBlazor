@@ -109,3 +109,127 @@ export function loadGoogleFonts(stylesheet, timeoutMs = 5000) {
         timer = window.setTimeout(() => finish("timeout"), Math.max(1000, Math.min(Number(timeoutMs) || 5000, 10000)));
     });
 }
+
+export function bindPaletteWorkbench(root, returnFocusId) {
+    if (!(root instanceof HTMLElement)) return { restoreFocus() {}, dispose() {} };
+    const media = window.matchMedia("(max-width: 64rem)");
+    const focusableSelector = [
+        "a[href]",
+        "button:not([disabled])",
+        "input:not([disabled])",
+        "textarea:not([disabled])",
+        "select:not([disabled])",
+        "[tabindex]:not([tabindex='-1'])"
+    ].join(",");
+
+    const focusable = () => [...root.querySelectorAll(focusableSelector)]
+        .filter(element => element instanceof HTMLElement && element.getClientRects().length > 0 && element.getAttribute("aria-hidden") !== "true");
+    const focusFirst = () => requestAnimationFrame(() => focusable()[0]?.focus({ preventScroll: true }));
+    let concealedBackground = [];
+    const concealBackground = () => {
+        if (concealedBackground.length) return;
+        const element = root.parentElement?.querySelector(":scope > .theme-studio-sidebar-provider");
+        if (!(element instanceof HTMLElement)) return;
+        concealedBackground.push({
+            element,
+            inert: element.inert,
+            ariaHidden: element.getAttribute("aria-hidden")
+        });
+        element.inert = true;
+        element.setAttribute("aria-hidden", "true");
+    };
+    const revealBackground = restorePrevious => {
+        for (const entry of concealedBackground) {
+            if (restorePrevious) {
+                entry.element.inert = entry.inert;
+                if (entry.ariaHidden === null) entry.element.removeAttribute("aria-hidden");
+                else entry.element.setAttribute("aria-hidden", entry.ariaHidden);
+            } else {
+                entry.element.inert = false;
+                entry.element.removeAttribute("aria-hidden");
+            }
+        }
+        concealedBackground = [];
+    };
+    const applyMode = () => {
+        if (media.matches) {
+            root.inert = false;
+            root.removeAttribute("aria-hidden");
+            concealBackground();
+            root.setAttribute("role", "dialog");
+            root.setAttribute("aria-modal", "true");
+            focusFirst();
+        } else {
+            revealBackground(false);
+            root.inert = false;
+            root.removeAttribute("aria-hidden");
+            root.removeAttribute("role");
+            root.removeAttribute("aria-modal");
+        }
+    };
+    let modeFrame = 0;
+    const onModeChange = () => {
+        window.cancelAnimationFrame(modeFrame);
+        modeFrame = window.requestAnimationFrame(applyMode);
+    };
+    const rootObserver = new MutationObserver(() => {
+        if (!media.matches || (!root.inert && root.getAttribute("aria-hidden") !== "true")) return;
+        root.inert = false;
+        root.removeAttribute("aria-hidden");
+    });
+    const hasActiveListbox = () => [...root.querySelectorAll('[role="listbox"]')]
+        .some(listbox => listbox instanceof HTMLElement && listbox.getClientRects().length > 0);
+    const isEditableTarget = target => target instanceof Element && Boolean(target.closest(
+        "input, textarea, select, button, [contenteditable]:not([contenteditable='false'])"));
+    const onKeyDown = event => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
+            root.querySelector("[data-testid='theme-palette-close']")?.click();
+            return;
+        }
+
+        if ((event.key === " " || event.key === "Spacebar") && !isEditableTarget(event.target) && !hasActiveListbox()) {
+            event.preventDefault();
+            event.stopPropagation();
+            root.querySelector("[data-testid='theme-palette-generate']")?.click();
+            return;
+        }
+
+        if (event.key !== "Tab" || !media.matches) return;
+        const controls = focusable();
+        if (!controls.length) {
+            event.preventDefault();
+            root.focus({ preventScroll: true });
+            return;
+        }
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === root)) {
+            event.preventDefault();
+            last.focus({ preventScroll: true });
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus({ preventScroll: true });
+        }
+    };
+    const restoreFocus = () => {
+        revealBackground(true);
+        document.getElementById(returnFocusId)?.focus({ preventScroll: true });
+    };
+    const dispose = () => {
+        revealBackground(true);
+        window.cancelAnimationFrame(modeFrame);
+        rootObserver.disconnect();
+        root.removeEventListener("keydown", onKeyDown);
+        media.removeEventListener("change", onModeChange);
+        root.removeAttribute("role");
+        root.removeAttribute("aria-modal");
+    };
+
+    root.addEventListener("keydown", onKeyDown);
+    rootObserver.observe(root, { attributes: true, attributeFilter: ["inert", "aria-hidden"] });
+    media.addEventListener("change", onModeChange);
+    applyMode();
+    return { restoreFocus, dispose };
+}

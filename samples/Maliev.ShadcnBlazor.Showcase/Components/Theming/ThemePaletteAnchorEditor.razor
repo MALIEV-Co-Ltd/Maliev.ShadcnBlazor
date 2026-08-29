@@ -1,0 +1,124 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@using MudBlazor.Utilities
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<fieldset class="theme-palette-anchor"
+          data-palette-anchor-role="@RoleKey"
+          data-testid="@($"theme-palette-anchor-{RoleKey}")">
+    <legend>@AnchorName</legend>
+    <div class="theme-palette-anchor__controls">
+        <span class="theme-palette-anchor__swatch" style="@SwatchStyle" aria-hidden="true"></span>
+        <input class="theme-palette-anchor__picker"
+               type="color"
+               value="@PickerValue"
+               aria-label="@PickerLabel"
+               @onpointerdown="BeginPointerInteraction"
+               @onpointerup="EndPointerInteraction"
+               @onpointercancel="EndPointerInteraction"
+               @oninput="SetPickerValue" />
+        <ShadcnInput TValue="string"
+                     Value="_editorValue"
+                     ValueChanged="CommitTextValue"
+                     aria-label="@ValueLabel"
+                     spellcheck="false"
+                     autocomplete="off" />
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                      Size="ShadcnButtonSize.Small"
+                      aria-label="@CopyLabel"
+                      data-palette-copy
+                      OnClick="CopyValueAsync">
+            @Copy.Copy
+        </ShadcnButton>
+        <ShadcnButton Variant="@(IsLocked ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)"
+                      Size="ShadcnButtonSize.Small"
+                      aria-label="@LockLabel"
+                      aria-pressed="@(IsLocked ? "true" : "false")"
+                      data-palette-lock
+                      OnClick="ToggleLockAsync">
+            @LockAction
+        </ShadcnButton>
+    </div>
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter, EditorRequired] public ShadcnPaletteAnchorRole Role { get; set; }
+    [Parameter, EditorRequired] public ThemeStudioPaletteCopy Copy { get; set; } = null!;
+    [Parameter] public EventCallback<string> Announce { get; set; }
+
+    private string _editorValue = string.Empty;
+    private string? _observedValue;
+    private IJSObjectReference? _clipboardModule;
+    private string RoleKey => Role.ToString().ToLowerInvariant();
+    private string AnchorName => Copy.AnchorName(Role);
+    private string AnchorValue => State.PaletteAnchors.Get(Role);
+    private string PickerLabel => $"{AnchorName}: {Copy.CustomizePalette}";
+    private string ValueLabel => $"{AnchorName}: {Copy.ActivePalette}";
+    private string CopyLabel => $"{Copy.Copy}: {AnchorName}";
+    private string LockAction => IsLocked ? Copy.Unlock : Copy.Lock;
+    private string LockLabel => $"{LockAction}: {AnchorName}";
+    private bool IsLocked => State.Document.Palette.LockedAnchors?.Contains(Role) == true;
+    private string SwatchStyle => $"background-color: {AnchorValue}";
+    private string PickerValue
+    {
+        get
+        {
+            var projection = State.Applied with
+            {
+                Light = State.Applied.Light with { Primary = AnchorValue }
+            };
+            return ShadcnThemeFactory.Create(projection).PaletteLight.Primary.ToString(MudColorOutputFormats.Hex);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        var current = AnchorValue;
+        if (string.Equals(current, _observedValue, StringComparison.Ordinal))
+            return;
+        _observedValue = current;
+        _editorValue = current;
+    }
+
+    private void BeginPointerInteraction() => State.BeginPointerInteraction($"palette.{Role}");
+    private void EndPointerInteraction() => State.EndPointerInteraction();
+
+    private void SetPickerValue(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+        if (!State.SetPaletteAnchor(Role, value))
+            _ = Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    private void CommitTextValue(string? value)
+    {
+        _editorValue = value ?? string.Empty;
+        if (!State.SetPaletteAnchor(Role, _editorValue))
+            _ = Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    private async Task CopyValueAsync()
+    {
+        _clipboardModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/shadcn-download.js");
+        await _clipboardModule.InvokeVoidAsync("copyText", AnchorValue);
+        await Announce.InvokeAsync($"{Copy.CopiedStatus}: {AnchorName}");
+    }
+
+    private async Task ToggleLockAsync()
+    {
+        var nextLocked = !IsLocked;
+        if (State.SetPaletteAnchorLock(Role, nextLocked))
+            await Announce.InvokeAsync($"{(nextLocked ? Copy.Lock : Copy.Unlock)}: {AnchorName}");
+        else
+            await Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_clipboardModule is null)
+            return;
+        try { await _clipboardModule.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

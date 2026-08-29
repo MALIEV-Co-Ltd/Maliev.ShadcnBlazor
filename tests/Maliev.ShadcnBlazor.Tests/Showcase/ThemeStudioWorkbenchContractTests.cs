@@ -1,7 +1,69 @@
+using Bunit;
+using Maliev.ShadcnBlazor.Showcase.Components.Theming;
+using Maliev.ShadcnBlazor.Showcase.Theming;
+using Maliev.ShadcnBlazor.Theming;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
-public sealed class ThemeStudioWorkbenchContractTests
+public sealed class ThemeStudioWorkbenchContractTests : BunitContext
 {
+    public ThemeStudioWorkbenchContractTests()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        Services.AddMalievShadcn();
+    }
+
+    [Fact]
+    public void InspectorExposesOneLocalizedFiveSwatchPaletteSummary()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var cut = Render<ThemeInspector>(parameters => parameters.Add(component => component.State, state));
+
+        var summary = cut.Find("[data-testid='theme-palette-summary']");
+        Assert.Equal(5, summary.QuerySelectorAll("[data-palette-summary-swatch]").Length);
+        Assert.Contains("Active palette", summary.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Contrast ready", summary.TextContent, StringComparison.Ordinal);
+        Assert.Equal("BUTTON", summary.QuerySelector("#theme-palette-customize")!.TagName);
+
+        cut.Find("[data-testid='locale-thai']").Click();
+        summary = cut.Find("[data-testid='theme-palette-summary']");
+        Assert.Contains("ชุดสีที่ใช้งาน", summary.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ปรับแต่งชุดสี", summary.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Active palette", summary.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Customize palette", summary.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PaletteWorkbenchRendersFiveAccessibleLocalizedAnchorEditors()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Single(cut.FindAll("[data-testid='theme-palette-workbench']"));
+        Assert.Equal(5, cut.FindAll("[data-palette-anchor-role]").Count);
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-palette-generate']"));
+        Assert.Single(cut.FindAll("[role='status'][aria-live='polite']"));
+        Assert.All(Enum.GetValues<ShadcnPaletteAnchorRole>(), role =>
+        {
+            var editor = cut.Find($"[data-testid='theme-palette-anchor-{role.ToString().ToLowerInvariant()}']");
+            Assert.NotNull(editor.QuerySelector("input[type='color'][aria-label]"));
+            Assert.NotNull(editor.QuerySelector("input[type='text'][aria-label]"));
+            Assert.Equal(2, editor.QuerySelectorAll("button[aria-label]").Length);
+        });
+
+        state.SetLocale(ThemeStudioLocale.Thai);
+        cut.Render();
+        var workbench = cut.Find("[data-testid='theme-palette-workbench']");
+        Assert.Contains("สร้างชุดสี", workbench.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ความกลมกลืน", workbench.TextContent, StringComparison.Ordinal);
+        Assert.Contains("แบรนด์", workbench.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Generate palette", workbench.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Harmony", workbench.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Brand", workbench.TextContent, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void WorkbenchUsesOfficialBrandPackageControlsAndNamedLandmarks()
     {
@@ -74,6 +136,35 @@ public sealed class ThemeStudioWorkbenchContractTests
     }
 
     [Fact]
+    public void PaletteWorkbenchHasOneResponsiveDomContractBetweenSettingsAndPreview()
+    {
+        var root = FindRoot();
+        var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
+        var component = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemePaletteWorkbench.razor");
+        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-studio.js");
+        var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
+
+        Assert.Equal(1, page.Split("<ThemePaletteWorkbench", StringSplitOptions.None).Length - 1);
+        Assert.True(
+            page.IndexOf("<ThemeStudioSidebar", StringComparison.Ordinal) < page.IndexOf("<ThemePaletteWorkbench", StringComparison.Ordinal) &&
+            page.IndexOf("<ThemePaletteWorkbench", StringComparison.Ordinal) < page.IndexOf("class=\"theme-preview-region\"", StringComparison.Ordinal));
+        Assert.Contains("data-palette-open", page, StringComparison.Ordinal);
+        Assert.Contains("State.IsPointerInteractionActive", page, StringComparison.Ordinal);
+        Assert.Contains("data-testid=\"theme-palette-workbench\"", component, StringComparison.Ordinal);
+        Assert.Contains("export function bindPaletteWorkbench(root, returnFocusId)", script, StringComparison.Ordinal);
+        Assert.Contains("role", script, StringComparison.Ordinal);
+        Assert.Contains("aria-modal", script, StringComparison.Ordinal);
+        Assert.Contains("restoreFocus", script, StringComparison.Ordinal);
+        Assert.Contains("contenteditable", script, StringComparison.Ordinal);
+        Assert.Contains("[role=\"listbox\"]", script, StringComparison.Ordinal);
+        Assert.Contains(".theme-studio-workbench[data-palette-open=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".theme-palette-workbench", css, StringComparison.Ordinal);
+        Assert.Contains("block-size: 100dvh", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TypographyUsesSelectableWeightsWithoutDuplicatingASettingsSpecimen()
     {
         var root = FindRoot();
@@ -107,5 +198,14 @@ public sealed class ThemeStudioWorkbenchContractTests
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
             directory = directory.Parent;
         return directory?.FullName ?? throw new DirectoryNotFoundException();
+    }
+
+    private sealed class NoOpStorage : IThemeStudioStorage
+    {
+        public ValueTask<ThemeStudioStorageResult> LoadAsync() =>
+            ValueTask.FromResult(ThemeStudioStorageResult.Success(null));
+
+        public ValueTask<ThemeStudioStorageResult> SaveAsync(ShadcnThemeDocument document) =>
+            ValueTask.FromResult(ThemeStudioStorageResult.Success(document));
     }
 }

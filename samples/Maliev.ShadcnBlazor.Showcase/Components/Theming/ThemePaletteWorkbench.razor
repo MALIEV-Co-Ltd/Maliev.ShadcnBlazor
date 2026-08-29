@@ -1,0 +1,201 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+@if (State.Workbench.PaletteWorkbenchOpen)
+{
+    <aside @ref="_root"
+           class="theme-palette-workbench"
+           tabindex="-1"
+           aria-labelledby="theme-palette-workbench-title"
+           data-testid="theme-palette-workbench">
+        <header class="theme-palette-workbench__header">
+            <div>
+                <span>@Copy.CustomizePalette</span>
+                <h2 id="theme-palette-workbench-title">@Copy.ActivePalette</h2>
+            </div>
+            <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                          Size="ShadcnButtonSize.Small"
+                          aria-label="@Copy.ClosePaletteEditor"
+                          data-testid="theme-palette-close"
+                          OnClick="CloseAsync">
+                @Copy.ReturnToPreview
+            </ShadcnButton>
+        </header>
+
+        <div class="theme-palette-workbench__strip" aria-hidden="true">
+            @foreach (var role in Roles)
+            {
+                <span style="@SwatchStyle(role)"></span>
+            }
+        </div>
+
+        <div class="theme-palette-workbench__body">
+            <div class="theme-palette-workbench__anchors">
+                @foreach (var role in Roles)
+                {
+                    <ThemePaletteAnchorEditor @key="role"
+                                              State="State"
+                                              Role="role"
+                                              Copy="Copy"
+                                              Announce="Announce" />
+                }
+            </div>
+
+            <section class="theme-palette-workbench__diagnostics" aria-labelledby="theme-palette-diagnostics-title">
+                <h3 id="theme-palette-diagnostics-title">@Copy.ValidationSummary</h3>
+                @if (State.PaletteDiagnostics.Count == 0)
+                {
+                    <p>@Copy.ContrastReady</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var diagnostic in State.PaletteDiagnostics)
+                        {
+                            <li><span>@Copy.NeedsReview</span><code>@diagnostic.Path</code></li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+
+        <footer class="theme-palette-workbench__actions">
+            <label class="theme-palette-workbench__harmony">
+                <span>@Copy.Harmony</span>
+                <ShadcnSelect TValue="ShadcnPaletteHarmony"
+                              Value="State.PaletteHarmony"
+                              ValueChanged="SetHarmonyAsync"
+                              Open="_harmonyOpen"
+                              OpenChanged="SetHarmonyOpenAsync"
+                              Options="HarmonyOptions"
+                              Size="ShadcnControlSize.Small"
+                              aria-label="@Copy.Harmony"
+                              data-testid="theme-palette-harmony" />
+            </label>
+            <ShadcnButton Variant="ShadcnButtonVariant.Default"
+                          Size="ShadcnButtonSize.Small"
+                          data-testid="theme-palette-generate"
+                          OnClick="GenerateAsync">
+                @Copy.GeneratePalette
+            </ShadcnButton>
+        </footer>
+
+        <p class="theme-palette-workbench__status"
+           role="status"
+           aria-live="polite"
+           aria-atomic="true"
+           data-testid="theme-palette-status">@_announcement</p>
+    </aside>
+}
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+
+    private readonly IReadOnlyList<ShadcnPaletteAnchorRole> Roles = Enum.GetValues<ShadcnPaletteAnchorRole>();
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _binding;
+    private string _announcement = string.Empty;
+    private bool _harmonyOpen;
+    private ThemeStudioLocale _locale;
+    private bool _disposed;
+    private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
+    private IReadOnlyList<ShadcnSelectOption<ShadcnPaletteHarmony>> HarmonyOptions =>
+        Enum.GetValues<ShadcnPaletteHarmony>()
+            .Select(value => new ShadcnSelectOption<ShadcnPaletteHarmony>(value, Copy.HarmonyName(value)))
+            .ToArray();
+
+    protected override void OnInitialized()
+    {
+        _locale = State.Locale;
+        State.Changed += OnStateChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_disposed)
+            return;
+        if (State.Workbench.PaletteWorkbenchOpen && _binding is null)
+        {
+            _module ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
+            _binding = await _module.InvokeAsync<IJSObjectReference>("bindPaletteWorkbench", _root, "theme-palette-customize");
+        }
+        else if (!State.Workbench.PaletteWorkbenchOpen && _binding is not null)
+        {
+            await DisposeBindingAsync();
+        }
+    }
+
+    private void OnStateChanged(object? sender, EventArgs args)
+    {
+        if (_disposed)
+            return;
+        if (_locale != State.Locale)
+        {
+            _locale = State.Locale;
+            _announcement = string.Empty;
+        }
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private string SwatchStyle(ShadcnPaletteAnchorRole role) => $"background-color: {State.PaletteAnchors.Get(role)}";
+    private Task Announce(string message) { _announcement = message; return InvokeAsync(StateHasChanged); }
+
+    private async Task SetHarmonyAsync(ShadcnPaletteHarmony harmony)
+    {
+        _announcement = State.SetPaletteHarmony(harmony)
+            ? $"{Copy.Harmony}: {Copy.HarmonyName(harmony)}"
+            : Copy.ErrorPrefix;
+        _harmonyOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task SetHarmonyOpenAsync(bool open)
+    {
+        _harmonyOpen = open;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task GenerateAsync()
+    {
+        State.GenerateNewPalette();
+        _announcement = State.PaletteDiagnostics.Any(item => item.Code.Contains("invalid", StringComparison.Ordinal))
+            ? Copy.ErrorPrefix
+            : Copy.GeneratedStatus;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CloseAsync()
+    {
+        if (_binding is not null)
+            await _binding.InvokeVoidAsync("restoreFocus");
+        State.Workbench.ClosePaletteWorkbench();
+        await DisposeBindingAsync();
+    }
+
+    private async Task DisposeBindingAsync()
+    {
+        var binding = _binding;
+        _binding = null;
+        if (binding is null)
+            return;
+        try
+        {
+            await binding.InvokeVoidAsync("dispose");
+            await binding.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        State.Changed -= OnStateChanged;
+        await DisposeBindingAsync();
+        if (_module is null)
+            return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}
