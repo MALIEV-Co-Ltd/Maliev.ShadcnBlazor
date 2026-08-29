@@ -5,8 +5,12 @@ namespace Maliev.ShadcnBlazor.Theming;
 /// <summary>Generates complete, deterministic semantic palettes from portable recipes.</summary>
 public static class ShadcnPaletteGenerator
 {
-    /// <summary>Gets the current deterministic palette algorithm version.</summary>
-    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.VersionTwoAlgorithmVersion;
+    /// <summary>Identifies the algorithm understood by historical four-argument recipe construction.</summary>
+    /// <remarks>This remains version one for source compatibility. Use <see cref="VersionTwoAlgorithmVersion"/> for version-two recipes.</remarks>
+    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.LegacyAlgorithmVersion;
+
+    /// <summary>Identifies the version-two deterministic palette generation algorithm.</summary>
+    public const int VersionTwoAlgorithmVersion = ShadcnPaletteRecipe.VersionTwoAlgorithmVersion;
 
     private static readonly IReadOnlyDictionary<string, (double Hue, double Chroma)> BaseColors =
         new Dictionary<string, (double, double)>(StringComparer.Ordinal)
@@ -25,7 +29,7 @@ public static class ShadcnPaletteGenerator
         return recipe.AlgorithmVersion switch
         {
             ShadcnPaletteRecipe.LegacyAlgorithmVersion => GenerateV1(source, recipe),
-            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion => GenerateV2(source, recipe),
+            VersionTwoAlgorithmVersion => GenerateV2(source, recipe),
             _ => Result(source.DeepClone(),
                 [new("palette-unsupported-algorithm", "palette.algorithmVersion",
                     $"Palette algorithm version {recipe.AlgorithmVersion} is not supported.")], [])
@@ -94,7 +98,15 @@ public static class ShadcnPaletteGenerator
         {
             foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>())
             {
-                if (!ShadcnPaletteColorParser.TryNormalize(normalized.Get(role), out _, out var value))
+                var anchorValue = normalized.Get(role);
+                if (anchorValue is { Length: > ShadcnPaletteColorParser.MaximumAnchorLength })
+                {
+                    errors.Add(new(
+                        "palette-anchor-too-long",
+                        $"palette.anchors.{AnchorName(role)}",
+                        $"Palette anchor must not exceed {ShadcnPaletteColorParser.MaximumAnchorLength} characters."));
+                }
+                else if (!ShadcnPaletteColorParser.TryNormalize(anchorValue, out _, out var value))
                 {
                     errors.Add(new(
                         "palette-invalid-anchor",

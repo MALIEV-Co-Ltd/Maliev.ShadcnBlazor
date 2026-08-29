@@ -81,7 +81,7 @@
     private string CopyLabel => $"{Copy.Copy}: {AnchorName}";
     private string LockAction => IsLocked ? Copy.Unlock : Copy.Lock;
     private string LockLabel => $"{LockAction}: {AnchorName}";
-    private bool IsLocked => State.Document.Palette.LockedAnchors?.Contains(Role) == true;
+    private bool IsLocked => State.IsPaletteAnchorLocked(Role);
     private string SwatchStyle => $"background-color: {AnchorValue}";
     private string PickerValue
     {

@@ -510,6 +510,69 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Contains($"palette.anchors.{member}", exception.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("brand")]
+    [InlineData("support")]
+    [InlineData("highlight")]
+    [InlineData("dataA")]
+    [InlineData("dataB")]
+    public void CanonicalVersionTwoEnforcesTheSchemaLengthLimitForEveryAnchor(string member)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(
+            CreateDocument() with { Palette = recipe }))!.AsObject();
+        var anchors = root["palette"]!.AsObject()["anchors"]!.AsObject();
+        var accepted = PaddedAnchor(128);
+        anchors[member] = accepted;
+
+        var restored = ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString());
+
+        var restoredRoot = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(restored))!.AsObject();
+        Assert.Equal(accepted, restoredRoot["palette"]!.AsObject()["anchors"]!.AsObject()[member]!.GetValue<string>());
+
+        anchors[member] = PaddedAnchor(129);
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+        Assert.Equal(
+            $"Theme document is invalid: palette-anchor-too-long at palette.anchors.{member}: Palette anchor must not exceed 128 characters.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void PaletteAnchorSchemaMaximumMatchesTheRuntimeBoundary()
+    {
+        var schema = JsonNode.Parse(File.ReadAllText(Path.Combine(
+            FindRoot(), "src", "Maliev.ShadcnBlazor", "Schemas", "shadcn-theme-document-v2.schema.json")))!.AsObject();
+        var schemaMaximum = schema["$defs"]!.AsObject()["paletteAnchor"]!.AsObject()["maxLength"]!.GetValue<int>();
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors(PaddedAnchor(schemaMaximum), "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Free,
+            []);
+
+        Assert.Equal(128, schemaMaximum);
+        Assert.True(ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = recipe }).IsValid);
+        var tooLong = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors(PaddedAnchor(schemaMaximum + 1), "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Free,
+            []);
+        var error = Assert.Single(
+            ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = tooLong }).Errors,
+            item => item.Path == "palette.anchors.brand");
+        Assert.Equal("palette-anchor-too-long", error.Code);
+    }
+
     [Fact]
     public void TypographyScaleTakesAnImmutableSnapshotOfRoleStyles()
     {
@@ -611,4 +674,19 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal(
             ShadcnThemeDocumentSerializer.Serialize(expected),
             ShadcnThemeDocumentSerializer.Serialize(actual));
+
+    private static string PaddedAnchor(int length)
+    {
+        const string prefix = "oklch(";
+        const string suffix = "0.5 0.2 20)";
+        return prefix + new string(' ', length - prefix.Length - suffix.Length) + suffix;
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
+    }
 }

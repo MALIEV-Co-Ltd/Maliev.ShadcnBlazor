@@ -14,7 +14,8 @@ public sealed class ShadcnPaletteGeneratorTests
         Assert.Equal(1, ShadcnPaletteRecipe.LegacyAlgorithmVersion);
         Assert.Equal(1, ShadcnPaletteRecipe.CurrentAlgorithmVersion);
         Assert.Equal(2, ShadcnPaletteRecipe.VersionTwoAlgorithmVersion);
-        Assert.Equal(2, ShadcnPaletteGenerator.CurrentAlgorithmVersion);
+        Assert.Equal(1, ShadcnPaletteGenerator.CurrentAlgorithmVersion);
+        Assert.Equal(2, ShadcnPaletteGenerator.VersionTwoAlgorithmVersion);
 
         var legacy = ShadcnThemeDocumentSerializer.Deserialize(
             ShadcnThemeSerializer.Serialize(ShadcnThemePresets.BaseVegaNeutral.CreateTheme()));
@@ -68,18 +69,48 @@ public sealed class ShadcnPaletteGeneratorTests
     }
 
     [Fact]
-    public void HistoricalCurrentVersionConstructorRemainsAnAlgorithmOneRecipe()
+    public void HistoricalCurrentVersionConstructorsRemainAlgorithmOneRecipes()
     {
         var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
-        var historical = new ShadcnPaletteRecipe(
-            ShadcnPaletteRecipe.CurrentAlgorithmVersion, 42, "neutral", []);
         var explicitLegacy = new ShadcnPaletteRecipe(1, 42, "neutral", []);
+        var expectedTheme = ShadcnThemeSerializer.Serialize(
+            ShadcnPaletteGenerator.Generate(source, explicitLegacy).Theme);
+        var expectedRecipe = JsonSerializer.Serialize(explicitLegacy);
+        var historicalRecipes = new[]
+        {
+            new ShadcnPaletteRecipe(ShadcnPaletteRecipe.CurrentAlgorithmVersion, 42, "neutral", []),
+            new ShadcnPaletteRecipe(ShadcnPaletteGenerator.CurrentAlgorithmVersion, 42, "neutral", [])
+        };
 
-        Assert.False(historical.IsVersion2);
-        Assert.Equal(
-            ShadcnThemeSerializer.Serialize(ShadcnPaletteGenerator.Generate(source, explicitLegacy).Theme),
-            ShadcnThemeSerializer.Serialize(ShadcnPaletteGenerator.Generate(source, historical).Theme));
-        Assert.DoesNotContain("\"anchors\"", JsonSerializer.Serialize(historical), StringComparison.Ordinal);
+        Assert.All(historicalRecipes, historical =>
+        {
+            Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, historical.AlgorithmVersion);
+            Assert.False(historical.IsVersion2);
+            Assert.Equal(expectedTheme, ShadcnThemeSerializer.Serialize(
+                ShadcnPaletteGenerator.Generate(source, historical).Theme));
+            Assert.Equal(expectedRecipe, JsonSerializer.Serialize(historical));
+            Assert.DoesNotContain("\"anchors\"", JsonSerializer.Serialize(historical), StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public void VersionTwoRejectsAnAnchorLongerThanThePortableSchemaLimit()
+    {
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            [],
+            new(PaddedAnchor(129), "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []);
+
+        var result = ShadcnPaletteGenerator.Generate(source, recipe);
+
+        var error = Assert.Single(result.Errors, item => item.Path == "palette.anchors.brand");
+        Assert.Equal("palette-anchor-too-long", error.Code);
+        Assert.Equal("Palette anchor must not exceed 128 characters.", error.Message);
+        Assert.Equal(ShadcnThemeSerializer.Serialize(source), ShadcnThemeSerializer.Serialize(result.Theme));
     }
 
     [Fact]
@@ -549,6 +580,13 @@ public sealed class ShadcnPaletteGeneratorTests
     {
         var difference = Math.Abs(first - second) % 360d;
         return Math.Min(difference, 360d - difference);
+    }
+
+    private static string PaddedAnchor(int length)
+    {
+        const string prefix = "oklch(";
+        const string suffix = "0.5 0.2 20)";
+        return prefix + new string(' ', length - prefix.Length - suffix.Length) + suffix;
     }
 
     private static IReadOnlyList<GoldenVector> ReadGoldenVectors()

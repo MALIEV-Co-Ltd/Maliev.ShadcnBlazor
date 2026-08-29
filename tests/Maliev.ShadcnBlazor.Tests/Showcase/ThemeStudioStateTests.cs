@@ -39,6 +39,26 @@ public sealed class ThemeStudioStateTests
     }
 
     [Fact]
+    public void OversizedVersionTwoAnchorImportIsAtomicAndReportsTheStableLengthDiagnostic()
+    {
+        var state = CreateState();
+        Assert.True(state.GeneratePalette(117));
+        var before = state.SerializeDocument();
+        var oversized = PaddedAnchor(129);
+        var invalid = before.Replace(
+            $"\"brand\": \"{state.PaletteAnchors.Brand}\"",
+            $"\"brand\": \"{oversized}\"",
+            StringComparison.Ordinal);
+        Assert.NotEqual(before, invalid);
+
+        Assert.False(state.ImportDocument(invalid));
+
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.Contains("palette-anchor-too-long", state.ImportDiagnostic, StringComparison.Ordinal);
+        Assert.Contains("palette.anchors.brand", state.ImportDiagnostic, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void WorkbenchStateOwnsShellPreferencesWithoutCreatingThemeHistory()
     {
         var workbench = new ThemeStudioWorkbenchState();
@@ -559,6 +579,13 @@ public sealed class ThemeStudioStateTests
 
     private static ThemeStudioState CreateState() => new(new RecordingStorage());
 
+    private static string PaddedAnchor(int length)
+    {
+        const string prefix = "oklch(";
+        const string suffix = "0.5 0.2 20)";
+        return prefix + new string(' ', length - prefix.Length - suffix.Length) + suffix;
+    }
+
     private sealed class RecordingStorage : IThemeStudioStorage
     {
         public ThemeStudioStorageResult? LoadResult { get; set; }
@@ -952,6 +979,54 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
 
         Assert.True(state.GeneratePalette(118));
         Assert.NotEqual(lockedBrand, state.Applied.Light.Primary);
+    }
+
+    [Theory]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "anchor")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "generate")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "anchor")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "generate")]
+    public void LegacyAnchorLockStaysTransientUntilAQualifyingVersionTwoMutation(
+        int algorithmVersion,
+        string mutation)
+    {
+        var generated = new ThemeStudioState(new NoOpStorage());
+        Assert.True(generated.GeneratePalette(117));
+        var legacy = generated.CreateDocument() with
+        {
+            Palette = new ShadcnPaletteRecipe(algorithmVersion, 42, "neutral", [])
+        };
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.ImportDocument(legacy));
+        var beforeLock = state.SerializeDocument();
+        var beforeTheme = state.Applied;
+        var notifications = 0;
+        state.Changed += (_, _) => notifications++;
+
+        Assert.True(state.SetPaletteAnchorLock(ShadcnPaletteAnchorRole.DataB, true));
+
+        Assert.Equal(beforeLock, state.SerializeDocument());
+        Assert.Equal(beforeTheme, state.Applied);
+        Assert.Equal(1, notifications);
+        Assert.True(state.Undo());
+        Assert.Equal(beforeLock, state.SerializeDocument());
+        Assert.True(state.Redo());
+        Assert.Equal(beforeLock, state.SerializeDocument());
+
+        var mutated = mutation switch
+        {
+            "anchor" => state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"),
+            "harmony" => state.SetPaletteHarmony(ShadcnPaletteHarmony.Triadic),
+            "generate" => state.GeneratePalette(117),
+            _ => throw new InvalidOperationException($"Unknown mutation {mutation}.")
+        };
+
+        Assert.True(mutated, string.Join(Environment.NewLine, state.PaletteDiagnostics));
+        Assert.Equal(ShadcnPaletteRecipe.VersionTwoAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Contains(ShadcnPaletteAnchorRole.DataB, state.Document.Palette.LockedAnchors!);
+        Assert.NotEqual(beforeLock, state.SerializeDocument());
     }
 
     [Fact]

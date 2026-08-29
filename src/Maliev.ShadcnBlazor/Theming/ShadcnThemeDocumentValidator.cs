@@ -121,6 +121,14 @@ public static class ShadcnThemeDocumentValidator
 
     private static void ValidateAnchor(string value, string name, ICollection<ShadcnThemeValidationMessage> errors)
     {
+        if (value.Length > ShadcnPaletteColorParser.MaximumAnchorLength)
+        {
+            errors.Add(new(
+                "palette-anchor-too-long",
+                $"palette.anchors.{name}",
+                $"Palette anchor must not exceed {ShadcnPaletteColorParser.MaximumAnchorLength} characters."));
+            return;
+        }
         if (!ShadcnPaletteColorParser.TryNormalize(value, out _, out _))
             errors.Add(new("invalid-palette-anchor", $"palette.anchors.{name}", "Palette anchor must be #rgb, #rrggbb, or oklch(L C H)."));
     }

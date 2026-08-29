@@ -10,6 +10,7 @@ public sealed record ThemeStudioSnapshot(
     ShadcnTheme Baseline,
     ShadcnThemeDocument DocumentTemplate,
     ShadcnThemeDocument BaselineDocumentTemplate,
+    ImmutableArray<ShadcnPaletteAnchorRole> ProjectedPaletteAnchorLocks,
     ImmutableArray<ShadcnThemeValidationMessage> PaletteDiagnostics,
     IReadOnlyDictionary<string, string> TokenEditorValues,
     IReadOnlyDictionary<string, string> MetricEditorValues,

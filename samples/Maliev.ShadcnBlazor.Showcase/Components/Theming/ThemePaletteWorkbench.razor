@@ -46,22 +46,26 @@
 
             <section class="theme-palette-workbench__diagnostics" aria-labelledby="theme-palette-diagnostics-title">
                 <h3 id="theme-palette-diagnostics-title">@Copy.ValidationSummary</h3>
-                @if (State.PaletteDiagnostics.Count == 0)
+                @if (State.PaletteContrastReady)
                 {
-                    <p>@Copy.ContrastReady</p>
+                    <p data-palette-contrast="ready">@Copy.ContrastReady</p>
                 }
                 else
                 {
-                    <ul>
-                        @foreach (var diagnostic in State.PaletteDiagnostics)
-                        {
-                            <li>
-                                <span>@Copy.NeedsReview</span>
-                                <code>@diagnostic.Path</code>
-                                <span>@Copy.DiagnosticMessage(diagnostic)</span>
-                            </li>
-                        }
-                    </ul>
+                    <p data-palette-contrast="review">@Copy.NeedsReview</p>
+                    @if (BlockingDiagnostics.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var diagnostic in BlockingDiagnostics)
+                            {
+                                <li>
+                                    <span>@Copy.NeedsReview</span>
+                                    <code>@diagnostic.Path</code>
+                                    <span>@Copy.DiagnosticMessage(diagnostic)</span>
+                                </li>
+                            }
+                        </ul>
+                    }
                 }
             </section>
         </div>
@@ -109,6 +113,9 @@
     private bool _bindingInitializing;
     private long _bindingGeneration;
     private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
+    private IReadOnlyList<ShadcnThemeValidationMessage> BlockingDiagnostics => State.PaletteDiagnostics
+        .Where(diagnostic => diagnostic.Code != "low-disabled-state-contrast")
+        .ToArray();
     private IReadOnlyList<ShadcnSelectOption<ShadcnPaletteHarmony>> HarmonyOptions =>
         Enum.GetValues<ShadcnPaletteHarmony>()
             .Select(value => new ShadcnSelectOption<ShadcnPaletteHarmony>(value, Copy.HarmonyName(value)))

@@ -75,6 +75,78 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
     }
 
     [Fact]
+    public void LegacyAnchorLockIsProjectedInTheWorkbenchWithoutChangingCanonicalBytes()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var legacy = state.CreateDocument() with
+        {
+            Palette = new ShadcnPaletteRecipe(
+                ShadcnPaletteRecipe.LegacyAlgorithmVersion,
+                42,
+                "neutral",
+                [])
+        };
+        Assert.True(state.ImportDocument(legacy));
+        var canonical = state.SerializeDocument();
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+        var lockButton = cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]");
+        Assert.Equal("false", lockButton.GetAttribute("aria-pressed"));
+
+        lockButton.Click();
+
+        lockButton = cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]");
+        Assert.Equal("true", lockButton.GetAttribute("aria-pressed"));
+        Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(canonical, state.SerializeDocument());
+
+        lockButton.Click();
+        Assert.Equal("false", cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]")
+            .GetAttribute("aria-pressed"));
+        Assert.Equal(canonical, state.SerializeDocument());
+    }
+
+    [Fact]
+    public void SummaryAndWorkbenchShareFullLocalizedContrastReadiness()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.GeneratePalette(117));
+        state.Workbench.OpenPaletteWorkbench();
+        var summary = Render<ThemePaletteSummary>(parameters => parameters.Add(component => component.State, state));
+        var workbench = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal("ready", summary.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Equal("ready", workbench.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Contains("Contrast ready", summary.Markup, StringComparison.Ordinal);
+        Assert.Contains("Contrast ready", workbench.Markup, StringComparison.Ordinal);
+
+        state.SetToken(ThemeStudioScheme.Light, "border", state.Applied.Light.Background);
+        summary.Render();
+        workbench.Render();
+
+        Assert.Contains(state.Validation.ContrastResults, result =>
+            result.Kind == ShadcnContrastKind.Boundary && !result.Passes);
+        Assert.Equal("review", summary.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Equal("review", workbench.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Contains("Needs review", summary.Markup, StringComparison.Ordinal);
+        Assert.Contains("Needs review", workbench.Markup, StringComparison.Ordinal);
+
+        state.SetLocale(ThemeStudioLocale.Thai);
+        summary.Render();
+        workbench.Render();
+        Assert.Contains("ต้องตรวจสอบ", summary.Markup, StringComparison.Ordinal);
+        Assert.Contains("ต้องตรวจสอบ", workbench.Markup, StringComparison.Ordinal);
+
+        Assert.True(state.Undo());
+        summary.Render();
+        workbench.Render();
+        Assert.Equal("ready", summary.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Equal("ready", workbench.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
+        Assert.Contains("คอนทราสต์พร้อมใช้งาน", summary.Markup, StringComparison.Ordinal);
+        Assert.Contains("คอนทราสต์พร้อมใช้งาน", workbench.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PaletteAnchorTextDraftDoesNotMutateStateOrHistoryUntilCommit()
     {
         var state = new ThemeStudioState(new NoOpStorage());

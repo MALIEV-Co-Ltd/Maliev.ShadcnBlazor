@@ -142,6 +142,7 @@ public sealed class ThemeStudioState
     private readonly List<ThemeStudioSnapshot> _redo = [];
     private readonly Dictionary<string, string> _tokenEditorValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _metricEditorValues = new(StringComparer.Ordinal);
+    private readonly HashSet<ShadcnPaletteAnchorRole> _projectedPaletteAnchorLocks = [];
     private ShadcnTheme _baseline = Clone(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     private string _baselineStyleId = "vega";
     private string _baselineBaseColorId = "neutral";
@@ -207,6 +208,7 @@ public sealed class ThemeStudioState
     public bool CanRedo => _redo.Count > 0;
     public bool IsPointerInteractionActive => _pointerMutationKey is not null;
     public bool IsDirty => _tokenEditorValues.Count > 0 || _metricEditorValues.Count > 0 || Draft != _baseline ||
+        _projectedPaletteAnchorLocks.Count > 0 ||
         StyleId != _baselineStyleId || BaseColorId != _baselineBaseColorId || IconLibrary != _baselineIconLibrary ||
         MenuAccent != _baselineMenuAccent || MenuColor != _baselineMenuColor || VisualStyle != _baselineVisualStyle ||
         ColorTreatment != _baselineColorTreatment || DepthTreatment != _baselineDepthTreatment ||
@@ -215,6 +217,9 @@ public sealed class ThemeStudioState
         !TypographyEquals(_documentTemplate.Typography, _baselineDocumentTemplate.Typography);
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public IReadOnlyList<ShadcnThemeValidationMessage> PaletteDiagnostics { get; private set; } = [];
+    public bool PaletteContrastReady => Validation.IsValid &&
+        Validation.ContrastResults.All(result => result.Passes || result.Kind == ShadcnContrastKind.DisabledState) &&
+        PaletteDiagnostics.All(diagnostic => diagnostic.Code == "low-disabled-state-contrast");
     public ShadcnPaletteAnchors PaletteAnchors => _documentTemplate.Palette.Anchors ?? new(
         Applied.Light.Primary,
         Applied.Light.Secondary,
@@ -223,6 +228,11 @@ public sealed class ThemeStudioState
         Applied.Light.Chart5);
     public ShadcnPaletteHarmony PaletteHarmony =>
         _documentTemplate.Palette.Harmony ?? ShadcnPaletteHarmony.Free;
+    public bool IsPaletteAnchorLocked(ShadcnPaletteAnchorRole role)
+    {
+        ValidateWorkspaceValue(role, nameof(role));
+        return EffectivePaletteAnchorLocks.Contains(role);
+    }
     public string? StorageDiagnostic { get; private set; }
     public string? ImportDiagnostic { get; private set; }
     public bool SystemDarkMode => Workbench.SystemDarkMode;
@@ -411,6 +421,7 @@ public sealed class ThemeStudioState
             throw new ArgumentException($"Curated preset '{preset.Id}' is invalid.", nameof(preset));
         if (captureHistory)
             CaptureHistory("preset");
+        _projectedPaletteAnchorLocks.Clear();
         _documentTemplate = document;
         _baselineDocumentTemplate = document;
         Draft = Clone(document.Theme);
@@ -494,6 +505,7 @@ public sealed class ThemeStudioState
             return;
         CaptureHistory("reset.all");
         Draft = Clone(_baseline);
+        _projectedPaletteAnchorLocks.Clear();
         _documentTemplate = _baselineDocumentTemplate;
         _tokenEditorValues.Clear();
         _metricEditorValues.Clear();
@@ -582,7 +594,7 @@ public sealed class ThemeStudioState
             _documentTemplate.Palette.LockedTokens,
             PaletteAnchors,
             PaletteHarmony,
-            _documentTemplate.Palette.LockedAnchors ?? []);
+            EffectivePaletteAnchorLocks);
         return TryApplyPaletteRecipe(recipe, "palette.generate");
     }
 
@@ -643,7 +655,7 @@ public sealed class ThemeStudioState
     {
         ValidateWorkspaceValue(role, nameof(role));
         value ??= string.Empty;
-        var locks = (_documentTemplate.Palette.LockedAnchors ?? []).ToHashSet();
+        var locks = EffectivePaletteAnchorLocks.ToHashSet();
         locks.Add(role);
         var recipe = ShadcnPaletteRecipe.CreateV2(
             _documentTemplate.Palette.Seed,
@@ -658,18 +670,26 @@ public sealed class ThemeStudioState
     public bool SetPaletteAnchorLock(ShadcnPaletteAnchorRole role, bool locked)
     {
         ValidateWorkspaceValue(role, nameof(role));
-        var locks = (_documentTemplate.Palette.LockedAnchors ?? []).ToHashSet();
+        var locks = EffectivePaletteAnchorLocks.ToHashSet();
         if (locked ? !locks.Add(role) : !locks.Remove(role))
             return true;
-        var recipe = ShadcnPaletteRecipe.CreateV2(
-            _documentTemplate.Palette.Seed,
-            BaseColorId,
-            _documentTemplate.Palette.LockedTokens,
-            PaletteAnchors,
-            PaletteHarmony,
-            locks);
         CaptureHistory($"palette.lock.{PaletteRoleName(role)}");
-        _documentTemplate = _documentTemplate with { Palette = recipe };
+        if (_documentTemplate.Palette.IsVersion2)
+        {
+            var recipe = ShadcnPaletteRecipe.CreateV2(
+                _documentTemplate.Palette.Seed,
+                BaseColorId,
+                _documentTemplate.Palette.LockedTokens,
+                PaletteAnchors,
+                PaletteHarmony,
+                locks);
+            _documentTemplate = _documentTemplate with { Palette = recipe };
+        }
+        else
+        {
+            _projectedPaletteAnchorLocks.Clear();
+            _projectedPaletteAnchorLocks.UnionWith(locks);
+        }
         RaiseChanged();
         return true;
     }
@@ -685,7 +705,7 @@ public sealed class ThemeStudioState
             _documentTemplate.Palette.LockedTokens,
             PaletteAnchors,
             harmony,
-            _documentTemplate.Palette.LockedAnchors ?? []);
+            EffectivePaletteAnchorLocks);
         return TryApplyPaletteRecipe(recipe, "palette.harmony");
     }
 
@@ -744,6 +764,7 @@ public sealed class ThemeStudioState
         CaptureHistory(mutationKey);
         Draft = Clone(result.Theme);
         Applied = Clone(result.Theme);
+        _projectedPaletteAnchorLocks.Clear();
         _documentTemplate = _documentTemplate with { Theme = Clone(result.Theme), Palette = recipe };
         _tokenEditorValues.Clear();
         PaletteDiagnostics = result.Warnings;
@@ -790,6 +811,7 @@ public sealed class ThemeStudioState
 
         if (captureHistory)
             CaptureHistory("document.import");
+        _projectedPaletteAnchorLocks.Clear();
         _documentTemplate = document;
         _baselineDocumentTemplate = document;
         Draft = Clone(document.Theme);
@@ -1090,6 +1112,7 @@ public sealed class ThemeStudioState
         Clone(_baseline),
         _documentTemplate,
         _baselineDocumentTemplate,
+        ImmutableArray.CreateRange(_projectedPaletteAnchorLocks.Order()),
         ImmutableArray.CreateRange(PaletteDiagnostics),
         new Dictionary<string, string>(_tokenEditorValues, StringComparer.Ordinal),
         new Dictionary<string, string>(_metricEditorValues, StringComparer.Ordinal),
@@ -1122,6 +1145,8 @@ public sealed class ThemeStudioState
         _baseline = Clone(snapshot.Baseline);
         _documentTemplate = snapshot.DocumentTemplate;
         _baselineDocumentTemplate = snapshot.BaselineDocumentTemplate;
+        _projectedPaletteAnchorLocks.Clear();
+        _projectedPaletteAnchorLocks.UnionWith(snapshot.ProjectedPaletteAnchorLocks);
         SelectedPresetId = snapshot.SelectedPresetId;
         StyleId = snapshot.StyleId;
         BaseColorId = snapshot.BaseColorId;
@@ -1195,6 +1220,11 @@ public sealed class ThemeStudioState
 
     private static string TokenEditorKey(ThemeStudioScheme scheme, string token) =>
         $"{scheme.ToString().ToLowerInvariant()}.{token}";
+
+    private IReadOnlyCollection<ShadcnPaletteAnchorRole> EffectivePaletteAnchorLocks =>
+        _documentTemplate.Palette.IsVersion2
+            ? _documentTemplate.Palette.LockedAnchors ?? []
+            : _projectedPaletteAnchorLocks;
 
     private static ShadcnTheme WithToken(
         ShadcnTheme theme,

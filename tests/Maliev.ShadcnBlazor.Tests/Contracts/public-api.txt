@@ -1772,6 +1772,7 @@ type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
   IReadOnlyList<ShadcnThemeValidationMessage> Warnings
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerator
   const Int32 CurrentAlgorithmVersion
+  const Int32 VersionTwoAlgorithmVersion
   method ShadcnPaletteGenerationResult Generate(ShadcnTheme source, ShadcnPaletteRecipe recipe)
 enum Maliev.ShadcnBlazor.Theming.ShadcnPaletteHarmony: Free, Analogous, Complementary, Triadic
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe

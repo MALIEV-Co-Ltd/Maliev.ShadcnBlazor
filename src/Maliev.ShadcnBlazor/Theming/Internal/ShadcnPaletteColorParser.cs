@@ -5,11 +5,13 @@ namespace Maliev.ShadcnBlazor.Theming.Internal;
 
 internal static partial class ShadcnPaletteColorParser
 {
+    internal const int MaximumAnchorLength = 128;
+
     internal static bool TryNormalize(string? value, out OklchColor color, out string normalized)
     {
         color = default;
         normalized = string.Empty;
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(value) || value.Length > MaximumAnchorLength)
             return false;
 
         var hex = HexPattern().Match(value);
