@@ -75,6 +75,7 @@ public static class ShadcnThemeDocumentSerializer
         {
             if (!hasTheme)
                 throw new JsonException("Canonical theme document must contain theme.");
+            EnsureNoVersionTwoPaletteMembersForLegacyAlgorithms(root);
             document = root.Deserialize<ShadcnThemeDocument>(Options)
                        ?? throw new JsonException("Theme document JSON produced no value.");
         }
@@ -105,6 +106,22 @@ public static class ShadcnThemeDocumentSerializer
         if (version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out var value))
             throw new JsonException("schemaVersion must be an integer.");
         return value;
+    }
+
+    private static void EnsureNoVersionTwoPaletteMembersForLegacyAlgorithms(JsonElement root)
+    {
+        if (!root.TryGetProperty("palette", out var palette) || palette.ValueKind != JsonValueKind.Object ||
+            !palette.TryGetProperty("algorithmVersion", out var algorithmVersion) ||
+            algorithmVersion.ValueKind != JsonValueKind.Number || !algorithmVersion.TryGetInt32(out var version) ||
+            version is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and not ShadcnPaletteRecipe.LegacyAlgorithmVersion)
+            return;
+
+        if (palette.TryGetProperty("anchors", out _) || palette.TryGetProperty("harmony", out _) ||
+            palette.TryGetProperty("lockedAnchors", out _))
+        {
+            throw new JsonException("Theme document is invalid: unexpected-palette-v2-field at palette: " +
+                "Version-two palette fields are not allowed on materialized or version-one recipes.");
+        }
     }
 
     private static void EnsureValid(ShadcnThemeDocument document)

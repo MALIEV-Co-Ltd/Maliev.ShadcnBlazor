@@ -363,6 +363,51 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Serialize(document));
     }
 
+    [Theory]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "anchors")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "lockedAnchors")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "anchors")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "lockedAnchors")]
+    public void CanonicalVersionZeroOrOneRejectsExplicitNullVersionTwoMembers(int algorithmVersion, string member)
+    {
+        var document = CreateDocument() with
+        {
+            Palette = new ShadcnPaletteRecipe(algorithmVersion, 42, "neutral", ["light.primary"])
+        };
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(document))!.AsObject();
+        root["palette"]!.AsObject()[member] = null;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: unexpected-palette-v2-field at palette: Version-two palette fields are not allowed on materialized or version-one recipes.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void CanonicalVersionTwoRejectsDuplicateAnchorLocksFromRawJson()
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["lockedAnchors"] = new JsonArray("brand", "brand");
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: invalid-locked-anchor at palette.lockedAnchors: Locked anchors must be unique supported roles.",
+            exception.Message);
+    }
+
     [Fact]
     public void TypographyScaleTakesAnImmutableSnapshotOfRoleStyles()
     {
