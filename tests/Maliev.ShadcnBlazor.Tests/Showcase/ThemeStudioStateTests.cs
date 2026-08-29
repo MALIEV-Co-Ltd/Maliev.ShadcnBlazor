@@ -53,6 +53,43 @@ public sealed class ThemeStudioStateTests
     }
 
     [Fact]
+    public void PaletteWorkbenchVisibilityRaisesWorkbenchChangesWithoutCreatingThemeHistory()
+    {
+        var workbench = new ThemeStudioWorkbenchState();
+        var state = new ThemeStudioState(new RecordingStorage(), workbench);
+        var changes = 0;
+        workbench.Changed += (_, _) => changes++;
+
+        workbench.OpenPaletteWorkbench();
+        workbench.OpenPaletteWorkbench();
+        Assert.True(workbench.PaletteWorkbenchOpen);
+        workbench.ClosePaletteWorkbench();
+
+        Assert.False(workbench.PaletteWorkbenchOpen);
+        Assert.Equal(2, changes);
+        Assert.False(state.CanUndo);
+    }
+
+    [Fact]
+    public void PaletteCopyIsCompleteForBothLocalesAndRejectsUnknownLocales()
+    {
+        var english = ThemeStudioPaletteCopy.For(ThemeStudioLocale.English);
+        var thai = ThemeStudioPaletteCopy.For(ThemeStudioLocale.Thai);
+
+        Assert.Equal("Customize palette", english.CustomizePalette);
+        Assert.Equal("Brand", english.AnchorName(ShadcnPaletteAnchorRole.Brand));
+        Assert.Equal("Triadic", english.HarmonyName(ShadcnPaletteHarmony.Triadic));
+        Assert.Equal("ปรับแต่งชุดสี", thai.CustomizePalette);
+        Assert.Equal("แบรนด์", thai.AnchorName(ShadcnPaletteAnchorRole.Brand));
+        Assert.Equal("สามสี", thai.HarmonyName(ShadcnPaletteHarmony.Triadic));
+        Assert.All(english.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public), property =>
+            Assert.False(string.IsNullOrWhiteSpace(property.GetValue(english) as string)));
+        Assert.All(thai.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public), property =>
+            Assert.False(string.IsNullOrWhiteSpace(property.GetValue(thai) as string)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => ThemeStudioPaletteCopy.For((ThemeStudioLocale)999));
+    }
+
+    [Fact]
     public void ThemeStateForwardsWorkbenchChangesWithoutPollutingThemeHistory()
     {
         var workbench = new ThemeStudioWorkbenchState();
@@ -783,6 +820,93 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void MaterializedOrV1DocumentProjectsAnchorsWithoutUpgradingUntilMutation()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var v1 = state.Document with
+        {
+            Palette = new ShadcnPaletteRecipe(1, 42, "neutral", [])
+        };
+        Assert.True(state.ImportDocument(v1));
+        var before = state.SerializeDocument();
+
+        Assert.Equal(state.Applied.Light.Primary, state.PaletteAnchors.Brand);
+        Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(before, state.SerializeDocument());
+
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        Assert.Equal(2, state.Document.Palette.AlgorithmVersion);
+        Assert.Contains(ShadcnPaletteAnchorRole.Brand, state.Document.Palette.LockedAnchors!);
+    }
+
+    [Fact]
+    public void PickerGestureCreatesOneHistoryEntryAndSignalsPersistenceOnlyAtEnd()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var interactionStates = new List<bool>();
+        state.Changed += (_, _) => interactionStates.Add(state.IsPointerInteractionActive);
+
+        state.BeginPointerInteraction("palette.brand");
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#1d4ed8"));
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        Assert.True(state.IsPointerInteractionActive);
+        state.EndPointerInteraction();
+
+        Assert.False(state.IsPointerInteractionActive);
+        Assert.Equal([true, true, false], interactionStates);
+        Assert.True(state.Undo());
+        Assert.False(state.CanUndo);
+    }
+
+    [Fact]
+    public void DirectAnchorEditLocksRoleAndUnlockAllowsGenerationToReplaceIt()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        var lockedBrand = state.Applied.Light.Primary;
+        Assert.Equal(lockedBrand, state.PaletteAnchors.Brand);
+        Assert.StartsWith("oklch(", state.PaletteAnchors.Brand, StringComparison.Ordinal);
+        Assert.Contains(ShadcnPaletteAnchorRole.Brand, state.Document.Palette.LockedAnchors!);
+        Assert.True(state.GeneratePalette(117));
+        Assert.Equal(lockedBrand, state.Applied.Light.Primary);
+
+        Assert.True(state.SetPaletteAnchorLock(ShadcnPaletteAnchorRole.Brand, false),
+            string.Join(Environment.NewLine, state.PaletteDiagnostics.Select(message => $"{message.Code}: {message.Message}")));
+        Assert.DoesNotContain(ShadcnPaletteAnchorRole.Brand, state.Document.Palette.LockedAnchors!);
+        Assert.NotEqual(lockedBrand, state.Applied.Light.Primary);
+    }
+
+    [Fact]
+    public void ChangingHarmonyUpgradesAndIsUndoable()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var before = state.SerializeDocument();
+
+        Assert.True(state.SetPaletteHarmony(ShadcnPaletteHarmony.Triadic));
+        Assert.Equal(ShadcnPaletteRecipe.CurrentAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(ShadcnPaletteHarmony.Triadic, state.PaletteHarmony);
+        Assert.True(state.Undo());
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.Equal(ShadcnPaletteHarmony.Free, state.PaletteHarmony);
+    }
+
+    [Fact]
+    public void InvalidAnchorPreservesDocumentPreviewAndHistory()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var beforeDocument = state.SerializeDocument();
+        var beforePreview = state.Applied;
+
+        Assert.False(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "rgb(0 0 0)"));
+
+        Assert.Equal(beforeDocument, state.SerializeDocument());
+        Assert.Equal(beforePreview, state.Applied);
+        Assert.False(state.CanUndo);
+        Assert.Contains(state.PaletteDiagnostics, diagnostic => diagnostic.Code == "palette-invalid-anchor");
+    }
+
+    [Fact]
     public void PaletteGenerationIsOneTransactionalUndoableMutation()
     {
         var state = new ThemeStudioState(new NoOpStorage());
@@ -793,7 +917,7 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.True(state.GeneratePalette(42));
 
         Assert.Equal(1, changes);
-        Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.Equal(ShadcnPaletteRecipe.CurrentAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
         Assert.Equal(42UL, state.Document.Palette.Seed);
         Assert.NotEqual(before.Theme.Light.Primary, state.Applied.Light.Primary);
         Assert.True(state.CanUndo);
@@ -815,13 +939,15 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.Equal(locked, state.Applied.Light.Primary);
         Assert.Contains("light.primary", state.Document.Palette.LockedTokens);
 
-        var share = ThemeStudioPaletteShareCodec.Encode(state.Document);
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.DataA, "#8b5cf6"));
+        Assert.True(state.SetPaletteHarmony(ShadcnPaletteHarmony.Complementary));
+        var share = state.CreatePaletteShare();
         var restored = new ThemeStudioState(new NoOpStorage());
         Assert.True(restored.ImportPaletteShare(share));
-        Assert.Equal(state.Document.Palette.AlgorithmVersion, restored.Document.Palette.AlgorithmVersion);
-        Assert.Equal(state.Document.Palette.Seed, restored.Document.Palette.Seed);
-        Assert.Equal(state.Document.Palette.BaseColor, restored.Document.Palette.BaseColor);
-        Assert.Equal(state.Document.Palette.LockedTokens, restored.Document.Palette.LockedTokens);
+        Assert.Equal(state.SerializeDocument(), restored.SerializeDocument());
+        Assert.Equal(state.PaletteAnchors, restored.PaletteAnchors);
+        Assert.Equal(state.PaletteHarmony, restored.PaletteHarmony);
+        Assert.Equal(state.Document.Palette.LockedAnchors, restored.Document.Palette.LockedAnchors);
         Assert.Equal(locked, restored.Applied.Light.Primary);
     }
 
@@ -844,6 +970,38 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.False(state.GeneratePalette(101));
         Assert.Equal(impossible, state.CreateDocument());
         Assert.Contains(state.PaletteDiagnostics, message => message.Code == "palette-locked-constraint");
+    }
+
+    [Fact]
+    public void UndoRedoRestoresPaletteRecipeLocksDiagnosticsAndPreviewTogether()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var before = state.SerializeDocument();
+
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        var anchorDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.True(state.SetPaletteHarmony(ShadcnPaletteHarmony.Analogous));
+        var valid = state.SerializeDocument();
+        var validPreview = state.Applied;
+        var validDiagnostics = state.PaletteDiagnostics.ToArray();
+        Assert.False(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Support, "not-a-color"));
+        Assert.NotEmpty(state.PaletteDiagnostics);
+
+        Assert.True(state.Undo());
+        Assert.NotEqual(valid, state.SerializeDocument());
+        Assert.Equal(anchorDiagnostics, state.PaletteDiagnostics);
+        Assert.True(state.Undo());
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.Equal(ShadcnPaletteHarmony.Free, state.PaletteHarmony);
+        Assert.Empty(state.PaletteDiagnostics);
+        Assert.True(state.Redo());
+        Assert.Equal(anchorDiagnostics, state.PaletteDiagnostics);
+        Assert.True(state.Redo());
+        Assert.Equal(valid, state.SerializeDocument());
+        Assert.Equal(validPreview, state.Applied);
+        Assert.Equal(ShadcnPaletteHarmony.Analogous, state.PaletteHarmony);
+        Assert.Contains(ShadcnPaletteAnchorRole.Brand, state.Document.Palette.LockedAnchors!);
+        Assert.Equal(validDiagnostics, state.PaletteDiagnostics);
     }
 
     [Fact]
