@@ -140,7 +140,7 @@ public sealed class ShadcnPaletteGeneratorTests
     [Fact]
     public void LockedBrandRemainsByteIdenticalWhileUnlockedAnchorsChangeWithTheSeed()
     {
-        const string brand = "oklch(0.4500 0.0800 250.00)";
+        const string brand = "oklch(0.6000 0.0800 250.00)";
         var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
         var anchors = new ShadcnPaletteAnchors(brand, "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899");
         var first = ShadcnPaletteGenerator.Generate(source, ShadcnPaletteRecipe.CreateV2(
@@ -158,6 +158,55 @@ public sealed class ShadcnPaletteGeneratorTests
     }
 
     [Fact]
+    public void ContrastRepairPreservesEveryTokenMappedFromLockedAnchorsAndReportsExactPaths()
+    {
+        const string white = "oklch(1.0000 0.0000 0.00)";
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var before = ShadcnThemeSerializer.Serialize(source);
+        var recipe = ShadcnPaletteRecipe.CreateV2(117, "neutral", ["light.background"],
+            new("#fff", "#fff", "#fff", "#fff", "#fff"),
+            ShadcnPaletteHarmony.Triadic,
+            [
+                ShadcnPaletteAnchorRole.Brand,
+                ShadcnPaletteAnchorRole.Support,
+                ShadcnPaletteAnchorRole.Highlight,
+                ShadcnPaletteAnchorRole.DataA,
+                ShadcnPaletteAnchorRole.DataB
+            ]);
+
+        var result = ShadcnPaletteGenerator.Generate(source, recipe);
+
+        Assert.False(result.IsValid);
+        Assert.Equal(white, result.Theme.Light.Primary);
+        Assert.Equal("oklch(0.1800 0.0000 0.00)", result.Theme.Light.Ring);
+        Assert.Equal(white, result.Theme.Light.SidebarPrimary);
+        Assert.Equal(white, result.Theme.Light.Chart1);
+        Assert.Equal("oklch(0.4500 0.0800 0.00)", result.Theme.Light.Secondary);
+        Assert.Equal(white, result.Theme.Light.Chart2);
+        Assert.Equal("oklch(0.4500 0.0800 0.00)", result.Theme.Light.Accent);
+        Assert.Equal("oklch(0.4500 0.0800 0.00)", result.Theme.Light.SidebarAccent);
+        Assert.Equal(white, result.Theme.Light.Chart3);
+        Assert.Equal(white, result.Theme.Light.Chart4);
+        Assert.Equal(white, result.Theme.Light.Chart5);
+        Assert.Equal(white, result.Theme.Dark.Primary);
+        Assert.Equal("oklch(0.9000 0.0000 0.00)", result.Theme.Dark.Ring);
+        Assert.Equal(white, result.Theme.Dark.SidebarPrimary);
+        Assert.Equal(white, result.Theme.Dark.Chart1);
+        Assert.Equal("oklch(0.7200 0.0800 0.00)", result.Theme.Dark.Secondary);
+        Assert.Equal(white, result.Theme.Dark.Chart2);
+        Assert.Equal("oklch(0.7200 0.0800 0.00)", result.Theme.Dark.Accent);
+        Assert.Equal("oklch(0.7200 0.0800 0.00)", result.Theme.Dark.SidebarAccent);
+        Assert.Equal(white, result.Theme.Dark.Chart3);
+        Assert.Equal(white, result.Theme.Dark.Chart4);
+        Assert.Equal(white, result.Theme.Dark.Chart5);
+        Assert.Contains(result.Errors, error =>
+            error.Code == "palette-locked-constraint" &&
+            error.Path == "light.chart1" &&
+            error.Message == "Contrast between light.chart1 and light.background is 1:1; 3:1 is required.");
+        Assert.Equal(before, ShadcnThemeSerializer.Serialize(source));
+    }
+
+    [Fact]
     public void LockedSemanticTokenWinsAfterVersionTwoMapping()
     {
         var original = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
@@ -167,12 +216,44 @@ public sealed class ShadcnPaletteGeneratorTests
         };
         var recipe = ShadcnPaletteRecipe.CreateV2(117, "neutral", ["light.primary"],
             new("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
-            ShadcnPaletteHarmony.Analogous, []);
+            ShadcnPaletteHarmony.Analogous, [ShadcnPaletteAnchorRole.Brand]);
 
         var result = ShadcnPaletteGenerator.Generate(source, recipe);
 
         Assert.True(result.IsValid, string.Join(Environment.NewLine, result.Errors));
         Assert.Equal(source.Light.Primary, result.Theme.Light.Primary);
+    }
+
+    [Fact]
+    public void ImpossibleVersionTwoSemanticPairReportsBothExactPathsWithoutMutatingSource()
+    {
+        var original = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var source = original with
+        {
+            Light = original.Light with
+            {
+                Primary = "oklch(0.5000 0.0000 0.00)",
+                PrimaryForeground = "oklch(0.5000 0.0000 0.00)"
+            }
+        };
+        var before = ShadcnThemeSerializer.Serialize(source);
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            ["light.primary", "light.primaryForeground"],
+            new("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Analogous,
+            []);
+
+        var result = ShadcnPaletteGenerator.Generate(source, recipe);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error =>
+            error.Code == "palette-locked-constraint" &&
+            error.Path == "light.primaryForeground" &&
+            error.Message ==
+                "Contrast between light.primaryForeground and light.primary is 1:1; 4.5:1 is required.");
+        Assert.Equal(before, ShadcnThemeSerializer.Serialize(source));
     }
 
     [Theory]
@@ -198,7 +279,7 @@ public sealed class ShadcnPaletteGeneratorTests
     [Fact]
     public void OutOfGamutLockedAnchorIsNormalizedBeforeMapping()
     {
-        const string brand = "oklch(0.7000 0.4000 40.00)";
+        const string brand = "oklch(0.5500 0.4000 40.00)";
         var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
         var recipe = ShadcnPaletteRecipe.CreateV2(117, "neutral", [],
             new(brand, "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),

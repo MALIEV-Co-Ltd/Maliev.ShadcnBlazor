@@ -2,6 +2,26 @@ namespace Maliev.ShadcnBlazor.Theming.Internal;
 
 internal static class ShadcnPaletteSemanticMapper
 {
+    internal static IReadOnlyList<string> ProjectLockedAnchorTokens(
+        IReadOnlyList<ShadcnPaletteAnchorRole> lockedAnchors)
+    {
+        var locked = lockedAnchors.ToHashSet();
+        var paths = new List<string>();
+        foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>())
+        {
+            if (!locked.Contains(role))
+                continue;
+
+            foreach (var scheme in new[] { "light", "dark" })
+            {
+                foreach (var token in MappedTokens(role))
+                    paths.Add($"{scheme}.{token}");
+            }
+        }
+
+        return paths;
+    }
+
     internal static ShadcnTheme Map(
         ShadcnTheme source,
         ShadcnPaletteAnchors anchors,
@@ -88,4 +108,14 @@ internal static class ShadcnPaletteSemanticMapper
             ShadowMedium = source.ShadowMedium
         };
     }
+
+    private static string[] MappedTokens(ShadcnPaletteAnchorRole role) => role switch
+    {
+        ShadcnPaletteAnchorRole.Brand => ["primary", "ring", "sidebarPrimary", "chart1"],
+        ShadcnPaletteAnchorRole.Support => ["secondary", "chart2"],
+        ShadcnPaletteAnchorRole.Highlight => ["accent", "sidebarAccent", "chart3"],
+        ShadcnPaletteAnchorRole.DataA => ["chart4"],
+        ShadcnPaletteAnchorRole.DataB => ["chart5"],
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown palette anchor role.")
+    };
 }

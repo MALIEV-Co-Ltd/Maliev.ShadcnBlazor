@@ -76,7 +76,7 @@ public static class ShadcnPaletteGenerator
             errors.Add(new(
                 locked ? "palette-locked-constraint" : "palette-constraint-unsatisfied",
                 foregroundPath,
-                $"Contrast against {failure.BackgroundToken} is {failure.Ratio:0.###}:1; {failure.RequiredRatio:0.###}:1 is required."));
+                ContrastMessage(foregroundPath, backgroundPath, failure)));
         }
 
         return Result(candidate, errors, validation.Warnings);
@@ -143,7 +143,11 @@ public static class ShadcnPaletteGenerator
         foreach (var path in recipe.LockedTokens)
             candidate = ShadcnPaletteTokenCatalog.Set(candidate, path, ShadcnPaletteTokenCatalog.Get(source, path));
 
-        candidate = RepairUnlockedContrast(candidate, recipe.LockedTokens);
+        var effectiveLocks = recipe.LockedTokens
+            .Concat(ShadcnPaletteSemanticMapper.ProjectLockedAnchorTokens(recipe.LockedAnchors!))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        candidate = RepairUnlockedContrast(candidate, effectiveLocks);
 
         var validation = ShadcnThemeValidator.Validate(candidate);
         errors.AddRange(validation.Errors);
@@ -151,12 +155,12 @@ public static class ShadcnPaletteGenerator
         {
             var foregroundPath = $"{failure.Scheme}.{failure.ForegroundToken}";
             var backgroundPath = $"{failure.Scheme}.{failure.BackgroundToken}";
-            var locked = recipe.LockedTokens.Contains(foregroundPath, StringComparer.Ordinal) &&
-                         recipe.LockedTokens.Contains(backgroundPath, StringComparer.Ordinal);
+            var locked = effectiveLocks.Contains(foregroundPath, StringComparer.Ordinal) &&
+                         effectiveLocks.Contains(backgroundPath, StringComparer.Ordinal);
             errors.Add(new(
                 locked ? "palette-locked-constraint" : "palette-constraint-unsatisfied",
                 foregroundPath,
-                $"Contrast against {failure.BackgroundToken} is {failure.Ratio:0.###}:1; {failure.RequiredRatio:0.###}:1 is required."));
+                ContrastMessage(foregroundPath, backgroundPath, failure)));
         }
 
         return Result(candidate, errors, validation.Warnings);
@@ -164,6 +168,13 @@ public static class ShadcnPaletteGenerator
 
     internal static bool SupportsBaseColor(string value) => BaseColors.ContainsKey(value);
     internal static bool SupportsLock(string value) => ShadcnPaletteTokenCatalog.IsPath(value);
+
+    private static string ContrastMessage(
+        string foregroundPath,
+        string backgroundPath,
+        ShadcnContrastResult failure) =>
+        FormattableString.Invariant(
+            $"Contrast between {foregroundPath} and {backgroundPath} is {failure.Ratio:0.###}:1; {failure.RequiredRatio:0.###}:1 is required.");
 
     private static ShadcnTheme RepairUnlockedContrast(ShadcnTheme candidate, IReadOnlyList<string> locks)
     {
