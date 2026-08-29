@@ -2,6 +2,7 @@ using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Components.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming;
 using Maliev.ShadcnBlazor.Theming;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
@@ -62,6 +63,88 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.DoesNotContain("Generate palette", workbench.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Harmony", workbench.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Brand", workbench.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PaletteAnchorTextDraftDoesNotMutateStateOrHistoryUntilCommit()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.Workbench.OpenPaletteWorkbench();
+        var changed = 0;
+        state.Changed += (_, _) => changed++;
+        var original = state.PaletteAnchors.Brand;
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+        var input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+
+        input.Input("#dc2626");
+
+        Assert.Equal("#dc2626", input.GetAttribute("value"));
+        Assert.Equal(original, state.PaletteAnchors.Brand);
+        Assert.False(state.CanUndo);
+        Assert.Equal(0, changed);
+
+        input.Change("#dc2626");
+
+        Assert.NotEqual(original, state.PaletteAnchors.Brand);
+        Assert.StartsWith("oklch(", state.PaletteAnchors.Brand, StringComparison.Ordinal);
+        Assert.True(state.CanUndo);
+        Assert.Equal(1, changed);
+    }
+
+    [Fact]
+    public void InvalidPaletteAnchorCommitIsAssociatedWithLocalizedActionableHelp()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+        var input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+
+        input.Input("not-a-color");
+        Assert.Null(input.GetAttribute("aria-invalid"));
+        input.Change("not-a-color");
+
+        input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        Assert.Equal("true", input.GetAttribute("aria-invalid"));
+        var describedBy = input.GetAttribute("aria-describedby");
+        Assert.Equal("theme-palette-anchor-brand-error", describedBy);
+        var error = cut.Find($"#{describedBy}");
+        Assert.Contains("Enter a color as", error.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("กรอกค่าสี", error.TextContent, StringComparison.Ordinal);
+
+        state.SetLocale(ThemeStudioLocale.Thai);
+        cut.Render();
+        error = cut.Find($"#{describedBy}");
+        Assert.Contains("กรอกค่าสี", error.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Enter a color as", error.TextContent, StringComparison.Ordinal);
+        Assert.NotEmpty(cut.FindAll("[data-testid='theme-palette-workbench'] .theme-palette-workbench__diagnostics li"));
+    }
+
+    [Fact]
+    public void PaletteAnchorEnterAndBlurEachCommitOnlyOnce()
+    {
+        var enterState = new ThemeStudioState(new NoOpStorage());
+        enterState.Workbench.OpenPaletteWorkbench();
+        var enterChanges = 0;
+        enterState.Changed += (_, _) => enterChanges++;
+        var enterCut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, enterState));
+        var enterInput = enterCut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        enterInput.Input("#dc2626");
+        enterInput.KeyDown(new KeyboardEventArgs { Key = "Enter" });
+        enterInput = enterCut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        enterInput.Change("#dc2626");
+        enterInput.Blur();
+        Assert.Equal(1, enterChanges);
+
+        var blurState = new ThemeStudioState(new NoOpStorage());
+        blurState.Workbench.OpenPaletteWorkbench();
+        var blurChanges = 0;
+        blurState.Changed += (_, _) => blurChanges++;
+        var blurCut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, blurState));
+        var blurInput = blurCut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        blurInput.Input("#dc2626");
+        blurInput.Blur();
+        Assert.Equal(1, blurChanges);
+        Assert.True(blurState.CanUndo);
     }
 
     [Fact]
@@ -152,11 +235,15 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Contains("State.IsPointerInteractionActive", page, StringComparison.Ordinal);
         Assert.Contains("data-testid=\"theme-palette-workbench\"", component, StringComparison.Ordinal);
         Assert.Contains("export function bindPaletteWorkbench(root, returnFocusId)", script, StringComparison.Ordinal);
+        Assert.Contains("export function bindPaletteTrigger(root)", script, StringComparison.Ordinal);
+        Assert.Contains("_bindingGeneration", component, StringComparison.Ordinal);
+        Assert.Contains("_bindingInitializing", component, StringComparison.Ordinal);
         Assert.Contains("role", script, StringComparison.Ordinal);
         Assert.Contains("aria-modal", script, StringComparison.Ordinal);
         Assert.Contains("restoreFocus", script, StringComparison.Ordinal);
         Assert.Contains("contenteditable", script, StringComparison.Ordinal);
         Assert.Contains("[role=\"listbox\"]", script, StringComparison.Ordinal);
+        Assert.Contains("(max-width: 68rem)", script, StringComparison.Ordinal);
         Assert.Contains(".theme-studio-workbench[data-palette-open=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains(".theme-palette-workbench", css, StringComparison.Ordinal);
         Assert.Contains("block-size: 100dvh", css, StringComparison.Ordinal);

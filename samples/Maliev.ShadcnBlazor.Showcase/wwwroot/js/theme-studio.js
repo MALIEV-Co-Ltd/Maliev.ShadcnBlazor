@@ -110,9 +110,58 @@ export function loadGoogleFonts(stylesheet, timeoutMs = 5000) {
     });
 }
 
+const paletteTriggerBindings = new WeakMap();
+const paletteWorkbenchBindings = new WeakMap();
+let activePaletteWorkbenchBindings = 0;
+
+const paletteConstrainedMedia = () => window.matchMedia("(max-width: 68rem)");
+
+const isVisibleFocusTarget = element => element instanceof HTMLElement &&
+    element.getClientRects().length > 0 &&
+    !element.closest("[inert], [aria-hidden='true']") &&
+    getComputedStyle(element).visibility !== "hidden";
+
+export function restorePaletteFocus(returnFocusId) {
+    const candidates = [
+        document.getElementById(returnFocusId),
+        document.querySelector("[data-testid='theme-sidebar-rail-toggle']"),
+        document.getElementById("theme-settings-toggle")
+    ];
+    const target = candidates.find(isVisibleFocusTarget);
+    target?.focus({ preventScroll: true });
+}
+
+export function bindPaletteTrigger(root) {
+    if (!(root instanceof HTMLElement)) return { dispose() {} };
+    paletteTriggerBindings.get(root)?.dispose();
+    const trigger = root.querySelector("#theme-palette-customize");
+    if (!(trigger instanceof HTMLElement)) return { dispose() {} };
+    const media = paletteConstrainedMedia();
+    const applyMode = () => {
+        if (media.matches) trigger.setAttribute("aria-haspopup", "dialog");
+        else trigger.removeAttribute("aria-haspopup");
+    };
+    let disposed = false;
+    const binding = {
+        dispose() {
+            if (disposed) return;
+            disposed = true;
+            media.removeEventListener("change", applyMode);
+            trigger.removeAttribute("aria-haspopup");
+            if (paletteTriggerBindings.get(root) === binding)
+                paletteTriggerBindings.delete(root);
+        }
+    };
+    paletteTriggerBindings.set(root, binding);
+    media.addEventListener("change", applyMode);
+    applyMode();
+    return binding;
+}
+
 export function bindPaletteWorkbench(root, returnFocusId) {
     if (!(root instanceof HTMLElement)) return { restoreFocus() {}, dispose() {} };
-    const media = window.matchMedia("(max-width: 64rem)");
+    paletteWorkbenchBindings.get(root)?.dispose();
+    const media = paletteConstrainedMedia();
     const focusableSelector = [
         "a[href]",
         "button:not([disabled])",
@@ -183,6 +232,12 @@ export function bindPaletteWorkbench(root, returnFocusId) {
         "input, textarea, select, button, [contenteditable]:not([contenteditable='false'])"));
     const onKeyDown = event => {
         if (event.key === "Escape") {
+            if (hasActiveListbox()) {
+                event.preventDefault();
+                event.stopPropagation();
+                root.querySelector("[data-testid='theme-palette-harmony']")?.click();
+                return;
+            }
             event.preventDefault();
             event.stopPropagation();
             root.querySelector("[data-testid='theme-palette-close']")?.click();
@@ -215,21 +270,37 @@ export function bindPaletteWorkbench(root, returnFocusId) {
     };
     const restoreFocus = () => {
         revealBackground(true);
-        document.getElementById(returnFocusId)?.focus({ preventScroll: true });
+        restorePaletteFocus(returnFocusId);
     };
-    const dispose = () => {
-        revealBackground(true);
-        window.cancelAnimationFrame(modeFrame);
-        rootObserver.disconnect();
-        root.removeEventListener("keydown", onKeyDown);
-        media.removeEventListener("change", onModeChange);
-        root.removeAttribute("role");
-        root.removeAttribute("aria-modal");
+    let disposed = false;
+    const binding = {
+        restoreFocus,
+        dispose() {
+            if (disposed) return;
+            disposed = true;
+            revealBackground(true);
+            window.cancelAnimationFrame(modeFrame);
+            rootObserver.disconnect();
+            root.removeEventListener("keydown", onKeyDown);
+            media.removeEventListener("change", onModeChange);
+            root.removeAttribute("role");
+            root.removeAttribute("aria-modal");
+            if (paletteWorkbenchBindings.get(root) === binding)
+                paletteWorkbenchBindings.delete(root);
+            activePaletteWorkbenchBindings = Math.max(0, activePaletteWorkbenchBindings - 1);
+            if (activePaletteWorkbenchBindings === 0)
+                delete document.documentElement.dataset.themePaletteBindings;
+            else
+                document.documentElement.dataset.themePaletteBindings = String(activePaletteWorkbenchBindings);
+        }
     };
 
+    paletteWorkbenchBindings.set(root, binding);
+    activePaletteWorkbenchBindings++;
+    document.documentElement.dataset.themePaletteBindings = String(activePaletteWorkbenchBindings);
     root.addEventListener("keydown", onKeyDown);
     rootObserver.observe(root, { attributes: true, attributeFilter: ["inert", "aria-hidden"] });
     media.addEventListener("change", onModeChange);
     applyMode();
-    return { restoreFocus, dispose };
+    return binding;
 }

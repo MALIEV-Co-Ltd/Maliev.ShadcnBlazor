@@ -194,6 +194,7 @@ public sealed class ThemeImportExportBrowserTests(
             {
                 var editor = page.GetByTestId($"theme-palette-anchor-{roleKeys[index]}");
                 await editor.Locator("input[type='text']").FillAsync(anchorInputs[index]);
+                await editor.Locator("input[type='text']").PressAsync("Tab");
                 var lockButton = editor.Locator("[data-palette-lock]");
                 await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
             }

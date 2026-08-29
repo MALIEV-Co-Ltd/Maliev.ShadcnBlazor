@@ -28,6 +28,11 @@ public sealed record ThemeStudioPaletteCopy(
     string ValidationSummary,
     string ErrorPrefix)
 {
+    public string AnchorValue => ReferenceEquals(this, Thai) ? "ค่าสี" : "Color value";
+    public string InvalidAnchorValue => ReferenceEquals(this, Thai)
+        ? "กรอกค่าสีเป็น #rgb, #rrggbb หรือ oklch(L C H)"
+        : "Enter a color as #rgb, #rrggbb, or oklch(L C H).";
+
     public static ThemeStudioPaletteCopy English { get; } = new(
         "Customize palette",
         "Active palette",

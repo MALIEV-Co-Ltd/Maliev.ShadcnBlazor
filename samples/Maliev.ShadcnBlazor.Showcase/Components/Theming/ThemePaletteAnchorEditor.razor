@@ -18,11 +18,17 @@
                @onpointercancel="EndPointerInteraction"
                @oninput="SetPickerValue" />
         <ShadcnInput TValue="string"
+                     id="@ValueId"
                      Value="_editorValue"
-                     ValueChanged="CommitTextValue"
+                     ValueChanged="UpdateTextDraft"
+                     Invalid="_inlineError"
+                     aria-describedby="@(_inlineError ? ErrorId : null)"
                      aria-label="@ValueLabel"
                      spellcheck="false"
-                     autocomplete="off" />
+                     autocomplete="off"
+                     @onchange="CommitTextValue"
+                     @onblur="CommitTextValue"
+                     @onkeydown="HandleTextKeyDownAsync" />
         <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
                       Size="ShadcnButtonSize.Small"
                       aria-label="@CopyLabel"
@@ -39,6 +45,12 @@
             @LockAction
         </ShadcnButton>
     </div>
+    @if (_inlineError)
+    {
+        <p id="@ErrorId"
+           class="theme-palette-anchor__error"
+           data-testid="@($"theme-palette-anchor-{RoleKey}-error")">@Copy.InvalidAnchorValue</p>
+    }
 </fieldset>
 
 @code {
@@ -49,12 +61,18 @@
 
     private string _editorValue = string.Empty;
     private string? _observedValue;
+    private string? _lastCommittedDraft;
+    private string? _lastCommittedValue;
+    private string? _lastRejectedDraft;
+    private bool _inlineError;
     private IJSObjectReference? _clipboardModule;
     private string RoleKey => Role.ToString().ToLowerInvariant();
     private string AnchorName => Copy.AnchorName(Role);
     private string AnchorValue => State.PaletteAnchors.Get(Role);
     private string PickerLabel => $"{AnchorName}: {Copy.CustomizePalette}";
-    private string ValueLabel => $"{AnchorName}: {Copy.ActivePalette}";
+    private string ValueId => $"theme-palette-anchor-{RoleKey}-value";
+    private string ErrorId => $"theme-palette-anchor-{RoleKey}-error";
+    private string ValueLabel => $"{AnchorName}: {Copy.AnchorValue}";
     private string CopyLabel => $"{Copy.Copy}: {AnchorName}";
     private string LockAction => IsLocked ? Copy.Unlock : Copy.Lock;
     private string LockLabel => $"{LockAction}: {AnchorName}";
@@ -79,6 +97,13 @@
             return;
         _observedValue = current;
         _editorValue = current;
+        if (!string.Equals(current, _lastCommittedValue, StringComparison.Ordinal))
+        {
+            _lastCommittedDraft = null;
+            _lastCommittedValue = null;
+        }
+        _lastRejectedDraft = null;
+        _inlineError = false;
     }
 
     private void BeginPointerInteraction() => State.BeginPointerInteraction($"palette.{Role}");
@@ -91,11 +116,58 @@
             _ = Announce.InvokeAsync(Copy.ErrorPrefix);
     }
 
-    private void CommitTextValue(string? value)
+    private void UpdateTextDraft(string? value)
     {
         _editorValue = value ?? string.Empty;
-        if (!State.SetPaletteAnchor(Role, _editorValue))
-            _ = Announce.InvokeAsync(Copy.ErrorPrefix);
+        if (!string.Equals(_editorValue, _lastCommittedDraft, StringComparison.Ordinal))
+        {
+            _lastCommittedDraft = null;
+            _lastCommittedValue = null;
+        }
+        if (!string.Equals(_editorValue, _lastRejectedDraft, StringComparison.Ordinal))
+            _inlineError = false;
+    }
+
+    private Task CommitTextValue(ChangeEventArgs args)
+    {
+        _editorValue = args.Value?.ToString() ?? _editorValue;
+        return CommitTextValueAsync();
+    }
+
+    private Task CommitTextValue(FocusEventArgs args) => CommitTextValueAsync();
+
+    private async Task HandleTextKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Enter", StringComparison.Ordinal))
+            await CommitTextValueAsync();
+    }
+
+    private async Task CommitTextValueAsync()
+    {
+        if (string.Equals(_editorValue, AnchorValue, StringComparison.Ordinal))
+        {
+            _lastRejectedDraft = null;
+            _inlineError = false;
+            return;
+        }
+        if (string.Equals(_editorValue, _lastCommittedDraft, StringComparison.Ordinal))
+            return;
+        if (string.Equals(_editorValue, _lastRejectedDraft, StringComparison.Ordinal))
+            return;
+
+        var draft = _editorValue;
+        if (State.SetPaletteAnchor(Role, draft))
+        {
+            _lastCommittedDraft = draft;
+            _lastCommittedValue = AnchorValue;
+            _lastRejectedDraft = null;
+            _inlineError = false;
+            return;
+        }
+
+        _lastRejectedDraft = _editorValue;
+        _inlineError = true;
+        await Announce.InvokeAsync(Copy.ErrorPrefix);
     }
 
     private async Task CopyValueAsync()
