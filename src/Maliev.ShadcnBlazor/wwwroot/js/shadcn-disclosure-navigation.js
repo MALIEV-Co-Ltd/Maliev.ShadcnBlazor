@@ -1,5 +1,5 @@
-export function focusById(id) {
-    document.getElementById(id)?.focus({ preventScroll: true });
+export function focusById(id, preventScroll = true) {
+    document.getElementById(id)?.focus({ preventScroll });
 }
 export async function focusFirstInId(id) {
     let root = document.getElementById(id);
@@ -39,9 +39,16 @@ export function attachNavigationViewport(position, dotnet) {
 export function detachNavigationViewport(position) { const value = navigationViewports.get(position); if (!value) return; if (position.matches(':popover-open')) position.hidePopover(); value.observer.disconnect(); value.mutations.disconnect(); window.removeEventListener('resize', value.sync); window.removeEventListener('scroll', value.sync, true); document.removeEventListener('pointerdown', value.dismiss, true); document.removeEventListener('focusin', value.dismiss, true); navigationViewports.delete(position); }
 
 const keyGuards = new WeakMap();
-export function attachKeyGuard(root, keys) {
+export function attachKeyGuard(root, keys, targetSelector = null, ownerSelector = null) {
     const allowed = new Set(keys);
-    const keydown = event => { if (allowed.has(event.key)) event.preventDefault(); };
+    const keydown = event => {
+        if (!allowed.has(event.key)) return;
+        if (targetSelector) {
+            const target = event.target instanceof Element ? event.target.closest(targetSelector) : null;
+            if (!target || ownerSelector && target.closest(ownerSelector) !== root) return;
+        }
+        event.preventDefault();
+    };
     root.addEventListener('keydown', keydown);
     keyGuards.set(root, keydown);
 }

@@ -55,6 +55,28 @@ public sealed class TabsShowcaseBrowserTests(
     }
 
     [Fact]
+    public async Task ArrowKeysRetainNativeScrollingInsideTabPanelContent()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 320, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/tabs").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var scroller = page.GetByTestId("tabs-panel-horizontal-scroller");
+        await scroller.FocusAsync();
+        var before = await scroller.EvaluateAsync<double>("element => element.scrollLeft");
+        await scroller.PressAsync("ArrowRight");
+        await page.WaitForTimeoutAsync(100);
+        var after = await scroller.EvaluateAsync<double>("element => element.scrollLeft");
+
+        Assert.True(after > before, $"Expected ArrowRight to scroll the focused panel content, but scrollLeft stayed at {after}.");
+    }
+
+    [Fact]
     public async Task TabsRemainContainedInDarkRtlMobileAndExposeForcedColorFocus()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
