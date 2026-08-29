@@ -6,7 +6,7 @@ namespace Maliev.ShadcnBlazor.Theming;
 public static class ShadcnPaletteGenerator
 {
     /// <summary>Gets the current deterministic palette algorithm version.</summary>
-    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.LegacyAlgorithmVersion;
+    public const int CurrentAlgorithmVersion = ShadcnPaletteRecipe.CurrentAlgorithmVersion;
 
     private static readonly IReadOnlyDictionary<string, (double Hue, double Chroma)> BaseColors =
         new Dictionary<string, (double, double)>(StringComparer.Ordinal)
@@ -22,6 +22,18 @@ public static class ShadcnPaletteGenerator
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(recipe);
+        return recipe.AlgorithmVersion switch
+        {
+            ShadcnPaletteRecipe.LegacyAlgorithmVersion => GenerateV1(source, recipe),
+            ShadcnPaletteRecipe.CurrentAlgorithmVersion => GenerateV2(source, recipe),
+            _ => Result(source.DeepClone(),
+                [new("palette-unsupported-algorithm", "palette.algorithmVersion",
+                    $"Palette algorithm version {recipe.AlgorithmVersion} is not supported.")], [])
+        };
+    }
+
+    private static ShadcnPaletteGenerationResult GenerateV1(ShadcnTheme source, ShadcnPaletteRecipe recipe)
+    {
         var errors = ValidateRecipe(recipe);
         if (errors.Count > 0)
             return Result(source.DeepClone(), errors, []);
@@ -48,6 +60,86 @@ public static class ShadcnPaletteGenerator
         var light = CreateScheme(source.Light, false, primaryHue, secondaryHue, accentHue, destructiveHue, chartHues, actionChroma);
         var dark = CreateScheme(source.Dark, true, primaryHue, secondaryHue, accentHue, destructiveHue, chartHues, actionChroma);
         var candidate = source with { Light = light, Dark = dark, Metrics = source.Metrics with { } };
+        foreach (var path in recipe.LockedTokens)
+            candidate = ShadcnPaletteTokenCatalog.Set(candidate, path, ShadcnPaletteTokenCatalog.Get(source, path));
+
+        candidate = RepairUnlockedContrast(candidate, recipe.LockedTokens);
+
+        var validation = ShadcnThemeValidator.Validate(candidate);
+        errors.AddRange(validation.Errors);
+        foreach (var failure in validation.ContrastResults.Where(result => !result.Passes && result.Kind != ShadcnContrastKind.DisabledState))
+        {
+            var foregroundPath = $"{failure.Scheme}.{failure.ForegroundToken}";
+            var backgroundPath = $"{failure.Scheme}.{failure.BackgroundToken}";
+            var locked = recipe.LockedTokens.Contains(foregroundPath, StringComparer.Ordinal) &&
+                         recipe.LockedTokens.Contains(backgroundPath, StringComparer.Ordinal);
+            errors.Add(new(
+                locked ? "palette-locked-constraint" : "palette-constraint-unsatisfied",
+                foregroundPath,
+                $"Contrast against {failure.BackgroundToken} is {failure.Ratio:0.###}:1; {failure.RequiredRatio:0.###}:1 is required."));
+        }
+
+        return Result(candidate, errors, validation.Warnings);
+    }
+
+    private static ShadcnPaletteGenerationResult GenerateV2(ShadcnTheme source, ShadcnPaletteRecipe recipe)
+    {
+        var errors = ValidateRecipe(recipe);
+        var normalized = recipe.Anchors;
+        if (normalized is null)
+        {
+            errors.Add(new("palette-missing-anchors", "palette.anchors", "Version two requires five palette anchors."));
+        }
+        else
+        {
+            foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>())
+            {
+                if (!ShadcnPaletteColorParser.TryNormalize(normalized.Get(role), out _, out var value))
+                {
+                    errors.Add(new(
+                        "palette-invalid-anchor",
+                        $"palette.anchors.{AnchorName(role)}",
+                        $"{AnchorLabel(role)} must be #rgb, #rrggbb, or oklch(L C H)."));
+                }
+                else
+                {
+                    normalized = normalized.Set(role, value);
+                }
+            }
+        }
+
+        if (recipe.Harmony is null)
+            errors.Add(new("palette-missing-harmony", "palette.harmony", "Version two requires a palette harmony."));
+        else if (!Enum.IsDefined(recipe.Harmony.Value))
+            errors.Add(new("palette-invalid-harmony", "palette.harmony", "Palette harmony is not supported."));
+
+        if (recipe.LockedAnchors is null)
+        {
+            errors.Add(new("palette-missing-locked-anchors", "palette.lockedAnchors", "Version two requires an anchor lock collection."));
+        }
+        else
+        {
+            var seen = new HashSet<ShadcnPaletteAnchorRole>();
+            for (var index = 0; index < recipe.LockedAnchors.Count; index++)
+            {
+                var role = recipe.LockedAnchors[index];
+                if (!Enum.IsDefined(role))
+                    errors.Add(new("palette-invalid-locked-anchor", $"palette.lockedAnchors[{index}]", "Palette anchor role is not supported."));
+                else if (!seen.Add(role))
+                    errors.Add(new("palette-duplicate-locked-anchor", $"palette.lockedAnchors[{index}]", $"{AnchorLabel(role)} is locked more than once."));
+            }
+        }
+
+        if (errors.Count > 0)
+            return Result(source.DeepClone(), errors, []);
+
+        var anchor = BaseColors[recipe.BaseColor];
+        var generated = ShadcnPaletteHarmonyGenerator.Generate(
+            recipe.Seed,
+            normalized!,
+            recipe.Harmony!.Value,
+            recipe.LockedAnchors!);
+        var candidate = ShadcnPaletteSemanticMapper.Map(source, generated, anchor.Hue, anchor.Chroma);
         foreach (var path in recipe.LockedTokens)
             candidate = ShadcnPaletteTokenCatalog.Set(candidate, path, ShadcnPaletteTokenCatalog.Get(source, path));
 
@@ -119,8 +211,6 @@ public static class ShadcnPaletteGenerator
     private static List<ShadcnThemeValidationMessage> ValidateRecipe(ShadcnPaletteRecipe recipe)
     {
         var errors = new List<ShadcnThemeValidationMessage>();
-        if (recipe.AlgorithmVersion != CurrentAlgorithmVersion)
-            errors.Add(new("palette-unsupported-algorithm", "palette.algorithmVersion", $"Palette generation requires algorithm version {CurrentAlgorithmVersion}."));
         if (string.IsNullOrWhiteSpace(recipe.BaseColor) || !SupportsBaseColor(recipe.BaseColor))
             errors.Add(new("palette-invalid-base-color", "palette.baseColor", "Base color must be neutral, stone, zinc, or slate."));
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -134,6 +224,26 @@ public static class ShadcnPaletteGenerator
         }
         return errors;
     }
+
+    private static string AnchorName(ShadcnPaletteAnchorRole role) => role switch
+    {
+        ShadcnPaletteAnchorRole.Brand => "brand",
+        ShadcnPaletteAnchorRole.Support => "support",
+        ShadcnPaletteAnchorRole.Highlight => "highlight",
+        ShadcnPaletteAnchorRole.DataA => "dataA",
+        ShadcnPaletteAnchorRole.DataB => "dataB",
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown palette anchor role.")
+    };
+
+    private static string AnchorLabel(ShadcnPaletteAnchorRole role) => role switch
+    {
+        ShadcnPaletteAnchorRole.Brand => "Brand",
+        ShadcnPaletteAnchorRole.Support => "Support",
+        ShadcnPaletteAnchorRole.Highlight => "Highlight",
+        ShadcnPaletteAnchorRole.DataA => "Data A",
+        ShadcnPaletteAnchorRole.DataB => "Data B",
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown palette anchor role.")
+    };
 
     private static ShadcnColorScheme CreateScheme(
         ShadcnColorScheme source,
