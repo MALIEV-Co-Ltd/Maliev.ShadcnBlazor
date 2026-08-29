@@ -108,7 +108,7 @@ public sealed class ShadcnPaletteGeneratorTests
         var result = ShadcnPaletteGenerator.Generate(source, recipe);
 
         var error = Assert.Single(result.Errors, item => item.Path == "palette.anchors.brand");
-        Assert.Equal("palette-anchor-too-long", error.Code);
+        Assert.Equal("palette-invalid-anchor", error.Code);
         Assert.Equal("Palette anchor must not exceed 128 characters.", error.Message);
         Assert.Equal(ShadcnThemeSerializer.Serialize(source), ShadcnThemeSerializer.Serialize(result.Theme));
     }
@@ -135,6 +135,40 @@ public sealed class ShadcnPaletteGeneratorTests
         Assert.Equal(active.DataA, result.Theme.Dark.Chart4);
         Assert.Equal(active.DataB, result.Theme.Light.Chart5);
         Assert.Equal(active.DataB, result.Theme.Dark.Chart5);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PersistedMaterializedVersionTwoRecipeRegeneratesTheEmbeddedThemeByteForByte(bool mixedLocks)
+    {
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var locks = mixedLocks
+            ? new[] { ShadcnPaletteAnchorRole.Brand, ShadcnPaletteAnchorRole.DataA }
+            : [];
+        var first = ShadcnPaletteGenerator.Generate(source, ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            [],
+            new("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            locks));
+        Assert.True(first.IsValid, string.Join(Environment.NewLine, first.Errors));
+        var materialized = ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            [],
+            Assert.IsType<ShadcnPaletteAnchors>(first.ActiveAnchors),
+            ShadcnPaletteHarmony.Triadic,
+            locks);
+
+        var regenerated = ShadcnPaletteGenerator.Generate(first.Theme, materialized);
+
+        Assert.True(regenerated.IsValid, string.Join(Environment.NewLine, regenerated.Errors));
+        Assert.Equal(materialized.Anchors, regenerated.ActiveAnchors);
+        Assert.Equal(
+            ShadcnThemeSerializer.Serialize(first.Theme),
+            ShadcnThemeSerializer.Serialize(regenerated.Theme));
     }
 
     [Fact]
@@ -300,6 +334,33 @@ public sealed class ShadcnPaletteGeneratorTests
             error.Path == "light.chart1" &&
             error.Message == "Contrast between light.chart1 and light.background is 1:1; 3:1 is required.");
         Assert.Equal(before, ShadcnThemeSerializer.Serialize(source));
+    }
+
+    [Fact]
+    public void LockedBrandAlsoLocksSidebarRingWhenTheSidebarBackgroundMakesRepairImpossible()
+    {
+        const string brand = "oklch(0.5500 0.1000 250.00)";
+        const string sidebarRing = "oklch(0.1800 0.0500 250.00)";
+        var original = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var source = original with
+        {
+            Light = original.Light with { Sidebar = sidebarRing }
+        };
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            ["light.sidebar"],
+            new(brand, "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+
+        var result = ShadcnPaletteGenerator.Generate(source, recipe);
+
+        Assert.False(result.IsValid);
+        Assert.Equal(sidebarRing, result.Theme.Light.Sidebar);
+        Assert.Equal(sidebarRing, result.Theme.Light.SidebarRing);
+        Assert.Contains(result.Errors, error =>
+            error.Code == "palette-locked-constraint" && error.Path == "light.sidebarRing");
     }
 
     [Fact]

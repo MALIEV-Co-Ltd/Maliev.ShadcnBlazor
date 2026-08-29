@@ -102,7 +102,7 @@ public static class ShadcnPaletteGenerator
                 if (anchorValue is { Length: > ShadcnPaletteColorParser.MaximumAnchorLength })
                 {
                     errors.Add(new(
-                        "palette-anchor-too-long",
+                        "palette-invalid-anchor",
                         $"palette.anchors.{AnchorName(role)}",
                         $"Palette anchor must not exceed {ShadcnPaletteColorParser.MaximumAnchorLength} characters."));
                 }
@@ -146,9 +146,10 @@ public static class ShadcnPaletteGenerator
             return Result(source.DeepClone(), errors, []);
 
         var anchor = BaseColors[recipe.BaseColor];
+        normalized = NormalizeUnlockedAnchorLightness(normalized!, recipe.LockedAnchors!);
         var generated = ShadcnPaletteHarmonyGenerator.Generate(
             recipe.Seed,
-            normalized!,
+            normalized,
             recipe.Harmony!.Value,
             recipe.LockedAnchors!);
         generated = NormalizeUnlockedAnchorLightness(generated, recipe.LockedAnchors!);

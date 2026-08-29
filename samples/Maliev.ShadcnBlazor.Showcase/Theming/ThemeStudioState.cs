@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using Maliev.ShadcnBlazor.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 using Maliev.ShadcnBlazor.Components.Styling;
+using MudBlazor.Utilities;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
@@ -217,9 +218,14 @@ public sealed class ThemeStudioState
         !TypographyEquals(_documentTemplate.Typography, _baselineDocumentTemplate.Typography);
     public ShadcnThemeValidationResult Validation { get; private set; } = ShadcnThemeValidator.Validate(ShadcnThemePresets.BaseVegaNeutral.CreateTheme());
     public IReadOnlyList<ShadcnThemeValidationMessage> PaletteDiagnostics { get; private set; } = [];
-    public bool PaletteContrastReady => Validation.IsValid &&
-        Validation.ContrastResults.All(result => result.Passes || result.Kind == ShadcnContrastKind.DisabledState) &&
-        PaletteDiagnostics.All(diagnostic => diagnostic.Code == "low-disabled-state-contrast");
+    public IReadOnlyList<ShadcnThemeValidationMessage> PaletteReviewDiagnostics => Validation.Errors
+        .Concat(Validation.Warnings)
+        .Concat(PaletteDiagnostics)
+        .Where(diagnostic => diagnostic.Code != "low-disabled-state-contrast")
+        .DistinctBy(diagnostic => (diagnostic.Code, diagnostic.Path, diagnostic.Message))
+        .ToArray();
+    public bool PaletteContrastReady => PaletteReviewDiagnostics.Count == 0;
+    public long PaletteRevision { get; private set; }
     public ShadcnPaletteAnchors PaletteAnchors => _documentTemplate.Palette.Anchors ?? new(
         Applied.Light.Primary,
         Applied.Light.Secondary,
@@ -292,6 +298,7 @@ public sealed class ThemeStudioState
         {
             _tokenEditorValues[editorKey] = value;
         }
+        PaletteRevision++;
         RevalidateAndApply();
     }
 
@@ -450,6 +457,7 @@ public sealed class ThemeStudioState
         _baselineDepthTreatment = DepthTreatment;
         _baselineMotionTreatment = MotionTreatment;
         _baselineStyleIntensity = StyleIntensity;
+        PaletteRevision++;
         RevalidateAndApply();
     }
 
@@ -496,6 +504,8 @@ public sealed class ThemeStudioState
             if (group == ThemeStudioGroup.Typography)
                 _documentTemplate = _documentTemplate with { Typography = _baselineDocumentTemplate.Typography };
         }
+        if (group is ThemeStudioGroup.Colors or ThemeStudioGroup.Shadows)
+            PaletteRevision++;
         RevalidateAndApply();
     }
 
@@ -519,6 +529,7 @@ public sealed class ThemeStudioState
         DepthTreatment = _baselineDepthTreatment;
         MotionTreatment = _baselineMotionTreatment;
         StyleIntensity = _baselineStyleIntensity;
+        PaletteRevision++;
         RevalidateAndApply();
     }
 
@@ -592,7 +603,7 @@ public sealed class ThemeStudioState
             seed,
             BaseColorId,
             _documentTemplate.Palette.LockedTokens,
-            PaletteAnchors,
+            PaletteAnchorsForVersionTwoMutation(),
             PaletteHarmony,
             EffectivePaletteAnchorLocks);
         return TryApplyPaletteRecipe(recipe, "palette.generate");
@@ -648,6 +659,7 @@ public sealed class ThemeStudioState
                 lockedTokens);
         _documentTemplate = _documentTemplate with { Palette = palette };
         PaletteDiagnostics = [];
+        PaletteRevision++;
         RaiseChanged();
     }
 
@@ -661,7 +673,7 @@ public sealed class ThemeStudioState
             _documentTemplate.Palette.Seed,
             BaseColorId,
             _documentTemplate.Palette.LockedTokens,
-            PaletteAnchors.Set(role, value),
+            PaletteAnchorsForVersionTwoMutation().Set(role, value),
             PaletteHarmony,
             locks);
         return TryApplyPaletteRecipe(recipe, PaletteMutationKey(role));
@@ -690,6 +702,7 @@ public sealed class ThemeStudioState
             _projectedPaletteAnchorLocks.Clear();
             _projectedPaletteAnchorLocks.UnionWith(locks);
         }
+        PaletteRevision++;
         RaiseChanged();
         return true;
     }
@@ -703,7 +716,7 @@ public sealed class ThemeStudioState
             _documentTemplate.Palette.Seed,
             BaseColorId,
             _documentTemplate.Palette.LockedTokens,
-            PaletteAnchors,
+            PaletteAnchorsForVersionTwoMutation(),
             harmony,
             EffectivePaletteAnchorLocks);
         return TryApplyPaletteRecipe(recipe, "palette.harmony");
@@ -771,6 +784,7 @@ public sealed class ThemeStudioState
         Validation = ShadcnThemeValidator.Validate(Draft);
         if (_pointerMutationKey is not null)
             _pointerMutationOccurred = true;
+        PaletteRevision++;
         RaiseChanged();
         return true;
     }
@@ -784,6 +798,32 @@ public sealed class ThemeStudioState
             ImportDiagnostic = "Theme document failed validation; the current theme was not changed.";
             RaiseChanged();
             return false;
+        }
+
+        if (document.Palette.IsVersion2)
+        {
+            var reproduction = ShadcnPaletteGenerator.Generate(document.Theme, document.Palette);
+            if (!reproduction.IsValid ||
+                !string.Equals(
+                    ShadcnThemeSerializer.Serialize(document.Theme),
+                    ShadcnThemeSerializer.Serialize(reproduction.Theme),
+                    StringComparison.Ordinal))
+            {
+                ImportDiagnostic = "Theme document was not applied: the version-two palette recipe does not reproduce the embedded theme.";
+                RaiseChanged();
+                return false;
+            }
+
+            document = document with
+            {
+                Palette = ShadcnPaletteRecipe.CreateV2(
+                    document.Palette.Seed,
+                    document.Palette.BaseColor,
+                    document.Palette.LockedTokens,
+                    reproduction.ActiveAnchors!,
+                    document.Palette.Harmony!.Value,
+                    document.Palette.LockedAnchors!)
+            };
         }
 
         ThemeStudioIconLibrary iconLibrary;
@@ -845,6 +885,7 @@ public sealed class ThemeStudioState
         _metricEditorValues.Clear();
         ImportDiagnostic = null;
         PaletteDiagnostics = [];
+        PaletteRevision++;
         RevalidateAndApply();
         return true;
     }
@@ -1175,6 +1216,7 @@ public sealed class ThemeStudioState
         foreach (var pair in snapshot.MetricEditorValues)
             _metricEditorValues[pair.Key] = pair.Value;
         PaletteDiagnostics = snapshot.PaletteDiagnostics;
+        PaletteRevision++;
         RevalidateAndApply(applyWhenValid: false);
     }
 
@@ -1225,6 +1267,25 @@ public sealed class ThemeStudioState
         _documentTemplate.Palette.IsVersion2
             ? _documentTemplate.Palette.LockedAnchors ?? []
             : _projectedPaletteAnchorLocks;
+
+    private ShadcnPaletteAnchors PaletteAnchorsForVersionTwoMutation()
+    {
+        var anchors = PaletteAnchors;
+        if (_documentTemplate.Palette.IsVersion2)
+            return anchors;
+
+        foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>())
+        {
+            var projection = Applied with
+            {
+                Light = Applied.Light with { Primary = anchors.Get(role) }
+            };
+            var opaqueHex = ShadcnThemeFactory.Create(projection).PaletteLight.Primary
+                .ToString(MudColorOutputFormats.Hex);
+            anchors = anchors.Set(role, opaqueHex);
+        }
+        return anchors;
+    }
 
     private static ShadcnTheme WithToken(
         ShadcnTheme theme,

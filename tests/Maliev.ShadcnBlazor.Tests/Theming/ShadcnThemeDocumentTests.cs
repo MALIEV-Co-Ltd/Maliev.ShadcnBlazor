@@ -507,7 +507,7 @@ public sealed class ShadcnThemeDocumentTests
         var exception = Assert.Throws<JsonException>(() =>
             ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
 
-        Assert.Contains($"palette.anchors.{member}", exception.Message, StringComparison.Ordinal);
+        Assert.Contains($"palette-invalid-anchor at palette.anchors.{member}", exception.Message, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -540,7 +540,7 @@ public sealed class ShadcnThemeDocumentTests
         var exception = Assert.Throws<JsonException>(() =>
             ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
         Assert.Equal(
-            $"Theme document is invalid: palette-anchor-too-long at palette.anchors.{member}: Palette anchor must not exceed 128 characters.",
+            $"Theme document is invalid: palette-invalid-anchor at palette.anchors.{member}: Palette anchor must not exceed 128 characters.",
             exception.Message);
     }
 
@@ -570,7 +570,7 @@ public sealed class ShadcnThemeDocumentTests
         var error = Assert.Single(
             ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = tooLong }).Errors,
             item => item.Path == "palette.anchors.brand");
-        Assert.Equal("palette-anchor-too-long", error.Code);
+        Assert.Equal("palette-invalid-anchor", error.Code);
     }
 
     [Fact]

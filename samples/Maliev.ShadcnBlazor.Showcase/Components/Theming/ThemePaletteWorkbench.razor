@@ -113,9 +113,7 @@
     private bool _bindingInitializing;
     private long _bindingGeneration;
     private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
-    private IReadOnlyList<ShadcnThemeValidationMessage> BlockingDiagnostics => State.PaletteDiagnostics
-        .Where(diagnostic => diagnostic.Code != "low-disabled-state-contrast")
-        .ToArray();
+    private IReadOnlyList<ShadcnThemeValidationMessage> BlockingDiagnostics => State.PaletteReviewDiagnostics;
     private IReadOnlyList<ShadcnSelectOption<ShadcnPaletteHarmony>> HarmonyOptions =>
         Enum.GetValues<ShadcnPaletteHarmony>()
             .Select(value => new ShadcnSelectOption<ShadcnPaletteHarmony>(value, Copy.HarmonyName(value)))
@@ -217,8 +215,8 @@
 
     private async Task GenerateAsync()
     {
-        _announcement = State.GenerateNewPalette(out _)
-            ? Copy.GeneratedStatus
+        _announcement = State.GenerateNewPalette(out var seed)
+            ? Copy.GeneratedStatusForSeed(seed)
             : Copy.ErrorPrefix;
         await InvokeAsync(StateHasChanged);
     }

@@ -22,17 +22,16 @@ internal static class ShadcnPaletteHarmonyGenerator
             chromaUnits[index] = random.NextUnitDouble();
         }
 
+        // Brand is the stable input basis for a v2 recipe. Seeded harmony generation projects
+        // the other unlocked roles from it; re-jittering Brand would make a materialized recipe
+        // transform itself again after export and reimport.
         var generated = anchors;
-        if (!locked.Contains(ShadcnPaletteAnchorRole.Brand))
-            generated = generated.Set(ShadcnPaletteAnchorRole.Brand,
-                GenerateColor(ShadcnPaletteAnchorRole.Brand, brand.Hue, offsets[(int)ShadcnPaletteAnchorRole.Brand]));
-        _ = ShadcnPaletteColorParser.TryNormalize(generated.Brand, out var generatedBrand, out _);
         foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>().Where(role => role != ShadcnPaletteAnchorRole.Brand))
         {
             if (locked.Contains(role))
                 continue;
 
-            generated = generated.Set(role, GenerateColor(role, generatedBrand.Hue, offsets[(int)role]));
+            generated = generated.Set(role, GenerateColor(role, brand.Hue, offsets[(int)role]));
         }
 
         return generated;

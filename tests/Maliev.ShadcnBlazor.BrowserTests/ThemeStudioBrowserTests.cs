@@ -92,7 +92,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         Assert.Equal("1", await page.Locator("html").GetAttributeAsync("data-theme-palette-bindings"));
         await workbench.FocusAsync();
         await workbench.PressAsync("Space");
-        await Assertions.Expect(page.GetByTestId("theme-palette-status")).ToHaveTextAsync("Palette generated");
+        await Assertions.Expect(page.GetByTestId("theme-palette-status"))
+            .ToHaveTextAsync(new Regex("^Palette generated: Seed [0-9]+$"));
         await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(workbench).ToHaveCountAsync(0);
         Assert.Empty(errors);
@@ -202,6 +203,17 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             Assert.Equal(anchor, dark.GetProperty(mapping.Item2).GetString());
             await Assertions.Expect(page.GetByTestId($"theme-palette-anchor-{mapping.Item1.ToLowerInvariant()}").Locator("input[type='text']")).ToHaveValueAsync(anchor!);
         }
+
+        var status = page.GetByTestId("theme-palette-status");
+        var firstAnnouncement = await status.InnerTextAsync();
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        await page.WaitForFunctionAsync(
+            "before => document.querySelector('[data-testid=theme-palette-status]')?.textContent !== before",
+            firstAnnouncement);
+        var secondAnnouncement = await status.InnerTextAsync();
+        Assert.Matches("^Palette generated: Seed [0-9]+$", firstAnnouncement);
+        Assert.Matches("^Palette generated: Seed [0-9]+$", secondAnnouncement);
+        Assert.NotEqual(firstAnnouncement, secondAnnouncement);
     }
 
     [Fact]
@@ -372,7 +384,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByRole(AriaRole.Listbox)).ToBeHiddenAsync();
         await workbench.FocusAsync();
         await workbench.PressAsync("Space");
-        await Assertions.Expect(status).ToHaveTextAsync("Palette generated");
+        await Assertions.Expect(status)
+            .ToHaveTextAsync(new Regex("^Palette generated: Seed [0-9]+$"));
     }
 
     [Fact]

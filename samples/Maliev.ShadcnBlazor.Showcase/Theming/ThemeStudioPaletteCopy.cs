@@ -32,6 +32,9 @@ public sealed record ThemeStudioPaletteCopy(
     private static readonly Regex ContrastDiagnosticPattern = new(
         @"^Contrast between (?<first>[A-Za-z0-9.]+) and (?<second>[A-Za-z0-9.]+) is (?<measured>[0-9.]+):1; (?<required>[0-9.]+):1 is required\.$",
         RegexOptions.CultureInvariant);
+    private static readonly Regex ValidationContrastDiagnosticPattern = new(
+        @"^(?<kind>Text|Boundary|DestructiveAdjacency|Chart|FocusRing) contrast against (?<background>[A-Za-z0-9.]+) is (?<measured>[0-9.]+):1; (?<required>[0-9.]+):1 is required\.$",
+        RegexOptions.CultureInvariant);
 
     public string AnchorValue => ReferenceEquals(this, Thai) ? "ค่าสี" : "Color value";
     public string PaletteIdentity(ShadcnThemeDocument document) => document.Palette.IsVersion2
@@ -40,6 +43,9 @@ public sealed record ThemeStudioPaletteCopy(
     public string InvalidAnchorValue => ReferenceEquals(this, Thai)
         ? "กรอกค่าสีเป็น #rgb, #rrggbb หรือ oklch(L C H)"
         : "Enter a color as #rgb, #rrggbb, or oklch(L C H).";
+    public string GeneratedStatusForSeed(ulong seed) => ReferenceEquals(this, Thai)
+        ? $"{GeneratedStatus}: ซีด {seed}"
+        : $"{GeneratedStatus}: Seed {seed}";
 
     public static ThemeStudioPaletteCopy English { get; } = new(
         "Customize palette",
@@ -123,14 +129,25 @@ public sealed record ThemeStudioPaletteCopy(
     {
         if (diagnostic.Code == "palette-invalid-anchor")
             return ReferenceEquals(this, Thai) ? InvalidAnchorValue : diagnostic.Message;
-        if (diagnostic.Code is not ("palette-locked-constraint" or "palette-constraint-unsatisfied"))
+        if (diagnostic.Code is "palette-locked-constraint" or "palette-constraint-unsatisfied")
+        {
+            if (!ReferenceEquals(this, Thai))
+                return diagnostic.Message;
+
+            var contrast = ContrastDiagnosticPattern.Match(diagnostic.Message);
+            return contrast.Success
+                ? $"คอนทราสต์ระหว่าง {contrast.Groups["first"].Value} และ {contrast.Groups["second"].Value} เท่ากับ {contrast.Groups["measured"].Value}:1 โดยต้องมีอย่างน้อย {contrast.Groups["required"].Value}:1"
+                : $"{ErrorPrefix}: {diagnostic.Path}";
+        }
+        if (diagnostic.Code is not ("low-contrast" or "low-boundary-contrast" or
+            "low-destructive-adjacency-contrast" or "low-chart-contrast" or "low-focus-ring-contrast"))
             return $"{ErrorPrefix}: {diagnostic.Path}";
         if (!ReferenceEquals(this, Thai))
             return diagnostic.Message;
 
-        var contrast = ContrastDiagnosticPattern.Match(diagnostic.Message);
-        return contrast.Success
-            ? $"คอนทราสต์ระหว่าง {contrast.Groups["first"].Value} และ {contrast.Groups["second"].Value} เท่ากับ {contrast.Groups["measured"].Value}:1 โดยต้องมีอย่างน้อย {contrast.Groups["required"].Value}:1"
+        var validationContrast = ValidationContrastDiagnosticPattern.Match(diagnostic.Message);
+        return validationContrast.Success
+            ? $"คอนทราสต์ของ {diagnostic.Path} เทียบกับ {validationContrast.Groups["background"].Value} เท่ากับ {validationContrast.Groups["measured"].Value}:1 โดยต้องมีอย่างน้อย {validationContrast.Groups["required"].Value}:1"
             : $"{ErrorPrefix}: {diagnostic.Path}";
     }
 }

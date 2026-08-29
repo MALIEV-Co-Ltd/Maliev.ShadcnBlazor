@@ -54,7 +54,7 @@ public sealed class ThemeStudioStateTests
         Assert.False(state.ImportDocument(invalid));
 
         Assert.Equal(before, state.SerializeDocument());
-        Assert.Contains("palette-anchor-too-long", state.ImportDiagnostic, StringComparison.Ordinal);
+        Assert.Contains("palette-invalid-anchor", state.ImportDiagnostic, StringComparison.Ordinal);
         Assert.Contains("palette.anchors.brand", state.ImportDiagnostic, StringComparison.Ordinal);
     }
 
@@ -1045,6 +1045,117 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.True(restored.ImportDocument(state.SerializeDocument()));
         Assert.Equal(state.PaletteAnchors, restored.PaletteAnchors);
         Assert.Equal(state.Applied, restored.Applied);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExportedVersionTwoDocumentRegeneratesItsEmbeddedThemeByteForByte(bool mixedLocks)
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.GeneratePalette(117));
+        if (mixedLocks)
+        {
+            Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.DataA, "#8b5cf6"));
+            Assert.True(state.GeneratePalette(118));
+        }
+        var json = state.SerializeDocument();
+        var document = ShadcnThemeDocumentSerializer.Deserialize(json);
+
+        var regenerated = ShadcnPaletteGenerator.Generate(document.Theme, document.Palette);
+
+        Assert.True(regenerated.IsValid, string.Join(Environment.NewLine, regenerated.Errors));
+        Assert.Equal(document.Palette.Anchors, regenerated.ActiveAnchors);
+        Assert.Equal(
+            ShadcnThemeSerializer.Serialize(document.Theme),
+            ShadcnThemeSerializer.Serialize(regenerated.Theme));
+    }
+
+    [Fact]
+    public void IncoherentVersionTwoRecipeAndEmbeddedThemeImportIsAtomic()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.GeneratePalette(117));
+        var before = state.SerializeDocument();
+        var generated = state.CreateDocument();
+        var incoherent = generated with
+        {
+            Theme = generated.Theme with
+            {
+                Light = generated.Theme.Light with { Chart5 = generated.Theme.Light.Chart4 }
+            }
+        };
+
+        Assert.False(state.ImportDocument(incoherent));
+
+        Assert.Equal(before, state.SerializeDocument());
+        Assert.Contains("palette", state.ImportDiagnostic, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("embedded theme", state.ImportDiagnostic, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static TheoryData<int, string, string> LegacyAlphaUpgradeCases => new()
+    {
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#26e8", "anchor" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#26e8", "harmony" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#26e8", "generate" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#2563eb80", "anchor" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#2563eb80", "harmony" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "#2563eb80", "generate" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "anchor" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "harmony" },
+        { ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "generate" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#26e8", "anchor" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#26e8", "harmony" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#26e8", "generate" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#2563eb80", "anchor" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#2563eb80", "harmony" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "#2563eb80", "generate" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "anchor" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "harmony" },
+        { ShadcnPaletteRecipe.LegacyAlgorithmVersion, "oklch(0.55 0.15 250 / 0.5)", "generate" }
+    };
+
+    [Theory]
+    [MemberData(nameof(LegacyAlphaUpgradeCases))]
+    public void FirstQualifyingLegacyMutationNormalizesAlphaAnchorsToOpaqueStrictVersionTwo(
+        int algorithmVersion,
+        string alphaAnchor,
+        string mutation)
+    {
+        var template = new ThemeStudioState(new NoOpStorage()).CreateDocument();
+        var legacy = template with
+        {
+            Theme = template.Theme with
+            {
+                Light = template.Theme.Light with { Primary = alphaAnchor }
+            },
+            Palette = new ShadcnPaletteRecipe(algorithmVersion, 42, "neutral", [])
+        };
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.ImportDocument(legacy));
+        var originalBytes = state.SerializeDocument();
+        Assert.Contains(alphaAnchor, originalBytes, StringComparison.Ordinal);
+        Assert.Equal(originalBytes, state.SerializeDocument());
+
+        var applied = mutation switch
+        {
+            "anchor" => state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Support, "#14b8a6"),
+            "harmony" => state.SetPaletteHarmony(ShadcnPaletteHarmony.Triadic),
+            "generate" => state.GeneratePalette(117),
+            _ => throw new InvalidOperationException($"Unknown mutation {mutation}.")
+        };
+
+        Assert.True(applied, string.Join(Environment.NewLine, state.PaletteDiagnostics));
+        Assert.Equal(ShadcnPaletteRecipe.VersionTwoAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
+        Assert.All(new[]
+        {
+            state.PaletteAnchors.Brand,
+            state.PaletteAnchors.Support,
+            state.PaletteAnchors.Highlight,
+            state.PaletteAnchors.DataA,
+            state.PaletteAnchors.DataB
+        }, anchor => Assert.Matches("^oklch\\([0-9]\\.[0-9]{4} [0-9]\\.[0-9]{4} [0-9]{1,3}\\.[0-9]{2}\\)$", anchor));
+        Assert.DoesNotContain(alphaAnchor, state.SerializeDocument(), StringComparison.Ordinal);
     }
 
     [Fact]

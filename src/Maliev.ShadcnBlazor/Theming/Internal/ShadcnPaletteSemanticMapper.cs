@@ -122,7 +122,7 @@ internal static class ShadcnPaletteSemanticMapper
 
     private static string[] MappedTokens(ShadcnPaletteAnchorRole role) => role switch
     {
-        ShadcnPaletteAnchorRole.Brand => ["primary", "ring", "sidebarPrimary", "chart1"],
+        ShadcnPaletteAnchorRole.Brand => ["primary", "ring", "sidebarPrimary", "sidebarRing", "chart1"],
         ShadcnPaletteAnchorRole.Support => ["secondary", "chart2"],
         ShadcnPaletteAnchorRole.Highlight => ["accent", "sidebarAccent", "chart3"],
         ShadcnPaletteAnchorRole.DataA => ["chart4"],

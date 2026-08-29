@@ -130,12 +130,25 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Equal("review", workbench.Find("[data-palette-contrast]").GetAttribute("data-palette-contrast"));
         Assert.Contains("Needs review", summary.Markup, StringComparison.Ordinal);
         Assert.Contains("Needs review", workbench.Markup, StringComparison.Ordinal);
+        var englishDetails = workbench.FindAll(".theme-palette-workbench__diagnostics li");
+        Assert.Equal(state.PaletteReviewDiagnostics.Count, englishDetails.Count);
+        Assert.Contains(englishDetails, item =>
+            item.TextContent.Contains("light.border", StringComparison.Ordinal) &&
+            item.TextContent.Contains("3:1", StringComparison.Ordinal));
+        Assert.Equal(
+            state.PaletteReviewDiagnostics.Count,
+            state.PaletteReviewDiagnostics.DistinctBy(message => (message.Code, message.Path, message.Message)).Count());
 
         state.SetLocale(ThemeStudioLocale.Thai);
         summary.Render();
         workbench.Render();
         Assert.Contains("ต้องตรวจสอบ", summary.Markup, StringComparison.Ordinal);
         Assert.Contains("ต้องตรวจสอบ", workbench.Markup, StringComparison.Ordinal);
+        var thaiDetails = workbench.Find(".theme-palette-workbench__diagnostics").TextContent;
+        Assert.Contains("light.border", thaiDetails, StringComparison.Ordinal);
+        Assert.Contains("3:1", thaiDetails, StringComparison.Ordinal);
+        Assert.Contains("คอนทราสต์", thaiDetails, StringComparison.Ordinal);
+        Assert.DoesNotContain("Boundary contrast", thaiDetails, StringComparison.Ordinal);
 
         Assert.True(state.Undo());
         summary.Render();
@@ -202,6 +215,35 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
     }
 
     [Fact]
+    public void RejectedAnchorDraftCanBeRetriedAfterPaletteConstraintsChange()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.SetToken(ThemeStudioScheme.Light, "primary", state.Applied.Light.Background);
+        state.SetToken(ThemeStudioScheme.Light, "primaryForeground", state.Applied.Light.Background);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primary", true);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primaryForeground", true);
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+        var input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+
+        input.Input("#2563eb");
+        input.Change("#2563eb");
+        Assert.NotEmpty(state.PaletteDiagnostics);
+        Assert.Equal("true", cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']")
+            .GetAttribute("aria-invalid"));
+
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primary", false);
+        state.SetPaletteLock(ThemeStudioScheme.Light, "primaryForeground", false);
+        cut.Render();
+        input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        input.Change("#2563eb");
+
+        input = cut.Find("[data-testid='theme-palette-anchor-brand'] input[type='text']");
+        Assert.Null(input.GetAttribute("aria-invalid"));
+        Assert.StartsWith("oklch(", state.PaletteAnchors.Brand, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RejectedPaletteGenerationAnnouncesAnErrorWithoutChangingTheDocument()
     {
         var state = new ThemeStudioState(new NoOpStorage());
@@ -231,6 +273,31 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
             thaiDiagnostics,
             StringComparison.Ordinal);
         Assert.DoesNotContain("Contrast between", thaiDiagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SequentialSuccessfulGenerationsProduceDistinctLocalizedPoliteAnnouncements()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        state.Workbench.OpenPaletteWorkbench();
+        var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
+        var generate = cut.Find("[data-testid='theme-palette-generate']");
+
+        generate.Click();
+        var first = cut.Find("[data-testid='theme-palette-status']").TextContent;
+        Assert.Equal($"Palette generated: Seed {state.Document.Palette.Seed}", first);
+
+        generate.Click();
+        var second = cut.Find("[data-testid='theme-palette-status']").TextContent;
+        Assert.Equal($"Palette generated: Seed {state.Document.Palette.Seed}", second);
+        Assert.NotEqual(first, second);
+
+        state.SetLocale(ThemeStudioLocale.Thai);
+        cut.Render();
+        cut.Find("[data-testid='theme-palette-generate']").Click();
+        Assert.Equal(
+            $"สร้างชุดสีแล้ว: ซีด {state.Document.Palette.Seed}",
+            cut.Find("[data-testid='theme-palette-status']").TextContent);
     }
 
     [Fact]

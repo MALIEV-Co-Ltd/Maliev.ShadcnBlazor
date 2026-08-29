@@ -124,13 +124,13 @@ public static class ShadcnThemeDocumentValidator
         if (value.Length > ShadcnPaletteColorParser.MaximumAnchorLength)
         {
             errors.Add(new(
-                "palette-anchor-too-long",
+                "palette-invalid-anchor",
                 $"palette.anchors.{name}",
                 $"Palette anchor must not exceed {ShadcnPaletteColorParser.MaximumAnchorLength} characters."));
             return;
         }
         if (!ShadcnPaletteColorParser.TryNormalize(value, out _, out _))
-            errors.Add(new("invalid-palette-anchor", $"palette.anchors.{name}", "Palette anchor must be #rgb, #rrggbb, or oklch(L C H)."));
+            errors.Add(new("palette-invalid-anchor", $"palette.anchors.{name}", "Palette anchor must be #rgb, #rrggbb, or oklch(L C H)."));
     }
 
     private static void ValidateTypography(ShadcnThemeDocument document, ICollection<ShadcnThemeValidationMessage> errors)

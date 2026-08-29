@@ -68,6 +68,7 @@
     private string? _lastCommittedDraft;
     private string? _lastCommittedValue;
     private string? _lastRejectedDraft;
+    private long _observedRevision = -1;
     private bool _inlineError;
     private bool _pickerInteractionActive;
     private IJSObjectReference? _clipboardModule;
@@ -97,6 +98,12 @@
 
     protected override void OnParametersSet()
     {
+        if (_observedRevision != State.PaletteRevision)
+        {
+            _observedRevision = State.PaletteRevision;
+            _lastRejectedDraft = null;
+            _inlineError = false;
+        }
         var current = AnchorValue;
         if (string.Equals(current, _observedValue, StringComparison.Ordinal))
             return;
@@ -184,6 +191,7 @@
             return;
         }
 
+        _observedRevision = State.PaletteRevision;
         _lastRejectedDraft = _editorValue;
         _inlineError = true;
         await Announce.InvokeAsync(Copy.ErrorPrefix);
