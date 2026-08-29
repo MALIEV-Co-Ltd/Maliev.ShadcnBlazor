@@ -310,6 +310,17 @@ public sealed class ShadcnThemeDocumentTests
         Assert.DoesNotContain("\"anchors\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("\"harmony\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("\"lockedAnchors\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"isVersion2\"", json, StringComparison.Ordinal);
+        Assert.Contains("""
+          "palette": {
+            "algorithmVersion": 1,
+            "seed": 42,
+            "baseColor": "neutral",
+            "lockedTokens": [
+              "light.primary"
+            ]
+          },
+        """, json, StringComparison.Ordinal);
         Assert.Equal(json, ShadcnThemeDocumentSerializer.Serialize(
             ShadcnThemeDocumentSerializer.Deserialize(json)));
     }
@@ -330,6 +341,26 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal(anchors, restored.Anchors);
         Assert.Equal(ShadcnPaletteHarmony.Triadic, restored.Harmony);
         Assert.Equal([ShadcnPaletteAnchorRole.Brand], restored.LockedAnchors);
+    }
+
+    [Fact]
+    public void DuplicateVersionTwoAnchorLocksAreRejectedByDocumentValidation()
+    {
+        var recipe = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand, ShadcnPaletteAnchorRole.Brand]);
+        var document = CreateDocument() with { Palette = recipe };
+
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+
+        Assert.Contains(validation.Errors, error =>
+            error.Code == "invalid-locked-anchor" && error.Path == "palette.lockedAnchors");
+        Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Serialize(document));
     }
 
     [Fact]

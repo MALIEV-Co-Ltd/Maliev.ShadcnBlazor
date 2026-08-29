@@ -51,7 +51,7 @@ public sealed record ShadcnPaletteRecipe
         Harmony = harmony;
         LockedAnchors = lockedAnchors is null
             ? null
-            : Array.AsReadOnly(lockedAnchors.Distinct().Order().ToArray());
+            : Array.AsReadOnly(lockedAnchors.ToArray());
     }
 
     /// <summary>Gets the deterministic palette algorithm version.</summary>
@@ -61,6 +61,7 @@ public sealed record ShadcnPaletteRecipe
     public ulong Seed { get; init; }
 
     /// <summary>Gets whether this is a version-two palette recipe.</summary>
+    [JsonIgnore]
     public bool IsVersion2 => AlgorithmVersion == CurrentAlgorithmVersion;
 
     /// <summary>Gets the base-color identifier.</summary>
@@ -117,6 +118,6 @@ public sealed record ShadcnPaletteRecipe
             lockedTokens,
             anchors,
             harmony,
-            anchorSnapshot);
+            anchorSnapshot.Distinct().Order().ToArray());
     }
 }
