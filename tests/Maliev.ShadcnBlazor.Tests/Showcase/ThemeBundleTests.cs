@@ -243,7 +243,7 @@ public sealed class ThemeBundleTests
         Assert.Contains("dotnet add package Maliev.ShadcnBlazor --version 1.0.0", text, StringComparison.Ordinal);
         Assert.Contains("AddMalievShadcn", text, StringComparison.Ordinal);
         Assert.Contains("<ShadcnThemeProvider Theme=\"@MalievShadcnTheme.Create()\"", text, StringComparison.Ordinal);
-        Assert.Contains("MudPopoverProvider", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("MudBlazor", text, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("ShadcnDirection.RightToLeft", text, StringComparison.Ordinal);
         Assert.Contains("_content/Maliev.ShadcnBlazor/css/shadcn-actions.css", text, StringComparison.Ordinal);
         Assert.Contains("ShadcnField", text, StringComparison.Ordinal);

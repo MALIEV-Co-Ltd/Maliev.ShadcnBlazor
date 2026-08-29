@@ -4,10 +4,6 @@ using Maliev.ShadcnBlazor.Components;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using MudBlazor;
-
-#pragma warning disable MUD0012 // Assertions observe the rendered providers' current parameter state.
 
 namespace Maliev.ShadcnBlazor.Tests.Components;
 
@@ -28,7 +24,7 @@ public sealed class ShadcnThemeProviderTests : BunitContext
     }
 
     [Fact]
-    public void RendersScopedDarkRtlRootAndAllMudProviders()
+    public void RendersScopedDarkRtlRootWithoutExternalProviders()
     {
         var cut = Render<ShadcnThemeProvider>(parameters => parameters
             .Add(x => x.IsDarkMode, true)
@@ -42,62 +38,28 @@ public sealed class ShadcnThemeProviderTests : BunitContext
         Assert.Equal("dark", root.GetAttribute("data-shadcn-theme"));
         Assert.Equal("rtl", root.GetAttribute("dir"));
         Assert.Equal("content", root.TextContent.Trim());
-        Assert.True(cut.FindComponent<MudThemeProvider>().Instance.IsDarkMode);
-        Assert.Equal(ShadcnCss.OverlayScopeClass,
-            cut.FindComponent<MudDialogProvider>().Instance.BackgroundClass);
-        cut.FindComponent<MudPopoverProvider>();
-        Assert.True(cut.FindComponent<MudSnackbarProvider>().Instance.RightToLeft);
+        Assert.DoesNotContain("mud-", cut.Markup, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void SystemPreferenceObservationIsOptInAndDefaultsDoNotChange()
     {
         var cut = Render<ShadcnThemeProvider>();
-        var mudProvider = cut.FindComponent<MudThemeProvider>().Instance;
-
         Assert.False(cut.Instance.ObserveSystemDarkModeChange);
-        Assert.False(mudProvider.ObserveSystemDarkModeChange);
-        Assert.False(mudProvider.IsDarkMode);
+        Assert.Equal("light", cut.Find("[data-shadcn-scope]").GetAttribute("data-shadcn-theme"));
     }
 
     [Fact]
-    public async Task OptedInSystemPreferenceChangesFlowThroughThePublicCallback()
+    public void OptedInSystemPreferenceIsSampledThroughThePackageModule()
     {
         bool? observed = null;
         var cut = Render<ShadcnThemeProvider>(parameters => parameters
             .Add(component => component.ObserveSystemDarkModeChange, true)
             .Add(component => component.SystemDarkModeChanged, value => observed = value));
-        var mudProvider = cut.FindComponent<MudThemeProvider>();
-
-        await cut.InvokeAsync(() => mudProvider.Instance.IsDarkModeChanged.InvokeAsync(true));
-
         Assert.True(cut.Instance.ObserveSystemDarkModeChange);
-        Assert.True(mudProvider.Instance.ObserveSystemDarkModeChange);
-        Assert.True(observed);
-    }
-
-    [Fact]
-    public void PortalProvidersCarryOverlayScopeAndSnackbarInheritsCurrentThemeAndDirection()
-    {
-        var cut = Render<ShadcnThemeProvider>(parameters => parameters
-            .Add(x => x.IsDarkMode, true)
-            .Add(x => x.Direction, ShadcnDirection.RightToLeft));
-
-        Assert.Equal(ShadcnCss.OverlayScopeClass,
-            cut.FindComponent<MudDialogProvider>().Instance.BackgroundClass);
-        Assert.Equal(ShadcnCss.OverlayScopeClass,
-            Services.GetRequiredService<IOptions<PopoverOptions>>().Value.ContainerClass);
-
-        Services.GetRequiredService<ISnackbar>().Add("Portal snackbar", Severity.Success);
-
-        cut.WaitForAssertion(() =>
-        {
-            var snackbar = cut.Find(".mud-snackbar");
-            var scope = snackbar.Closest("[data-shadcn-scope]");
-            Assert.NotNull(scope);
-            Assert.Equal("dark", scope!.GetAttribute("data-shadcn-theme"));
-            Assert.Equal("rtl", scope.GetAttribute("dir"));
-        });
+        Assert.False(observed);
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier == "import");
+        Assert.Contains(JSInterop.Invocations, invocation => invocation.Identifier == "observeSystemDarkMode");
     }
 
     [Fact]
@@ -126,12 +88,6 @@ public sealed class ShadcnThemeProviderTests : BunitContext
         Assert.Equal("dark", root.GetAttribute("data-shadcn-theme"));
         Assert.Equal("rtl", root.GetAttribute("dir"));
         Assert.Equal("--shadcn-font-sans: Noto Sans Thai, sans-serif", root.GetAttribute("style"));
-        var mudThemeProvider = cut.FindComponent<MudThemeProvider>().Instance;
-        Assert.True(mudThemeProvider.IsDarkMode);
-        var theme = Assert.IsType<MudTheme>(mudThemeProvider.Theme);
-        var fontFamily = Assert.IsType<string[]>(theme.Typography.Default.FontFamily);
-        Assert.Equal(["Noto Sans Thai, sans-serif"], fontFamily);
-        Assert.True(cut.FindComponent<MudSnackbarProvider>().Instance.RightToLeft);
     }
 
     [Fact]

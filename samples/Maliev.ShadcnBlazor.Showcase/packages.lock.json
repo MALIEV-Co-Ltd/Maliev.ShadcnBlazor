@@ -200,22 +200,6 @@
         "resolved": "10.0.3",
         "contentHash": "oM7pl8uJz8WRPRlh4AGQS61aeV9GOfTu89yqTiRSYyyMuCNVkbNra9zEk7ApyJ/sZrUpbjOZCRHuitCEsTWghg=="
       },
-      "Microsoft.Extensions.Localization": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "yJBI3IRm9uTRu7cPc7i90/8+CuiiJJ5M4khj6iWQcYnq6VrG+H2U5GzpRLtkVCsgxc1LjtkNMEbSDatfBA+z5g==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Localization.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Options": "10.0.1"
-        }
-      },
-      "Microsoft.Extensions.Localization.Abstractions": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "TQSQWF+iZdtGNgPiu7gKUqrTEeRD/mhk7KeYiuEwmTUPbawsYfPSNzSvOOeueJ0nU1697X8HZ2vCp2ByHNHkZg=="
-      },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
         "resolved": "10.0.3",
@@ -282,45 +266,34 @@
           "Microsoft.JSInterop": "10.0.3"
         }
       },
-      "MudBlazor": {
-        "type": "Transitive",
-        "resolved": "9.7.0",
-        "contentHash": "uWOgNn9B556J/TL8KFoSqpA3YD2heqOpK5etcofwlj1RiEX1IDy0NmwYE9urlTUQ8zProEK5GqwTBnoObFPN3g==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Components": "10.0.1",
-          "Microsoft.AspNetCore.Components.Web": "10.0.1",
-          "Microsoft.Extensions.Localization": "10.0.1"
-        }
-      },
       "maliev.shadcnblazor": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.AspNetCore.Components.Web": "[10.0.3, )",
-          "MudBlazor": "[9.7.0, )"
+          "Microsoft.AspNetCore.Components.Web": "[10.0.3, )"
         }
       },
       "maliev.shadcnblazor.icons.hugeicons": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.lucide": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.phosphor": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.tabler": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       }
     },

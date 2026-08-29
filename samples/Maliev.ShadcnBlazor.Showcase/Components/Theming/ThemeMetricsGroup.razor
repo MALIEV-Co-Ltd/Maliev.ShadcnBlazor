@@ -6,11 +6,11 @@
             <h3>@Title</h3>
             <p>@Description</p>
         </div>
-        <MudButton Variant="Variant.Text"
-                   Size="Size.Small"
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                   Size="ShadcnButtonSize.Small"
                    aria-label="@($"Reset {Title}")"
                    data-testid="@ResetGroupTestId"
-                   OnClick="() => State.ResetGroup(Group)">Reset group</MudButton>
+                   OnClick="() => State.ResetGroup(Group)">Reset group</ShadcnButton>
     </div>
     <div class="theme-control-grid">
         @foreach (var metric in Metrics)
@@ -19,50 +19,37 @@
             var testId = $"theme-metric-{metric.Name}";
             @if (metric.Property.PropertyType == typeof(ShadcnReducedMotionBehavior))
             {
-                <MudSelect T="string"
-                           Value="@State.GetMetricEditorValue(metric.Name)"
-                           ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
-                           Label="@label"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           aria-label="@label"
-                           data-theme-metric="@metric.Name"
-                           data-testid="@testId">
+                <label class="theme-native-control"><span>@label</span>
+                <select class="shadcn-native-select"
+                           value="@State.GetMetricEditorValue(metric.Name)"
+                           @onchange="args => State.SetMetric(metric.Name, args.Value?.ToString() ?? string.Empty)"
+                           aria-label="@label" data-theme-metric="@metric.Name" data-testid="@testId">
                     @foreach (var behavior in Enum.GetNames<ShadcnReducedMotionBehavior>())
                     {
-                        <MudSelectItem T="string" Value="@behavior">@behavior</MudSelectItem>
+                        <option value="@behavior">@behavior</option>
                     }
-                </MudSelect>
+                </select></label>
             }
             else if (metric.Name == "motionEasing")
             {
-                <MudSelect T="string"
-                           Value="@State.GetMetricEditorValue(metric.Name)"
-                           ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
-                           Label="@label"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           aria-label="@label"
-                           data-theme-metric="@metric.Name"
-                           data-testid="@testId">
+                <label class="theme-native-control"><span>@label</span>
+                <select class="shadcn-native-select"
+                           value="@State.GetMetricEditorValue(metric.Name)"
+                           @onchange="args => State.SetMetric(metric.Name, args.Value?.ToString() ?? string.Empty)"
+                           aria-label="@label" data-theme-metric="@metric.Name" data-testid="@testId">
                     @foreach (var easing in Easings)
                     {
-                        <MudSelectItem T="string" Value="@easing">@easing</MudSelectItem>
+                        <option value="@easing">@easing</option>
                     }
-                </MudSelect>
+                </select></label>
             }
             else
             {
-                <MudTextField T="string"
-                              Value="@State.GetMetricEditorValue(metric.Name)"
-                              ValueChanged="value => State.SetMetric(metric.Name, value ?? string.Empty)"
-                              Immediate="false"
-                              Label="@label"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              aria-label="@label"
-                              data-theme-metric="@metric.Name"
-                              data-testid="@testId" />
+                <label class="theme-native-control"><span>@label</span>
+                <input class="shadcn-input" value="@State.GetMetricEditorValue(metric.Name)"
+                       @onchange="args => State.SetMetric(metric.Name, args.Value?.ToString() ?? string.Empty)"
+                       aria-label="@label" data-theme-metric="@metric.Name" data-testid="@testId" />
+                </label>
             }
         }
     </div>

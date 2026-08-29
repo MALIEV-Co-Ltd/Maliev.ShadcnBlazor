@@ -87,7 +87,7 @@ public sealed class DialogDossierBrowserTests(
             Assert.NotEqual("0px", await dialog.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
 
         var axe = await dialog.RunAxe();
-        Assert.True(!axe.Violations.Any(), $"Dialog axe violations: {string.Join("; ", axe.Violations.Select(violation => violation.Id))}");
+        Assert.True(!axe.Violations.Any(), $"Dialog axe violations: {string.Join("; ", axe.Violations.Select(violation => $"{violation.Id}: {string.Join(", ", violation.Nodes.Select(node => string.Join(" ", node.Target)))}"))}");
 
         await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(dialog).ToHaveCountAsync(0);

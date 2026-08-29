@@ -9,7 +9,7 @@ public sealed class ThemeControlsBrowserTests(
     PlaywrightFixture playwright)
 {
     [Fact]
-    public async Task CustomControlsChangeRealMudComponentComputedStylesWithoutChangingDefaults()
+    public async Task CustomControlsChangeRealPackageComponentComputedStylesWithoutChangingDefaults()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -17,8 +17,8 @@ public sealed class ThemeControlsBrowserTests(
             ReducedMotion = ReducedMotion.NoPreference
         });
         var page = await context.NewPageAsync();
-        await page.GotoAsync(new Uri(server.BaseUri, "/components/mud-inventory").ToString());
-        await page.GetByTestId("mud-inventory-fixture").WaitForAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/components/actions-and-selection").ToString());
+        await page.GetByTestId("actions-selection-fixture").WaitForAsync();
 
         var button = page.GetByTestId("button-default");
         var inlineCode = await page.Locator("[data-shadcn-scope]").EvaluateHandleAsync("""
@@ -34,15 +34,15 @@ public sealed class ThemeControlsBrowserTests(
         var defaults = await ReadButtonStyles(button);
         Assert.Equal(6, defaults.Gap);
         Assert.Equal(10, defaults.PaddingInlineStart);
-        Assert.Equal(0.1, defaults.TransitionDuration, 3);
-        Assert.Equal("ease, ease, ease, ease", defaults.TransitionTimingFunction);
+        Assert.Equal(0.15, defaults.TransitionDuration, 3);
+        Assert.Equal("ease, ease, ease, ease, ease", defaults.TransitionTimingFunction);
 
         await page.Locator("[data-shadcn-scope]").EvaluateAsync("""
             element => {
                 element.style.setProperty('--shadcn-spacing-multiplier', '2');
                 element.style.setProperty('--shadcn-focus-ring-width', '5px');
                 element.style.setProperty('--shadcn-focus-ring-offset', '2px');
-                element.style.setProperty('--shadcn-motion-duration-fast', '200ms');
+                element.style.setProperty('--shadcn-motion-duration', '200ms');
                 element.style.setProperty('--shadcn-motion-easing-standard', 'linear');
                 element.style.setProperty('--shadcn-font-mono', '"Courier New", monospace');
             }
@@ -54,7 +54,7 @@ public sealed class ThemeControlsBrowserTests(
         Assert.Equal(12, customized.Gap);
         Assert.Equal(20, customized.PaddingInlineStart);
         Assert.Equal(0.2, customized.TransitionDuration, 3);
-        Assert.Equal("linear, linear, linear, linear", customized.TransitionTimingFunction);
+        Assert.Equal("linear, linear, linear, linear, linear", customized.TransitionTimingFunction);
         Assert.Equal("5px", customized.FocusRingWidth);
         Assert.Equal("2px", customized.FocusRingOffset);
         Assert.NotEqual("none", customized.BoxShadow);
@@ -71,10 +71,10 @@ public sealed class ThemeControlsBrowserTests(
             ReducedMotion = ReducedMotion.NoPreference
         });
         var normalPage = await normalContext.NewPageAsync();
-        await normalPage.GotoAsync(new Uri(server.BaseUri, "/components/mud-inventory").ToString());
-        await normalPage.GetByTestId("mud-inventory-fixture").WaitForAsync();
+        await normalPage.GotoAsync(new Uri(server.BaseUri, "/components/actions-and-selection").ToString());
+        await normalPage.GetByTestId("actions-selection-fixture").WaitForAsync();
         var normalButton = normalPage.GetByTestId("button-default");
-        Assert.Equal(0.1, await ReadTransitionDuration(normalButton), 3);
+        Assert.Equal(0.15, await ReadTransitionDuration(normalButton), 3);
 
         await normalPage.Locator("[data-shadcn-scope]")
             .EvaluateAsync("element => element.setAttribute('data-shadcn-reduced-motion', 'always')");
@@ -85,8 +85,8 @@ public sealed class ThemeControlsBrowserTests(
             ReducedMotion = ReducedMotion.Reduce
         });
         var reducedPage = await reducedContext.NewPageAsync();
-        await reducedPage.GotoAsync(new Uri(server.BaseUri, "/components/mud-inventory").ToString());
-        await reducedPage.GetByTestId("mud-inventory-fixture").WaitForAsync();
+        await reducedPage.GotoAsync(new Uri(server.BaseUri, "/components/actions-and-selection").ToString());
+        await reducedPage.GetByTestId("actions-selection-fixture").WaitForAsync();
         var reducedButton = reducedPage.GetByTestId("button-default");
         Assert.InRange(await ReadTransitionDuration(reducedButton), 0, 0.001);
 

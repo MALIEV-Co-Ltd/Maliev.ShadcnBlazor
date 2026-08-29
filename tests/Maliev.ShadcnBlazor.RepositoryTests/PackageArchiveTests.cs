@@ -34,7 +34,7 @@ public sealed class PackageArchiveTests
             Assert.Contains("LICENSE", entries);
             Assert.Contains("README.md", entries);
             Assert.Contains("THIRD-PARTY-NOTICES.md", entries);
-            Assert.Contains("licenses/MudBlazor-LICENSE.txt", entries);
+            Assert.DoesNotContain("licenses/MudBlazor-LICENSE.txt", entries);
             Assert.Contains("licenses/shadcn-ui-LICENSE.md", entries);
             Assert.Contains("lib/net10.0/Maliev.ShadcnBlazor.dll", entries);
             Assert.Contains("tools/net10.0/Maliev.ShadcnBlazor.Build.dll", entries);
@@ -65,6 +65,7 @@ public sealed class PackageArchiveTests
                 .Where(id => id is not null)
                 .ToArray();
             Assert.DoesNotContain("Maliev.ShadcnBlazor.Build", dependencyIds);
+            Assert.DoesNotContain("MudBlazor", dependencyIds);
 
             var guard = Run(
                 "pwsh",

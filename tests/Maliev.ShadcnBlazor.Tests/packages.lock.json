@@ -309,17 +309,6 @@
         "resolved": "10.0.10",
         "contentHash": "jSOCVxEwCd4Aq925kJVz1kSO1EpX2OHYKL04qVREXkDU7Ce3pVDdHPYm+fEy8y/th2kJf/DAstRHpJAqoNWP8w=="
       },
-      "Microsoft.Extensions.Localization": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "yJBI3IRm9uTRu7cPc7i90/8+CuiiJJ5M4khj6iWQcYnq6VrG+H2U5GzpRLtkVCsgxc1LjtkNMEbSDatfBA+z5g==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Localization.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Options": "10.0.1"
-        }
-      },
       "Microsoft.Extensions.Localization.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.10",
@@ -405,16 +394,6 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
-      "MudBlazor": {
-        "type": "Transitive",
-        "resolved": "9.7.0",
-        "contentHash": "uWOgNn9B556J/TL8KFoSqpA3YD2heqOpK5etcofwlj1RiEX1IDy0NmwYE9urlTUQ8zProEK5GqwTBnoObFPN3g==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Components": "10.0.1",
-          "Microsoft.AspNetCore.Components.Web": "10.0.1",
-          "Microsoft.Extensions.Localization": "10.0.1"
-        }
-      },
       "Newtonsoft.Json": {
         "type": "Transitive",
         "resolved": "13.0.3",
@@ -463,42 +442,41 @@
       "maliev.shadcnblazor": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.AspNetCore.Components.Web": "[10.0.3, )",
-          "MudBlazor": "[9.7.0, )"
+          "Microsoft.AspNetCore.Components.Web": "[10.0.3, )"
         }
       },
       "maliev.shadcnblazor.icons.hugeicons": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.lucide": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.phosphor": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.icons.tabler": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )"
+          "Maliev.ShadcnBlazor": "[1.2.2, )"
         }
       },
       "maliev.shadcnblazor.showcase": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[1.2.1, )",
-          "Maliev.ShadcnBlazor.Icons.Hugeicons": "[1.2.1, )",
-          "Maliev.ShadcnBlazor.Icons.Lucide": "[1.2.1, )",
-          "Maliev.ShadcnBlazor.Icons.Phosphor": "[1.2.1, )",
-          "Maliev.ShadcnBlazor.Icons.Tabler": "[1.2.1, )",
+          "Maliev.ShadcnBlazor": "[1.2.2, )",
+          "Maliev.ShadcnBlazor.Icons.Hugeicons": "[1.2.2, )",
+          "Maliev.ShadcnBlazor.Icons.Lucide": "[1.2.2, )",
+          "Maliev.ShadcnBlazor.Icons.Phosphor": "[1.2.2, )",
+          "Maliev.ShadcnBlazor.Icons.Tabler": "[1.2.2, )",
           "Microsoft.AspNetCore.Components.WebAssembly": "[10.0.3, )",
           "Microsoft.DotNet.HotReload.WebAssembly.Browser": "[10.0.111, )"
         }

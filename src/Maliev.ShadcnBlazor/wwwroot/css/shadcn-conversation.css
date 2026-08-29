@@ -88,7 +88,7 @@
 @media (forced-colors:active) { .shadcn-bubble-content { border:1px solid CanvasText; background:Canvas; color:CanvasText; } .shadcn-marker[data-variant="separator"]::before,.shadcn-marker[data-variant="separator"]::after { background:CanvasText; } .shadcn-marker-icon[data-streaming="true"],.shadcn-marker-loader { animation:none; color:CanvasText; } .shadcn-marker-content[data-streaming="true"] { color:CanvasText; mask:none; -webkit-mask:none; -webkit-text-fill-color:CanvasText; animation:none !important; } .shadcn-marker-content[data-streaming="true"]::after { background:none; animation:none; } }
 @media (forced-colors:active) { .shadcn-bubble-reaction > .shadcn-avatar,.shadcn-bubble-reaction-overflow-trigger { border-color:CanvasText; box-shadow:none; } }
 .shadcn-message-scroller { position:relative; display:flex; width:100%; height:100%; min-height:0; flex-direction:column; overflow:hidden; }
-.shadcn-message-scroller-viewport { width:100%; height:100%; min-width:0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+.shadcn-message-scroller-viewport { width:100%; height:100%; min-width:0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; scrollbar-width:thin; }
 .shadcn-message-scroller-content { display:flex; min-height:100%; height:max-content; flex-direction:column; }
 .shadcn-message-scroller-item { min-width:0; flex:none; content-visibility:auto; contain-intrinsic-size:auto 10rem; }
 .shadcn-message-scroller-button { position:absolute; inset-inline-start:50%; z-index:10; transform:translateX(-50%); transition:opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter),scale var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter); }

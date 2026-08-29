@@ -44,12 +44,12 @@ public sealed class PackageContractTests
 
             Assert.Contains("README.md", names);
             Assert.Contains("licenses/shadcn-ui-LICENSE.md", names);
-            Assert.Contains("licenses/MudBlazor-LICENSE.txt", names);
+            Assert.DoesNotContain("licenses/MudBlazor-LICENSE.txt", names);
             Assert.Contains("reference/shadcn-reference.json", names);
             Assert.Contains("schemas/shadcn-theme-document-v2.schema.json", names);
             Assert.Single(names, x => string.Equals(x, "staticwebassets/css/shadcn-base.css", StringComparison.Ordinal));
             Assert.Single(names, x => string.Equals(x, "staticwebassets/css/shadcn-visual-styles.css", StringComparison.Ordinal));
-            Assert.Single(names, x => string.Equals(x, "staticwebassets/css/shadcn-mudblazor.css", StringComparison.Ordinal));
+            Assert.DoesNotContain(names, x => string.Equals(x, "staticwebassets/css/shadcn-mudblazor.css", StringComparison.Ordinal));
             Assert.Contains("lib/net10.0/Maliev.ShadcnBlazor.dll", names);
             Assert.DoesNotContain(names, x => x.StartsWith("content/", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(names, x => x.StartsWith("contentFiles/", StringComparison.OrdinalIgnoreCase));
@@ -59,6 +59,7 @@ public sealed class PackageContractTests
             using var nuspecReader = new StreamReader(nuspec.Open());
             var nuspecText = await nuspecReader.ReadToEndAsync();
             Assert.Contains("<readme>README.md</readme>", nuspecText, StringComparison.Ordinal);
+            Assert.DoesNotContain("MudBlazor", nuspecText, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {
