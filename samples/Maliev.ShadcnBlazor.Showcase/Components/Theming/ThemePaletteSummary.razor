@@ -8,6 +8,7 @@
          aria-labelledby="theme-palette-summary-title">
     <div class="theme-palette-summary__copy">
         <strong id="theme-palette-summary-title">@Copy.ActivePalette</strong>
+        <small data-testid="theme-palette-identity">@Copy.PaletteIdentity(State.Document)</small>
         <span data-palette-contrast="@(ContrastReady ? "ready" : "review")">
             @(ContrastReady ? Copy.ContrastReady : Copy.NeedsReview)
         </span>
@@ -40,7 +41,9 @@
     private bool _disposed;
     private long _bindingGeneration;
     private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
-    private bool ContrastReady => State.Validation.IsValid && State.PaletteDiagnostics.Count == 0;
+    private bool ContrastReady => State.Validation.IsValid &&
+        State.Validation.ContrastResults.All(result => result.Passes) &&
+        State.PaletteDiagnostics.Count == 0;
     private static readonly IReadOnlyList<ShadcnPaletteAnchorRole> Roles = Enum.GetValues<ShadcnPaletteAnchorRole>();
     private string SwatchStyle(ShadcnPaletteAnchorRole role) => $"background-color: {State.PaletteAnchors.Get(role)}";
     private static string RoleKey(ShadcnPaletteAnchorRole role) => role.ToString().ToLowerInvariant();

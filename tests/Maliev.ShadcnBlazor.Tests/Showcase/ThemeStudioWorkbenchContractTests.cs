@@ -32,13 +32,14 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.NotNull(summary.PreviousElementSibling?.QuerySelector("[data-testid='theme-color-treatment']"));
         Assert.Equal(5, summary.QuerySelectorAll("[data-palette-summary-swatch]").Length);
         Assert.Contains("Active palette", summary.TextContent, StringComparison.Ordinal);
-        Assert.Contains("Contrast ready", summary.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Needs review", summary.TextContent, StringComparison.Ordinal);
         Assert.Equal("BUTTON", summary.QuerySelector("#theme-palette-customize")!.TagName);
 
         cut.Find("[data-testid='locale-thai']").Click();
         summary = cut.Find("[data-testid='theme-palette-summary']");
         Assert.Contains("ชุดสีที่ใช้งาน", summary.TextContent, StringComparison.Ordinal);
         Assert.Contains("ปรับแต่งชุดสี", summary.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ต้องตรวจสอบ", summary.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Active palette", summary.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Customize palette", summary.TextContent, StringComparison.Ordinal);
     }
@@ -302,6 +303,8 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Contains("contenteditable", script, StringComparison.Ordinal);
         Assert.Contains("[role=\"listbox\"]", script, StringComparison.Ordinal);
         Assert.Contains("(max-width: 68rem)", script, StringComparison.Ordinal);
+        Assert.Contains("for (let ancestor = root.parentElement", script, StringComparison.Ordinal);
+        Assert.Contains("revealBackground(true)", script, StringComparison.Ordinal);
         Assert.Contains(".theme-studio-workbench[data-palette-open=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains(".theme-palette-workbench", css, StringComparison.Ordinal);
         Assert.Contains("block-size: 100dvh", css, StringComparison.Ordinal);
@@ -318,6 +321,23 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.DoesNotContain("theme-typography-specimen", typography, StringComparison.Ordinal);
         Assert.Contains("ShadcnSelect TValue=\"int\"", typography, StringComparison.Ordinal);
         Assert.Contains("State.SetTypographyRole", typography, StringComparison.Ordinal);
+        Assert.Contains("if (Active && _catalog is null)", typography, StringComparison.Ordinal);
+        Assert.DoesNotContain("OnInitializedAsync", typography, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NativePalettePickerHasFocusInputChangeBlurAndPointerLifecycleFallbacks()
+    {
+        var root = FindRoot();
+        var editor = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemePaletteAnchorEditor.razor");
+
+        Assert.Contains("@onfocus=\"BeginPickerInteraction\"", editor, StringComparison.Ordinal);
+        Assert.Contains("@oninput=\"SetPickerValue\"", editor, StringComparison.Ordinal);
+        Assert.Contains("@onchange=\"FinalizePickerInteraction\"", editor, StringComparison.Ordinal);
+        Assert.Contains("@onblur=\"FinalizePickerInteraction\"", editor, StringComparison.Ordinal);
+        Assert.Contains("@onpointerup=\"FinalizePickerInteraction\"", editor, StringComparison.Ordinal);
+        Assert.Contains("if (_pickerInteractionActive)", editor, StringComparison.Ordinal);
+        Assert.Contains("FinalizePickerInteraction();", editor, StringComparison.Ordinal);
     }
 
     [Fact]

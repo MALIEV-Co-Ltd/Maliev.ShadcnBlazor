@@ -7,6 +7,11 @@ internal sealed class GoogleFontCatalogService(HttpClient httpClient)
     private readonly object _gate = new();
     private Task<GoogleFontCatalog>? _catalog;
 
+    internal bool IsLoaded
+    {
+        get { lock (_gate) return _catalog is not null; }
+    }
+
     public Task<GoogleFontCatalog> GetAsync(CancellationToken cancellationToken = default)
     {
         Task<GoogleFontCatalog> catalog;

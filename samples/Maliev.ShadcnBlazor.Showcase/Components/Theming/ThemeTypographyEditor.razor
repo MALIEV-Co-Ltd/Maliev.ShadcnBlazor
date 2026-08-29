@@ -86,6 +86,7 @@
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
     [Parameter] public bool ShowHeading { get; set; } = true;
+    [Parameter] public bool Active { get; set; } = true;
     private GoogleFontCatalog? _catalog;
     private ThemeStudioFontSlot _slot;
     private string _query = string.Empty;
@@ -107,7 +108,11 @@
         "prompt"
     ];
     private static readonly ShadcnIconData ChevronIcon = new("lucide", "chevron-down", "0 0 24 24", "<path d=\"m6 9 6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>");
-    protected override async Task OnInitializedAsync() => _catalog = await CatalogService.GetAsync();
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Active && _catalog is null)
+            _catalog = await CatalogService.GetAsync();
+    }
 
     private IReadOnlyList<GoogleFontCatalogEntry> Results => _catalog is null
         ? []

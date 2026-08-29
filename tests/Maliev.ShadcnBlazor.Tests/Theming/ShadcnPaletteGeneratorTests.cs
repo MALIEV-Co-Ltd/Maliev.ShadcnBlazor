@@ -12,7 +12,8 @@ public sealed class ShadcnPaletteGeneratorTests
     {
         Assert.Equal(0, ShadcnPaletteRecipe.MaterializedAlgorithmVersion);
         Assert.Equal(1, ShadcnPaletteRecipe.LegacyAlgorithmVersion);
-        Assert.Equal(2, ShadcnPaletteRecipe.CurrentAlgorithmVersion);
+        Assert.Equal(1, ShadcnPaletteRecipe.CurrentAlgorithmVersion);
+        Assert.Equal(2, ShadcnPaletteRecipe.VersionTwoAlgorithmVersion);
         Assert.Equal(2, ShadcnPaletteGenerator.CurrentAlgorithmVersion);
 
         var legacy = ShadcnThemeDocumentSerializer.Deserialize(
@@ -64,6 +65,70 @@ public sealed class ShadcnPaletteGeneratorTests
         {
             CultureInfo.CurrentCulture = originalCulture;
         }
+    }
+
+    [Fact]
+    public void HistoricalCurrentVersionConstructorRemainsAnAlgorithmOneRecipe()
+    {
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var historical = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.CurrentAlgorithmVersion, 42, "neutral", []);
+        var explicitLegacy = new ShadcnPaletteRecipe(1, 42, "neutral", []);
+
+        Assert.False(historical.IsVersion2);
+        Assert.Equal(
+            ShadcnThemeSerializer.Serialize(ShadcnPaletteGenerator.Generate(source, explicitLegacy).Theme),
+            ShadcnThemeSerializer.Serialize(ShadcnPaletteGenerator.Generate(source, historical).Theme));
+        Assert.DoesNotContain("\"anchors\"", JsonSerializer.Serialize(historical), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VersionTwoReturnsTheMaterializedAnchorsMappedIdenticallyAcrossBothSchemes()
+    {
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var recipe = ShadcnPaletteRecipe.CreateV2(117, "neutral", [],
+            new("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic, []);
+
+        var result = ShadcnPaletteGenerator.Generate(source, recipe);
+
+        Assert.True(result.IsValid, string.Join(Environment.NewLine, result.Errors));
+        var active = Assert.IsType<ShadcnPaletteAnchors>(result.ActiveAnchors);
+        Assert.Equal(active.Brand, result.Theme.Light.Chart1);
+        Assert.Equal(active.Brand, result.Theme.Dark.Chart1);
+        Assert.Equal(active.Support, result.Theme.Light.Chart2);
+        Assert.Equal(active.Support, result.Theme.Dark.Chart2);
+        Assert.Equal(active.Highlight, result.Theme.Light.Chart3);
+        Assert.Equal(active.Highlight, result.Theme.Dark.Chart3);
+        Assert.Equal(active.DataA, result.Theme.Light.Chart4);
+        Assert.Equal(active.DataA, result.Theme.Dark.Chart4);
+        Assert.Equal(active.DataB, result.Theme.Light.Chart5);
+        Assert.Equal(active.DataB, result.Theme.Dark.Chart5);
+    }
+
+    [Fact]
+    public void VersionTwoSeedSweepPreservesPaletteAndDestructiveHueWhileMeetingContrast()
+    {
+        var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var anchors = new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899");
+        foreach (var harmony in Enum.GetValues<ShadcnPaletteHarmony>())
+            foreach (var seed in Enumerable.Range(0, 64).Select(value => (ulong)value))
+            {
+                var result = ShadcnPaletteGenerator.Generate(source,
+                    ShadcnPaletteRecipe.CreateV2(seed, "neutral", [], anchors, harmony, []));
+
+                Assert.True(result.IsValid, $"seed={seed}, harmony={harmony}: {string.Join(Environment.NewLine, result.Errors)}");
+                var active = Assert.IsType<ShadcnPaletteAnchors>(result.ActiveAnchors);
+                Assert.Equal(Hue(active.Brand), Hue(result.Theme.Light.Chart1), precision: 2);
+                Assert.Equal(Hue(active.Brand), Hue(result.Theme.Dark.Chart1), precision: 2);
+                Assert.InRange(CircularDistance(Hue(result.Theme.Light.Destructive), 25), 0, 0.01);
+                Assert.InRange(CircularDistance(Hue(result.Theme.Dark.Destructive), 25), 0, 0.01);
+                Assert.True(Hue(result.Theme.Light.Destructive) is >= 0 and <= 50 or >= 330);
+                Assert.Equal(5, new[] { active.Brand, active.Support, active.Highlight, active.DataA, active.DataB }
+                    .Select(Hue).Distinct().Count());
+                Assert.DoesNotContain(ShadcnThemeValidator.Validate(result.Theme).ContrastResults,
+                    contrast => !contrast.Passes && contrast.Kind != ShadcnContrastKind.DisabledState);
+            }
     }
 
     [Theory]
@@ -256,6 +321,31 @@ public sealed class ShadcnPaletteGeneratorTests
         Assert.Equal(before, ShadcnThemeSerializer.Serialize(source));
     }
 
+    [Fact]
+    public void PromotedVersionTwoContrastFailuresAreNotDuplicatedAsWarningsOrErrors()
+    {
+        var original = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
+        var source = original with
+        {
+            Light = original.Light with
+            {
+                Primary = "oklch(0.5000 0.1200 250.00)",
+                PrimaryForeground = "oklch(0.5000 0.0800 250.00)"
+            }
+        };
+        var result = ShadcnPaletteGenerator.Generate(source, ShadcnPaletteRecipe.CreateV2(
+            117,
+            "neutral",
+            ["light.primary", "light.primaryForeground"],
+            new("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []));
+
+        Assert.False(result.IsValid);
+        Assert.Equal(result.Errors.Count, result.Errors.DistinctBy(message => (message.Code, message.Path, message.Message)).Count());
+        Assert.DoesNotContain(result.Warnings, warning => warning.Path == "light.primaryForeground");
+    }
+
     [Theory]
     [InlineData("rgb(37 99 235)")]
     [InlineData("#2563ebff")]
@@ -313,7 +403,7 @@ public sealed class ShadcnPaletteGeneratorTests
     {
         var source = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
         var recipe = new ShadcnPaletteRecipe(
-            ShadcnPaletteRecipe.CurrentAlgorithmVersion, 117, "neutral", [], null, null, null);
+            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion, 117, "neutral", [], null, null, null);
 
         var result = ShadcnPaletteGenerator.Generate(source, recipe);
 

@@ -362,7 +362,7 @@ public sealed class ShadcnThemeDocumentTests
     public void ValidatorRejectsUndefinedVersionTwoHarmony()
     {
         var recipe = new ShadcnPaletteRecipe(
-            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion,
             42,
             "neutral",
             [],
@@ -382,7 +382,7 @@ public sealed class ShadcnThemeDocumentTests
     public void DuplicateVersionTwoAnchorLocksAreRejectedByDocumentValidation()
     {
         var recipe = new ShadcnPaletteRecipe(
-            ShadcnPaletteRecipe.CurrentAlgorithmVersion,
+            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion,
             42,
             "neutral",
             [],
@@ -484,6 +484,30 @@ public sealed class ShadcnThemeDocumentTests
         root["palette"]!.AsObject()["anchors"]!.AsObject()["dataB"] = 42;
 
         Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+    }
+
+    [Theory]
+    [InlineData("brand", "rgb(37 99 235)")]
+    [InlineData("support", "#2563ebff")]
+    [InlineData("highlight", "oklch(0.5 0.2 20 / 50%)")]
+    [InlineData("dataA", "not-a-color")]
+    [InlineData("dataB", " oklch(0.5 0.2 20)")]
+    public void CanonicalVersionTwoStrictlyValidatesEveryAnchorWithAnExactPath(string member, string value)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["anchors"]!.AsObject()[member] = value;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Contains($"palette.anchors.{member}", exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -2,6 +2,17 @@ namespace Maliev.ShadcnBlazor.Theming.Internal;
 
 internal static class ShadcnPaletteSemanticMapper
 {
+    internal static IReadOnlyList<string> ProjectMaterializedAnchorTokens()
+    {
+        var paths = new List<string>();
+        foreach (var scheme in new[] { "light", "dark" })
+        {
+            foreach (var token in new[] { "primary", "sidebarPrimary", "chart1", "chart2", "chart3", "chart4", "chart5" })
+                paths.Add($"{scheme}.{token}");
+        }
+        return paths;
+    }
+
     internal static IReadOnlyList<string> ProjectLockedAnchorTokens(
         IReadOnlyList<ShadcnPaletteAnchorRole> lockedAnchors)
     {

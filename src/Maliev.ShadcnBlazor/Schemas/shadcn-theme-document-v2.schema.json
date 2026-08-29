@@ -40,11 +40,11 @@
           "additionalProperties": false,
           "required": ["brand", "support", "highlight", "dataA", "dataB"],
           "properties": {
-            "brand": { "type": "string" },
-            "support": { "type": "string" },
-            "highlight": { "type": "string" },
-            "dataA": { "type": "string" },
-            "dataB": { "type": "string" }
+            "brand": { "$ref": "#/$defs/paletteAnchor" },
+            "support": { "$ref": "#/$defs/paletteAnchor" },
+            "highlight": { "$ref": "#/$defs/paletteAnchor" },
+            "dataA": { "$ref": "#/$defs/paletteAnchor" },
+            "dataB": { "$ref": "#/$defs/paletteAnchor" }
           }
         },
         "harmony": { "enum": ["free", "analogous", "complementary", "triadic"] },
@@ -88,6 +88,11 @@
     }
   },
   "$defs": {
+    "paletteAnchor": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^(#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|oklch\\(\\s*(\\d+(?:\\.\\d+)?|\\.\\d+)\\s+(\\d+(?:\\.\\d+)?|\\.\\d+)\\s+(\\d+(?:\\.\\d+)?|\\.\\d+)\\s*\\))$"
+    },
     "font": {
       "type": "object",
       "additionalProperties": false,

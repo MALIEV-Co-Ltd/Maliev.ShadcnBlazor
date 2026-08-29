@@ -34,6 +34,9 @@ public sealed record ThemeStudioPaletteCopy(
         RegexOptions.CultureInvariant);
 
     public string AnchorValue => ReferenceEquals(this, Thai) ? "ค่าสี" : "Color value";
+    public string PaletteIdentity(ShadcnThemeDocument document) => document.Palette.IsVersion2
+        ? ReferenceEquals(this, Thai) ? $"ซีด {document.Palette.Seed}" : $"Seed {document.Palette.Seed}"
+        : document.Name;
     public string InvalidAnchorValue => ReferenceEquals(this, Thai)
         ? "กรอกค่าสีเป็น #rgb, #rrggbb หรือ oklch(L C H)"
         : "Enter a color as #rgb, #rrggbb, or oklch(L C H).";

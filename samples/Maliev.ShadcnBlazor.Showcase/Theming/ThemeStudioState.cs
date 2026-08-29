@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Security.Cryptography;
-using System.Text;
 using Maliev.ShadcnBlazor.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 using Maliev.ShadcnBlazor.Components.Styling;
@@ -669,7 +668,10 @@ public sealed class ThemeStudioState
             PaletteAnchors,
             PaletteHarmony,
             locks);
-        return TryApplyPaletteRecipe(recipe, $"palette.lock.{PaletteRoleName(role)}");
+        CaptureHistory($"palette.lock.{PaletteRoleName(role)}");
+        _documentTemplate = _documentTemplate with { Palette = recipe };
+        RaiseChanged();
+        return true;
     }
 
     public bool SetPaletteHarmony(ShadcnPaletteHarmony harmony)
@@ -687,11 +689,7 @@ public sealed class ThemeStudioState
         return TryApplyPaletteRecipe(recipe, "palette.harmony");
     }
 
-    public string CreatePaletteShare()
-    {
-        var bytes = Encoding.UTF8.GetBytes(SerializeDocument());
-        return "palette-v1:" + Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-    }
+    public string CreatePaletteShare() => ThemeStudioPaletteShareCodec.Encode(CreateDocument());
 
     public bool ImportPaletteShare(string value)
     {
@@ -733,7 +731,16 @@ public sealed class ThemeStudioState
             return false;
         }
 
-        recipe = NormalizeLockedPaletteAnchors(recipe);
+        if (recipe.IsVersion2 && result.ActiveAnchors is not null)
+        {
+            recipe = ShadcnPaletteRecipe.CreateV2(
+                recipe.Seed,
+                recipe.BaseColor,
+                recipe.LockedTokens,
+                result.ActiveAnchors,
+                recipe.Harmony!.Value,
+                recipe.LockedAnchors!);
+        }
         CaptureHistory(mutationKey);
         Draft = Clone(result.Theme);
         Applied = Clone(result.Theme);
@@ -745,40 +752,6 @@ public sealed class ThemeStudioState
             _pointerMutationOccurred = true;
         RaiseChanged();
         return true;
-    }
-
-    private ShadcnPaletteRecipe NormalizeLockedPaletteAnchors(ShadcnPaletteRecipe recipe)
-    {
-        if (!recipe.IsVersion2 || recipe.LockedAnchors is not { Count: > 0 })
-            return recipe;
-        var projectionRecipe = ShadcnPaletteRecipe.CreateV2(
-            recipe.Seed,
-            recipe.BaseColor,
-            [],
-            recipe.Anchors!,
-            recipe.Harmony!.Value,
-            recipe.LockedAnchors);
-        var projection = ShadcnPaletteGenerator.Generate(Applied, projectionRecipe).Theme.Light;
-        var anchors = recipe.Anchors!;
-        foreach (var role in recipe.LockedAnchors)
-        {
-            anchors = anchors.Set(role, role switch
-            {
-                ShadcnPaletteAnchorRole.Brand => projection.Chart1,
-                ShadcnPaletteAnchorRole.Support => projection.Chart2,
-                ShadcnPaletteAnchorRole.Highlight => projection.Chart3,
-                ShadcnPaletteAnchorRole.DataA => projection.Chart4,
-                ShadcnPaletteAnchorRole.DataB => projection.Chart5,
-                _ => throw new ArgumentOutOfRangeException(nameof(recipe), role, "Unknown palette anchor role.")
-            });
-        }
-        return ShadcnPaletteRecipe.CreateV2(
-            recipe.Seed,
-            recipe.BaseColor,
-            recipe.LockedTokens,
-            anchors,
-            recipe.Harmony.Value,
-            recipe.LockedAnchors);
     }
 
     private bool ApplyDocument(ShadcnThemeDocument document, bool captureHistory)

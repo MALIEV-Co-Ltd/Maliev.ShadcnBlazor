@@ -177,15 +177,21 @@ export function bindPaletteWorkbench(root, returnFocusId) {
     let concealedBackground = [];
     const concealBackground = () => {
         if (concealedBackground.length) return;
-        const element = root.parentElement?.querySelector(":scope > .theme-studio-sidebar-provider");
-        if (!(element instanceof HTMLElement)) return;
-        concealedBackground.push({
-            element,
-            inert: element.inert,
-            ariaHidden: element.getAttribute("aria-hidden")
-        });
-        element.inert = true;
-        element.setAttribute("aria-hidden", "true");
+        let branch = root;
+        for (let ancestor = root.parentElement; ancestor instanceof HTMLElement; ancestor = ancestor.parentElement) {
+            for (const element of ancestor.children) {
+                if (!(element instanceof HTMLElement) || element === branch || element.matches("script, style")) continue;
+                concealedBackground.push({
+                    element,
+                    inert: element.inert,
+                    ariaHidden: element.getAttribute("aria-hidden")
+                });
+                element.inert = true;
+                element.setAttribute("aria-hidden", "true");
+            }
+            branch = ancestor;
+            if (ancestor === document.body) break;
+        }
     };
     const revealBackground = restorePrevious => {
         for (const entry of concealedBackground) {
@@ -209,7 +215,7 @@ export function bindPaletteWorkbench(root, returnFocusId) {
             root.setAttribute("aria-modal", "true");
             focusFirst();
         } else {
-            revealBackground(false);
+            revealBackground(true);
             root.inert = false;
             root.removeAttribute("aria-hidden");
             root.removeAttribute("role");

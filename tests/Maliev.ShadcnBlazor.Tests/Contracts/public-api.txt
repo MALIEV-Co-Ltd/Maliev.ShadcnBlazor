@@ -1765,6 +1765,7 @@ type Maliev.ShadcnBlazor.Theming.ShadcnPaletteAnchors
   method String Get(ShadcnPaletteAnchorRole role)
   method ShadcnPaletteAnchors Set(ShadcnPaletteAnchorRole role, String value)
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
+  ShadcnPaletteAnchors ActiveAnchors
   IReadOnlyList<ShadcnThemeValidationMessage> Errors
   Boolean IsValid
   ShadcnTheme Theme
@@ -1777,6 +1778,7 @@ type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe
   const Int32 CurrentAlgorithmVersion
   const Int32 LegacyAlgorithmVersion
   const Int32 MaterializedAlgorithmVersion
+  const Int32 VersionTwoAlgorithmVersion
   Int32 AlgorithmVersion
   ShadcnPaletteAnchors Anchors
   String BaseColor

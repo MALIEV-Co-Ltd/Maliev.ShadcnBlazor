@@ -11,8 +11,12 @@ public sealed record ShadcnPaletteRecipe
     /// <summary>Identifies the version-one deterministic palette generation algorithm.</summary>
     public const int LegacyAlgorithmVersion = 1;
 
-    /// <summary>Identifies the current portable palette recipe algorithm.</summary>
-    public const int CurrentAlgorithmVersion = 2;
+    /// <summary>Identifies the current algorithm understood by the historical four-argument constructor.</summary>
+    /// <remarks>This remains version one for source compatibility. Use <see cref="CreateV2"/> for version two recipes.</remarks>
+    public const int CurrentAlgorithmVersion = LegacyAlgorithmVersion;
+
+    /// <summary>Identifies the version-two portable palette recipe algorithm.</summary>
+    public const int VersionTwoAlgorithmVersion = 2;
 
     /// <summary>Creates a portable palette recipe with a defensive token snapshot.</summary>
     /// <param name="algorithmVersion">The deterministic palette algorithm version.</param>
@@ -62,7 +66,7 @@ public sealed record ShadcnPaletteRecipe
 
     /// <summary>Gets whether this is a version-two palette recipe.</summary>
     [JsonIgnore]
-    public bool IsVersion2 => AlgorithmVersion == CurrentAlgorithmVersion;
+    public bool IsVersion2 => AlgorithmVersion == VersionTwoAlgorithmVersion;
 
     /// <summary>Gets the base-color identifier.</summary>
     public string BaseColor { get; init; }
@@ -114,7 +118,7 @@ public sealed record ShadcnPaletteRecipe
         }
 
         return new(
-            CurrentAlgorithmVersion,
+            VersionTwoAlgorithmVersion,
             seed,
             baseColor,
             lockedTokens,
