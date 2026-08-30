@@ -24,8 +24,8 @@ public sealed class PackageArchiveTests
             Assert.True(result.ExitCode == 0, result.Output);
             Assert.DoesNotContain("warning", result.Output, StringComparison.OrdinalIgnoreCase);
 
-            var package = Path.Combine(output, "Maliev.ShadcnBlazor.1.3.0.nupkg");
-            var symbols = Path.Combine(output, "Maliev.ShadcnBlazor.1.3.0.snupkg");
+            var package = Path.Combine(output, "Maliev.ShadcnBlazor.2.1.0.nupkg");
+            var symbols = Path.Combine(output, "Maliev.ShadcnBlazor.2.1.0.snupkg");
             Assert.True(File.Exists(package), result.Output);
             Assert.True(File.Exists(symbols), result.Output);
 
@@ -53,7 +53,7 @@ public sealed class PackageArchiveTests
             XNamespace ns = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
             var metadata = nuspec.Root!.Element(ns + "metadata")!;
             Assert.Equal("Maliev.ShadcnBlazor", metadata.Element(ns + "id")!.Value);
-            Assert.Equal("1.3.0", metadata.Element(ns + "version")!.Value);
+            Assert.Equal("2.1.0", metadata.Element(ns + "version")!.Value);
             Assert.Equal("MIT", metadata.Element(ns + "license")!.Value);
             Assert.Equal("README.md", metadata.Element(ns + "readme")!.Value);
             Assert.Equal(

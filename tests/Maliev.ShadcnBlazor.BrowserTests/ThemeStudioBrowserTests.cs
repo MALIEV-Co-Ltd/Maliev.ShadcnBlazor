@@ -624,7 +624,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         var stylesheet = await page.EvaluateAsync<string>(
-            "async () => await (await fetch('_content/Maliev.ShadcnBlazor/css/shadcn-layout.css?v=1.3.0')).text()");
+            "async () => await (await fetch('_content/Maliev.ShadcnBlazor/css/shadcn-layout.css?v=2.1.0')).text()");
         Assert.Contains(".shadcn-bento-grid__layout", stylesheet, StringComparison.Ordinal);
 
         var layout = page.Locator(".theme-bento__grid [data-slot='bento-grid-layout']");
