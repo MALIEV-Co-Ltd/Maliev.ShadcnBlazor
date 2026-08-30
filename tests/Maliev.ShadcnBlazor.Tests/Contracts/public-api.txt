@@ -728,6 +728,8 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnCombobox`1
   IReadOnlyList<TValue> Values
   EventCallback<IReadOnlyList<TValue>> ValuesChanged
   Expression<Func<IReadOnlyList<TValue>>> ValuesExpression
+  Single VirtualizationItemSize
+  Boolean Virtualize
   method ValueTask FocusAsync(Boolean preventScroll)
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnControlSize: Default, Small
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
@@ -928,6 +930,8 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnSelect`1
   IReadOnlyList<ShadcnSelectOption<TValue>> Options
   String Placeholder
   ShadcnControlSize Size
+  Single VirtualizationItemSize
+  Boolean Virtualize
   method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnTextarea`1
   String Placeholder

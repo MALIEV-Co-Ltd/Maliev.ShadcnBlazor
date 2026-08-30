@@ -1,4 +1,5 @@
 @typeparam TValue
+@using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
@@ -25,13 +26,30 @@
                 {
                     <div role="group" aria-label="@group.Key" data-slot="select-group">
                         @if (!string.IsNullOrWhiteSpace(group.Key)) { <div class="shadcn-select-label" data-slot="select-label">@group.Key</div> }
-                        @foreach (var option in group)
+                        @if (Virtualize)
                         {
-                            var index = OptionIndex(option);
-                            <div id="@OptionId(index)" class="shadcn-select-item" data-slot="select-item" data-value="@FormatFormValue(option.Value)" data-active="@(index == ActiveIndex ? "true" : null)" role="option" aria-selected="@IsSelected(option).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" @onclick="() => SelectAsync(option)">
-                                @(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }
-                                @if (IsSelected(option)) { <span class="shadcn-select-item-indicator" aria-hidden="true">✓</span> }
-                            </div>
+                            @if (ActiveOption is { } activeOption && string.Equals(activeOption.Group ?? string.Empty, group.Key, StringComparison.Ordinal))
+                            {
+                                <div id="@OptionId(ActiveIndex)" data-slot="select-active-option" style="@ActiveOptionStyle" role="option" aria-label="@activeOption.Text" aria-selected="@IsSelected(activeOption).ToString().ToLowerInvariant()" aria-disabled="@(activeOption.Disabled ? "true" : null)" aria-setsize="@Options.Count" aria-posinset="@(ActiveIndex + 1)">@activeOption.Text</div>
+                            }
+                            <Virtualize Items="@group.ToArray()" Context="option" ItemSize="@VirtualizationItemSize" SpacerElement="div">
+                                @{ var index = OptionIndex(option); }
+                                <div id="@VirtualizedOptionId(index)" class="shadcn-select-item" data-slot="select-item" data-value="@FormatFormValue(option.Value)" data-active="@(index == ActiveIndex ? "true" : null)" role="option" aria-hidden="@(index == ActiveIndex ? "true" : null)" aria-selected="@IsSelected(option).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" aria-setsize="@Options.Count" aria-posinset="@(index + 1)" @onclick="() => SelectAsync(option)">
+                                    @(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }
+                                    @if (IsSelected(option)) { <span class="shadcn-select-item-indicator" aria-hidden="true">✓</span> }
+                                </div>
+                            </Virtualize>
+                        }
+                        else
+                        {
+                            @foreach (var option in group)
+                            {
+                                var index = OptionIndex(option);
+                                <div id="@OptionId(index)" class="shadcn-select-item" data-slot="select-item" data-value="@FormatFormValue(option.Value)" data-active="@(index == ActiveIndex ? "true" : null)" role="option" aria-selected="@IsSelected(option).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" @onclick="() => SelectAsync(option)">
+                                    @(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }
+                                    @if (IsSelected(option)) { <span class="shadcn-select-item-indicator" aria-hidden="true">✓</span> }
+                                </div>
+                            }
                         }
                     </div>
                 }
@@ -49,6 +67,10 @@
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
     [Parameter] public bool Clearable { get; set; }
+    /// <summary>Gets or sets whether option rows are virtualized for large collections.</summary>
+    [Parameter] public bool Virtualize { get; set; }
+    /// <summary>Gets or sets the estimated height, in CSS pixels, of each virtualized option row.</summary>
+    [Parameter] public float VirtualizationItemSize { get; set; } = 36f;
     [Parameter] public string ClearLabel { get; set; } = "Clear selection";
     [Parameter] public ShadcnControlSize Size { get; set; } = ShadcnControlSize.Default;
     [Parameter] public RenderFragment<ShadcnSelectOption<TValue>>? ItemTemplate { get; set; }
@@ -66,7 +88,9 @@
     private bool _openParameterInitialized;
     private bool _openedFromActivationKey;
     private int ActiveIndex;
+    private const string ActiveOptionStyle = "position:absolute;inline-size:1px;block-size:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0";
     private ShadcnSelectOption<TValue>? SelectedOption => Options.FirstOrDefault(IsSelected);
+    private ShadcnSelectOption<TValue>? ActiveOption => ActiveIndex >= 0 && ActiveIndex < Options.Count ? Options[ActiveIndex] : null;
     private IEnumerable<IGrouping<string, ShadcnSelectOption<TValue>>> GroupedOptions => Options.GroupBy(option => option.Group ?? string.Empty);
     private string SizeValue => Size switch { ShadcnControlSize.Default => "default", ShadcnControlSize.Small => "sm", _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown control size.") };
     private bool EffectiveOpen => OpenChanged.HasDelegate && _controlledOpenPending ? _requestedOpen : OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
@@ -76,6 +100,8 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        if (!float.IsFinite(VirtualizationItemSize) || VirtualizationItemSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(VirtualizationItemSize), VirtualizationItemSize, "Virtualization item size must be finite and greater than zero.");
         _ = SizeValue;
         if (!_openInitialized)
         {
@@ -150,6 +176,7 @@
     }
     private Task FocusValidationTargetAsync(EventArgs _) => Trigger.FocusAsync().AsTask();
     private string OptionId(int index) => $"{ListboxId}-option-{index}";
+    private string VirtualizedOptionId(int index) => $"{OptionId(index)}-virtual";
     private async Task CloseAndFocusAsync() { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private int LastEnabled() { for (var i = Options.Count - 1; i >= 0; i--) if (!Options[i].Disabled) return i; return -1; }
     private int Move(int delta) { if (Options.Count == 0) return -1; var current = ActiveIndex; for (var count = 0; count < Options.Count; count++) { current = (current + delta + Options.Count) % Options.Count; if (!Options[current].Disabled) return current; } return ActiveIndex; }

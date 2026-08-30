@@ -8,6 +8,141 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Forms;
 
 public sealed class SelectComboboxTests : BunitContext
 {
+    [Theory]
+    [InlineData(typeof(ShadcnSelect<int>))]
+    [InlineData(typeof(ShadcnCombobox<int>))]
+    public void LargeCollectionControlsExposeOptInVirtualization(Type componentType)
+    {
+        var virtualize = componentType.GetProperty("Virtualize");
+        var itemSize = componentType.GetProperty("VirtualizationItemSize");
+
+        Assert.NotNull(virtualize);
+        Assert.Equal(typeof(bool), virtualize.PropertyType);
+        Assert.NotNull(virtualize.GetCustomAttributes(typeof(ParameterAttribute), inherit: true).SingleOrDefault());
+        Assert.NotNull(itemSize);
+        Assert.Equal(typeof(float), itemSize.PropertyType);
+        Assert.NotNull(itemSize.GetCustomAttributes(typeof(ParameterAttribute), inherit: true).SingleOrDefault());
+    }
+
+    [Fact]
+    public void VirtualizedSelectBoundsRenderedOptionsWithoutLosingGroupsOrFormValue()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var options = Enumerable.Range(0, 1_000)
+            .Select(index => new ShadcnSelectOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+            .ToArray();
+
+        var cut = Render<ShadcnSelect<int>>(parameters => parameters
+            .Add(component => component.Value, 42)
+            .Add(component => component.Options, options)
+            .Add(component => component.Name, "choice")
+            .Add(component => component.Open, true)
+            .Add(component => component.Virtualize, true));
+
+        Assert.Equal(2, cut.FindAll("[role='group']").Count);
+        var renderedOptions = cut.FindAll("[role='option']");
+        Assert.InRange(renderedOptions.Count, 1, options.Length - 1);
+        Assert.All(renderedOptions, option =>
+        {
+            Assert.Equal(options.Length.ToString(), option.GetAttribute("aria-setsize"));
+            Assert.InRange(int.Parse(option.GetAttribute("aria-posinset")!), 1, options.Length);
+        });
+        var activeId = cut.Find("[data-slot='select-trigger']").GetAttribute("aria-activedescendant");
+        Assert.NotNull(cut.Find($"#{activeId}"));
+        Assert.Equal("42", cut.Find("input[name='choice']").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void VirtualizedComboboxBoundsRenderedOptionsWithoutLosingGroupsOrFormValue()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var options = Enumerable.Range(0, 1_000)
+            .Select(index => new ShadcnComboboxOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+            .ToArray();
+
+        var cut = Render<ShadcnCombobox<int>>(parameters => parameters
+            .Add(component => component.Value, 42)
+            .Add(component => component.Options, options)
+            .Add(component => component.Name, "choice")
+            .Add(component => component.Open, true)
+            .Add(component => component.Virtualize, true));
+
+        Assert.Equal(2, cut.FindAll("[role='group']").Count);
+        var renderedOptions = cut.FindAll("[role='option']");
+        Assert.InRange(renderedOptions.Count, 1, options.Length - 1);
+        Assert.All(renderedOptions, option =>
+        {
+            Assert.Equal(options.Length.ToString(), option.GetAttribute("aria-setsize"));
+            Assert.InRange(int.Parse(option.GetAttribute("aria-posinset")!), 1, options.Length);
+        });
+        var activeId = cut.Find("[data-slot='combobox-input']").GetAttribute("aria-activedescendant");
+        Assert.NotNull(cut.Find($"#{activeId}"));
+        Assert.Equal("42", cut.Find("input[name='choice']").GetAttribute("value"));
+    }
+
+    [Theory]
+    [InlineData("Home")]
+    [InlineData("End")]
+    [InlineData("ArrowDown")]
+    [InlineData("ArrowUp")]
+    public void VirtualizedSelectKeepsKeyboardActiveDescendantMounted(string key)
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var options = Enumerable.Range(0, 1_000)
+            .Select(index => new ShadcnSelectOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+            .ToArray();
+        var cut = Render<ShadcnSelect<int>>(parameters => parameters
+            .Add(component => component.Value, 42)
+            .Add(component => component.Options, options)
+            .Add(component => component.Open, true)
+            .Add(component => component.Virtualize, true));
+
+        cut.Find("[data-slot='select-trigger']").KeyDown(new KeyboardEventArgs { Key = key });
+
+        var activeId = cut.Find("[data-slot='select-trigger']").GetAttribute("aria-activedescendant");
+        var active = cut.Find($"#{activeId}");
+        Assert.Equal("option", active.GetAttribute("role"));
+        Assert.False(active.HasAttribute("aria-hidden"));
+    }
+
+    [Theory]
+    [InlineData("Home")]
+    [InlineData("End")]
+    [InlineData("ArrowDown")]
+    [InlineData("ArrowUp")]
+    public void VirtualizedComboboxKeepsKeyboardActiveDescendantMounted(string key)
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var options = Enumerable.Range(0, 1_000)
+            .Select(index => new ShadcnComboboxOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+            .ToArray();
+        var cut = Render<ShadcnCombobox<int>>(parameters => parameters
+            .Add(component => component.Value, 42)
+            .Add(component => component.Options, options)
+            .Add(component => component.Open, true)
+            .Add(component => component.Virtualize, true));
+
+        cut.Find("[data-slot='combobox-input']").KeyDown(new KeyboardEventArgs { Key = key });
+
+        var activeId = cut.Find("[data-slot='combobox-input']").GetAttribute("aria-activedescendant");
+        var active = cut.Find($"#{activeId}");
+        Assert.Equal("option", active.GetAttribute("role"));
+        Assert.False(active.HasAttribute("aria-hidden"));
+    }
+
+    [Theory]
+    [InlineData(0f)]
+    [InlineData(-1f)]
+    [InlineData(float.NaN)]
+    [InlineData(float.PositiveInfinity)]
+    public void VirtualizationRequiresFinitePositiveItemSize(float itemSize)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render<ShadcnSelect<int>>(parameters => parameters
+            .Add(component => component.VirtualizationItemSize, itemSize)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render<ShadcnCombobox<int>>(parameters => parameters
+            .Add(component => component.VirtualizationItemSize, itemSize)));
+    }
+
     [Fact]
     public void MultipleComboboxSeparatesWrappedChipsFromItsInput()
     {
