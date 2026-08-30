@@ -56,7 +56,8 @@ public sealed class DocumentationAnnotationsBrowserTests(
             ViewportSize = new() { Width = width, Height = height },
             ReducedMotion = ReducedMotion.Reduce,
             ColorScheme = rtl ? ColorScheme.Dark : ColorScheme.Light,
-            ForcedColors = accessibilityMode ? ForcedColors.Active : ForcedColors.None
+            ForcedColors = accessibilityMode ? ForcedColors.Active : ForcedColors.None,
+            Permissions = ["clipboard-read", "clipboard-write"]
         });
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/code-block").ToString());
@@ -106,8 +107,11 @@ public sealed class DocumentationAnnotationsBrowserTests(
         await select.PressAsync("Enter");
         await Assertions.Expect(first).ToHaveAttributeAsync("data-language", "csharp");
         await Assertions.Expect(first.Locator("pre")).ToContainTextAsync("SaveAsync");
+        var expectedSource = await first.Locator("[data-slot='code-block-code']").TextContentAsync();
+        Assert.NotNull(expectedSource);
         var copyStableBefore = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
 
+        await page.EvaluateAsync("navigator.clipboard.writeText('before-first-copy')");
         if (accessibilityMode)
         {
             await copy.FocusAsync();
@@ -117,8 +121,9 @@ public sealed class DocumentationAnnotationsBrowserTests(
         {
             await copy.ClickAsync();
         }
-        await Assertions.Expect(copy).ToHaveAttributeAsync("data-copy-state", "copied");
-        await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copied");
+        await page.WaitForFunctionAsync(
+            "expected => navigator.clipboard.readText().then(value => value === expected)",
+            expectedSource);
         var stableAfter = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
         for (var index = 0; index < copyStableBefore.Length; index++)
         {
@@ -128,6 +133,7 @@ public sealed class DocumentationAnnotationsBrowserTests(
         await Assertions.Expect(copy).ToHaveAttributeAsync("data-copy-state", "idle", new() { Timeout = 3000 });
         await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copy source");
         await Assertions.Expect(copy).ToBeVisibleAsync();
+        await page.EvaluateAsync("navigator.clipboard.writeText('before-second-copy')");
         if (accessibilityMode)
         {
             await copy.PressAsync("Enter");
@@ -136,7 +142,9 @@ public sealed class DocumentationAnnotationsBrowserTests(
         {
             await copy.ClickAsync();
         }
-        await Assertions.Expect(copy).ToHaveAttributeAsync("data-copy-state", "copied");
+        await page.WaitForFunctionAsync(
+            "expected => navigator.clipboard.readText().then(value => value === expected)",
+            expectedSource);
 
         Assert.True(await first.Locator(".shadcn-code-token-keyword").CountAsync() > 0);
         Assert.True(await first.Locator(".shadcn-code-token-method").CountAsync() > 0);
