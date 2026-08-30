@@ -15,7 +15,7 @@
             @foreach (var value in EffectiveValues)
             {
                 var option = Options.FirstOrDefault(candidate => EqualityComparer<TValue>.Default.Equals(candidate.Value, value));
-                <span class="shadcn-combobox-chip" data-slot="combobox-chip">@(option?.Text ?? Format(value))<button type="button" data-slot="combobox-chip-remove" aria-label="@($"Remove {option?.Text ?? Format(value)}")" @onclick="() => RemoveAsync(value)">×</button></span>
+                <span class="shadcn-combobox-chip" data-slot="combobox-chip">@(option?.Text ?? Format(value))<button type="button" data-slot="combobox-chip-remove" aria-label="@($"Remove {option?.Text ?? Format(value)}")" disabled="@(EffectiveDisabled || ReadOnly)" @onclick="() => RemoveAsync(value)">×</button></span>
             }
         </div>
     }
@@ -27,7 +27,7 @@
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
         }
-        @if (ShowTrigger) { <button type="button" data-slot="combobox-trigger" aria-label="@TriggerLabel" disabled="@EffectiveDisabled" @onclick="ToggleOpenAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg></button> }
+        @if (ShowTrigger) { <button type="button" data-slot="combobox-trigger" aria-label="@TriggerLabel" disabled="@(EffectiveDisabled || ReadOnly)" @onclick="ToggleOpenAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg></button> }
     </div>
     @if (EffectiveOpen)
     {
@@ -50,12 +50,12 @@
     }
     @if (Multiple)
     {
-        @if (Required) { <input class="shadcn-form-control-proxy" data-slot="combobox-required-control" aria-label="@Placeholder" value="@(EffectiveValues.Count == 0 ? string.Empty : "selected")" disabled="@EffectiveDisabled" required /> }
+        @if (Required) { <input class="shadcn-form-control-proxy" data-slot="combobox-required-control" tabindex="-1" aria-label="@Placeholder" value="@(EffectiveValues.Count == 0 ? string.Empty : "selected")" disabled="@EffectiveDisabled" required @oninvalid="FocusValidationTargetAsync" @oninvalid:preventDefault /> }
         @if (!string.IsNullOrWhiteSpace(Name)) { foreach (var value in EffectiveValues) { <input type="hidden" name="@Name" value="@Format(value)" disabled="@EffectiveDisabled" /> } }
     }
     else if (!string.IsNullOrWhiteSpace(Name))
     {
-        <input class="shadcn-form-control-proxy" data-slot="combobox-form-control" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : Format(Value))" disabled="@EffectiveDisabled" required="@Required" />
+        <input class="shadcn-form-control-proxy" data-slot="combobox-form-control" tabindex="-1" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : Format(Value))" disabled="@EffectiveDisabled" required="@Required" @oninvalid="FocusValidationTargetAsync" @oninvalid:preventDefault />
     }
 </div>
 
@@ -146,6 +146,7 @@
     private async Task OpenAsync() { if (!EffectiveDisabled && !ReadOnly && !EffectiveOpen) await SetOpenAsync(true); }
     private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
     private async Task HandleKeyDownAsync(KeyboardEventArgs args) { if (EffectiveDisabled || ReadOnly) return; if (args.Key is "ArrowDown" or "ArrowUp" && !EffectiveOpen) await SetOpenAsync(true); ActiveIndex = args.Key switch { "ArrowDown" => Move(1), "ArrowUp" => Move(-1), "Home" => FirstEnabled(), "End" => LastEnabled(), _ => ActiveIndex }; if (args.Key is "Enter" && ActiveIndex >= 0) await SelectAsync(FilteredOptions[ActiveIndex]); if (args.Key is "Escape" or "Tab") await SetOpenAsync(false); }
+    private Task FocusValidationTargetAsync(EventArgs _) => InputElement.FocusAsync().AsTask();
     private int LastEnabled() { for (var i = FilteredOptions.Count - 1; i >= 0; i--) if (!FilteredOptions[i].Disabled) return i; return -1; }
     private async Task SelectAsync(ShadcnComboboxOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; if (Multiple) { var next = EffectiveValues.Contains(option.Value) ? EffectiveValues.Where(value => !EqualityComparer<TValue>.Default.Equals(value, option.Value)).ToArray() : [.. EffectiveValues, option.Value]; await SetValuesAsync(next); Notify(ValuesExpression); } else { await SetValueAsync(option.Value); Notify(ValueExpression); await SetOpenAsync(false); } await SetQueryAsync(string.Empty); }
     private async Task ClearAsync() { if (EffectiveDisabled || ReadOnly) return; if (Multiple) { await SetValuesAsync([]); Notify(ValuesExpression); } else { await SetValueAsync(default!); Notify(ValueExpression); } await SetQueryAsync(string.Empty); }
@@ -161,9 +162,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (Required || !string.IsNullOrWhiteSpace(Name)) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); await Module.InvokeVoidAsync("observeValidationProxies", Root, "[data-slot=\"combobox-input\"]"); }
         if (EffectiveOpen && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "combobox"); IsObserving = true; }
         else if (!EffectiveOpen && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
     }
     [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", InputElement); } }
-    public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
+    public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectValidationProxies", Root); await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
 }

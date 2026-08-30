@@ -277,6 +277,11 @@ public sealed class MenuTests : BunitContext
         Assert.Contains("trigger.removeAttribute('data-context-menu-ready')", script, StringComparison.Ordinal);
         Assert.Contains("menu.dataset.positioned = 'false'", script, StringComparison.Ordinal);
         Assert.Contains("menu.dataset.positioned = 'true'", script, StringComparison.Ordinal);
+        Assert.Contains("menu.setAttribute('popover', 'manual')", script, StringComparison.Ordinal);
+        Assert.Contains("menu.showPopover()", script, StringComparison.Ordinal);
+        Assert.Contains("visualViewport", script, StringComparison.Ordinal);
+        Assert.Contains("visualViewport?.addEventListener('resize', sync)", script, StringComparison.Ordinal);
+        Assert.Contains("visualViewport?.addEventListener('scroll', sync)", script, StringComparison.Ordinal);
         Assert.Contains("event.key !== 'ContextMenu'", script, StringComparison.Ordinal);
         Assert.Contains("event.shiftKey && event.key === 'F10'", script, StringComparison.Ordinal);
         Assert.Contains("attachContextMenuSubmenu", script, StringComparison.Ordinal);
@@ -302,6 +307,9 @@ public sealed class MenuTests : BunitContext
         Assert.Contains(".shadcn-context-menu-item:hover", css, StringComparison.Ordinal);
         Assert.Contains("background-clip: padding-box", css, StringComparison.Ordinal);
         Assert.Contains("max(0.25rem, calc(0.25rem * var(--shadcn-spacing-multiplier)))", css, StringComparison.Ordinal);
+        Assert.Contains("@media (pointer: coarse)", css, StringComparison.Ordinal);
+        Assert.Contains("[role=\"menuitemradio\"]),", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-command-item { min-height: 2.75rem; }", css, StringComparison.Ordinal);
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);

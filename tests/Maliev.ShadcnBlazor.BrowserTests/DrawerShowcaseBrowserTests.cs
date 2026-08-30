@@ -7,6 +7,37 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class DrawerShowcaseBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task DrawerOwnsScrollingForLongContentAtMobileHeight()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 320, Height = 640 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/drawer").ToString());
+        await page.Locator("#preview [data-slot='drawer-trigger']").ClickAsync();
+
+        var content = page.Locator("[data-slot='drawer-content']");
+        await content.EvaluateAsync("""
+            element => {
+                const filler = document.createElement('div');
+                filler.dataset.testid = 'drawer-long-content';
+                filler.style.blockSize = '900px';
+                filler.style.flex = '0 0 auto';
+                element.querySelector('[data-slot="drawer-footer"]')?.before(filler);
+            }
+            """);
+
+        Assert.Equal("auto", await content.EvaluateAsync<string>("element => getComputedStyle(element).overflowY"));
+        Assert.True(await content.EvaluateAsync<bool>("element => element.scrollHeight > element.clientHeight"));
+        await content.EvaluateAsync("element => element.scrollTop = element.scrollHeight");
+        Assert.True(await content.EvaluateAsync<double>("element => element.scrollTop") > 0);
+        await Assertions.Expect(content.Locator("[data-slot='drawer-footer']")).ToBeInViewportAsync();
+    }
+
+    [Fact]
     public async Task DrawerSupportsTriggerEscapeOutsidePressAndRepeatedOpening()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

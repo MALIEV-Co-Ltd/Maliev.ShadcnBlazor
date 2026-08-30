@@ -72,6 +72,26 @@ public sealed class SecretInputTests : BunitContext
     }
 
     [Fact]
+    public void NamedMaskedSecretSubmitsTheRealValueThroughAHiddenSuccessfulControl()
+    {
+        var cut = Render<ShadcnSecretInput>(parameters => parameters
+            .Add(component => component.Value, "sk-abcdef")
+            .Add(component => component.MaskStart, 3)
+            .Add(component => component.Name, "apiKey")
+            .Add(component => component.Required, true));
+
+        var visibleInput = cut.Find("[data-slot='input-group-control']");
+        var submissionInput = cut.Find("input[data-slot='secret-input-form-control']");
+
+        Assert.Equal("sk-••••••", visibleInput.GetAttribute("value"));
+        Assert.False(visibleInput.HasAttribute("name"));
+        Assert.True(visibleInput.HasAttribute("required"));
+        Assert.Equal("hidden", submissionInput.GetAttribute("type"));
+        Assert.Equal("apiKey", submissionInput.GetAttribute("name"));
+        Assert.Equal("sk-abcdef", submissionInput.GetAttribute("value"));
+    }
+
+    [Fact]
     public void ReadOnlySecretsCanBeRevealedButCannotBeEdited()
     {
         var cut = Render<ShadcnSecretInput>(parameters => parameters

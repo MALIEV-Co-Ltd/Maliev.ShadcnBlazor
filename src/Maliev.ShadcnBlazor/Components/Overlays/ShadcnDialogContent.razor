@@ -5,7 +5,10 @@
 @if (Context.Owner.EffectiveOpen)
 {
     <div class="shadcn-dialog-portal" data-slot="dialog-portal">
-        <div class="shadcn-dialog-overlay" data-slot="dialog-overlay" data-state="open" @onclick="OutsideAsync"></div>
+        @if (Context.Owner.Modal)
+        {
+            <div class="shadcn-dialog-overlay" data-slot="dialog-overlay" data-state="open" @onclick="OutsideAsync"></div>
+        }
         <div @ref="_element" @attributes="ForwardedAttributes" id="@Context.ContentId" class="@MergeClass("shadcn-dialog-content")" style="@MergeStyle(null)" data-slot="dialog-content" data-state="open" role="dialog" aria-modal="@(Context.Owner.Modal ? "true" : null)" aria-labelledby="@Context.TitleId" aria-describedby="@Context.DescriptionId" tabindex="-1">
             @ChildContent
             @if (ShowCloseButton) { <ShadcnDialogClose Label="@CloseLabel" /> }
@@ -34,7 +37,7 @@
         if (_attached) await ResetInteropAsync();
         _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
         _selfReference = DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync("attachDialog", _element, _selfReference, Context.Owner.Modal, Context.Owner.CloseOnEscape);
+        await _module.InvokeVoidAsync("attachDialog", _element, _selfReference, Context.Owner.Modal, Context.Owner.CloseOnEscape, Context.Owner.Modal, Context.Owner.CloseOnOutsidePress);
         _attached = true;
         _attachedElementId = _element.Id;
     }

@@ -97,6 +97,11 @@
 
 .shadcn-reveal[data-reveal-state='pending'] {
     opacity: 0;
+    visibility: hidden;
+}
+
+.shadcn-reveal[data-reveal-state='revealed'] {
+    visibility: visible;
 }
 
 .shadcn-reveal[data-reveal-state='pending'][data-reveal-effect='rise'] {
@@ -144,6 +149,7 @@
     .shadcn-reveal[data-reveal-state='pending'],
     .shadcn-reveal[data-reveal-cascade='true'] * {
         opacity: 1 !important;
+        visibility: visible !important;
         transform: none !important;
         clip-path: none !important;
         transition: none !important;

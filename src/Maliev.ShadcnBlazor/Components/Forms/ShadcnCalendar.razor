@@ -235,7 +235,6 @@
             FocusedDate = focusTarget;
             if (FocusedDate.Year != EffectiveMonth.Year || FocusedDate.Month != EffectiveMonth.Month) await SetVisibleMonthAsync(new(FocusedDate.Year, FocusedDate.Month, 1));
         }
-        if (args.Key is "Enter" or " ") await SelectAsync(FocusedDate);
         if (args.Key is "ArrowRight" or "ArrowLeft" or "ArrowDown" or "ArrowUp" or "Home" or "End" or "PageUp" or "PageDown")
         {
             PendingFocus = focusTarget;

@@ -104,6 +104,18 @@ public sealed class DialogDossierBrowserTests(
         await trigger.ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).Not.ToHaveAttributeAsync("aria-modal", "true");
         await Assertions.Expect(page.Locator("#preview .component-code pre")).ToContainTextAsync("Modal=\"false\"");
+        await page.EvaluateAsync("""
+            () => {
+                const target = document.createElement('button');
+                target.dataset.testid = 'non-modal-outside-target';
+                target.style.cssText = 'position:fixed;inset:0 auto auto 0;width:12px;height:12px;z-index:2147483647';
+                target.addEventListener('click', () => target.dataset.clicked = 'true');
+                document.body.append(target);
+            }
+            """);
+        await page.Mouse.ClickAsync(6, 6);
+        await Assertions.Expect(page.GetByTestId("non-modal-outside-target")).ToHaveAttributeAsync("data-clicked", "true");
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
 
         Assert.Empty(errors);
     }

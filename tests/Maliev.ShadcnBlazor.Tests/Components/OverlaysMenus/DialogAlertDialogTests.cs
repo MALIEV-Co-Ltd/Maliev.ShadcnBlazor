@@ -200,6 +200,10 @@ public sealed class DialogAlertDialogTests : BunitContext
         Assert.Contains("requestAnimationFrame(restoreFocus)", script, StringComparison.Ordinal);
         Assert.Contains("previous?.closest?.('[data-slot=\"dialog\"],[data-slot=\"alert-dialog\"]')", script, StringComparison.Ordinal);
         Assert.Contains("focusOwner?.querySelector?.('[data-slot=\"dialog-trigger\"],[data-slot=\"alert-dialog-trigger\"]')", script, StringComparison.Ordinal);
+        Assert.Contains("element.getAttribute('tabindex') !== '-1'", script, StringComparison.Ordinal);
+        Assert.Contains("element.closest('[inert]')", script, StringComparison.Ordinal);
+        Assert.Contains("style.visibility !== 'hidden'", script, StringComparison.Ordinal);
+        Assert.Contains("style.display !== 'none'", script, StringComparison.Ordinal);
     }
 
     private IRenderedComponent<ShadcnDialog> RenderDialog(bool open, Action<bool>? changed = null) => Render<ShadcnDialog>(p => p

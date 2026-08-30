@@ -14,13 +14,23 @@ let documentOverflow = '';
 
 function focusable(root) {
     return [...root.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')]
-        .filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true');
+        .filter(element => {
+            const style = getComputedStyle(element);
+            return element.getAttribute('tabindex') !== '-1'
+                && !element.hidden
+                && element.getAttribute('aria-hidden') !== 'true'
+                && !element.closest('[inert]')
+                && style.visibility !== 'hidden'
+                && style.display !== 'none'
+                && element.getClientRects().length > 0;
+        });
 }
 
 function releaseDialog(content, restore = true) {
     const state = dialogs.get(content);
     if (!state) return;
     document.removeEventListener('keydown', state.keydown);
+    document.removeEventListener('pointerdown', state.outside);
     releaseLayer(content);
     state.observer?.disconnect();
     state.inerted.forEach(element => {
@@ -51,7 +61,7 @@ function releaseDialog(content, restore = true) {
     dialogs.delete(content);
 }
 
-export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = modal) {
+export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = modal, closeOnOutsidePress = false) {
     if (dialogs.has(content)) return;
     const previous = document.activeElement;
     const focusOwner = previous?.closest?.('[data-slot="dialog"],[data-slot="alert-dialog"]');
@@ -77,7 +87,7 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (modalCount++ === 0) documentOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
     }
-    const state = { content, portal, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, observer: null };
+    const state = { content, portal, topLayer, previous, focusOwner, inerted: [...inerted], modal, keydown: null, outside: null, observer: null };
     const keydown = event => {
         content.querySelectorAll('[data-pointer-highlighted="true"]').forEach(item => item.removeAttribute('data-pointer-highlighted'));
         if (event.__shadcnLayerHandled || dialogStack[dialogStack.length - 1] !== state || !isTopLayer(content)) return;
@@ -89,9 +99,17 @@ export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = 
         if (event.shiftKey && (document.activeElement === first || document.activeElement === content)) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
+    const outside = event => {
+        if (modal || !closeOnOutsidePress || !isTopLayer(content) || content.contains(event.target)) return;
+        const trigger = content.id ? document.querySelector(`[data-slot="dialog-trigger"][aria-controls="${CSS.escape(content.id)}"]`) : null;
+        if (trigger?.contains(event.target)) return;
+        dotnet.invokeMethodAsync('RequestCloseAsync');
+    };
     document.addEventListener('keydown', keydown);
+    if (!modal && closeOnOutsidePress) document.addEventListener('pointerdown', outside);
     const observer = new MutationObserver(() => { if (!content.isConnected) releaseDialog(content); });
     state.keydown = keydown;
+    state.outside = outside;
     state.observer = observer;
     dialogs.set(content, state);
     dialogStack.push(state);
@@ -191,9 +209,31 @@ export function attachDrawer(content, dotnet, direction, modalMode, disablePoint
 export function detachDrawer(content) { if (!content) return; content.removeAttribute('data-drawer-ready'); const value = drawers.get(content); if (value) { content.removeEventListener('pointerdown', value.down); content.removeEventListener('pointermove', value.move); content.removeEventListener('pointerup', value.up); content.removeEventListener('pointercancel', value.cancel); removeEventListener('resize', value.resize); if (!value.modal) document.removeEventListener('pointerdown', value.outside); value.snapObserver.disconnect(); drawers.delete(content); } detachDialog(content); }
 
 const positioned = new WeakMap();
+function viewportBounds() {
+    const viewport = window.visualViewport;
+    return {
+        left: viewport?.offsetLeft ?? 0,
+        top: viewport?.offsetTop ?? 0,
+        width: viewport?.width ?? innerWidth,
+        height: viewport?.height ?? innerHeight
+    };
+}
+function listenToViewport(sync) {
+    const visualViewport = window.visualViewport;
+    addEventListener('resize', sync);
+    addEventListener('scroll', sync, true);
+    visualViewport?.addEventListener('resize', sync);
+    visualViewport?.addEventListener('scroll', sync);
+    return () => {
+        removeEventListener('resize', sync);
+        removeEventListener('scroll', sync, true);
+        visualViewport?.removeEventListener('resize', sync);
+        visualViewport?.removeEventListener('scroll', sync);
+    };
+}
 function placePositioned(content, trigger, preferredSide, align, sideOffset, alignOffset, padding) {
-    const anchor = trigger.getBoundingClientRect(), popup = { width: content.offsetWidth, height: content.offsetHeight };
-    const space = { top: anchor.top - padding, bottom: innerHeight - anchor.bottom - padding, left: anchor.left - padding, right: innerWidth - anchor.right - padding };
+    const anchor = trigger.getBoundingClientRect(), popup = { width: content.offsetWidth, height: content.offsetHeight }, viewport = viewportBounds();
+    const space = { top: anchor.top - viewport.top - padding, bottom: viewport.top + viewport.height - anchor.bottom - padding, left: anchor.left - viewport.left - padding, right: viewport.left + viewport.width - anchor.right - padding };
     const opposite = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
     const needed = preferredSide === 'top' || preferredSide === 'bottom' ? popup.height + sideOffset : popup.width + sideOffset;
     const side = space[preferredSide] < needed && space[opposite[preferredSide]] > space[preferredSide] ? opposite[preferredSide] : preferredSide;
@@ -206,8 +246,8 @@ function placePositioned(content, trigger, preferredSide, align, sideOffset, ali
         left = side === 'left' ? anchor.left - popup.width - sideOffset : anchor.right + sideOffset;
         top = align === 'start' ? anchor.top + alignOffset : align === 'end' ? anchor.bottom - popup.height + alignOffset : anchor.top + (anchor.height - popup.height) / 2 + alignOffset;
     }
-    left = Math.min(Math.max(padding, left), Math.max(padding, innerWidth - padding - popup.width));
-    top = Math.min(Math.max(padding, top), Math.max(padding, innerHeight - padding - popup.height));
+    left = Math.min(Math.max(viewport.left + padding, left), Math.max(viewport.left + padding, viewport.left + viewport.width - padding - popup.width));
+    top = Math.min(Math.max(viewport.top + padding, top), Math.max(viewport.top + padding, viewport.top + viewport.height - padding - popup.height));
     content.dataset.side = side; content.dataset.align = align; content.style.position = 'fixed'; content.style.left = `${left}px`; content.style.top = `${top}px`;
     content.style.setProperty('--shadcn-transform-origin', side === 'top' ? 'bottom' : side === 'bottom' ? 'top' : side === 'left' ? 'right' : 'left');
     content.dataset.positioned = 'true';
@@ -224,11 +264,11 @@ export function attachPositioned(content, triggerId, side, align, sideOffset, al
     const observer = new ResizeObserver(sync); observer.observe(content); observer.observe(trigger);
     const anchorObserver = new MutationObserver(() => { if (!content.isConnected) detachPositioned(content); else if (!trigger.isConnected) dotnet?.invokeMethodAsync('RequestCloseAsync'); });
     anchorObserver.observe(document.body, { childList: true, subtree: true });
-    addEventListener('resize', sync); addEventListener('scroll', sync, true); document.addEventListener('keydown', keydown); document.addEventListener('pointerdown', outside);
+    const stopViewportListeners = listenToViewport(sync); document.addEventListener('keydown', keydown); document.addEventListener('pointerdown', outside);
     queueMicrotask(() => { sync(); if (focusContent) (focusable(content)[0] || content).focus({ preventScroll: true }); });
-    positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver, restoreFocus: restoreFocusOnDetach });
+    positioned.set(content, { trigger, previous, sync, keydown, outside, observer, anchorObserver, stopViewportListeners, restoreFocus: restoreFocusOnDetach });
 }
-export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); removeEventListener('resize', value.sync); removeEventListener('scroll', value.sync, true); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (content.matches(':popover-open')) content.hidePopover(); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
+export function detachPositioned(content) { const value = positioned.get(content); if (!value) return; releaseLayer(content); value.observer.disconnect(); value.anchorObserver.disconnect(); value.stopViewportListeners(); document.removeEventListener('keydown', value.keydown); document.removeEventListener('pointerdown', value.outside); if (content.matches(':popover-open')) content.hidePopover(); if (value.restoreFocus && value.previous?.isConnected) value.previous.focus?.({ preventScroll: true }); positioned.delete(content); }
 export function isPositionedAttached(content) { return positioned.has(content); }
 
 const hoverCards = new Map();
@@ -350,7 +390,7 @@ export function attachMenu(menu, triggerId, dotnet = null, loop = true, focusOnH
     const out = event => { const trigger = event.target.closest?.('[data-slot$="sub-trigger"]'); if (!trigger || trigger.parentElement?.contains(event.relatedTarget)) return; hoverTimer = setTimeout(() => { if (trigger.getAttribute('aria-expanded') === 'true') trigger.click(); }, 300); };
     menu.addEventListener('keydown', keydown, true); menu.addEventListener('pointerover', over); menu.addEventListener('pointerout', out); document.addEventListener('keydown', documentEscape); document.addEventListener('pointerdown', outside); if (!menu.matches('[data-slot="menubar-content"]')) queueMicrotask(() => focusAt(menu, 0)); menus.set(menu, { keydown, documentEscape, outside, over, out, clear: () => { clearTimeout(timer); clearTimeout(hoverTimer); } });
 }
-export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('keydown', value.documentEscape); document.removeEventListener('pointerdown', value.outside); menus.delete(menu); }
+export function detachMenu(menu) { const value = menus.get(menu); if (!value) return; releaseLayer(menu);value.clear(); menu.removeEventListener('keydown', value.keydown, true); menu.removeEventListener('pointerover', value.over); menu.removeEventListener('pointerout', value.out); document.removeEventListener('keydown', value.documentEscape); document.removeEventListener('pointerdown', value.outside); const contextState = contextMenus.get(menu); if (contextState) { contextState.observer.disconnect(); contextState.stopViewportListeners(); contextMenus.delete(menu); } if (menu.matches(':popover-open')) menu.hidePopover(); menus.delete(menu); }
 export function isMenuAttached(menu) { return menus.has(menu); }
 export function focusFirstMenuItem(menu) { requestAnimationFrame(() => menu.querySelector('[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"]')?.focus({ preventScroll: true })); }
 export function focusSubTrigger(menu) { menu.parentElement?.querySelector(':scope > [data-slot$="sub-trigger"]')?.focus({ preventScroll: true }); }
@@ -386,15 +426,22 @@ export function detachContextMenuTrigger(trigger) {
 
 export function placeContextMenu(menu, padding = 8) {
     const desiredX = Number(menu.dataset.anchorX) || 0, desiredY = Number(menu.dataset.anchorY) || 0;
-    const width = menu.getBoundingClientRect().width, height = menu.getBoundingClientRect().height;
-    menu.style.left = `${Math.min(Math.max(padding, desiredX), Math.max(padding, innerWidth - padding - width))}px`;
-    menu.style.top = `${Math.min(Math.max(padding, desiredY), Math.max(padding, innerHeight - padding - height))}px`;
+    const width = menu.getBoundingClientRect().width, height = menu.getBoundingClientRect().height, viewport = viewportBounds();
+    menu.style.left = `${Math.min(Math.max(viewport.left + padding, desiredX), Math.max(viewport.left + padding, viewport.left + viewport.width - padding - width))}px`;
+    menu.style.top = `${Math.min(Math.max(viewport.top + padding, desiredY), Math.max(viewport.top + padding, viewport.top + viewport.height - padding - height))}px`;
     menu.dataset.positioned = 'true';
 }
 
+const contextMenus = new WeakMap();
 export function attachContextMenu(menu, triggerId, dotnet, padding = 8) {
     menu.dataset.positioned = 'false';
-    placeContextMenu(menu, padding);
+    if (menu.showPopover) { menu.setAttribute('popover', 'manual'); if (!menu.matches(':popover-open')) menu.showPopover(); }
+    const sync = () => placeContextMenu(menu, padding);
+    const observer = new ResizeObserver(sync);
+    observer.observe(menu);
+    const stopViewportListeners = listenToViewport(sync);
+    contextMenus.set(menu, { observer, stopViewportListeners });
+    sync();
     attachMenu(menu, triggerId, dotnet, true, false);
 }
 
@@ -414,18 +461,16 @@ export function attachContextMenuSubmenu(content, triggerId, padding = 8) {
         if (!content.isConnected || !trigger.isConnected) detachContextMenuSubmenu(content);
     });
     anchorObserver.observe(document.body, { childList: true, subtree: true });
-    addEventListener('resize', sync);
-    addEventListener('scroll', sync, true);
+    const stopViewportListeners = listenToViewport(sync);
     queueMicrotask(sync);
-    contextMenuSubmenus.set(content, { sync, observer, anchorObserver });
+    contextMenuSubmenus.set(content, { sync, observer, anchorObserver, stopViewportListeners });
 }
 export function detachContextMenuSubmenu(content) {
     const state = contextMenuSubmenus.get(content);
     if (!state) return;
     state.observer.disconnect();
     state.anchorObserver.disconnect();
-    removeEventListener('resize', state.sync);
-    removeEventListener('scroll', state.sync, true);
+    state.stopViewportListeners();
     contextMenuSubmenus.delete(content);
 }
 

@@ -236,6 +236,12 @@
 @keyframes shadcn-button-spin { to { transform: rotate(360deg); } }
 
 @media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item, .shadcn-slider-thumb):focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"] { border-color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-radio-item-root[data-presentation="card"][data-state="checked"] { border-color: Highlight; outline: 2px solid Highlight; outline-offset: 2px; }
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-button, .shadcn-toggle, .shadcn-checkbox, .shadcn-switch, .shadcn-radio-group-item, .shadcn-slider-thumb) {

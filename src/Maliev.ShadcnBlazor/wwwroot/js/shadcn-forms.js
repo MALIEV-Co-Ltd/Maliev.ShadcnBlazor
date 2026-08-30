@@ -90,6 +90,28 @@ export function disconnectOtpSelection(input) {
 
 const popupObservers = new WeakMap();
 const promotedPopups = new WeakMap();
+const validationProxyObservers = new WeakMap();
+
+export function observeValidationProxies(root, targetSelector) {
+    disconnectValidationProxies(root);
+    const target = root?.querySelector?.(targetSelector);
+    const proxies = [...(root?.querySelectorAll?.('.shadcn-form-control-proxy') ?? [])];
+    if (!target || !proxies.length) return;
+
+    const onInvalid = event => {
+        event.preventDefault();
+        target.focus({ preventScroll: false });
+    };
+    for (const proxy of proxies) proxy.addEventListener('invalid', onInvalid);
+    validationProxyObservers.set(root, { proxies, onInvalid });
+}
+
+export function disconnectValidationProxies(root) {
+    const observer = validationProxyObservers.get(root);
+    if (!observer) return;
+    for (const proxy of observer.proxies) proxy.removeEventListener('invalid', observer.onInvalid);
+    validationProxyObservers.delete(root);
+}
 
 export function promoteDatePickerPopup(root) {
     promoteAnchoredPopup(root, 'date-picker');

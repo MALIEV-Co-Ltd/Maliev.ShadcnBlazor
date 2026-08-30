@@ -7,6 +7,36 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class ContextMenuBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task ContextMenuEscapesTransformedOverflowClippedHost()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            DeviceScaleFactor = 1,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/context-menu").ToString());
+
+        var trigger = page.Locator("#preview [data-slot='context-menu-trigger']");
+        await trigger.EvaluateAsync("""
+            element => {
+                const host = element.closest('.component-preview__canvas');
+                host.style.transform = 'translateZ(0)';
+                host.style.overflow = 'hidden';
+                host.style.blockSize = '8rem';
+                host.style.zIndex = '0';
+            }
+            """);
+        await trigger.ClickAsync(new() { Button = MouseButton.Right, Position = new() { X = 120, Y = 90 } });
+
+        var menu = page.Locator("#preview [data-slot='context-menu-content']");
+        await Assertions.Expect(menu).ToHaveAttributeAsync("popover", "manual");
+        Assert.True(await menu.EvaluateAsync<bool>("element => element.matches(':popover-open')"));
+        await menu.GetByRole(AriaRole.Menuitem, new() { Name = "Rename", Exact = true }).ClickAsync();
+    }
+
+    [Fact]
     public async Task ContextMenuTriggerUsesTheContextMenuCursorAcrossNestedText()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

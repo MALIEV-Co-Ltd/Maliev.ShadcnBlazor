@@ -143,6 +143,9 @@ public sealed class ResizableScrollAreaTests : BunitContext
         var script = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "js", "shadcn-disclosure-navigation.js"));
         Assert.Contains("const coordinate = direction === 'horizontal' ? event.clientX : event.clientY", script, StringComparison.Ordinal);
         Assert.Contains("touchAction", script, StringComparison.Ordinal);
+        Assert.Contains("cancelAnimationFrame(value.frame)", script, StringComparison.Ordinal);
+        Assert.Contains("releasePointerCapture", script, StringComparison.Ordinal);
+        Assert.Contains("style.removeProperty('touch-action')", script, StringComparison.Ordinal);
 
         var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-disclosure-navigation.css"));
         Assert.Contains("--shadcn-resizable-hit-target", css, StringComparison.Ordinal);

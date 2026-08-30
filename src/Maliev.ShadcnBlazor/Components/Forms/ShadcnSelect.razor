@@ -37,7 +37,7 @@
             </div>
         </div>
     }
-    @if (!string.IsNullOrWhiteSpace(Name)) { <input class="shadcn-form-control-proxy" data-slot="select-form-control" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : CurrentValueAsString)" disabled="@EffectiveDisabled" required="@Required" /> }
+    @if (!string.IsNullOrWhiteSpace(Name)) { <input class="shadcn-form-control-proxy" data-slot="select-form-control" tabindex="-1" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : CurrentValueAsString)" disabled="@EffectiveDisabled" required="@Required" @oninvalid="FocusValidationTargetAsync" @oninvalid:preventDefault /> }
 </div>
 
 @code {
@@ -63,6 +63,7 @@
     private bool _requestedOpen;
     private bool _lastOpenParameter;
     private bool _openParameterInitialized;
+    private bool _openedFromActivationKey;
     private int ActiveIndex;
     private ShadcnSelectOption<TValue>? SelectedOption => Options.FirstOrDefault(IsSelected);
     private IEnumerable<IGrouping<string, ShadcnSelectOption<TValue>>> GroupedOptions => Options.GroupBy(option => option.Group ?? string.Empty);
@@ -112,12 +113,27 @@
         _uncontrolledOpen = value;
         await InvokeAsync(StateHasChanged);
     }
-    private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
+    private async Task ToggleOpenAsync(MouseEventArgs args)
+    {
+        if (_openedFromActivationKey && args.Detail == 0)
+        {
+            _openedFromActivationKey = false;
+            return;
+        }
+        _openedFromActivationKey = false;
+        if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen);
+    }
     private async Task ClearAsync() { if (!EffectiveDisabled && !ReadOnly) await SetCurrentValueAsync(default!); }
     private async Task SelectAsync(ShadcnSelectOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; await SetOpenAsync(false); await SetCurrentValueAsync(option.Value); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private async Task HandleKeyDownAsync(KeyboardEventArgs args)
     {
         if (EffectiveDisabled || ReadOnly) return;
+        if (!EffectiveOpen && args.Key is "Enter" or " ")
+        {
+            _openedFromActivationKey = true;
+            await SetOpenAsync(true);
+            return;
+        }
         if (args.Key is "ArrowDown" or "ArrowUp" or "Home" or "End" && !EffectiveOpen) await SetOpenAsync(true);
         ActiveIndex = args.Key switch { "Home" => FirstEnabled(), "End" => LastEnabled(), "ArrowDown" => Move(1), "ArrowUp" => Move(-1), _ => ActiveIndex };
         if (args.Key.Length == 1 && args.Key != " ")
@@ -130,6 +146,7 @@
         if (args.Key == "Escape") await CloseAndFocusAsync();
         if (args.Key == "Tab" && EffectiveOpen) await SetOpenAsync(false);
     }
+    private Task FocusValidationTargetAsync(EventArgs _) => Trigger.FocusAsync().AsTask();
     private string OptionId(int index) => $"{ListboxId}-option-{index}";
     private async Task CloseAndFocusAsync() { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private int LastEnabled() { for (var i = Options.Count - 1; i >= 0; i--) if (!Options[i].Disabled) return i; return -1; }
@@ -137,6 +154,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!string.IsNullOrWhiteSpace(Name))
+        {
+            Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+            await Module.InvokeVoidAsync("observeValidationProxies", Root, "[data-slot=\"select-trigger\"]");
+        }
         if (EffectiveOpen && !IsObserving)
         {
             Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
@@ -157,7 +179,7 @@
     public async ValueTask DisposeAsync()
     {
         Dispose();
-        if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } }
+        if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectValidationProxies", Root); await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } }
         SelfReference?.Dispose();
     }
 }

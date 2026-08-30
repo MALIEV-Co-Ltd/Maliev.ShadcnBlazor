@@ -47,6 +47,9 @@ public sealed class DropzoneShowcaseBrowserTests(ShowcaseServerFixture server, P
         });
         await Assertions.Expect(root).ToHaveAttributeAsync("data-state", "invalid");
         await Assertions.Expect(root.GetByRole(AriaRole.Alert)).ToContainTextAsync("notes.txt is not an accepted file type.");
+        var errorId = await root.GetByRole(AriaRole.Alert).GetAttributeAsync("id");
+        Assert.False(string.IsNullOrWhiteSpace(errorId));
+        Assert.Contains(errorId!, await input.GetAttributeAsync("aria-describedby"), StringComparison.Ordinal);
 
         await page.GetByTestId("control-dropzone-multiple").UncheckAsync();
         await page.GetByTestId("control-dropzone-loading").CheckAsync();

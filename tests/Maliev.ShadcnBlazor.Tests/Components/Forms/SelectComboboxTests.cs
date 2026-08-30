@@ -25,6 +25,8 @@ public sealed class SelectComboboxTests : BunitContext
     public SelectComboboxTests()
     {
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+        module.SetupVoid("observeValidationProxies", _ => true);
+        module.SetupVoid("disconnectValidationProxies", _ => true);
         module.SetupVoid("observePopupDismissal", _ => true);
         module.SetupVoid("disconnectPopupDismissal", _ => true);
         module.SetupVoid("focusElement", _ => true);
@@ -103,6 +105,47 @@ public sealed class SelectComboboxTests : BunitContext
         cut.Find("[data-slot='select-trigger']").KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
         Assert.True(open);
         Assert.Null(selected);
+    }
+
+    [Theory]
+    [InlineData("Enter")]
+    [InlineData(" ")]
+    public void ClosedSelectActivationKeysOpenWithoutSelecting(string key)
+    {
+        int? selected = null;
+        var open = false;
+        var cut = Render<ShadcnSelect<int?>>(parameters => parameters
+            .Add(component => component.Value, selected)
+            .Add(component => component.ValueChanged, value => selected = value)
+            .Add(component => component.Options, Priorities.Select(option => new ShadcnSelectOption<int?>(option.Value, option.Text, option.Group, option.Disabled)).ToArray())
+            .Add(component => component.Open, open)
+            .Add(component => component.OpenChanged, value => open = value));
+
+        cut.Find("[data-slot='select-trigger']").KeyDown(new KeyboardEventArgs { Key = key });
+
+        Assert.True(open);
+        Assert.Null(selected);
+    }
+
+    [Fact]
+    public void PopupValidationProxiesAreExcludedFromSequentialFocus()
+    {
+        var select = Render<ShadcnSelect<int?>>(parameters => parameters
+            .Add(component => component.Options, Priorities.Select(option => new ShadcnSelectOption<int?>(option.Value, option.Text)).ToArray())
+            .Add(component => component.Name, "priority")
+            .Add(component => component.Required, true));
+        var singleCombobox = Render<ShadcnCombobox<string>>(parameters => parameters
+            .Add(component => component.Options, Frameworks)
+            .Add(component => component.Name, "framework")
+            .Add(component => component.Required, true));
+        var multipleCombobox = Render<ShadcnCombobox<string>>(parameters => parameters
+            .Add(component => component.Options, Frameworks)
+            .Add(component => component.Multiple, true)
+            .Add(component => component.Required, true));
+
+        Assert.Equal("-1", select.Find("[data-slot='select-form-control']").GetAttribute("tabindex"));
+        Assert.Equal("-1", singleCombobox.Find("[data-slot='combobox-form-control']").GetAttribute("tabindex"));
+        Assert.Equal("-1", multipleCombobox.Find("[data-slot='combobox-required-control']").GetAttribute("tabindex"));
     }
 
     [Fact]
@@ -365,6 +408,22 @@ public sealed class SelectComboboxTests : BunitContext
             .Add(component => component.ValuesChanged, values => selected = values));
         cut.Find("[data-slot='combobox-chip-remove']").Click();
         Assert.Equal(["nuxt"], selected);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void LockedMultipleComboboxDisablesMutatingButtons(bool disabled, bool readOnly)
+    {
+        var cut = Render<ShadcnCombobox<string>>(parameters => parameters
+            .Add(component => component.Options, Frameworks)
+            .Add(component => component.Multiple, true)
+            .Add(component => component.Values, new[] { "next" })
+            .Add(component => component.Disabled, disabled)
+            .Add(component => component.ReadOnly, readOnly));
+
+        Assert.True(cut.Find("[data-slot='combobox-chip-remove']").HasAttribute("disabled"));
+        Assert.True(cut.Find("[data-slot='combobox-trigger']").HasAttribute("disabled"));
     }
 
     [Fact]

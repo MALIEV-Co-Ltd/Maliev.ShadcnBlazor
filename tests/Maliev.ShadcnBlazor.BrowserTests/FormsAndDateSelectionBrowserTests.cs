@@ -68,6 +68,14 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
 
         var select = page.GetByTestId("forms-select");
         await select.FocusAsync();
+        await select.PressAsync("Enter");
+        await Assertions.Expect(select).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(select).ToContainTextAsync("CNC machining");
+        await select.PressAsync("Escape");
+        await select.PressAsync("Space");
+        await Assertions.Expect(select).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(select).ToContainTextAsync("CNC machining");
+        await select.PressAsync("Escape");
         await select.PressAsync("ArrowDown");
         await Assertions.Expect(select).ToHaveAttributeAsync("aria-expanded", "true");
         await select.PressAsync("End");
@@ -107,7 +115,7 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         Assert.Equal(0, await page.Locator("input[name='deliveryDate']").CountAsync());
         var submitCount = await page.GetByTestId("forms-native-form").EvaluateAsync<int>("form => { let count=0; form.addEventListener('submit', () => count++); form.requestSubmit(); return count; }");
         Assert.Equal(0, submitCount);
-        await Assertions.Expect(page.Locator("[data-slot='date-picker-form-control']")).ToBeFocusedAsync();
+        await Assertions.Expect(dateInput).ToBeFocusedAsync();
 
         var calendar = page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]");
         var selectedRange = calendar.Locator("[data-range-start='true'],[data-range-middle='true'],[data-range-end='true']");
@@ -116,6 +124,12 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         await focusedDay.FocusAsync();
         await focusedDay.PressAsync("ArrowRight");
         await Assertions.Expect(calendar.Locator("[data-day='2026-08-21']")).ToBeFocusedAsync();
+
+        var activationDay = calendar.Locator("[data-day='2026-08-24']");
+        await activationDay.FocusAsync();
+        await activationDay.PressAsync("Enter");
+        await Assertions.Expect(activationDay).ToHaveAttributeAsync("data-range-start", "true");
+        Assert.Null(await activationDay.GetAttributeAsync("data-range-end"));
 
     }
 
@@ -198,6 +212,36 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         var yearSelect = calendar.Locator("[data-slot='calendar-year-select']");
         await yearSelect.Locator("[data-slot='select-trigger']").ClickAsync();
         await Assertions.Expect(yearSelect.Locator("[role='option'][data-value='2026']")).ToHaveTextAsync("2569✓");
+    }
+
+    [Fact]
+    public async Task ForcedColorsKeepsFormFocusVisible()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 800, Height = 900 },
+            ForcedColors = ForcedColors.Active,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(Url("light", "ltr"));
+
+        foreach (var control in new[]
+        {
+            page.Locator("input[name='partName']"),
+            page.Locator("textarea[name='notes']"),
+            page.GetByTestId("forms-select"),
+            page.GetByTestId("forms-combobox"),
+            page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]").Locator("[data-slot='calendar-day'][tabindex='0']")
+        })
+        {
+            await control.FocusAsync();
+            var outline = await control.EvaluateAsync<string[]>("element => { const style = getComputedStyle(element); return [style.outlineStyle, style.outlineWidth, style.outlineColor]; }");
+            var identity = await control.EvaluateAsync<string>("element => `${element.tagName.toLowerCase()}[data-slot=${element.dataset.slot ?? ''}][data-testid=${element.dataset.testid ?? ''}]`");
+            Assert.True(outline[0] == "solid", $"{identity} must retain a solid forced-colors focus outline, but computed {string.Join(", ", outline)}.");
+            Assert.NotEqual("0px", outline[1]);
+            Assert.NotEqual("rgba(0, 0, 0, 0)", outline[2]);
+        }
     }
 
     [Fact]
