@@ -7,6 +7,7 @@
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IServiceProvider IdAllocator
 
 <CascadingValue Value="@_context">
     <div @ref="GroupReference"
@@ -39,7 +40,7 @@
     [Parameter] public bool Invalid { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private readonly string GeneratedName = $"shadcn-radio-{Guid.NewGuid():N}";
+    private string GeneratedName = null!;
     private ShadcnRadioGroupContext<TValue> _context = default!;
     private ElementReference GroupReference;
     private IJSObjectReference? Module;
@@ -51,6 +52,7 @@
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true;
     private TValue EffectiveValue => ValueChanged.HasDelegate ? Value : UncontrolledValue;
     private string EffectiveName => string.IsNullOrWhiteSpace(Name) ? GeneratedName : Name;
+
     private string OrientationValue => Orientation switch
     {
         ShadcnRadioGroupOrientation.Vertical => "vertical",
@@ -60,7 +62,11 @@
     private string PresentationValue => Presentation switch { ShadcnRadioGroupPresentation.Default => "default", ShadcnRadioGroupPresentation.Card => "card", _ => throw new ArgumentOutOfRangeException(nameof(Presentation), Presentation, "Unknown Shadcn radio group presentation.") };
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "aria-invalid", "aria-describedby", "aria-orientation", "data-slot", "data-orientation", "data-presentation");
 
-    protected override void OnInitialized() => _context = new(SelectAsync);
+    protected override void OnInitialized()
+    {
+        GeneratedName = IdAllocator.NextId("shadcn-radio");
+        _context = new(SelectAsync);
+    }
 
     protected override void OnParametersSet()
     {

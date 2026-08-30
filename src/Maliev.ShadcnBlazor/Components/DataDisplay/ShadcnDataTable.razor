@@ -37,7 +37,8 @@
     else
     {
         <div class="shadcn-data-table-frame">
-            <ShadcnTable>
+            <CascadingValue Name="ShadcnTableSuppressContainerTabStop" Value="true" IsFixed="true">
+            <ShadcnTable AdditionalAttributes="@TableAttributes">
                 <ShadcnTableHeader>
                     <ShadcnTableRow>
                         @if (Selectable)
@@ -67,7 +68,7 @@
                 <ShadcnTableBody>
                     @if (Result.PageRows.Count == 0)
                     {
-                        <ShadcnTableRow><ShadcnTableCell ColSpan="@RenderedColumnCount" Class="shadcn-data-table-empty"><span data-slot="data-table-empty">@EmptyText</span></ShadcnTableCell></ShadcnTableRow>
+                        <ShadcnTableRow><ShadcnTableCell ColSpan="@RenderedColumnCount" Class="shadcn-data-table-empty"><span data-slot="data-table-empty" role="status" aria-live="polite">@EmptyText</span></ShadcnTableCell></ShadcnTableRow>
                     }
                     else
                     {
@@ -91,6 +92,7 @@
                     }
                 </ShadcnTableBody>
             </ShadcnTable>
+            </CascadingValue>
         </div>
     }
     <div class="shadcn-data-table-footer" data-slot="data-table-footer">
@@ -145,19 +147,32 @@
     private ShadcnDataTableState _internalState = new();
     private bool _defaultStateApplied;
     private ShadcnDataTableState? _pendingReconciliation;
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> _orderedColumns = [];
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> _visibleColumns = [];
+    private ShadcnDataTableResult<TItem> _result = default!;
     private ShadcnDataTableState CurrentState => State ?? _internalState;
-    private IReadOnlyList<ShadcnDataTableColumn<TItem>> OrderedColumns => Columns.OrderBy(column => column.Order).ThenBy(column => Array.IndexOf(Columns.ToArray(), column)).ToList();
-    private IReadOnlyList<ShadcnDataTableColumn<TItem>> VisibleColumns => OrderedColumns.Where(column => !CurrentState.HiddenColumnKeys.Contains(column.Key)).ToList();
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> OrderedColumns => _orderedColumns;
+    private IReadOnlyList<ShadcnDataTableColumn<TItem>> VisibleColumns => _visibleColumns;
     private IReadOnlyList<int> EffectivePageSizeOptions => PageSizeOptions.Contains(CurrentState.PageSize)
         ? PageSizeOptions
         : [CurrentState.PageSize, .. PageSizeOptions];
-    private ShadcnDataTableResult<TItem> Result => Manual
-        ? ShadcnDataTableEngine.EvaluateManual(Items, CurrentState, TotalCount, RowKey)
-        : ShadcnDataTableEngine.Evaluate(Items, Columns, CurrentState, RowKey, FilterPredicate);
+    private ShadcnDataTableResult<TItem> Result => _result;
     private ShadcnSelectionState PageSelection => ShadcnDataTableEngine.GetPageSelectionState(Result.PageRows, CurrentState.SelectedKeys, RowKey, CanSelect);
     private string PageSelectionAria => PageSelection switch { ShadcnSelectionState.Checked => "true", ShadcnSelectionState.Indeterminate => "mixed", _ => "false" };
     private int RenderedColumnCount => VisibleColumns.Count + (Selectable ? 1 : 0) + (RowActionTemplate is null ? 0 : 1);
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "aria-busy");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "aria-busy", "aria-label", "aria-labelledby");
+    private IReadOnlyDictionary<string, object> TableAttributes
+    {
+        get
+        {
+            var attributes = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            if (AdditionalAttributes is null) return attributes;
+            foreach (var (name, value) in AdditionalAttributes)
+                if (name is not null && (name.Equals("aria-label", StringComparison.OrdinalIgnoreCase) || name.Equals("aria-labelledby", StringComparison.OrdinalIgnoreCase)))
+                    attributes[name] = value;
+            return attributes;
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -166,6 +181,7 @@
         if (State is null && !_defaultStateApplied) { _internalState = DefaultState; _defaultStateApplied = true; }
         if (PageSizeOptions.Count == 0 || PageSizeOptions.Any(size => size < 1)) throw new InvalidOperationException("Page-size options must contain positive values.");
         ShadcnDataTableEngine.ValidateColumns(Columns);
+        RefreshProjection();
         var result = Result;
         if (!Manual)
         {
@@ -184,9 +200,29 @@
 
     private async Task PublishAsync(ShadcnDataTableState next)
     {
-        if (State is null) _internalState = next;
+        if (State is null)
+        {
+            _internalState = next;
+            RefreshProjection();
+        }
         await StateChanged.InvokeAsync(next);
         if (Manual) await RequestChanged.InvokeAsync(ShadcnDataTableRequest.FromState(next));
+    }
+
+    private void RefreshProjection()
+    {
+        _orderedColumns = Columns
+            .Select((column, index) => (Column: column, Index: index))
+            .OrderBy(entry => entry.Column.Order)
+            .ThenBy(entry => entry.Index)
+            .Select(entry => entry.Column)
+            .ToArray();
+        _visibleColumns = _orderedColumns
+            .Where(column => !CurrentState.HiddenColumnKeys.Contains(column.Key))
+            .ToArray();
+        _result = Manual
+            ? ShadcnDataTableEngine.EvaluateManual(Items, CurrentState, TotalCount, RowKey)
+            : ShadcnDataTableEngine.Evaluate(Items, Columns, CurrentState, RowKey, FilterPredicate);
     }
 
     private Task OnFilterInput(ChangeEventArgs args) => PublishAsync(CurrentState with { Query = args.Value?.ToString() ?? string.Empty, PageIndex = 0 });

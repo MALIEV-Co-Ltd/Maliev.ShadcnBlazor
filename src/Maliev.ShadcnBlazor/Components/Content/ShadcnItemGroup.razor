@@ -1,5 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-item-group")" style="@MergeStyle(null)" role="list" data-slot="item-group">@ChildContent</div>
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-item-group")" style="@MergeStyle(null)" role="list" data-slot="item-group"><CascadingValue Name="ShadcnItemGroup" Value="true" IsFixed="true">@ChildContent</CascadingValue></div>
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("role", "data-slot");

@@ -223,22 +223,25 @@ public sealed class ToastTests : BunitContext
         var cut = Render<ShadcnToaster>(parameters => parameters
             .Add(component => component.MaximumVisible, 2)
             .Add(component => component.CloseLabel, "ปิดการแจ้งเตือน")
+            .Add(component => component.ReducedMotion, true)
             .Add(component => component.Placement, ShadcnToastPlacement.BottomStart));
 
         var viewport = cut.Find("[data-slot='toast-viewport']");
         Assert.Equal("bottom-start", viewport.GetAttribute("data-placement"));
-        Assert.Equal(3, cut.FindAll("[data-slot='toast']").Count);
-        Assert.Single(cut.FindAll("[data-limited='true']"));
-        var limitedToast = cut.Find("[data-limited='true']");
-        Assert.Equal("off", limitedToast.GetAttribute("aria-live"));
-        Assert.NotNull(limitedToast.GetAttribute("inert"));
-        Assert.Equal("true", limitedToast.GetAttribute("aria-hidden"));
-        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-feedback-content.css"));
-        Assert.Contains(".shadcn-toast[data-limited=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Equal(2, cut.FindAll("[data-slot='toast']").Count);
+        Assert.Empty(cut.FindAll("[data-limited='true']"));
+        Assert.DoesNotContain("One", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Two", cut.Markup);
         Assert.Contains("Three", cut.Markup);
         Assert.Equal("ปิดการแจ้งเตือน", cut.Find("[data-slot='toast-close']").GetAttribute("aria-label"));
         Assert.Equal("status", cut.FindAll("[data-slot='toast']")[1].GetAttribute("role"));
+
+        cut.Find("[data-slot='toast-close']").Click();
+
+        Assert.Equal(2, cut.FindAll("[data-slot='toast']").Count);
+        Assert.Contains("One", cut.Markup);
+        Assert.Contains("Three", cut.Markup);
+        Assert.DoesNotContain("Two", cut.Markup, StringComparison.Ordinal);
     }
 
     [Fact]

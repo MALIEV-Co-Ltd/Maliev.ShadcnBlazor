@@ -2,10 +2,12 @@
 @using System.Globalization
 @using System.Linq.Expressions
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
+@inject IServiceProvider IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @ref="Root" class="@MergeClass("shadcn-combobox")" style="@MergeStyle(null)" data-slot="combobox" data-open="@(EffectiveOpen ? "true" : null)">
@@ -15,7 +17,7 @@
             @foreach (var value in EffectiveValues)
             {
                 var option = Options.FirstOrDefault(candidate => EqualityComparer<TValue>.Default.Equals(candidate.Value, value));
-                <span class="shadcn-combobox-chip" data-slot="combobox-chip">@(option?.Text ?? Format(value))<button type="button" data-slot="combobox-chip-remove" aria-label="@($"Remove {option?.Text ?? Format(value)}")" @onclick="() => RemoveAsync(value)">×</button></span>
+                <span class="shadcn-combobox-chip" data-slot="combobox-chip">@(option?.Text ?? Format(value))<button type="button" data-slot="combobox-chip-remove" aria-label="@($"Remove {option?.Text ?? Format(value)}")" disabled="@(EffectiveDisabled || ReadOnly)" @onclick="() => RemoveAsync(value)">×</button></span>
             }
         </div>
     }
@@ -27,7 +29,7 @@
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
         }
-        @if (ShowTrigger) { <button type="button" data-slot="combobox-trigger" aria-label="@TriggerLabel" disabled="@EffectiveDisabled" @onclick="ToggleOpenAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg></button> }
+        @if (ShowTrigger) { <button type="button" data-slot="combobox-trigger" aria-label="@TriggerLabel" disabled="@(EffectiveDisabled || ReadOnly)" @onclick="ToggleOpenAsync"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg></button> }
     </div>
     @if (EffectiveOpen)
     {
@@ -38,10 +40,24 @@
                 {
                     <div role="group" aria-label="@group.Key" data-slot="combobox-group">
                     @if (!string.IsNullOrWhiteSpace(group.Key)) { <div data-slot="combobox-label">@group.Key</div> }
-                    @foreach (var option in group)
+                    @if (Virtualize)
                     {
-                        var index = FilteredIndex(option);
-                        <div id="@OptionId(index)" class="shadcn-combobox-item" data-slot="combobox-item" data-value="@Format(option.Value)" role="option" aria-selected="@IsSelected(option.Value).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" data-active="@(index == ActiveIndex ? "true" : null)" @onclick="() => SelectAsync(option)">@(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }@if (IsSelected(option.Value)) { <span aria-hidden="true">✓</span> }</div>
+                        @if (ActiveOption is { } activeOption && string.Equals(activeOption.Group ?? string.Empty, group.Key, StringComparison.Ordinal))
+                        {
+                            <div id="@OptionId(ActiveIndex)" data-slot="combobox-active-option" style="@ActiveOptionStyle" role="option" aria-label="@activeOption.Text" aria-selected="@IsSelected(activeOption.Value).ToString().ToLowerInvariant()" aria-disabled="@(activeOption.Disabled ? "true" : null)" aria-setsize="@FilteredOptions.Count" aria-posinset="@(ActiveIndex + 1)">@activeOption.Text</div>
+                        }
+                        <Virtualize Items="@group.ToArray()" Context="option" ItemSize="@VirtualizationItemSize" SpacerElement="div">
+                            @{ var index = FilteredIndex(option); }
+                            <div id="@VirtualizedOptionId(index)" class="shadcn-combobox-item" data-slot="combobox-item" data-value="@Format(option.Value)" role="option" aria-hidden="@(index == ActiveIndex ? "true" : null)" aria-selected="@IsSelected(option.Value).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" aria-setsize="@FilteredOptions.Count" aria-posinset="@(index + 1)" data-active="@(index == ActiveIndex ? "true" : null)" @onclick="() => SelectAsync(option)">@(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }@if (IsSelected(option.Value)) { <span aria-hidden="true">✓</span> }</div>
+                        </Virtualize>
+                    }
+                    else
+                    {
+                        @foreach (var option in group)
+                        {
+                            var index = FilteredIndex(option);
+                            <div id="@OptionId(index)" class="shadcn-combobox-item" data-slot="combobox-item" data-value="@Format(option.Value)" role="option" aria-selected="@IsSelected(option.Value).ToString().ToLowerInvariant()" aria-disabled="@(option.Disabled ? "true" : null)" data-active="@(index == ActiveIndex ? "true" : null)" @onclick="() => SelectAsync(option)">@(ItemTemplate is null ? option.Text : null)@if (ItemTemplate is not null) { @ItemTemplate(option) }@if (IsSelected(option.Value)) { <span aria-hidden="true">✓</span> }</div>
+                        }
                     }
                     </div>
                 }
@@ -50,12 +66,12 @@
     }
     @if (Multiple)
     {
-        @if (Required) { <input class="shadcn-form-control-proxy" data-slot="combobox-required-control" aria-label="@Placeholder" value="@(EffectiveValues.Count == 0 ? string.Empty : "selected")" disabled="@EffectiveDisabled" required /> }
+        @if (Required) { <input class="shadcn-form-control-proxy" data-slot="combobox-required-control" tabindex="-1" aria-label="@Placeholder" value="@(EffectiveValues.Count == 0 ? string.Empty : "selected")" disabled="@EffectiveDisabled" required @oninvalid="FocusValidationTargetAsync" @oninvalid:preventDefault /> }
         @if (!string.IsNullOrWhiteSpace(Name)) { foreach (var value in EffectiveValues) { <input type="hidden" name="@Name" value="@Format(value)" disabled="@EffectiveDisabled" /> } }
     }
     else if (!string.IsNullOrWhiteSpace(Name))
     {
-        <input class="shadcn-form-control-proxy" data-slot="combobox-form-control" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : Format(Value))" disabled="@EffectiveDisabled" required="@Required" />
+        <input class="shadcn-form-control-proxy" data-slot="combobox-form-control" tabindex="-1" aria-label="@Placeholder" name="@Name" value="@(SelectedOption is null ? string.Empty : Format(Value))" disabled="@EffectiveDisabled" required="@Required" @oninvalid="FocusValidationTargetAsync" @oninvalid:preventDefault />
     }
 </div>
 
@@ -78,6 +94,10 @@
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
     [Parameter] public bool ShowClear { get; set; }
     [Parameter] public bool ShowTrigger { get; set; } = true;
+    /// <summary>Gets or sets whether option rows are virtualized for large collections.</summary>
+    [Parameter] public bool Virtualize { get; set; }
+    /// <summary>Gets or sets the estimated height, in CSS pixels, of each virtualized option row.</summary>
+    [Parameter] public float VirtualizationItemSize { get; set; } = 36f;
     [Parameter] public string Placeholder { get; set; } = "Select an option";
     [Parameter] public string EmptyText { get; set; } = "No items found.";
     [Parameter] public string ClearLabel { get; set; } = "Clear selection";
@@ -88,14 +108,16 @@
     [Parameter] public bool Required { get; set; }
     [Parameter] public bool Invalid { get; set; }
     [Parameter] public RenderFragment<ShadcnComboboxOption<TValue>>? ItemTemplate { get; set; }
-    private readonly string ListboxId = $"shadcn-combobox-{Guid.NewGuid():N}";
+    private string ListboxId = null!;
     private int ActiveIndex;
+    private const string ActiveOptionStyle = "position:absolute;inline-size:1px;block-size:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0";
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true || HasValidationMessages();
     private string? DescribedBy => MergeIds(FieldContext?.AriaDescribedBy, AttributeText("aria-describedby"));
     private ShadcnComboboxOption<TValue>? SelectedOption => Multiple ? null : Options.FirstOrDefault(option => EqualityComparer<TValue>.Default.Equals(option.Value, EffectiveValue));
     private string DisplayQuery => string.IsNullOrEmpty(EffectiveQuery) ? SelectedOption?.Text ?? string.Empty : EffectiveQuery;
     private IReadOnlyList<ShadcnComboboxOption<TValue>> FilteredOptions => Options.Where(option => string.IsNullOrWhiteSpace(EffectiveQuery) || option.Text.Contains(EffectiveQuery, StringComparison.CurrentCultureIgnoreCase)).ToArray();
+    private ShadcnComboboxOption<TValue>? ActiveOption => ActiveIndex >= 0 && ActiveIndex < FilteredOptions.Count ? FilteredOptions[ActiveIndex] : null;
     private IEnumerable<IGrouping<string, ShadcnComboboxOption<TValue>>> GroupedOptions => FilteredOptions.GroupBy(option => option.Group ?? string.Empty);
     private string? ActiveDescendant => EffectiveOpen && ActiveIndex >= 0 && ActiveIndex < FilteredOptions.Count ? OptionId(ActiveIndex) : null;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "role", "value", "placeholder", "name", "disabled", "readonly", "required", "aria-required", "aria-autocomplete", "aria-haspopup", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-invalid", "aria-describedby");
@@ -114,9 +136,12 @@
     private IReadOnlyList<TValue> EffectiveValues => ValuesChanged.HasDelegate ? Values : _uncontrolledValues;
     private string EffectiveQuery => QueryChanged.HasDelegate ? Query : _uncontrolledQuery;
     private bool EffectiveOpen => OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
+    protected override void OnInitialized() => ListboxId = IdAllocator.NextId("shadcn-combobox");
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        if (!float.IsFinite(VirtualizationItemSize) || VirtualizationItemSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(VirtualizationItemSize), VirtualizationItemSize, "Virtualization item size must be finite and greater than zero.");
         EnsureValidationSubscription();
         if (!_stateInitialized)
         {
@@ -139,6 +164,7 @@
     private bool IsSelected(TValue value) => Multiple ? EffectiveValues.Contains(value) : EqualityComparer<TValue>.Default.Equals(EffectiveValue, value);
     private static string Format(TValue value) => value is IFormattable formattable ? formattable.ToString(null, CultureInfo.InvariantCulture) : value?.ToString() ?? string.Empty;
     private string OptionId(int index) => $"{ListboxId}-option-{index}";
+    private string VirtualizedOptionId(int index) => $"{OptionId(index)}-virtual";
     private int FirstEnabled() { for (var i = 0; i < FilteredOptions.Count; i++) if (!FilteredOptions[i].Disabled) return i; return -1; }
     private int FilteredIndex(ShadcnComboboxOption<TValue> option) { var items = FilteredOptions; for (var i = 0; i < items.Count; i++) if (ReferenceEquals(items[i], option) || EqualityComparer<ShadcnComboboxOption<TValue>>.Default.Equals(items[i], option)) return i; return -1; }
     private int Move(int delta) { var items = FilteredOptions; if (items.Count == 0) return -1; var current = ActiveIndex; for (var count = 0; count < items.Count; count++) { current = (current + delta + items.Count) % items.Count; if (!items[current].Disabled) return current; } return ActiveIndex; }
@@ -146,6 +172,7 @@
     private async Task OpenAsync() { if (!EffectiveDisabled && !ReadOnly && !EffectiveOpen) await SetOpenAsync(true); }
     private async Task ToggleOpenAsync() { if (!EffectiveDisabled && !ReadOnly) await SetOpenAsync(!EffectiveOpen); }
     private async Task HandleKeyDownAsync(KeyboardEventArgs args) { if (EffectiveDisabled || ReadOnly) return; if (args.Key is "ArrowDown" or "ArrowUp" && !EffectiveOpen) await SetOpenAsync(true); ActiveIndex = args.Key switch { "ArrowDown" => Move(1), "ArrowUp" => Move(-1), "Home" => FirstEnabled(), "End" => LastEnabled(), _ => ActiveIndex }; if (args.Key is "Enter" && ActiveIndex >= 0) await SelectAsync(FilteredOptions[ActiveIndex]); if (args.Key is "Escape" or "Tab") await SetOpenAsync(false); }
+    private Task FocusValidationTargetAsync(EventArgs _) => InputElement.FocusAsync().AsTask();
     private int LastEnabled() { for (var i = FilteredOptions.Count - 1; i >= 0; i--) if (!FilteredOptions[i].Disabled) return i; return -1; }
     private async Task SelectAsync(ShadcnComboboxOption<TValue> option) { if (EffectiveDisabled || ReadOnly || option.Disabled) return; if (Multiple) { var next = EffectiveValues.Contains(option.Value) ? EffectiveValues.Where(value => !EqualityComparer<TValue>.Default.Equals(value, option.Value)).ToArray() : [.. EffectiveValues, option.Value]; await SetValuesAsync(next); Notify(ValuesExpression); } else { await SetValueAsync(option.Value); Notify(ValueExpression); await SetOpenAsync(false); } await SetQueryAsync(string.Empty); }
     private async Task ClearAsync() { if (EffectiveDisabled || ReadOnly) return; if (Multiple) { await SetValuesAsync([]); Notify(ValuesExpression); } else { await SetValueAsync(default!); Notify(ValueExpression); } await SetQueryAsync(string.Empty); }
@@ -161,9 +188,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (Required || !string.IsNullOrWhiteSpace(Name)) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); await Module.InvokeVoidAsync("observeValidationProxies", Root, "[data-slot=\"combobox-input\"]"); }
         if (EffectiveOpen && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "combobox"); IsObserving = true; }
         else if (!EffectiveOpen && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
     }
     [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", InputElement); } }
-    public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
+    public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectValidationProxies", Root); await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
 }

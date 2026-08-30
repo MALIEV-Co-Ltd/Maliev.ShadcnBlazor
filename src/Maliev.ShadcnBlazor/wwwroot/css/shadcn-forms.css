@@ -197,7 +197,6 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) :is(.shadcn-input, .shadcn-textarea) { font-size: .875rem; }
 }
 @media (max-width: 40rem) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) .documentation-page { min-width: 0; overflow-x: clip; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group { max-width: 100%; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp { max-width: 100%; gap: calc(.25rem * var(--shadcn-spacing-multiplier)); }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot { width: min(2.25rem, calc((100vw - 4rem) / 6)); }
@@ -212,12 +211,22 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-caret { animation: none; }
 }
 @media (forced-colors: active) {
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-date-picker-trigger, .shadcn-date-picker-input, .shadcn-calendar-nav > button, .shadcn-calendar-day-button):where(:focus, :focus-visible),
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> :where(.shadcn-input, .shadcn-textarea, .shadcn-combobox-control):where(:focus, :focus-visible)) {
+        outline-color: Highlight !important;
+        outline-style: solid !important;
+        outline-width: 2px !important;
+        outline-offset: 2px !important;
+        box-shadow: none !important;
+    }
+
     :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-input-group, .shadcn-input-otp-slot, .shadcn-select-trigger, .shadcn-combobox-chips, .shadcn-date-picker-trigger) { border-color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input::file-selector-button { color: ButtonText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-slot[data-active="true"] { outline: 2px solid Highlight; outline-offset: 2px; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp[data-invalid="true"] .shadcn-input-otp-slot { border-color: Mark; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-select:focus-within { outline: 2px solid Highlight; outline-offset: 2px; box-shadow: none; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where([data-selected-single="true"], [data-range-start="true"], [data-range-end="true"]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+    :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day-button:where(:focus, :focus-visible) { forced-color-adjust: auto; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-middle="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-calendar-day[data-range-complete="true"]::before { forced-color-adjust: none; background: Highlight; }
 }

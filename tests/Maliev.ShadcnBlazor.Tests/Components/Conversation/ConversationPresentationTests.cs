@@ -6,6 +6,8 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Conversation;
 
 public sealed class ConversationPresentationTests : BunitContext
 {
+    public ConversationPresentationTests() => Services.AddMalievShadcn();
+
     [Theory]
     [InlineData(ShadcnBubbleVariant.Default, "default")]
     [InlineData(ShadcnBubbleVariant.Secondary, "secondary")]
@@ -126,6 +128,35 @@ public sealed class ConversationPresentationTests : BunitContext
         trigger.Click();
         Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
         Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
+    }
+
+    [Fact]
+    public void BubbleReactionOverflowStateLabelCanBeLocalized()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReactionOverflow>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReactionOverflow.Count), 2);
+                reactions.AddAttribute(2, "LabelFormatter", (Func<bool, int, string>)((expanded, count) => expanded ? $"ซ่อนอีก {count} รายการ" : $"แสดงอีก {count} รายการ"));
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReactionOverflow.ChildContent), (RenderFragment)(overflow =>
+                {
+                    overflow.OpenComponent<ShadcnBubbleReaction>(0);
+                    overflow.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Mali reacted");
+                    overflow.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "ML");
+                    overflow.CloseComponent();
+                }));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var trigger = cut.Find("[data-slot='bubble-reaction-overflow-trigger']");
+        Assert.Equal("แสดงอีก 2 รายการ", trigger.GetAttribute("aria-label"));
+        trigger.Click();
+        Assert.Equal("ซ่อนอีก 2 รายการ", trigger.GetAttribute("aria-label"));
     }
 
     [Theory]

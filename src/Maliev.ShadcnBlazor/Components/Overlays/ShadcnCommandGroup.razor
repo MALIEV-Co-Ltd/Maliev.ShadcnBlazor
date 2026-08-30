@@ -1,3 +1,4 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IServiceProvider IdAllocator
 <div @attributes="Forwarded" class="@MergeClass("shadcn-command-group")" style="@MergeStyle(null)" data-slot="command-group" role="group" aria-labelledby="@(Heading is null?null:_headingId)">@if(Heading is not null){<div id="@_headingId" class="shadcn-command-group-heading" data-slot="command-group-heading">@Heading</div>}@ChildContent</div>
-@code { [Parameter]public string? Heading{get;set;} [Parameter]public RenderFragment? ChildContent{get;set;} private readonly string _headingId=$"shadcn-command-heading-{Guid.NewGuid():N}"; private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","role","aria-labelledby"); }
+@code { [Parameter]public string? Heading{get;set;} [Parameter]public RenderFragment? ChildContent{get;set;} private string _headingId=null!; protected override void OnInitialized()=>_headingId=IdAllocator.NextId("shadcn-command-heading"); private IReadOnlyDictionary<string,object> Forwarded=>AttributesExcept("data-slot","role","aria-labelledby"); }

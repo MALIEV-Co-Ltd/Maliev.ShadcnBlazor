@@ -10,9 +10,41 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Forms;
 
 public sealed class CalendarDatePickerTests : BunitContext
 {
+    [Fact]
+    public void DatePickerForwardsLocalizedCalendarAndGeneratedAssistiveText()
+    {
+        var cut = Render<DynamicComponent>(parameters => parameters
+            .Add(component => component.Type, typeof(ShadcnDatePicker))
+            .Add(component => component.Parameters, new Dictionary<string, object>
+            {
+                [nameof(ShadcnDatePicker.Open)] = true,
+                [nameof(ShadcnDatePicker.Mode)] = ShadcnCalendarSelectionMode.Range,
+                [nameof(ShadcnDatePicker.Name)] = "delivery",
+                [nameof(ShadcnDatePicker.VisibleMonth)] = new DateOnly(2026, 8, 1),
+                [nameof(ShadcnDatePicker.Today)] = new DateOnly(2026, 8, 30),
+                ["PreviousMonthLabel"] = "เดือนก่อนหน้า",
+                ["NextMonthLabel"] = "เดือนถัดไป",
+                ["WeekLabel"] = "สัปดาห์",
+                ["MonthSelectLabel"] = "เดือน",
+                ["YearSelectLabel"] = "ปี",
+                ["RangeStartLabel"] = "วันเริ่มต้น",
+                ["RangeEndLabel"] = "วันสิ้นสุด",
+                ["DayLabel"] = (Func<DateOnly, string>)(date => $"วันที่ {date.Day}")
+            }));
+
+        Assert.Equal("เดือนก่อนหน้า", cut.Find("[data-slot='calendar-previous']").GetAttribute("aria-label"));
+        Assert.Equal("เดือนถัดไป", cut.Find("[data-slot='calendar-next']").GetAttribute("aria-label"));
+        Assert.Equal("วันที่ 30", cut.Find("[data-day='2026-08-30']").GetAttribute("aria-label"));
+        Assert.Equal("วันเริ่มต้น", cut.Find("[data-slot='date-picker-range-start-control']").GetAttribute("aria-label"));
+        Assert.Equal("วันสิ้นสุด", cut.Find("[data-slot='date-picker-range-end-control']").GetAttribute("aria-label"));
+    }
+
     public CalendarDatePickerTests()
     {
+        Services.AddMalievShadcn();
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
+        module.SetupVoid("observeValidationProxies", _ => true);
+        module.SetupVoid("disconnectValidationProxies", _ => true);
         module.SetupVoid("focusCalendarDay", _ => true);
         module.SetupVoid("observePopupDismissal", _ => true);
         module.SetupVoid("disconnectPopupDismissal", _ => true);
@@ -206,6 +238,8 @@ public sealed class CalendarDatePickerTests : BunitContext
         var day = cut.Find("[data-day='2026-07-15']");
         day.KeyDown(new KeyboardEventArgs { Key = "ArrowRight" });
         day.KeyDown(new KeyboardEventArgs { Key = "Enter" });
+        Assert.Null(selected);
+        cut.Find("[data-day='2026-07-14']").Click();
         Assert.Equal(new DateOnly(2026, 7, 14), selected);
 
         day.KeyDown(new KeyboardEventArgs { Key = "PageDown" });
@@ -384,6 +418,7 @@ public sealed class CalendarDatePickerTests : BunitContext
         var formControl = cut.Find("input[data-slot='date-picker-form-control']");
         Assert.Equal("deliveryDate", formControl.GetAttribute("name"));
         Assert.Equal("2026-08-13", formControl.GetAttribute("value"));
+        Assert.Equal("-1", formControl.GetAttribute("tabindex"));
     }
 
     [Fact]
@@ -520,6 +555,8 @@ public sealed class CalendarDatePickerTests : BunitContext
         Assert.Equal(new ShadcnDateRange(new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13)), model.Window);
         Assert.Contains(editContext.GetValidationMessages(), message => message.Contains(nameof(DateModel.Window), StringComparison.Ordinal));
         Assert.False(cut.Find("[data-slot='date-picker-range-start-control']").HasAttribute("name"));
+        Assert.Equal("-1", cut.Find("[data-slot='date-picker-range-start-control']").GetAttribute("tabindex"));
+        Assert.Equal("-1", cut.Find("[data-slot='date-picker-range-end-control']").GetAttribute("tabindex"));
         Assert.Equal("18/08/2026 – 14/08/2026", cut.Find("[data-slot='date-picker-input']").GetAttribute("value"));
     }
 

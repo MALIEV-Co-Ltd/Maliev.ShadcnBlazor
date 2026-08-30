@@ -1,5 +1,6 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Content;
+using Microsoft.AspNetCore.Components;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.SemanticFoundations;
 
@@ -67,6 +68,27 @@ public sealed class ContentFoundationTests : BunitContext
         Assert.Equal("actions", actions.Find("[data-slot='item-actions']").TextContent);
         Assert.Equal("header", header.Find("[data-slot='item-header']").TextContent);
         Assert.Equal("footer", footer.Find("[data-slot='item-footer']").TextContent);
+    }
+
+    [Fact]
+    public void ItemGroupComposesListItemsWithoutRemovingLinkSemantics()
+    {
+        RenderFragment items = builder =>
+        {
+            builder.OpenComponent<ShadcnItem>(0);
+            builder.AddAttribute(1, nameof(ShadcnItem.ChildContent), (RenderFragment)(content => content.AddContent(0, "Regular")));
+            builder.CloseComponent();
+            builder.OpenComponent<ShadcnItem>(2);
+            builder.AddAttribute(3, nameof(ShadcnItem.Href), "/orders/42");
+            builder.AddAttribute(4, nameof(ShadcnItem.ChildContent), (RenderFragment)(content => content.AddContent(0, "Linked")));
+            builder.CloseComponent();
+        };
+        var cut = Render<ShadcnItemGroup>(parameters => parameters.Add(component => component.ChildContent, items));
+
+        Assert.Equal("list", cut.Find("[data-slot='item-group']").GetAttribute("role"));
+        Assert.Equal(2, cut.FindAll("[role='listitem']").Count);
+        var link = cut.Find("[role='listitem'] a[data-slot='item']");
+        Assert.Equal("/orders/42", link.GetAttribute("href"));
     }
 
     [Fact]

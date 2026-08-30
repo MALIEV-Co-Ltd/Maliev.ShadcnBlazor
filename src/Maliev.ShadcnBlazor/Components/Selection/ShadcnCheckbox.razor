@@ -4,6 +4,7 @@
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject IServiceProvider IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
@@ -41,7 +42,7 @@
     [Parameter] public string? Name { get; set; }
     [Parameter] public string FormValue { get; set; } = "on";
 
-    private readonly string GeneratedId = $"shadcn-checkbox-{Guid.NewGuid():N}";
+    private string GeneratedId = null!;
     private ElementReference InputReference;
     private IJSObjectReference? Module;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
@@ -50,6 +51,8 @@
     private string AriaChecked => Value?.ToString().ToLowerInvariant() ?? "mixed";
     private string EffectiveId => AdditionalAttributes?.FirstOrDefault(attribute => string.Equals(attribute.Key, "id", StringComparison.OrdinalIgnoreCase)).Value?.ToString() ?? GeneratedId;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "name", "value", "checked", "disabled", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state");
+
+    protected override void OnInitialized() => GeneratedId = IdAllocator.NextId("shadcn-checkbox");
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

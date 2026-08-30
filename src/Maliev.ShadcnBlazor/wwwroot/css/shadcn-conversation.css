@@ -31,7 +31,7 @@
 @keyframes shadcn-attachment-title-pulse { 0%,100% { opacity: .72; } 50% { opacity: 1; } }
 [data-state="uploading"] > .shadcn-attachment-content .shadcn-attachment-title,[data-state="processing"] > .shadcn-attachment-content .shadcn-attachment-title { color: var(--shadcn-foreground); animation: shadcn-attachment-title-pulse var(--shadcn-motion-duration-slow) var(--shadcn-motion-easing-standard) infinite; }
 @media (prefers-reduced-motion: reduce) { [data-state="uploading"] > .shadcn-attachment-content .shadcn-attachment-title,[data-state="processing"] > .shadcn-attachment-content .shadcn-attachment-title { animation:none !important; color:var(--shadcn-foreground) !important; } .shadcn-attachment-progress > span::after { animation:none; } .shadcn-attachment-progress[data-state="indeterminate"] > span { animation:none; translate:75% 0; } }
-@media (forced-colors: active) { .shadcn-attachment,.shadcn-attachment-action,.shadcn-attachment-trigger { border-color: CanvasText; } [data-state="error"] { border-style: double; } }
+@media (forced-colors: active) { .shadcn-attachment,.shadcn-attachment-action,.shadcn-attachment-trigger { border-color: CanvasText; } .shadcn-attachment[data-state="error"] { border-style: double; } }
 .shadcn-bubble-group,.shadcn-message-group { display:flex; min-width:0; flex-direction:column; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-bubble { position:relative; display:flex; width:fit-content; min-width:0; max-width:80%; flex-direction:column; }
 .shadcn-bubble[data-align="end"] { align-self:flex-end; }
@@ -156,19 +156,8 @@
     border-color: color-mix(in oklch, var(--shadcn-primary) 34%, var(--shadcn-border));
     color: var(--shadcn-primary);
 }
-.shadcn-attachment[data-state="uploading"] .showcase-attachment-spinner {
-    transform-origin: center;
-    animation: shadcn-attachment-spinner var(--shadcn-motion-duration-slow) linear infinite;
-}
 .shadcn-attachment[data-state="uploading"] .shadcn-attachment-description,
 .shadcn-attachment[data-state="processing"] .shadcn-attachment-description { color: var(--shadcn-primary); }
-.showcase-attachment-file[data-state="uploading"] .shadcn-attachment-title,
-.showcase-attachment-file[data-state="processing"] .shadcn-attachment-title,
-.showcase-attachment-file[data-state="uploading"] .shadcn-attachment-description,
-.showcase-attachment-file[data-state="processing"] .shadcn-attachment-description {
-    color: var(--shadcn-foreground) !important;
-}
-@keyframes shadcn-attachment-spinner { to { transform: rotate(360deg); } }
 
 .shadcn-bubble-content {
     border-radius: var(--shadcn-radius-xl);
@@ -200,26 +189,14 @@
     background: var(--shadcn-destructive);
     color: var(--shadcn-destructive-foreground);
 }
-html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="ghost"] > .shadcn-bubble-content {
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: var(--shadcn-foreground) !important;
-}
-.showcase-bubble-thread .shadcn-bubble-content {
-    border-radius: 1.15rem !important;
-    box-shadow: none !important;
-}
-.shadcn-bubble[data-align="end"] > .shadcn-bubble-content,
-.showcase-bubble-thread > [data-slot="bubble"][data-align="end"] .shadcn-bubble-content {
+.shadcn-bubble[data-align="end"] > .shadcn-bubble-content {
     border-top-left-radius: 1.15rem !important;
     border-top-right-radius: 1.15rem !important;
     border-bottom-left-radius: 1.15rem !important;
     border-end-end-radius: .35rem !important;
     border-bottom-right-radius: .35rem !important;
 }
-.shadcn-bubble[data-align="start"] > .shadcn-bubble-content,
-.showcase-bubble-thread > [data-slot="bubble"][data-align="start"] .shadcn-bubble-content {
+.shadcn-bubble[data-align="start"] > .shadcn-bubble-content {
     border-top-left-radius: 1.15rem !important;
     border-top-right-radius: 1.15rem !important;
     border-bottom-right-radius: 1.15rem !important;
@@ -240,19 +217,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-variant="ghost"] >
     border-end-start-radius: .35rem !important;
     border-bottom-right-radius: .35rem !important;
 }
-/* Keep the showcase tail deterministic across engines that resolve logical and physical corner declarations differently. */
-html body .showcase-bubble-thread > [data-slot="bubble"][data-align="end"] > .shadcn-bubble-content {
-    border-top-left-radius: 1.15rem !important;
-    border-top-right-radius: 1.15rem !important;
-    border-bottom-left-radius: 1.15rem !important;
-    border-bottom-right-radius: .35rem !important;
-}
-html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .shadcn-bubble-content {
-    border-top-left-radius: 1.15rem !important;
-    border-top-right-radius: 1.15rem !important;
-    border-bottom-left-radius: .35rem !important;
-    border-bottom-right-radius: 1.15rem !important;
-}
 .shadcn-bubble-group[data-reveal="true"] > [data-slot="bubble"] {
     opacity: 0;
     animation: shadcn-bubble-reveal var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter) both;
@@ -266,24 +230,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
     from { opacity: 0; transform: translateY(.35rem); }
     to { opacity: 1; transform: translateY(0); }
 }
-.showcase-bubble-thread .showcase-bubble-reaction-set {
-    min-height: 1.75rem !important;
-    gap: calc(.25rem * var(--shadcn-spacing-multiplier)) !important;
-    border-color: color-mix(in oklch, var(--shadcn-border) 76%, var(--shadcn-primary)) !important;
-    background: var(--shadcn-card) !important;
-    color: var(--shadcn-foreground) !important;
-    box-shadow: var(--shadcn-shadow-sm) !important;
-}
-.showcase-bubble-thread .showcase-bubble-reaction-icon {
-    width: 1.15rem !important;
-    height: 1.15rem !important;
-    padding: calc(.14rem * var(--shadcn-spacing-multiplier)) !important;
-    border-radius: 999px;
-}
-.showcase-bubble-thread .showcase-bubble-reaction-icon--like { color: #f59e0b; }
-.showcase-bubble-thread .showcase-bubble-reaction-icon--fire { color: #f97316; }
-.showcase-bubble-thread .showcase-bubble-reaction-icon--eyes { color: #a855f7; }
-
 .shadcn-marker-icon[data-streaming="true"] {
     width: 1.5rem;
     height: .75rem;
@@ -309,19 +255,6 @@ html body .showcase-bubble-thread > [data-slot="bubble"][data-align="start"] > .
 .shadcn-marker-content[data-streaming="true"] {
     color: var(--shadcn-foreground);
 }
-/* The showcase has its own streaming treatment. Keep the package contract authoritative:
-   the icon is static, the loader owns the dots, and the content owns one text mask wave. */
-html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] {
-    animation: none;
-}
-html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] {
-    color: var(--shadcn-muted-foreground);
-    -webkit-text-fill-color: currentColor;
-}
-html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after {
-    content: none;
-}
-
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -423,60 +356,7 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     .shadcn-message-copy-feedback { animation:none; }
 }
 
-.showcase-scroller-frame .shadcn-message-scroller-item { border: 0 !important; padding-block: calc(.4rem * var(--shadcn-spacing-multiplier)) !important; }
-.showcase-scroller-frame .shadcn-message-scroller-content { gap: calc(.2rem * var(--shadcn-spacing-multiplier)); }
-.showcase-scroller-frame .shadcn-message { min-height: 3rem; }
-.showcase-scroller-frame .shadcn-message-avatar { width: 2rem; min-width: 2rem; height: 2rem; min-height: 2rem; }
-.showcase-message-avatar-placeholder {
-    display: grid;
-    width: 100%;
-    height: 100%;
-    place-items: center;
-    border-radius: inherit;
-    background: color-mix(in oklch, var(--shadcn-primary) 12%, var(--shadcn-muted));
-    color: var(--shadcn-foreground);
-    font-size: .8rem;
-    font-weight: 700;
-}
-.shadcn-message-reply-icon,
-.showcase-message-reply-icon { width: 1rem; height: 1rem; display: block; }
-
-.showcase-scroller-composer {
-    display: flex;
-    align-items: center;
-    gap: calc(.5rem * var(--shadcn-spacing-multiplier));
-    margin: 0 calc(1rem * var(--shadcn-spacing-multiplier)) calc(1rem * var(--shadcn-spacing-multiplier));
-    padding: calc(.375rem * var(--shadcn-spacing-multiplier));
-    border: 1px solid var(--shadcn-border);
-    border-radius: var(--shadcn-radius-xl);
-    background: var(--shadcn-background);
-}
-.showcase-scroller-composer input {
-    min-width: 0;
-    flex: 1;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--shadcn-foreground);
-    font: inherit;
-}
-.showcase-scroller-composer input::placeholder { color: var(--shadcn-muted-foreground); }
-.showcase-scroller-composer button {
-    display: grid;
-    width: 2rem;
-    min-width: 2rem;
-    height: 2rem;
-    place-items: center;
-    border: 0;
-    border-radius: 999px;
-    background: var(--shadcn-primary);
-    color: var(--shadcn-primary-foreground);
-    cursor: pointer;
-    transition: transform var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), opacity var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
-}
-.showcase-scroller-composer button:hover { transform: translateY(-1px); }
-.showcase-scroller-composer button svg { width: 1rem; height: 1rem; }
-.showcase-scroller-composer button:focus-visible { outline: 2px solid var(--shadcn-ring); outline-offset: 2px; }
+.shadcn-message-reply-icon { width: 1rem; height: 1rem; display: block; }
 
 .shadcn-questionnaire { gap: calc(1.25rem * var(--shadcn-spacing-multiplier)); }
 .shadcn-questionnaire-choice {
@@ -513,20 +393,14 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
 .shadcn-questionnaire-choice[data-indicator="hidden"] { align-items:center; }
 .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-label"] { min-width: 0; color: var(--shadcn-foreground); font-weight: 650; line-height: 1.35; }
 .shadcn-questionnaire-choice-description { display: grid; min-width: 0; gap: calc(.2rem * var(--shadcn-spacing-multiplier)); color: var(--shadcn-muted-foreground); font-weight: 400; line-height: 1.4; }
-.showcase-questionnaire-choice-title { color: var(--shadcn-foreground); font-size: .9rem; font-weight: 650; }
-.showcase-questionnaire-choice-detail { color: var(--shadcn-muted-foreground); font-size: .8125rem; }
-.showcase-questionnaire-card { width: min(100%, 38rem) !important; border-radius: var(--shadcn-radius-xl) !important; padding: calc(clamp(1rem, 3vw, 1.75rem) * var(--shadcn-spacing-multiplier)) !important; }
-.showcase-questionnaire-card [data-slot="questionnaire-choice"] { min-height: 4rem; }
 .shadcn-questionnaire-navigation { transition: background-color var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard), transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard); }
 .shadcn-questionnaire-navigation:hover:not(:disabled) { transform: translateY(-1px); }
 @media (prefers-reduced-motion: reduce) {
-    .shadcn-attachment[data-state="uploading"] .showcase-attachment-spinner,
     .shadcn-marker-icon[data-streaming="true"],
     .shadcn-marker-loader { animation: none !important; }
     .shadcn-marker-content[data-streaming="true"] { animation: none !important; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: currentColor; }
     .shadcn-marker-content[data-streaming="true"]::after { animation: none !important; }
     .shadcn-bubble-group[data-reveal="true"] > [data-slot="bubble"] { opacity: 1; animation: none !important; }
-    .showcase-scroller-composer button,
     .shadcn-questionnaire-choice, .shadcn-questionnaire-choice > [data-slot="questionnaire-choice-input"]::before { transition: none; }
 }
 @media (forced-colors: active) {
@@ -535,9 +409,10 @@ html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]:
     .shadcn-marker-icon[data-streaming="true"], .shadcn-marker-loader { color: CanvasText; animation: none !important; }
     .shadcn-marker-content[data-streaming="true"] { color: CanvasText; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
     .shadcn-marker-content[data-streaming="true"]::after { background: none; animation: none !important; }
-    html body .showcase-marker-thread [data-slot="marker-icon"][data-streaming="true"] { animation: none; }
-    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"] { color: CanvasText; mask: none !important; -webkit-mask: none !important; -webkit-text-fill-color: CanvasText; animation: none !important; }
-    html body .showcase-marker-thread .shadcn-marker-content[data-streaming="true"]::after { background: none; animation: none; }
     .shadcn-message-action,.shadcn-message-reply-dismiss { color:ButtonText !important; }
     .shadcn-message-reply-quote { border-color:Highlight; background:Canvas; color:CanvasText; }
+}
+@media (pointer: coarse) {
+    .shadcn-attachment-action { width: 2.75rem; min-width: 2.75rem; max-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
+    .shadcn-message-action { width: 2.75rem; min-width: 2.75rem !important; height: 2.75rem; min-height: 2.75rem !important; }
 }

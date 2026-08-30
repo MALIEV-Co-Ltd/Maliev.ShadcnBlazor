@@ -34,6 +34,10 @@ public sealed class FormStyleParityTests
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("forced-color-adjust: none", css, StringComparison.Ordinal);
         Assert.Contains(".shadcn-calendar-day[data-range-middle=\"true\"]", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".documentation-page", css, StringComparison.Ordinal);
+        Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
+        Assert.Contains(":focus-visible", css, StringComparison.Ordinal);
+        Assert.Contains("outline: 2px solid Highlight", css, StringComparison.Ordinal);
     }
 
     [Fact]

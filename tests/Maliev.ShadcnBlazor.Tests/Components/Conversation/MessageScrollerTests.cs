@@ -47,11 +47,24 @@ public sealed class MessageScrollerTests : BunitContext
         var viewport = cut.Find("[data-slot='message-scroller-viewport']");
         Assert.Equal("region", viewport.GetAttribute("role"));
         Assert.Equal("บทสนทนา", viewport.GetAttribute("aria-label"));
-        Assert.Equal("polite", cut.Find("[data-slot='message-scroller-content']").GetAttribute("aria-live"));
+        Assert.Equal("off", cut.Find("[data-slot='message-scroller-content']").GetAttribute("aria-live"));
         var item = cut.Find("[data-slot='message-scroller-item']");
         Assert.Equal("turn-1", item.GetAttribute("data-message-id"));
         Assert.Equal("true", item.GetAttribute("data-scroll-anchor"));
         Assert.Equal("ไปข้อความล่าสุด", cut.Find("[data-slot='message-scroller-button']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void TranscriptAnnouncementsAreExplicitSoHistoricalPrependsStaySilentByDefault()
+    {
+        var cut = Render<ShadcnMessageScrollerProvider>(parameters => parameters.AddChildContent<ShadcnMessageScroller>(scroller => scroller
+            .AddChildContent<ShadcnMessageScrollerViewport>(viewport => viewport
+                .Add(component => component.AccessibleName, "Messages")
+                .AddChildContent<ShadcnMessageScrollerContent>(content => content
+                    .Add(component => component.AriaLive, "polite")
+                    .AddChildContent("Latest response")))));
+
+        Assert.Equal("polite", cut.Find("[data-slot='message-scroller-content']").GetAttribute("aria-live"));
     }
 
     [Fact]
@@ -161,6 +174,24 @@ public sealed class MessageScrollerTests : BunitContext
         Assert.False(command.IsCompleted);
         await provider.DisposeAsync();
         Assert.False(await command);
+    }
+
+    [Fact]
+    public async Task CancelledPremountCommandDisposesItsTimeoutSource()
+    {
+        var provider = new ShadcnMessageScrollerProvider();
+        var command = provider.ScrollToEndAsync();
+        var pendingField = typeof(ShadcnMessageScrollerProvider).GetField("_pending", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        var pending = Assert.Single((System.Collections.IEnumerable)pendingField.GetValue(provider)!);
+        Assert.NotNull(pending);
+        var timeoutProperty = pending!.GetType().GetProperty("Timeout")!;
+        var timeout = (CancellationTokenSource)timeoutProperty.GetValue(pending)!;
+
+        timeout.Cancel();
+
+        Assert.False(await command.WaitAsync(TimeSpan.FromSeconds(1)));
+        Assert.Throws<ObjectDisposedException>(() => _ = timeout.Token);
+        await provider.DisposeAsync();
     }
 
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);

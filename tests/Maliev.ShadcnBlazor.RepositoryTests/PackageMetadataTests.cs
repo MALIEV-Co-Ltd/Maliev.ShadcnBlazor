@@ -4,8 +4,8 @@ namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class PackageMetadataTests
 {
-    private const string ReleaseVersion = "2.1.2";
-    private const string PreviousReleaseVersion = "2.1.1";
+    private const string ReleaseVersion = "2.1.3";
+    private const string PreviousReleaseVersion = "2.1.2";
 
     [Fact]
     public void PackageMetadataIsReadyForPublicNuGetDistribution()
@@ -85,5 +85,22 @@ public sealed class PackageMetadataTests
     {
         var root = RepositoryRoot.Find();
         Assert.True(File.Exists(Path.Combine(root, fileName)), $"Missing {fileName}.");
+    }
+
+    [Fact]
+    public void ShippedStylesDoNotContainSampleOnlySelectors()
+    {
+        var root = RepositoryRoot.Find();
+        var cssRoot = Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css");
+        var sampleOnlySelectors = new[] { ".showcase-", ".documentation-page" };
+        var leakedFiles = Directory.EnumerateFiles(cssRoot, "*.css", SearchOption.AllDirectories)
+            .Where(file => sampleOnlySelectors.Any(selector => File.ReadAllText(file).Contains(selector, StringComparison.Ordinal)))
+            .Select(file => Path.GetRelativePath(root, file))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.True(
+            leakedFiles.Length == 0,
+            $"Sample-only selectors must stay in the sample app, not the package: {string.Join(", ", leakedFiles)}");
     }
 }

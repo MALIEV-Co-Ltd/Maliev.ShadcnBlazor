@@ -119,7 +119,10 @@ public sealed class RevealTests : BunitContext
         Assert.Contains("data-reveal-state", script, StringComparison.Ordinal);
         Assert.DoesNotContain("immediatelyVisible", script, StringComparison.Ordinal);
         Assert.Contains(".shadcn-reveal[data-reveal-state='pending']", css, StringComparison.Ordinal);
+        Assert.Contains("visibility: hidden", css, StringComparison.Ordinal);
+        Assert.Contains("visibility: visible", css, StringComparison.Ordinal);
         Assert.Contains("[data-reveal-cascade='true'] .shadcn-chart", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
+        Assert.Contains("visibility: visible !important", css, StringComparison.Ordinal);
     }
 }

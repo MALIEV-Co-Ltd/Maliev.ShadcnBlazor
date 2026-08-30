@@ -1,7 +1,9 @@
 using Bunit;
+using Maliev.ShadcnBlazor.Components.DataDisplay;
 using Maliev.ShadcnBlazor.Components.Forms;
 using Maliev.ShadcnBlazor.Components.Selection;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.Actions;
 
@@ -9,10 +11,50 @@ public sealed class SelectionTests : BunitContext
 {
     public SelectionTests()
     {
+        Services.AddScoped<IShadcnIdAllocator, ShadcnIdAllocator>();
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
         module.SetupVoid("setIndeterminate", _ => true);
         module.SetupVoid("attachRovingGroup", _ => true);
         module.SetupVoid("detach", _ => true);
+    }
+
+    [Fact]
+    public void GeneratedDomIdsReplayAcrossEquivalentScopesAndRemainUniqueAmongSiblings()
+    {
+        var first = Render(TwoCheckboxes());
+
+        using var freshScope = new BunitContext();
+        freshScope.Services.AddScoped<IShadcnIdAllocator, ShadcnIdAllocator>();
+        var module = freshScope.JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        module.SetupVoid("setIndeterminate", _ => true);
+        var recreated = freshScope.Render(TwoCheckboxes());
+
+        var ids = first.FindAll("input[data-slot='checkbox']").Select(element => element.Id).ToArray();
+        var recreatedIds = recreated.FindAll("input[data-slot='checkbox']").Select(element => element.Id).ToArray();
+        Assert.Equal(2, ids.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(string.Join('\n', ids), string.Join('\n', recreatedIds));
+    }
+
+    [Fact]
+    public void ShippedComponentsDoNotGenerateDomIdentityFromGuids()
+    {
+        var componentRoot = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "Components");
+        var allowedInternalRegistrations = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "ShadcnToggleGroupContext.cs",
+            "ShadcnRadioGroupContext.cs",
+            "ShadcnCarouselItem.razor"
+        };
+
+        var offenders = Directory.EnumerateFiles(componentRoot, "*", SearchOption.AllDirectories)
+            .Where(path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase))
+            .Where(path => !allowedInternalRegistrations.Contains(Path.GetFileName(path)))
+            .Where(path => File.ReadAllText(path).Contains("Guid.NewGuid()", StringComparison.Ordinal))
+            .Select(path => Path.GetRelativePath(componentRoot, path))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Empty(offenders);
     }
 
     [Theory]
@@ -241,4 +283,12 @@ public sealed class SelectionTests : BunitContext
 
         return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root was not found.");
     }
+
+    private static RenderFragment TwoCheckboxes() => builder =>
+    {
+        builder.OpenComponent<ShadcnCheckbox>(0);
+        builder.CloseComponent();
+        builder.OpenComponent<ShadcnCheckbox>(1);
+        builder.CloseComponent();
+    };
 }

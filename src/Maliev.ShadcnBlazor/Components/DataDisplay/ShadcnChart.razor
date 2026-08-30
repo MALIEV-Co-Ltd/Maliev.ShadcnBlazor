@@ -1,4 +1,5 @@
 @using System.Globalization
+@using System.Text
 @using Maliev.ShadcnBlazor.Theming
 @implements IAsyncDisposable
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
@@ -14,7 +15,7 @@
     else if (!HasData) { <div data-slot="chart-empty">@EmptyText</div> }
     else
     {
-        <svg data-slot="chart-surface" viewBox="0 0 @F(_width) @F(_height)" preserveAspectRatio="@(IsRadial ? "xMidYMid meet" : "none")" role="group" aria-label="@Title" tabindex="0" @onkeydown="OnKeyDown" @onmousemove="OnMouseMove" @onmouseleave="Deactivate">
+        <svg data-slot="chart-surface" viewBox="0 0 @F(_width) @F(_height)" preserveAspectRatio="@(IsRadial ? "xMidYMid meet" : "none")" role="group" aria-label="@Title" aria-activedescendant="@ActiveDescendantId" tabindex="0" @onkeydown="OnKeyDown" @onmousemove="OnMouseMove" @onmouseleave="Deactivate">
             @if ((ShowGrid || ShowMajorGrid) && !IsRadial)
             {
                 @for (var grid = 0; grid <= 4; grid++) { <line data-slot="chart-grid-line" data-grid-level="major" x1="36" y1="@F(12 + grid * Math.Max(1, _height - 40) / 4)" x2="@F(_width - 12)" y2="@F(12 + grid * Math.Max(1, _height - 40) / 4)" /> }
@@ -38,10 +39,10 @@
             <g>
                 @foreach (var shape in Geometry.Shapes)
                 {
-                    if (shape.Kind == "rect") { var shapePoint = shape.PointIndex; <rect data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" x="@F(shape.Values[0])" y="@F(shape.Values[1])" width="@F(shape.Values[2])" height="@F(shape.Values[3])" rx="@BarRadius" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onmouseenter="() => Activate(shapePoint)" @onmousemove:stopPropagation @onmousemove="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
+                    if (shape.Kind == "rect") { var shapePoint = shape.PointIndex; <rect id="@PointId(shape.SeriesKey, shapePoint)" data-series="@shape.SeriesKey" data-point="@shapePoint" role="img" tabindex="-1" aria-label="@PointLabel(shapePoint)" x="@F(shape.Values[0])" y="@F(shape.Values[1])" width="@F(shape.Values[2])" height="@F(shape.Values[3])" rx="@BarRadius" fill="var(--color-@shape.SeriesKey)" @onfocus="() => Activate(shapePoint)" @onmouseenter="() => Activate(shapePoint)" @onmousemove:stopPropagation @onmousemove="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "polyline") { <polyline data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="none" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
                     else if (shape.Kind == "area") { <polygon data-series="@shape.SeriesKey" points="@Points(shape.Values)" fill="var(--color-@shape.SeriesKey)" fill-opacity="0.25" stroke="var(--color-@shape.SeriesKey)" stroke-width="@StrokeWidth" /> }
-                    else if (shape.Kind == "arc") { var shapePoint = shape.PointIndex; <path data-chart-shape="arc" data-series="@shape.SeriesKey" data-point="@shapePoint" data-active="@(_activeIndex == shapePoint ? "true" : null)" style="@RadialOffsetStyle(shape.Values)" role="img" tabindex="0" aria-label="@PointLabel(shapePoint)" d="@ArcPath(shape.Values)" transform="@RadialTransform(shape.Values, _activeIndex == shapePoint)" fill="var(--color-@RadialColorKey(shape.SeriesKey, shapePoint))" @onfocus="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
+                    else if (shape.Kind == "arc") { var shapePoint = shape.PointIndex; <path id="@PointId(shape.SeriesKey, shapePoint)" data-chart-shape="arc" data-series="@shape.SeriesKey" data-point="@shapePoint" data-active="@(_activeIndex == shapePoint ? "true" : null)" style="@RadialOffsetStyle(shape.Values)" role="img" tabindex="-1" aria-label="@PointLabel(shapePoint)" d="@ArcPath(shape.Values)" transform="@RadialTransform(shape.Values, _activeIndex == shapePoint)" fill="var(--color-@RadialColorKey(shape.SeriesKey, shapePoint))" @onfocus="() => Activate(shapePoint)" @onpointerenter="() => Activate(shapePoint)" @onclick="() => Activate(shapePoint)" /> }
                     else if (shape.Kind == "baseline" && ShowAxis) { <line x1="@F(shape.Values[0])" y1="@F(shape.Values[1])" x2="@F(shape.Values[2])" y2="@F(shape.Values[3])" /> }
                 }
             </g>
@@ -52,7 +53,7 @@
                     var capturedIndex = pointIndex;
                     @foreach (var series in VisibleSeries.Where(item => item.Values[capturedIndex].HasValue))
                     {
-                        <circle data-slot="chart-point" data-series="@series.Key" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="0" aria-label="@SeriesPointLabel(series, capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(series, capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
+                        <circle id="@PointId(series.Key, capturedIndex)" data-slot="chart-point" data-series="@series.Key" data-point="@capturedIndex" data-active="@(_activeIndex == capturedIndex ? "true" : null)" role="img" tabindex="-1" aria-label="@SeriesPointLabel(series, capturedIndex)" cx="@F(PointX(capturedIndex))" cy="@F(PointY(series, capturedIndex))" r="8" @onfocus="() => Activate(capturedIndex)" @onpointerenter="() => Activate(capturedIndex)" @onmouseover="() => Activate(capturedIndex)" @onclick="() => Activate(capturedIndex)" />
                     }
                 }
             }
@@ -197,6 +198,12 @@
     }
     private string PointLabel(int index) => $"{Categories[index]}: {string.Join(", ", VisibleSeries.Select(item => $"{SeriesLabel(item.Key)} {Format(item.Values[index])}"))}";
     private string SeriesPointLabel(ShadcnChartSeries series, int index) => $"{Categories[index]}: {SeriesLabel(series.Key)} {Format(series.Values[index])}";
+    private string PointId(string seriesKey, int index) => $"{ChartId}-point-{Convert.ToHexString(Encoding.UTF8.GetBytes(seriesKey))}-{index}";
+    private string? ActiveDescendantId => _activeIndex < 0
+        ? null
+        : VisibleSeries.FirstOrDefault(series => series.Values[_activeIndex].HasValue) is { } series
+            ? PointId(series.Key, _activeIndex)
+            : null;
     private string TooltipLabel(int index) => Config.TryGetValue(LabelKey ?? string.Empty, out var label) ? label.Label : Categories[index];
     private double TooltipXPercent => Math.Clamp(PointX(_activeIndex) / Math.Max(1, _width) * 100, 0, 100);
     private double TooltipY => Math.Max(12, PointY(_activeIndex) - 92);

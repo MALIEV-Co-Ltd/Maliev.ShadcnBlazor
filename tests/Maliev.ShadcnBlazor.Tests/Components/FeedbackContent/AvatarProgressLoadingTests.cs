@@ -71,9 +71,11 @@ public sealed class AvatarProgressLoadingTests : BunitContext
         cut.Find("img").TriggerEvent("onload", new ProgressEventArgs());
         Assert.Equal(1, loaded);
         Assert.Equal("hidden", cut.Find("[data-slot='avatar-fallback']").GetAttribute("data-state"));
+        Assert.True(cut.Find("[data-slot='avatar-fallback']").HasAttribute("hidden"));
         cut.Find("img").TriggerEvent("onerror", new Microsoft.AspNetCore.Components.Web.ErrorEventArgs());
         Assert.Equal(1, failed);
         Assert.Equal("visible", cut.Find("[data-slot='avatar-fallback']").GetAttribute("data-state"));
+        Assert.False(cut.Find("[data-slot='avatar-fallback']").HasAttribute("hidden"));
         Assert.Equal("error", cut.Find("[data-slot='avatar-image']").GetAttribute("data-state"));
         Assert.NotNull(cut.Find("[data-slot='avatar-image']"));
     }

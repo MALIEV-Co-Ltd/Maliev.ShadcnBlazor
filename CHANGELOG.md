@@ -6,6 +6,30 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.1.3] - 2026-08-30
+
+### Added
+
+- Added opt-in virtualization for large Select and Combobox collections while
+  preserving groups, form values, and mounted keyboard active descendants.
+- Added localizable assistive labels, status messages, and validation-message
+  formatters across Code Block, Calendar and Date Picker, Dropzone,
+  Attachments, and reaction overflow controls.
+
+### Changed
+
+- Made generated DOM identifiers deterministic across equivalent server and
+  interactive scopes without requiring additional service registration.
+- Kept transcript history silent by default so prepending older messages does
+  not trigger live-region announcements.
+
+### Fixed
+
+- Enforced a single visual boundary for Code Block content and excluded
+  Showcase-only styles from the shipped component package.
+- Hardened form, overlay, data, and content component interaction contracts,
+  including forced-colors focus-ring ownership for composite Select controls.
+
 ## [2.1.2] - 2026-08-30
 
 ### Changed
@@ -330,7 +354,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.3...HEAD
+[2.1.3]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.0.0...v2.1.0

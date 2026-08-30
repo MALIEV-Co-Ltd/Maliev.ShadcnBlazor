@@ -18,6 +18,8 @@
     [Parameter] public ShadcnAttachmentSize Size { get; set; } = ShadcnAttachmentSize.Default;
     [Parameter] public ShadcnAttachmentOrientation Orientation { get; set; } = ShadcnAttachmentOrientation.Horizontal;
     [Parameter] public double? Progress { get; set; }
+    /// <summary>Gets or sets the formatter for the progress indicator's accessible label.</summary>
+    [Parameter] public Func<string?, string> ProgressLabel { get; set; } = title => $"{title ?? "Attachment"} upload progress";
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
 
     private ShadcnAttachmentState _effectiveState;
@@ -29,7 +31,7 @@
     private string? ProgressValue => Progress?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
     private string? ProgressIndicatorStyle => ProgressValue is null ? null : $"width:{ProgressValue}%";
     private string? AccessibleTitle => Title ?? File?.Name;
-    private string ProgressAccessibleName => $"{AccessibleTitle ?? "Attachment"} upload progress";
+    private string ProgressAccessibleName => ProgressLabel(AccessibleTitle);
     private string StateValue => EffectiveState switch { ShadcnAttachmentState.Idle => "idle", ShadcnAttachmentState.Uploading => "uploading", ShadcnAttachmentState.Processing => "processing", ShadcnAttachmentState.Error => "error", ShadcnAttachmentState.Done => "done", _ => throw Unknown(nameof(State), EffectiveState) };
     private string SizeValue => Size switch { ShadcnAttachmentSize.Default => "default", ShadcnAttachmentSize.Small => "sm", ShadcnAttachmentSize.ExtraSmall => "xs", _ => throw Unknown(nameof(Size), Size) };
     private string OrientationValue => Orientation switch { ShadcnAttachmentOrientation.Horizontal => "horizontal", ShadcnAttachmentOrientation.Vertical => "vertical", _ => throw Unknown(nameof(Orientation), Orientation) };

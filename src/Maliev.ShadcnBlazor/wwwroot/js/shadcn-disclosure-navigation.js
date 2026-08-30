@@ -61,28 +61,26 @@ export function detachKeyGuard(root) {
 
 const resizable = new WeakMap();
 export function attachResizableHandle(handle, dotnet, direction, rtl) {
-    let start = null;
-    let pending = 0;
-    let frame = 0;
-    const flush = () => { frame = 0; const delta = pending; pending = 0; if (delta) dotnet.invokeMethodAsync('ResizeFromPointerByPanelIdAsync', handle.dataset.leftPanelId, delta); };
+    const value = { start: null, pending: 0, frame: 0, down: null, move: null, up: null };
+    const flush = () => { value.frame = 0; const delta = value.pending; value.pending = 0; if (delta) dotnet.invokeMethodAsync('ResizeFromPointerByPanelIdAsync', handle.dataset.leftPanelId, delta); };
     const move = event => {
-        if (!start || event.pointerId !== start.id) return;
+        if (!value.start || event.pointerId !== value.start.id) return;
         const group = handle.closest('[data-slot="resizable-group"]');
         const rect = group?.getBoundingClientRect();
         const span = direction === 'horizontal' ? rect?.width : rect?.height;
         if (!span) return;
         const coordinate = direction === 'horizontal' ? event.clientX : event.clientY;
-        const physical = coordinate - start.coordinate;
-        pending += (direction === 'horizontal' && rtl ? -physical : physical) / span * 100;
-        start = { id: event.pointerId, coordinate };
-        if (!frame) frame = requestAnimationFrame(flush);
+        const physical = coordinate - value.start.coordinate;
+        value.pending += (direction === 'horizontal' && rtl ? -physical : physical) / span * 100;
+        value.start = { id: event.pointerId, coordinate };
+        if (!value.frame) value.frame = requestAnimationFrame(flush);
     };
-    const down = event => { if (handle.dataset.disabled === 'true' || event.button > 0) return; const coordinate = direction === 'horizontal' ? event.clientX : event.clientY; start = { id: event.pointerId, coordinate }; handle.dataset.resizeActive = 'true'; handle.style.touchAction = 'none'; handle.setPointerCapture?.(event.pointerId); };
-    const up = event => { if (start?.id === event.pointerId) { if (frame) { cancelAnimationFrame(frame); flush(); } start = null; delete handle.dataset.resizeActive; handle.releasePointerCapture?.(event.pointerId); } };
+    const down = event => { if (handle.dataset.disabled === 'true' || event.button > 0) return; const coordinate = direction === 'horizontal' ? event.clientX : event.clientY; value.start = { id: event.pointerId, coordinate }; handle.dataset.resizeActive = 'true'; handle.style.touchAction = 'none'; handle.setPointerCapture?.(event.pointerId); };
+    const up = event => { if (value.start?.id === event.pointerId) { if (value.frame) { cancelAnimationFrame(value.frame); flush(); } value.start = null; delete handle.dataset.resizeActive; handle.style.removeProperty('touch-action'); handle.releasePointerCapture?.(event.pointerId); } };
     handle.addEventListener('pointerdown', down); handle.addEventListener('pointermove', move); handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
-    resizable.set(handle, { down, move, up });
+    value.down = down; value.move = move; value.up = up; resizable.set(handle, value);
 }
-export function detachResizableHandle(handle) { const value = resizable.get(handle); if (!value) return; handle.removeEventListener('pointerdown', value.down); handle.removeEventListener('pointermove', value.move); handle.removeEventListener('pointerup', value.up); handle.removeEventListener('pointercancel', value.up); delete handle.dataset.resizeActive; resizable.delete(handle); }
+export function detachResizableHandle(handle) { const value = resizable.get(handle); if (!value) return; handle.removeEventListener('pointerdown', value.down); handle.removeEventListener('pointermove', value.move); handle.removeEventListener('pointerup', value.up); handle.removeEventListener('pointercancel', value.up); if (value.frame) cancelAnimationFrame(value.frame); value.frame = 0; value.pending = 0; if (value.start) { try { handle.releasePointerCapture?.(value.start.id); } catch (error) { if (error?.name !== 'NotFoundError') throw error; } } value.start = null; delete handle.dataset.resizeActive; handle.style.removeProperty('touch-action'); resizable.delete(handle); }
 
 const scrollAreas = new WeakMap();
 let rtlScrollType;

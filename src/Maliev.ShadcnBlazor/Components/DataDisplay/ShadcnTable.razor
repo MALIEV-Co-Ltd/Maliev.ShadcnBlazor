@@ -1,5 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div class="shadcn-table-container" data-slot="table-container" tabindex="0">
+<div class="shadcn-table-container" data-slot="table-container" tabindex="@(SuppressContainerTabStop ? "-1" : "0")">
     <table @attributes="ForwardedAttributes" class="@MergeClass("shadcn-table")" style="@MergeStyle(null)" data-slot="table" data-borders="@(Borders ? "true" : "false")" data-expected-columns="@ExpectedColumnCount"><CascadingValue Value="TableContext" IsFixed="true"><CascadingValue Name="ShadcnTableExpectedColumnCount" Value="ExpectedColumnCount">@ChildContent</CascadingValue></CascadingValue></table>
 </div>
 @code {
@@ -8,6 +8,7 @@
     [Parameter] public bool Borders { get; set; } = true;
     /// <summary>Gets or sets the optional number of rendered columns each row must provide, including column spans.</summary>
     [Parameter] public int? ExpectedColumnCount { get; set; }
+    [CascadingParameter(Name = "ShadcnTableSuppressContainerTabStop")] private bool SuppressContainerTabStop { get; set; }
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot");
     private static ShadcnTableCompositionContext TableContext { get; } = new(ShadcnTableCompositionKind.Table);
     protected override void OnParametersSet()

@@ -821,6 +821,13 @@ public sealed class ActionsAndSelectionBrowserTests(
                 })
             """);
         Assert.Empty(invisible);
+
+        var focusTarget = page.GetByTestId(testId).Locator("button:not(:disabled), input:not(:disabled), a[href]").First;
+        await focusTarget.FocusAsync();
+        var outline = await focusTarget.EvaluateAsync<string[]>("element => { const style = getComputedStyle(element); return [style.outlineStyle, style.outlineWidth, style.outlineColor]; }");
+        Assert.Equal("solid", outline[0]);
+        Assert.NotEqual("0px", outline[1]);
+        Assert.NotEqual("rgba(0, 0, 0, 0)", outline[2]);
     }
 
     [Fact]
