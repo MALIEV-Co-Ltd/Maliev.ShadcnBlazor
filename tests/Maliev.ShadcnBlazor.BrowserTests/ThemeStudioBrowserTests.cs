@@ -2069,6 +2069,17 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             "--shadcn-font-sans: 'Space Grotesk', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
             exportedCss,
             StringComparison.Ordinal);
+
+        await page.ReloadAsync();
+        await page.GetByTestId("theme-studio").WaitForAsync();
+        var restoredPreview = page.GetByTestId("theme-preview-scope");
+        var restoredStack = await restoredPreview.EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans').trim()");
+        AssertFamilyOrder(restoredStack, "Space Grotesk", "Anuphan", "Noto Sans Thai", "ui-sans-serif", "system-ui");
+        await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
+        var restoredThaiHeading = page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title");
+        await Assertions.Expect(restoredThaiHeading).ToHaveTextAsync("กำลังการผลิต");
+        AssertFamilyOrder(await ComputedFontAsync(restoredThaiHeading), "Space Grotesk", "Anuphan", "Noto Sans Thai");
     }
 
     [Fact]

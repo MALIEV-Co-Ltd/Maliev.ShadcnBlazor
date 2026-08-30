@@ -648,6 +648,28 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal(1, Count(fontSans, "system-ui"));
     }
 
+    [Fact]
+    public void DocumentCssKeepsSelectedBodyPrimaryFirstWhenThaiFallbackRepeatsIt()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            "noto-sans-thai");
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+
+        Assert.Contains(
+            "--shadcn-font-sans: 'Noto Sans Thai', 'Anuphan', ui-sans-serif, system-ui, sans-serif",
+            properties,
+            StringComparison.Ordinal);
+    }
+
     private static ShadcnThemeDocument CreateDocument()
     {
         var theme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with { Name = "Factory Night" };
