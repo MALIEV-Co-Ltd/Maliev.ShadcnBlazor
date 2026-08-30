@@ -159,6 +159,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-preview-expanded", "false");
         await page.GetByTestId("theme-sidebar-rail-toggle").ClickAsync();
         await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-state", "expanded");
+        await Assertions.Expect(provider).ToHaveCSSAsync("width", new Regex("^(?:3\\d{2}|[4-9]\\d{2}|\\d{4,})px$"));
         Assert.True((await provider.BoundingBoxAsync())!.Width >= 300);
     }
 
