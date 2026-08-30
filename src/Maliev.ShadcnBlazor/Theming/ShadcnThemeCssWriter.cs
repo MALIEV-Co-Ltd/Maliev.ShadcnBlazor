@@ -102,8 +102,11 @@ public static class ShadcnThemeCssWriter
         ShadcnThemeMetrics metrics,
         ShadcnTypographyScale typography)
     {
+        var effectiveSansFamily = ComposeSansFamily(typography);
         foreach (var declaration in GetDeclarations(scheme, metrics))
-            yield return declaration;
+            yield return declaration.Name == "--shadcn-font-sans"
+                ? (declaration.Name, effectiveSansFamily)
+                : declaration;
         yield return ("--shadcn-font-thai", typography.ThaiFallback.Family);
         foreach (var role in Enum.GetValues<ShadcnTypographyRole>())
         {
@@ -114,6 +117,121 @@ public static class ShadcnThemeCssWriter
             yield return ($"--shadcn-typography-{name}-line-height", Format(style.LineHeight));
             yield return ($"--shadcn-typography-{name}-letter-spacing", $"{Format(style.LetterSpacingEm)}em");
         }
+    }
+
+    private static string ComposeSansFamily(ShadcnTypographyScale typography)
+    {
+        var (bodyPrimary, bodyFallback) = SeparateFontFamily(
+            typography.Body.Family,
+            typography.Body.Fallback);
+        var (thaiPrimary, thaiFallback) = SeparateFontFamily(
+            typography.ThaiFallback.Family,
+            typography.ThaiFallback.Fallback);
+        var thaiNames = thaiPrimary.Concat(thaiFallback)
+            .Select(NormalizeFamily)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var ordered = new List<string>(
+            bodyPrimary.Count + bodyFallback.Count + thaiPrimary.Count + thaiFallback.Count);
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        Add(bodyPrimary.Take(1));
+        Add(bodyPrimary.Skip(1).Where(token =>
+            !IsGenericFamily(token) && !thaiNames.Contains(NormalizeFamily(token))));
+        Add(thaiPrimary.Where(token => !IsGenericFamily(token)));
+        Add(thaiFallback.Where(token => !IsGenericFamily(token)));
+        Add(bodyPrimary.Skip(1).Where(token =>
+            !IsGenericFamily(token) && thaiNames.Contains(NormalizeFamily(token))));
+        Add(bodyFallback.Where(token => !IsGenericFamily(token)));
+        Add(bodyPrimary.Where(IsGenericFamily));
+        Add(bodyFallback.Where(IsGenericFamily));
+        Add(thaiPrimary.Where(IsGenericFamily));
+        Add(thaiFallback.Where(IsGenericFamily));
+        return string.Join(", ", ordered);
+
+        void Add(IEnumerable<string> tokens)
+        {
+            foreach (var token in tokens)
+            {
+                if (seen.Add(NormalizeFamily(token)))
+                    ordered.Add(token);
+            }
+        }
+    }
+
+    private static (IReadOnlyList<string> Primary, IReadOnlyList<string> Fallback) SeparateFontFamily(
+        string family,
+        string fallback)
+    {
+        var familyTokens = ParseFontFamily(family).ToArray();
+        var fallbackTokens = ParseFontFamily(fallback).ToArray();
+        var hasFallbackSuffix = fallbackTokens.Length > 0 &&
+            familyTokens.Length >= fallbackTokens.Length &&
+            familyTokens[^fallbackTokens.Length..]
+                .Select(NormalizeFamily)
+                .SequenceEqual(fallbackTokens.Select(NormalizeFamily), StringComparer.OrdinalIgnoreCase);
+        return hasFallbackSuffix
+            ? (familyTokens[..^fallbackTokens.Length], familyTokens[^fallbackTokens.Length..])
+            : (familyTokens, fallbackTokens);
+    }
+
+    private static IEnumerable<string> ParseFontFamily(string value)
+    {
+        var start = 0;
+        var quote = '\0';
+        var escaped = false;
+        for (var index = 0; index < value.Length; index++)
+        {
+            var character = value[index];
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+            if (character == '\\' && quote != '\0')
+            {
+                escaped = true;
+                continue;
+            }
+            if (quote == '\0' && character is '\'' or '"')
+            {
+                quote = character;
+                continue;
+            }
+            if (character == quote)
+            {
+                quote = '\0';
+                continue;
+            }
+            if (quote == '\0' && character == ',')
+            {
+                var token = value[start..index].Trim();
+                if (token.Length > 0)
+                    yield return token;
+                start = index + 1;
+            }
+        }
+
+        var finalToken = value[start..].Trim();
+        if (finalToken.Length > 0)
+            yield return finalToken;
+    }
+
+    private static bool IsGenericFamily(string value) => NormalizeFamily(value) is
+        "serif" or "sans-serif" or "monospace" or "cursive" or "fantasy" or
+        "system-ui" or "ui-serif" or "ui-sans-serif" or "ui-monospace" or
+        "ui-rounded" or "math" or "emoji" or "fangsong";
+
+    private static string NormalizeFamily(string value)
+    {
+        var normalized = value.Trim();
+        if (normalized.Length >= 2 &&
+            normalized[0] is '\'' or '"' &&
+            normalized[^1] == normalized[0])
+            normalized = normalized[1..^1];
+        return normalized.Replace("\\'", "'", StringComparison.Ordinal)
+            .Replace("\\\"", "\"", StringComparison.Ordinal)
+            .Trim()
+            .ToLowerInvariant();
     }
 
     private static string RoleName(ShadcnTypographyRole role) => role switch

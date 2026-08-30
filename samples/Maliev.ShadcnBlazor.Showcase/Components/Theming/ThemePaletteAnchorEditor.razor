@@ -1,0 +1,219 @@
+@namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<fieldset class="theme-palette-anchor"
+          data-palette-anchor-role="@RoleKey"
+          data-testid="@($"theme-palette-anchor-{RoleKey}")">
+    <legend>@AnchorName</legend>
+    <div class="theme-palette-anchor__controls">
+        <span class="theme-palette-anchor__swatch" style="@SwatchStyle" aria-hidden="true"></span>
+        <input class="theme-palette-anchor__picker"
+               type="color"
+               value="@PickerValue"
+               aria-label="@PickerLabel"
+               data-testid="@($"theme-palette-anchor-{RoleKey}-picker")"
+               @onfocus="BeginPickerInteraction"
+               @onpointerdown="BeginPickerInteraction"
+               @onpointerup="FinalizePickerInteraction"
+               @onpointercancel="FinalizePickerInteraction"
+               @oninput="SetPickerValue"
+               @onchange="FinalizePickerInteraction"
+               @onblur="FinalizePickerInteraction" />
+        <ShadcnInput TValue="string"
+                     id="@ValueId"
+                     Value="_editorValue"
+                     ValueChanged="UpdateTextDraft"
+                     Invalid="_inlineError"
+                     aria-describedby="@(_inlineError ? ErrorId : null)"
+                     aria-label="@ValueLabel"
+                     spellcheck="false"
+                     autocomplete="off"
+                     @onchange="CommitTextValue"
+                     @onblur="CommitTextValue"
+                     @onkeydown="HandleTextKeyDownAsync" />
+        <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
+                      Size="ShadcnButtonSize.Small"
+                      aria-label="@CopyLabel"
+                      data-palette-copy
+                      OnClick="CopyValueAsync">
+            @Copy.Copy
+        </ShadcnButton>
+        <ShadcnButton Variant="@(IsLocked ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)"
+                      Size="ShadcnButtonSize.Small"
+                      aria-label="@LockLabel"
+                      aria-pressed="@(IsLocked ? "true" : "false")"
+                      data-palette-lock
+                      OnClick="ToggleLockAsync">
+            @LockAction
+        </ShadcnButton>
+    </div>
+    @if (_inlineError)
+    {
+        <p id="@ErrorId"
+           class="theme-palette-anchor__error"
+           data-testid="@($"theme-palette-anchor-{RoleKey}-error")">@Copy.InvalidAnchorValue</p>
+    }
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
+    [Parameter, EditorRequired] public ShadcnPaletteAnchorRole Role { get; set; }
+    [Parameter, EditorRequired] public ThemeStudioPaletteCopy Copy { get; set; } = null!;
+    [Parameter] public EventCallback<string> Announce { get; set; }
+
+    private string _editorValue = string.Empty;
+    private string? _observedValue;
+    private string? _lastCommittedDraft;
+    private string? _lastCommittedValue;
+    private string? _lastRejectedDraft;
+    private long _observedRevision = -1;
+    private bool _inlineError;
+    private bool _pickerInteractionActive;
+    private IJSObjectReference? _clipboardModule;
+    private string RoleKey => Role.ToString().ToLowerInvariant();
+    private string AnchorName => Copy.AnchorName(Role);
+    private string AnchorValue => State.PaletteAnchors.Get(Role);
+    private string PickerLabel => $"{AnchorName}: {Copy.CustomizePalette}";
+    private string ValueId => $"theme-palette-anchor-{RoleKey}-value";
+    private string ErrorId => $"theme-palette-anchor-{RoleKey}-error";
+    private string ValueLabel => $"{AnchorName}: {Copy.AnchorValue}";
+    private string CopyLabel => $"{Copy.Copy}: {AnchorName}";
+    private string LockAction => IsLocked ? Copy.Unlock : Copy.Lock;
+    private string LockLabel => $"{LockAction}: {AnchorName}";
+    private bool IsLocked => State.IsPaletteAnchorLocked(Role);
+    private string SwatchStyle => $"background-color: {AnchorValue}";
+    private string PickerValue
+    {
+        get
+        {
+            return ShadcnThemeValidator.ToHexColor(AnchorValue, includeAlpha: false);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_observedRevision != State.PaletteRevision)
+        {
+            _observedRevision = State.PaletteRevision;
+            _lastRejectedDraft = null;
+            _inlineError = false;
+        }
+        var current = AnchorValue;
+        if (string.Equals(current, _observedValue, StringComparison.Ordinal))
+            return;
+        _observedValue = current;
+        _editorValue = current;
+        if (!string.Equals(current, _lastCommittedValue, StringComparison.Ordinal))
+        {
+            _lastCommittedDraft = null;
+            _lastCommittedValue = null;
+        }
+        _lastRejectedDraft = null;
+        _inlineError = false;
+    }
+
+    private void BeginPickerInteraction()
+    {
+        if (_pickerInteractionActive)
+            return;
+        _pickerInteractionActive = true;
+        State.BeginPointerInteraction($"palette.{Role}");
+    }
+
+    private void FinalizePickerInteraction()
+    {
+        if (!_pickerInteractionActive)
+            return;
+        _pickerInteractionActive = false;
+        State.EndPointerInteraction();
+    }
+
+    private void SetPickerValue(ChangeEventArgs args)
+    {
+        BeginPickerInteraction();
+        var value = args.Value?.ToString() ?? string.Empty;
+        if (!State.SetPaletteAnchor(Role, value))
+            _ = Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    private void UpdateTextDraft(string? value)
+    {
+        _editorValue = value ?? string.Empty;
+        if (!string.Equals(_editorValue, _lastCommittedDraft, StringComparison.Ordinal))
+        {
+            _lastCommittedDraft = null;
+            _lastCommittedValue = null;
+        }
+        if (!string.Equals(_editorValue, _lastRejectedDraft, StringComparison.Ordinal))
+            _inlineError = false;
+    }
+
+    private Task CommitTextValue(ChangeEventArgs args)
+    {
+        _editorValue = args.Value?.ToString() ?? _editorValue;
+        return CommitTextValueAsync();
+    }
+
+    private Task CommitTextValue(FocusEventArgs args) => CommitTextValueAsync();
+
+    private async Task HandleTextKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Enter", StringComparison.Ordinal))
+            await CommitTextValueAsync();
+    }
+
+    private async Task CommitTextValueAsync()
+    {
+        if (string.Equals(_editorValue, AnchorValue, StringComparison.Ordinal))
+        {
+            _lastRejectedDraft = null;
+            _inlineError = false;
+            return;
+        }
+        if (string.Equals(_editorValue, _lastCommittedDraft, StringComparison.Ordinal))
+            return;
+        if (string.Equals(_editorValue, _lastRejectedDraft, StringComparison.Ordinal))
+            return;
+
+        var draft = _editorValue;
+        if (State.SetPaletteAnchor(Role, draft))
+        {
+            _lastCommittedDraft = draft;
+            _lastCommittedValue = AnchorValue;
+            _lastRejectedDraft = null;
+            _inlineError = false;
+            return;
+        }
+
+        _observedRevision = State.PaletteRevision;
+        _lastRejectedDraft = _editorValue;
+        _inlineError = true;
+        await Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    private async Task CopyValueAsync()
+    {
+        _clipboardModule ??= await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/shadcn-download.js");
+        await _clipboardModule.InvokeVoidAsync("copyText", AnchorValue);
+        await Announce.InvokeAsync($"{Copy.CopiedStatus}: {AnchorName}");
+    }
+
+    private async Task ToggleLockAsync()
+    {
+        var nextLocked = !IsLocked;
+        if (State.SetPaletteAnchorLock(Role, nextLocked))
+            await Announce.InvokeAsync($"{(nextLocked ? Copy.Lock : Copy.Unlock)}: {AnchorName}");
+        else
+            await Announce.InvokeAsync(Copy.ErrorPrefix);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        FinalizePickerInteraction();
+        if (_clipboardModule is null)
+            return;
+        try { await _clipboardModule.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

@@ -1,3 +1,5 @@
+using Maliev.ShadcnBlazor.Theming.Internal;
+
 namespace Maliev.ShadcnBlazor.Theming;
 
 /// <summary>Validates portable theme documents before they are applied or exported.</summary>
@@ -66,7 +68,9 @@ public static class ShadcnThemeDocumentValidator
             return;
         }
 
-        if (palette.AlgorithmVersion is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and not ShadcnPaletteRecipe.CurrentAlgorithmVersion)
+        if (palette.AlgorithmVersion is not ShadcnPaletteRecipe.MaterializedAlgorithmVersion and
+            not ShadcnPaletteRecipe.LegacyAlgorithmVersion and
+            not ShadcnPaletteRecipe.VersionTwoAlgorithmVersion)
             errors.Add(new("invalid-palette-algorithm", "palette.algorithmVersion", "Palette algorithm version must identify materialized values or a supported deterministic algorithm."));
         ValidateIdentifier(palette.BaseColor, "palette.baseColor", errors);
         if (palette.LockedTokens is null)
@@ -84,6 +88,49 @@ public static class ShadcnThemeDocumentValidator
                     errors.Add(new("invalid-locked-token", "palette.lockedTokens", "Locked tokens must be unique semantic token paths."));
             }
         }
+
+        if (palette.IsVersion2)
+        {
+            if (palette.Anchors is null)
+                errors.Add(new("required-palette-anchors", "palette.anchors", "Palette anchors are required for algorithm version 2."));
+            else if (palette.Anchors.Brand is null || palette.Anchors.Support is null ||
+                     palette.Anchors.Highlight is null || palette.Anchors.DataA is null || palette.Anchors.DataB is null)
+                errors.Add(new("invalid-palette-anchors", "palette.anchors", "Palette anchors must define all five non-null string values."));
+            else
+            {
+                ValidateAnchor(palette.Anchors.Brand, "brand", errors);
+                ValidateAnchor(palette.Anchors.Support, "support", errors);
+                ValidateAnchor(palette.Anchors.Highlight, "highlight", errors);
+                ValidateAnchor(palette.Anchors.DataA, "dataA", errors);
+                ValidateAnchor(palette.Anchors.DataB, "dataB", errors);
+            }
+            if (palette.Harmony is null)
+                errors.Add(new("required-palette-harmony", "palette.harmony", "Palette harmony is required for algorithm version 2."));
+            else if (!Enum.IsDefined(palette.Harmony.Value))
+                errors.Add(new("invalid-palette-harmony", "palette.harmony", "Palette harmony must be a supported value."));
+            if (palette.LockedAnchors is null ||
+                palette.LockedAnchors.Any(role => !Enum.IsDefined(role)) ||
+                palette.LockedAnchors.Distinct().Count() != palette.LockedAnchors.Count)
+                errors.Add(new("invalid-locked-anchor", "palette.lockedAnchors", "Locked anchors must be unique supported roles."));
+        }
+        else if (palette.Anchors is not null || palette.Harmony is not null || palette.LockedAnchors is not null)
+        {
+            errors.Add(new("unexpected-palette-v2-field", "palette", "Version-two palette fields are not allowed on materialized or version-one recipes."));
+        }
+    }
+
+    private static void ValidateAnchor(string value, string name, ICollection<ShadcnThemeValidationMessage> errors)
+    {
+        if (value.Length > ShadcnPaletteColorParser.MaximumAnchorLength)
+        {
+            errors.Add(new(
+                "palette-invalid-anchor",
+                $"palette.anchors.{name}",
+                $"Palette anchor must not exceed {ShadcnPaletteColorParser.MaximumAnchorLength} characters."));
+            return;
+        }
+        if (!ShadcnPaletteColorParser.TryNormalize(value, out _, out _))
+            errors.Add(new("palette-invalid-anchor", $"palette.anchors.{name}", "Palette anchor must be #rgb, #rrggbb, or oklch(L C H)."));
     }
 
     private static void ValidateTypography(ShadcnThemeDocument document, ICollection<ShadcnThemeValidationMessage> errors)

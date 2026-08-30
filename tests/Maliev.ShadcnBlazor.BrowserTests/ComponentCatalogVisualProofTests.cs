@@ -204,7 +204,7 @@ public sealed class ComponentCatalogVisualProofTests(
                 await settingsToggle.ClickAsync();
         }
         var catalogStatus = page.GetByTestId("theme-font-catalog-status");
-        if (await catalogStatus.CountAsync() > 0)
+        if (await catalogStatus.CountAsync() > 0 && await catalogStatus.IsVisibleAsync())
             await Assertions.Expect(catalogStatus).Not.ToContainTextAsync("Loading local font catalog");
         await page.EvaluateAsync("document.fonts.ready");
         await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");

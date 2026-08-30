@@ -2,6 +2,8 @@ using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
 using System.Globalization;
+using System.IO.Compression;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
@@ -10,6 +12,506 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     public static TheoryData<int, int> ReleaseViewports => new() { { 1440, 900 }, { 1024, 768 }, { 768, 1024 }, { 390, 844 }, { 320, 568 } };
+    public static TheoryData<int, int> PaletteWorkbenchViewports => new() { { 1440, 900 }, { 1055, 800 }, { 1025, 768 }, { 1024, 768 }, { 390, 844 }, { 320, 568 } };
+
+    [Theory]
+    [MemberData(nameof(PaletteWorkbenchViewports))]
+    public async Task PaletteWorkbenchUsesOneResponsiveDomWithoutDocumentOverflow(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 1024);
+        var page = await OpenAsync(context);
+        if (width <= 1024)
+            await OpenSettingsAsync(page);
+
+        var customize = page.GetByTestId("theme-palette-customize");
+        await Assertions.Expect(customize).ToHaveAttributeAsync("aria-controls", "theme-palette-workbench");
+        if (width <= 1088)
+            await Assertions.Expect(customize).ToHaveAttributeAsync("aria-haspopup", "dialog");
+        else
+            await Assertions.Expect(customize).Not.ToHaveAttributeAsync("aria-haspopup", "dialog");
+        await customize.ScrollIntoViewIfNeededAsync();
+        await customize.ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+
+        await Assertions.Expect(workbench).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator(".theme-preview-region")).ToBeVisibleAsync();
+        Assert.Equal(1, await workbench.CountAsync());
+        Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+
+        if (width > 1088)
+        {
+            Assert.Null(await workbench.GetAttributeAsync("role"));
+            var preview = page.GetByTestId("theme-preview-scope");
+            var before = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+            var brandValue = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+            await brandValue.FillAsync("#2563eb");
+            await brandValue.PressAsync("Tab");
+            await page.WaitForFunctionAsync(
+                "before => getComputedStyle(document.querySelector('[data-testid=theme-preview-scope]')).getPropertyValue('--shadcn-primary').trim() !== before",
+                before);
+            await page.GetByTestId("theme-category-filter-overlays").ClickAsync();
+            await Assertions.Expect(page.GetByTestId("theme-category-filter-overlays")).ToHaveAttributeAsync("aria-pressed", "true");
+            return;
+        }
+
+        await Assertions.Expect(workbench).ToHaveAttributeAsync("role", "dialog");
+        await Assertions.Expect(workbench).ToHaveAttributeAsync("aria-modal", "true");
+        Assert.False(await workbench.EvaluateAsync<bool>("root => root.inert"));
+        await Assertions.Expect(workbench).Not.ToHaveAttributeAsync("aria-hidden", "true");
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog, new() { Name = "Active palette", Exact = true })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Close palette editor", Exact = true })).ToBeVisibleAsync();
+        Assert.True(await workbench.EvaluateAsync<bool>("root => root.contains(document.activeElement)"));
+        await page.Keyboard.PressAsync("Shift+Tab");
+        Assert.True(await workbench.EvaluateAsync<bool>("root => root.contains(document.activeElement)"));
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(workbench).ToHaveCountAsync(0);
+        await Assertions.Expect(customize).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task PaletteWorkbenchRapidOpenCloseReopenKeepsOneLiveBindingAndKeyboardBehavior()
+    {
+        await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce, true);
+        var page = await OpenAsync(context);
+        var errors = new List<string>();
+        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
+        page.PageError += (_, error) => errors.Add(error);
+        await OpenSettingsAsync(page);
+        var customize = page.GetByTestId("theme-palette-customize");
+
+        for (var index = 0; index < 3; index++)
+        {
+            await customize.ClickAsync();
+            await page.GetByTestId("theme-palette-workbench").WaitForAsync();
+            await page.GetByTestId("theme-palette-close").ClickAsync();
+            await Assertions.Expect(customize).ToBeFocusedAsync();
+        }
+
+        await customize.ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+        await Assertions.Expect(workbench).ToBeVisibleAsync();
+        await page.WaitForFunctionAsync("() => document.documentElement.dataset.themePaletteBindings === '1'");
+        Assert.Equal("1", await page.Locator("html").GetAttributeAsync("data-theme-palette-bindings"));
+        await workbench.FocusAsync();
+        await workbench.PressAsync("Space");
+        await Assertions.Expect(page.GetByTestId("theme-palette-status"))
+            .ToHaveTextAsync(new Regex("^Palette generated: Seed [0-9]+$"));
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(workbench).ToHaveCountAsync(0);
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task PaletteAnchorDraftCommitsOnceOnEnterAndThenPersists()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2') !== null");
+        await Task.Delay(100);
+        var input = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+        var preview = page.GetByTestId("theme-preview-scope");
+        var beforePrimary = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        var beforeStorage = await page.EvaluateAsync<string>("localStorage.getItem('maliev.shadcn.theme-studio.document.v2')");
+        var undo = page.GetByRole(AriaRole.Button, new() { Name = "Undo theme change", Exact = true });
+
+        await input.FillAsync("#dc2626");
+        await Task.Delay(100);
+
+        Assert.Equal("#dc2626", await input.InputValueAsync());
+        Assert.Equal(beforePrimary, await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
+        Assert.Equal(beforeStorage, await page.EvaluateAsync<string>("localStorage.getItem('maliev.shadcn.theme-studio.document.v2')"));
+        await Assertions.Expect(undo).ToBeDisabledAsync();
+
+        await input.PressAsync("Enter");
+        await page.WaitForFunctionAsync("before => localStorage.getItem('maliev.shadcn.theme-studio.document.v2') !== before", beforeStorage);
+        Assert.NotEqual(beforePrimary, await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
+        await Assertions.Expect(undo).ToBeEnabledAsync();
+    }
+
+    [Fact]
+    public async Task NativePalettePickerCoalescesKeyboardAndPointerLifecyclesIntoSingleSaves()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        await context.AddInitScriptAsync("""
+            (() => {
+                window.__paletteSaves = 0;
+                const original = Storage.prototype.setItem;
+                Storage.prototype.setItem = function(key, value) {
+                    if (key === 'maliev.shadcn.theme-studio.document.v2') window.__paletteSaves++;
+                    return original.call(this, key, value);
+                };
+            })();
+            """);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        await page.WaitForFunctionAsync("() => localStorage.getItem('maliev.shadcn.theme-studio.document.v2') !== null");
+        await page.EvaluateAsync("window.__paletteSaves = 0");
+
+        var picker = page.GetByTestId("theme-palette-anchor-brand-picker");
+        var preview = page.GetByTestId("theme-preview-scope");
+        var before = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        await picker.FocusAsync();
+        await picker.EvaluateAsync("element => { element.value = '#dc2626'; element.dispatchEvent(new Event('input', { bubbles: true })); }");
+        await page.WaitForFunctionAsync("before => getComputedStyle(document.querySelector('[data-testid=theme-preview-scope]')).getPropertyValue('--shadcn-primary').trim() !== before", before);
+        await picker.EvaluateAsync("element => { element.value = '#ea580c'; element.dispatchEvent(new Event('input', { bubbles: true })); }");
+        await Assertions.Expect(page.GetByTestId("theme-studio")).ToHaveAttributeAsync("data-pointer-interaction-active", "true");
+        Assert.Equal(0, await page.EvaluateAsync<int>("window.__paletteSaves"));
+        await picker.EvaluateAsync("element => element.dispatchEvent(new Event('change', { bubbles: true }))");
+        await picker.BlurAsync();
+        await page.WaitForFunctionAsync("() => window.__paletteSaves === 1");
+        await Assertions.Expect(page.GetByTestId("theme-studio")).ToHaveAttributeAsync("data-pointer-interaction-active", "false");
+
+        var saved = await page.EvaluateAsync<string>("localStorage.getItem('maliev.shadcn.theme-studio.document.v2')");
+        using (var document = System.Text.Json.JsonDocument.Parse(saved))
+        {
+            var root = document.RootElement;
+            var anchor = root.GetProperty("palette").GetProperty("anchors").GetProperty("brand").GetString();
+            Assert.StartsWith("oklch(", anchor, StringComparison.Ordinal);
+            Assert.Equal(anchor, root.GetProperty("theme").GetProperty("light").GetProperty("chart1").GetString());
+            Assert.Equal(anchor, root.GetProperty("theme").GetProperty("dark").GetProperty("chart1").GetString());
+        }
+
+        var support = page.GetByTestId("theme-palette-anchor-support-picker");
+        await support.DispatchEventAsync("pointerdown");
+        await support.EvaluateAsync("element => { element.value = '#7c3aed'; element.dispatchEvent(new Event('input', { bubbles: true })); }");
+        await support.EvaluateAsync("element => { element.value = '#9333ea'; element.dispatchEvent(new Event('input', { bubbles: true })); }");
+        Assert.Equal(1, await page.EvaluateAsync<int>("window.__paletteSaves"));
+        await support.DispatchEventAsync("pointerup");
+        await support.EvaluateAsync("element => element.dispatchEvent(new Event('change', { bubbles: true }))");
+        await page.WaitForFunctionAsync("() => window.__paletteSaves === 2");
+    }
+
+    [Fact]
+    public async Task GeneratedPaletteEditorsAndBothSchemesUseTheSameMaterializedAnchors()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        await page.WaitForFunctionAsync("() => document.querySelector('[data-testid=theme-palette-workbench-identity]')?.textContent.includes('Seed ')");
+        await page.WaitForFunctionAsync("() => JSON.parse(localStorage.getItem('maliev.shadcn.theme-studio.document.v2')).palette.algorithmVersion === 2");
+
+        var snapshot = await page.EvaluateAsync<string>("localStorage.getItem('maliev.shadcn.theme-studio.document.v2')");
+        using var document = System.Text.Json.JsonDocument.Parse(snapshot);
+        var root = document.RootElement;
+        var anchors = root.GetProperty("palette").GetProperty("anchors");
+        var light = root.GetProperty("theme").GetProperty("light");
+        var dark = root.GetProperty("theme").GetProperty("dark");
+        foreach (var mapping in new[] { ("brand", "chart1"), ("support", "chart2"), ("highlight", "chart3"), ("dataA", "chart4"), ("dataB", "chart5") })
+        {
+            var anchor = anchors.GetProperty(mapping.Item1).GetString();
+            Assert.Equal(anchor, light.GetProperty(mapping.Item2).GetString());
+            Assert.Equal(anchor, dark.GetProperty(mapping.Item2).GetString());
+            await Assertions.Expect(page.GetByTestId($"theme-palette-anchor-{mapping.Item1.ToLowerInvariant()}").Locator("input[type='text']")).ToHaveValueAsync(anchor!);
+        }
+
+        var status = page.GetByTestId("theme-palette-status");
+        var firstAnnouncement = await status.InnerTextAsync();
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        await page.WaitForFunctionAsync(
+            "before => document.querySelector('[data-testid=theme-palette-status]')?.textContent !== before",
+            firstAnnouncement);
+        var secondAnnouncement = await status.InnerTextAsync();
+        Assert.Matches("^Palette generated: Seed [0-9]+$", firstAnnouncement);
+        Assert.Matches("^Palette generated: Seed [0-9]+$", secondAnnouncement);
+        Assert.NotEqual(firstAnnouncement, secondAnnouncement);
+    }
+
+    [Fact]
+    public async Task UnlockingAnAnchorDoesNotChangePreviewUntilGenerate()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var editor = page.GetByTestId("theme-palette-anchor-brand");
+        var value = editor.Locator("input[type='text']");
+        var lockButton = editor.Locator("[data-palette-lock]");
+        var preview = page.GetByTestId("theme-preview-scope");
+        await value.FillAsync("#dc2626");
+        await value.PressAsync("Enter");
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+        var lockedPrimary = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+        var lockedValue = await value.InputValueAsync();
+
+        await lockButton.ClickAsync();
+
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "false");
+        Assert.Equal(lockedPrimary, await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
+        Assert.Equal(lockedValue, await value.InputValueAsync());
+        await page.GetByTestId("theme-palette-generate").ClickAsync();
+        await page.WaitForFunctionAsync("before => getComputedStyle(document.querySelector('[data-testid=theme-preview-scope]')).getPropertyValue('--shadcn-primary').trim() !== before", lockedPrimary);
+    }
+
+    [Fact]
+    public async Task ConstrainedPaletteModalIsolatesAndRestoresEveryBackgroundRegion()
+    {
+        await using var context = await NewContextAsync(390, 844, ReducedMotion.Reduce, true);
+        var page = await OpenAsync(context);
+        await OpenSettingsAsync(page);
+        var selectors = new[] { ".theme-preview-region", ".theme-studio-sidebar-provider", ".documentation-header", ".documentation-skip-link" };
+        var prior = new List<(string? AriaHidden, bool Inert)>();
+        foreach (var selector in selectors)
+        {
+            var region = page.Locator(selector).First;
+            prior.Add((await region.GetAttributeAsync("aria-hidden"), await region.EvaluateAsync<bool>("element => element.inert")));
+        }
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+        await Assertions.Expect(workbench).ToHaveAttributeAsync("aria-modal", "true");
+
+        foreach (var selector in selectors)
+        {
+            var region = page.Locator(selector).First;
+            await Assertions.Expect(region).ToHaveAttributeAsync("aria-hidden", "true");
+            Assert.True(await region.EvaluateAsync<bool>("element => element.inert"));
+        }
+        await page.Locator(".theme-preview-region").EvaluateAsync("element => element.focus()");
+        Assert.True(await workbench.EvaluateAsync<bool>("root => root.contains(document.activeElement)"));
+
+        await page.GetByTestId("theme-palette-close").ClickAsync();
+        for (var index = 0; index < selectors.Length; index++)
+        {
+            var region = page.Locator(selectors[index]).First;
+            Assert.Equal(prior[index].AriaHidden, await region.GetAttributeAsync("aria-hidden"));
+            Assert.Equal(prior[index].Inert, await region.EvaluateAsync<bool>("element => element.inert"));
+        }
+    }
+
+    [Theory]
+    [InlineData(2f, 640)]
+    [InlineData(4f, 320)]
+    public async Task PaletteWorkbenchReflowsAtZoomEquivalentViewportsWithoutOverflow(float deviceScaleFactor, int width)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = width, Height = 844 },
+            DeviceScaleFactor = deviceScaleFactor,
+            ReducedMotion = ReducedMotion.Reduce,
+            HasTouch = true
+        });
+        var page = await OpenAsync(context);
+        await OpenSettingsAsync(page);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+
+        await Assertions.Expect(workbench).ToHaveAttributeAsync("aria-modal", "true");
+        Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+        Assert.True(await workbench.EvaluateAsync<bool>("root => root.contains(document.activeElement)"));
+        await page.Keyboard.PressAsync("Tab");
+        Assert.True(await workbench.EvaluateAsync<bool>("root => root.contains(document.activeElement)"));
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(workbench).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task EscapeClosesHarmonyListboxBeforePaletteWorkbench()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var customize = page.GetByTestId("theme-palette-customize");
+        await customize.ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+        await page.GetByTestId("theme-palette-harmony").ClickAsync();
+        var listbox = page.GetByRole(AriaRole.Listbox);
+        await Assertions.Expect(listbox).ToBeVisibleAsync();
+
+        await page.Keyboard.PressAsync("Escape");
+
+        await Assertions.Expect(listbox).ToBeHiddenAsync();
+        await Assertions.Expect(workbench).ToBeVisibleAsync();
+        await page.GetByTestId("theme-palette-close").ClickAsync();
+        await customize.ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Listbox)).ToBeHiddenAsync();
+    }
+
+    [Theory]
+    [InlineData(1440, 900)]
+    [InlineData(1055, 800)]
+    [InlineData(1025, 768)]
+    [InlineData(390, 844)]
+    [InlineData(320, 568)]
+    public async Task PaletteWorkbenchInteractiveTargetsMeetMinimumGeometry(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 1024);
+        var page = await OpenAsync(context);
+        if (width <= 1024)
+            await OpenSettingsAsync(page);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var targets = page.GetByTestId("theme-palette-workbench").Locator("button, input");
+        for (var index = 0; index < await targets.CountAsync(); index++)
+        {
+            var box = await targets.Nth(index).BoundingBoxAsync();
+            Assert.NotNull(box);
+            Assert.True(box.Width >= 44 && box.Height >= 44, $"Target {index} was {box.Width}x{box.Height} at {width}px.");
+        }
+
+        await page.GetByTestId("theme-palette-harmony").ClickAsync();
+        var listbox = page.GetByRole(AriaRole.Listbox);
+        await Assertions.Expect(listbox).ToBeVisibleAsync();
+        var options = listbox.GetByRole(AriaRole.Option);
+        for (var index = 0; index < await options.CountAsync(); index++)
+        {
+            var box = await options.Nth(index).BoundingBoxAsync();
+            Assert.NotNull(box);
+            Assert.True(box.Width >= 44 && box.Height >= 44, $"Harmony option {index} was {box.Width}x{box.Height} at {width}px.");
+        }
+    }
+
+    [Fact]
+    public async Task PaletteWorkbenchFiltersSpaceByEventTargetAndOpenListbox()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+        var status = page.GetByTestId("theme-palette-status");
+        var value = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+        var preview = page.GetByTestId("theme-preview-scope");
+        var initialPrimary = await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()");
+
+        await value.FocusAsync();
+        await value.PressAsync("Space");
+        Assert.NotEqual("Palette generated", await status.InnerTextAsync());
+        Assert.Equal(initialPrimary, await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
+
+        await page.GetByTestId("theme-palette-harmony").ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Listbox)).ToBeVisibleAsync();
+        await workbench.FocusAsync();
+        await workbench.PressAsync("Space");
+        Assert.NotEqual("Palette generated", await status.InnerTextAsync());
+        Assert.Equal(initialPrimary, await preview.EvaluateAsync<string>("element => getComputedStyle(element).getPropertyValue('--shadcn-primary').trim()"));
+
+        await workbench.GetByRole(AriaRole.Heading, new() { Name = "Active palette", Exact = true }).ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Listbox)).ToBeHiddenAsync();
+        await workbench.FocusAsync();
+        await workbench.PressAsync("Space");
+        await Assertions.Expect(status)
+            .ToHaveTextAsync(new Regex("^Palette generated: Seed [0-9]+$"));
+    }
+
+    [Fact]
+    public async Task PaletteWorkbenchRemainsTheAccessibleModalAfterAConstrainedResize()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var errors = new List<string>();
+        page.Console += (_, message) => { if (message.Type == "error") errors.Add(message.Text); };
+        page.PageError += (_, error) => errors.Add(error);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var customize = page.GetByTestId("theme-palette-customize");
+        await Assertions.Expect(customize).Not.ToHaveAttributeAsync("aria-haspopup", "dialog");
+        var workbench = page.GetByTestId("theme-palette-workbench");
+
+        await page.SetViewportSizeAsync(390, 844);
+        await Assertions.Expect(customize).ToHaveAttributeAsync("aria-haspopup", "dialog");
+        await Assertions.Expect(customize).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(workbench).ToHaveAttributeAsync("role", "dialog");
+        Assert.False(await workbench.EvaluateAsync<bool>("root => root.inert"));
+        await Assertions.Expect(workbench).Not.ToHaveAttributeAsync("aria-hidden", "true");
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog, new() { Name = "Active palette", Exact = true })).ToBeVisibleAsync();
+        Assert.Equal(1, await page.GetByRole(AriaRole.Dialog).CountAsync());
+
+        await page.SetViewportSizeAsync(1440, 900);
+        await Assertions.Expect(customize).Not.ToHaveAttributeAsync("aria-haspopup", "dialog");
+        await Assertions.Expect(customize).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(workbench).Not.ToHaveAttributeAsync("role", "dialog");
+
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(workbench).ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByTestId("theme-sidebar-rail-toggle")).ToBeFocusedAsync();
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task ClosingAfterDesktopSidebarCollapseRestoresFocusToVisibleRailToggle()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        var customize = page.GetByTestId("theme-palette-customize");
+        await customize.ClickAsync();
+        await page.GetByTestId("theme-sidebar-collapse").ClickAsync();
+        await Assertions.Expect(customize).ToBeHiddenAsync();
+
+        await page.GetByTestId("theme-palette-close").ClickAsync();
+
+        var fallback = page.GetByTestId("theme-sidebar-rail-toggle");
+        await Assertions.Expect(fallback).ToBeVisibleAsync();
+        await Assertions.Expect(fallback).ToBeFocusedAsync();
+    }
+
+    [Theory]
+    [InlineData(1440, 900)]
+    [InlineData(390, 844)]
+    public async Task PaletteWorkbenchLocalizesItsControlsAndHasNoSeriousAxeViolations(int width, int height)
+    {
+        await using var context = await NewContextAsync(width, height, ReducedMotion.Reduce, width <= 1024);
+        var page = await OpenAsync(context);
+        if (width <= 1024)
+            await OpenSettingsAsync(page);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var workbench = page.GetByTestId("theme-palette-workbench");
+        await Assertions.Expect(workbench).ToContainTextAsync("Generate palette");
+        await Assertions.Expect(workbench).ToContainTextAsync("Harmony");
+        await Assertions.Expect(page.GetByRole(AriaRole.Textbox, new() { Name = "Brand: Color value", Exact = true })).ToBeVisibleAsync();
+        Assert.DoesNotContain("สร้างชุดสี", await workbench.InnerTextAsync(), StringComparison.Ordinal);
+        var englishInput = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+        await englishInput.FillAsync("not-a-color");
+        await englishInput.PressAsync("Enter");
+        await Assertions.Expect(englishInput).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(page.GetByTestId("theme-palette-anchor-brand-error")).ToContainTextAsync("Enter a color as");
+        Assert.DoesNotContain("กรอกค่าสี", await workbench.InnerTextAsync(), StringComparison.Ordinal);
+        var accessibility = await workbench.RunAxe();
+        Assert.DoesNotContain(accessibility.Violations, violation => violation.Impact is "serious" or "critical");
+
+        await page.GetByTestId("theme-palette-close").ClickAsync();
+        await page.GetByTestId("locale-thai").ClickAsync();
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        workbench = page.GetByTestId("theme-palette-workbench");
+        await Assertions.Expect(workbench).ToContainTextAsync("สร้างชุดสี");
+        await Assertions.Expect(workbench).ToContainTextAsync("ความกลมกลืน");
+        await Assertions.Expect(page.GetByRole(AriaRole.Textbox, new() { Name = "แบรนด์: ค่าสี", Exact = true })).ToBeVisibleAsync();
+        var thaiText = await workbench.InnerTextAsync();
+        Assert.DoesNotContain("Generate palette", thaiText, StringComparison.Ordinal);
+        Assert.DoesNotContain("Harmony", thaiText, StringComparison.Ordinal);
+        Assert.DoesNotContain("Brand", thaiText, StringComparison.Ordinal);
+        var thaiInput = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+        await thaiInput.FillAsync("not-a-color");
+        await thaiInput.PressAsync("Enter");
+        await Assertions.Expect(page.GetByTestId("theme-palette-anchor-brand-error")).ToContainTextAsync("กรอกค่าสี");
+        thaiText = await workbench.InnerTextAsync();
+        Assert.DoesNotContain("Enter a color as", thaiText, StringComparison.Ordinal);
+        Assert.DoesNotContain("Color value", thaiText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PaletteWorkbenchRemainsDistinguishableWithForcedColorsAndReducedMotion()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce,
+            ForcedColors = ForcedColors.Active,
+            HasTouch = true
+        });
+        var page = await OpenAsync(context);
+        await OpenSettingsAsync(page);
+        await page.GetByTestId("theme-palette-customize").ClickAsync();
+        var swatch = page.Locator("[data-palette-summary-swatch], .theme-palette-anchor__swatch").Last;
+        var lockButton = page.GetByTestId("theme-palette-anchor-brand").Locator("[data-palette-lock]");
+
+        var brandValue = page.GetByTestId("theme-palette-anchor-brand").Locator("input[type='text']");
+        await brandValue.FillAsync("#dc2626");
+        await brandValue.PressAsync("Enter");
+        await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        Assert.Equal("0s", await swatch.EvaluateAsync<string>("element => getComputedStyle(element).transitionDuration"));
+        Assert.NotEqual("none", await swatch.EvaluateAsync<string>("element => getComputedStyle(element).borderTopStyle"));
+        Assert.NotEqual("none", await lockButton.EvaluateAsync<string>("element => getComputedStyle(element).borderTopStyle"));
+        Assert.True(await lockButton.EvaluateAsync<bool>("element => parseFloat(getComputedStyle(element).borderTopWidth) >= 2"));
+        await lockButton.FocusAsync();
+        Assert.NotEqual("none", await lockButton.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+    }
 
     [Fact]
     public async Task MobileHeaderBrandMarkMatchesCompactActionGeometry()
@@ -122,7 +624,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1121, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
         var stylesheet = await page.EvaluateAsync<string>(
-            "async () => await (await fetch('_content/Maliev.ShadcnBlazor/css/shadcn-layout.css?v=2.0.0')).text()");
+            "async () => await (await fetch('_content/Maliev.ShadcnBlazor/css/shadcn-layout.css?v=2.1.0')).text()");
         Assert.Contains(".shadcn-bento-grid__layout", stylesheet, StringComparison.Ordinal);
 
         var layout = page.Locator(".theme-bento__grid [data-slot='bento-grid-layout']");
@@ -1495,6 +1997,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var trigger = section.Locator(":scope > [data-slot='collapsible-trigger']");
 
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.GetByTestId("theme-typography-editor")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("theme-font-slot-body")).ToHaveCountAsync(1);
+        Assert.False(await page.EvaluateAsync<bool>("performance.getEntriesByType('resource').some(entry => entry.name.includes('data/google-fonts-catalog.json'))"));
         await trigger.ClickAsync();
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
         await Assertions.Expect(page.GetByTestId("theme-font-results").Locator("li")).ToHaveCountAsync(10);
@@ -1509,6 +2014,72 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await trigger.ClickAsync();
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(page.GetByTestId("theme-font-results")).ToBeHiddenAsync();
+    }
+
+    [Fact]
+    public async Task SelectedThaiFallbackParticipatesInPreviewAndExportedFontStack()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await OpenAsync(context);
+        await OpenAdvancedAsync(page, "theme-typography-section");
+
+        await page.GetByTestId("theme-font-search").FillAsync("Space Grotesk");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-space-grotesk")).ToBeVisibleAsync();
+        await page.GetByTestId("theme-font-result-space-grotesk").ClickAsync();
+        await page.GetByTestId("theme-font-slot-thaifallback").ClickAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("Anuphan");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-anuphan")).ToBeVisibleAsync();
+        await page.GetByTestId("theme-font-result-anuphan").ClickAsync();
+
+        var preview = page.GetByTestId("theme-preview-scope");
+        var effectiveStack = await preview.EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans').trim()");
+        AssertFamilyOrder(effectiveStack, "Space Grotesk", "Anuphan", "Noto Sans Thai", "ui-sans-serif", "system-ui");
+        Assert.EndsWith("sans-serif", effectiveStack, StringComparison.Ordinal);
+        Assert.Single(Regex.Matches(effectiveStack, "Noto Sans Thai", RegexOptions.CultureInvariant).Cast<Match>());
+        Assert.Contains("Space Grotesk", await ComputedFontAsync(page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title")));
+
+        await page.GetByTestId("locale-thai").ClickAsync();
+        var thaiHeading = page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title");
+        await Assertions.Expect(thaiHeading).ToBeVisibleAsync();
+        await Assertions.Expect(thaiHeading).ToHaveTextAsync("กำลังการผลิต");
+        AssertFamilyOrder(await ComputedFontAsync(thaiHeading), "Space Grotesk", "Anuphan", "Noto Sans Thai");
+
+        await page.GetByTestId("theme-export-open").ClickAsync();
+        var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+        if (await acknowledgement.CountAsync() > 0)
+            await acknowledgement.CheckAsync();
+        var download = await page.RunAndWaitForDownloadAsync(
+            () => page.GetByTestId("theme-download").ClickAsync(),
+            new() { Timeout = 90_000 });
+        var downloadPath = await download.PathAsync();
+        Assert.NotNull(downloadPath);
+        using var archive = ZipFile.OpenRead(downloadPath);
+        var cssEntry = archive.GetEntry("theme.css");
+        Assert.NotNull(cssEntry);
+        await using var cssStream = cssEntry.Open();
+        using var reader = new StreamReader(cssStream, Encoding.UTF8);
+        var exportedCss = await reader.ReadToEndAsync();
+        Assert.Contains(
+            "--shadcn-font-sans: 'Space Grotesk', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            exportedCss,
+            StringComparison.Ordinal);
+
+        await page.ReloadAsync();
+        await page.GetByTestId("theme-studio").WaitForAsync();
+        var restoredPreview = page.GetByTestId("theme-preview-scope");
+        var restoredStack = await restoredPreview.EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans').trim()");
+        AssertFamilyOrder(restoredStack, "Space Grotesk", "Anuphan", "Noto Sans Thai", "ui-sans-serif", "system-ui");
+        await Assertions.Expect(page.GetByTestId("locale-thai")).ToHaveAttributeAsync("aria-pressed", "true");
+        var restoredThaiHeading = page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title");
+        await Assertions.Expect(restoredThaiHeading).ToHaveTextAsync("กำลังการผลิต");
+        AssertFamilyOrder(await ComputedFontAsync(restoredThaiHeading), "Space Grotesk", "Anuphan", "Noto Sans Thai");
     }
 
     [Fact]
@@ -2039,4 +2610,15 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByRole(AriaRole.Option, new() { Name = option, Exact = true }).ClickAsync();
     }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
+
+    private static void AssertFamilyOrder(string stack, params string[] families)
+    {
+        var previous = -1;
+        foreach (var family in families)
+        {
+            var current = stack.IndexOf(family, StringComparison.OrdinalIgnoreCase);
+            Assert.True(current > previous, $"Expected {family} after index {previous} in {stack}.");
+            previous = current;
+        }
+    }
 }

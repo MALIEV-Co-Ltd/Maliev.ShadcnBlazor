@@ -181,6 +181,9 @@ public sealed class ThemeBentoContractTests
         Assert.True(card.Split("new(\"Q-", StringSplitOptions.None).Length - 1 >= 9);
         Assert.Contains("theme-quality-checklist", card, StringComparison.Ordinal);
         Assert.Contains("theme-marker-conversation", card, StringComparison.Ordinal);
+        Assert.Contains("loading=\"lazy\"", card, StringComparison.Ordinal);
+        Assert.Contains("inspection-camera-machined-bore.png", card, StringComparison.Ordinal);
+        Assert.DoesNotContain("inspection-camera-machined-bore.png", showcaseCss, StringComparison.Ordinal);
         Assert.Contains("_issueSubject", card, StringComparison.Ordinal);
         Assert.Contains("_issueDetails", card, StringComparison.Ordinal);
         Assert.Contains("Value=\"@_issueSubject\" ValueChanged=\"value => _issueSubject = value\"", card, StringComparison.Ordinal);

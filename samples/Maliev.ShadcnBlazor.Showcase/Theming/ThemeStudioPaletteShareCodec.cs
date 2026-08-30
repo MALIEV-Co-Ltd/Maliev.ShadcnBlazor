@@ -10,13 +10,7 @@ public static class ThemeStudioPaletteShareCodec
     public static string Encode(ShadcnThemeDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        var recipe = new ShadcnPaletteRecipe(
-            document.Palette.AlgorithmVersion,
-            document.Palette.Seed,
-            document.Palette.BaseColor,
-            document.Palette.LockedTokens.Order(StringComparer.Ordinal).ToArray());
-        var canonical = document with { Palette = recipe };
-        var bytes = Encoding.UTF8.GetBytes(ShadcnThemeDocumentSerializer.Serialize(canonical));
+        var bytes = Encoding.UTF8.GetBytes(ShadcnThemeDocumentSerializer.Serialize(document));
         return Prefix + Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 

@@ -24,6 +24,7 @@ public sealed class ThemeStudioWorkbenchState
     public bool HighContrastPreview { get; private set; }
     public bool RunwayPaused { get; private set; }
     public bool SystemDarkMode { get; private set; }
+    public bool PaletteWorkbenchOpen { get; private set; }
     public bool EffectiveDarkMode => Mode == ThemeStudioMode.Dark || Mode == ThemeStudioMode.System && SystemDarkMode;
 
     public event EventHandler? Changed;
@@ -31,11 +32,20 @@ public sealed class ThemeStudioWorkbenchState
     public void OpenSidebar() => SetSidebarOpen(true);
     public void CloseSidebar() => SetSidebarOpen(false);
     public void ToggleSidebar() => SetSidebarOpen(!SidebarOpen);
+    public void OpenPaletteWorkbench() => SetPaletteWorkbenchOpen(true);
+    public void ClosePaletteWorkbench() => SetPaletteWorkbenchOpen(false);
 
     public void SetSidebarOpen(bool open)
     {
         if (SidebarOpen == open) return;
         SidebarOpen = open;
+        RaiseChanged();
+    }
+
+    private void SetPaletteWorkbenchOpen(bool open)
+    {
+        if (PaletteWorkbenchOpen == open) return;
+        PaletteWorkbenchOpen = open;
         RaiseChanged();
     }
 

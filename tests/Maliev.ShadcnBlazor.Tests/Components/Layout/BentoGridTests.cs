@@ -46,6 +46,17 @@ public sealed class BentoGridTests : BunitContext
     }
 
     [Fact]
+    public void MasonryKeepsNaturalRowsUntilMeasurementsAreReady()
+    {
+        var root = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..");
+        var css = File.ReadAllText(Path.Combine(root, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-layout.css"));
+
+        Assert.Contains("[data-layout=\"masonry\"]:not([data-masonry-ready=\"true\"])", css, StringComparison.Ordinal);
+        Assert.Contains("[data-layout=\"masonry\"][data-masonry-ready=\"true\"]", css, StringComparison.Ordinal);
+        Assert.Contains("grid-auto-rows: auto", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GridAndItemProtectOwnedAttributesWhileForwardingConsumerAttributes()
     {
         var cut = Render<ShadcnBentoGrid>(parameters => parameters

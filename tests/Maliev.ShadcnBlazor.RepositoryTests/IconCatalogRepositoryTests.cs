@@ -151,7 +151,7 @@ public sealed class IconCatalogRepositoryTests
                 Assert.Equal("Maliev.ShadcnBlazor", dependencies[0].Attribute("id")?.Value);
                 var metadata = nuspec.Root!.Element(ns + "metadata")!;
                 Assert.Equal(packageId, metadata.Element(ns + "id")?.Value);
-                Assert.Equal("2.0.0", metadata.Element(ns + "version")?.Value);
+                Assert.Equal("2.1.0", metadata.Element(ns + "version")?.Value);
                 Assert.Equal("README.md", metadata.Element(ns + "readme")?.Value);
                 Assert.Equal(expected.Id == "lucide" ? "MIT AND ISC" : "MIT", metadata.Element(ns + "license")?.Value);
             }

@@ -454,7 +454,7 @@
             break;
         case "inspection-camera":
             <ShadcnAspectRatio Ratio="@(4d / 3d)" Class="theme-aspect-preview theme-aspect-preview--camera">
-                <div class="theme-aspect-preview__canvas"><div class="theme-camera-reticle" aria-hidden="true"></div><span class="theme-camera-reading" aria-hidden="true">25.000 mm</span><span class="theme-aspect-preview__annotation">@T("Probe P-08 · Bore 4")</span></div>
+                <div class="theme-aspect-preview__canvas"><img class="theme-camera-image" src="images/theme-studio/inspection-camera-machined-bore.png" alt="" width="1672" height="941" loading="lazy" decoding="async" fetchpriority="low" /><div class="theme-camera-reticle" aria-hidden="true"></div><span class="theme-camera-reading" aria-hidden="true">25.000 mm</span><span class="theme-aspect-preview__annotation">@T("Probe P-08 · Bore 4")</span></div>
             </ShadcnAspectRatio>
             <div class="theme-use-case-card__actions"><ShadcnBadge Class="theme-status-success">@T("Live")</ShadcnBadge><ShadcnButton Size="ShadcnButtonSize.Small" OnClick="CaptureInspectionFrame"><span class="theme-workflow-inline-icon" data-theme-workflow-icon="@Definition.Id"><ShadcnIcon Icon="@WorkflowIcon" Size="15" /></span>@T(_inspectionFrameCaptured ? "Captured" : "Capture frame")</ShadcnButton></div>
             break;

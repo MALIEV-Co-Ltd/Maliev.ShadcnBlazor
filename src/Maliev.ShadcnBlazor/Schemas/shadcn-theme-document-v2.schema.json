@@ -31,11 +31,44 @@
       "additionalProperties": false,
       "required": ["algorithmVersion", "seed", "baseColor", "lockedTokens"],
       "properties": {
-        "algorithmVersion": { "type": "integer", "minimum": 1 },
+        "algorithmVersion": { "enum": [0, 1, 2] },
         "seed": { "type": "integer", "minimum": 0 },
         "baseColor": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "lockedTokens": { "type": "array", "maxItems": 128, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } }
-      }
+        "lockedTokens": { "type": "array", "maxItems": 128, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "anchors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["brand", "support", "highlight", "dataA", "dataB"],
+          "properties": {
+            "brand": { "$ref": "#/$defs/paletteAnchor" },
+            "support": { "$ref": "#/$defs/paletteAnchor" },
+            "highlight": { "$ref": "#/$defs/paletteAnchor" },
+            "dataA": { "$ref": "#/$defs/paletteAnchor" },
+            "dataB": { "$ref": "#/$defs/paletteAnchor" }
+          }
+        },
+        "harmony": { "enum": ["free", "analogous", "complementary", "triadic"] },
+        "lockedAnchors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["brand", "support", "highlight", "dataA", "dataB"] }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "algorithmVersion": { "const": 2 } } },
+          "then": { "required": ["anchors", "harmony", "lockedAnchors"] },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["anchors"] },
+                { "required": ["harmony"] },
+                { "required": ["lockedAnchors"] }
+              ]
+            }
+          }
+        }
+      ]
     },
     "typography": {
       "type": "object",
@@ -55,6 +88,11 @@
     }
   },
   "$defs": {
+    "paletteAnchor": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^(#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|oklch\\(\\s*(\\d+(?:\\.\\d+)?|\\.\\d+)\\s+(\\d+(?:\\.\\d+)?|\\.\\d+)\\s+(\\d+(?:\\.\\d+)?|\\.\\d+)\\s*\\))$"
+    },
     "font": {
       "type": "object",
       "additionalProperties": false,

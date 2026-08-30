@@ -6,6 +6,26 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-30
+
+### Added
+
+- Added the Theme Studio palette workbench with deterministic harmony recipes,
+  lockable semantic anchors, contrast-aware generation, shareable state, and
+  portable versioned theme documents.
+
+### Changed
+
+- Hardened Theme Studio palette history, diagnostics, import/export, responsive
+  editing, modal isolation, startup performance, and recipe compatibility while
+  preserving legacy documents.
+
+### Fixed
+
+- Composed the selected Thai fallback into the effective portable document font
+  stack, preserving the chosen body face while placing Thai families before
+  generic system fallbacks across preview, export, and restored state (#249).
+
 ## [2.0.0] - 2026-08-30
 
 ### Added
@@ -288,7 +308,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...v2.0.0
 [1.2.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...v1.2.1

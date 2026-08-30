@@ -300,6 +300,280 @@ public sealed class ShadcnThemeDocumentTests
     }
 
     [Fact]
+    public void VersionOneRecipeSerializationRemainsByteIdentical()
+    {
+        var recipe = new ShadcnPaletteRecipe(1, 42, "neutral", ["light.primary"]);
+        var document = CreateDocument() with { Palette = recipe };
+
+        var json = ShadcnThemeDocumentSerializer.Serialize(document);
+
+        Assert.DoesNotContain("\"anchors\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"harmony\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"lockedAnchors\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"isVersion2\"", json, StringComparison.Ordinal);
+        Assert.Contains("""
+          "palette": {
+            "algorithmVersion": 1,
+            "seed": 42,
+            "baseColor": "neutral",
+            "lockedTokens": [
+              "light.primary"
+            ]
+          },
+        """, json, StringComparison.Ordinal);
+        Assert.Equal(json, ShadcnThemeDocumentSerializer.Serialize(
+            ShadcnThemeDocumentSerializer.Deserialize(json)));
+    }
+
+    [Fact]
+    public void VersionTwoRecipeTakesDefensiveAnchorLockSnapshotAndRoundTrips()
+    {
+        var locks = new[] { ShadcnPaletteAnchorRole.Brand };
+        var anchors = new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899");
+        var recipe = ShadcnPaletteRecipe.CreateV2(42, "neutral", [], anchors,
+            ShadcnPaletteHarmony.Triadic, locks);
+        locks[0] = ShadcnPaletteAnchorRole.DataB;
+
+        var restored = ShadcnThemeDocumentSerializer.Deserialize(
+            ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe })).Palette;
+
+        Assert.Equal(2, restored.AlgorithmVersion);
+        Assert.Equal(anchors, restored.Anchors);
+        Assert.Equal(ShadcnPaletteHarmony.Triadic, restored.Harmony);
+        Assert.Equal([ShadcnPaletteAnchorRole.Brand], restored.LockedAnchors);
+    }
+
+    [Fact]
+    public void VersionTwoFactoryRejectsUndefinedHarmony()
+    {
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            (ShadcnPaletteHarmony)99,
+            [ShadcnPaletteAnchorRole.Brand]));
+
+        Assert.Equal("harmony", exception.ParamName);
+        Assert.StartsWith("Unknown palette harmony.", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ValidatorRejectsUndefinedVersionTwoHarmony()
+    {
+        var recipe = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion,
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            (ShadcnPaletteHarmony)99,
+            [ShadcnPaletteAnchorRole.Brand]);
+
+        var validation = ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = recipe });
+
+        Assert.Contains(validation.Errors, error =>
+            error.Code == "invalid-palette-harmony" &&
+            error.Path == "palette.harmony" &&
+            error.Message == "Palette harmony must be a supported value.");
+    }
+
+    [Fact]
+    public void DuplicateVersionTwoAnchorLocksAreRejectedByDocumentValidation()
+    {
+        var recipe = new ShadcnPaletteRecipe(
+            ShadcnPaletteRecipe.VersionTwoAlgorithmVersion,
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand, ShadcnPaletteAnchorRole.Brand]);
+        var document = CreateDocument() with { Palette = recipe };
+
+        var validation = ShadcnThemeDocumentValidator.Validate(document);
+
+        Assert.Contains(validation.Errors, error =>
+            error.Code == "invalid-locked-anchor" && error.Path == "palette.lockedAnchors");
+        Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Serialize(document));
+    }
+
+    [Theory]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "anchors")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "lockedAnchors")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "anchors")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "harmony")]
+    [InlineData(ShadcnPaletteRecipe.LegacyAlgorithmVersion, "lockedAnchors")]
+    public void CanonicalVersionZeroOrOneRejectsExplicitNullVersionTwoMembers(int algorithmVersion, string member)
+    {
+        var document = CreateDocument() with
+        {
+            Palette = new ShadcnPaletteRecipe(algorithmVersion, 42, "neutral", ["light.primary"])
+        };
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(document))!.AsObject();
+        root["palette"]!.AsObject()[member] = null;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: unexpected-palette-v2-field at palette: Version-two palette fields are not allowed on materialized or version-one recipes.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void CanonicalVersionTwoRejectsDuplicateAnchorLocksFromRawJson()
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["lockedAnchors"] = new JsonArray("brand", "brand");
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: invalid-locked-anchor at palette.lockedAnchors: Locked anchors must be unique supported roles.",
+            exception.Message);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CanonicalVersionTwoRejectsMissingOrNullAnchorMembersFromRawJson(bool removeMember)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        var anchors = root["palette"]!.AsObject()["anchors"]!.AsObject();
+        if (removeMember)
+            anchors.Remove("dataB");
+        else
+            anchors["dataB"] = null;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Equal(
+            "Theme document is invalid: invalid-palette-anchors at palette.anchors: Palette anchors must define all five non-null string values.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void CanonicalVersionTwoRejectsNonStringAnchorMembersFromRawJson()
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            [ShadcnPaletteAnchorRole.Brand]);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["anchors"]!.AsObject()["dataB"] = 42;
+
+        Assert.Throws<JsonException>(() => ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+    }
+
+    [Theory]
+    [InlineData("brand", "rgb(37 99 235)")]
+    [InlineData("support", "#2563ebff")]
+    [InlineData("highlight", "oklch(0.5 0.2 20 / 50%)")]
+    [InlineData("dataA", "not-a-color")]
+    [InlineData("dataB", " oklch(0.5 0.2 20)")]
+    public void CanonicalVersionTwoStrictlyValidatesEveryAnchorWithAnExactPath(string member, string value)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(CreateDocument() with { Palette = recipe }))!.AsObject();
+        root["palette"]!.AsObject()["anchors"]!.AsObject()[member] = value;
+
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+
+        Assert.Contains($"palette-invalid-anchor at palette.anchors.{member}", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("brand")]
+    [InlineData("support")]
+    [InlineData("highlight")]
+    [InlineData("dataA")]
+    [InlineData("dataB")]
+    public void CanonicalVersionTwoEnforcesTheSchemaLengthLimitForEveryAnchor(string member)
+    {
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors("#2563eb", "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Triadic,
+            []);
+        var root = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(
+            CreateDocument() with { Palette = recipe }))!.AsObject();
+        var anchors = root["palette"]!.AsObject()["anchors"]!.AsObject();
+        var accepted = PaddedAnchor(128);
+        anchors[member] = accepted;
+
+        var restored = ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString());
+
+        var restoredRoot = JsonNode.Parse(ShadcnThemeDocumentSerializer.Serialize(restored))!.AsObject();
+        Assert.Equal(accepted, restoredRoot["palette"]!.AsObject()["anchors"]!.AsObject()[member]!.GetValue<string>());
+
+        anchors[member] = PaddedAnchor(129);
+        var exception = Assert.Throws<JsonException>(() =>
+            ShadcnThemeDocumentSerializer.Deserialize(root.ToJsonString()));
+        Assert.Equal(
+            $"Theme document is invalid: palette-invalid-anchor at palette.anchors.{member}: Palette anchor must not exceed 128 characters.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void PaletteAnchorSchemaMaximumMatchesTheRuntimeBoundary()
+    {
+        var schema = JsonNode.Parse(File.ReadAllText(Path.Combine(
+            FindRoot(), "src", "Maliev.ShadcnBlazor", "Schemas", "shadcn-theme-document-v2.schema.json")))!.AsObject();
+        var schemaMaximum = schema["$defs"]!.AsObject()["paletteAnchor"]!.AsObject()["maxLength"]!.GetValue<int>();
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors(PaddedAnchor(schemaMaximum), "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Free,
+            []);
+
+        Assert.Equal(128, schemaMaximum);
+        Assert.True(ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = recipe }).IsValid);
+        var tooLong = ShadcnPaletteRecipe.CreateV2(
+            42,
+            "neutral",
+            [],
+            new ShadcnPaletteAnchors(PaddedAnchor(schemaMaximum + 1), "#14b8a6", "#f59e0b", "#8b5cf6", "#ec4899"),
+            ShadcnPaletteHarmony.Free,
+            []);
+        var error = Assert.Single(
+            ShadcnThemeDocumentValidator.Validate(CreateDocument() with { Palette = tooLong }).Errors,
+            item => item.Path == "palette.anchors.brand");
+        Assert.Equal("palette-invalid-anchor", error.Code);
+    }
+
+    [Fact]
     public void TypographyScaleTakesAnImmutableSnapshotOfRoleStyles()
     {
         var source = new Dictionary<ShadcnTypographyRole, ShadcnTypographyRoleStyle>
@@ -320,6 +594,102 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Throws<NotSupportedException>(() =>
             ((IDictionary<ShadcnTypographyRole, ShadcnTypographyRoleStyle>)scale.Roles)
             .Add(ShadcnTypographyRole.Code, new(400, 1, 1.5, 0)));
+    }
+
+    [Fact]
+    public void DocumentCssComposesSelectedThaiFallbackBeforeGenericBodyFallbacks()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            "space-grotesk");
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+        const string expected =
+            "--shadcn-font-sans: 'Space Grotesk', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif";
+
+        var css = ShadcnThemeCssWriter.Write(document);
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+
+        Assert.Equal(2, Count(css, expected));
+        Assert.Contains(expected, properties, StringComparison.Ordinal);
+        Assert.Equal(1, Count(properties, "--shadcn-font-sans:"));
+        Assert.Contains("--shadcn-font-thai: 'Anuphan', 'Noto Sans Thai', sans-serif", properties, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DocumentCssPreservesQuotedCommasAndDeduplicatesOverlappingFamilies()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Body, Display', 'Body Text', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            null);
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+        var fontSans = properties.Split("; ", StringSplitOptions.None)
+            .Single(value => value.StartsWith("--shadcn-font-sans:", StringComparison.Ordinal));
+
+        Assert.Contains(
+            "--shadcn-font-sans: 'Body, Display', 'Body Text', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            fontSans,
+            StringComparison.Ordinal);
+        Assert.Equal(1, Count(fontSans, "'Noto Sans Thai'"));
+        Assert.Equal(1, Count(fontSans, "ui-sans-serif"));
+        Assert.Equal(1, Count(fontSans, "system-ui"));
+    }
+
+    [Fact]
+    public void DocumentCssKeepsSelectedBodyPrimaryFirstWhenThaiFallbackRepeatsIt()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            "noto-sans-thai");
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+
+        Assert.Contains(
+            "--shadcn-font-sans: 'Noto Sans Thai', 'Anuphan', ui-sans-serif, system-ui, sans-serif",
+            properties,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DocumentCssMovesBakedThaiBodyFallbackBehindNewThaiPrimary()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            null);
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+
+        Assert.Contains(
+            "--shadcn-font-sans: 'Geist', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            properties,
+            StringComparison.Ordinal);
     }
 
     private static ShadcnThemeDocument CreateDocument()
@@ -350,6 +720,30 @@ public sealed class ShadcnThemeDocumentTests
                     [ShadcnTypographyRole.Code] = new(400, 0.875, 1.5, 0)
                 })
         };
+    }
+
+    private static ShadcnThemeDocument WithTypography(
+        ShadcnThemeDocument source,
+        ShadcnFontSelection body,
+        ShadcnFontSelection thai)
+    {
+        return source with
+        {
+            Theme = source.Theme with { Metrics = source.Theme.Metrics with { FontFamily = body.Family } },
+            Typography = new ShadcnTypographyScale(body, thai, source.Typography.Code, source.Typography.Roles)
+        };
+    }
+
+    private static int Count(string value, string fragment)
+    {
+        var count = 0;
+        var offset = 0;
+        while ((offset = value.IndexOf(fragment, offset, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            offset += fragment.Length;
+        }
+        return count;
     }
 
     private static ShadcnThemeDocument CompleteTypographyRoles(ShadcnThemeDocument document)
@@ -400,4 +794,19 @@ public sealed class ShadcnThemeDocumentTests
         Assert.Equal(
             ShadcnThemeDocumentSerializer.Serialize(expected),
             ShadcnThemeDocumentSerializer.Serialize(actual));
+
+    private static string PaddedAnchor(int length)
+    {
+        const string prefix = "oklch(";
+        const string suffix = "0.5 0.2 20)";
+        return prefix + new string(' ', length - prefix.Length - suffix.Length) + suffix;
+    }
+
+    private static string FindRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        return directory?.FullName ?? throw new DirectoryNotFoundException();
+    }
 }

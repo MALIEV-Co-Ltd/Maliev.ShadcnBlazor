@@ -39,6 +39,13 @@ Set-Content -LiteralPath $indexPath -Value $index -NoNewline
 
 $fallbackPath = Join-Path $resolvedPublishDirectory '404.html'
 Copy-Item -LiteralPath $indexPath -Destination $fallbackPath -Force
+
+foreach ($route in @('theme', 'docs', 'docs/components')) {
+    $routeDirectory = Join-Path $resolvedPublishDirectory $route
+    New-Item -ItemType Directory -Path $routeDirectory -Force | Out-Null
+    Copy-Item -LiteralPath $indexPath -Destination (Join-Path $routeDirectory 'index.html') -Force
+}
+
 New-Item -ItemType File -Path (Join-Path $resolvedPublishDirectory '.nojekyll') -Force | Out-Null
 
 if ((Get-Content -LiteralPath $indexPath -Raw).Contains($localBase, [StringComparison]::Ordinal)) {

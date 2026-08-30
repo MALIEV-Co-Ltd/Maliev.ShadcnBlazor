@@ -1836,21 +1836,40 @@ type Maliev.ShadcnBlazor.Theming.ShadcnOptions
   ShadcnTheme Theme
   TimeSpan ToastDuration
   TimeSpan ToastExitDuration
+enum Maliev.ShadcnBlazor.Theming.ShadcnPaletteAnchorRole: Brand, Support, Highlight, DataA, DataB
+type Maliev.ShadcnBlazor.Theming.ShadcnPaletteAnchors
+  String Brand
+  String DataA
+  String DataB
+  String Highlight
+  String Support
+  method String Get(ShadcnPaletteAnchorRole role)
+  method ShadcnPaletteAnchors Set(ShadcnPaletteAnchorRole role, String value)
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerationResult
+  ShadcnPaletteAnchors ActiveAnchors
   IReadOnlyList<ShadcnThemeValidationMessage> Errors
   Boolean IsValid
   ShadcnTheme Theme
   IReadOnlyList<ShadcnThemeValidationMessage> Warnings
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteGenerator
   const Int32 CurrentAlgorithmVersion
+  const Int32 VersionTwoAlgorithmVersion
   method ShadcnPaletteGenerationResult Generate(ShadcnTheme source, ShadcnPaletteRecipe recipe)
+enum Maliev.ShadcnBlazor.Theming.ShadcnPaletteHarmony: Free, Analogous, Complementary, Triadic
 type Maliev.ShadcnBlazor.Theming.ShadcnPaletteRecipe
   const Int32 CurrentAlgorithmVersion
+  const Int32 LegacyAlgorithmVersion
   const Int32 MaterializedAlgorithmVersion
+  const Int32 VersionTwoAlgorithmVersion
   Int32 AlgorithmVersion
+  ShadcnPaletteAnchors Anchors
   String BaseColor
+  Nullable<ShadcnPaletteHarmony> Harmony
+  Boolean IsVersion2
+  IReadOnlyList<ShadcnPaletteAnchorRole> LockedAnchors
   IReadOnlyList<String> LockedTokens
   UInt64 Seed
+  method ShadcnPaletteRecipe CreateV2(UInt64 seed, String baseColor, IReadOnlyList<String> lockedTokens, ShadcnPaletteAnchors anchors, ShadcnPaletteHarmony harmony, IEnumerable<ShadcnPaletteAnchorRole> lockedAnchors)
 enum Maliev.ShadcnBlazor.Theming.ShadcnReducedMotionBehavior: RespectSystemPreference, AlwaysReduce
 type Maliev.ShadcnBlazor.Theming.ShadcnTheme
   const Int32 CurrentSchemaVersion
@@ -1937,6 +1956,8 @@ type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidationResult
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidator
   const Double NonTextContrastRatio
   const Double TextContrastRatio
+  method String ToHexColor(String value)
+  method String ToHexColor(String value, Boolean includeAlpha)
   method ShadcnThemeValidationResult Validate(ShadcnTheme theme)
 enum Maliev.ShadcnBlazor.Theming.ShadcnTypographyRole: Body, Heading1, Heading2, Heading3, Heading4To6, Label, Button, Caption, Code
 type Maliev.ShadcnBlazor.Theming.ShadcnTypographyRoleStyle
