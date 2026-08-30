@@ -1,11 +1,38 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Forms;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.Forms;
 
 public sealed class DropzoneTests : BunitContext
 {
+    public DropzoneTests() => Services.AddMalievShadcn();
+
+    [Fact]
+    public void StatusAndValidationMessagesCanBeLocalized()
+    {
+        var cut = Render<DynamicComponent>(parameters => parameters
+            .Add(component => component.Type, typeof(ShadcnDropzone))
+            .Add(component => component.Parameters, new Dictionary<string, object>
+            {
+                [nameof(ShadcnDropzone.Loading)] = true,
+                ["LoadingStatus"] = "กำลังประมวลผลไฟล์ที่เลือก",
+                ["SelectedFilesStatus"] = (Func<int, string>)(count => $"เลือกแล้ว {count} ไฟล์"),
+                ["ValidationErrorsStatus"] = (Func<int, string>)(count => $"พบข้อผิดพลาด {count} รายการ")
+            }));
+
+        Assert.Equal("กำลังประมวลผลไฟล์ที่เลือก", cut.Find("[data-slot='dropzone-status']").TextContent.Trim());
+
+        var overload = typeof(ShadcnDropzoneValidation).GetMethods()
+            .SingleOrDefault(method => method.Name == nameof(ShadcnDropzoneValidation.Validate) && method.GetParameters().Length == 6);
+        Assert.NotNull(overload);
+        Func<ShadcnDropzoneErrorCode, string?, long, string> formatter = (code, fileName, limit) => $"{code}:{fileName}:{limit}";
+        IBrowserFile[] files = [new TestBrowserFile("large.pdf", 5_000, "application/pdf")];
+        var selection = Assert.IsType<ShadcnDropzoneSelection>(overload.Invoke(null, [files, null, false, 1, 1_000L, formatter]));
+        Assert.Equal("FileTooLarge:large.pdf:1000", Assert.Single(selection.Errors).Message);
+    }
+
     [Fact]
     public void RendersOneAccessibleNativeFileBoundaryForClickKeyboardAndDrop()
     {

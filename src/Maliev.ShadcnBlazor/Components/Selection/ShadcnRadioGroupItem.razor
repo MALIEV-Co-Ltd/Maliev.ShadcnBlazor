@@ -2,7 +2,7 @@
 @using System.Globalization
 @implements IDisposable
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-@inject IShadcnIdAllocator IdAllocator
+@inject IServiceProvider IdAllocator
 
 <label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State" data-presentation="@PresentationValue">
     <span class="shadcn-radio-control" data-slot="radio-group-control">

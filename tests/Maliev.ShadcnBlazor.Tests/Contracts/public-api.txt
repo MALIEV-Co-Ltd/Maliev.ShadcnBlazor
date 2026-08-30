@@ -190,6 +190,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnAttachment
   ShadcnAttachmentFile File
   ShadcnAttachmentOrientation Orientation
   Nullable<Double> Progress
+  Func<String, String> ProgressLabel
   ShadcnAttachmentSize Size
   ShadcnAttachmentState State
   EventCallback<ShadcnAttachmentState> StateChanged
@@ -255,6 +256,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
   Int32 Count
   Boolean DefaultExpanded
   EventCallback<Boolean> ExpandedChanged
+  Func<Boolean, Int32, String> LabelFormatter
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactions
   String AccessibleName
   ShadcnLogicalAlign Align
@@ -670,6 +672,7 @@ type Maliev.ShadcnBlazor.Components.Feedback.Toast.ShadcnToaster
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnCalendar
   ShadcnCalendarCaptionLayout CaptionLayout
   CultureInfo Culture
+  Func<DateOnly, String> DayLabel
   Nullable<ShadcnDirection> Direction
   Boolean Disabled
   Nullable<DayOfWeek> FirstDayOfWeek
@@ -734,6 +737,7 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   String ClearLabel
   Boolean Clearable
   CultureInfo Culture
+  Func<DateOnly, String> DayLabel
   Nullable<ShadcnDirection> Direction
   Boolean Disabled
   Nullable<DayOfWeek> FirstDayOfWeek
@@ -744,13 +748,18 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   Nullable<DateOnly> Max
   Nullable<DateOnly> Min
   ShadcnCalendarSelectionMode Mode
+  String MonthSelectLabel
   String Name
+  String NextMonthLabel
   Boolean Open
   EventCallback<Boolean> OpenChanged
   String Placeholder
+  String PreviousMonthLabel
   ShadcnDateRange Range
   EventCallback<ShadcnDateRange> RangeChanged
+  String RangeEndLabel
   Expression<Func<ShadcnDateRange>> RangeExpression
+  String RangeStartLabel
   Boolean ReadOnly
   Boolean Required
   Boolean ShowOutsideDays
@@ -763,6 +772,8 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDatePicker
   Expression<Func<Nullable<DateOnly>>> ValueExpression
   DateOnly VisibleMonth
   EventCallback<DateOnly> VisibleMonthChanged
+  String WeekLabel
+  String YearSelectLabel
   method ValueTask FocusAsync(Boolean preventScroll)
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDateRange
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzone
@@ -771,10 +782,13 @@ type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzone
   Boolean Disabled
   String Instructions
   Boolean Loading
+  String LoadingStatus
   Int64 MaxFileSize
   Int32 MaxFiles
   Boolean Multiple
+  Func<Int32, String> SelectedFilesStatus
   EventCallback<ShadcnDropzoneSelection> SelectionChanged
+  Func<Int32, String> ValidationErrorsStatus
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneError
 enum Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneErrorCode: TooManyFiles, FileTooLarge, FileTypeNotAccepted
 type Maliev.ShadcnBlazor.Components.Forms.ShadcnDropzoneSelection
@@ -1758,7 +1772,13 @@ type Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope
   ShadcnMotionTreatment Motion
   ShadcnVisualStyle VisualStyle
 type Maliev.ShadcnBlazor.Components.Typography.ShadcnCodeBlock
+  Func<String, String> CodeLabel
+  String CopiedLabel
+  String CopyLabel
+  String CopySuccessAnnouncement
+  String FallbackLabel
   String Language
+  String LanguageLabel
   String Source
   IReadOnlyDictionary<String, String> Sources
 type Maliev.ShadcnBlazor.Components.Typography.ShadcnTypeset

@@ -3,7 +3,7 @@
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
-@inject IShadcnIdAllocator IdAllocator
+@inject IServiceProvider IdAllocator
 @inherits ShadcnFormComponentBase<TValue>
 
 <div @ref="Root" class="@MergeClass("shadcn-select")" style="@MergeStyle()" data-slot="select" data-open="@(EffectiveOpen ? "true" : null)" data-clearable="@(Clearable && SelectedOption is not null ? "true" : null)">

@@ -2,28 +2,28 @@
 @using Maliev.ShadcnBlazor.Components.Forms
 @implements IAsyncDisposable
 @inject IJSRuntime JS
-@inject IShadcnIdAllocator IdAllocator
+@inject IServiceProvider IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-code-block")" style="@MergeStyle(null)" data-slot="code-block" data-language="@SelectedLanguage">
     <div class="shadcn-code-block-toolbar" data-slot="code-block-toolbar">
         @if (SourceByLanguage.Count > 1)
         {
-            <label class="shadcn-sr-only" for="@LanguageId">Code language</label>
+            <label class="shadcn-sr-only" for="@LanguageId">@LanguageLabel</label>
             <ShadcnSelect TValue="string"
                           id="@LanguageId"
                           Class="shadcn-code-block-language-select"
                           Value="@SelectedLanguage"
                           ValueChanged="@ChangeLanguageAsync"
                           Options="@LanguageOptions"
-                          Placeholder="Code language"
+                          Placeholder="@LanguageLabel"
                           Size="ShadcnControlSize.Small" />
         }
         else
         {
             <span class="shadcn-code-block-language" data-slot="code-block-language">@SelectedLanguage</span>
         }
-        <button type="button" class="shadcn-code-block-copy" data-testid="copy-source" data-copied="@_copied.ToString().ToLowerInvariant()" data-copy-state="@(_copied ? "copied" : "idle")" aria-label="@(_copied ? "Copied" : "Copy source")" title="@(_copied ? "Copied" : "Copy source")" @onclick="CopyAsync">
+        <button type="button" class="shadcn-code-block-copy" data-testid="copy-source" data-copied="@_copied.ToString().ToLowerInvariant()" data-copy-state="@(_copied ? "copied" : "idle")" aria-label="@CopyButtonLabel" title="@CopyButtonLabel" @onclick="CopyAsync">
             @if (_copied)
             {
                 <span @key="_copyFeedbackId" class="shadcn-code-block-copy-feedback" aria-hidden="true">
@@ -36,14 +36,14 @@
                     <svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
                 </span>
             }
-            <span class="shadcn-sr-only">@(_copied ? "Copied" : "Copy source")</span>
+            <span class="shadcn-sr-only">@CopyButtonLabel</span>
         </button>
     </div>
-    <pre tabindex="0" aria-label="@($"{SelectedLanguage} code example")" data-slot="code-block-content"><code data-slot="code-block-code">@((MarkupString)HighlightedSource)</code></pre>
+    <pre tabindex="0" aria-label="@CodeLabel(SelectedLanguage)" data-slot="code-block-content"><code data-slot="code-block-code">@((MarkupString)HighlightedSource)</code></pre>
     <p class="shadcn-code-block-announcement component-code__announcement" aria-live="polite">@_announcement</p>
     @if (_showFallback)
     {
-        <label class="shadcn-sr-only" for="@FallbackId">Selectable source fallback</label>
+        <label class="shadcn-sr-only" for="@FallbackId">@FallbackLabel</label>
         <textarea id="@FallbackId" readonly rows="8">@SelectedSource</textarea>
     }
 </div>
@@ -52,6 +52,18 @@
     [Parameter, EditorRequired] public string Source { get; set; } = string.Empty;
     [Parameter] public string Language { get; set; } = "razor";
     [Parameter] public IReadOnlyDictionary<string, string>? Sources { get; set; }
+    /// <summary>Gets or sets the accessible label for the language selector.</summary>
+    [Parameter] public string LanguageLabel { get; set; } = "Code language";
+    /// <summary>Gets or sets the accessible label for the copy action.</summary>
+    [Parameter] public string CopyLabel { get; set; } = "Copy source";
+    /// <summary>Gets or sets the accessible label shown after a successful copy.</summary>
+    [Parameter] public string CopiedLabel { get; set; } = "Copied";
+    /// <summary>Gets or sets the live-region message announced after a successful copy.</summary>
+    [Parameter] public string CopySuccessAnnouncement { get; set; } = "Source copied to clipboard.";
+    /// <summary>Gets or sets the accessible label for the manual-copy fallback.</summary>
+    [Parameter] public string FallbackLabel { get; set; } = "Selectable source fallback";
+    /// <summary>Gets or sets the formatter for the code example's accessible label.</summary>
+    [Parameter] public Func<string, string> CodeLabel { get; set; } = language => $"{language} code example";
 
     private IJSObjectReference? _module;
     private string _selectedLanguage = string.Empty;
@@ -75,6 +87,7 @@
     private string SelectedLanguage => SourceByLanguage.ContainsKey(_selectedLanguage) ? _selectedLanguage : SourceByLanguage.Keys.First();
     private string SelectedSource => SourceByLanguage.TryGetValue(SelectedLanguage, out var source) ? source : Source;
     private string HighlightedSource => Highlight(SelectedSource, SelectedLanguage);
+    private string CopyButtonLabel => _copied ? CopiedLabel : CopyLabel;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "data-slot", "data-language");
 
     protected override void OnParametersSet()
@@ -106,7 +119,7 @@
             _copied = true;
             _copyFeedbackId++;
             _showFallback = false;
-            _announcement = "Source copied to clipboard.";
+            _announcement = CopySuccessAnnouncement;
             BeginCopyReset();
         }
         catch (JSException)

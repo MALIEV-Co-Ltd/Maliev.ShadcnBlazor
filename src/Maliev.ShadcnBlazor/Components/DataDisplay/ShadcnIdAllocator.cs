@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Maliev.ShadcnBlazor.Components.DataDisplay;
 
 /// <summary>Allocates deterministic, sibling-unique component identifiers within a Blazor service scope.</summary>
@@ -25,5 +27,18 @@ public sealed class ShadcnIdAllocator : IShadcnIdAllocator
             _sequences[prefix] = sequence;
             return $"{prefix}-{sequence:x}";
         }
+    }
+}
+
+internal static class ShadcnIdAllocatorResolver
+{
+    private static readonly ConditionalWeakTable<IServiceProvider, IShadcnIdAllocator> FallbackAllocators = new();
+
+    internal static string NextId(this IServiceProvider services, string prefix)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        var allocator = services.GetService(typeof(IShadcnIdAllocator)) as IShadcnIdAllocator
+            ?? FallbackAllocators.GetValue(services, static _ => new ShadcnIdAllocator());
+        return allocator.NextId(prefix);
     }
 }

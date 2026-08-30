@@ -6,6 +6,49 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Conversation;
 
 public sealed class AttachmentTests : BunitContext
 {
+    public AttachmentTests() => Services.AddMalievShadcn();
+
+    [Fact]
+    public void ProgressAndValidationMessagesCanBeLocalized()
+    {
+        var cut = Render<DynamicComponent>(parameters => parameters
+            .Add(component => component.Type, typeof(ShadcnAttachment))
+            .Add(component => component.Parameters, new Dictionary<string, object>
+            {
+                [nameof(ShadcnAttachment.State)] = ShadcnAttachmentState.Uploading,
+                [nameof(ShadcnAttachment.Title)] = "drawing.step",
+                [nameof(ShadcnAttachment.ChildContent)] = (RenderFragment)(builder => builder.AddContent(0, "drawing.step")),
+                ["ProgressLabel"] = (Func<string?, string>)(title => $"ความคืบหน้าการอัปโหลด {title}")
+            }));
+        Assert.Equal("ความคืบหน้าการอัปโหลด drawing.step", cut.Find("[role='progressbar']").GetAttribute("aria-label"));
+
+        var options = new ShadcnAttachmentValidationOptions
+        {
+            AcceptedTypes = new HashSet<string>(["application/pdf"]),
+            MaximumFileSize = 100,
+            MaximumFileCount = 1
+        };
+        var formatters = new Dictionary<string, Delegate>
+        {
+            ["MaximumFileCountMessage"] = (Func<int, string>)(maximum => $"สูงสุด {maximum} ไฟล์"),
+            ["UnsupportedFileTypeMessage"] = (Func<ShadcnAttachmentFile, string>)(file => $"ไม่รองรับชนิดไฟล์ {file.Name}"),
+            ["MaximumFileSizeMessage"] = (Func<ShadcnAttachmentFile, long, string>)((file, maximum) => $"{file.Name} เกิน {maximum} ไบต์")
+        };
+        foreach (var formatter in formatters)
+        {
+            var property = typeof(ShadcnAttachmentValidationOptions).GetProperty(formatter.Key);
+            Assert.NotNull(property);
+            property.SetValue(options, formatter.Value);
+        }
+
+        var result = ShadcnAttachmentValidator.Validate(
+            [new("bad.exe", 200, "application/octet-stream"), new("extra.exe", 1, "application/octet-stream")],
+            options);
+        Assert.Contains(result.Errors, error => error.Message == "สูงสุด 1 ไฟล์");
+        Assert.Contains(result.Errors, error => error.Message == "ไม่รองรับชนิดไฟล์ bad.exe");
+        Assert.Contains(result.Errors, error => error.Message == "bad.exe เกิน 100 ไบต์");
+    }
+
     [Theory]
     [InlineData(ShadcnAttachmentState.Idle, "idle")]
     [InlineData(ShadcnAttachmentState.Uploading, "uploading")]

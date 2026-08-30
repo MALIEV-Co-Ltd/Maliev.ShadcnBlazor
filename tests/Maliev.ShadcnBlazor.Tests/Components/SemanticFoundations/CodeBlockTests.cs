@@ -1,5 +1,6 @@
 using Bunit;
 using Maliev.ShadcnBlazor.Components.Typography;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace Maliev.ShadcnBlazor.Tests.Components.SemanticFoundations;
@@ -58,6 +59,36 @@ public sealed class CodeBlockTests : BunitContext
             Assert.Null(copy.QuerySelector(".shadcn-code-block-copy-status"));
             Assert.NotNull(copy.QuerySelector("svg"));
             Assert.Equal("Source copied to clipboard.", cut.Find("[aria-live='polite']").TextContent.Trim());
+        });
+    }
+
+    [Fact]
+    public void CopyAndAssistiveTextCanBeLocalizedWithoutReplacingTheComponent()
+    {
+        const string source = "dotnet add package Maliev.ShadcnBlazor";
+        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-code-block.js");
+        module.SetupVoid("copyText", source).SetVoidResult();
+        var cut = Render<DynamicComponent>(parameters => parameters
+            .Add(component => component.Type, typeof(ShadcnCodeBlock))
+            .Add(component => component.Parameters, new Dictionary<string, object>
+            {
+                [nameof(ShadcnCodeBlock.Source)] = source,
+                [nameof(ShadcnCodeBlock.Language)] = "bash",
+                ["LanguageLabel"] = "ภาษาของโค้ด",
+                ["CopyLabel"] = "คัดลอกต้นฉบับ",
+                ["CopiedLabel"] = "คัดลอกแล้ว",
+                ["CopySuccessAnnouncement"] = "คัดลอกต้นฉบับไปยังคลิปบอร์ดแล้ว",
+                ["FallbackLabel"] = "ต้นฉบับสำหรับเลือกคัดลอก",
+                ["CodeLabel"] = (Func<string, string>)(language => $"ตัวอย่างโค้ด {language}")
+            }));
+
+        Assert.Equal("คัดลอกต้นฉบับ", cut.Find("[data-testid='copy-source']").GetAttribute("aria-label"));
+        Assert.Equal("ตัวอย่างโค้ด bash", cut.Find("pre").GetAttribute("aria-label"));
+        cut.Find("[data-testid='copy-source']").Click();
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal("คัดลอกแล้ว", cut.Find("[data-testid='copy-source']").GetAttribute("aria-label"));
+            Assert.Equal("คัดลอกต้นฉบับไปยังคลิปบอร์ดแล้ว", cut.Find("[aria-live='polite']").TextContent.Trim());
         });
     }
 

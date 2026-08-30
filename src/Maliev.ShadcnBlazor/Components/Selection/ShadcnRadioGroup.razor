@@ -7,7 +7,7 @@
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-@inject IShadcnIdAllocator IdAllocator
+@inject IServiceProvider IdAllocator
 
 <CascadingValue Value="@_context">
     <div @ref="GroupReference"

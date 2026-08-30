@@ -10,8 +10,38 @@ namespace Maliev.ShadcnBlazor.Tests.Components.Forms;
 
 public sealed class CalendarDatePickerTests : BunitContext
 {
+    [Fact]
+    public void DatePickerForwardsLocalizedCalendarAndGeneratedAssistiveText()
+    {
+        var cut = Render<DynamicComponent>(parameters => parameters
+            .Add(component => component.Type, typeof(ShadcnDatePicker))
+            .Add(component => component.Parameters, new Dictionary<string, object>
+            {
+                [nameof(ShadcnDatePicker.Open)] = true,
+                [nameof(ShadcnDatePicker.Mode)] = ShadcnCalendarSelectionMode.Range,
+                [nameof(ShadcnDatePicker.Name)] = "delivery",
+                [nameof(ShadcnDatePicker.VisibleMonth)] = new DateOnly(2026, 8, 1),
+                [nameof(ShadcnDatePicker.Today)] = new DateOnly(2026, 8, 30),
+                ["PreviousMonthLabel"] = "เดือนก่อนหน้า",
+                ["NextMonthLabel"] = "เดือนถัดไป",
+                ["WeekLabel"] = "สัปดาห์",
+                ["MonthSelectLabel"] = "เดือน",
+                ["YearSelectLabel"] = "ปี",
+                ["RangeStartLabel"] = "วันเริ่มต้น",
+                ["RangeEndLabel"] = "วันสิ้นสุด",
+                ["DayLabel"] = (Func<DateOnly, string>)(date => $"วันที่ {date.Day}")
+            }));
+
+        Assert.Equal("เดือนก่อนหน้า", cut.Find("[data-slot='calendar-previous']").GetAttribute("aria-label"));
+        Assert.Equal("เดือนถัดไป", cut.Find("[data-slot='calendar-next']").GetAttribute("aria-label"));
+        Assert.Equal("วันที่ 30", cut.Find("[data-day='2026-08-30']").GetAttribute("aria-label"));
+        Assert.Equal("วันเริ่มต้น", cut.Find("[data-slot='date-picker-range-start-control']").GetAttribute("aria-label"));
+        Assert.Equal("วันสิ้นสุด", cut.Find("[data-slot='date-picker-range-end-control']").GetAttribute("aria-label"));
+    }
+
     public CalendarDatePickerTests()
     {
+        Services.AddMalievShadcn();
         var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js");
         module.SetupVoid("observeValidationProxies", _ => true);
         module.SetupVoid("disconnectValidationProxies", _ => true);

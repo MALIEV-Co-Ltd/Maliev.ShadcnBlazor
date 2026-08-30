@@ -1,5 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-@inject IShadcnIdAllocator IdAllocator
+@inject IServiceProvider IdAllocator
 
 <span @attributes="ForwardedAttributes"
       class="@MergeClass("shadcn-bubble-reaction-overflow")"
@@ -23,6 +23,8 @@
     [CascadingParameter] private ShadcnBubbleReactions? Owner { get; set; }
     [Parameter] public int Count { get; set; }
     [Parameter] public string? AccessibleName { get; set; }
+    /// <summary>Gets or sets the formatter for the expanded and collapsed trigger labels.</summary>
+    [Parameter] public Func<bool, int, string> LabelFormatter { get; set; } = (expanded, count) => expanded ? $"Hide {count} additional reactions" : $"Show {count} more reactions";
     [Parameter] public bool DefaultExpanded { get; set; }
     [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
@@ -30,7 +32,7 @@
     private string ContentId = null!;
     private bool _expanded;
     private bool _initialized;
-    private string TriggerLabel => AccessibleName ?? (_expanded ? $"Hide {Count} additional reactions" : $"Show {Count} more reactions");
+    private string TriggerLabel => AccessibleName ?? LabelFormatter(_expanded, Count);
     private IReadOnlyDictionary<string, object> ForwardedAttributes
         => AttributesExcept("data-slot", "data-state");
 
