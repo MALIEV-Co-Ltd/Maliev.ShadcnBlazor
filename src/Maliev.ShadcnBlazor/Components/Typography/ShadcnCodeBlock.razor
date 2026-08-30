@@ -38,7 +38,7 @@
             <span class="shadcn-sr-only">@(_copied ? "Copied" : "Copy source")</span>
         </button>
     </div>
-    <pre tabindex="0" aria-label="@($"{SelectedLanguage} code example")"><code>@((MarkupString)HighlightedSource)</code></pre>
+    <pre tabindex="0" aria-label="@($"{SelectedLanguage} code example")" data-slot="code-block-content"><code data-slot="code-block-code">@((MarkupString)HighlightedSource)</code></pre>
     <p class="shadcn-code-block-announcement component-code__announcement" aria-live="polite">@_announcement</p>
     @if (_showFallback)
     {

@@ -118,6 +118,54 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await Assertions.Expect(page.GetByText("Build accessible Blazor interfaces with shadcn primitives")).ToBeVisibleAsync();
     }
 
+    [Fact]
+    public async Task CodeBlockKeepsOneOuterBoundaryWhenHostPreStylesLoadLater()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components").ToString());
+
+        var codeBlock = page.Locator(".documentation-landing__installation [data-slot='code-block']");
+        await codeBlock.WaitForAsync();
+        await page.AddStyleTagAsync(new()
+        {
+            Content = """
+                .documentation-landing__installation pre {
+                    border: 3px solid red;
+                    border-radius: 2rem;
+                    box-shadow: inset 0 0 0 2px red;
+                }
+                .documentation-landing__installation pre code {
+                    border: 3px solid red;
+                    border-radius: 2rem;
+                    box-shadow: inset 0 0 0 2px red;
+                }
+                """
+        });
+
+        var outer = await codeBlock.EvaluateAsync<string[]>("""
+            element => {
+                const style = getComputedStyle(element);
+                return [style.borderTopWidth, style.borderTopStyle, style.borderRadius];
+            }
+            """);
+        var inner = await codeBlock.Locator("pre, pre code").EvaluateAllAsync<string[][]>("""
+            elements => elements.map(element => {
+                const style = getComputedStyle(element);
+                return [style.borderTopWidth, style.borderRadius, style.boxShadow];
+            })
+            """);
+
+        Assert.Equal("1px", outer[0]);
+        Assert.Equal("solid", outer[1]);
+        Assert.NotEqual("0px", outer[2]);
+        Assert.All(inner, style => Assert.Equal(["0px", "0px", "none"], style));
+    }
+
     [Theory]
     [InlineData(1440, 900)]
     [InlineData(390, 844)]
