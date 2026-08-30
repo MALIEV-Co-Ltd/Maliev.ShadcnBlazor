@@ -1,0 +1,29 @@
+@page "/tests/virtualized-options"
+@using Maliev.ShadcnBlazor.Components.Forms
+
+<PageTitle>Virtualized options fixture</PageTitle>
+
+<main data-testid="virtualized-options-fixture">
+    <ShadcnSelect TValue="int"
+                  Value="42"
+                  Options="@SelectOptions"
+                  Open="true"
+                  Virtualize="true"
+                  aria-label="Virtualized select" />
+    <ShadcnCombobox TValue="int"
+                    Value="42"
+                    Options="@ComboboxOptions"
+                    Open="true"
+                    Virtualize="true"
+                    aria-label="Virtualized combobox" />
+</main>
+
+@code {
+    private static readonly IReadOnlyList<ShadcnSelectOption<int>> SelectOptions = Enumerable.Range(0, 1_000)
+        .Select(index => new ShadcnSelectOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+        .ToArray();
+
+    private static readonly IReadOnlyList<ShadcnComboboxOption<int>> ComboboxOptions = Enumerable.Range(0, 1_000)
+        .Select(index => new ShadcnComboboxOption<int>(index, $"Option {index}", index < 500 ? "First" : "Second"))
+        .ToArray();
+}
