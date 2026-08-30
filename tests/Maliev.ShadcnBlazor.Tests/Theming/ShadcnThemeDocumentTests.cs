@@ -311,7 +311,7 @@ public sealed class ShadcnThemeDocumentTests
         Assert.DoesNotContain("\"harmony\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("\"lockedAnchors\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("\"isVersion2\"", json, StringComparison.Ordinal);
-        Assert.Contains("""
+        const string expectedPalette = """
           "palette": {
             "algorithmVersion": 1,
             "seed": 42,
@@ -320,7 +320,11 @@ public sealed class ShadcnThemeDocumentTests
               "light.primary"
             ]
           },
-        """, json, StringComparison.Ordinal);
+        """;
+        Assert.Contains(
+            expectedPalette.ReplaceLineEndings("\n"),
+            json.ReplaceLineEndings("\n"),
+            StringComparison.Ordinal);
         Assert.Equal(json, ShadcnThemeDocumentSerializer.Serialize(
             ShadcnThemeDocumentSerializer.Deserialize(json)));
     }

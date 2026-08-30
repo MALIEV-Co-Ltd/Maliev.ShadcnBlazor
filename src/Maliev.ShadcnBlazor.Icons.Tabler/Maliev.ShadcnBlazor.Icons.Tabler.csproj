@@ -2,7 +2,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Maliev.ShadcnBlazor.Icons.Tabler</PackageId>
-    <VersionPrefix>2.1.0</VersionPrefix>
+    <VersionPrefix>2.1.1</VersionPrefix>
     <Authors>MALIEV Co., Ltd.</Authors>
     <Company>MALIEV Co., Ltd.</Company>
     <Description>Complete pinned Tabler Icons outline catalog for Maliev.ShadcnBlazor.</Description>
