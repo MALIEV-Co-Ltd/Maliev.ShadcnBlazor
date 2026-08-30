@@ -6,6 +6,29 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-30
+
+### Added
+
+- Added target-aware programmatic focus APIs across buttons, form controls,
+  action and trigger controls, and composite widgets (#237-#241).
+
+### Changed
+
+- Removed the core package's MudBlazor dependency, providers, adapters, assets,
+  and license. Applications that still use MudBlazor must reference and
+  configure it directly; see the
+  [MudBlazor decoupling migration](docs/migration-mudblazor.md) (#244).
+- Scoped Tabs arrow-key guards to the tab list so controls rendered inside tab
+  panels retain their native keyboard behavior (#243).
+
+### Fixed
+
+- Restored alert-dialog focus to the current trigger after Blazor replaces the
+  original trigger during a close render (#246).
+- Preserved responsive Showcase reflow at 200% zoom after removing MudBlazor's
+  global visual defaults.
+
 ## [1.2.2] - 2026-08-28
 
 ### Added
@@ -265,7 +288,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...v2.0.0
 [1.2.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...v1.2.0
