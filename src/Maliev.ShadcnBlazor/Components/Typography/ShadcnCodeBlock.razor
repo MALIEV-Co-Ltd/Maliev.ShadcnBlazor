@@ -2,6 +2,7 @@
 @using Maliev.ShadcnBlazor.Components.Forms
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject IShadcnIdAllocator IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-code-block")" style="@MergeStyle(null)" data-slot="code-block" data-language="@SelectedLanguage">
@@ -60,8 +61,14 @@
     private int _copyFeedbackId;
     private CancellationTokenSource? _copyResetCancellation;
     private static readonly TimeSpan CopyFeedbackDuration = TimeSpan.FromMilliseconds(1800);
-    private string LanguageId = $"shadcn-code-language-{Guid.NewGuid():N}";
-    private string FallbackId = $"shadcn-code-fallback-{Guid.NewGuid():N}";
+    private string LanguageId = null!;
+    private string FallbackId = null!;
+
+    protected override void OnInitialized()
+    {
+        LanguageId = IdAllocator.NextId("shadcn-code-language");
+        FallbackId = IdAllocator.NextId("shadcn-code-fallback");
+    }
 
     private IReadOnlyDictionary<string, string> SourceByLanguage => Sources is { Count: > 0 } ? Sources : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [Language] = Source };
     private IReadOnlyList<ShadcnSelectOption<string>> LanguageOptions => SourceByLanguage.Keys.Select(language => new ShadcnSelectOption<string>(language, language)).ToArray();

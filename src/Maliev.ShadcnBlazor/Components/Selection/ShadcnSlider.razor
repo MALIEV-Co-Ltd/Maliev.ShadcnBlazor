@@ -6,6 +6,7 @@
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
+@inject IShadcnIdAllocator IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @ref="RootReference"
@@ -105,7 +106,7 @@
         if (ThumbAttributes is not null && ThumbAttributes.Count != Values.Count)
             throw new ArgumentException("ThumbAttributes must contain exactly one entry per slider value.", nameof(ThumbAttributes));
         while (GeneratedThumbIds.Count < Values.Count)
-            GeneratedThumbIds.Add($"shadcn-slider-thumb-{Guid.NewGuid():N}");
+            GeneratedThumbIds.Add(IdAllocator.NextId("shadcn-slider-thumb"));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

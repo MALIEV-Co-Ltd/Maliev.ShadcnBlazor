@@ -6,6 +6,7 @@
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
+@inject IShadcnIdAllocator IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @ref="Root" class="@MergeClass("shadcn-combobox")" style="@MergeStyle(null)" data-slot="combobox" data-open="@(EffectiveOpen ? "true" : null)">
@@ -88,7 +89,7 @@
     [Parameter] public bool Required { get; set; }
     [Parameter] public bool Invalid { get; set; }
     [Parameter] public RenderFragment<ShadcnComboboxOption<TValue>>? ItemTemplate { get; set; }
-    private readonly string ListboxId = $"shadcn-combobox-{Guid.NewGuid():N}";
+    private string ListboxId = null!;
     private int ActiveIndex;
     private bool EffectiveDisabled => Disabled || FieldContext?.Disabled == true;
     private bool EffectiveInvalid => Invalid || FieldContext?.Invalid == true || HasValidationMessages();
@@ -114,6 +115,7 @@
     private IReadOnlyList<TValue> EffectiveValues => ValuesChanged.HasDelegate ? Values : _uncontrolledValues;
     private string EffectiveQuery => QueryChanged.HasDelegate ? Query : _uncontrolledQuery;
     private bool EffectiveOpen => OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
+    protected override void OnInitialized() => ListboxId = IdAllocator.NextId("shadcn-combobox");
     protected override void OnParametersSet()
     {
         base.OnParametersSet();

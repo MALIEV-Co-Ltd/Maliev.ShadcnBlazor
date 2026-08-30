@@ -1,4 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 
 <span @attributes="ForwardedAttributes"
       class="@MergeClass("shadcn-bubble-reaction-overflow")"
@@ -26,12 +27,14 @@
     [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
 
-    private readonly string ContentId = $"shadcn-bubble-reaction-overflow-{Guid.NewGuid():N}";
+    private string ContentId = null!;
     private bool _expanded;
     private bool _initialized;
     private string TriggerLabel => AccessibleName ?? (_expanded ? $"Hide {Count} additional reactions" : $"Show {Count} more reactions");
     private IReadOnlyDictionary<string, object> ForwardedAttributes
         => AttributesExcept("data-slot", "data-state");
+
+    protected override void OnInitialized() => ContentId = IdAllocator.NextId("shadcn-bubble-reaction-overflow");
 
     protected override void OnParametersSet()
     {

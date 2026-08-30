@@ -6,6 +6,7 @@
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
+@inject IShadcnIdAllocator IdAllocator
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
 <div @ref="Root" class="@MergeClass("shadcn-date-picker")" style="@MergeStyle(null)" data-slot="date-picker" data-open="@(EffectiveOpen ? "true" : null)" data-mode="@ModeValue" @onkeydown="HandleKeyDownAsync">
@@ -64,7 +65,7 @@
     [Parameter] public int? FromYear { get; set; }
     [Parameter] public int? ToYear { get; set; }
     private bool ParseInvalid;
-    private readonly string DialogId = $"shadcn-date-picker-{Guid.NewGuid():N}";
+    private string DialogId = null!;
     private ElementReference Root;
     private ElementReference Trigger;
     private ElementReference InputElement;
@@ -152,6 +153,7 @@
     private async Task CloseAndFocusAsync() { await SetOpenAsync(false); if (Module is not null) await Module.InvokeVoidAsync("focusElement", Trigger); }
     private string? AttributeText(string name) => AdditionalAttributes?.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase)).Value?.ToString();
     private static string? MergeIds(params string?[] values) { var ids = values.Where(value => !string.IsNullOrWhiteSpace(value)).SelectMany(value => value!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Distinct(StringComparer.Ordinal).ToArray(); return ids.Length == 0 ? null : string.Join(' ', ids); }
+    protected override void OnInitialized() => DialogId = IdAllocator.NextId("shadcn-date-picker");
     protected override void OnParametersSet()
     {
         base.OnParametersSet();

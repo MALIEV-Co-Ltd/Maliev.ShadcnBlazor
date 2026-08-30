@@ -1,5 +1,6 @@
 @using System.Globalization
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 
 <CascadingValue Value="ProgressContext" IsFixed="true">
     <CascadingValue Value="ProgressVersion" Name="ShadcnProgressVersion">
@@ -20,9 +21,9 @@
     [Parameter] public bool ShowValue { get; set; }
     [Parameter] public Func<double, string>? ValueFormatter { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    private readonly ShadcnProgressContext ProgressContext;
+    private ShadcnProgressContext ProgressContext = null!;
     private long ProgressVersion { get; set; }
-    public ShadcnProgress() => ProgressContext = new($"shadcn-progress-label-{Guid.NewGuid():N}", () => _ = InvokeAsync(StateHasChanged));
+    protected override void OnInitialized() => ProgressContext = new(IdAllocator.NextId("shadcn-progress-label"), () => _ = InvokeAsync(StateHasChanged));
     private double? ClampedValue => Value is null ? null : Math.Clamp(Value.Value, Minimum, Maximum);
     private double? Percent => ClampedValue is null ? null : (ClampedValue.Value - Minimum) / (Maximum - Minimum) * 100;
     private string FormattedValue => ValueFormatter?.Invoke(ClampedValue!.Value) ?? $"{Percent:0.#}%";

@@ -1,6 +1,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 
 <div @attributes="ForwardedAttributes"
      class="@MergeClass("shadcn-dropzone")"
@@ -44,7 +45,7 @@
 </div>
 
 @code {
-    private readonly string _id = $"shadcn-dropzone-{Guid.NewGuid():N}";
+    private string _id = null!;
     private ShadcnDropzoneSelection? _selection;
     private bool _dragging;
 
@@ -76,6 +77,8 @@
     private string DescriptionIds => string.Join(' ', new[] { InstructionsId, string.IsNullOrWhiteSpace(Description) ? null : DescriptionId, StatusId, _selection?.Errors.Count > 0 ? ErrorsId : null }.Where(id => id is not null));
     private string Status => Loading ? "Processing selected files" : _selection is null ? string.Empty : _selection.IsValid ? $"{_selection.Files.Count} file{(_selection.Files.Count == 1 ? string.Empty : "s")} selected" : $"{_selection.Errors.Count} file validation error{(_selection.Errors.Count == 1 ? string.Empty : "s")}";
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "role", "aria-busy", "aria-labelledby", "aria-describedby");
+
+    protected override void OnInitialized() => _id = IdAllocator.NextId("shadcn-dropzone");
 
     protected override void OnParametersSet()
     {

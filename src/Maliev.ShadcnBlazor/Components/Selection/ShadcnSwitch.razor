@@ -2,6 +2,7 @@
 @using Maliev.ShadcnBlazor.Components.Forms
 @using Microsoft.AspNetCore.Components.Forms
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 <span class="shadcn-switch-root"
@@ -47,7 +48,7 @@
     [Parameter] public string? Name { get; set; }
     [Parameter] public string FormValue { get; set; } = "on";
 
-    private readonly string GeneratedId = $"shadcn-switch-{Guid.NewGuid():N}";
+    private string GeneratedId = null!;
     private bool CurrentValue;
     private bool LastParameterValue;
     private bool Initialized;
@@ -63,6 +64,8 @@
         _ => throw new ArgumentOutOfRangeException(nameof(Size), Size, "Unknown Shadcn switch size.")
     };
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("id", "type", "role", "name", "value", "checked", "disabled", "aria-checked", "aria-readonly", "aria-invalid", "aria-describedby", "data-slot", "data-state", "data-size");
+
+    protected override void OnInitialized() => GeneratedId = IdAllocator.NextId("shadcn-switch");
 
     protected override void OnParametersSet()
     {

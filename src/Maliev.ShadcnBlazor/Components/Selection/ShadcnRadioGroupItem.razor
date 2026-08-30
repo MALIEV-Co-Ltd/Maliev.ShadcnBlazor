@@ -2,6 +2,7 @@
 @using System.Globalization
 @implements IDisposable
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 
 <label class="shadcn-radio-item-root" data-slot="radio-group-item-root" data-state="@State" data-presentation="@PresentationValue">
     <span class="shadcn-radio-control" data-slot="radio-group-control">
@@ -40,7 +41,7 @@
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private readonly string GeneratedId = $"shadcn-radio-item-{Guid.NewGuid():N}";
+    private string GeneratedId = null!;
     private Guid RegistrationKey;
     private bool Selected => Context?.IsSelected(Value) == true;
     private bool EffectiveDisabled => Disabled || Context?.Disabled == true;
@@ -53,6 +54,7 @@
 
     protected override void OnInitialized()
     {
+        GeneratedId = IdAllocator.NextId("shadcn-radio-item");
         if (Context is not null)
             RegistrationKey = Context.Register(Value, () => Disabled);
     }

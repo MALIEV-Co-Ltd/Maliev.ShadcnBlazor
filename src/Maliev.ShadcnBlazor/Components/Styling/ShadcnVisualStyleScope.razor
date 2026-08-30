@@ -1,4 +1,5 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inject IShadcnIdAllocator IdAllocator
 
 <div @attributes="ForwardedAttributes"
      class="@MergeClass("shadcn-visual-style-scope")"
@@ -50,7 +51,9 @@
 </div>
 
 @code {
-    private readonly string _refractionFilterId = $"shadcn-liquid-glass-{Guid.NewGuid():N}";
+    private string _refractionFilterId = null!;
+
+    protected override void OnInitialized() => _refractionFilterId = IdAllocator.NextId("shadcn-liquid-glass");
 
     /// <summary>Gets or sets the surface and control treatment.</summary>
     [Parameter]

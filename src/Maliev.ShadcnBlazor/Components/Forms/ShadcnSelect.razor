@@ -3,6 +3,7 @@
 @implements IAsyncDisposable
 @implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
+@inject IShadcnIdAllocator IdAllocator
 @inherits ShadcnFormComponentBase<TValue>
 
 <div @ref="Root" class="@MergeClass("shadcn-select")" style="@MergeStyle()" data-slot="select" data-open="@(EffectiveOpen ? "true" : null)" data-clearable="@(Clearable && SelectedOption is not null ? "true" : null)">
@@ -51,7 +52,7 @@
     [Parameter] public string ClearLabel { get; set; } = "Clear selection";
     [Parameter] public ShadcnControlSize Size { get; set; } = ShadcnControlSize.Default;
     [Parameter] public RenderFragment<ShadcnSelectOption<TValue>>? ItemTemplate { get; set; }
-    private readonly string ListboxId = $"shadcn-select-{Guid.NewGuid():N}";
+    private string ListboxId = null!;
     private ElementReference Root;
     private ElementReference Trigger;
     private IJSObjectReference? Module;
@@ -71,6 +72,7 @@
     private bool EffectiveOpen => OpenChanged.HasDelegate && _controlledOpenPending ? _requestedOpen : OpenChanged.HasDelegate ? Open : _uncontrolledOpen;
     private string? ActiveDescendant => EffectiveOpen && ActiveIndex >= 0 ? OptionId(ActiveIndex) : null;
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("class", "style", "type", "role", "data-slot", "data-size", "disabled", "aria-haspopup", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-readonly", "aria-required", "aria-invalid", "aria-describedby");
+    protected override void OnInitialized() => ListboxId = IdAllocator.NextId("shadcn-select");
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
