@@ -253,10 +253,13 @@ internal static class ConversationWorkflowExamples
         RenderFragment preview = b =>
         {
             b.OpenElement(0, "div");
-            b.AddAttribute(1, "class", "showcase-marker-thread");
-            AddMarker(b, 2, variant, false, "✓", "ตรวจสอบ 4 ไฟล์แล้ว");
-            AddMarker(b, 12, ShadcnMarkerVariant.Separator, false, "•", "วันนี้");
-            AddMarker(b, 22, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "กำลังประมวลผล" : "พร้อมส่งให้ผู้ตรวจ");
+            b.AddAttribute(1, "class", "showcase-marker-thread showcase-bubble-thread");
+            AddConversationBubble(b, 2, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Muted, "Machining is complete. Bore 4 is ready for final inspection.");
+            AddConversationBubble(b, 12, ShadcnLogicalAlign.End, ShadcnBubbleVariant.Default, "Probe result received. I am uploading the signed report now.");
+            AddConversationBubble(b, 22, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Ghost, "Thanks. I will hold dispatch until Quality signs off.");
+            AddMarker(b, 32, variant, false, "✓", "Four inspection files verified");
+            AddMarker(b, 42, ShadcnMarkerVariant.Separator, false, "•", "14:32 · WO-2418");
+            AddMarker(b, 52, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "Preparing quality handoff" : "Ready for quality review");
             b.CloseElement();
         };
         return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
@@ -297,9 +300,25 @@ internal static class ConversationWorkflowExamples
             content.OpenComponent<ShadcnMarkerContent>(3);
             content.AddAttribute(4, nameof(ShadcnMarkerContent.Streaming), live);
             content.AddAttribute(5, nameof(ShadcnMarkerContent.ChildContent), Text(text));
+            content.AddAttribute(6, "dir", "auto");
             content.CloseComponent();
         }));
         b.CloseComponent();
+    }
+
+    private static void AddConversationBubble(RenderTreeBuilder builder, int sequence, ShadcnLogicalAlign align, ShadcnBubbleVariant variant, string text)
+    {
+        builder.OpenComponent<ShadcnBubble>(sequence);
+        builder.AddAttribute(sequence + 1, nameof(ShadcnBubble.Align), align);
+        builder.AddAttribute(sequence + 2, nameof(ShadcnBubble.Variant), variant);
+        builder.AddAttribute(sequence + 3, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
+        {
+            content.OpenComponent<ShadcnBubbleContent>(0);
+            content.AddAttribute(1, "dir", "auto");
+            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
+            content.CloseComponent();
+        }));
+        builder.CloseComponent();
     }
 
     private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false)
@@ -497,22 +516,34 @@ internal static class ConversationWorkflowExamples
     private const string MarkerRazorSource = """
 @using Maliev.ShadcnBlazor.Components.Conversation
 
-<div>
+<div class="showcase-marker-thread showcase-bubble-thread">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+        <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+        <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
+    </ShadcnBubble>
+
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+        <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
+    </ShadcnBubble>
+
     <ShadcnMarker Variant="ShadcnMarkerVariant.Default">
         <ShadcnMarkerIcon>✓</ShadcnMarkerIcon>
-        <ShadcnMarkerContent>ตรวจสอบ 4 ไฟล์แล้ว</ShadcnMarkerContent>
+        <ShadcnMarkerContent dir="auto">Four inspection files verified</ShadcnMarkerContent>
     </ShadcnMarker>
 
     <ShadcnMarker Variant="ShadcnMarkerVariant.Separator">
         <ShadcnMarkerIcon>•</ShadcnMarkerIcon>
-        <ShadcnMarkerContent>วันนี้</ShadcnMarkerContent>
+        <ShadcnMarkerContent dir="auto">14:32 · WO-2418</ShadcnMarkerContent>
     </ShadcnMarker>
 
     <ShadcnMarker Live="true" Variant="ShadcnMarkerVariant.Border">
         <ShadcnMarkerIcon>
             <span class="showcase-marker-loader shadcn-marker-loader" aria-hidden="true"></span>
         </ShadcnMarkerIcon>
-        <ShadcnMarkerContent Streaming="true">กำลังประมวลผล</ShadcnMarkerContent>
+        <ShadcnMarkerContent dir="auto" Streaming="true">Preparing quality handoff</ShadcnMarkerContent>
     </ShadcnMarker>
 </div>
 """;
