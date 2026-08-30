@@ -211,7 +211,7 @@
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-otp-caret { animation: none; }
 }
 @media (forced-colors: active) {
-    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-select-trigger, .shadcn-date-picker-trigger, .shadcn-date-picker-input, .shadcn-calendar-nav > button, .shadcn-calendar-day-button):where(:focus, :focus-visible),
+    :where(.shadcn-scope, .shadcn-overlay-scope) :where(.shadcn-input, .shadcn-textarea, .shadcn-native-select, .shadcn-date-picker-trigger, .shadcn-date-picker-input, .shadcn-calendar-nav > button, .shadcn-calendar-day-button):where(:focus, :focus-visible),
     :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-input-group:has(> :where(.shadcn-input, .shadcn-textarea, .shadcn-combobox-control):where(:focus, :focus-visible)) {
         outline: 2px solid Highlight !important;
         outline-offset: 2px !important;
