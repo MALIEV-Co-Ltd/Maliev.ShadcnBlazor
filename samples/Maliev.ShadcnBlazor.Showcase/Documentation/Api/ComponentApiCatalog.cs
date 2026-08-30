@@ -12,6 +12,7 @@ public sealed class ComponentApiCatalog
 {
     private static readonly string[] OwnedNamespaces =
     [
+        "Maliev.ShadcnBlazor.Components",
         "Maliev.ShadcnBlazor.Components.Actions",
         "Maliev.ShadcnBlazor.Components.Content",
         "Maliev.ShadcnBlazor.Components.Conversation",
@@ -19,6 +20,7 @@ public sealed class ComponentApiCatalog
         "Maliev.ShadcnBlazor.Components.Disclosure",
         "Maliev.ShadcnBlazor.Components.Direction",
         "Maliev.ShadcnBlazor.Components.Forms",
+        "Maliev.ShadcnBlazor.Components.Icons",
         "Maliev.ShadcnBlazor.Components.Feedback",
         "Maliev.ShadcnBlazor.Components.Feedback.Toast",
         "Maliev.ShadcnBlazor.Components.Layout",
@@ -73,6 +75,8 @@ public sealed class ComponentApiCatalog
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnReveal",
                 "Maliev.ShadcnBlazor.Components.Layout.ShadcnRevealEffect"),
             ["visual-style-scope"] = Types(
+                "Maliev.ShadcnBlazor.Components.ShadcnThemeProvider",
+                "Maliev.ShadcnBlazor.Components.Icons.ShadcnIcon",
                 "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyleScope",
                 "Maliev.ShadcnBlazor.Components.Styling.ShadcnVisualStyle",
                 "Maliev.ShadcnBlazor.Components.Styling.ShadcnColorTreatment",

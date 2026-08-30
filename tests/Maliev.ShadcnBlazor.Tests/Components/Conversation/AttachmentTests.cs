@@ -110,6 +110,11 @@ public sealed class AttachmentTests : BunitContext
         Assert.Contains("background: color-mix(in srgb, var(--shadcn-destructive)", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("forced-colors", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-attachment[data-state=\"error\"] { border-style: double; }", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("[data-state=\"error\"] { border-style: double; }", css.Replace(".shadcn-attachment[data-state=\"error\"]", string.Empty, StringComparison.Ordinal), StringComparison.Ordinal);
+        Assert.Contains("@media (pointer: coarse)", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-attachment-action { width: 2.75rem;", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-message-action { width: 2.75rem;", css, StringComparison.Ordinal);
     }
 
     [Fact]

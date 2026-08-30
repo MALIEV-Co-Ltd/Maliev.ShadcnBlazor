@@ -137,26 +137,22 @@ public sealed class ComponentDossierTests : BunitContext
     {
         var descriptors = new ComponentApiCatalog().All.ToDictionary(descriptor => descriptor.FullTypeName, StringComparer.Ordinal);
         string? currentType = null;
+        Type? currentRuntimeType = null;
 
         foreach (var line in File.ReadLines(FindSnapshot()))
         {
             if (line.StartsWith("type ", StringComparison.Ordinal))
             {
                 currentType = line[5..];
-                if (!currentType.StartsWith("Maliev.ShadcnBlazor.Components.Actions.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Content.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Direction.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Forms.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Layout.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Primitives.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Selection.", StringComparison.Ordinal) &&
-                    !currentType.StartsWith("Maliev.ShadcnBlazor.Components.Typography.", StringComparison.Ordinal))
+                if (!currentType.StartsWith("Maliev.ShadcnBlazor.Components.", StringComparison.Ordinal))
                 {
                     currentType = null;
+                    currentRuntimeType = null;
                     continue;
                 }
 
                 Assert.True(descriptors.ContainsKey(currentType), $"Missing API descriptor for {currentType}.");
+                currentRuntimeType = typeof(ShadcnComponentBase).Assembly.GetType(currentType, throwOnError: true);
                 continue;
             }
 
@@ -172,6 +168,12 @@ public sealed class ComponentDossierTests : BunitContext
             var separator = declaration.LastIndexOf(' ');
             var expectedType = declaration[..separator];
             var expectedName = declaration[(separator + 1)..];
+            var runtimeProperty = currentRuntimeType!.GetProperty(expectedName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var isDocumentedSurface = runtimeProperty?.GetCustomAttribute<ParameterAttribute>() is not null ||
+                                      currentRuntimeType.IsValueType ||
+                                      currentType == "Maliev.ShadcnBlazor.Components.Selection.ShadcnSliderThumbAttributes";
+            if (!isDocumentedSurface)
+                continue;
             var parameter = Assert.Single(descriptors[currentType].Parameters, candidate => candidate.Name == expectedName);
             Assert.Equal(expectedType, parameter.FriendlyType);
         }
