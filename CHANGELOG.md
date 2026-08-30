@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-08-30
+
+### Changed
+
+- Reorganized Theme Studio palette customization into an inline collapsible
+  sidebar workflow with a taller palette preview, one authoritative main color,
+  derived harmony colors, and optional advanced anchor controls.
+
+### Fixed
+
+- Coalesced repeated palette-generation requests after each completed
+  derivation to prevent expensive validation and preview updates from queuing
+  until the browser becomes unresponsive.
+
 ## [2.1.1] - 2026-08-30
 
 ### Fixed
@@ -316,7 +330,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...v2.0.0
