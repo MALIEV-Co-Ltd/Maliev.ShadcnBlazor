@@ -2,6 +2,8 @@ using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
 using System.Globalization;
+using System.IO.Compression;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Maliev.ShadcnBlazor.BrowserTests;
@@ -2015,6 +2017,61 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
+    public async Task SelectedThaiFallbackParticipatesInPreviewAndExportedFontStack()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            AcceptDownloads = true,
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await OpenAsync(context);
+        await OpenAdvancedAsync(page, "theme-typography-section");
+
+        await page.GetByTestId("theme-font-search").FillAsync("Space Grotesk");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-space-grotesk")).ToBeVisibleAsync();
+        await page.GetByTestId("theme-font-result-space-grotesk").ClickAsync();
+        await page.GetByTestId("theme-font-slot-thaifallback").ClickAsync();
+        await page.GetByTestId("theme-font-search").FillAsync("Anuphan");
+        await Assertions.Expect(page.GetByTestId("theme-font-result-anuphan")).ToBeVisibleAsync();
+        await page.GetByTestId("theme-font-result-anuphan").ClickAsync();
+
+        var preview = page.GetByTestId("theme-preview-scope");
+        var effectiveStack = await preview.EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--shadcn-font-sans').trim()");
+        AssertFamilyOrder(effectiveStack, "Space Grotesk", "Anuphan", "Noto Sans Thai", "ui-sans-serif", "system-ui");
+        Assert.EndsWith("sans-serif", effectiveStack, StringComparison.Ordinal);
+        Assert.Single(Regex.Matches(effectiveStack, "Noto Sans Thai", RegexOptions.CultureInvariant).Cast<Match>());
+        Assert.Contains("Space Grotesk", await ComputedFontAsync(page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title")));
+
+        await page.GetByTestId("locale-thai").ClickAsync();
+        var thaiHeading = page.Locator("[data-use-case-id='production-capacity'] .shadcn-card-title");
+        await Assertions.Expect(thaiHeading).ToBeVisibleAsync();
+        await Assertions.Expect(thaiHeading).ToHaveTextAsync("กำลังการผลิต");
+        AssertFamilyOrder(await ComputedFontAsync(thaiHeading), "Space Grotesk", "Anuphan", "Noto Sans Thai");
+
+        await page.GetByTestId("theme-export-open").ClickAsync();
+        var acknowledgement = page.GetByTestId("theme-export-warning-ack");
+        if (await acknowledgement.CountAsync() > 0)
+            await acknowledgement.CheckAsync();
+        var download = await page.RunAndWaitForDownloadAsync(
+            () => page.GetByTestId("theme-download").ClickAsync(),
+            new() { Timeout = 90_000 });
+        var downloadPath = await download.PathAsync();
+        Assert.NotNull(downloadPath);
+        using var archive = ZipFile.OpenRead(downloadPath);
+        var cssEntry = archive.GetEntry("theme.css");
+        Assert.NotNull(cssEntry);
+        await using var cssStream = cssEntry.Open();
+        using var reader = new StreamReader(cssStream, Encoding.UTF8);
+        var exportedCss = await reader.ReadToEndAsync();
+        Assert.Contains(
+            "--shadcn-font-sans: 'Space Grotesk', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            exportedCss,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task GraphiteControlInheritsTheUniversalColorMode()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
@@ -2542,4 +2599,15 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByRole(AriaRole.Option, new() { Name = option, Exact = true }).ClickAsync();
     }
     private static Task<string> ComputedFontAsync(ILocator locator) => locator.EvaluateAsync<string>("element => getComputedStyle(element).fontFamily");
+
+    private static void AssertFamilyOrder(string stack, params string[] families)
+    {
+        var previous = -1;
+        foreach (var family in families)
+        {
+            var current = stack.IndexOf(family, StringComparison.OrdinalIgnoreCase);
+            Assert.True(current > previous, $"Expected {family} after index {previous} in {stack}.");
+            previous = current;
+        }
+    }
 }

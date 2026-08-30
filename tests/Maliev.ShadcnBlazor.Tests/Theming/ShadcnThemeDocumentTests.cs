@@ -596,6 +596,58 @@ public sealed class ShadcnThemeDocumentTests
             .Add(ShadcnTypographyRole.Code, new(400, 1, 1.5, 0)));
     }
 
+    [Fact]
+    public void DocumentCssComposesSelectedThaiFallbackBeforeGenericBodyFallbacks()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
+            "ui-sans-serif, system-ui, sans-serif",
+            "space-grotesk");
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+        const string expected =
+            "--shadcn-font-sans: 'Space Grotesk', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif";
+
+        var css = ShadcnThemeCssWriter.Write(document);
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+
+        Assert.Equal(2, Count(css, expected));
+        Assert.Contains(expected, properties, StringComparison.Ordinal);
+        Assert.Equal(1, Count(properties, "--shadcn-font-sans:"));
+        Assert.Contains("--shadcn-font-thai: 'Anuphan', 'Noto Sans Thai', sans-serif", properties, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DocumentCssPreservesQuotedCommasAndDeduplicatesOverlappingFamilies()
+    {
+        var source = CreateDocument();
+        var body = new ShadcnFontSelection(
+            "'Body, Display', 'Body Text', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            "'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            null);
+        var thai = new ShadcnFontSelection(
+            "'Anuphan', 'Noto Sans Thai', sans-serif",
+            "'Noto Sans Thai', sans-serif",
+            "anuphan");
+        var document = WithTypography(source, body, thai);
+
+        var properties = ShadcnThemeCssWriter.WriteProperties(document, darkMode: false);
+        var fontSans = properties.Split("; ", StringSplitOptions.None)
+            .Single(value => value.StartsWith("--shadcn-font-sans:", StringComparison.Ordinal));
+
+        Assert.Contains(
+            "--shadcn-font-sans: 'Body, Display', 'Body Text', 'Anuphan', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif",
+            fontSans,
+            StringComparison.Ordinal);
+        Assert.Equal(1, Count(fontSans, "'Noto Sans Thai'"));
+        Assert.Equal(1, Count(fontSans, "ui-sans-serif"));
+        Assert.Equal(1, Count(fontSans, "system-ui"));
+    }
+
     private static ShadcnThemeDocument CreateDocument()
     {
         var theme = ShadcnThemePresets.BaseVegaNeutral.CreateTheme() with { Name = "Factory Night" };
@@ -624,6 +676,30 @@ public sealed class ShadcnThemeDocumentTests
                     [ShadcnTypographyRole.Code] = new(400, 0.875, 1.5, 0)
                 })
         };
+    }
+
+    private static ShadcnThemeDocument WithTypography(
+        ShadcnThemeDocument source,
+        ShadcnFontSelection body,
+        ShadcnFontSelection thai)
+    {
+        return source with
+        {
+            Theme = source.Theme with { Metrics = source.Theme.Metrics with { FontFamily = body.Family } },
+            Typography = new ShadcnTypographyScale(body, thai, source.Typography.Code, source.Typography.Roles)
+        };
+    }
+
+    private static int Count(string value, string fragment)
+    {
+        var count = 0;
+        var offset = 0;
+        while ((offset = value.IndexOf(fragment, offset, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            offset += fragment.Length;
+        }
+        return count;
     }
 
     private static ShadcnThemeDocument CompleteTypographyRoles(ShadcnThemeDocument document)

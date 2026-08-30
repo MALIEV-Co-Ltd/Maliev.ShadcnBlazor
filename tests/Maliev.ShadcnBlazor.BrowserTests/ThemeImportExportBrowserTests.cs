@@ -133,7 +133,7 @@ public sealed class ThemeImportExportBrowserTests(
             Assert.Contains("oklch(0.49 0.22 264)", themeJson, StringComparison.Ordinal);
             var css = Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("theme.css")!));
             Assert.Contains("oklch(0.49 0.22 264)", css, StringComparison.Ordinal);
-            Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", css, StringComparison.Ordinal);
+            Assert.Contains("--shadcn-font-sans: 'DM Sans', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif", css, StringComparison.Ordinal);
             Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", css, StringComparison.Ordinal);
             Assert.Contains("oklch(0.49 0.22 264)", Encoding.UTF8.GetString(await ReadBytesAsync(archive.GetEntry("MalievShadcnTheme.cs")!)), StringComparison.Ordinal);
         }
@@ -166,7 +166,7 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("data-shadcn-theme", "dark");
         await Assertions.Expect(page.GetByTestId("theme-preview-scope")).ToHaveAttributeAsync("dir", "rtl");
         var restoredTypography = await page.GetByTestId("theme-preview-scope").GetAttributeAsync("style");
-        Assert.Contains("--shadcn-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
+        Assert.Contains("--shadcn-font-sans: 'DM Sans', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif", restoredTypography, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typography-heading-1-scale: 2.5", restoredTypography, StringComparison.Ordinal);
         Assert.Null(await page.GetByTestId("theme-typography-editor").GetAttributeAsync("style"));
         Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
