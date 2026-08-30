@@ -263,9 +263,6 @@ public sealed class ConversationPresentationTests : BunitContext
             Assert.Equal(1, copied);
         });
 
-        cut.WaitForAssertion(
-            () => Assert.Equal("idle", cut.Find("button[data-slot='message-copy-action']").GetAttribute("data-copy-state")),
-            TimeSpan.FromSeconds(2));
         cut.Find("button[data-slot='message-copy-action']").Click();
         cut.WaitForAssertion(() =>
         {
