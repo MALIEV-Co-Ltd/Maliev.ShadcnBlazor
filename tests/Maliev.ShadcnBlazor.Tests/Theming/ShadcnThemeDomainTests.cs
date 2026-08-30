@@ -906,7 +906,7 @@ public sealed class ShadcnThemeDomainTests
                 </Project>
                 """, new UTF8Encoding(false));
 
-            var startInfo = new ProcessStartInfo("dotnet")
+            var buildStartInfo = new ProcessStartInfo("dotnet")
             {
                 WorkingDirectory = directory,
                 RedirectStandardOutput = true,
@@ -914,9 +914,26 @@ public sealed class ShadcnThemeDomainTests
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-            foreach (var argument in new[] { "run", "--project", "GeneratedTheme.csproj", "-c", "Release", "--nologo" })
-                startInfo.ArgumentList.Add(argument);
-            using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Could not execute generated C# factory.");
+            foreach (var argument in new[] { "build", "GeneratedTheme.csproj", "-c", "Release", "--nologo" })
+                buildStartInfo.ArgumentList.Add(argument);
+            using var buildProcess = Process.Start(buildStartInfo) ?? throw new InvalidOperationException("Could not build generated C# factory.");
+            var buildStdoutTask = buildProcess.StandardOutput.ReadToEndAsync();
+            var buildStderrTask = buildProcess.StandardError.ReadToEndAsync();
+            await buildProcess.WaitForExitAsync();
+            var buildStdout = await buildStdoutTask;
+            var buildStderr = await buildStderrTask;
+            Assert.True(buildProcess.ExitCode == 0, $"Generated C# build failed.\n{buildStdout}\n{buildStderr}");
+
+            var executeStartInfo = new ProcessStartInfo("dotnet")
+            {
+                WorkingDirectory = directory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            executeStartInfo.ArgumentList.Add(Path.Combine(directory, "bin", "Release", "net10.0", "GeneratedTheme.dll"));
+            using var process = Process.Start(executeStartInfo) ?? throw new InvalidOperationException("Could not execute generated C# factory.");
             var stdoutTask = process.StandardOutput.ReadToEndAsync();
             var stderrTask = process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
