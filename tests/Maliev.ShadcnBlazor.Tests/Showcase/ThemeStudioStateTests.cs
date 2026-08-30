@@ -981,6 +981,23 @@ public sealed class ThemeStudioComponentTests : BunitContext, IAsyncLifetime
         Assert.NotEqual(lockedBrand, state.Applied.Light.Primary);
     }
 
+    [Fact]
+    public void GenerateFromMainColorKeepsBrandAndDerivesEveryOtherAnchor()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Support, "#dc2626"));
+        var main = state.PaletteAnchors.Brand;
+        var priorSupport = state.PaletteAnchors.Support;
+
+        Assert.True(state.GeneratePaletteFromMainColor(out var seed));
+
+        Assert.NotEqual(0UL, seed);
+        Assert.Equal(main, state.PaletteAnchors.Brand);
+        Assert.NotEqual(priorSupport, state.PaletteAnchors.Support);
+        Assert.Equal([ShadcnPaletteAnchorRole.Brand], state.Document.Palette.LockedAnchors);
+    }
+
     [Theory]
     [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "anchor")]
     [InlineData(ShadcnPaletteRecipe.MaterializedAlgorithmVersion, "harmony")]

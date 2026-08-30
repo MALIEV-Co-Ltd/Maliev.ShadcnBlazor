@@ -15,10 +15,8 @@
 <div class="theme-studio" data-testid="theme-studio" data-sidebar-open="@(State.Workbench.SidebarOpen ? "true" : "false")" data-pointer-interaction-active="@(State.IsPointerInteractionActive ? "true" : "false")" lang="@LocaleCode" @onkeydown="HandleWorkbenchKeyDownAsync">
     <ThemeFontLoader State="State" />
     <div class="theme-studio-workbench"
-         data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")"
-         data-palette-open="@(State.Workbench.PaletteWorkbenchOpen ? "true" : "false")">
+         data-controls-open="@(State.Workbench.SidebarOpen ? "true" : "false")">
         <ThemeStudioSidebar State="State" />
-        <ThemePaletteWorkbench State="State" />
         <section class="theme-preview-region" id="theme-preview" tabindex="-1" aria-label="Theme preview" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
             <div class="theme-preview-stage" data-testid="theme-preview-stage" data-preview-width="@State.Viewport.Width" style="@($"--theme-preview-width: {State.Viewport.Width}px")">
                 <div class="shadcn-scope theme-preview-scope"

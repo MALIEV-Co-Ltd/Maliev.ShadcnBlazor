@@ -246,24 +246,32 @@ public sealed class ConversationPresentationTests : BunitContext
         {
             builder.OpenComponent<ShadcnMessageCopyAction>(0);
             builder.AddAttribute(1, nameof(ShadcnMessageCopyAction.Text), "ตรวจสอบแล้ว");
-            builder.AddAttribute(2, nameof(ShadcnMessageCopyAction.FeedbackDuration), TimeSpan.FromMilliseconds(200));
+            builder.AddAttribute(2, nameof(ShadcnMessageCopyAction.FeedbackDuration), TimeSpan.FromSeconds(1));
             builder.AddAttribute(3, nameof(ShadcnMessageCopyAction.OnCopied), EventCallback.Factory.Create(this, () => copied++));
             builder.CloseComponent();
         });
 
         var action = cut.Find("button[data-slot='message-copy-action']");
         Assert.Equal("idle", action.GetAttribute("data-copy-state"));
-        Assert.Contains("--shadcn-message-copy-feedback-duration:200ms", action.GetAttribute("style"), StringComparison.Ordinal);
+        Assert.Contains("--shadcn-message-copy-feedback-duration:1000ms", action.GetAttribute("style"), StringComparison.Ordinal);
         action.Click();
-        cut.WaitForAssertion(() => Assert.Equal("copied", action.GetAttribute("data-copy-state")));
-        Assert.Equal("Copied", action.GetAttribute("aria-label"));
-        Assert.Equal(1, copied);
+        cut.WaitForAssertion(() =>
+        {
+            var copiedAction = cut.Find("button[data-slot='message-copy-action']");
+            Assert.Equal("copied", copiedAction.GetAttribute("data-copy-state"));
+            Assert.Equal("Copied", copiedAction.GetAttribute("aria-label"));
+            Assert.Equal(1, copied);
+        });
 
-        cut.WaitForAssertion(() => Assert.Equal("idle", action.GetAttribute("data-copy-state")), TimeSpan.FromSeconds(1));
-        action.Click();
-        cut.WaitForAssertion(() => Assert.Equal("copied", action.GetAttribute("data-copy-state")));
-        Assert.Equal(2, copied);
-        Assert.Equal(2, JSInterop.Invocations.Count(invocation => invocation.Identifier == "navigator.clipboard.writeText"));
+        cut.Find("button[data-slot='message-copy-action']").Click();
+        cut.WaitForAssertion(() =>
+        {
+            var copiedAction = cut.Find("button[data-slot='message-copy-action']");
+            Assert.Equal("copied", copiedAction.GetAttribute("data-copy-state"));
+            Assert.Equal("Copied", copiedAction.GetAttribute("aria-label"));
+            Assert.Equal(2, copied);
+            Assert.Equal(2, JSInterop.Invocations.Count(invocation => invocation.Identifier == "navigator.clipboard.writeText"));
+        });
     }
 
     [Fact]

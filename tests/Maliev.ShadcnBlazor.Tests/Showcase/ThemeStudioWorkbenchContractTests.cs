@@ -33,7 +33,7 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Equal(5, summary.QuerySelectorAll("[data-palette-summary-swatch]").Length);
         Assert.Contains("Active palette", summary.TextContent, StringComparison.Ordinal);
         Assert.Contains("Needs review", summary.TextContent, StringComparison.Ordinal);
-        Assert.Equal("BUTTON", summary.QuerySelector("#theme-palette-customize")!.TagName);
+        Assert.Equal("BUTTON", summary.QuerySelector("[data-testid='theme-palette-customize']")!.TagName);
 
         cut.Find("[data-testid='locale-thai']").Click();
         summary = cut.Find("[data-testid='theme-palette-summary']");
@@ -42,6 +42,25 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         Assert.Contains("ต้องตรวจสอบ", summary.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Active palette", summary.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Customize palette", summary.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PaletteCustomizationExpandsInsideTheSidebarSummary()
+    {
+        var state = new ThemeStudioState(new NoOpStorage());
+        var cut = Render<ThemePaletteSummary>(parameters => parameters.Add(component => component.State, state));
+
+        Assert.Equal("closed", cut.Find("[data-testid='theme-palette-summary']").GetAttribute("data-state"));
+
+        cut.Find("[data-testid='theme-palette-customize']").Click();
+
+        var summary = cut.Find("[data-testid='theme-palette-summary']");
+        var workbench = summary.QuerySelector("[data-testid='theme-palette-workbench']");
+        Assert.NotNull(workbench);
+        Assert.Equal("true", cut.Find("[data-testid='theme-palette-customize']").GetAttribute("aria-expanded"));
+        Assert.NotNull(workbench!.QuerySelector("[data-testid='theme-palette-anchor-brand']"));
+        Assert.Contains("Main color", workbench.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Generate from main color", workbench.TextContent, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -60,13 +79,13 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
             var editor = cut.Find($"[data-testid='theme-palette-anchor-{role.ToString().ToLowerInvariant()}']");
             Assert.NotNull(editor.QuerySelector("input[type='color'][aria-label]"));
             Assert.NotNull(editor.QuerySelector("input[type='text'][aria-label]"));
-            Assert.Equal(2, editor.QuerySelectorAll("button[aria-label]").Length);
+            Assert.Equal(role == ShadcnPaletteAnchorRole.Brand ? 1 : 2, editor.QuerySelectorAll("button[aria-label]").Length);
         });
 
         state.SetLocale(ThemeStudioLocale.Thai);
         cut.Render();
         var workbench = cut.Find("[data-testid='theme-palette-workbench']");
-        Assert.Contains("สร้างชุดสี", workbench.TextContent, StringComparison.Ordinal);
+        Assert.Contains("สร้างจากสีหลัก", workbench.TextContent, StringComparison.Ordinal);
         Assert.Contains("ความกลมกลืน", workbench.TextContent, StringComparison.Ordinal);
         Assert.Contains("แบรนด์", workbench.TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Generate palette", workbench.TextContent, StringComparison.Ordinal);
@@ -90,18 +109,18 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
         var canonical = state.SerializeDocument();
         state.Workbench.OpenPaletteWorkbench();
         var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
-        var lockButton = cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]");
+        var lockButton = cut.Find("[data-testid='theme-palette-anchor-support'] [data-palette-lock]");
         Assert.Equal("false", lockButton.GetAttribute("aria-pressed"));
 
         lockButton.Click();
 
-        lockButton = cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]");
+        lockButton = cut.Find("[data-testid='theme-palette-anchor-support'] [data-palette-lock]");
         Assert.Equal("true", lockButton.GetAttribute("aria-pressed"));
         Assert.Equal(ShadcnPaletteRecipe.LegacyAlgorithmVersion, state.Document.Palette.AlgorithmVersion);
         Assert.Equal(canonical, state.SerializeDocument());
 
         lockButton.Click();
-        Assert.Equal("false", cut.Find("[data-testid='theme-palette-anchor-brand'] [data-palette-lock]")
+        Assert.Equal("false", cut.Find("[data-testid='theme-palette-anchor-support'] [data-palette-lock]")
             .GetAttribute("aria-pressed"));
         Assert.Equal(canonical, state.SerializeDocument());
     }
@@ -276,9 +295,10 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
     }
 
     [Fact]
-    public void SequentialSuccessfulGenerationsProduceDistinctLocalizedPoliteAnnouncements()
+    public async Task RapidGenerationRequestsAreCoalescedBeforeTheNextLocalizedGeneration()
     {
         var state = new ThemeStudioState(new NoOpStorage());
+        Assert.True(state.SetPaletteAnchor(ShadcnPaletteAnchorRole.Brand, "#2563eb"));
         state.Workbench.OpenPaletteWorkbench();
         var cut = Render<ThemePaletteWorkbench>(parameters => parameters.Add(component => component.State, state));
         var generate = cut.Find("[data-testid='theme-palette-generate']");
@@ -289,11 +309,17 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
 
         generate.Click();
         var second = cut.Find("[data-testid='theme-palette-status']").TextContent;
-        Assert.Equal($"Palette generated: Seed {state.Document.Palette.Seed}", second);
-        Assert.NotEqual(first, second);
+        Assert.Equal(first, second);
+
+        await Task.Delay(550);
+        generate.Click();
+        var third = cut.Find("[data-testid='theme-palette-status']").TextContent;
+        Assert.Equal($"Palette generated: Seed {state.Document.Palette.Seed}", third);
+        Assert.NotEqual(first, third);
 
         state.SetLocale(ThemeStudioLocale.Thai);
         cut.Render();
+        await Task.Delay(550);
         cut.Find("[data-testid='theme-palette-generate']").Click();
         Assert.Equal(
             $"สร้างชุดสีแล้ว: ซีด {state.Document.Palette.Seed}",
@@ -417,36 +443,22 @@ public sealed class ThemeStudioWorkbenchContractTests : BunitContext
     }
 
     [Fact]
-    public void PaletteWorkbenchHasOneResponsiveDomContractBetweenSettingsAndPreview()
+    public void PaletteWorkbenchIsNestedInTheSidebarWithoutModalBindingMachinery()
     {
         var root = FindRoot();
         var page = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Pages", "ThemeStudio.razor");
         var component = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemePaletteWorkbench.razor");
-        var script = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "theme-studio.js");
         var css = Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css");
 
-        Assert.Equal(1, page.Split("<ThemePaletteWorkbench", StringSplitOptions.None).Length - 1);
-        Assert.True(
-            page.IndexOf("<ThemeStudioSidebar", StringComparison.Ordinal) < page.IndexOf("<ThemePaletteWorkbench", StringComparison.Ordinal) &&
-            page.IndexOf("<ThemePaletteWorkbench", StringComparison.Ordinal) < page.IndexOf("class=\"theme-preview-region\"", StringComparison.Ordinal));
-        Assert.Contains("data-palette-open", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("<ThemePaletteWorkbench", page, StringComparison.Ordinal);
+        Assert.Contains("<ThemePaletteWorkbench State=\"State\"", Read(root, "samples", "Maliev.ShadcnBlazor.Showcase", "Components", "Theming", "ThemePaletteSummary.razor"), StringComparison.Ordinal);
+        Assert.DoesNotContain("data-palette-open", page, StringComparison.Ordinal);
         Assert.Contains("State.IsPointerInteractionActive", page, StringComparison.Ordinal);
         Assert.Contains("data-testid=\"theme-palette-workbench\"", component, StringComparison.Ordinal);
-        Assert.Contains("export function bindPaletteWorkbench(root, returnFocusId)", script, StringComparison.Ordinal);
-        Assert.Contains("export function bindPaletteTrigger(root)", script, StringComparison.Ordinal);
-        Assert.Contains("_bindingGeneration", component, StringComparison.Ordinal);
-        Assert.Contains("_bindingInitializing", component, StringComparison.Ordinal);
-        Assert.Contains("role", script, StringComparison.Ordinal);
-        Assert.Contains("aria-modal", script, StringComparison.Ordinal);
-        Assert.Contains("restoreFocus", script, StringComparison.Ordinal);
-        Assert.Contains("contenteditable", script, StringComparison.Ordinal);
-        Assert.Contains("[role=\"listbox\"]", script, StringComparison.Ordinal);
-        Assert.Contains("(max-width: 68rem)", script, StringComparison.Ordinal);
-        Assert.Contains("for (let ancestor = root.parentElement", script, StringComparison.Ordinal);
-        Assert.Contains("revealBackground(true)", script, StringComparison.Ordinal);
-        Assert.Contains(".theme-studio-workbench[data-palette-open=\"true\"]", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("IJSRuntime", component, StringComparison.Ordinal);
+        Assert.Contains("GeneratePaletteFromMainColor", component, StringComparison.Ordinal);
+        Assert.DoesNotContain(".theme-studio-workbench[data-palette-open=\"true\"]", css, StringComparison.Ordinal);
         Assert.Contains(".theme-palette-workbench", css, StringComparison.Ordinal);
-        Assert.Contains("block-size: 100dvh", css, StringComparison.Ordinal);
         Assert.Contains("@media (forced-colors: active)", css, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
     }

@@ -631,6 +631,21 @@ public sealed class ThemeStudioState
         return GeneratePalette(seed);
     }
 
+    public bool GeneratePaletteFromMainColor(out ulong seed)
+    {
+        Span<byte> bytes = stackalloc byte[sizeof(ulong)];
+        RandomNumberGenerator.Fill(bytes);
+        seed = BitConverter.ToUInt64(bytes);
+        var recipe = ShadcnPaletteRecipe.CreateV2(
+            seed,
+            BaseColorId,
+            _documentTemplate.Palette.LockedTokens,
+            PaletteAnchorsForVersionTwoMutation(),
+            PaletteHarmony,
+            [ShadcnPaletteAnchorRole.Brand]);
+        return TryApplyPaletteRecipe(recipe, "palette.generate-from-main");
+    }
+
     public bool IsPaletteLocked(ThemeStudioScheme scheme, string token) =>
         _documentTemplate.Palette.LockedTokens.Contains(TokenEditorKey(scheme, token), StringComparer.Ordinal);
 

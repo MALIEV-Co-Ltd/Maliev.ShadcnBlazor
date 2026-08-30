@@ -1,117 +1,125 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
-@inject IJSRuntime JavaScript
-@implements IAsyncDisposable
+@using Maliev.ShadcnBlazor.Components.Disclosure
+@using System.Diagnostics
+@implements IDisposable
 
-@if (State.Workbench.PaletteWorkbenchOpen)
-{
-    <aside @ref="_root"
-           id="theme-palette-workbench"
-           class="theme-palette-workbench"
-           tabindex="-1"
-           aria-labelledby="theme-palette-workbench-title"
-           data-testid="theme-palette-workbench">
-        <header class="theme-palette-workbench__header">
-            <div>
-                <span>@Copy.CustomizePalette</span>
-                <h2 id="theme-palette-workbench-title">@Copy.ActivePalette</h2>
-                <small data-testid="theme-palette-workbench-identity">@Copy.PaletteIdentity(State.Document)</small>
-            </div>
-            <ShadcnButton Variant="ShadcnButtonVariant.Ghost"
-                          Size="ShadcnButtonSize.Small"
-                          aria-label="@Copy.ClosePaletteEditor"
-                          data-testid="theme-palette-close"
-                          OnClick="CloseAsync">
-                @Copy.ReturnToPreview
-            </ShadcnButton>
-        </header>
-
-        <div class="theme-palette-workbench__strip" aria-hidden="true">
-            @foreach (var role in Roles)
-            {
-                <span style="@SwatchStyle(role)"></span>
-            }
+<section id="theme-palette-workbench"
+         class="theme-palette-workbench"
+         aria-labelledby="theme-palette-workbench-title"
+         data-testid="theme-palette-workbench">
+    <header class="theme-palette-workbench__header">
+        <div>
+            <h2 id="theme-palette-workbench-title">@Copy.MainColor</h2>
+            <p>@Copy.MainColorHelp</p>
         </div>
+    </header>
 
-        <div class="theme-palette-workbench__body">
-            <div class="theme-palette-workbench__anchors">
+    <div class="theme-palette-workbench__body">
+        <ThemePaletteAnchorEditor State="State"
+                                  Role="ShadcnPaletteAnchorRole.Brand"
+                                  Copy="Copy"
+                                  ShowLockControl="false"
+                                  Announce="Announce" />
+
+        <label class="theme-palette-workbench__harmony">
+            <span>@Copy.Harmony</span>
+            <ShadcnSelect TValue="ShadcnPaletteHarmony"
+                          Value="State.PaletteHarmony"
+                          ValueChanged="SetHarmonyAsync"
+                          Open="_harmonyOpen"
+                          OpenChanged="SetHarmonyOpenAsync"
+                          Options="HarmonyOptions"
+                          Size="ShadcnControlSize.Small"
+                          aria-label="@Copy.Harmony"
+                          data-testid="theme-palette-harmony" />
+        </label>
+
+        <ShadcnButton Variant="ShadcnButtonVariant.Default"
+                      Size="ShadcnButtonSize.Small"
+                      Disabled="_generating"
+                      data-testid="theme-palette-generate"
+                      OnClick="GenerateAsync">
+            @(_generating ? Copy.DerivingPalette : Copy.GenerateFromMainColor)
+        </ShadcnButton>
+
+        <div class="theme-palette-workbench__derived">
+            <strong>@Copy.DerivedColors</strong>
+            <div class="theme-palette-workbench__strip" role="img" aria-label="@Copy.DerivedColors">
                 @foreach (var role in Roles)
                 {
-                    <ThemePaletteAnchorEditor @key="role"
-                                              State="State"
-                                              Role="role"
-                                              Copy="Copy"
-                                              Announce="Announce" />
+                    <span style="@SwatchStyle(role)"></span>
                 }
             </div>
-
-            <section class="theme-palette-workbench__diagnostics" aria-labelledby="theme-palette-diagnostics-title">
-                <h3 id="theme-palette-diagnostics-title">@Copy.ValidationSummary</h3>
-                @if (State.PaletteContrastReady)
-                {
-                    <p data-palette-contrast="ready">@Copy.ContrastReady</p>
-                }
-                else
-                {
-                    <p data-palette-contrast="review">@Copy.NeedsReview</p>
-                    @if (BlockingDiagnostics.Count > 0)
-                    {
-                        <ul>
-                            @foreach (var diagnostic in BlockingDiagnostics)
-                            {
-                                <li>
-                                    <span>@Copy.NeedsReview</span>
-                                    <code>@diagnostic.Path</code>
-                                    <span>@Copy.DiagnosticMessage(diagnostic)</span>
-                                </li>
-                            }
-                        </ul>
-                    }
-                }
-            </section>
         </div>
 
-        <footer class="theme-palette-workbench__actions">
-            <label class="theme-palette-workbench__harmony">
-                <span>@Copy.Harmony</span>
-                <ShadcnSelect TValue="ShadcnPaletteHarmony"
-                              Value="State.PaletteHarmony"
-                              ValueChanged="SetHarmonyAsync"
-                              Open="_harmonyOpen"
-                              OpenChanged="SetHarmonyOpenAsync"
-                              Options="HarmonyOptions"
-                              Size="ShadcnControlSize.Small"
-                              aria-label="@Copy.Harmony"
-                              data-testid="theme-palette-harmony" />
-            </label>
-            <ShadcnButton Variant="ShadcnButtonVariant.Default"
-                          Size="ShadcnButtonSize.Small"
-                          data-testid="theme-palette-generate"
-                          OnClick="GenerateAsync">
-                @Copy.GeneratePalette
-            </ShadcnButton>
-        </footer>
+        <ShadcnCollapsible Open="_advancedOpen"
+                            OpenChanged="SetAdvancedOpen"
+                            Class="theme-palette-workbench__advanced"
+                            data-testid="theme-palette-advanced">
+            <ShadcnCollapsibleTrigger Class="theme-palette-workbench__advanced-trigger">
+                <span>@Copy.AdvancedColors</span>
+                <span aria-hidden="true">⌄</span>
+            </ShadcnCollapsibleTrigger>
+            <ShadcnCollapsibleContent>
+                <div class="theme-palette-workbench__anchors">
+                    @foreach (var role in DerivedRoles)
+                    {
+                        <ThemePaletteAnchorEditor @key="role"
+                                                  State="State"
+                                                  Role="role"
+                                                  Copy="Copy"
+                                                  Announce="Announce" />
+                    }
+                </div>
+            </ShadcnCollapsibleContent>
+        </ShadcnCollapsible>
 
-        <p class="theme-palette-workbench__status"
-           role="status"
-           aria-live="polite"
-           aria-atomic="true"
-           data-testid="theme-palette-status">@_announcement</p>
-    </aside>
-}
+        <section class="theme-palette-workbench__diagnostics" aria-labelledby="theme-palette-diagnostics-title">
+            <h3 id="theme-palette-diagnostics-title">@Copy.ValidationSummary</h3>
+            @if (State.PaletteContrastReady)
+            {
+                <p data-palette-contrast="ready">@Copy.ContrastReady</p>
+            }
+            else
+            {
+                <p data-palette-contrast="review">@Copy.NeedsReview</p>
+                @if (BlockingDiagnostics.Count > 0)
+                {
+                    <ul>
+                        @foreach (var diagnostic in BlockingDiagnostics)
+                        {
+                            <li>
+                                <code>@diagnostic.Path</code>
+                                <span>@Copy.DiagnosticMessage(diagnostic)</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        </section>
+    </div>
+
+    <p class="theme-palette-workbench__status"
+       role="status"
+       aria-live="polite"
+       aria-atomic="true"
+       data-testid="theme-palette-status">@_announcement</p>
+</section>
 
 @code {
     [Parameter, EditorRequired] public ThemeStudioState State { get; set; } = null!;
 
-    private readonly IReadOnlyList<ShadcnPaletteAnchorRole> Roles = Enum.GetValues<ShadcnPaletteAnchorRole>();
-    private ElementReference _root;
-    private IJSObjectReference? _module;
-    private IJSObjectReference? _binding;
+    private static readonly IReadOnlyList<ShadcnPaletteAnchorRole> Roles = Enum.GetValues<ShadcnPaletteAnchorRole>();
+    private static readonly IReadOnlyList<ShadcnPaletteAnchorRole> DerivedRoles = Roles
+        .Where(role => role != ShadcnPaletteAnchorRole.Brand)
+        .ToArray();
     private string _announcement = string.Empty;
     private bool _harmonyOpen;
+    private bool _advancedOpen;
+    private bool _generating;
+    private long _nextGenerationAllowedAt;
     private ThemeStudioLocale _locale;
     private bool _disposed;
-    private bool _bindingInitializing;
-    private long _bindingGeneration;
     private ThemeStudioPaletteCopy Copy => ThemeStudioPaletteCopy.For(State.Locale);
     private IReadOnlyList<ShadcnThemeValidationMessage> BlockingDiagnostics => State.PaletteReviewDiagnostics;
     private IReadOnlyList<ShadcnSelectOption<ShadcnPaletteHarmony>> HarmonyOptions =>
@@ -123,64 +131,6 @@
     {
         _locale = State.Locale;
         State.Changed += OnStateChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_disposed)
-            return;
-        if (!State.Workbench.PaletteWorkbenchOpen)
-        {
-            CancelBindingInitialization();
-            await DisposeBindingAsync();
-            return;
-        }
-        if (_binding is not null || _bindingInitializing)
-            return;
-
-        var generation = ++_bindingGeneration;
-        _bindingInitializing = true;
-        IJSObjectReference? pendingBinding = null;
-        try
-        {
-            var module = _module;
-            if (module is null)
-            {
-                module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/theme-studio.js");
-                if (!CanAttachBinding(generation))
-                {
-                    if (!_disposed && !State.Workbench.PaletteWorkbenchOpen)
-                        await module.InvokeVoidAsync("restorePaletteFocus", "theme-palette-customize");
-                    await DisposeReferenceAsync(module);
-                    return;
-                }
-                _module = module;
-            }
-
-            if (!CanAttachBinding(generation))
-                return;
-            pendingBinding = await module.InvokeAsync<IJSObjectReference>("bindPaletteWorkbench", _root, "theme-palette-customize");
-            if (!CanAttachBinding(generation))
-            {
-                await DisposeBindingReferenceAsync(pendingBinding);
-                pendingBinding = null;
-                if (!_disposed && !State.Workbench.PaletteWorkbenchOpen)
-                    await module.InvokeVoidAsync("restorePaletteFocus", "theme-palette-customize");
-                return;
-            }
-
-            _binding = pendingBinding;
-            pendingBinding = null;
-        }
-        catch (Exception exception) when ((exception is JSDisconnectedException or ObjectDisposedException) &&
-                                          (_disposed || generation != _bindingGeneration)) { }
-        finally
-        {
-            if (pendingBinding is not null)
-                await DisposeBindingReferenceAsync(pendingBinding);
-            if (generation == _bindingGeneration)
-                _bindingInitializing = false;
-        }
     }
 
     private void OnStateChanged(object? sender, EventArgs args)
@@ -213,65 +163,36 @@
         return InvokeAsync(StateHasChanged);
     }
 
-    private async Task GenerateAsync()
+    private Task SetAdvancedOpen(bool open)
     {
-        _announcement = State.GenerateNewPalette(out var seed)
-            ? Copy.GeneratedStatusForSeed(seed)
-            : Copy.ErrorPrefix;
-        await InvokeAsync(StateHasChanged);
+        _advancedOpen = open;
+        return Task.CompletedTask;
     }
 
-    private async Task CloseAsync()
+    private Task GenerateAsync()
     {
-        _harmonyOpen = false;
-        CancelBindingInitialization();
-        if (_binding is not null)
-            await _binding.InvokeVoidAsync("restoreFocus");
-        else if (_module is not null)
-            await _module.InvokeVoidAsync("restorePaletteFocus", "theme-palette-customize");
-        State.Workbench.ClosePaletteWorkbench();
-        await DisposeBindingAsync();
+        var now = Stopwatch.GetTimestamp();
+        if (_generating || now < _nextGenerationAllowedAt)
+            return Task.CompletedTask;
+
+        _generating = true;
+        try
+        {
+            _announcement = State.GeneratePaletteFromMainColor(out var seed)
+                ? Copy.GeneratedStatusForSeed(seed)
+                : Copy.ErrorPrefix;
+        }
+        finally
+        {
+            _generating = false;
+            _nextGenerationAllowedAt = Stopwatch.GetTimestamp() + (Stopwatch.Frequency / 2);
+        }
+        return InvokeAsync(StateHasChanged);
     }
 
-    private bool CanAttachBinding(long generation) =>
-        !_disposed && State.Workbench.PaletteWorkbenchOpen && generation == _bindingGeneration;
-
-    private void CancelBindingInitialization()
-    {
-        _bindingGeneration++;
-        _bindingInitializing = false;
-    }
-
-    private async Task DisposeBindingAsync()
-    {
-        var binding = _binding;
-        _binding = null;
-        if (binding is null)
-            return;
-        await DisposeBindingReferenceAsync(binding);
-    }
-
-    private static async ValueTask DisposeBindingReferenceAsync(IJSObjectReference binding)
-    {
-        try { await binding.InvokeVoidAsync("dispose"); }
-        catch (Exception exception) when (exception is JSDisconnectedException or ObjectDisposedException) { }
-        await DisposeReferenceAsync(binding);
-    }
-
-    private static async ValueTask DisposeReferenceAsync(IJSObjectReference reference)
-    {
-        try { await reference.DisposeAsync(); }
-        catch (Exception exception) when (exception is JSDisconnectedException or ObjectDisposedException) { }
-    }
-
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         _disposed = true;
-        CancelBindingInitialization();
         State.Changed -= OnStateChanged;
-        await DisposeBindingAsync();
-        if (_module is null)
-            return;
-        await DisposeReferenceAsync(_module);
     }
 }
