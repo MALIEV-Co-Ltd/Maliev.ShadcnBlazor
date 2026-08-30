@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-30
+
+### Added
+
+- Added the Theme Studio palette workbench with deterministic harmony recipes,
+  lockable semantic anchors, contrast-aware generation, shareable state, and
+  portable versioned theme documents.
+- Added package-owned programmatic focus APIs across interactive primitives and
+  expanded keyboard and browser regression coverage.
+
+### Changed
+
+- Removed the core package's transitive MudBlazor dependency and replaced the
+  former adapter/provider boundary with package-owned component behavior.
+- Hardened Theme Studio palette history, diagnostics, import/export, responsive
+  editing, modal isolation, and recipe compatibility while preserving legacy
+  documents.
+
+### Fixed
+
+- Composed the selected Thai fallback into the effective portable document font
+  stack, preserving the chosen body face while placing Thai families before
+  generic system fallbacks across preview, export, and restored state (#249).
+- Restored focus after alert-dialog rerenders and standardized guarded keyboard
+  focus behavior across tabs, forms, overlays, navigation, and selection controls.
+
 ## [1.2.2] - 2026-08-28
 
 ### Added
@@ -265,7 +291,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.2...v1.3.0
 [1.2.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v1.1.1...v1.2.0
