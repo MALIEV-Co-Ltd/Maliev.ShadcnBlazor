@@ -1956,6 +1956,8 @@ type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidationResult
 type Maliev.ShadcnBlazor.Theming.ShadcnThemeValidator
   const Double NonTextContrastRatio
   const Double TextContrastRatio
+  method String ToHexColor(String value)
+  method String ToHexColor(String value, Boolean includeAlpha)
   method ShadcnThemeValidationResult Validate(ShadcnTheme theme)
 enum Maliev.ShadcnBlazor.Theming.ShadcnTypographyRole: Body, Heading1, Heading2, Heading3, Heading4To6, Label, Button, Caption, Code
 type Maliev.ShadcnBlazor.Theming.ShadcnTypographyRoleStyle

@@ -46,13 +46,24 @@ public static partial class ShadcnThemeValidator
         return new ShadcnThemeValidationResult(errors.AsReadOnly(), warnings.AsReadOnly(), contrastResults.AsReadOnly());
     }
 
-    internal static string ToHexColor(string value)
+    /// <summary>Converts a supported Shadcn color value to its canonical lowercase hexadecimal representation.</summary>
+    /// <param name="value">A hexadecimal or canonical <c>oklch()</c> color accepted by the Shadcn theme contract.</param>
+    /// <returns>A six-digit hexadecimal color, or an eight-digit hexadecimal color when the input includes transparency.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="value"/> is not a supported Shadcn color.</exception>
+    public static string ToHexColor(string value) => ToHexColor(value, includeAlpha: true);
+
+    /// <summary>Converts a supported Shadcn color value to its canonical lowercase hexadecimal representation.</summary>
+    /// <param name="value">A hexadecimal or canonical <c>oklch()</c> color accepted by the Shadcn theme contract.</param>
+    /// <param name="includeAlpha">Whether a non-opaque alpha channel is included in the returned value.</param>
+    /// <returns>A six-digit hexadecimal color, or an eight-digit hexadecimal color when alpha is requested and the input includes transparency.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="value"/> is not a supported Shadcn color.</exception>
+    public static string ToHexColor(string value, bool includeAlpha)
     {
         if (!TryParseColor(value, out var color))
             throw new ArgumentException("The value is not a supported Shadcn color.", nameof(value));
 
         var valueWithoutAlpha = $"#{ToByte(color.Red):x2}{ToByte(color.Green):x2}{ToByte(color.Blue):x2}";
-        return color.Alpha >= 1
+        return !includeAlpha || color.Alpha >= 1
             ? valueWithoutAlpha
             : $"{valueWithoutAlpha}{ToAlphaByte(color.Alpha):x2}";
     }

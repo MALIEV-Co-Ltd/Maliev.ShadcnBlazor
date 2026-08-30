@@ -1,5 +1,4 @@
 @namespace Maliev.ShadcnBlazor.Showcase.Components.Theming
-@using MudBlazor.Utilities
 @inject IJSRuntime JavaScript
 @implements IAsyncDisposable
 
@@ -88,11 +87,7 @@
     {
         get
         {
-            var projection = State.Applied with
-            {
-                Light = State.Applied.Light with { Primary = AnchorValue }
-            };
-            return ShadcnThemeFactory.Create(projection).PaletteLight.Primary.ToString(MudColorOutputFormats.Hex);
+            return ShadcnThemeValidator.ToHexColor(AnchorValue, includeAlpha: false);
         }
     }
 

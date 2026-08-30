@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Maliev.ShadcnBlazor.Components.Primitives;
 using Maliev.ShadcnBlazor.Components.Selection;
+using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
 
 namespace Maliev.ShadcnBlazor.Tests.Contracts;
@@ -45,6 +46,30 @@ public sealed class PublicApiSnapshotTests
             throw new InvalidOperationException(actual);
         var expected = File.ReadAllText(snapshot).Replace("\r\n", "\n", StringComparison.Ordinal);
         Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void ThemeColorConversionIsPublicAndNormalizesSupportedCssColors()
+    {
+        var method = typeof(ShadcnThemeValidator).GetMethod(
+            "ToHexColor",
+            BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly,
+            binder: null,
+            types: [typeof(string)],
+            modifiers: null);
+
+        Assert.NotNull(method);
+        Assert.Equal("#aabbcc", method.Invoke(null, ["#abc"]));
+
+        var alphaPolicyMethod = typeof(ShadcnThemeValidator).GetMethod(
+            "ToHexColor",
+            BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly,
+            binder: null,
+            types: [typeof(string), typeof(bool)],
+            modifiers: null);
+        Assert.NotNull(alphaPolicyMethod);
+        Assert.Equal("#aabbccdd", alphaPolicyMethod.Invoke(null, ["#abcd", true]));
+        Assert.Equal("#aabbcc", alphaPolicyMethod.Invoke(null, ["#abcd", false]));
     }
 
     private static string BuildSnapshot()

@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using Maliev.ShadcnBlazor.Theming;
 using Maliev.ShadcnBlazor.Showcase.Theming.Presets;
 using Maliev.ShadcnBlazor.Components.Styling;
-using MudBlazor.Utilities;
 
 namespace Maliev.ShadcnBlazor.Showcase.Theming;
 
@@ -1276,12 +1275,7 @@ public sealed class ThemeStudioState
 
         foreach (var role in Enum.GetValues<ShadcnPaletteAnchorRole>())
         {
-            var projection = Applied with
-            {
-                Light = Applied.Light with { Primary = anchors.Get(role) }
-            };
-            var opaqueHex = ShadcnThemeFactory.Create(projection).PaletteLight.Primary
-                .ToString(MudColorOutputFormats.Hex);
+            var opaqueHex = ShadcnThemeValidator.ToHexColor(anchors.Get(role), includeAlpha: false);
             anchors = anchors.Set(role, opaqueHex);
         }
         return anchors;
