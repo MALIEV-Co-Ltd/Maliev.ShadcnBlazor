@@ -80,6 +80,22 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(page.GetByTestId("theme-category-filter-overlays")).ToHaveAttributeAsync("aria-pressed", "true");
     }
 
+    [Fact]
+    public async Task OrderMixRendersEveryGeneratedPaletteAnchor()
+    {
+        await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
+        var page = await OpenAsync(context);
+        await page.GetByTestId("theme-category-filter-data").ClickAsync();
+        var chart = page.Locator("[data-use-case-id='order-mix'] .shadcn-chart");
+        await Assertions.Expect(chart).ToBeVisibleAsync();
+
+        var fills = await chart.Locator("path[data-chart-shape='arc']")
+            .EvaluateAllAsync<string[]>("paths => paths.map(path => getComputedStyle(path).fill)");
+
+        Assert.Equal(5, fills.Length);
+        Assert.Equal(5, fills.Distinct(StringComparer.Ordinal).Count());
+    }
+
     [Theory]
     [InlineData(1440, 900)]
     [InlineData(390, 844)]

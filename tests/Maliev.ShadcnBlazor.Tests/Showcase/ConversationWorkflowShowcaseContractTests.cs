@@ -162,10 +162,11 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
             .GetBySlug("marker").Single();
         var cut = Render(example.Preview);
 
+        Assert.Equal(3, cut.FindAll("[data-slot='bubble']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='marker']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='marker-icon']").Count);
-        Assert.Contains("ตรวจสอบ 4 ไฟล์แล้ว", cut.Markup, StringComparison.Ordinal);
-        Assert.Contains("กำลังประมวลผล", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Four inspection files verified", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Preparing quality handoff", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("showcase-marker-loader", cut.Markup, StringComparison.Ordinal);
         Assert.Equal("true", cut.Find("[data-slot='marker'][role='status']").GetAttribute("data-live"));
         Assert.Equal("true", cut.Find("[data-slot='marker'][role='status'] [data-slot='marker-icon']").GetAttribute("data-streaming"));
@@ -179,12 +180,14 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
             .GetBySlug("marker").Single();
 
         Assert.DoesNotContain("...", example.RazorSource, StringComparison.Ordinal);
+        Assert.Equal(3, example.RazorSource.Split("<ShadcnBubble ", StringSplitOptions.None).Length - 1);
+        Assert.Contains("Bore 4 is ready for final inspection", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMarker Live=\"true\"", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMarkerIcon>", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<span class=\"showcase-marker-loader shadcn-marker-loader\"", example.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("style=\"display:none\"", example.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("<ShadcnMarkerContent Streaming=\"true\">", example.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("กำลังประมวลผล", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ShadcnMarkerContent dir=\"auto\" Streaming=\"true\">", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Preparing quality handoff", example.RazorSource, StringComparison.Ordinal);
 
         var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");
         var css = File.ReadAllText(cssPath);

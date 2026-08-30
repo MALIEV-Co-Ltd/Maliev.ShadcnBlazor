@@ -22,11 +22,15 @@ All notable changes to this project are documented here. The format follows
   interactive scopes without requiring additional service registration.
 - Kept transcript history silent by default so prepending older messages does
   not trigger live-region announcements.
+- Reworked the Marker dossier into a realistic inspection conversation and
+  expanded the Theme Studio order-mix chart to render all five palette roles.
 
 ### Fixed
 
 - Enforced a single visual boundary for Code Block content and excluded
   Showcase-only styles from the shipped component package.
+- Kept the Code Block language selector visually unstyled across dark and
+  visual-treatment cascades while preserving its keyboard interaction.
 - Hardened form, overlay, data, and content component interaction contracts,
   including forced-colors focus-ring ownership for composite Select controls.
 

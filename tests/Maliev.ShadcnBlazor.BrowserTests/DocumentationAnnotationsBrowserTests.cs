@@ -101,6 +101,12 @@ public sealed class DocumentationAnnotationsBrowserTests(
         }
 
         var select = first.Locator("[data-slot='select-trigger']");
+        var selectorChrome = await select.EvaluateAsync<string[]>(
+            "element => { const style=getComputedStyle(element); return [style.borderTopWidth, style.boxShadow]; }");
+        Assert.True(await select.EvaluateAsync<bool>(
+            "element => { const value=getComputedStyle(element).backgroundColor; return value === 'transparent' || /^rgba\\([^)]*,\\s*0\\)$/.test(value); }"));
+        Assert.Equal("0px", selectorChrome[0]);
+        Assert.Equal("none", selectorChrome[1]);
         await select.FocusAsync();
         await select.PressAsync("ArrowDown");
         await select.PressAsync("End");

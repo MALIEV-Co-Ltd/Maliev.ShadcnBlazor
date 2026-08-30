@@ -678,15 +678,17 @@
         new("yield", [92.4, 93.1, 94.8, 95.2, 96.4, 96.8]),
         new("rework", [7.6, 6.9, 5.2, 4.8, 3.6, 3.2])
     ];
-    private string[] LocalizedOrderMixCategories => [T("Aluminum"), T("Stainless"), T("Polymer")];
+    private string[] LocalizedOrderMixCategories => [T("Aluminum"), T("Stainless"), T("Polymer"), T("Titanium"), T("Tool steel")];
     private ShadcnChartConfig LocalizedOrderMixChartConfig => new()
     {
         ["orders"] = new(T("Scheduled jobs")) { Color = "var(--shadcn-chart-3)" },
         ["orders-0"] = new(T("Aluminum")) { Color = "var(--shadcn-chart-1)" },
         ["orders-1"] = new(T("Stainless")) { Color = "var(--shadcn-chart-2)" },
-        ["orders-2"] = new(T("Polymer")) { Color = "var(--shadcn-chart-4)" }
+        ["orders-2"] = new(T("Polymer")) { Color = "var(--shadcn-chart-3)" },
+        ["orders-3"] = new(T("Titanium")) { Color = "var(--shadcn-chart-4)" },
+        ["orders-4"] = new(T("Tool steel")) { Color = "var(--shadcn-chart-5)" }
     };
-    private static readonly ShadcnChartSeries[] OrderMixSeries = [new("orders", [12, 8, 5])];
+    private static readonly ShadcnChartSeries[] OrderMixSeries = [new("orders", [12, 8, 5, 3, 4])];
     private int _apiKeyRevision = 1;
     private string _apiKey = "example-maliev-credential-0001";
     private const string MachinePin = "241850";
