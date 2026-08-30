@@ -461,20 +461,23 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var card = page.Locator("[data-use-case-id='overlay-feedback-lab']");
         await card.ScrollIntoViewIfNeededAsync();
         var trigger = card.GetByRole(AriaRole.Button, new() { Name = "Show toast" });
-
-        await trigger.EvaluateAsync(
-            "element => { for (let index = 0; index < 3; index++) element.dispatchEvent(new MouseEvent('click', { bubbles: true })); }");
-
         var viewport = card.Locator("[data-slot='toast-viewport']");
         var toasts = viewport.Locator("[data-slot='toast']");
-        var presentedToasts = viewport.Locator("[data-slot='toast']:not([data-limited='true'])");
-        await Assertions.Expect(toasts).ToHaveCountAsync(3);
-        await Assertions.Expect(presentedToasts).ToHaveCountAsync(2);
+
+        await trigger.ClickAsync();
+        await Assertions.Expect(toasts).ToHaveCountAsync(1);
+        await viewport.HoverAsync();
+        await trigger.EvaluateAsync(
+            "element => element.dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+        await Assertions.Expect(toasts).ToHaveCountAsync(2);
+        await trigger.EvaluateAsync(
+            "element => element.dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+        await Assertions.Expect(toasts).ToHaveCountAsync(2);
         Assert.True(
             await viewport.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
             "The toast viewport must use the browser top layer so containing blocks cannot capture fixed positioning.");
 
-        var bounds = await presentedToasts.EvaluateAllAsync<double[][]>(
+        var bounds = await toasts.EvaluateAllAsync<double[][]>(
             "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.left, box.top, box.right, box.bottom, innerWidth, innerHeight]; })");
         Assert.All(bounds, box =>
         {
@@ -943,6 +946,9 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     {
         await using var context = await NewContextAsync(1569, 1032, ReducedMotion.NoPreference);
         var page = await OpenAsync(context);
+        var card = page.Locator("[data-use-case-id='contact-dialog']");
+        await card.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(card).ToBeVisibleAsync();
         await page.EvaluateAsync("""
             () => {
                 window.__contactDialogPresentation = { animationStarts: 0, frames: [] };
@@ -975,7 +981,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
             }
             """);
 
-        await page.Locator("[data-use-case-id='contact-dialog']")
+        await card
             .GetByRole(AriaRole.Button, new() { Name = "Edit contact", Exact = true })
             .ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
@@ -1354,6 +1360,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var page = await OpenAsync(context);
 
         var issue = page.Locator("[data-use-case-id='issue-report']");
+        await issue.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(issue).ToBeVisibleAsync();
         await Assertions.Expect(issue.Locator("[data-animated-input]")).ToHaveCountAsync(1);
         await Assertions.Expect(issue.Locator("[data-animated-textarea]")).ToHaveCountAsync(1);
         var typedDetails = issue.Locator("[data-animated-textarea] [data-typing-text]");
@@ -1413,6 +1421,8 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         await using var context = await NewContextAsync(1440, 900);
         var page = await OpenAsync(context);
         var conversation = page.Locator("[data-use-case-id='assistant-conversation']");
+        await conversation.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(conversation).ToBeVisibleAsync();
         var turns = conversation.Locator("[data-slot='message-scroller-item']");
         await Assertions.Expect(turns).ToHaveCountAsync(2);
         await conversation.Locator(".theme-runway-composer input").FillAsync("สถานะการตรวจสอบล่าสุดเป็นอย่างไร");
@@ -1536,12 +1546,14 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     {
         await using var context = await NewContextAsync(1440, 900);
         var page = await OpenAsync(context);
+        var profile = page.Locator("[data-use-case-id='operator-profile']");
+        await profile.EvaluateAsync("element => element.scrollIntoView({ block: 'center' })");
+        await Assertions.Expect(profile).ToBeVisibleAsync();
         await OpenAdvancedAsync(page, "theme-advanced-accessibility");
         await page.GetByTestId("preview-animation-pause").ClickAsync();
         var bento = page.GetByTestId("theme-bento");
         await Assertions.Expect(bento).ToHaveAttributeAsync("data-animation-paused", "true");
         var renderCycle = await bento.GetAttributeAsync("data-render-cycle");
-        var profile = page.Locator("[data-use-case-id='operator-profile']");
         var name = profile.Locator("input").First;
         await name.FillAsync("Kanda T.");
         await page.WaitForTimeoutAsync(700);

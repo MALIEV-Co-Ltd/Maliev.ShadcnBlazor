@@ -1,7 +1,7 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-fallback")" style="@MergeStyle(null)" data-slot="avatar-fallback" data-state="@(Context?.ImageLoaded == true ? "hidden" : "visible")" aria-hidden="@(Context?.ImageLoaded == true ? "true" : null)">@ChildContent</span>
+<span @attributes="ForwardedAttributes" class="@MergeClass("shadcn-avatar-fallback")" style="@MergeStyle(null)" data-slot="avatar-fallback" data-state="@(Context?.ImageLoaded == true ? "hidden" : "visible")" aria-hidden="@(Context?.ImageLoaded == true ? "true" : null)" hidden="@(Context?.ImageLoaded == true)">@ChildContent</span>
 @code {
     [CascadingParameter] private ShadcnAvatarContext? Context { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "aria-hidden");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-state", "aria-hidden", "hidden");
 }
