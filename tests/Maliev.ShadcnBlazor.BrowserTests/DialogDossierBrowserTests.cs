@@ -102,6 +102,8 @@ public sealed class DialogDossierBrowserTests(
 
         await page.GetByTestId("control-dialog-variant").CheckAsync();
         await trigger.ClickAsync();
+        await Assertions.Expect(page.Locator("[data-slot='dialog-portal']"))
+            .ToHaveAttributeAsync("data-shadcn-dialog-ready", "");
         await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).Not.ToHaveAttributeAsync("aria-modal", "true");
         await Assertions.Expect(page.Locator("#preview .component-code pre")).ToContainTextAsync("Modal=\"false\"");
         await page.EvaluateAsync("""
