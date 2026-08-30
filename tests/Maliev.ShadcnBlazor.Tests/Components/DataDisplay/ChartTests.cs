@@ -67,6 +67,35 @@ public sealed class ChartTests : BunitContext
     }
 
     [Fact]
+    public void ChartUsesOneCompositeTabStopForAnyNumberOfDataPoints()
+    {
+        var cut = RenderChart();
+        var surface = cut.Find("svg[data-slot='chart-surface']");
+
+        Assert.Equal("0", surface.GetAttribute("tabindex"));
+        Assert.All(cut.FindAll("[data-series][data-point]"), point => Assert.Equal("-1", point.GetAttribute("tabindex")));
+        Assert.Single(cut.FindAll("[tabindex='0']"));
+
+        surface.KeyDown(new KeyboardEventArgs { Key = "ArrowRight" });
+        var activeDescendant = surface.GetAttribute("aria-activedescendant");
+        Assert.False(string.IsNullOrWhiteSpace(activeDescendant));
+        Assert.Single(cut.FindAll($"#{activeDescendant}"));
+    }
+
+    [Fact]
+    public void ChartActiveDescendantIdEncodesArbitrarySeriesKeysAsOneAsciiToken()
+    {
+        const string seriesKey = "ยอด ขาย/東京";
+        var cut = RenderChart();
+        var pointId = typeof(ShadcnChart).GetMethod("PointId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+
+        var encoded = Assert.IsType<string>(pointId.Invoke(cut.Instance, [seriesKey, 0]));
+
+        Assert.Matches("^[A-Za-z0-9_-]+$", encoded);
+        Assert.DoesNotContain(seriesKey, encoded, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TooltipAndLegendHonorHideAndNameOptions()
     {
         var cut = RenderChart(hideLabel: true, hideIndicator: true, nameKey: "mobile");
@@ -255,10 +284,14 @@ public sealed class ChartTests : BunitContext
     public void PointerAndPerBarFocusExposeVisibleActiveTargetWithoutSyntheticMarker()
     {
         var cut = RenderChart();
+        var surface = cut.Find("svg[data-slot='chart-surface']");
         var bar = cut.Find("rect[data-series='desktop'][data-point='1']");
-        Assert.Equal("0", bar.GetAttribute("tabindex"));
+        Assert.Equal("0", surface.GetAttribute("tabindex"));
+        Assert.Equal("-1", bar.GetAttribute("tabindex"));
         Assert.Contains("Feb", bar.GetAttribute("aria-label"));
         bar.PointerEnter(new PointerEventArgs());
+        Assert.Matches("^[A-Za-z0-9_-]+$", bar.Id);
+        Assert.Equal(bar.Id, surface.GetAttribute("aria-activedescendant"));
         Assert.Empty(cut.FindAll("[data-slot='chart-point']"));
         Assert.Contains("Feb", cut.Find("[data-slot='chart-tooltip-content']").TextContent);
         Assert.NotNull(cut.Find("[data-slot='chart-tooltip-cursor']"));

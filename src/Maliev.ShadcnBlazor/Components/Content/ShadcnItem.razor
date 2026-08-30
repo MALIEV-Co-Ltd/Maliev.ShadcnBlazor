@@ -8,6 +8,7 @@
     [Parameter] public ShadcnItemSize Size { get; set; } = ShadcnItemSize.Default;
     [Parameter] public string? Href { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [CascadingParameter(Name = "ShadcnItemGroup")] private bool IsInItemGroup { get; set; }
 
     private string VariantValue => Variant switch
     {
@@ -24,17 +25,26 @@
     };
     private RenderFragment Element => builder =>
     {
-        builder.OpenElement(0, Href is null ? "div" : "a");
-        builder.AddMultipleAttributes(1, AttributesExcept("href", "data-slot", "data-variant", "data-size"));
-        builder.AddAttribute(2, "class", MergeClass("shadcn-item"));
-        builder.AddAttribute(3, "style", MergeStyle(null));
+        var sequence = 0;
+        if (IsInItemGroup)
+        {
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "role", "listitem");
+            builder.AddAttribute(sequence++, "style", "display: contents");
+        }
+        builder.OpenElement(sequence++, Href is null ? "div" : "a");
+        builder.AddMultipleAttributes(sequence++, AttributesExcept("href", "data-slot", "data-variant", "data-size"));
+        builder.AddAttribute(sequence++, "class", MergeClass("shadcn-item"));
+        builder.AddAttribute(sequence++, "style", MergeStyle(null));
         if (Href is not null)
-            builder.AddAttribute(4, "href", Href);
-        builder.AddAttribute(5, "data-slot", "item");
-        builder.AddAttribute(6, "data-variant", VariantValue);
-        builder.AddAttribute(7, "data-size", SizeValue);
-        builder.AddContent(8, ChildContent);
+            builder.AddAttribute(sequence++, "href", Href);
+        builder.AddAttribute(sequence++, "data-slot", "item");
+        builder.AddAttribute(sequence++, "data-variant", VariantValue);
+        builder.AddAttribute(sequence++, "data-size", SizeValue);
+        builder.AddContent(sequence++, ChildContent);
         builder.CloseElement();
+        if (IsInItemGroup)
+            builder.CloseElement();
     };
 
     protected override void OnParametersSet()

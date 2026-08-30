@@ -163,5 +163,23 @@ public sealed class MessageScrollerTests : BunitContext
         Assert.False(await command);
     }
 
+    [Fact]
+    public async Task CancelledPremountCommandDisposesItsTimeoutSource()
+    {
+        var provider = new ShadcnMessageScrollerProvider();
+        var command = provider.ScrollToEndAsync();
+        var pendingField = typeof(ShadcnMessageScrollerProvider).GetField("_pending", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        var pending = Assert.Single((System.Collections.IEnumerable)pendingField.GetValue(provider)!);
+        Assert.NotNull(pending);
+        var timeoutProperty = pending!.GetType().GetProperty("Timeout")!;
+        var timeout = (CancellationTokenSource)timeoutProperty.GetValue(pending)!;
+
+        timeout.Cancel();
+
+        Assert.False(await command.WaitAsync(TimeSpan.FromSeconds(1)));
+        Assert.Throws<ObjectDisposedException>(() => _ = timeout.Token);
+        await provider.DisposeAsync();
+    }
+
     private static RenderFragment Text(string value) => builder => builder.AddContent(0, value);
 }

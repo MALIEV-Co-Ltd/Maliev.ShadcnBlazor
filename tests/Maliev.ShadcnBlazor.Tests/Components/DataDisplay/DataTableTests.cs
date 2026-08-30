@@ -51,6 +51,44 @@ public sealed class DataTableTests : BunitContext
     }
 
     [Fact]
+    public void DataTableMaterializesTheProjectionOncePerRenderState()
+    {
+        var predicateCalls = 0;
+
+        var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
+            .Add(component => component.Items, Rows)
+            .Add(component => component.Columns, Columns)
+            .Add(component => component.RowKey, row => row.Id)
+            .Add(component => component.FilterPredicate, _ =>
+            {
+                predicateCalls++;
+                return true;
+            }));
+
+        Assert.Equal(Rows.Length, predicateCalls);
+        Assert.Equal(Rows.Length, cut.FindAll("tbody tr[data-slot='table-row']").Count);
+    }
+
+    [Fact]
+    public void DataTableNamesItsInnerTableRemovesTheWrapperTabStopAndAnnouncesNoResults()
+    {
+        var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
+            .Add(component => component.Items, Array.Empty<Payment>())
+            .Add(component => component.Columns, Columns)
+            .Add(component => component.RowKey, row => row.Id)
+            .Add(component => component.AdditionalAttributes, new Dictionary<string, object>
+            {
+                ["aria-label"] = "Payments"
+            }));
+
+        Assert.Equal("Payments", cut.Find("table[data-slot='table']").GetAttribute("aria-label"));
+        Assert.Equal("-1", cut.Find("[data-slot='table-container']").GetAttribute("tabindex"));
+        var empty = cut.Find("[data-slot='data-table-empty']");
+        Assert.Equal("status", empty.GetAttribute("role"));
+        Assert.Equal("polite", empty.GetAttribute("aria-live"));
+    }
+
+    [Fact]
     public void SortFilterSelectionVisibilityAndPaginationPublishControlledState()
     {
         var states = new List<ShadcnDataTableState>();
