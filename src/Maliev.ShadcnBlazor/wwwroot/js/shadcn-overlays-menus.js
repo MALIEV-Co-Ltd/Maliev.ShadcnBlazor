@@ -1,4 +1,7 @@
 const dialogs = new WeakMap();
+export function focusCompositeTarget(root, selector, preventScroll = false) {
+    root?.querySelector?.(selector)?.focus?.({ preventScroll });
+}
 const dialogStack = [];
 const layerStack = [];
 const layerRefs = new WeakMap();
@@ -39,7 +42,7 @@ function releaseDialog(content, restore = true) {
         const restoreFocus = () => {
             const target = state.previous?.isConnected
                 ? state.previous
-                : state.focusOwner?.querySelector?.('[data-slot="dialog-trigger"]');
+                : state.focusOwner?.querySelector?.('[data-slot="dialog-trigger"],[data-slot="alert-dialog-trigger"]');
             target?.focus?.({ preventScroll: true });
         };
         restoreFocus();
@@ -51,7 +54,7 @@ function releaseDialog(content, restore = true) {
 export function attachDialog(content, dotnet, modal, closeOnEscape, trapFocus = modal) {
     if (dialogs.has(content)) return;
     const previous = document.activeElement;
-    const focusOwner = previous?.closest?.('[data-slot="dialog"]');
+    const focusOwner = previous?.closest?.('[data-slot="dialog"],[data-slot="alert-dialog"]');
     const portal = content.closest('[data-slot$="-portal"]');
     const topLayer = portal?.showPopover ? portal : content;
     if (topLayer.showPopover) { topLayer.setAttribute('popover', 'manual'); topLayer.showPopover(); }

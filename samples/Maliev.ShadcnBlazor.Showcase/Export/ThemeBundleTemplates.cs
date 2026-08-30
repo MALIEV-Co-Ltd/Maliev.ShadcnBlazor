@@ -34,39 +34,31 @@ public static class ThemeBundleTemplates
         dotnet add package Maliev.ShadcnBlazor --version {{options.PackageVersion}}
         ```
 
-        In `Program.cs`, call `builder.Services.AddMalievShadcn();`. The registration includes the supported MudBlazor services and configures the Shadcn overlay scope.
+        In `Program.cs`, call `builder.Services.AddMalievShadcn();`. The registration includes only package-owned services.
 
         ## Stylesheet order
 
         Add these files to the document head in this order, followed by your application stylesheet:
 
         ```html
-        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-disclosure-navigation.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-data-display.css" rel="stylesheet" />
-        <link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
         <link href="_content/Maliev.ShadcnBlazor/css/shadcn-visual-styles.css" rel="stylesheet" />
         <link href="theme.css" rel="stylesheet" />
         ```
-
-        Load `_content/MudBlazor/MudBlazor.min.js` once before the Blazor runtime script.
 
         ## Provider and typed theme
 
         Add `@using Maliev.ShadcnBlazor.Components`, `@using Maliev.ShadcnBlazor.Theming`, and `@using YourApp.Theming` to `_Imports.razor`. Wrap application content once, as shown in `Examples/AppShell.razor.txt`. `MalievShadcnTheme.Create()` uses only public typed RCL APIs and reproduces `theme.json`.
 
-        `ShadcnThemeProvider` already renders `MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`, and `MudSnackbarProvider`. Do not render duplicate Mud overlay providers at the same root.
+        `ShadcnThemeProvider` renders only package-owned markup. Package overlay components own their focus, dismissal, and stacking behavior.
 
         ## RTL and localization
 
         Set `Direction="ShadcnDirection.RightToLeft"` for an RTL subtree or bind `Direction` to locale state. Keep translated accessible names in the application; generated technical identifiers stay invariant.
-
-        ## Coexistence and migration
-
-        Existing MudBlazor content can remain inside `ShadcnThemeProvider` while screens migrate incrementally. Keep MudBlazor on the package-supported 9.7.x boundary and validate adapter selectors before any MudBlazor upgrade. Remove duplicate root Mud theme and overlay providers when adopting the Shadcn provider.
 
         ## Import and export
 
@@ -144,7 +136,7 @@ public static class ThemeBundleTemplates
             <p lang="th">ตัวอย่างเนื้อหาภาษาไทยแบบขวาไปซ้าย</p>
         </ShadcnDirectionProvider>
 
-        @* ShadcnThemeProvider owns MudPopoverProvider, MudDialogProvider, and MudSnackbarProvider. *@
+        @* Package-owned overlays require no external provider. *@
         """);
 
     private static string WriteMessages(ShadcnThemeValidationResult validation)

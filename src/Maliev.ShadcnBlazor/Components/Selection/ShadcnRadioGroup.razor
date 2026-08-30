@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 
@@ -100,6 +101,13 @@
         if (EditContext is not null && ValueExpression is not null)
             EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
         await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Focuses the selected radio item, or the first enabled item when no enabled selection exists.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-selection.js");
+        await Module.InvokeVoidAsync("focusRovingItem", GroupReference, "radio", preventScroll);
     }
 
     public async ValueTask DisposeAsync()

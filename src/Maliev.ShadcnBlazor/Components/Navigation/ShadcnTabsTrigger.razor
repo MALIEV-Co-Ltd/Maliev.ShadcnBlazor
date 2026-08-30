@@ -1,6 +1,6 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 @implements IDisposable
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs-trigger")" style="@MergeStyle(null)" data-slot="tabs-trigger" data-value="@Value" data-state="@(Selected ? "active" : "inactive")" id="@_triggerId" role="tab" type="button" disabled="@EffectiveDisabled" aria-selected="@(Selected ? "true" : "false")" aria-controls="@_contentId" tabindex="@(Focused ? "0" : "-1")" @onclick="ActivateAsync" @onfocus="FocusAsync" @onkeydown="HandleKeyAsync">@ChildContent</button>
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-tabs-trigger")" style="@MergeStyle(null)" data-slot="tabs-trigger" data-value="@Value" data-state="@(Selected ? "active" : "inactive")" id="@_triggerId" role="tab" type="button" disabled="@EffectiveDisabled" aria-selected="@(Selected ? "true" : "false")" aria-controls="@_contentId" tabindex="@(Focused ? "0" : "-1")" @onclick="ActivateAsync" @onfocus="HandleFocusAsync" @onkeydown="HandleKeyAsync">@ChildContent</button>
 @code {
     [CascadingParameter] private ShadcnTabsContext Context { get; set; } = default!;
     [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
@@ -18,7 +18,7 @@
     protected override void OnInitialized() { Context.Register(new(Value, _triggerId, _contentId, Disabled)); _registeredValue = Value; }
     protected override void OnParametersSet() { if (_registeredValue is not null && _registeredValue != Value) throw new InvalidOperationException("Tab values cannot change after registration."); Context.Update(Value, Disabled); }
     private Task ActivateAsync() => Context.Owner.ActivateAsync(Value, Disabled).AsTask();
-    private Task FocusAsync() => Context.Owner.SetFocusedValueAsync(Value, Disabled).AsTask();
+    private Task HandleFocusAsync() => Context.Owner.SetFocusedValueAsync(Value, Disabled).AsTask();
     private Task HandleKeyAsync(KeyboardEventArgs args) => Context.Owner.HandleKeyAsync(Value, Disabled, args.Key).AsTask();
     public void Dispose() { if (_registeredValue is not null) Context.Unregister(_registeredValue); }
 }

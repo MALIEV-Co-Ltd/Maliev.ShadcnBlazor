@@ -82,3 +82,30 @@ Remove-Item Env:SHADCN_VISUAL_PROOF_SLUGS
 Inspect every changed image at its original resolution, rerun without the
 environment variable, and commit the reviewed images separately. Pull-request
 automation never enables the update variable and cannot approve visual changes.
+
+## Programmatic focus
+
+Public controls with one stable native focus target and audited composite widgets
+implement `IShadcnFocusable`. Capture the component with `@ref` after it renders
+and call `FocusAsync(bool preventScroll = false)`. This keeps focus restoration
+independent of package DOM IDs and selectors. Dual-mode controls focus their
+rendered anchor or button without changing disabled, click, keyboard, or ARIA
+behavior.
+
+Composite entry targets are deterministic:
+
+- Radio and toggle groups focus the selected enabled item, the current roving
+  item, or the first enabled item.
+- Tabs, accordion, navigation menu, and menubar focus the selected or open
+  enabled trigger, the current roving trigger, or the first enabled trigger.
+- Select and date picker focus their trigger; combobox and command focus their
+  text input; calendar focuses its current or nearest enabled day.
+- Slider focuses its first thumb by default and exposes `FocusThumbAsync(index,
+  preventScroll)` for an explicit thumb.
+- Empty or fully disabled composites perform no focus movement.
+
+The audit intentionally excludes roots that do not own one semantic target:
+`ShadcnSidebarRail` is deliberately removed from the tab order,
+`ShadcnAvatarGroupCount` can render non-interactive text, and multi-action
+containers such as toaster, code block, reaction overflow, and reply quote must
+be focused through their specific child action instead.

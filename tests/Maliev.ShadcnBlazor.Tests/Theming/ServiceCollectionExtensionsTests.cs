@@ -1,15 +1,15 @@
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MudBlazor;
 using Maliev.ShadcnBlazor.Components.Feedback.Toast;
+using Maliev.ShadcnBlazor.Components.DataDisplay;
 
 namespace Maliev.ShadcnBlazor.Tests.Theming;
 
 public sealed class ServiceCollectionExtensionsTests
 {
     [Fact]
-    public void AddMalievShadcnRegistersOptionsAndPopoverScope()
+    public void AddMalievShadcnRegistersOnlyPackageOwnedOptionsAndServices()
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -17,8 +17,8 @@ public sealed class ServiceCollectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         Assert.Equal("Test Sans", provider.GetRequiredService<IOptions<ShadcnOptions>>().Value.FontFamily);
-        Assert.Equal(ShadcnCss.OverlayScopeClass,
-            provider.GetRequiredService<IOptions<PopoverOptions>>().Value.ContainerClass);
+        Assert.NotNull(provider.GetRequiredService<IShadcnIdAllocator>());
+        Assert.NotNull(provider.GetRequiredService<IShadcnToastService>());
     }
 
     [Fact]

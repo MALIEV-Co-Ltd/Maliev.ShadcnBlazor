@@ -5,10 +5,6 @@ using Bunit;
 using Maliev.ShadcnBlazor.Components;
 using Maliev.ShadcnBlazor.Theming;
 using Microsoft.Extensions.DependencyInjection;
-using MudBlazor;
-using MudBlazor.Utilities;
-
-#pragma warning disable MUD0012 // Assertions observe the rendered provider's public parameter state.
 
 namespace Maliev.ShadcnBlazor.Tests.Theming;
 
@@ -621,26 +617,17 @@ public sealed class ShadcnThemeDomainTests
     }
 
     [Fact]
-    public async Task DefaultProviderOutputAndMudMappingRemainUnchangedWhenThemeIsOmitted()
+    public async Task DefaultProviderOutputRemainsUnchangedWhenThemeIsOmitted()
     {
         await using var context = CreateBunitContext();
 
         var cut = context.Render<ShadcnThemeProvider>();
         var root = cut.Find("[data-shadcn-scope]");
-        var mud = Assert.IsType<MudTheme>(cut.FindComponent<MudThemeProvider>().Instance.Theme);
-
         Assert.Equal("--shadcn-font-sans: 'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif", root.GetAttribute("style"));
-        Assert.Equal(new MudColor("#171717"), mud.PaletteLight.Primary);
-        Assert.Equal(new MudColor("#ffffff"), mud.PaletteLight.Background);
-        Assert.Equal(new MudColor("#e4e4e7"), mud.PaletteDark.Primary);
-        Assert.Equal(new MudColor("#252525"), mud.PaletteDark.Background);
-        Assert.Equal(
-            ["'Geist', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif"],
-            Assert.IsType<string[]>(mud.Typography.Default.FontFamily));
     }
 
     [Fact]
-    public async Task TypedProviderWritesCurrentSchemePropertiesAndMapsBothMudPalettes()
+    public async Task TypedProviderWritesCurrentSchemeProperties()
     {
         await using var context = CreateBunitContext();
         var theme = CreateTheme() with
@@ -665,19 +652,10 @@ public sealed class ShadcnThemeDomainTests
             .Add(component => component.IsDarkMode, true));
         var root = cut.Find("[data-shadcn-scope]");
         var style = root.GetAttribute("style")!;
-        var mud = Assert.IsType<MudTheme>(cut.FindComponent<MudThemeProvider>().Instance.Theme);
-
         Assert.Contains("--shadcn-background: #101010", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-primary: #abcdef", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-radius: 0.625rem", style, StringComparison.Ordinal);
         Assert.DoesNotContain("--shadcn-primary: #123456", style, StringComparison.Ordinal);
-        Assert.Equal(new MudColor("#123456"), mud.PaletteLight.Primary);
-        Assert.Equal(new MudColor("#abcdef"), mud.PaletteDark.Primary);
-        Assert.Equal(new MudColor("#f0f0f0"), mud.PaletteLight.Surface);
-        Assert.Equal(new MudColor("#181818"), mud.PaletteDark.Surface);
-        Assert.Equal(
-            ["Noto Sans Thai, sans-serif"],
-            Assert.IsType<string[]>(mud.Typography.Button.FontFamily));
         Assert.Contains("--shadcn-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-typeset-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-spacing-multiplier: 1", style, StringComparison.Ordinal);
@@ -685,20 +663,6 @@ public sealed class ShadcnThemeDomainTests
         Assert.Contains("--shadcn-motion-duration: 150ms", style, StringComparison.Ordinal);
         Assert.Contains("--shadcn-reduced-motion-duration: 0.01ms", style, StringComparison.Ordinal);
         Assert.Equal("system", root.GetAttribute("data-shadcn-reduced-motion"));
-    }
-
-    [Fact]
-    public void TypedMudMappingPreservesDefaultAndCustomAlpha()
-    {
-        var preset = ShadcnThemePresets.BaseVegaNeutral.CreateTheme();
-        var custom = preset with { Dark = preset.Dark with { Border = "#12345680" } };
-
-        var defaultMud = ShadcnThemeFactory.Create(preset);
-        var customMud = ShadcnThemeFactory.Create(custom);
-
-        Assert.Equal(new MudColor("#ffffff1a"), defaultMud.PaletteDark.LinesDefault);
-        Assert.Equal(new MudColor("#ffffff26"), defaultMud.PaletteDark.LinesInputs);
-        Assert.Equal(new MudColor("#12345680"), customMud.PaletteDark.Divider);
     }
 
     [Fact]

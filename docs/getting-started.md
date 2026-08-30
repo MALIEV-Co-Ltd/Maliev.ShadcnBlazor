@@ -3,7 +3,6 @@
 ## Requirements
 
 - .NET 10 SDK and a .NET 10 Blazor application.
-- MudBlazor 9.7.x. The package references 9.7.0.
 
 ## Install and register
 
@@ -39,17 +38,15 @@ Wrap the rendered application content once:
 </ShadcnThemeProvider>
 ```
 
-Do not add a second `MudThemeProvider`, `MudPopoverProvider`,
-`MudDialogProvider`, or `MudSnackbarProvider` inside the same application root.
-The Shadcn provider owns the compatible MudBlazor provider composition.
+The provider renders only package-owned markup. Dialogs, menus, popovers, tooltips,
+and toasts need no external root provider.
 
 ## Styles and scripts
 
-Load MudBlazor first, then the Shadcn base and semantic styles, followed by the
+Load the Shadcn base and semantic styles, followed by the
 component-family styles you use. Loading all family files is supported:
 
 ```html
-<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-actions.css" rel="stylesheet" />
@@ -59,8 +56,6 @@ component-family styles you use. Loading all family files is supported:
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-feedback-content.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-overlays-menus.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-conversation.css" rel="stylesheet" />
-<link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
 ```
 
 Component-specific JavaScript modules are imported on demand by the library.

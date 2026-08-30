@@ -44,6 +44,14 @@
             }
         </div>
     </section>
+    <section class="showcase-button-dossier__section" aria-labelledby="button-focus-title">
+        <h3 id="button-focus-title">Programmatic focus</h3>
+        <p dir="auto">Capture the component with <code>@@ref</code>, then request focus without assigning or querying a DOM ID.</p>
+        <div class="showcase-button-dossier__focus-actions">
+            <ShadcnButton Variant="ShadcnButtonVariant.Outline" Disabled="Disabled" OnClick="@(_ => FocusPrimaryActionAsync())" data-testid="button-focus-request">Move focus to primary action</ShadcnButton>
+            <ShadcnButton @ref="_primaryAction" Disabled="Disabled" data-testid="button-focus-target">Primary action</ShadcnButton>
+        </div>
+    </section>
     <p class="showcase-button-dossier__status" data-testid="button-last-action" role="status" aria-live="polite">
         <span>Last action</span>
         <strong>@(LastAction ?? "Choose an enabled action to try it")</strong>
@@ -53,7 +61,14 @@
 @code {
     [Parameter] public bool Disabled { get; set; }
 
+    private ShadcnButton? _primaryAction;
     private string? LastAction { get; set; }
+
+    private async Task FocusPrimaryActionAsync()
+    {
+        if (_primaryAction is not null)
+            await _primaryAction.FocusAsync(preventScroll: true);
+    }
 
     private static RenderFragment SaveIcon => builder => builder.AddMarkupContent(0, """
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -198,7 +198,8 @@ public sealed class DialogAlertDialogTests : BunitContext
 
         Assert.Contains("if (dialogs.has(content)) return;", script, StringComparison.Ordinal);
         Assert.Contains("requestAnimationFrame(restoreFocus)", script, StringComparison.Ordinal);
-        Assert.Contains("focusOwner?.querySelector?.('[data-slot=\"dialog-trigger\"]')", script, StringComparison.Ordinal);
+        Assert.Contains("previous?.closest?.('[data-slot=\"dialog\"],[data-slot=\"alert-dialog\"]')", script, StringComparison.Ordinal);
+        Assert.Contains("focusOwner?.querySelector?.('[data-slot=\"dialog-trigger\"],[data-slot=\"alert-dialog-trigger\"]')", script, StringComparison.Ordinal);
     }
 
     private IRenderedComponent<ShadcnDialog> RenderDialog(bool open, Action<bool>? changed = null) => Render<ShadcnDialog>(p => p

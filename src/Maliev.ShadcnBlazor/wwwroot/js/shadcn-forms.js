@@ -183,6 +183,6 @@ export function focusCalendarInPopup(root) {
     queueMicrotask(() => root?.querySelector?.('[data-slot="date-picker-content"] [data-slot="calendar-day"][tabindex="0"]:not(:disabled)')?.focus?.({ preventScroll: true }));
 }
 
-export function focusCalendarDay(root, isoDate) {
-    root?.querySelector?.(`[data-slot="calendar-day"][data-day="${CSS.escape(isoDate)}"]`)?.focus();
+export function focusCalendarDay(root, isoDate, preventScroll = false) {
+    root?.querySelector?.(`[data-slot="calendar-day"][data-day="${CSS.escape(isoDate)}"]:not(:disabled)`)?.focus({ preventScroll });
 }

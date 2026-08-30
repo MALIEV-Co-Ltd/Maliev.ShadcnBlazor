@@ -1,8 +1,9 @@
 @using Microsoft.JSInterop
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
-<CascadingValue Value="Context" IsFixed="true"><nav @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu")" style="@MergeStyle(null)" data-slot="navigation-menu" data-orientation="@OrientationValue" data-state="@(EffectiveValue is null ? "closed" : "open")" aria-label="@Label">@ChildContent</nav></CascadingValue>
+<CascadingValue Value="Context" IsFixed="true"><nav @ref="_root" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-navigation-menu")" style="@MergeStyle(null)" data-slot="navigation-menu" data-orientation="@OrientationValue" data-state="@(EffectiveValue is null ? "closed" : "open")" aria-label="@Label">@ChildContent</nav></CascadingValue>
 @code {
     [CascadingParameter] private ShadcnContext? Shadcn { get; set; }
     [Parameter] public string? Value { get; set; }
@@ -14,7 +15,7 @@
     [Parameter] public int CloseDelay { get; set; } = 150;
     [Parameter] public string Label { get; set; } = "Main navigation";
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    private string? _effectiveValue; private string? _lastValue; private bool _initialized; private bool _contentRegisteredRender; private IJSObjectReference? _module; private CancellationTokenSource? _hover;
+    private string? _effectiveValue; private string? _lastValue; private bool _initialized; private bool _contentRegisteredRender; private ElementReference _root; private IJSObjectReference? _module; private CancellationTokenSource? _hover;
     private ShadcnNavigationMenuContext Context { get; set; } = default!;
     internal string? EffectiveValue => _effectiveValue;
     private bool IsRtl => Shadcn?.Direction == ShadcnDirection.RightToLeft;
@@ -32,6 +33,8 @@
         catch (OperationCanceledException) { }
     }
     internal async ValueTask FocusTriggerAsync(string id) { _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("focusById", id); }
+    /// <summary>Focuses the open trigger, or the first enabled navigation-menu trigger.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false) { var enabled = Context.Items.Where(item => !Disabled && !item.Disabled).ToArray(); var target = enabled.FirstOrDefault(item => item.Value == EffectiveValue) ?? enabled.FirstOrDefault(); if (target is null) return; _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("focusById", target.TriggerId, preventScroll); }
     private async ValueTask FocusContentAsync(string id) { _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js"); await _module.InvokeVoidAsync("focusFirstInId", id); }
     internal async ValueTask HandleTriggerKeyAsync(string value, string key)
     {

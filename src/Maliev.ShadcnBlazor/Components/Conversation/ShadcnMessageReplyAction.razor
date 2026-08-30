@@ -1,6 +1,6 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 
-<button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-action shadcn-message-reply-action")" style="@MergeStyle(null)" data-slot="message-reply-action" type="button" disabled="@Disabled" aria-label="@Label" title="@Label" @onclick="ReplyAsync">
+<button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-action shadcn-message-reply-action")" style="@MergeStyle(null)" data-slot="message-reply-action" type="button" disabled="@Disabled" aria-label="@Label" title="@Label" @onclick="ReplyAsync">
     <svg class="shadcn-message-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M4 12h10a5 5 0 0 1 5 5v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
     <span class="shadcn-sr-only">@Label</span>
 </button>

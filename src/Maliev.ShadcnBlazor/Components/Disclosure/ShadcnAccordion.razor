@@ -1,6 +1,7 @@
 @using Microsoft.JSInterop
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JS
 
 <CascadingValue Value="Context" IsFixed="true">
@@ -55,7 +56,7 @@
         var signature = string.Join('|', keys);
         if (_guardSignature == signature) return;
         if (_guardSignature is not null) await _module.InvokeVoidAsync("detachKeyGuard", _root);
-        await _module.InvokeVoidAsync("attachKeyGuard", _root, keys);
+        await _module.InvokeVoidAsync("attachKeyGuard", _root, keys, "[data-slot='accordion-trigger']", "[data-slot='accordion']");
         _guardSignature = signature;
     }
 
@@ -108,6 +109,17 @@
         else target = Math.Clamp(target, 0, enabled.Length - 1);
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
         await _module.InvokeVoidAsync("focusById", enabled[target].TriggerId);
+    }
+
+    /// <summary>Focuses the first open enabled trigger, or the first enabled trigger.</summary>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        var enabled = Context.Items.Where(item => !Disabled && !item.Disabled).ToArray();
+        var target = enabled.FirstOrDefault(item => IsOpen(item.Value));
+        if (target == default) target = enabled.FirstOrDefault();
+        if (target == default) return;
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-disclosure-navigation.js");
+        await _module.InvokeVoidAsync("focusById", target.TriggerId, preventScroll);
     }
 
     public async ValueTask DisposeAsync()

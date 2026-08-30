@@ -37,7 +37,6 @@ with `ShadcnThemeProvider`:
 Load the stylesheets in this order:
 
 ```html
-<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-base.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-semantic-foundations.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-layout.css" rel="stylesheet" />
@@ -48,8 +47,6 @@ Load the stylesheets in this order:
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-feedback-content.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-overlays-menus.css" rel="stylesheet" />
 <link href="_content/Maliev.ShadcnBlazor/css/shadcn-conversation.css" rel="stylesheet" />
-<link href="_content/Maliev.ShadcnBlazor/css/shadcn-mudblazor.css" rel="stylesheet" />
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
 ```
 
 See the [getting started guide](docs/getting-started.md) for provider setup,
@@ -81,7 +78,7 @@ global scope, prompts, package contents, and safety boundaries.
 - Light and dark themes, LTR and RTL layout, forced-colors support, and reduced
   motion behavior.
 - Keyboard and screen-reader behavior covered by unit and real-browser tests.
-- Theme tokens and MudBlazor adapters for applications that need both systems.
+- Theme tokens and package-owned providers with no transitive UI-framework dependency.
 - Bundled Geist, Noto Sans Thai, and JetBrains Mono fonts for a
   deterministic offline default; see [theming](docs/theming.md).
 - A Blazor-first Theme Studio with live generator options plus portable JSON
@@ -93,9 +90,9 @@ global scope, prompts, package contents, and safety boundaries.
 
 ## Compatibility
 
-The 1.x line targets .NET 10 and MudBlazor 9.7.x. MudBlazor is pinned to 9.7.0
-by the package. Revalidate adapter behavior before moving to another MudBlazor
-minor line.
+The package targets .NET 10 and has no transitive component-framework dependency.
+See the [MudBlazor decoupling migration](docs/migration-mudblazor.md) when upgrading
+from the former Mud-backed provider contract.
 
 ## Repository
 

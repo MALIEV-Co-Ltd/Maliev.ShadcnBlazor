@@ -1,11 +1,11 @@
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 @if (Href is not null)
 {
-    <a @attributes="ForwardedAttributes" class="@MergeClass("shadcn-pagination-link")" style="@MergeStyle(null)" data-slot="pagination-link" data-size="@SizeValue" data-current="@(Current ? "true" : null)" href="@(Disabled ? null : Href)" aria-current="@(Current ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync">@ChildContent</a>
+    <a @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-pagination-link")" style="@MergeStyle(null)" data-slot="pagination-link" data-size="@SizeValue" data-current="@(Current ? "true" : null)" href="@(Disabled ? null : Href)" aria-current="@(Current ? "page" : null)" aria-disabled="@(Disabled ? "true" : null)" tabindex="@(Disabled ? "-1" : null)" @onclick="HandleClickAsync">@ChildContent</a>
 }
 else
 {
-    <button @attributes="ForwardedAttributes" class="@MergeClass("shadcn-pagination-link")" style="@MergeStyle(null)" data-slot="pagination-link" data-size="@SizeValue" data-current="@(Current ? "true" : null)" type="button" disabled="@Disabled" aria-current="@(Current ? "page" : null)" @onclick="HandleClickAsync">@ChildContent</button>
+    <button @ref="FocusElement" @attributes="ForwardedAttributes" class="@MergeClass("shadcn-pagination-link")" style="@MergeStyle(null)" data-slot="pagination-link" data-size="@SizeValue" data-current="@(Current ? "true" : null)" type="button" disabled="@Disabled" aria-current="@(Current ? "page" : null)" @onclick="HandleClickAsync">@ChildContent</button>
 }
 @code {
     [Parameter] public string? Href { get; set; }

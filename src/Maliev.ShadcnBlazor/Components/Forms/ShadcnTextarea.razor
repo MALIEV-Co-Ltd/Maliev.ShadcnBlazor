@@ -1,7 +1,9 @@
 @typeparam TValue
 @inherits ShadcnFormComponentBase<TValue>
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
-<textarea @attributes="ForwardedAttributes"
+<textarea @ref="TextareaElement"
+          @attributes="ForwardedAttributes"
           class="@MergeClass(TextareaClass)"
           style="@MergeStyle()"
           data-slot="@Slot"
@@ -20,10 +22,15 @@
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public int? Rows { get; set; }
     private string TextareaClass => InputGroup is null ? "shadcn-textarea" : "shadcn-textarea shadcn-input-group-control";
+    private ElementReference TextareaElement;
     private string Slot => InputGroup is null ? "textarea" : "input-group-control";
 
     private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
         "data-slot", "name", "placeholder", "rows", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
 
     private Task HandleInputAsync(ChangeEventArgs args) => SetCurrentValueFromStringAsync(args.Value?.ToString());
+
+    /// <summary>Moves focus to the rendered native textarea after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused textarea into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => TextareaElement.FocusAsync(preventScroll);
 }

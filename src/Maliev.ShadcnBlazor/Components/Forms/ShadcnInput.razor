@@ -1,10 +1,12 @@
 @typeparam TValue
 @using Microsoft.AspNetCore.Components.Forms
 @inherits ShadcnFormComponentBase<TValue>
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 @if (IsFileInput)
 {
-<InputFile @attributes="ForwardedAttributes"
+<InputFile @ref="FileInput"
+       @attributes="ForwardedAttributes"
        class="@MergeClass(InputClass)"
        style="@MergeStyle()"
        data-slot="@Slot"
@@ -20,7 +22,8 @@
 }
 else
 {
-<input @attributes="ForwardedAttributes"
+<input @ref="InputElement"
+       @attributes="ForwardedAttributes"
        class="@MergeClass(InputClass)"
        style="@MergeStyle()"
        data-slot="@Slot"
@@ -49,6 +52,8 @@ else
     [Parameter] public string? Capture { get; set; }
     [Parameter] public EventCallback<InputFileChangeEventArgs> FilesChanged { get; set; }
     private bool IsFileInput => string.Equals(Type, "file", StringComparison.OrdinalIgnoreCase);
+    private InputFile? FileInput;
+    private ElementReference InputElement;
     private string? RenderedValue => string.Equals(Type, "file", StringComparison.OrdinalIgnoreCase) ? null : CurrentValueAsString;
     private string InputClass => InputGroup is null ? "shadcn-input" : "shadcn-input shadcn-input-group-control";
     private string Slot => InputGroup is null ? "input" : "input-group-control";
@@ -57,4 +62,18 @@ else
         "data-slot", "type", "name", "value", "placeholder", "inputmode", "autocomplete", "accept", "multiple", "capture", "disabled", "readonly", "required", "aria-invalid", "aria-describedby");
 
     private Task HandleInputAsync(ChangeEventArgs args) => SetCurrentValueFromStringAsync(args.Value?.ToString());
+
+    /// <summary>Moves focus to the rendered native input after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused input into view.</param>
+    public async ValueTask FocusAsync(bool preventScroll = false)
+    {
+        if (IsFileInput)
+        {
+            if (FileInput?.Element is { } fileElement)
+                await fileElement.FocusAsync(preventScroll);
+            return;
+        }
+
+        await InputElement.FocusAsync(preventScroll);
+    }
 }

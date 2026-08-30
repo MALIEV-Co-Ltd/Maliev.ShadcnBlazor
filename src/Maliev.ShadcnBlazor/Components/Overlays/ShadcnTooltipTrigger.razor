@@ -1,13 +1,15 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JavaScript
-<span @ref="_interactionElement" id="@Context.AnchorId" class="shadcn-tooltip-trigger-wrapper" data-slot="tooltip-trigger-wrapper" tabindex="@(Disabled ? "0" : null)" role="@(Disabled ? "button" : null)" aria-disabled="@(Disabled ? "true" : null)" aria-label="@(Disabled ? AccessibleLabel : null)" aria-describedby="@(Disabled && Context.Owner.EffectiveOpen ? Context.ContentId : null)"><button @attributes="Forwarded" id="@Context.TriggerId" class="@MergeClass("shadcn-tooltip-trigger")" style="@MergeStyle(null)" data-slot="tooltip-trigger" type="button" disabled="@Disabled" aria-hidden="@(Disabled ? "true" : null)" aria-describedby="@(!Disabled && Context.Owner.EffectiveOpen?Context.ContentId:null)">@ChildContent</button></span>
+<span @ref="_interactionElement" id="@Context.AnchorId" class="shadcn-tooltip-trigger-wrapper" data-slot="tooltip-trigger-wrapper" tabindex="@(Disabled ? "0" : null)" role="@(Disabled ? "button" : null)" aria-disabled="@(Disabled ? "true" : null)" aria-label="@(Disabled ? AccessibleLabel : null)" aria-describedby="@(Disabled && Context.Owner.EffectiveOpen ? Context.ContentId : null)"><button @ref="_buttonElement" @attributes="Forwarded" id="@Context.TriggerId" class="@MergeClass("shadcn-tooltip-trigger")" style="@MergeStyle(null)" data-slot="tooltip-trigger" type="button" disabled="@Disabled" aria-hidden="@(Disabled ? "true" : null)" aria-describedby="@(!Disabled && Context.Owner.EffectiveOpen?Context.ContentId:null)">@ChildContent</button></span>
 @code {
     [CascadingParameter] private ShadcnTooltipContext Context { get; set; } = default!;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public string? AccessibleLabel { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     private ElementReference _interactionElement;
+    private ElementReference _buttonElement;
     private IJSObjectReference? _module;
     private DotNetObjectReference<ShadcnTooltip>? _ownerRef;
     private string? _attachmentSignature;
@@ -29,6 +31,9 @@
         await _module.InvokeVoidAsync("attachDelayedTrigger", _interactionElement, _ownerRef, Context.Owner.OpenDelayMs, Context.Owner.CloseDelayMs, Context.ContentId);
         _attachmentSignature = signature;
     }
+
+    /// <summary>Focuses the native button, or its accessible wrapper when the native button is disabled.</summary>
+    public ValueTask FocusAsync(bool preventScroll = false) => (Disabled ? _interactionElement : _buttonElement).FocusAsync(preventScroll);
 
     public async ValueTask DisposeAsync()
     {

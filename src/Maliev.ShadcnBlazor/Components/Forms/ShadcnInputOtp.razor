@@ -5,6 +5,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inherits ShadcnFormComponentBase<string>
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 
 <CascadingValue Value="Context">
     <div class="@MergeClass("shadcn-input-otp")"
@@ -68,6 +69,10 @@
         }
         return string.Concat(accepted);
     }
+
+    /// <summary>Moves focus to the rendered native one-time-code input after the component has rendered.</summary>
+    /// <param name="preventScroll">Whether the browser should avoid scrolling the focused input into view.</param>
+    public ValueTask FocusAsync(bool preventScroll = false) => InputElement.FocusAsync(preventScroll);
 
     public async ValueTask DisposeAsync()
     {

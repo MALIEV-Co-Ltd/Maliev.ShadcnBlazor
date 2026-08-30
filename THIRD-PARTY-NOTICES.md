@@ -14,16 +14,6 @@ corresponding third-party material.
 The component API and styling are inspired by and, where noted in the source,
 adapted from shadcn/ui.
 
-## MudBlazor
-
-- Project: <https://github.com/MudBlazor/MudBlazor>
-- License: MIT
-- Copyright: Copyright (c) 2021 MudBlazor
-- License copy: `licenses/MudBlazor-LICENSE.txt`
-
-MudBlazor is a NuGet dependency and provides selected adapter and portal
-infrastructure used by this library.
-
 ## Microsoft .NET and ASP.NET Core
 
 - Project: <https://github.com/dotnet/aspnetcore>

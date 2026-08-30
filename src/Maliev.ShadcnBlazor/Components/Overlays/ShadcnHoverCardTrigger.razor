@@ -1,5 +1,6 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 @implements IAsyncDisposable
+@implements Maliev.ShadcnBlazor.Components.Primitives.IShadcnFocusable
 @inject IJSRuntime JavaScript
 <a @ref="_element"
    @attributes="Forwarded"
@@ -29,6 +30,9 @@
         _ownerRef = DotNetObjectReference.Create(Context.Owner);
         await _module.InvokeVoidAsync("attachHoverCardTrigger", _element, _ownerRef, Context.Owner.OpenDelayMs, Context.Owner.CloseDelayMs, Context.ContentId);
     }
+
+    /// <summary>Focuses the hover-card anchor.</summary>
+    public ValueTask FocusAsync(bool preventScroll = false) => _element.FocusAsync(preventScroll);
 
     public async ValueTask DisposeAsync()
     {

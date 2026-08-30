@@ -238,21 +238,90 @@
 .shadcn-overlay-scope {
     box-sizing: border-box;
     font-family: var(--shadcn-font-sans);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.43;
+    letter-spacing: 0.01071em;
+    text-transform: none;
     color: var(--shadcn-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) :where(code, kbd, pre, samp) {
     font-family: var(--shadcn-font-mono);
 }
 
-.shadcn-scope *,
-.shadcn-scope *::before,
-.shadcn-scope *::after,
-.shadcn-overlay-scope,
-.shadcn-overlay-scope *,
-.shadcn-overlay-scope *::before,
-.shadcn-overlay-scope *::after {
+:where(.shadcn-scope *),
+:where(.shadcn-scope *)::before,
+:where(.shadcn-scope *)::after,
+:where(.shadcn-overlay-scope),
+:where(.shadcn-overlay-scope *),
+:where(.shadcn-overlay-scope *)::before,
+:where(.shadcn-overlay-scope *)::after {
     box-sizing: border-box;
+    margin: 0;
+    border-width: 0;
+    border-style: solid;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(strong, b) {
+    font-weight: 700;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) [hidden] {
+    display: none !important;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) label {
+    display: inline-block;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(input, button, select, optgroup, textarea) {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(button, input) {
+    overflow: visible;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(button, select) {
+    text-transform: none;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) select {
+    overflow-wrap: normal;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background-color: transparent;
+    color: inherit;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    outline: 0;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where(.shadcn-scope, .shadcn-overlay-scope) :where(button, [type="button"], [type="reset"], [type="submit"]) {
+    appearance: button;
 }
 
 :where(.shadcn-scope, .shadcn-overlay-scope) .shadcn-state-transition {

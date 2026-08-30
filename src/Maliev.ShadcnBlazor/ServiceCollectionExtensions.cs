@@ -4,7 +4,6 @@ using Maliev.ShadcnBlazor.Components.DataDisplay;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using MudBlazor.Services;
 
 namespace Maliev.ShadcnBlazor;
 
@@ -18,8 +17,6 @@ public static class ServiceCollectionExtensions
         services.AddOptions<ShadcnOptions>();
         if (configure is not null)
             services.Configure(configure);
-        services.AddMudServices(configuration =>
-            configuration.PopoverOptions.ContainerClass = ShadcnCss.OverlayScopeClass);
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddScoped<IShadcnIdAllocator, ShadcnIdAllocator>();
         services.AddScoped<IShadcnToastService>(provider =>

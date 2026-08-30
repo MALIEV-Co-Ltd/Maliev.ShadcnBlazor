@@ -1,9 +1,9 @@
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
 @inject IJSRuntime JS
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 
-<button @attributes="ForwardedAttributes"
+<button @ref="FocusElement" @attributes="ForwardedAttributes"
         class="@MergeClass("shadcn-message-action shadcn-message-copy-action")"
         style="@MergeStyle(FeedbackStyle)"
         data-slot="message-copy-action"

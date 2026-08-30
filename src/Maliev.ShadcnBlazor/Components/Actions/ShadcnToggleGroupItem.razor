@@ -1,9 +1,9 @@
 @typeparam TValue
 @using Microsoft.AspNetCore.Components.Web
 @implements IDisposable
-@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnFocusableComponentBase
 
-<button @attributes="ForwardedAttributes"
+<button @ref="FocusElement" @attributes="ForwardedAttributes"
         class="@MergeClass("shadcn-toggle shadcn-toggle-group-item")"
         style="@MergeStyle(null)"
         type="button"
