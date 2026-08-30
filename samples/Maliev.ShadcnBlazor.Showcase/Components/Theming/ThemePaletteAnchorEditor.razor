@@ -39,14 +39,17 @@
                       OnClick="CopyValueAsync">
             @Copy.Copy
         </ShadcnButton>
-        <ShadcnButton Variant="@(IsLocked ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)"
-                      Size="ShadcnButtonSize.Small"
-                      aria-label="@LockLabel"
-                      aria-pressed="@(IsLocked ? "true" : "false")"
-                      data-palette-lock
-                      OnClick="ToggleLockAsync">
-            @LockAction
-        </ShadcnButton>
+        @if (ShowLockControl)
+        {
+            <ShadcnButton Variant="@(IsLocked ? ShadcnButtonVariant.Secondary : ShadcnButtonVariant.Outline)"
+                          Size="ShadcnButtonSize.Small"
+                          aria-label="@LockLabel"
+                          aria-pressed="@(IsLocked ? "true" : "false")"
+                          data-palette-lock
+                          OnClick="ToggleLockAsync">
+                @LockAction
+            </ShadcnButton>
+        }
     </div>
     @if (_inlineError)
     {
@@ -61,6 +64,7 @@
     [Parameter, EditorRequired] public ShadcnPaletteAnchorRole Role { get; set; }
     [Parameter, EditorRequired] public ThemeStudioPaletteCopy Copy { get; set; } = null!;
     [Parameter] public EventCallback<string> Announce { get; set; }
+    [Parameter] public bool ShowLockControl { get; set; } = true;
 
     private string _editorValue = string.Empty;
     private string? _observedValue;

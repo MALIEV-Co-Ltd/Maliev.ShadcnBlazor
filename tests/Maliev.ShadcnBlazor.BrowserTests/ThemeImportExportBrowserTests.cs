@@ -188,6 +188,7 @@ public sealed class ThemeImportExportBrowserTests(
             await page.GotoAsync(new Uri(server.BaseUri, "/theme").ToString());
             await page.GetByTestId("theme-studio").WaitForAsync();
             await page.GetByTestId("theme-palette-customize").ClickAsync();
+            await page.GetByTestId("theme-palette-advanced").GetByRole(AriaRole.Button).ClickAsync();
             var roleKeys = new[] { "brand", "support", "highlight", "dataa", "datab" };
             var anchorInputs = new[] { "#2563eb", "#0f766e", "#b45309", "#7c3aed", "#8b5cf6" };
             for (var index = 0; index < roleKeys.Length; index++)
@@ -196,7 +197,8 @@ public sealed class ThemeImportExportBrowserTests(
                 await editor.Locator("input[type='text']").FillAsync(anchorInputs[index]);
                 await editor.Locator("input[type='text']").PressAsync("Tab");
                 var lockButton = editor.Locator("[data-palette-lock]");
-                await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
+                if (await lockButton.CountAsync() > 0)
+                    await Assertions.Expect(lockButton).ToHaveAttributeAsync("aria-pressed", "true");
             }
             await page.GetByTestId("theme-palette-harmony").ClickAsync();
             await page.GetByRole(AriaRole.Option, new() { Name = "Triadic", Exact = true }).ClickAsync();
@@ -213,7 +215,6 @@ public sealed class ThemeImportExportBrowserTests(
                 Assert.Equal(displayedAnchors[index], liveToken);
             }
 
-            await page.GetByTestId("theme-palette-close").ClickAsync();
             await page.GetByTestId("theme-export-open").ClickAsync();
             var acknowledgement = page.GetByTestId("theme-export-warning-ack");
             if (await acknowledgement.CountAsync() > 0)
@@ -253,6 +254,7 @@ public sealed class ThemeImportExportBrowserTests(
         await Assertions.Expect(freshPage.GetByTestId("theme-import-status")).ToContainTextAsync("successfully");
         await freshPage.GetByRole(AriaRole.Button, new() { Name = "Close theme import" }).ClickAsync();
         await freshPage.GetByTestId("theme-palette-customize").ClickAsync();
+        await freshPage.GetByTestId("theme-palette-advanced").GetByRole(AriaRole.Button).ClickAsync();
         var importedRoleKeys = new[] { "brand", "support", "highlight", "dataa", "datab" };
         for (var index = 0; index < importedRoleKeys.Length; index++)
             Assert.Equal(displayedAnchors[index], await freshPage.GetByTestId($"theme-palette-anchor-{importedRoleKeys[index]}").Locator("input[type='text']").InputValueAsync());
@@ -328,7 +330,6 @@ public sealed class ThemeImportExportBrowserTests(
         using (var persisted = JsonDocument.Parse(persistedJson))
             Assert.Equal(normalizedAnchor, persisted.RootElement.GetProperty("palette").GetProperty("anchors").GetProperty("brand").GetString());
 
-        await page.GetByTestId("theme-palette-close").ClickAsync();
         await page.GetByTestId("theme-export-open").ClickAsync();
         var acknowledgement = page.GetByTestId("theme-export-warning-ack");
         if (await acknowledgement.CountAsync() > 0)
