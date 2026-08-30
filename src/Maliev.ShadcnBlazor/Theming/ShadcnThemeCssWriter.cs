@@ -127,13 +127,20 @@ public static class ShadcnThemeCssWriter
         var (thaiPrimary, thaiFallback) = SeparateFontFamily(
             typography.ThaiFallback.Family,
             typography.ThaiFallback.Fallback);
+        var thaiNames = thaiPrimary.Concat(thaiFallback)
+            .Select(NormalizeFamily)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var ordered = new List<string>(
             bodyPrimary.Count + bodyFallback.Count + thaiPrimary.Count + thaiFallback.Count);
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        Add(bodyPrimary.Where(token => !IsGenericFamily(token)));
+        Add(bodyPrimary.Take(1));
+        Add(bodyPrimary.Skip(1).Where(token =>
+            !IsGenericFamily(token) && !thaiNames.Contains(NormalizeFamily(token))));
         Add(thaiPrimary.Where(token => !IsGenericFamily(token)));
         Add(thaiFallback.Where(token => !IsGenericFamily(token)));
+        Add(bodyPrimary.Skip(1).Where(token =>
+            !IsGenericFamily(token) && thaiNames.Contains(NormalizeFamily(token))));
         Add(bodyFallback.Where(token => !IsGenericFamily(token)));
         Add(bodyPrimary.Where(IsGenericFamily));
         Add(bodyFallback.Where(IsGenericFamily));
