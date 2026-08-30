@@ -226,21 +226,23 @@ public sealed class FormsAndDateSelectionBrowserTests(ShowcaseServerFixture serv
         var page = await context.NewPageAsync();
         await page.GotoAsync(Url("light", "ltr"));
 
-        foreach (var control in new[]
+        var selectTrigger = page.GetByTestId("forms-select");
+        var comboboxInput = page.GetByTestId("forms-combobox");
+        foreach (var (focusTarget, focusIndicator) in new[]
         {
-            page.Locator("input[name='partName']"),
-            page.Locator("textarea[name='notes']"),
-            page.GetByTestId("forms-select"),
-            page.GetByTestId("forms-combobox"),
-            page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]").Locator("[data-slot='calendar-day'][tabindex='0']")
+            (page.Locator("input[name='partName']"), page.Locator("input[name='partName']")),
+            (page.Locator("textarea[name='notes']"), page.Locator("textarea[name='notes']")),
+            (selectTrigger, selectTrigger.Locator("xpath=ancestor::*[@data-slot='select'][1]")),
+            (comboboxInput, comboboxInput.Locator("xpath=ancestor::*[@data-slot='input-group'][1]")),
+            (page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]").Locator("[data-slot='calendar-day'][tabindex='0']"), page.GetByTestId("forms-calendar").Locator("xpath=ancestor-or-self::*[@data-slot='calendar'][1]").Locator("[data-slot='calendar-day'][tabindex='0']"))
         })
         {
-            await control.FocusAsync();
-            var outline = await control.EvaluateAsync<string[]>("element => { const style = getComputedStyle(element); return [style.outlineStyle, style.outlineWidth, style.outlineColor]; }");
-            var identity = await control.EvaluateAsync<string>("element => `${element.tagName.toLowerCase()}[data-slot=${element.dataset.slot ?? ''}][data-testid=${element.dataset.testid ?? ''}]`");
-            Assert.True(outline[0] == "solid", $"{identity} must retain a solid forced-colors focus outline, but computed {string.Join(", ", outline)}.");
-            Assert.NotEqual("0px", outline[1]);
-            Assert.NotEqual("rgba(0, 0, 0, 0)", outline[2]);
+            await focusTarget.FocusAsync();
+            var identity = await focusIndicator.EvaluateAsync<string>("element => `${element.tagName.toLowerCase()}[data-slot=${element.dataset.slot ?? ''}][data-testid=${element.dataset.testid ?? ''}]`");
+            await Assertions.Expect(focusIndicator, $"{identity} must retain a solid forced-colors focus outline.").ToHaveCSSAsync("outline-style", "solid");
+            await Assertions.Expect(focusIndicator, $"{identity} must retain a non-zero forced-colors focus outline.").ToHaveCSSAsync("outline-width", "2px");
+            var outlineColor = await focusIndicator.EvaluateAsync<string>("element => getComputedStyle(element).outlineColor");
+            Assert.True(outlineColor != "rgba(0, 0, 0, 0)", $"{identity} must retain a visible forced-colors focus outline, but computed {outlineColor}.");
         }
     }
 
