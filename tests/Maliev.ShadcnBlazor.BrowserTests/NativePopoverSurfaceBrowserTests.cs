@@ -13,6 +13,7 @@ public sealed class NativePopoverSurfaceBrowserTests(
     [InlineData(ColorScheme.Dark)]
     public async Task NativeFormPopoversResetTheUserAgentBorder(ColorScheme colorScheme)
     {
+        var theme = colorScheme == ColorScheme.Dark ? "dark" : "light";
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
             ViewportSize = new() { Width = 1280, Height = 900 },
@@ -21,15 +22,16 @@ public sealed class NativePopoverSurfaceBrowserTests(
         });
         var page = await context.NewPageAsync();
 
-        var datePickerContent = await OpenDatePickerAsync(page);
-        await AssertBorderAsync(datePickerContent, "0px", "none");
+        var datePickerContent = await OpenDatePickerAsync(page, theme);
+        await AssertTokenizedSurfaceAsync(datePickerContent);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/select").ToString());
+        await SetDocumentationThemeAsync(page, theme);
         var selectTrigger = page.GetByTestId("forms-dossier-select");
         await selectTrigger.ClickAsync();
         var selectContent = page.Locator("#preview [data-slot='select-content']");
         await Assertions.Expect(selectContent).ToBeVisibleAsync();
-        await AssertBorderAsync(selectContent, "0px", "none");
+        await AssertTokenizedSurfaceAsync(selectContent);
     }
 
     [Fact]
@@ -44,18 +46,45 @@ public sealed class NativePopoverSurfaceBrowserTests(
         });
         var page = await context.NewPageAsync();
 
-        var content = await OpenDatePickerAsync(page);
+        var content = await OpenDatePickerAsync(page, "dark");
         await AssertBorderAsync(content, "1px", "solid");
+        Assert.True(await content.EvaluateAsync<bool>("""
+            element => {
+                const probe = document.createElement('span');
+                probe.style.color = 'CanvasText';
+                document.body.append(probe);
+                const matches = getComputedStyle(element).borderTopColor === getComputedStyle(probe).color;
+                probe.remove();
+                return matches;
+            }
+            """), "Expected the forced-colors popup border to resolve to CanvasText.");
     }
 
-    private async Task<ILocator> OpenDatePickerAsync(IPage page)
+    private async Task<ILocator> OpenDatePickerAsync(IPage page, string theme)
     {
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/date-picker").ToString());
+        await SetDocumentationThemeAsync(page, theme);
         var trigger = page.GetByTestId("forms-dossier-date-picker");
         await trigger.ClickAsync();
         var content = page.Locator("#preview [data-slot='date-picker-content']");
         await Assertions.Expect(content).ToBeVisibleAsync();
         return content;
+    }
+
+    private static async Task SetDocumentationThemeAsync(IPage page, string theme)
+    {
+        var scope = page.Locator("[data-shadcn-scope]").First;
+        await scope.WaitForAsync();
+        if (theme == "dark")
+            await page.GetByTestId("documentation-theme-toggle").ClickAsync();
+        await Assertions.Expect(scope).ToHaveAttributeAsync("data-shadcn-theme", theme);
+    }
+
+    private static async Task AssertTokenizedSurfaceAsync(ILocator content)
+    {
+        await AssertBorderAsync(content, "0px", "none");
+        Assert.NotEqual("0px", await content.EvaluateAsync<string>("element => getComputedStyle(element).borderTopLeftRadius"));
+        Assert.NotEqual("none", await content.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
     }
 
     private static async Task AssertBorderAsync(ILocator content, string width, string style)
