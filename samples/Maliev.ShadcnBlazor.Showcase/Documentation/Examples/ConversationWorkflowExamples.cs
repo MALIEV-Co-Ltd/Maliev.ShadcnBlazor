@@ -292,16 +292,17 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Scroller()
     {
-        var auto = true; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
+        var auto = true; var extra = false; var showStreamingStatus = true; var position = ShadcnMessageDefaultScrollPosition.End;
         RenderFragment preview = b =>
         {
             b.OpenComponent<StreamingScrollerDemo>(0);
             b.AddAttribute(1, nameof(StreamingScrollerDemo.AutoFollow), auto);
             b.AddAttribute(2, nameof(StreamingScrollerDemo.AppendUnread), extra);
             b.AddAttribute(3, nameof(StreamingScrollerDemo.OpeningPosition), position);
+            b.AddAttribute(4, nameof(StreamingScrollerDemo.ShowStreamingStatus), showStreamingStatus);
             b.CloseComponent();
         };
-        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v, true), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"], MessageScrollerRazorSource);
+        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v, true), Toggle("scroller-append", "Append unread turn", v => extra = v), Toggle("scroller-status", "Streaming status", v => showStreamingStatus = v, true), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "streaming-status", "focus", "rtl"], MessageScrollerRazorSource);
     }
 
     private static ComponentExampleDefinition Questionnaire()
@@ -682,16 +683,19 @@ internal static class ConversationWorkflowExamples
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
                 <ShadcnMessageScrollerItem MessageId="assistant-1" ScrollAnchor="true">
-                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
-                        <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
-                        <ShadcnMessageContent>
-                            <ShadcnMessageBody>
-                                <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
-                                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
-                                    <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
-                                </ShadcnBubble>
-                            </ShadcnMessageBody>
-                        </ShadcnMessageContent>
+                    <ShadcnMessage Align="ShadcnLogicalAlign.Start" Streaming="true" ShowStreamingStatus="true">
+                        <StreamingContent>Generating…</StreamingContent>
+                        <ChildContent>
+                            <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
+                            <ShadcnMessageContent>
+                                <ShadcnMessageBody>
+                                    <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
+                                    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
+                                        <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
+                                    </ShadcnBubble>
+                                </ShadcnMessageBody>
+                            </ShadcnMessageContent>
+                        </ChildContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
                 </ShadcnMessageScrollerContent>

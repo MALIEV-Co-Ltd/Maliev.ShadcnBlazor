@@ -514,6 +514,58 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task ScrollerRendersStreamingStatusAsAStableRowBelowTheMessageBubble()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
+
+        await page.GetByTestId("scroller-send").ClickAsync();
+        var message = page.Locator("[data-slot='message-scroller-item']").Last.Locator("[data-slot='message']");
+        var bubble = message.Locator("[data-slot='bubble']");
+        var status = message.Locator("[data-slot='message-streaming-status']");
+        await Assertions.Expect(message).ToHaveAttributeAsync("aria-busy", "true");
+        await Assertions.Expect(status).ToBeVisibleAsync();
+        await Assertions.Expect(status).ToHaveAttributeAsync("role", "status");
+        await Assertions.Expect(status).ToHaveAttributeAsync("aria-live", "polite");
+        await Assertions.Expect(bubble.Locator("[data-slot='message-streaming-status']")).ToHaveCountAsync(0);
+
+        var first = await message.EvaluateAsync<double[]>("element => { const b = element.querySelector('[data-slot=bubble]').getBoundingClientRect(); const s = element.querySelector('[data-slot=message-streaming-status]').getBoundingClientRect(); return [s.x, s.width, s.top - b.bottom]; }");
+        await page.WaitForTimeoutAsync(180);
+        var later = await status.EvaluateAsync<double[]>("element => { const s = element.getBoundingClientRect(); return [s.x, s.width]; }");
+        Assert.True(first[2] >= 0, "The streaming status must render below the message bubble.");
+        Assert.InRange(Math.Abs(later[0] - first[0]), 0, 1);
+        Assert.InRange(Math.Abs(later[1] - first[1]), 0, 1);
+    }
+
+    [Fact]
+    public async Task ScrollerCanHideTheStreamingStatusWithoutLosingTheMessageBusyState()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
+
+        var control = page.GetByTestId("control-scroller-status");
+        await Assertions.Expect(control).ToBeCheckedAsync();
+        await control.UncheckAsync();
+        await page.GetByTestId("scroller-send").ClickAsync();
+
+        var message = page.Locator("[data-slot='message-scroller-item']").Last.Locator("[data-slot='message']");
+        await Assertions.Expect(message).ToHaveAttributeAsync("aria-busy", "true");
+        await Assertions.Expect(message.Locator("[data-slot='message-streaming-status']")).ToHaveCountAsync(0);
+        await control.CheckAsync();
+        await Assertions.Expect(message.Locator("[data-slot='message-streaming-status']")).ToBeVisibleAsync();
+    }
+
+    [Fact]
     public async Task QuestionnaireDossierSupportsBilingualKeyboardCustomAnswersAndExactSource()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

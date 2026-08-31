@@ -88,6 +88,8 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
 .shadcn-message-content { display:flex; width:auto; max-width:100%; min-width:0; flex:1 1 auto; flex-direction:column; align-items:flex-start; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); overflow-wrap:anywhere; }
 .shadcn-message[data-align="end"] .shadcn-message-content { align-items:flex-end; }
 .shadcn-message-header,.shadcn-message-footer { display:flex; max-width:100%; min-width:0; align-items:center; gap:calc(.375rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-message-streaming-status { display:flex; width:fit-content; min-width:0; min-height:1rem; align-items:center; color:var(--shadcn-muted-foreground); font-size:.75rem; font-weight:600; line-height:1.25; }
+.shadcn-message[data-align="end"] .shadcn-message-streaming-status { align-self:flex-end; }
 .shadcn-message-footer button { min-width:0 !important; min-height:1.75rem; border:0; border-radius:999px; padding-inline:calc(.375rem * var(--shadcn-spacing-multiplier)); background:transparent; }
 [data-align="end"] .shadcn-message-footer { justify-content:flex-end; }
 .shadcn-message-footer :is(button,a):focus-visible { outline:2px solid currentColor !important; outline-offset:2px !important; }
@@ -128,7 +130,7 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
 .shadcn-questionnaire-navigation[data-variant="outline"]:hover:not(:disabled),.shadcn-questionnaire-navigation[data-variant="ghost"]:hover:not(:disabled) { background:var(--shadcn-muted); color:var(--shadcn-foreground); }
 @media (prefers-reduced-motion:reduce) { .shadcn-questionnaire-choice { transition:none; } }
 @media (forced-colors:active) { .shadcn-questionnaire-choice[data-checked="true"] { outline:2px solid Highlight; } .shadcn-questionnaire-item[aria-invalid="true"] { border:2px solid Mark; } }
-@media (forced-colors:active) { .shadcn-message,.shadcn-message-header,.shadcn-message-footer,.shadcn-questionnaire,.shadcn-questionnaire-progress,.shadcn-questionnaire-title,.shadcn-questionnaire-description { color:CanvasText; } .shadcn-questionnaire-navigation { color:ButtonText; background:ButtonFace; border-color:ButtonText; } }
+@media (forced-colors:active) { .shadcn-message,.shadcn-message-header,.shadcn-message-footer,.shadcn-message-streaming-status,.shadcn-questionnaire,.shadcn-questionnaire-progress,.shadcn-questionnaire-title,.shadcn-questionnaire-description { color:CanvasText; } .shadcn-questionnaire-navigation { color:ButtonText; background:ButtonFace; border-color:ButtonText; } }
 
 /* Conversation refinement: keep the primitives visually close to the compact
    shadcn conversation patterns while retaining semantic theme ownership. */
@@ -313,6 +315,9 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
 }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:2; grid-row:2; justify-content:flex-start; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] .shadcn-message-footer { grid-column:1; justify-content:flex-end; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-streaming-status { grid-column:2; grid-row:2; justify-self:start; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] .shadcn-message-streaming-status { grid-column:1; justify-self:end; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-streaming-status) .shadcn-message-footer { grid-row:3; }
 .shadcn-message:hover .shadcn-message-footer,
 .shadcn-message:focus-within .shadcn-message-footer,
 .shadcn-message-footer[data-visibility="always"] {

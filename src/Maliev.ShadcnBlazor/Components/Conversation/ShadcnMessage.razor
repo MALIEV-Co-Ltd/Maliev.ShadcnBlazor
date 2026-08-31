@@ -1,3 +1,32 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message")" style="@MergeStyle(null)" data-slot="message" data-align="@AlignValue"><CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue></div>
-@code { [Parameter] public ShadcnLogicalAlign Align{get;set;} [Parameter,EditorRequired] public RenderFragment? ChildContent{get;set;} private string AlignValue=>ShadcnConversationValues.Align(Align); private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot","data-align"); protected override void OnParametersSet(){if(ChildContent is null)throw new InvalidOperationException("ShadcnMessage requires content.");if(!Enum.IsDefined(Align))throw new ArgumentOutOfRangeException(nameof(Align));} }
+
+<div @attributes="ForwardedAttributes"
+     class="@MergeClass("shadcn-message")"
+     style="@MergeStyle(null)"
+     data-slot="message"
+     data-align="@AlignValue"
+     data-streaming="@(Streaming ? "true" : null)"
+     aria-busy="@(Streaming ? "true" : null)">
+    <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+</div>
+
+@code {
+    [Parameter] public ShadcnLogicalAlign Align { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool ShowStreamingStatus { get; set; } = true;
+    [Parameter] public bool Streaming { get; set; }
+    [Parameter] public RenderFragment? StreamingContent { get; set; }
+
+    internal bool HasStreamingStatus => Streaming && ShowStreamingStatus && StreamingContent is not null;
+
+    private string AlignValue => ShadcnConversationValues.Align(Align);
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-align", "data-streaming", "aria-busy");
+
+    protected override void OnParametersSet()
+    {
+        if (ChildContent is null) throw new InvalidOperationException("ShadcnMessage requires content.");
+        if (!Enum.IsDefined(Align)) throw new ArgumentOutOfRangeException(nameof(Align));
+        if (Streaming && ShowStreamingStatus && StreamingContent is null)
+            throw new InvalidOperationException("ShadcnMessage requires StreamingContent when its streaming status is shown.");
+    }
+}

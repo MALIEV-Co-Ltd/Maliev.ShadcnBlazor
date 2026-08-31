@@ -292,6 +292,41 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void MessageOwnsLocalizedStreamingStatusAndCanHideItWithoutClearingBusyState()
+    {
+        var visible = Render<ShadcnMessage>(parameters => parameters
+            .Add(component => component.Streaming, true)
+            .Add(component => component.StreamingContent, Text("กำลังสร้างคำตอบ…"))
+            .AddChildContent<ShadcnMessageContent>(content => content.AddChildContent<ShadcnMessageBody>(body => body.AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnBubble>(0);
+                builder.AddAttribute(1, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble =>
+                {
+                    bubble.OpenComponent<ShadcnBubbleContent>(0);
+                    bubble.AddAttribute(1, nameof(ShadcnBubbleContent.ChildContent), Text("คำตอบบางส่วน"));
+                    bubble.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }))));
+
+        var message = visible.Find("[data-slot='message']");
+        var status = visible.Find("[data-slot='message-streaming-status']");
+        Assert.Equal("true", message.GetAttribute("aria-busy"));
+        Assert.Equal("true", message.GetAttribute("data-streaming"));
+        Assert.Equal("status", status.GetAttribute("role"));
+        Assert.Equal("polite", status.GetAttribute("aria-live"));
+        Assert.Equal("กำลังสร้างคำตอบ…", status.TextContent.Trim());
+        Assert.Empty(visible.FindAll("[data-slot='bubble-content'] [data-slot='message-streaming-status']"));
+
+        var hidden = Render<ShadcnMessage>(parameters => parameters
+            .Add(component => component.Streaming, true)
+            .Add(component => component.ShowStreamingStatus, false)
+            .AddChildContent<ShadcnMessageContent>());
+        Assert.Equal("true", hidden.Find("[data-slot='message']").GetAttribute("aria-busy"));
+        Assert.Empty(hidden.FindAll("[data-slot='message-streaming-status']"));
+    }
+
+    [Fact]
     public void MessageStructuredCompositionKeepsActionsAndStatusInSeparateSlots()
     {
         var cut = Render<ShadcnMessage>(parameters => parameters

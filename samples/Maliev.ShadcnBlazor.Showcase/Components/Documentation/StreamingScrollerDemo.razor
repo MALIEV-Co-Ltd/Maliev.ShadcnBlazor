@@ -10,21 +10,21 @@
                         @foreach (var message in _messages)
                         {
                             <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
-                                <ShadcnMessage Align="@message.Align">
-                                    <ShadcnMessageAvatar>
-                                        <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
-                                    </ShadcnMessageAvatar>
-                                    <ShadcnMessageContent>
-                                        <ShadcnMessageBody>
-                                            <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
-                                            <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
-                                                <ShadcnBubbleContent>@message.Text @if (message.IsStreaming)
-                                                    {
-                                                        <span class="showcase-scroller-streaming" data-testid="scroller-streaming" role="status">Generating…</span>
-                                                    }</ShadcnBubbleContent>
-                                            </ShadcnBubble>
-                                        </ShadcnMessageBody>
-                                    </ShadcnMessageContent>
+                                <ShadcnMessage Align="@message.Align" Streaming="@message.IsStreaming" ShowStreamingStatus="@ShowStreamingStatus">
+                                    <StreamingContent><span data-testid="scroller-streaming">Generating…</span></StreamingContent>
+                                    <ChildContent>
+                                        <ShadcnMessageAvatar>
+                                            <img class="showcase-message-avatar-image" src="@message.AvatarSource" alt="@message.AvatarAlt" />
+                                        </ShadcnMessageAvatar>
+                                        <ShadcnMessageContent>
+                                            <ShadcnMessageBody>
+                                                <ShadcnMessageHeader>@message.Author</ShadcnMessageHeader>
+                                                <ShadcnBubble Align="@message.Align" Variant="@(message.Align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)">
+                                                    <ShadcnBubbleContent>@message.Text</ShadcnBubbleContent>
+                                                </ShadcnBubble>
+                                            </ShadcnMessageBody>
+                                        </ShadcnMessageContent>
+                                    </ChildContent>
                                 </ShadcnMessage>
                             </ShadcnMessageScrollerItem>
                         }
@@ -48,6 +48,7 @@
     [Parameter] public bool AutoFollow { get; set; } = true;
     [Parameter] public bool AppendUnread { get; set; }
     [Parameter] public ShadcnMessageDefaultScrollPosition OpeningPosition { get; set; } = ShadcnMessageDefaultScrollPosition.End;
+    [Parameter] public bool ShowStreamingStatus { get; set; } = true;
 
     private readonly CancellationTokenSource _lifetime = new();
     private readonly List<TranscriptMessage> _messages =

@@ -1798,22 +1798,7 @@ a {
     text-align: center;
 }
 
-.showcase-scroller-streaming {
-    display: inline-flex;
-    margin-inline-start: .45rem;
-    color: var(--shadcn-primary);
-    font-size: .7rem;
-    font-weight: 650;
-    animation: showcase-scroller-streaming 1.2s ease-in-out infinite;
-}
-
-@keyframes showcase-scroller-streaming {
-    0%, 100% { opacity: .48; }
-    50% { opacity: 1; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .showcase-scroller-streaming { animation: none; }
     .showcase-scroller-frame .showcase-scroller-composer button { transition: none; }
 }
 
