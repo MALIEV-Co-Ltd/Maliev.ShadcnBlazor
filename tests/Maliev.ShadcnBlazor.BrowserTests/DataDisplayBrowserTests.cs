@@ -84,8 +84,14 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await Assertions.Expect(bars.First).ToHaveAttributeAsync("rx", "0");
         await surface.FocusAsync(); await page.Keyboard.PressAsync("End");
         await Assertions.Expect(chart.Locator("[data-slot='chart-tooltip-content']")).ToContainTextAsync("Jun");
-        await page.GetByTestId("control-chart-line").CheckAsync();
+        await page.ChooseOptionAsync("control-chart-type", "Line");
         await Assertions.Expect(surface.Locator("polyline[data-series='desktop']")).ToHaveCountAsync(1);
+        await page.ChooseOptionAsync("control-chart-type", "Pie");
+        await Assertions.Expect(surface.Locator("path[data-series]")).Not.ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByTestId("control-chart-stacked")).ToBeDisabledAsync();
+        await Assertions.Expect(page.GetByTestId("control-chart-primary-axis")).ToBeDisabledAsync();
+        await Assertions.Expect(page.GetByTestId("control-chart-major-grid")).ToBeDisabledAsync();
+        await page.ChooseOptionAsync("control-chart-type", "Line");
         await chart.EvaluateAsync("el => { const scope = el.closest('[dir]') ?? document.documentElement; scope.classList.add('dark'); scope.dir='rtl'; }");
         await Assertions.Expect(chart).ToHaveCSSAsync("direction", "rtl");
         await page.SetViewportSizeAsync(390, 844);

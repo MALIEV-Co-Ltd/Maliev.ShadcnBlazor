@@ -141,15 +141,24 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("Error=\"Unable to load payments.\"", dataTable.RazorSource, StringComparison.Ordinal);
 
         var chart = registry.GetBySlug("chart").Single();
-        chart.Controls.Single(control => control.Id == "chart-line").Apply("true");
+        var chartType = chart.Controls.Single(control => control.Id == "chart-type");
+        Assert.Equal(ComponentParameterControlKind.Select, chartType.Kind);
+        Assert.Equal(Enum.GetNames<ShadcnChartType>(), chartType.Options);
+        Assert.DoesNotContain(chart.Controls, control => control.Id is "chart-line" or "chart-area");
+        chart.Controls.Single(control => control.Id == "chart-stacked").Apply("true");
+        chartType.Apply(nameof(ShadcnChartType.Pie));
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-stacked").IsEnabled);
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-primary-axis").IsEnabled);
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-major-grid").IsEnabled);
         chart.Controls.Single(control => control.Id == "chart-loading").Apply("true");
         chart.Controls.Single(control => control.Id == "chart-legend").Apply("true");
-        Assert.Contains("Type=\"ShadcnChartType.Line\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Type=\"ShadcnChartType.Pie\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Stacked=\"false\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Loading=\"true\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowLegend=\"false\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("BarRadius=\"0\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("ShowMajorGrid=\"true\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowMajorGrid=\"false\"", chart.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

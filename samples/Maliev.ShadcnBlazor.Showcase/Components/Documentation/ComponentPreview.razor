@@ -26,6 +26,7 @@
                             <input id="@control.Id"
                                    data-testid="control-@control.Id"
                                    type="checkbox"
+                                   disabled="@(!control.IsEnabled)"
                                    checked="@bool.Parse(control.Value)"
                                    @onchange="args => Update(control, args.Value?.ToString() ?? bool.FalseString)" />
                             @control.Label
@@ -37,6 +38,7 @@
                         <input id="@control.Id"
                                data-testid="control-@control.Id"
                                type="number"
+                               disabled="@(!control.IsEnabled)"
                                value="@control.Value"
                                @onchange="args => Update(control, args.Value?.ToString() ?? string.Empty)" />
                     }
@@ -47,6 +49,7 @@
                                       id="@control.Id"
                                       data-testid="@($"control-{control.Id}")"
                                       aria-label="@control.Label"
+                                      Disabled="@(!control.IsEnabled)"
                                       Value="@control.Value"
                                       ValueChanged="value => Update(control, value)"
                                       Options="@SelectOptions(control)"

@@ -12,6 +12,7 @@ public enum ComponentParameterControlKind
 public sealed class ComponentParameterControl
 {
     private readonly Action<string> _apply;
+    private readonly Func<bool> _isEnabled;
 
     public ComponentParameterControl(
         string id,
@@ -19,7 +20,8 @@ public sealed class ComponentParameterControl
         ComponentParameterControlKind kind,
         string value,
         IReadOnlyList<string> options,
-        Action<string> apply)
+        Action<string> apply,
+        Func<bool>? isEnabled = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -32,6 +34,7 @@ public sealed class ComponentParameterControl
         Value = value;
         Options = options;
         _apply = apply;
+        _isEnabled = isEnabled ?? (() => true);
     }
 
     public string Id { get; }
@@ -43,6 +46,8 @@ public sealed class ComponentParameterControl
     public string Value { get; private set; }
 
     public IReadOnlyList<string> Options { get; }
+
+    public bool IsEnabled => _isEnabled();
 
     public void Apply(string value)
     {

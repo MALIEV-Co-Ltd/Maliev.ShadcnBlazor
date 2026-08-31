@@ -182,9 +182,11 @@ __STATE_ATTRIBUTES__
 
     private static ComponentExampleDefinition Chart()
     {
-        var line = false; var area = false; var loading = false; var hideLegend = false; var stacked = false; var primaryAxis = true; var secondaryAxis = false; var majorGrid = true; var minorGrid = false;
+        var type = ShadcnChartType.Bar; var loading = false; var hideLegend = false; var stacked = false; var primaryAxis = true; var secondaryAxis = false; var majorGrid = true; var minorGrid = false;
+        bool IsCartesian() => type is ShadcnChartType.Bar or ShadcnChartType.Line or ShadcnChartType.Area;
+        bool SupportsStacking() => type is ShadcnChartType.Bar or ShadcnChartType.Area;
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", area ? ShadcnChartType.Area : line ? ShadcnChartType.Line : ShadcnChartType.Bar); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", majorGrid); b.AddAttribute(14, "ShowMinorGrid", minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
+        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", type); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", IsCartesian() && primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", IsCartesian() && secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", IsCartesian() && majorGrid); b.AddAttribute(14, "ShowMinorGrid", IsCartesian() && minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", SupportsStacking() && stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
         const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
@@ -222,21 +224,22 @@ __STATE_ATTRIBUTES__
 }
 """;
         string Source() => sourceTemplate
-            .Replace("__TYPE__", area ? "Area" : line ? "Line" : "Bar", StringComparison.Ordinal)
+            .Replace("__TYPE__", type.ToString(), StringComparison.Ordinal)
             .Replace("__LOADING__", loading ? "true" : "false", StringComparison.Ordinal)
             .Replace("__SHOW_LEGEND__", hideLegend ? "false" : "true", StringComparison.Ordinal)
-            .Replace("__PRIMARY_AXIS__", primaryAxis ? "true" : "false", StringComparison.Ordinal)
-            .Replace("__SECONDARY_AXIS__", secondaryAxis ? "true" : "false", StringComparison.Ordinal)
-            .Replace("__MAJOR_GRID__", majorGrid ? "true" : "false", StringComparison.Ordinal)
-            .Replace("__MINOR_GRID__", minorGrid ? "true" : "false", StringComparison.Ordinal)
-            .Replace("__STACKED__", stacked ? "true" : "false", StringComparison.Ordinal);
-        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, and area series with independently configurable axes and grid levels.", Source(), preview, [Toggle("chart-line", "Line chart", v => line = v), Toggle("chart-area", "Area chart", v => area = v), Toggle("chart-stacked", "Stacked", v => stacked = v), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v), Toggle("chart-primary-axis", "Primary axis", v => primaryAxis = v, true), Toggle("chart-secondary-axis", "Secondary axis", v => secondaryAxis = v), Toggle("chart-major-grid", "Major grid", v => majorGrid = v, true), Toggle("chart-minor-grid", "Minor grid", v => minorGrid = v)], ["bar", "line", "area", "axes", "major-grid", "minor-grid", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
+            .Replace("__PRIMARY_AXIS__", IsCartesian() && primaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__SECONDARY_AXIS__", IsCartesian() && secondaryAxis ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MAJOR_GRID__", IsCartesian() && majorGrid ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__MINOR_GRID__", IsCartesian() && minorGrid ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__STACKED__", SupportsStacking() && stacked ? "true" : "false", StringComparison.Ordinal);
+        var example = Example("chart", "Interactive traffic overview", "Compare bar, line, area, pie, and donut charts with type-appropriate controls.", Source(), preview, [Select("chart-type", "Chart type", type.ToString(), Enum.GetNames<ShadcnChartType>(), value => type = Enum.Parse<ShadcnChartType>(value)), Toggle("chart-stacked", "Stacked bars or areas", v => stacked = v, isEnabled: SupportsStacking), Toggle("chart-legend", "Hide legend", v => hideLegend = v), Toggle("chart-loading", "Loading", v => loading = v), Toggle("chart-primary-axis", "Primary axis", v => primaryAxis = v, true, IsCartesian), Toggle("chart-secondary-axis", "Secondary axis", v => secondaryAxis = v, isEnabled: IsCartesian), Toggle("chart-major-grid", "Major grid", v => majorGrid = v, true, IsCartesian), Toggle("chart-minor-grid", "Minor grid", v => minorGrid = v, isEnabled: IsCartesian)], ["bar", "line", "area", "pie", "donut", "axes", "major-grid", "minor-grid", "tooltip", "legend", "theme", "keyboard", "resize", "loading", "rtl"]);
         return example with { RazorSourceProvider = Source };
     }
 
     private static ComponentExampleDefinition Example(string slug, string title, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, "Live package component with caller-owned localized state.", $"<Shadcn{ToPascal(slug)} />", preview, controls, tags);
     private static ComponentExampleDefinition Example(string slug, string title, string description, string source, RenderFragment preview, IReadOnlyList<ComponentParameterControl> controls, IReadOnlyList<string> tags) => new($"{slug}-primary", title, description, source, preview, controls, tags);
-    private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], value => apply(bool.Parse(value)));
+    private static ComponentParameterControl Toggle(string id, string label, Action<bool> apply, bool initial = false, Func<bool>? isEnabled = null) => new(id, label, ComponentParameterControlKind.Toggle, initial.ToString(), [], value => apply(bool.Parse(value)), isEnabled);
+    private static ComponentParameterControl Select(string id, string label, string value, IReadOnlyList<string> options, Action<string> apply) => new(id, label, ComponentParameterControlKind.Select, value, options, apply);
     private static void AddText<T>(RenderTreeBuilder b, int sequence, string text) where T : IComponent { b.OpenComponent<T>(sequence); b.AddAttribute(sequence + 1, "ChildContent", (RenderFragment)(c => c.AddContent(0, text))); b.CloseComponent(); }
     private static string ToPascal(string value) => string.Concat(value.Split('-').Select(word => char.ToUpperInvariant(word[0]) + word[1..]));
 }
