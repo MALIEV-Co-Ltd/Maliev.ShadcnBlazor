@@ -8,21 +8,23 @@
                 <ConversationAvatar AvatarId="operator" Source="images/avatars/operator-thai.png" Alt="นที · วิศวกร" Fallback="นท" />
             }
             <ShadcnMessageContent>
-                <ShadcnMessageBody>
-                    <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
-                    <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start" data-testid="engineer-message-1">
-                        <ShadcnBubbleContent dir="auto">ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
-                    </ShadcnBubble>
-                </ShadcnMessageBody>
-                @if (FooterActions)
-                {
-                    <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
-                        <ShadcnMessageActions>
-                            <ShadcnMessageCopyAction Text="ตรวจสอบไฟล์แล้ว 3 รายการ" data-testid="message-copy" />
-                            <ShadcnMessageReplyAction Quote="ตรวจสอบไฟล์แล้ว 3 รายการ" OnReply="ReplyTo" data-testid="message-reply" />
-                        </ShadcnMessageActions>
-                    </ShadcnMessageFooter>
-                }
+                <div class="showcase-message-inline-actions">
+                    <ShadcnMessageBody>
+                        <ShadcnMessageHeader>วิศวกร MALIEV</ShadcnMessageHeader>
+                        <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start" data-testid="engineer-message-1">
+                            <ShadcnBubbleContent dir="auto">ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
+                        </ShadcnBubble>
+                    </ShadcnMessageBody>
+                    @if (FooterActions)
+                    {
+                        <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
+                            <ShadcnMessageActions>
+                                <ShadcnMessageCopyAction Text="ตรวจสอบไฟล์แล้ว 3 รายการ" data-testid="message-copy" />
+                                <ShadcnMessageReplyAction Quote="ตรวจสอบไฟล์แล้ว 3 รายการ" OnReply="ReplyTo" data-testid="message-reply" />
+                            </ShadcnMessageActions>
+                        </ShadcnMessageFooter>
+                    }
+                </div>
             </ShadcnMessageContent>
         </ShadcnMessage>
 

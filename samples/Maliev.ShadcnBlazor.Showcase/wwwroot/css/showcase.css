@@ -1874,20 +1874,22 @@ a {
     padding: .25rem;
 }
 
-.showcase-message-thread > [data-slot="message"][data-sender="engineer"] {
-    grid-template-columns: 2.25rem minmax(0, max-content) auto minmax(0, 1fr);
-    grid-template-rows: auto;
-    row-gap: 0;
+.showcase-message-inline-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(.625rem * var(--shadcn-spacing-multiplier));
 }
 
-.showcase-message-thread > [data-slot="message"][data-sender="engineer"] > .shadcn-message-content > .shadcn-message-body {
-    grid-column: 2;
-}
-
-.showcase-message-thread > [data-slot="message"][data-sender="engineer"] .shadcn-message-footer {
-    grid-column: 3;
-    grid-row: 1;
+.showcase-message-inline-actions > .shadcn-message-footer {
     width: auto;
+    flex: none;
+}
+
+.showcase-message-inline-actions .shadcn-bubble {
+    max-width: 100%;
+}
+
+.showcase-message-thread > [data-slot="message"]:has(.showcase-message-inline-actions) > .shadcn-message-avatar {
     align-self: end;
 }
 
