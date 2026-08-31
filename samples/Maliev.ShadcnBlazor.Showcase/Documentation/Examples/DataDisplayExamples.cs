@@ -185,18 +185,22 @@ __STATE_ATTRIBUTES__
         var type = ShadcnChartType.Bar; var loading = false; var hideLegend = false; var stacked = false; var primaryAxis = true; var secondaryAxis = false; var majorGrid = true; var minorGrid = false;
         bool IsCartesian() => type is ShadcnChartType.Bar or ShadcnChartType.Line or ShadcnChartType.Area;
         bool SupportsStacking() => type is ShadcnChartType.Bar or ShadcnChartType.Area;
+        IReadOnlyList<string> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+        IReadOnlyList<ShadcnChartSeries> monthlySeries = [new("desktop", [186, 305, 237, 284, 312, 356]), new("mobile", [80, 200, 120, 168, 190, 224])];
+        IReadOnlyList<string> deviceCategories = ["Traffic"];
+        IReadOnlyList<ShadcnChartSeries> deviceSeries = [new("desktop", [1680]), new("mobile", [982])];
         var config = new ShadcnChartConfig { ["desktop"] = new("Desktop") { Color = "var(--shadcn-chart-1)" }, ["mobile"] = new("Mobile") { Theme = new("var(--shadcn-chart-2)", "var(--shadcn-chart-4)") } };
-        RenderFragment preview = b => { b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", "ยอดผู้เข้าชม"); b.AddAttribute(4, "Description", "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"); b.AddAttribute(5, "Type", type); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun" }); b.AddAttribute(8, "Series", new[] { new ShadcnChartSeries("desktop", [186, 305, 237, 284, 312, 356]), new ShadcnChartSeries("mobile", [80, 200, 120, 168, 190, 224]) }); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", IsCartesian() && primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", IsCartesian() && secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", IsCartesian() && majorGrid); b.AddAttribute(14, "ShowMinorGrid", IsCartesian() && minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", SupportsStacking() && stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
+        RenderFragment preview = b => { var cartesian = IsCartesian(); b.OpenComponent<ShadcnChart>(0); b.AddAttribute(1, "Class", "showcase-chart-dossier"); b.AddAttribute(2, "Id", "dossier"); b.AddAttribute(3, "Title", cartesian ? "ยอดผู้เข้าชม" : "สัดส่วนผู้เข้าชมตามอุปกรณ์"); b.AddAttribute(4, "Description", cartesian ? "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด" : "สัดส่วนการเข้าชมรวมจากเดสก์ท็อปและมือถือ"); b.AddAttribute(5, "Type", type); b.AddAttribute(6, "Config", config); b.AddAttribute(7, "Categories", cartesian ? months : deviceCategories); b.AddAttribute(8, "Series", cartesian ? monthlySeries : deviceSeries); b.AddAttribute(9, "Loading", loading); b.AddAttribute(10, "ShowLegend", !hideLegend); b.AddAttribute(11, "ShowPrimaryYAxis", cartesian && primaryAxis); b.AddAttribute(12, "ShowSecondaryYAxis", cartesian && secondaryAxis); b.AddAttribute(13, "ShowMajorGrid", cartesian && majorGrid); b.AddAttribute(14, "ShowMinorGrid", cartesian && minorGrid); b.AddAttribute(15, "BarRadius", 0d); b.AddAttribute(16, "InitialHeight", 260d); b.AddAttribute(17, "Stacked", SupportsStacking() && stacked); b.AddAttribute(18, "LegendInteractive", true); b.AddAttribute(19, "Animated", true); b.CloseComponent(); };
         const string sourceTemplate = """
 @using Maliev.ShadcnBlazor.Components.DataDisplay
 
 <ShadcnChart Class="showcase-chart-dossier"
              Id="dossier"
-             Title="ยอดผู้เข้าชม"
-             Description="สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด"
+             Title="__TITLE__"
+             Description="__DESCRIPTION__"
              Type="ShadcnChartType.__TYPE__"
-             Categories="@Months"
-             Series="@Series"
+             Categories="@__CATEGORIES__"
+             Series="@__SERIES__"
              Config="@Config"
              Loading="__LOADING__"
              ShowLegend="__SHOW_LEGEND__"
@@ -212,9 +216,14 @@ __STATE_ATTRIBUTES__
 
 @code {
     private readonly IReadOnlyList<string> Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-    private readonly IReadOnlyList<ShadcnChartSeries> Series = [
+    private readonly IReadOnlyList<ShadcnChartSeries> MonthlySeries = [
         new("desktop", [186, 305, 237, 284, 312, 356]),
         new("mobile", [80, 200, 120, 168, 190, 224])
+    ];
+    private readonly IReadOnlyList<string> DeviceCategories = ["Traffic"];
+    private readonly IReadOnlyList<ShadcnChartSeries> DeviceSeries = [
+        new("desktop", [1680]),
+        new("mobile", [982])
     ];
     private readonly ShadcnChartConfig Config = new()
     {
@@ -224,7 +233,11 @@ __STATE_ATTRIBUTES__
 }
 """;
         string Source() => sourceTemplate
+            .Replace("__TITLE__", IsCartesian() ? "ยอดผู้เข้าชม" : "สัดส่วนผู้เข้าชมตามอุปกรณ์", StringComparison.Ordinal)
+            .Replace("__DESCRIPTION__", IsCartesian() ? "สรุปการเข้าชมเว็บไซต์ 6 เดือนล่าสุด" : "สัดส่วนการเข้าชมรวมจากเดสก์ท็อปและมือถือ", StringComparison.Ordinal)
             .Replace("__TYPE__", type.ToString(), StringComparison.Ordinal)
+            .Replace("__CATEGORIES__", IsCartesian() ? "Months" : "DeviceCategories", StringComparison.Ordinal)
+            .Replace("__SERIES__", IsCartesian() ? "MonthlySeries" : "DeviceSeries", StringComparison.Ordinal)
             .Replace("__LOADING__", loading ? "true" : "false", StringComparison.Ordinal)
             .Replace("__SHOW_LEGEND__", hideLegend ? "false" : "true", StringComparison.Ordinal)
             .Replace("__PRIMARY_AXIS__", IsCartesian() && primaryAxis ? "true" : "false", StringComparison.Ordinal)

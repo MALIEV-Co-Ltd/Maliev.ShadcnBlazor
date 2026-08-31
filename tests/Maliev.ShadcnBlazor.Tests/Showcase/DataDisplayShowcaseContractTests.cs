@@ -167,6 +167,17 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("BarRadius=\"0\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowMajorGrid=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Categories=\"@DeviceCategories\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Series=\"@DeviceSeries\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private readonly IReadOnlyList<string> DeviceCategories = [\"Traffic\"]", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("new(\"desktop\", [1680])", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("new(\"mobile\", [982])", chart.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Categories=\"@Months\"", chart.RazorSource, StringComparison.Ordinal);
+
+        chartType.Apply(nameof(ShadcnChartType.Donut));
+        Assert.Contains("Type=\"ShadcnChartType.Donut\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Categories=\"@DeviceCategories\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Series=\"@DeviceSeries\"", chart.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]
