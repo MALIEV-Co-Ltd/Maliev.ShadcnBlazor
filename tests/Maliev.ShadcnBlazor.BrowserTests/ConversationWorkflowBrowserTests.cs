@@ -189,7 +189,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await engineer.Nth(1).GetByTestId("message-reply").ClickAsync();
         await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ");
 
-        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const firstBubble = messages[0].querySelector('[data-slot=bubble]').getBoundingClientRect(); const secondBubble = messages[1].querySelector('[data-slot=bubble]').getBoundingClientRect(); const coordinatorBubble = messages[2].querySelector('[data-slot=bubble]').getBoundingClientRect(); const firstFooter = messages[0].querySelector('[data-slot=message-footer]').getBoundingClientRect(); const secondFooter = messages[1].querySelector('[data-slot=message-footer]').getBoundingClientRect(); return [secondBubble.top - firstBubble.bottom, coordinatorBubble.top - secondBubble.bottom, Math.abs(firstFooter.bottom - firstBubble.bottom), firstFooter.left - firstBubble.right, secondFooter.top - secondBubble.bottom, Math.abs(secondFooter.left - secondBubble.left)]; }");
+        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const firstBubble = messages[0].querySelector('[data-slot=bubble]').getBoundingClientRect(); const secondBubble = messages[1].querySelector('[data-slot=bubble]').getBoundingClientRect(); const coordinatorBubble = messages[2].querySelector('[data-slot=bubble]').getBoundingClientRect(); const firstFooter = messages[0].querySelector('[data-slot=message-footer]').getBoundingClientRect(); const secondFooter = messages[1].querySelector('[data-slot=message-footer]').getBoundingClientRect(); return [secondBubble.top - firstBubble.bottom, coordinatorBubble.top - secondBubble.bottom, Math.abs(firstFooter.bottom - firstBubble.bottom), firstFooter.left - firstBubble.right, secondFooter.top - secondBubble.bottom, Math.abs(secondFooter.left - secondBubble.left), Math.abs(secondBubble.left - firstBubble.left)]; }");
         Assert.InRange(spacing[0], 3, 8);
         Assert.InRange(spacing[1], 68, 104);
         Assert.True(spacing[1] > spacing[0] * 4);
@@ -197,6 +197,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.InRange(spacing[3], 6, 16);
         Assert.InRange(spacing[4], 8, 12);
         Assert.InRange(spacing[5], 0, 1);
+        Assert.InRange(spacing[6], 0, 1);
         Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 

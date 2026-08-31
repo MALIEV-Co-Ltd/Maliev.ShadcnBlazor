@@ -1893,6 +1893,10 @@ a {
     align-self: end;
 }
 
+.showcase-message-thread > [data-slot="message"][data-continuation="true"] {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+}
+
 .showcase-message-thread > [data-slot="message"]:not(:first-child, [data-continuation="true"]) {
     margin-block-start: calc(var(--showcase-message-participant-gap) - var(--showcase-message-continuation-gap));
 }
