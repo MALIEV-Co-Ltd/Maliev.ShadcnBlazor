@@ -213,4 +213,25 @@ public sealed class DocumentationAnnotationsBrowserTests(
         var pageOverflow = await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth");
         Assert.InRange(pageOverflow, 0, 1);
     }
+
+    [Fact]
+    public async Task UsageCodeBlockKeepsToolbarFlushWithSourceBody()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
+
+        var codeBlock = page.Locator("#usage [data-slot='code-block']");
+        await codeBlock.WaitForAsync();
+        var toolbar = await codeBlock.Locator("[data-slot='code-block-toolbar']").BoundingBoxAsync();
+        var source = await codeBlock.Locator("[data-slot='code-block-content']").BoundingBoxAsync();
+
+        Assert.NotNull(toolbar);
+        Assert.NotNull(source);
+        Assert.InRange(Math.Abs(source!.Y - (toolbar!.Y + toolbar.Height)), 0, 0.5);
+    }
 }

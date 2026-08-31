@@ -1053,7 +1053,7 @@ a {
 
 .component-dossier__hero,
 .component-preview,
-.component-code,
+:is(section, details).component-code,
 .component-api,
 .component-accessibility,
 .component-evidence,
@@ -1095,7 +1095,7 @@ a {
 .component-dossier__preview,
 .component-guide,
 .component-preview,
-.component-code,
+:is(section, details).component-code,
 .component-api,
 .component-accessibility,
 .component-evidence,
@@ -2269,7 +2269,7 @@ a {
     tab-size: 4;
 }
 
-.component-guide .component-code {
+.component-guide :is(section, details).component-code {
     gap: 0.75rem;
 }
 
