@@ -191,6 +191,9 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
+        await page.ChooseOptionAsync("control-bubble-received-variant", "Muted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "muted");
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
         var sentBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
         Assert.NotEqual(defaultBackground, sentBackground);
 

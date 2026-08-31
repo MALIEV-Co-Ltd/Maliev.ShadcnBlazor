@@ -70,16 +70,18 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Bubble()
     {
-        var variant = ShadcnBubbleVariant.Default;
+        var sentVariant = ShadcnBubbleVariant.Default;
+        var receivedVariant = ShadcnBubbleVariant.Ghost;
         var end = false;
         var top = false;
 
         RenderFragment preview = b =>
         {
             b.OpenComponent<ConversationBubbleDossierPreview>(0);
-            b.AddAttribute(1, nameof(ConversationBubbleDossierPreview.Variant), variant);
-            b.AddAttribute(2, nameof(ConversationBubbleDossierPreview.AlignIncomingEnd), end);
-            b.AddAttribute(3, nameof(ConversationBubbleDossierPreview.ReactionsTop), top);
+            b.AddAttribute(1, nameof(ConversationBubbleDossierPreview.SentVariant), sentVariant);
+            b.AddAttribute(2, nameof(ConversationBubbleDossierPreview.ReceivedVariant), receivedVariant);
+            b.AddAttribute(3, nameof(ConversationBubbleDossierPreview.AlignIncomingEnd), end);
+            b.AddAttribute(4, nameof(ConversationBubbleDossierPreview.ReactionsTop), top);
             b.CloseComponent();
         };
 
@@ -88,7 +90,8 @@ internal static class ConversationWorkflowExamples
             "Conversation bubble",
             preview,
             [
-                Select("bubble-variant", "Sent variant", "Default", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-variant", "Sent variant", "Default", Enum.GetNames<ShadcnBubbleVariant>(), v => sentVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-received-variant", "Received variant", "Ghost", Enum.GetNames<ShadcnBubbleVariant>(), v => receivedVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
                 Toggle("bubble-end", "Align incoming end", v => end = v),
                 Toggle("bubble-reactions-top", "Reactions top", v => top = v)
             ],
@@ -489,11 +492,11 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Conversation
 
 <ShadcnBubbleGroup data-reveal="true">
-    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="@sentVariant">
         <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
             <ShadcnBubbleReaction Fallback="👍"
@@ -504,15 +507,15 @@ internal static class ConversationWorkflowExamples
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="@sentVariant">
         <ShadcnBubbleContent Href="/docs/components/bubble">Sure. Hit me with your best demo.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
             <ShadcnBubbleReaction Fallback="❤️"
@@ -542,6 +545,8 @@ internal static class ConversationWorkflowExamples
 </ShadcnBubbleGroup>
 
 @code {
+    private ShadcnBubbleVariant sentVariant = ShadcnBubbleVariant.Default;
+    private ShadcnBubbleVariant receivedVariant = ShadcnBubbleVariant.Ghost;
     private int thumbsUpCount = 1;
     private int heartCount = 2;
     private int laughCount = 1;

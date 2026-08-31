@@ -146,11 +146,13 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
 
         Assert.Equal("true", cut.Find("[data-slot='bubble-group']").GetAttribute("data-reveal"));
 
-        var variant = example.Controls.Single(control => control.Id == "bubble-variant");
-        variant.Apply(nameof(ShadcnBubbleVariant.Ghost));
+        var sentVariant = example.Controls.Single(control => control.Id == "bubble-variant");
+        var receivedVariant = example.Controls.Single(control => control.Id == "bubble-received-variant");
+        sentVariant.Apply(nameof(ShadcnBubbleVariant.Tinted));
+        receivedVariant.Apply(nameof(ShadcnBubbleVariant.Muted));
         cut = Render(example.Preview);
-        Assert.All(cut.FindAll("[data-bubble-role='outgoing']"), bubble => Assert.Equal("ghost", bubble.GetAttribute("data-variant")));
-        Assert.All(cut.FindAll("[data-bubble-role='incoming']"), bubble => Assert.Equal("ghost", bubble.GetAttribute("data-variant")));
+        Assert.All(cut.FindAll("[data-bubble-role='outgoing']"), bubble => Assert.Equal("tinted", bubble.GetAttribute("data-variant")));
+        Assert.All(cut.FindAll("[data-bubble-role='incoming']"), bubble => Assert.Equal("muted", bubble.GetAttribute("data-variant")));
 
         var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");
         var css = File.ReadAllText(cssPath);
