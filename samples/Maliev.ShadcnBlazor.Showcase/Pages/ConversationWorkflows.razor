@@ -29,6 +29,7 @@
             </ShadcnMessageScroller>
         </ShadcnMessageScrollerProvider>
         <button type="button" data-testid="scroll-message" @onclick="ScrollToMessage">Focus turn 3</button>
+        <output data-testid="scroll-message-result">@ScrollMessageResult</output>
         <button type="button" data-testid="focus-end" @onclick="FocusEnd">Focus latest</button>
         <button type="button" data-testid="queue-missing-message" @onclick="QueueMissingMessage">Queue delayed row</button>
         <output data-testid="queued-message-result">@QueuedMessageResult</output>
@@ -100,11 +101,16 @@
     private ShadcnMessageScrollerProvider? EmptyScroller { get; set; }
     private string QueuedMessageResult { get; set; } = "pending";
     private string FirstMessageResult { get; set; } = "pending";
+    private string ScrollMessageResult { get; set; } = "pending";
     private ShadcnQuestionnaire? Questionnaire { get; set; }
 
     private void AppendMessage() => Messages.Add(new($"turn-{_nextMessage}", $"ข้อความใหม่ {_nextMessage++}", true));
     private void PrependMessage() => Messages.Insert(0, new($"turn-before-{_nextMessage}", $"ข้อความก่อนหน้า {_nextMessage++}"));
-    private async Task ScrollToMessage() { if (Scroller is not null) await Scroller.ScrollToMessageAsync("turn-3", new(Behavior: ShadcnMessageScrollBehavior.Smooth, FocusViewport: true)); }
+    private async Task ScrollToMessage()
+    {
+        if (Scroller is null) return;
+        ScrollMessageResult = await Scroller.ScrollToMessageAsync("turn-3", new(Behavior: ShadcnMessageScrollBehavior.Smooth, FocusViewport: true)) ? "handled" : "missed";
+    }
     private async Task FocusEnd() { if (Scroller is not null) await Scroller.ScrollToEndAsync(focusViewport: true); }
     private async Task QueueMissingMessage()
     {

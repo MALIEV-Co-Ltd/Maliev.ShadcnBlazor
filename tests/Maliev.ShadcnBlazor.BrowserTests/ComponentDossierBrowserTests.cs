@@ -702,7 +702,8 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(sourceDisclosure.Locator("[data-slot='code-block']")).ToBeVisibleAsync();
         await Assertions.Expect(sourceDisclosure.GetByTestId("copy-source")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#installation").GetByTestId("copy-source")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("#usage").GetByTestId("copy-source")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(3);
         await Assertions.Expect(page.GetByTestId("component-api")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByTestId("evidence-row")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);

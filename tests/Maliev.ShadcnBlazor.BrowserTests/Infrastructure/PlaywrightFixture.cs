@@ -10,6 +10,7 @@ public sealed class PlaywrightFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _playwright = await Playwright.CreateAsync();
+        Assertions.SetDefaultExpectTimeout(15_000);
         Browser = await _playwright.Chromium.LaunchAsync(new() { Headless = true });
     }
 

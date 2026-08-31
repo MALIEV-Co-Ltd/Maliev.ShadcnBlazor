@@ -440,7 +440,8 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(scroller.Locator("[data-slot='message-scroller-viewport']")).ToBeFocusedAsync();
         await Assertions.Expect(scroller).ToHaveAttributeAsync("data-autoscrolling", "");
         await Assertions.Expect(scroller.Locator("[data-slot='message-scroller-viewport']")).ToHaveAttributeAsync("data-autoscrolling", "");
-        await Assertions.Expect(page.Locator("[data-message-id='turn-3']")).ToBeInViewportAsync();
+        await Assertions.Expect(page.GetByTestId("scroll-message-result")).ToHaveTextAsync("handled");
+        Assert.True(await page.Locator("[data-message-id='turn-3']").EvaluateAsync<bool>("element => { const row = element.getBoundingClientRect(); const viewport = element.closest('[data-slot=message-scroller-viewport]').getBoundingClientRect(); return row.top >= viewport.top && row.bottom <= viewport.bottom; }"));
         await page.GetByTestId("queue-missing-message").ClickAsync();
         await Assertions.Expect(page.GetByTestId("queued-message-result")).ToHaveTextAsync("missed");
         await page.GetByTestId("queue-before-first-message").ClickAsync();
