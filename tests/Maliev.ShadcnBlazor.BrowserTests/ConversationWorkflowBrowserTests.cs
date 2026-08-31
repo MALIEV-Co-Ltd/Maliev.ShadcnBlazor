@@ -189,10 +189,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await engineer.Nth(1).GetByTestId("message-reply").ClickAsync();
         await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ");
 
-        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const first = messages[0].getBoundingClientRect(); const second = messages[1].getBoundingClientRect(); const coordinator = messages[2].getBoundingClientRect(); return [second.top - first.bottom, coordinator.top - second.bottom]; }");
-        Assert.InRange(spacing[0], 3, 6);
-        Assert.InRange(spacing[1], 16, 21);
-        Assert.True(spacing[1] > spacing[0] * 3);
+        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const firstBubble = messages[0].querySelector('[data-slot=bubble]').getBoundingClientRect(); const secondBubble = messages[1].querySelector('[data-slot=bubble]').getBoundingClientRect(); const coordinatorBubble = messages[2].querySelector('[data-slot=bubble]').getBoundingClientRect(); const firstFooter = messages[0].querySelector('[data-slot=message-footer]').getBoundingClientRect(); const secondFooter = messages[1].querySelector('[data-slot=message-footer]').getBoundingClientRect(); return [secondBubble.top - firstBubble.bottom, coordinatorBubble.top - secondBubble.bottom, Math.abs(firstFooter.bottom - firstBubble.bottom), Math.abs(secondFooter.bottom - secondBubble.bottom)]; }");
+        Assert.InRange(spacing[0], 3, 8);
+        Assert.InRange(spacing[1], 36, 72);
+        Assert.True(spacing[1] > spacing[0] * 4);
+        Assert.InRange(spacing[2], 0, 1);
+        Assert.InRange(spacing[3], 0, 1);
         Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 
