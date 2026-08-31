@@ -7,13 +7,17 @@
       data-slot="bubble-reaction"
       role="img"
       aria-label="@AccessibleName">
-    <ShadcnAvatar Size="ShadcnAvatarSize.Small">
-        @if (!string.IsNullOrWhiteSpace(Source))
-        {
+    @if (!string.IsNullOrWhiteSpace(Source))
+    {
+        <ShadcnAvatar Size="ShadcnAvatarSize.Small">
             <ShadcnAvatarImage Source="@Source" Alt="" />
-        }
-        <ShadcnAvatarFallback>@Fallback</ShadcnAvatarFallback>
-    </ShadcnAvatar>
+            <ShadcnAvatarFallback>@Fallback</ShadcnAvatarFallback>
+        </ShadcnAvatar>
+    }
+    else
+    {
+        <span class="shadcn-bubble-reaction-value" data-slot="bubble-reaction-value" aria-hidden="true">@Fallback</span>
+    }
 </span>
 
 @code {

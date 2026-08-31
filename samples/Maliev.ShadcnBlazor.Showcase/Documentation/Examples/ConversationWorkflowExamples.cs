@@ -70,7 +70,7 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Bubble()
     {
-        var variant = ShadcnBubbleVariant.Secondary;
+        var variant = ShadcnBubbleVariant.Default;
         var end = false;
         var top = false;
 
@@ -81,11 +81,11 @@ internal static class ConversationWorkflowExamples
             b.AddAttribute(2, "data-reveal", "true");
             b.AddAttribute(3, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
             {
-                AddBubble(thread, 0, null, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top);
-                AddBubble(thread, 10, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top, "incoming");
-                AddBubble(thread, 20, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "I can group messages, switch sides, and keep the whole thread easy to scan.", false, null, top, "incoming");
-                AddBubble(thread, 30, null, ShadcnLogicalAlign.End, "Sure. Hit me with your best demo.", true, null, top);
-                AddBubble(thread, 40, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.", false, "👍 🔥 👀 +2", top, "incoming");
+                AddBubble(thread, 0, variant, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top, "outgoing");
+                AddBubble(thread, 10, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top, "incoming");
+                AddBubble(thread, 20, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "I can group messages, switch sides, and keep the whole thread easy to scan.", false, null, top, "incoming");
+                AddBubble(thread, 30, variant, ShadcnLogicalAlign.End, "Sure. Hit me with your best demo.", true, null, top, "outgoing");
+                AddBubble(thread, 40, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.", false, "multiple", top, "incoming");
             }));
             b.CloseComponent();
         };
@@ -95,7 +95,7 @@ internal static class ConversationWorkflowExamples
             "Conversation bubble",
             preview,
             [
-                Select("bubble-variant", "Incoming variant", "Secondary", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-variant", "Sent variant", "Default", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)),
                 Toggle("bubble-end", "Align incoming end", v => end = v),
                 Toggle("bubble-reactions-top", "Reactions top", v => top = v)
             ],
@@ -222,26 +222,25 @@ internal static class ConversationWorkflowExamples
 
     private static RenderFragment ReactionComponents(string value) => b =>
     {
-        AddReaction(b, 0, "images/avatars/reviewer-thai.png", "ผต", "Quality reviewer reacted with approval");
+        AddReaction(b, 0, value == "👍" ? "👍" : "❤️", value == "👍" ? "Thumbs up reaction" : "Loved reaction");
         if (value == "👍")
             return;
 
-        AddReaction(b, 10, "images/avatars/coordinator-thai.png", "มล", "Mali reacted with support");
+        AddReaction(b, 10, "😂", "Laughing reaction");
         b.OpenComponent<ShadcnBubbleReactionOverflow>(20);
         b.AddAttribute(21, nameof(ShadcnBubbleReactionOverflow.Count), 2);
         b.AddAttribute(22, nameof(ShadcnBubbleReactionOverflow.ChildContent), (RenderFragment)(overflow =>
         {
-            AddReaction(overflow, 0, "images/avatars/assistant-thai.png", "MA", "MALIEV Assistant reacted with attention");
-            AddReaction(overflow, 10, "images/avatars/operator-thai.png", "นท", "Natee reacted with thanks");
+            AddReaction(overflow, 0, "🔥", "Fire reaction");
+            AddReaction(overflow, 10, "👀", "Eyes reaction");
         }));
         b.CloseComponent();
     };
 
-    private static void AddReaction(RenderTreeBuilder b, int sequence, string source, string fallback, string accessibleName)
+    private static void AddReaction(RenderTreeBuilder b, int sequence, string emoji, string accessibleName)
     {
         b.OpenComponent<ShadcnBubbleReaction>(sequence);
-        b.AddAttribute(sequence + 1, nameof(ShadcnBubbleReaction.Source), source);
-        b.AddAttribute(sequence + 2, nameof(ShadcnBubbleReaction.Fallback), fallback);
+        b.AddAttribute(sequence + 2, nameof(ShadcnBubbleReaction.Fallback), emoji);
         b.AddAttribute(sequence + 3, nameof(ShadcnBubbleReaction.AccessibleName), accessibleName);
         b.CloseComponent();
     }
@@ -521,7 +520,7 @@ internal static class ConversationWorkflowExamples
         <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
         <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
     </ShadcnBubble>
 
@@ -556,29 +555,29 @@ internal static class ConversationWorkflowExamples
         <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Tinted">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
         <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Source="images/avatars/reviewer-thai.png" Fallback="ผต" AccessibleName="Quality reviewer reacted with approval" />
+            <ShadcnBubbleReaction Fallback="👍" AccessibleName="Thumbs up reaction" />
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
         <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
         <ShadcnBubbleContent Href="/docs/components/bubble">Sure. Hit me with your best demo.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start">
         <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Source="images/avatars/reviewer-thai.png" Fallback="ผต" AccessibleName="Quality reviewer reacted with approval" />
-            <ShadcnBubbleReaction Source="images/avatars/coordinator-thai.png" Fallback="มล" AccessibleName="Mali reacted with support" />
+            <ShadcnBubbleReaction Fallback="❤️" AccessibleName="Loved reaction" />
+            <ShadcnBubbleReaction Fallback="😂" AccessibleName="Laughing reaction" />
             <ShadcnBubbleReactionOverflow Count="2">
-                <ShadcnBubbleReaction Source="images/avatars/assistant-thai.png" Fallback="MA" AccessibleName="MALIEV Assistant reacted with attention" />
-                <ShadcnBubbleReaction Source="images/avatars/operator-thai.png" Fallback="นท" AccessibleName="Natee reacted with thanks" />
+                <ShadcnBubbleReaction Fallback="🔥" AccessibleName="Fire reaction" />
+                <ShadcnBubbleReaction Fallback="👀" AccessibleName="Eyes reaction" />
             </ShadcnBubbleReactionOverflow>
         </ShadcnBubbleReactions>
     </ShadcnBubble>

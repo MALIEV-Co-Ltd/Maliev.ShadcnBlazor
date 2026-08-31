@@ -116,9 +116,15 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, incoming.Count);
         Assert.All(incoming, bubble =>
         {
-            Assert.Equal("secondary", bubble.GetAttribute("data-variant"));
+            Assert.Equal("ghost", bubble.GetAttribute("data-variant"));
             Assert.Equal("start", bubble.GetAttribute("data-align"));
         });
+        var outgoing = cut.FindAll("[data-bubble-role='outgoing']");
+        Assert.Equal(2, outgoing.Count);
+        Assert.All(outgoing, bubble => Assert.Equal("default", bubble.GetAttribute("data-variant")));
+        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction'] [data-slot='avatar']"));
+        Assert.Contains("👍", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
+        Assert.Contains("❤️", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
         Assert.Contains("Hey there! what's up?", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("I can group messages, switch sides, and keep the whole thread easy to scan.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Very meta. Very on-brand.", cut.Markup, StringComparison.Ordinal);
@@ -137,6 +143,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var variant = example.Controls.Single(control => control.Id == "bubble-variant");
         variant.Apply(nameof(ShadcnBubbleVariant.Ghost));
         cut = Render(example.Preview);
+        Assert.All(cut.FindAll("[data-bubble-role='outgoing']"), bubble => Assert.Equal("ghost", bubble.GetAttribute("data-variant")));
         Assert.All(cut.FindAll("[data-bubble-role='incoming']"), bubble => Assert.Equal("ghost", bubble.GetAttribute("data-variant")));
 
         var cssPath = Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css");

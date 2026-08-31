@@ -79,6 +79,7 @@ public sealed class ConversationPresentationTests : BunitContext
                 reactions.OpenComponent<ShadcnBubbleReaction>(0);
                 reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Narin reacted with thumbs up");
                 reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "NS");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Source), "/images/narin.png");
                 reactions.CloseComponent();
             }));
             builder.CloseComponent();
@@ -88,6 +89,28 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Equal("img", reaction.GetAttribute("role"));
         Assert.Equal("Narin reacted with thumbs up", reaction.GetAttribute("aria-label"));
         Assert.Equal("NS", reaction.QuerySelector("[data-slot='avatar-fallback']")?.TextContent);
+    }
+
+    [Fact]
+    public void BubbleReactionWithoutSourceRendersEmojiInsteadOfAvatar()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Thumbs up reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "👍");
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("[data-slot='bubble-reaction']");
+        Assert.Empty(reaction.QuerySelectorAll("[data-slot='avatar']"));
+        Assert.Equal("👍", reaction.QuerySelector("[data-slot='bubble-reaction-value']")?.TextContent);
+        Assert.Equal("Thumbs up reaction", reaction.GetAttribute("aria-label"));
     }
 
     [Fact]

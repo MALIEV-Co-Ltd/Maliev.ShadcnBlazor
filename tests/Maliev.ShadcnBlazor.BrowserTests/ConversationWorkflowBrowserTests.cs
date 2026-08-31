@@ -68,11 +68,16 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(2);
         var incomingBubbles = page.Locator("[data-bubble-role='incoming']");
         await Assertions.Expect(incomingBubbles).ToHaveCountAsync(3);
-        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "secondary");
+        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "ghost");
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-align", "start");
+        var outgoingBubbles = page.Locator("[data-bubble-role='outgoing']");
+        await Assertions.Expect(outgoingBubbles).ToHaveCountAsync(2);
+        await Assertions.Expect(outgoingBubbles.First).ToHaveAttributeAsync("data-variant", "default");
         await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
+        for (var index = 0; index < await outgoingBubbles.CountAsync(); index++)
+            await Assertions.Expect(outgoingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
         for (var index = 0; index < await incomingBubbles.CountAsync(); index++)
-            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
+            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "ghost");
         await page.GetByTestId("control-bubble-end").CheckAsync();
         var selectedIncomingBubble = page.Locator("[data-bubble-role='incoming']").Filter(new() { HasTextString = "I can group messages, switch sides, and keep the whole thread easy to scan." });
         await Assertions.Expect(selectedIncomingBubble).ToHaveAttributeAsync("data-align", "end");
@@ -153,7 +158,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
-    public async Task BubblePreviewAppliesVariantTailRadiusAndExpandableAvatarReactions()
+    public async Task BubblePreviewUsesDarkOutgoingGhostIncomingAndExpandableEmojiReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -163,16 +168,24 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
 
-        var defaultBubble = page.Locator("[data-slot='bubble']").First.Locator("[data-slot='bubble-content']");
+        var outgoing = page.Locator("[data-bubble-role='outgoing']");
+        await Assertions.Expect(outgoing).ToHaveCountAsync(2);
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "default");
+        var defaultBubble = outgoing.First.Locator("[data-slot='bubble-content']");
         var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
-        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         var incoming = page.Locator("[data-bubble-role='incoming']").First;
-        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "tinted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "start");
         var incomingContent = incoming.Locator("[data-slot='bubble-content']");
-        var incomingBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
-        Assert.NotEqual(defaultBackground, incomingBackground);
+        var ghostBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual(defaultBackground, ghostBackground);
+
+        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
+        var sentBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual(defaultBackground, sentBackground);
 
         var incomingTail = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderEndStartRadius");
         var incomingTop = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderStartStartRadius");
@@ -187,9 +200,10 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var endTop = Math.Max(ParseCssPixels(endRadiusValues[2]), ParseCssPixels(endRadiusValues[3]));
         Assert.True(endTail < endTop, $"end tail={endTail}px, top={endTop}px");
 
-        var reactionAvatar = page.Locator("[data-slot='bubble-reactions'] [data-slot='bubble-reaction'] [data-slot='avatar']").First;
-        Assert.True(await reactionAvatar.EvaluateAsync<double>("element => element.getBoundingClientRect().width") >= 24);
-        await Assertions.Expect(reactionAvatar.Locator("[data-slot='avatar-image']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-slot='bubble-reactions'] [data-slot='avatar']")).ToHaveCountAsync(0);
+        var emojiReactions = page.Locator("[data-slot='bubble-reaction-value']");
+        await Assertions.Expect(emojiReactions).ToHaveCountAsync(3);
+        await Assertions.Expect(emojiReactions.First).ToHaveTextAsync("👍");
 
         var overflow = page.Locator("[data-slot='bubble-reaction-overflow']");
         var overflowTrigger = overflow.Locator("[data-slot='bubble-reaction-overflow-trigger']");
@@ -198,6 +212,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await overflowTrigger.ClickAsync();
         await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "true");
         await Assertions.Expect(overflow.Locator("[data-slot='bubble-reaction-overflow-content'] [data-slot='bubble-reaction']")).ToHaveCountAsync(2);
+        await Assertions.Expect(emojiReactions).ToHaveCountAsync(5);
     }
 
     [Fact]
