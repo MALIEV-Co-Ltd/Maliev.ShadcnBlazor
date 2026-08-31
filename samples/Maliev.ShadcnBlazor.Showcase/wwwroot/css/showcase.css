@@ -2359,7 +2359,9 @@ a {
     font-family: var(--shadcn-font-mono);
     font-size: 0.78rem;
     font-weight: 550;
+    white-space: normal;
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .component-api__identifier {

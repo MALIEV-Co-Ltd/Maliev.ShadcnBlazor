@@ -16,7 +16,9 @@
     <h2 id="usage-title">Usage</h2>
     <p><strong>Use when</strong> you need the documented semantics, states, and theming behavior in an application.</p>
     <p><strong>Avoid when</strong> a native HTML element already meets the same interaction and accessibility requirements.</p>
-    <p class="component-guide__namespace component-code"><code><span class="code-token-keyword">@@using</span> @Entry.Namespace</code></p>
+    <ShadcnCodeBlock Source="@UsageSource"
+                     Language="razor"
+                     Class="component-guide__namespace component-code" />
     <p><a href="#preview">View the complete preview source</a> before adapting the composition to your project.</p>
 </section>
 
@@ -35,6 +37,8 @@
     [Parameter, EditorRequired] public ComponentDocumentationEntry Entry { get; set; } = null!;
 
     [Parameter, EditorRequired] public IReadOnlyList<ComponentApiDescriptor> Descriptors { get; set; } = [];
+
+    private string UsageSource => $"@using {Entry.Namespace}";
 
     private IReadOnlyDictionary<string, string> InstallationSources => new Dictionary<string, string>
     {
