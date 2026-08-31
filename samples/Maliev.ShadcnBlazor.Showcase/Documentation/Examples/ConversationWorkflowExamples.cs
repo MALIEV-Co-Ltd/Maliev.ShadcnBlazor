@@ -188,15 +188,15 @@ internal static class ConversationWorkflowExamples
         {
             b.OpenElement(0, "div");
             b.AddAttribute(1, "class", "showcase-marker-thread showcase-bubble-thread");
-            AddConversationBubble(b, 2, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Muted, "Machining is complete. Bore 4 is ready for final inspection.");
-            AddConversationBubble(b, 12, ShadcnLogicalAlign.End, ShadcnBubbleVariant.Default, "Probe result received. I am uploading the signed report now.");
-            AddConversationBubble(b, 22, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Ghost, "Thanks. I will hold dispatch until Quality signs off.");
+            AddMessage(b, 2, ShadcnLogicalAlign.Start, AssistantAvatar, false, "MALIEV Assistant", "Machining is complete. Bore 4 is ready for final inspection.", bubbleVariant: ShadcnBubbleVariant.Ghost);
+            AddMessage(b, 12, ShadcnLogicalAlign.End, OperatorAvatar, false, "Narin S.", "Probe result received. I am uploading the signed report now.", bubbleVariant: ShadcnBubbleVariant.Default);
+            AddMessage(b, 22, ShadcnLogicalAlign.Start, ReviewerAvatar, false, "Kanda T.", "Thanks. I will hold dispatch until Quality signs off.", bubbleVariant: ShadcnBubbleVariant.Ghost);
             AddMarker(b, 32, variant, false, "✓", "Four inspection files verified");
             AddMarker(b, 42, ShadcnMarkerVariant.Separator, false, "•", "14:32 · WO-2418");
             AddMarker(b, 52, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "Preparing quality handoff" : "Ready for quality review");
             b.CloseElement();
         };
-        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
+        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "avatar", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
     }
 
     private static ComponentExampleDefinition Message()
@@ -240,22 +240,7 @@ internal static class ConversationWorkflowExamples
         b.CloseComponent();
     }
 
-    private static void AddConversationBubble(RenderTreeBuilder builder, int sequence, ShadcnLogicalAlign align, ShadcnBubbleVariant variant, string text)
-    {
-        builder.OpenComponent<ShadcnBubble>(sequence);
-        builder.AddAttribute(sequence + 1, nameof(ShadcnBubble.Align), align);
-        builder.AddAttribute(sequence + 2, nameof(ShadcnBubble.Variant), variant);
-        builder.AddAttribute(sequence + 3, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
-        {
-            content.OpenComponent<ShadcnBubbleContent>(0);
-            content.AddAttribute(1, "dir", "auto");
-            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
-            content.CloseComponent();
-        }));
-        builder.CloseComponent();
-    }
-
-    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false)
+    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false, ShadcnBubbleVariant? bubbleVariant = null)
     {
         b.OpenComponent<ShadcnMessage>(sequence);
         b.AddAttribute(sequence + 1, nameof(ShadcnMessage.Align), align);
@@ -267,7 +252,7 @@ internal static class ConversationWorkflowExamples
             {
                 AddText<ShadcnMessageHeader>(content, 0, author);
                 content.OpenComponent<ShadcnBubble>(3);
-                content.AddAttribute(4, nameof(ShadcnBubble.Variant), align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted);
+                content.AddAttribute(4, nameof(ShadcnBubble.Variant), bubbleVariant ?? (align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted));
                 content.AddAttribute(5, nameof(ShadcnBubble.Align), align);
                 content.AddAttribute(6, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble => AddText<ShadcnBubbleContent>(bubble, 0, message)));
                 content.CloseComponent();
@@ -451,17 +436,35 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Conversation
 
 <div class="showcase-marker-thread showcase-bubble-thread">
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
-        <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="MALIEV Assistant" /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+                <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
-        <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+        <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Narin S." /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Narin S.</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
-        <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar><img src="images/avatars/reviewer-thai.png" alt="Kanda T." /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Kanda T.</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+                <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
     <ShadcnMarker Variant="ShadcnMarkerVariant.Default">
         <ShadcnMarkerIcon>✓</ShadcnMarkerIcon>

@@ -170,13 +170,17 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
     }
 
     [Fact]
-    public void MarkerDossierShowsStatusSeparatorAndStreamingCompositions()
+    public void MarkerDossierShowsAvatarsCurrentBubbleVariantsAndMarkerCompositions()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog())
             .GetBySlug("marker").Single();
         var cut = Render(example.Preview);
 
         Assert.Equal(3, cut.FindAll("[data-slot='bubble']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-avatar']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message'][data-align='start'] [data-slot='bubble'][data-variant='ghost']").Count);
+        Assert.Single(cut.FindAll("[data-slot='message'][data-align='end'] [data-slot='bubble'][data-variant='default']"));
         Assert.Equal(3, cut.FindAll("[data-slot='marker']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='marker-icon']").Count);
         Assert.Contains("Four inspection files verified", cut.Markup, StringComparison.Ordinal);

@@ -358,6 +358,30 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task MarkerConversationLeavesReadableSpaceBetweenMessageBubbles()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 640, Height = 700 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
+
+        var bubbles = page.Locator(".showcase-marker-thread [data-slot='bubble']");
+        await Assertions.Expect(bubbles).ToHaveCountAsync(3);
+        var first = await bubbles.Nth(0).BoundingBoxAsync();
+        var second = await bubbles.Nth(1).BoundingBoxAsync();
+        var third = await bubbles.Nth(2).BoundingBoxAsync();
+
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.NotNull(third);
+        Assert.True(second!.Y - (first!.Y + first.Height) >= 12);
+        Assert.True(third!.Y - (second.Y + second.Height) >= 12);
+    }
+
+    [Fact]
     public async Task ScrollerTracksAppendUserIntentUnreadJumpAndPrepend()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 390, Height = 844 } });
