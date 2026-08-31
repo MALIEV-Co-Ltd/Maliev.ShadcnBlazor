@@ -1878,8 +1878,12 @@ a {
     align-self: end;
 }
 
-.showcase-message-thread > [data-slot="message"][data-continuation="true"] {
+.showcase-message-thread:has(> [data-slot="message"] > [data-slot="message-avatar"]) > [data-slot="message"][data-continuation="true"] {
     grid-template-columns: 2.25rem minmax(0, 1fr);
+}
+
+.showcase-message-thread:has(> [data-slot="message"] > [data-slot="message-avatar"]) > [data-slot="message"][data-continuation="true"] :is(.shadcn-message-body, .shadcn-message-footer, .shadcn-message-streaming-status) {
+    grid-column: 2;
 }
 
 .showcase-message-thread > [data-slot="message"]:not(:first-child, [data-continuation="true"]) {

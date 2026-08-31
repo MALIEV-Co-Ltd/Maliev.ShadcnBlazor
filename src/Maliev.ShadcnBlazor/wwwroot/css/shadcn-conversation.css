@@ -267,13 +267,18 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
 }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     align-items: stretch;
 }
+.shadcn-message:has(> .shadcn-message-avatar):has(> .shadcn-message-content > .shadcn-message-body) {
+    grid-template-columns: auto minmax(0, 1fr);
+}
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] {
-    grid-template-columns: minmax(0, 1fr) auto;
     flex-direction: initial;
+}
+.shadcn-message:has(> .shadcn-message-avatar):has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] {
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 .shadcn-message-avatar {
     width: 2.25rem;
@@ -295,7 +300,8 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) > .shadcn-message-avatar { grid-column:1; grid-row:1; align-self:end; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] > .shadcn-message-avatar { grid-column:2; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) > .shadcn-message-content { display:contents; }
-.shadcn-message-body { display:flex; grid-column:2; grid-row:1; min-width:0; max-width:100%; flex-direction:column; align-items:flex-start; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-message-body { display:flex; grid-column:1; grid-row:1; min-width:0; max-width:100%; flex-direction:column; align-items:flex-start; gap:calc(.25rem * var(--shadcn-spacing-multiplier)); }
+.shadcn-message:has(> .shadcn-message-avatar):not([data-align="end"]) .shadcn-message-body { grid-column:2; }
 .shadcn-message[data-align="end"] .shadcn-message-body { grid-column:1; align-items:flex-end; }
 .shadcn-message-header { align-self: flex-start; color: var(--shadcn-muted-foreground); font-size: .75rem; font-weight: 600; line-height: 1.25; }
 .shadcn-message[data-align="end"] .shadcn-message-header { align-self: flex-end; }
@@ -313,9 +319,11 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
     transition: opacity var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard),
         transform var(--shadcn-motion-duration) var(--shadcn-motion-easing-standard);
 }
-.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:2; grid-row:2; justify-content:flex-start; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:1; grid-row:2; justify-content:flex-start; }
+.shadcn-message:has(> .shadcn-message-avatar):not([data-align="end"]):has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-footer { grid-column:2; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] .shadcn-message-footer { grid-column:1; justify-content:flex-end; }
-.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-streaming-status { grid-column:2; grid-row:2; justify-self:start; }
+.shadcn-message:has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-streaming-status { grid-column:1; grid-row:2; justify-self:start; }
+.shadcn-message:has(> .shadcn-message-avatar):not([data-align="end"]):has(> .shadcn-message-content > .shadcn-message-body) .shadcn-message-streaming-status { grid-column:2; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-body)[data-align="end"] .shadcn-message-streaming-status { grid-column:1; justify-self:end; }
 .shadcn-message:has(> .shadcn-message-content > .shadcn-message-streaming-status) .shadcn-message-footer { grid-row:3; }
 .shadcn-message:hover .shadcn-message-footer,

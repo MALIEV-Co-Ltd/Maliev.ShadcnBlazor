@@ -202,6 +202,31 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task MessageRowsRemainAlignedWhenOptionalAvatarsAreHidden()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 640, Height = 700 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
+        await page.GetByTestId("control-message-avatar").UncheckAsync();
+
+        var thread = page.Locator(".showcase-message-thread");
+        await Assertions.Expect(thread.Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+
+        var ltrEdges = await thread.EvaluateAsync<double[]>("element => [...element.querySelectorAll('[data-slot=message][data-align=start] [data-slot=message-body]')].flatMap(body => { const rect = body.getBoundingClientRect(); return [rect.left, rect.right]; })");
+        Assert.Equal(6, ltrEdges.Length);
+        Assert.InRange(ltrEdges.Where((_, index) => index % 2 == 0).Max() - ltrEdges.Where((_, index) => index % 2 == 0).Min(), 0, 1);
+
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        var rtlEdges = await thread.EvaluateAsync<double[]>("element => [...element.querySelectorAll('[data-slot=message][data-align=start] [data-slot=message-body]')].flatMap(body => { const rect = body.getBoundingClientRect(); return [rect.left, rect.right]; })");
+        Assert.Equal(6, rtlEdges.Length);
+        Assert.InRange(rtlEdges.Where((_, index) => index % 2 == 1).Max() - rtlEdges.Where((_, index) => index % 2 == 1).Min(), 0, 1);
+    }
+
+    [Fact]
     public async Task BubblePreviewUsesDarkOutgoingGhostIncomingAndExpandableEmojiReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
