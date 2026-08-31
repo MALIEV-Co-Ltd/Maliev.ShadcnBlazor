@@ -16,12 +16,15 @@
                    Variant="ShadcnSidebarVariant.Inset"
                    Collapsible="Collapsible">
         <ShadcnSidebarHeader>
-            <div class="showcase-sidebar-brand">
-                <span class="showcase-sidebar-brand__mark" aria-hidden="true">M</span>
-                <span class="showcase-sidebar-brand__copy">
-                    <strong>MALIEV</strong>
-                    <small>Production</small>
-                </span>
+            <div class="showcase-sidebar-header-row">
+                <div class="showcase-sidebar-brand">
+                    <span class="showcase-sidebar-brand__mark" aria-hidden="true">M</span>
+                    <span class="showcase-sidebar-brand__copy">
+                        <strong>MALIEV</strong>
+                        <small>Production</small>
+                    </span>
+                </div>
+                <ShadcnSidebarTrigger TargetId="production-navigation" />
             </div>
         </ShadcnSidebarHeader>
 
@@ -87,7 +90,7 @@
 
     <ShadcnSidebarInset>
         <header class="showcase-sidebar-toolbar">
-            <ShadcnSidebarTrigger TargetId="production-navigation" />
+            <ShadcnSidebarTrigger TargetId="production-navigation" Class="showcase-sidebar-mobile-trigger" />
             <span>Factory workspace</span>
             <span class="showcase-sidebar-shift">Shift A · Live</span>
         </header>

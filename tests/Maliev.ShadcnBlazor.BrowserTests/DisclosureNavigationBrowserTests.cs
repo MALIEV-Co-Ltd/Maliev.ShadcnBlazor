@@ -415,7 +415,9 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         Assert.InRange(Math.Abs(railBox.Y - shellBox.Y), 0, 1);
         Assert.InRange(Math.Abs((railBox.Y + railBox.Height) - (shellBox.Y + shellBox.Height)), 0, 1);
 
-        var trigger = canvas.Locator("[data-slot='sidebar-trigger']");
+        var sidebar = canvas.Locator("aside[data-slot='sidebar']");
+        var trigger = sidebar.Locator("[data-slot='sidebar-trigger']");
+        await Assertions.Expect(trigger).ToHaveCountAsync(1);
         await trigger.ClickAsync();
         await Assertions.Expect(shell).ToHaveAttributeAsync("data-state", "collapsed");
         var active = canvas.Locator("[data-slot='sidebar-menu-button'][data-active='true']");
@@ -425,6 +427,20 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         await desktop.ChooseOptionAsync("control-sidebar-side", "Right");
         await Assertions.Expect(canvas.Locator("aside[data-slot='sidebar']")).ToHaveAttributeAsync("data-side", "right");
         await Assertions.Expect(desktop.Locator("#preview .component-code pre")).ToContainTextAsync("Side=\"ShadcnSidebarSide.Right\"");
+
+        await desktop.ChooseOptionAsync("control-sidebar-mode", "None");
+        await Assertions.Expect(canvas.Locator("[data-slot='sidebar-trigger']")).ToHaveCountAsync(0);
+
+        await desktop.ChooseOptionAsync("control-sidebar-side", "Left");
+        await desktop.ChooseOptionAsync("control-sidebar-mode", "Off canvas");
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-state", "collapsed");
+        await Assertions.Expect(sidebar).ToHaveAttributeAsync("data-collapsible", "offcanvas");
+        var insetBox = await canvas.Locator("[data-slot='sidebar-inset']").BoundingBoxAsync();
+        shellBox = await shell.BoundingBoxAsync();
+        Assert.NotNull(insetBox);
+        Assert.NotNull(shellBox);
+        Assert.InRange(Math.Abs(insetBox.X - shellBox.X), 0, 9);
+        Assert.InRange(Math.Abs((insetBox.X + insetBox.Width) - (shellBox.X + shellBox.Width)), 0, 9);
 
         await using var mobileContext = await playwright.Browser.NewContextAsync(new()
         {

@@ -513,8 +513,10 @@ internal static class DisclosureNavigationExamples
                    Variant="ShadcnSidebarVariant.Inset"
                    Collapsible="{{nameof(ShadcnSidebarCollapsible)}}.{{collapsible}}">
         <ShadcnSidebarHeader>
-            <strong>MALIEV</strong>
-            <span>Production</span>
+            <div class="sidebar-header-row">
+                <span><strong>MALIEV</strong><small>Production</small></span>
+                <ShadcnSidebarTrigger TargetId="production-navigation" />
+            </div>
         </ShadcnSidebarHeader>
         <ShadcnSidebarContent>
             <ShadcnSidebarGroup>
@@ -544,7 +546,7 @@ internal static class DisclosureNavigationExamples
     </ShadcnSidebar>
     <ShadcnSidebarInset>
         <header>
-            <ShadcnSidebarTrigger TargetId="production-navigation" />
+            <ShadcnSidebarTrigger TargetId="production-navigation" Class="sidebar-mobile-trigger" />
             <span>Factory workspace</span>
         </header>
         <main>
@@ -563,11 +565,15 @@ internal static class DisclosureNavigationExamples
             [
                 Toggle("sidebar-open", "Expanded", value => open = value, true),
                 Select("sidebar-side", "Side", side.ToString(), Enum.GetNames<ShadcnSidebarSide>(), value => side = Enum.Parse<ShadcnSidebarSide>(value)),
-                Select("sidebar-mode", "Collapse mode", collapsible.ToString(), Enum.GetNames<ShadcnSidebarCollapsible>(), value => collapsible = Enum.Parse<ShadcnSidebarCollapsible>(value)),
+                Select("sidebar-mode", "Collapse mode", CollapsibleLabel(collapsible), ["Off canvas", "Icon", "None"], value => collapsible = ParseCollapsible(value)),
             ],
             ["expanded", "collapsed", "offcanvas", "icon", "none", "mobile-modal", "persistence", "tooltip", "focus", "inert", "rtl", "responsive"]);
         return example with { RazorSourceProvider = Source };
     }
+
+    private static string CollapsibleLabel(ShadcnSidebarCollapsible value) => value == ShadcnSidebarCollapsible.OffCanvas ? "Off canvas" : value.ToString();
+
+    private static ShadcnSidebarCollapsible ParseCollapsible(string value) => value == "Off canvas" ? ShadcnSidebarCollapsible.OffCanvas : Enum.Parse<ShadcnSidebarCollapsible>(value);
 
     private static ComponentExampleDefinition Tabs()
     {
