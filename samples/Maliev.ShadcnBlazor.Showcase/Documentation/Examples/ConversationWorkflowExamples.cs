@@ -204,23 +204,21 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Message()
     {
-        var end = false;
         var avatar = true;
         var footer = true;
         var footerAlways = false;
         RenderFragment preview = b =>
         {
             b.OpenComponent<ConversationMessageDossierPreview>(0);
-            b.AddAttribute(1, nameof(ConversationMessageDossierPreview.AlignMiddleRowEnd), end);
-            b.AddAttribute(2, nameof(ConversationMessageDossierPreview.Avatars), avatar);
-            b.AddAttribute(3, nameof(ConversationMessageDossierPreview.FooterActions), footer);
-            b.AddAttribute(4, nameof(ConversationMessageDossierPreview.AlwaysShowActions), footerAlways);
+            b.AddAttribute(1, nameof(ConversationMessageDossierPreview.Avatars), avatar);
+            b.AddAttribute(2, nameof(ConversationMessageDossierPreview.FooterActions), footer);
+            b.AddAttribute(3, nameof(ConversationMessageDossierPreview.AlwaysShowActions), footerAlways);
             b.CloseComponent();
         };
-        return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "copy", "reply", "quote", "hover-actions", "bubbles", "rtl"])
+        return Example("message", "Message row", preview, [Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "copy", "reply", "quote", "hover-actions", "bubbles", "rtl"])
             with
         {
-            RazorSourceProvider = () => MessageRazorSource(end, avatar, footer, footerAlways)
+            RazorSourceProvider = () => MessageRazorSource(avatar, footer, footerAlways)
         };
     }
 
@@ -708,7 +706,7 @@ internal static class ConversationWorkflowExamples
 </ShadcnMessageScrollerProvider>
 """;
 
-    private static string MessageRazorSource(bool middleRowEnd, bool avatars, bool footerActions, bool alwaysShowActions)
+    private static string MessageRazorSource(bool avatars, bool footerActions, bool alwaysShowActions)
     {
         var operatorAvatar = avatars ? """
         <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
@@ -726,6 +724,14 @@ internal static class ConversationWorkflowExamples
                 <ShadcnMessageActions>
                     <ShadcnMessageCopyAction Text="ตรวจสอบไฟล์แล้ว 3 รายการ" />
                     <ShadcnMessageReplyAction Quote="ตรวจสอบไฟล์แล้ว 3 รายการ" OnReply="ReplyTo" />
+                </ShadcnMessageActions>
+            </ShadcnMessageFooter>
+""" : string.Empty;
+        var coordinatorFooter = footerActions ? $$"""
+            <ShadcnMessageFooter{{(alwaysShowActions ? " data-visibility=\"always\"" : string.Empty)}}>
+                <ShadcnMessageActions>
+                    <ShadcnMessageCopyAction Text="พร้อมส่งแบบให้ตรวจ" />
+                    <ShadcnMessageReplyAction Quote="พร้อมส่งแบบให้ตรวจ" OnReply="ReplyTo" />
                 </ShadcnMessageActions>
             </ShadcnMessageFooter>
 """ : string.Empty;
@@ -772,15 +778,16 @@ internal static class ConversationWorkflowExamples
         </ShadcnMessageContent>
     </ShadcnMessage>
 
-    <ShadcnMessage Align="ShadcnLogicalAlign.{{(middleRowEnd ? "End" : "Start")}}">
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
 {{coordinatorAvatar}}
         <ShadcnMessageContent>
             <ShadcnMessageBody>
                 <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
-                <ShadcnBubble Align="ShadcnLogicalAlign.{{(middleRowEnd ? "End" : "Start")}}" Variant="ShadcnBubbleVariant.{{(middleRowEnd ? "Default" : "Muted")}}">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
                     <ShadcnBubbleContent dir="auto">พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>
+{{coordinatorFooter}}
         </ShadcnMessageContent>
     </ShadcnMessage>
 

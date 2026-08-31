@@ -106,9 +106,11 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(streamingMarker.Locator("[data-slot='marker-content'][data-streaming='true']")).ToHaveCountAsync(1);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
-        await page.GetByTestId("control-message-end").CheckAsync();
         await page.Locator("[data-testid='component-preview-canvas']").EvaluateAsync("el => el.dir='rtl'");
-        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.GetByTestId("control-message-end")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='start']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-slot='message']").Nth(1).Locator("[data-slot='message-footer']")).ToHaveCountAsync(1);
     }
 
     [Fact]

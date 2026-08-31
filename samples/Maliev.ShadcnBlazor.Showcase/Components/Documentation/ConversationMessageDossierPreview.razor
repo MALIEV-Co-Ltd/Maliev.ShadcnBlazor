@@ -26,7 +26,7 @@
             </ShadcnMessageContent>
         </ShadcnMessage>
 
-        <ShadcnMessage Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
+        <ShadcnMessage Align="ShadcnLogicalAlign.Start">
             @if (Avatars)
             {
                 <ConversationAvatar AvatarId="placeholder" Alt="มาลี · ผู้ประสานงาน" Fallback="ม" />
@@ -34,10 +34,19 @@
             <ShadcnMessageContent>
                 <ShadcnMessageBody>
                     <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
-                    <ShadcnBubble Variant="@(AlignMiddleRowEnd ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted)" Align="@(AlignMiddleRowEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)">
+                    <ShadcnBubble Variant="ShadcnBubbleVariant.Muted" Align="ShadcnLogicalAlign.Start">
                         <ShadcnBubbleContent dir="auto">พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
                     </ShadcnBubble>
                 </ShadcnMessageBody>
+                @if (FooterActions)
+                {
+                    <ShadcnMessageFooter data-visibility="@(AlwaysShowActions ? "always" : null)">
+                        <ShadcnMessageActions>
+                            <ShadcnMessageCopyAction Text="พร้อมส่งแบบให้ตรวจ" data-testid="message-copy" />
+                            <ShadcnMessageReplyAction Quote="พร้อมส่งแบบให้ตรวจ" OnReply="ReplyTo" data-testid="message-reply" />
+                        </ShadcnMessageActions>
+                    </ShadcnMessageFooter>
+                }
             </ShadcnMessageContent>
         </ShadcnMessage>
 
@@ -74,7 +83,6 @@
 </div>
 
 @code {
-    [Parameter] public bool AlignMiddleRowEnd { get; set; }
     [Parameter] public bool Avatars { get; set; } = true;
     [Parameter] public bool FooterActions { get; set; } = true;
     [Parameter] public bool AlwaysShowActions { get; set; }

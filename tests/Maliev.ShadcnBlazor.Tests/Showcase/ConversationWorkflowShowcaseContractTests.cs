@@ -238,12 +238,14 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Single(cut.FindAll("[data-slot='message-avatar'] [data-avatar='placeholder']"));
         Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
-        Assert.Equal(2, cut.FindAll("[data-testid='message-copy']").Count);
-        Assert.Equal(2, cut.FindAll("[data-testid='message-reply']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-footer']").Count);
+        Assert.Equal(3, cut.FindAll("[data-testid='message-copy']").Count);
+        Assert.Equal(3, cut.FindAll("[data-testid='message-reply']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-body']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='message-actions']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-actions']").Count);
         Assert.Single(cut.FindAll("[data-slot='message-status']"));
+        Assert.Equal("start", cut.FindAll("[data-slot='message']")[1].GetAttribute("data-align"));
+        Assert.Single(cut.FindAll("[data-slot='message']")[1].QuerySelectorAll("[data-slot='message-footer']"));
         Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
     }
 
@@ -263,12 +265,12 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var cut = Render(example.Preview);
         var copy = cut.FindAll("[data-testid='message-copy']");
         var reply = cut.FindAll("[data-testid='message-reply']");
-        Assert.Equal(2, copy.Count);
-        Assert.Equal(2, reply.Count);
+        Assert.Equal(3, copy.Count);
+        Assert.Equal(3, reply.Count);
 
         copy[0].Click();
         Assert.Contains("Copied", cut.Markup, StringComparison.Ordinal);
-        reply[1].Click();
+        reply[2].Click();
         var quote = cut.Find("[data-testid='message-reply-quote']");
         Assert.Contains("Sure. I’ll keep the thread easy to scan.", quote.TextContent, StringComparison.Ordinal);
         quote.QuerySelector("[data-slot='message-reply-dismiss']")!.Click();
@@ -298,13 +300,14 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessageReplyAction", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageStatus>", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageReplyQuote", example.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain(example.Controls, control => control.Id == "message-end");
+        Assert.Collection(System.Text.RegularExpressions.Regex.Matches(example.RazorSource, "<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\">"), _ => { }, _ => { });
+        Assert.Collection(System.Text.RegularExpressions.Regex.Matches(example.RazorSource, "<ShadcnMessageFooter"), _ => { }, _ => { }, _ => { });
 
         example.Controls.Single(control => control.Id == "message-footer-always").Apply("True");
         Assert.Contains("data-visibility=\"always\"", example.RazorSource, StringComparison.Ordinal);
         example.Controls.Single(control => control.Id == "message-avatar").Apply("False");
         Assert.DoesNotContain("<ShadcnMessageAvatar", example.RazorSource, StringComparison.Ordinal);
-        example.Controls.Single(control => control.Id == "message-end").Apply("True");
-        Assert.Contains("<ShadcnMessage Align=\"ShadcnLogicalAlign.End\">", example.RazorSource, StringComparison.Ordinal);
         example.Controls.Single(control => control.Id == "message-footer").Apply("False");
         Assert.DoesNotContain("<ShadcnMessageFooter", example.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("<ShadcnMessageReplyQuote", example.RazorSource, StringComparison.Ordinal);
@@ -324,7 +327,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, cut.FindAll("[data-slot='message-body']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] > [data-slot='avatar']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar'] [data-slot='avatar-fallback']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='message-footer']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='message-footer']").Count);
 
         var conversationCss = File.ReadAllText(Path.Combine(FindRoot(), "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-conversation.css"));
         Assert.Contains("grid-template-rows: auto auto", conversationCss, StringComparison.Ordinal);
