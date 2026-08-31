@@ -161,6 +161,30 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task ConsecutiveMessagesFromOneSenderUseCompactGroupedSpacing()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
+
+        var engineer = page.Locator("[data-slot='message']").First;
+        var engineerBubbles = engineer.Locator("[data-testid^='engineer-message-']");
+        await Assertions.Expect(engineerBubbles).ToHaveCountAsync(2);
+        await Assertions.Expect(engineer.Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Locator("[data-slot='message-header']")).ToHaveCountAsync(1);
+
+        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const bubbles = messages[0].querySelectorAll('[data-slot=bubble]'); const first = bubbles[0].getBoundingClientRect(); const second = bubbles[1].getBoundingClientRect(); const engineer = messages[0].getBoundingClientRect(); const coordinator = messages[1].getBoundingClientRect(); return [second.top - first.bottom, coordinator.top - engineer.bottom]; }");
+        Assert.InRange(spacing[0], 3, 6);
+        Assert.InRange(spacing[1], 16, 21);
+        Assert.True(spacing[1] > spacing[0] * 3);
+        Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    [Fact]
     public async Task BubblePreviewUsesDarkOutgoingGhostIncomingAndExpandableEmojiReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

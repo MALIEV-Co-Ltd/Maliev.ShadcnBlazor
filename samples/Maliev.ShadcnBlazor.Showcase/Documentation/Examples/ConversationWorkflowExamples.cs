@@ -773,6 +773,9 @@ internal static class ConversationWorkflowExamples
                 <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
                     <ShadcnBubbleContent dir="auto">ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
                 </ShadcnBubble>
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                    <ShadcnBubbleContent dir="auto">กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ</ShadcnBubbleContent>
+                </ShadcnBubble>
             </ShadcnMessageBody>
 {{operatorFooter}}
         </ShadcnMessageContent>

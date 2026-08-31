@@ -237,13 +237,17 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, cut.FindAll("img[data-avatar]").Count);
         Assert.Single(cut.FindAll("[data-slot='message-avatar'] [data-avatar='placeholder']"));
         Assert.Equal(3, cut.FindAll("[data-slot='message-header']").Count);
-        Assert.Equal(3, cut.FindAll("[data-slot='bubble-content']").Count);
+        Assert.Equal(4, cut.FindAll("[data-slot='bubble-content']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-footer']").Count);
         Assert.Equal(3, cut.FindAll("[data-testid='message-copy']").Count);
         Assert.Equal(3, cut.FindAll("[data-testid='message-reply']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-body']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-actions']").Count);
         Assert.Single(cut.FindAll("[data-slot='message-status']"));
+        Assert.Equal(2, cut.FindAll("[data-slot='message']")[0].QuerySelectorAll("[data-slot='bubble']").Length);
+        Assert.Single(cut.FindAll("[data-slot='message']")[0].QuerySelectorAll("[data-slot='message-header']"));
+        Assert.Single(cut.FindAll("[data-slot='message']")[0].QuerySelectorAll("[data-slot='message-avatar']"));
+        Assert.Contains("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ", cut.Markup, StringComparison.Ordinal);
         Assert.Equal("start", cut.FindAll("[data-slot='message']")[1].GetAttribute("data-align"));
         Assert.Single(cut.FindAll("[data-slot='message']")[1].QuerySelectorAll("[data-slot='message-footer']"));
         Assert.Contains("พร้อมส่งแบบให้ตรวจ", cut.Markup, StringComparison.Ordinal);
@@ -300,6 +304,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("<ShadcnMessageReplyAction", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageStatus>", example.RazorSource, StringComparison.Ordinal);
         Assert.Contains("<ShadcnMessageReplyQuote", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ", example.RazorSource, StringComparison.Ordinal);
         Assert.DoesNotContain(example.Controls, control => control.Id == "message-end");
         Assert.Collection(System.Text.RegularExpressions.Regex.Matches(example.RazorSource, "<ShadcnMessage Align=\"ShadcnLogicalAlign.Start\">"), _ => { }, _ => { });
         Assert.Collection(System.Text.RegularExpressions.Regex.Matches(example.RazorSource, "<ShadcnMessageFooter"), _ => { }, _ => { }, _ => { });
