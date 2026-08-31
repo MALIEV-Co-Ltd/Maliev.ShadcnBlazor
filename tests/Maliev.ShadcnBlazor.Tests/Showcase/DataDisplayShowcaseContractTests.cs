@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
@@ -46,7 +47,14 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
                 var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
                 var control = example.Controls.Single(candidate => candidate.Id == controlId);
                 var before = Render(example.Preview).Markup;
-                control.Apply(bool.Parse(control.Value) ? "false" : "true");
+                var nextValue = control.Kind switch
+                {
+                    ComponentParameterControlKind.Toggle => bool.Parse(control.Value) ? "false" : "true",
+                    ComponentParameterControlKind.Select => control.Options.First(option => !string.Equals(option, control.Value, StringComparison.Ordinal)),
+                    ComponentParameterControlKind.Number => (double.Parse(control.Value, CultureInfo.InvariantCulture) + 1).ToString(CultureInfo.InvariantCulture),
+                    _ => throw new InvalidOperationException($"Unsupported control kind {control.Kind}.")
+                };
+                control.Apply(nextValue);
                 Assert.NotEqual(before, Render(example.Preview).Markup);
             }
     }
