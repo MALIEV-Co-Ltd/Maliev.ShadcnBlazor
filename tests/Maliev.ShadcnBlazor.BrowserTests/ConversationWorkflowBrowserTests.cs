@@ -231,9 +231,15 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(overflowTrigger).ToHaveTextAsync("+2");
         await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "false");
         await overflowTrigger.ClickAsync();
-        await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(overflowTrigger).ToHaveCountAsync(0);
         await Assertions.Expect(overflow.Locator("[data-slot='bubble-reaction-overflow-content'] [data-slot='bubble-reaction']")).ToHaveCountAsync(2);
         await Assertions.Expect(emojiReactions).ToHaveCountAsync(5);
+        var fireReaction = page.GetByTestId("bubble-reaction-fire");
+        await Assertions.Expect(fireReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(fireReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("1");
+        await fireReaction.ClickAsync();
+        await Assertions.Expect(fireReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(fireReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
     }
 
     [Fact]

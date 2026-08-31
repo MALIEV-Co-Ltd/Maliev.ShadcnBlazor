@@ -39,8 +39,18 @@
                                   Pressed="_laughPressed"
                                   PressedChanged="SetLaugh" />
             <ShadcnBubbleReactionOverflow Count="2">
-                <ShadcnBubbleReaction Fallback="🔥" AccessibleName="Fire reaction" />
-                <ShadcnBubbleReaction Fallback="👀" AccessibleName="Eyes reaction" />
+                <ShadcnBubbleReaction Fallback="🔥"
+                                      AccessibleName="Fire reaction"
+                                      Count="_fireCount"
+                                      Pressed="_firePressed"
+                                      PressedChanged="SetFire"
+                                      data-testid="bubble-reaction-fire" />
+                <ShadcnBubbleReaction Fallback="👀"
+                                      AccessibleName="Eyes reaction"
+                                      Count="_eyesCount"
+                                      Pressed="_eyesPressed"
+                                      PressedChanged="SetEyes"
+                                      data-testid="bubble-reaction-eyes" />
             </ShadcnBubbleReactionOverflow>
         </ShadcnBubbleReactions>
     </ShadcnBubble>
@@ -54,9 +64,13 @@
     private int _thumbsUpCount = 1;
     private int _heartCount = 2;
     private int _laughCount = 1;
+    private int _fireCount = 1;
+    private int _eyesCount = 1;
     private bool _thumbsUpPressed;
     private bool _heartPressed;
     private bool _laughPressed;
+    private bool _firePressed;
+    private bool _eyesPressed;
 
     private ShadcnLogicalAlign IncomingAlign => AlignIncomingEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start;
     private ShadcnReactionSide ReactionSide => ReactionsTop ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom;
@@ -64,6 +78,8 @@
     private void SetThumbsUp(bool pressed) => SetReaction(ref _thumbsUpPressed, ref _thumbsUpCount, pressed);
     private void SetHeart(bool pressed) => SetReaction(ref _heartPressed, ref _heartCount, pressed);
     private void SetLaugh(bool pressed) => SetReaction(ref _laughPressed, ref _laughCount, pressed);
+    private void SetFire(bool pressed) => SetReaction(ref _firePressed, ref _fireCount, pressed);
+    private void SetEyes(bool pressed) => SetReaction(ref _eyesPressed, ref _eyesCount, pressed);
 
     private static void SetReaction(ref bool current, ref int count, bool pressed)
     {

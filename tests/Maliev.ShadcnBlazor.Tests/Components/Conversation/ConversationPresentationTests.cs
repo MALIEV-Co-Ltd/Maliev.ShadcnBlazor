@@ -163,7 +163,7 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
-    public void BubbleReactionOverflowRevealsAndHidesAdditionalReactions()
+    public void BubbleReactionOverflowRevealsAdditionalReactionsAndRemovesExhaustedTrigger()
     {
         var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
         {
@@ -193,13 +193,9 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
 
         trigger.Click();
-        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
         Assert.Single(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
         Assert.Contains("Mali reacted with fire", cut.Markup, StringComparison.Ordinal);
-
-        trigger.Click();
-        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
-        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
+        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-trigger']"));
     }
 
     [Fact]
@@ -227,8 +223,6 @@ public sealed class ConversationPresentationTests : BunitContext
 
         var trigger = cut.Find("[data-slot='bubble-reaction-overflow-trigger']");
         Assert.Equal("แสดงอีก 2 รายการ", trigger.GetAttribute("aria-label"));
-        trigger.Click();
-        Assert.Equal("ซ่อนอีก 2 รายการ", trigger.GetAttribute("aria-label"));
     }
 
     [Theory]

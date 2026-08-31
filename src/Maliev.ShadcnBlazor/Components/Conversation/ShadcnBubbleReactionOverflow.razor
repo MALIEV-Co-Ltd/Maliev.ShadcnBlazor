@@ -10,13 +10,16 @@
     {
         <span id="@ContentId" class="shadcn-bubble-reaction-overflow-content" data-slot="bubble-reaction-overflow-content">@ChildContent</span>
     }
-    <button class="shadcn-bubble-reaction-overflow-trigger"
-            data-slot="bubble-reaction-overflow-trigger"
-            type="button"
-            aria-label="@TriggerLabel"
-            aria-expanded="@(_expanded ? "true" : "false")"
-            aria-controls="@ContentId"
-            @onclick="ToggleAsync">+@Count</button>
+    else
+    {
+        <button class="shadcn-bubble-reaction-overflow-trigger"
+                data-slot="bubble-reaction-overflow-trigger"
+                type="button"
+                aria-label="@TriggerLabel"
+                aria-expanded="false"
+                aria-controls="@ContentId"
+                @onclick="RevealAsync">+@Count</button>
+    }
 </span>
 
 @code {
@@ -53,9 +56,9 @@
             throw new InvalidOperationException("ShadcnBubbleReactionOverflow requires additional reactions.");
     }
 
-    private async Task ToggleAsync()
+    private async Task RevealAsync()
     {
-        _expanded = !_expanded;
-        await ExpandedChanged.InvokeAsync(_expanded);
+        _expanded = true;
+        await ExpandedChanged.InvokeAsync(true);
     }
 }

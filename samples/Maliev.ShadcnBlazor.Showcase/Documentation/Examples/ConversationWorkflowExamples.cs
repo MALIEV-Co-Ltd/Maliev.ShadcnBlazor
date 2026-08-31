@@ -493,7 +493,11 @@ internal static class ConversationWorkflowExamples
     <ShadcnBubble Align="ShadcnLogicalAlign.Start">
         <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Fallback="👍" AccessibleName="Thumbs up reaction" />
+            <ShadcnBubbleReaction Fallback="👍"
+                                  AccessibleName="Thumbs up reaction"
+                                  Count="@thumbsUpCount"
+                                  Pressed="@thumbsUpPressed"
+                                  PressedChanged="SetThumbsUp" />
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
@@ -513,26 +517,52 @@ internal static class ConversationWorkflowExamples
                                   Count="@heartCount"
                                   Pressed="@heartPressed"
                                   PressedChanged="SetHeart" />
-            <ShadcnBubbleReaction Fallback="😂" AccessibleName="Laughing reaction" Count="1" />
+            <ShadcnBubbleReaction Fallback="😂"
+                                  AccessibleName="Laughing reaction"
+                                  Count="@laughCount"
+                                  Pressed="@laughPressed"
+                                  PressedChanged="SetLaugh" />
             <ShadcnBubbleReactionOverflow Count="2">
-                <ShadcnBubbleReaction Fallback="🔥" AccessibleName="Fire reaction" />
-                <ShadcnBubbleReaction Fallback="👀" AccessibleName="Eyes reaction" />
+                <ShadcnBubbleReaction Fallback="🔥"
+                                      AccessibleName="Fire reaction"
+                                      Count="@fireCount"
+                                      Pressed="@firePressed"
+                                      PressedChanged="SetFire" />
+                <ShadcnBubbleReaction Fallback="👀"
+                                      AccessibleName="Eyes reaction"
+                                      Count="@eyesCount"
+                                      Pressed="@eyesPressed"
+                                      PressedChanged="SetEyes" />
             </ShadcnBubbleReactionOverflow>
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 </ShadcnBubbleGroup>
 
 @code {
+    private int thumbsUpCount = 1;
     private int heartCount = 2;
+    private int laughCount = 1;
+    private int fireCount = 1;
+    private int eyesCount = 1;
+    private bool thumbsUpPressed;
     private bool heartPressed;
+    private bool laughPressed;
+    private bool firePressed;
+    private bool eyesPressed;
 
-    private void SetHeart(bool pressed)
+    private void SetThumbsUp(bool pressed) => SetReaction(ref thumbsUpPressed, ref thumbsUpCount, pressed);
+    private void SetHeart(bool pressed) => SetReaction(ref heartPressed, ref heartCount, pressed);
+    private void SetLaugh(bool pressed) => SetReaction(ref laughPressed, ref laughCount, pressed);
+    private void SetFire(bool pressed) => SetReaction(ref firePressed, ref fireCount, pressed);
+    private void SetEyes(bool pressed) => SetReaction(ref eyesPressed, ref eyesCount, pressed);
+
+    private static void SetReaction(ref bool current, ref int count, bool pressed)
     {
-        if (heartPressed == pressed)
+        if (current == pressed)
             return;
 
-        heartPressed = pressed;
-        heartCount += pressed ? 1 : -1;
+        current = pressed;
+        count += pressed ? 1 : -1;
     }
 }
 """;
