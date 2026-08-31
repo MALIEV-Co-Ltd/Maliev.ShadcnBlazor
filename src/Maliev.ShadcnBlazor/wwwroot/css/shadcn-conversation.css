@@ -322,7 +322,7 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
     transform: none;
 }
 .shadcn-message-actions { display:flex; width:fit-content; min-width:0; flex:none; align-items:center; gap:calc(.125rem * var(--shadcn-spacing-multiplier)); }
-.shadcn-message-status { min-width:0; margin-inline-start:auto; white-space:nowrap; }
+.shadcn-message-status { min-width:0; white-space:nowrap; }
 .shadcn-message-action {
     display:inline-flex;
     width:1.75rem;

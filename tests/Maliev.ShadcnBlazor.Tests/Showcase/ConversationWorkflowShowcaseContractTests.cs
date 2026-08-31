@@ -328,7 +328,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Contains("grid-template-rows: auto auto", conversationCss, StringComparison.Ordinal);
         Assert.Contains("align-self:end", conversationCss, StringComparison.Ordinal);
         Assert.Contains("justify-content:flex-start", conversationCss, StringComparison.Ordinal);
-        Assert.Contains("margin-inline-start:auto", conversationCss, StringComparison.Ordinal);
+        Assert.DoesNotContain(".shadcn-message-status { min-width:0; margin-inline-start:auto;", conversationCss, StringComparison.Ordinal);
         Assert.Contains("aspect-ratio:1", conversationCss, StringComparison.Ordinal);
         Assert.Contains(".shadcn-message-action {", conversationCss, StringComparison.Ordinal);
         Assert.Contains(".shadcn-message-avatar > [data-slot=\"avatar\"]", conversationCss, StringComparison.Ordinal);

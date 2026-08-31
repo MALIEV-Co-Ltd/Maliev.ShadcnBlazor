@@ -152,9 +152,10 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(avatarImage).ToBeVisibleAsync();
 
         var outgoing = page.Locator("[data-slot='message'][data-align='end']").Last;
-        var footerGeometry = await outgoing.EvaluateAsync<double[]>("element => { const actions = element.querySelector('[data-slot=message-actions]').getBoundingClientRect(); const status = element.querySelector('[data-slot=message-status]').getBoundingClientRect(); const button = element.querySelector('[data-slot=message-reply-action]').getBoundingClientRect(); return [actions.left, status.left, button.width]; }");
+        var footerGeometry = await outgoing.EvaluateAsync<double[]>("element => { const actions = element.querySelector('[data-slot=message-actions]').getBoundingClientRect(); const status = element.querySelector('[data-slot=message-status]').getBoundingClientRect(); const button = element.querySelector('[data-slot=message-reply-action]').getBoundingClientRect(); return [actions.left, actions.right, status.left, button.width]; }");
         Assert.True(footerGeometry[0] < footerGeometry[1]);
-        Assert.InRange(footerGeometry[2], 24, 32);
+        Assert.InRange(footerGeometry[2] - footerGeometry[1], 0, 8);
+        Assert.InRange(footerGeometry[3], 24, 32);
     }
 
     [Fact]
