@@ -462,7 +462,8 @@ public sealed class ComponentDossierBrowserTests(
         var avatar = message.Locator("[data-slot='message-avatar']");
         Assert.Equal("end", await avatar.EvaluateAsync<string>("element => getComputedStyle(element).alignSelf"));
         await Assertions.Expect(message.Locator("img[data-avatar='operator']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(2).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#preview img[data-avatar='assistant']")).ToHaveCountAsync(1);
         var footer = message.Locator("[data-slot='message-footer']");
         Assert.Equal("0", await footer.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));

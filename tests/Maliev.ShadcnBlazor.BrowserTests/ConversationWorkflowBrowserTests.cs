@@ -108,9 +108,9 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
         await page.Locator("[data-testid='component-preview-canvas']").EvaluateAsync("el => el.dir='rtl'");
         await Assertions.Expect(page.GetByTestId("control-message-end")).ToHaveCountAsync(0);
-        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='start']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='start']")).ToHaveCountAsync(3);
         await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("[data-slot='message']").Nth(1).Locator("[data-slot='message-footer']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-slot='message']").Nth(2).Locator("[data-slot='message-footer']")).ToHaveCountAsync(1);
     }
 
     [Fact]
@@ -171,13 +171,25 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
 
-        var engineer = page.Locator("[data-slot='message']").First;
-        var engineerBubbles = engineer.Locator("[data-testid^='engineer-message-']");
-        await Assertions.Expect(engineerBubbles).ToHaveCountAsync(2);
-        await Assertions.Expect(engineer.Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
-        await Assertions.Expect(engineer.Locator("[data-slot='message-header']")).ToHaveCountAsync(1);
+        var engineer = page.Locator("[data-slot='message'][data-sender='engineer']");
+        await Assertions.Expect(engineer).ToHaveCountAsync(2);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-testid='engineer-message-1']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-testid='engineer-message-2']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-slot='message-header']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(1)).ToHaveAttributeAsync("data-continuation", "true");
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-slot='message-header']")).ToHaveCountAsync(0);
+        await Assertions.Expect(engineer.Locator("[data-testid='message-reply']")).ToHaveCountAsync(2);
 
-        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const bubbles = messages[0].querySelectorAll('[data-slot=bubble]'); const first = bubbles[0].getBoundingClientRect(); const second = bubbles[1].getBoundingClientRect(); const engineer = messages[0].getBoundingClientRect(); const coordinator = messages[1].getBoundingClientRect(); return [second.top - first.bottom, coordinator.top - engineer.bottom]; }");
+        await page.GetByTestId("control-message-footer-always").CheckAsync();
+        await engineer.Nth(0).GetByTestId("message-reply").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("ตรวจสอบไฟล์แล้ว 3 รายการ");
+        await page.GetByTestId("message-reply-quote").GetByRole(AriaRole.Button, new() { Name = "Cancel reply" }).ClickAsync();
+        await engineer.Nth(1).GetByTestId("message-reply").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ");
+
+        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const first = messages[0].getBoundingClientRect(); const second = messages[1].getBoundingClientRect(); const coordinator = messages[2].getBoundingClientRect(); return [second.top - first.bottom, coordinator.top - second.bottom]; }");
         Assert.InRange(spacing[0], 3, 6);
         Assert.InRange(spacing[1], 16, 21);
         Assert.True(spacing[1] > spacing[0] * 3);

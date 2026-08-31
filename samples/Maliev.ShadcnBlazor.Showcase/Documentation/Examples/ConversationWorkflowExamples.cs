@@ -727,6 +727,14 @@ internal static class ConversationWorkflowExamples
                 </ShadcnMessageActions>
             </ShadcnMessageFooter>
 """ : string.Empty;
+        var operatorContinuationFooter = footerActions ? $$"""
+            <ShadcnMessageFooter{{(alwaysShowActions ? " data-visibility=\"always\"" : string.Empty)}}>
+                <ShadcnMessageActions>
+                    <ShadcnMessageCopyAction Text="กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ" />
+                    <ShadcnMessageReplyAction Quote="กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ" OnReply="ReplyTo" />
+                </ShadcnMessageActions>
+            </ShadcnMessageFooter>
+""" : string.Empty;
         var coordinatorFooter = footerActions ? $$"""
             <ShadcnMessageFooter{{(alwaysShowActions ? " data-visibility=\"always\"" : string.Empty)}}>
                 <ShadcnMessageActions>
@@ -765,7 +773,7 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Content
 
 <ShadcnMessageGroup Class="message-thread">
-    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start" data-sender="engineer" aria-label="Operator message 1">
 {{operatorAvatar}}
         <ShadcnMessageContent>
             <ShadcnMessageBody>
@@ -773,11 +781,19 @@ internal static class ConversationWorkflowExamples
                 <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
                     <ShadcnBubbleContent dir="auto">ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
                 </ShadcnBubble>
+            </ShadcnMessageBody>
+{{operatorFooter}}
+        </ShadcnMessageContent>
+    </ShadcnMessage>
+
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start" Class="message-continuation" data-sender="engineer" data-continuation="true" aria-label="Operator message 2">
+        <ShadcnMessageContent>
+            <ShadcnMessageBody>
                 <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
                     <ShadcnBubbleContent dir="auto">กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>
-{{operatorFooter}}
+{{operatorContinuationFooter}}
         </ShadcnMessageContent>
     </ShadcnMessage>
 

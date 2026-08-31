@@ -1609,10 +1609,12 @@ a {
 }
 
 .showcase-message-thread {
+    --showcase-message-participant-gap: 1.15rem;
+    --showcase-message-continuation-gap: calc(0.25rem * var(--shadcn-spacing-multiplier));
     display: grid;
     width: 100%;
     min-width: 0;
-    gap: 1.15rem;
+    gap: var(--showcase-message-continuation-gap);
     padding-block: 1rem;
 }
 
@@ -1870,6 +1872,14 @@ a {
     align-items: center;
     gap: .625rem;
     padding: .25rem;
+}
+
+.showcase-message-thread > [data-slot="message"][data-continuation="true"] {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+}
+
+.showcase-message-thread > [data-slot="message"]:not(:first-child, [data-continuation="true"]) {
+    margin-block-start: calc(var(--showcase-message-participant-gap) - var(--showcase-message-continuation-gap));
 }
 
 .showcase-sidebar-header-row {
