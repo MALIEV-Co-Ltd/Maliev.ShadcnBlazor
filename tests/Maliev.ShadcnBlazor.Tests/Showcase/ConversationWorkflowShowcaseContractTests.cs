@@ -125,6 +125,12 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Empty(cut.FindAll("[data-slot='bubble-reaction'] [data-slot='avatar']"));
         Assert.Contains("👍", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
         Assert.Contains("❤️", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
+        var heartReaction = cut.Find("button[data-testid='bubble-reaction-heart']");
+        Assert.Equal("false", heartReaction.GetAttribute("aria-pressed"));
+        Assert.Equal("2", heartReaction.QuerySelector("[data-slot='bubble-reaction-count']")?.TextContent);
+        heartReaction.Click();
+        Assert.Equal("true", heartReaction.GetAttribute("aria-pressed"));
+        Assert.Equal("3", heartReaction.QuerySelector("[data-slot='bubble-reaction-count']")?.TextContent);
         Assert.Contains("Hey there! what's up?", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("I can group messages, switch sides, and keep the whole thread easy to scan.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Very meta. Very on-brand.", cut.Markup, StringComparison.Ordinal);
@@ -160,6 +166,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         var ghostRuleEnd = showcaseCss.IndexOf('}', ghostRuleStart);
         Assert.True(ghostRuleEnd > ghostRuleStart);
         Assert.DoesNotContain("padding-inline: 0 !important", showcaseCss[ghostRuleStart..(ghostRuleEnd + 1)], StringComparison.Ordinal);
+        Assert.DoesNotContain("[data-slot=\"bubble\"]:hover", showcaseCss, StringComparison.Ordinal);
     }
 
     [Fact]

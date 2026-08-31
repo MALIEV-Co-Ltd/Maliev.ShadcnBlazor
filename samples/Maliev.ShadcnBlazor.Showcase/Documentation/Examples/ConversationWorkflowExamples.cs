@@ -76,17 +76,10 @@ internal static class ConversationWorkflowExamples
 
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnBubbleGroup>(0);
-            b.AddAttribute(1, nameof(ShadcnBubbleGroup.Class), "showcase-bubble-thread");
-            b.AddAttribute(2, "data-reveal", "true");
-            b.AddAttribute(3, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
-            {
-                AddBubble(thread, 0, variant, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top, "outgoing");
-                AddBubble(thread, 10, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top, "incoming");
-                AddBubble(thread, 20, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "I can group messages, switch sides, and keep the whole thread easy to scan.", false, null, top, "incoming");
-                AddBubble(thread, 30, variant, ShadcnLogicalAlign.End, "Sure. Hit me with your best demo.", true, null, top, "outgoing");
-                AddBubble(thread, 40, null, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.", false, "multiple", top, "incoming");
-            }));
+            b.OpenComponent<ConversationBubbleDossierPreview>(0);
+            b.AddAttribute(1, nameof(ConversationBubbleDossierPreview.Variant), variant);
+            b.AddAttribute(2, nameof(ConversationBubbleDossierPreview.AlignIncomingEnd), end);
+            b.AddAttribute(3, nameof(ConversationBubbleDossierPreview.ReactionsTop), top);
             b.CloseComponent();
         };
 
@@ -174,35 +167,6 @@ internal static class ConversationWorkflowExamples
         return new ShadcnAttachmentFile(title, size, contentType);
     }
 
-    private static void AddBubble(RenderTreeBuilder b, int sequence, ShadcnBubbleVariant? variant, ShadcnLogicalAlign align, string text, bool interactive, string? reaction, bool reactionTop, string? role = null)
-    {
-        b.OpenComponent<ShadcnBubble>(sequence);
-        if (variant is not null)
-            b.AddAttribute(sequence + 1, nameof(ShadcnBubble.Variant), variant.Value);
-        b.AddAttribute(sequence + 2, nameof(ShadcnBubble.Align), align);
-        b.AddAttribute(sequence + 3, "data-bubble-index", Math.Max(0, sequence / 10).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        if (role is not null)
-            b.AddAttribute(sequence + 4, "data-bubble-role", role);
-        b.AddAttribute(sequence + 5, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
-        {
-            content.OpenComponent<ShadcnBubbleContent>(0);
-            if (interactive)
-                content.AddAttribute(1, nameof(ShadcnBubbleContent.OnActivate), EventCallback.Factory.Create(new object(), () => { }));
-            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
-            content.CloseComponent();
-            if (reaction is not null)
-            {
-                content.OpenComponent<ShadcnBubbleReactions>(3);
-                content.AddAttribute(4, nameof(ShadcnBubbleReactions.Side), reactionTop ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom);
-                content.AddAttribute(5, nameof(ShadcnBubbleReactions.Align), align == ShadcnLogicalAlign.End ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start);
-                content.AddAttribute(6, nameof(ShadcnBubbleReactions.AccessibleName), $"Reactions for {text}");
-                content.AddAttribute(7, nameof(ShadcnBubbleReactions.ChildContent), ReactionComponents(reaction));
-                content.CloseComponent();
-            }
-        }));
-        b.CloseComponent();
-    }
-
     private static RenderFragment Thumbnail(string artwork) => b =>
     {
         var file = artwork switch
@@ -216,35 +180,6 @@ internal static class ConversationWorkflowExamples
 
     private static RenderFragment FileIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 2.75h8l4 4v14.5H6z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M14 2.75v4h4M9 12h6M9 16h4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>");
     private static RenderFragment CloseIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m7 7 10 10M17 7 7 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>");
-    private static RenderFragment LegacyReactionMarkup(string value) => b => b.AddMarkupContent(0, value == "👍"
-        ? "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--like\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8.5 10.5v9h-3v-9zM10 10.5l3.8-7.1a1.5 1.5 0 0 1 2.8 1l-.8 4.1h4.1a2 2 0 0 1 2 2.4l-1.3 6.3a3 3 0 0 1-2.9 2.4H8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/></svg></span>"
-        : "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--fire\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13.4 2.8c.5 3.2-1.4 4.1-2.4 5.7-.8 1.3-.7 2.8.2 3.7.1-1.8 1.3-2.6 2.3-3.4.9 1.5 3.4 2.7 3.4 6a5 5 0 1 1-9.8-1.4c.6-2.4 2.6-3.9 3.6-5.8.8-1.5 1.2-3.2.6-4.8 1.1.5 1.7 1.1 2.1 2.2Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18.1 5.3v3.4M16.4 7h3.4\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\"/></svg><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--eyes\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg><span class=\"showcase-bubble-reaction-count\">+2</span></span>");
-
-    private static RenderFragment ReactionComponents(string value) => b =>
-    {
-        AddReaction(b, 0, value == "👍" ? "👍" : "❤️", value == "👍" ? "Thumbs up reaction" : "Loved reaction");
-        if (value == "👍")
-            return;
-
-        AddReaction(b, 10, "😂", "Laughing reaction");
-        b.OpenComponent<ShadcnBubbleReactionOverflow>(20);
-        b.AddAttribute(21, nameof(ShadcnBubbleReactionOverflow.Count), 2);
-        b.AddAttribute(22, nameof(ShadcnBubbleReactionOverflow.ChildContent), (RenderFragment)(overflow =>
-        {
-            AddReaction(overflow, 0, "🔥", "Fire reaction");
-            AddReaction(overflow, 10, "👀", "Eyes reaction");
-        }));
-        b.CloseComponent();
-    };
-
-    private static void AddReaction(RenderTreeBuilder b, int sequence, string emoji, string accessibleName)
-    {
-        b.OpenComponent<ShadcnBubbleReaction>(sequence);
-        b.AddAttribute(sequence + 2, nameof(ShadcnBubbleReaction.Fallback), emoji);
-        b.AddAttribute(sequence + 3, nameof(ShadcnBubbleReaction.AccessibleName), accessibleName);
-        b.CloseComponent();
-    }
-
     private static ComponentExampleDefinition Marker()
     {
         var variant = ShadcnMarkerVariant.Default;
@@ -551,7 +486,7 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Conversation
 
 <ShadcnBubbleGroup data-reveal="true">
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
         <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
     </ShadcnBubble>
 
@@ -573,8 +508,12 @@ internal static class ConversationWorkflowExamples
     <ShadcnBubble Align="ShadcnLogicalAlign.Start">
         <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Fallback="❤️" AccessibleName="Loved reaction" />
-            <ShadcnBubbleReaction Fallback="😂" AccessibleName="Laughing reaction" />
+            <ShadcnBubbleReaction Fallback="❤️"
+                                  AccessibleName="Heart reaction"
+                                  Count="@heartCount"
+                                  Pressed="@heartPressed"
+                                  PressedChanged="SetHeart" />
+            <ShadcnBubbleReaction Fallback="😂" AccessibleName="Laughing reaction" Count="1" />
             <ShadcnBubbleReactionOverflow Count="2">
                 <ShadcnBubbleReaction Fallback="🔥" AccessibleName="Fire reaction" />
                 <ShadcnBubbleReaction Fallback="👀" AccessibleName="Eyes reaction" />
@@ -582,6 +521,20 @@ internal static class ConversationWorkflowExamples
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 </ShadcnBubbleGroup>
+
+@code {
+    private int heartCount = 2;
+    private bool heartPressed;
+
+    private void SetHeart(bool pressed)
+    {
+        if (heartPressed == pressed)
+            return;
+
+        heartPressed = pressed;
+        heartCount += pressed ? 1 : -1;
+    }
+}
 """;
 
     private static void AddAvatar(RenderTreeBuilder b, int sequence, AvatarProfile profile)

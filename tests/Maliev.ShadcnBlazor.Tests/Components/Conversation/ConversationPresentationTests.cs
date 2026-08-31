@@ -114,6 +114,55 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void BubbleReactionCanRenderAsAnAccessibleControlledToggleWithCount()
+    {
+        bool? requestedState = null;
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Heart reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "❤️");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Count), 2);
+                reactions.AddAttribute(4, nameof(ShadcnBubbleReaction.Pressed), false);
+                reactions.AddAttribute(5, nameof(ShadcnBubbleReaction.PressedChanged), EventCallback.Factory.Create<bool>(this, pressed => requestedState = pressed));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("button[data-slot='bubble-reaction']");
+        Assert.Equal("button", reaction.GetAttribute("type"));
+        Assert.Equal("false", reaction.GetAttribute("aria-pressed"));
+        Assert.Equal("Heart reaction, 2", reaction.GetAttribute("aria-label"));
+        Assert.Equal("2", reaction.QuerySelector("[data-slot='bubble-reaction-count']")?.TextContent);
+
+        reaction.Click();
+
+        Assert.True(requestedState);
+    }
+
+    [Fact]
+    public void BubbleReactionRejectsNegativeCounts()
+    {
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Invalid reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "❤️");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Count), -1);
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        })));
+    }
+
+    [Fact]
     public void BubbleReactionOverflowRevealsAndHidesAdditionalReactions()
     {
         var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>

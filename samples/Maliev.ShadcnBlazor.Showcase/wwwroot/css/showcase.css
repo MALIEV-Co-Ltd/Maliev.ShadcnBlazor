@@ -6724,13 +6724,6 @@ a {
 
 .showcase-bubble-thread > [data-slot="bubble"] {
     max-inline-size: min(78%, 28rem);
-    transition: translate var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard),
-        filter var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
-}
-
-.showcase-bubble-thread > [data-slot="bubble"]:hover {
-    translate: 0 -1px;
-    filter: drop-shadow(0 2px 6px color-mix(in oklch, var(--shadcn-foreground) 8%, transparent));
 }
 
 .showcase-bubble-thread .shadcn-bubble-content {

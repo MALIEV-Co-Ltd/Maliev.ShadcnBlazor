@@ -171,6 +171,12 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var outgoing = page.Locator("[data-bubble-role='outgoing']");
         await Assertions.Expect(outgoing).ToHaveCountAsync(2);
         await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "default");
+        var bubblePositionBeforeHover = await outgoing.First.BoundingBoxAsync();
+        Assert.NotNull(bubblePositionBeforeHover);
+        await outgoing.First.HoverAsync();
+        var bubblePositionAfterHover = await outgoing.First.BoundingBoxAsync();
+        Assert.NotNull(bubblePositionAfterHover);
+        Assert.InRange(Math.Abs(bubblePositionAfterHover.Y - bubblePositionBeforeHover.Y), 0, 0.1);
         var defaultBubble = outgoing.First.Locator("[data-slot='bubble-content']");
         var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
@@ -204,6 +210,21 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var emojiReactions = page.Locator("[data-slot='bubble-reaction-value']");
         await Assertions.Expect(emojiReactions).ToHaveCountAsync(3);
         await Assertions.Expect(emojiReactions.First).ToHaveTextAsync("👍");
+
+        var heartReaction = page.GetByTestId("bubble-reaction-heart");
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+        Assert.Equal("pointer", await heartReaction.EvaluateAsync<string>("element => getComputedStyle(element).cursor"));
+        await heartReaction.ClickAsync();
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("3");
+        await heartReaction.ClickAsync();
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+        await heartReaction.FocusAsync();
+        await heartReaction.PressAsync("Space");
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("3");
 
         var overflow = page.Locator("[data-slot='bubble-reaction-overflow']");
         var overflowTrigger = overflow.Locator("[data-slot='bubble-reaction-overflow-trigger']");
