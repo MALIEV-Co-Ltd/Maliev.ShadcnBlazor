@@ -6634,6 +6634,30 @@ a {
     box-shadow: 0 1px 2px color-mix(in oklch, var(--shadcn-foreground) 12%, transparent);
 }
 
+.documentation-version-link {
+    display: inline-flex;
+    min-block-size: 1.75rem;
+    align-items: center;
+    border: 1px solid var(--shadcn-border);
+    border-radius: 999px;
+    padding-inline: .5rem;
+    color: var(--shadcn-muted-foreground);
+    font-size: .6875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.documentation-version-link:hover {
+    border-color: var(--shadcn-ring);
+    color: var(--shadcn-foreground);
+}
+
+.documentation-version-link:focus-visible {
+    outline: var(--shadcn-focus-ring-width) solid var(--shadcn-ring);
+    outline-offset: var(--shadcn-focus-ring-offset);
+}
+
 .documentation-brand__mark svg {
     inline-size: 1.15rem;
     block-size: 1.15rem;

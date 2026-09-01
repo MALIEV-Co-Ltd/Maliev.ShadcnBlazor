@@ -1,5 +1,7 @@
 @using Maliev.ShadcnBlazor.Showcase.Documentation
 @using Maliev.ShadcnBlazor.Components.Icons
+@using Maliev.ShadcnBlazor.Components.DataDisplay
+@using System.Reflection
 @inject ShowcaseState ThemeState
 @inject NavigationManager Navigation
 @inject DocumentationPageState PageState
@@ -26,6 +28,12 @@
             </span>
             <span>Maliev Shadcn Blazor</span>
         </a>
+        <a class="documentation-version-link"
+           data-testid="documentation-version-link"
+           href="@DocumentationVersionUrl"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Package release @DocumentationVersion">@DocumentationVersion</a>
         @if (!StudioMode)
         {
         <button @ref="_catalogTrigger"
@@ -121,6 +129,16 @@
     private string CurrentPath => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
     private bool IsDocsOverview => string.Equals(CurrentPath, "docs", StringComparison.OrdinalIgnoreCase);
     private bool IsComponentsRoute => CurrentPath.StartsWith("docs/components", StringComparison.OrdinalIgnoreCase);
+    private static string DocumentationVersion { get; } = ResolveDocumentationVersion();
+    private static string DocumentationVersionUrl => $"https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/{DocumentationVersion}";
+
+    private static string ResolveDocumentationVersion()
+    {
+        var assembly = typeof(ShadcnDataTable<>).Assembly;
+        var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        var version = (informational ?? assembly.GetName().Version?.ToString(3) ?? "0.0.0").Split('+', 2)[0];
+        return $"v{version}";
+    }
 
     [Parameter, EditorRequired]
     public DocumentationNavigationState State { get; set; } = null!;

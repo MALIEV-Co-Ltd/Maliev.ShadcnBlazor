@@ -1,4 +1,5 @@
 using Bunit;
+using Maliev.ShadcnBlazor.Components.DataDisplay;
 using Maliev.ShadcnBlazor.Showcase;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Layout;
@@ -6,6 +7,7 @@ using Maliev.ShadcnBlazor.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Maliev.ShadcnBlazor.Tests.Showcase;
 
@@ -239,6 +241,22 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Empty(sponsor.QuerySelectorAll(".documentation-kofi__badge"));
         Assert.Contains("images/brand/kofi-cup.png", cup.GetAttribute("src"), StringComparison.Ordinal);
         Assert.Equal("Ko-fi", label.TextContent.Trim());
+    }
+
+    [Fact]
+    public void HeaderIdentifiesTheReferencedPackageReleaseFromAssemblyMetadata()
+    {
+        var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
+        var informational = typeof(ShadcnDataTable<>).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        var semver = (informational ?? typeof(ShadcnDataTable<>).Assembly.GetName().Version?.ToString(3) ?? "0.0.0")
+            .Split('+', 2)[0];
+        var expected = $"v{semver}";
+        var version = cut.Find("[data-testid='documentation-version-link']");
+
+        Assert.Equal(expected, version.TextContent.Trim());
+        Assert.Equal($"https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/releases/tag/{expected}", version.GetAttribute("href"));
+        Assert.Equal("Package release " + expected, version.GetAttribute("aria-label"));
     }
 
     [Fact]
