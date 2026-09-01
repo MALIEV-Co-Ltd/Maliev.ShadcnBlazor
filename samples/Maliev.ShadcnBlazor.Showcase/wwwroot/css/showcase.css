@@ -4861,10 +4861,6 @@ a {
         font-size: .5625rem;
     }
 
-    .documentation-kofi {
-        display: none;
-    }
-
     .documentation-trigger,
     .documentation-icon-action {
         inline-size: var(--documentation-compact-control-size);
@@ -4875,6 +4871,12 @@ a {
 
     .documentation-panel-header {
         padding-block-start: max(1rem, env(safe-area-inset-top));
+    }
+}
+
+@media (max-width: 22rem) {
+    .documentation-kofi {
+        display: none;
     }
 }
 
