@@ -1,0 +1,56 @@
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<button @attributes="ForwardedAttributes"
+        type="button"
+        class="@MergeClass("shadcn-bubble-reaction-option")"
+        style="@MergeStyle(null)"
+        data-slot="bubble-reaction-option"
+        aria-label="@AccessibleName"
+        aria-pressed="@(Selected ? "true" : "false")"
+        disabled="@Disabled"
+        @onclick="SelectAsync">
+    <span class="shadcn-bubble-reaction-option-value" data-slot="bubble-reaction-option-value" aria-hidden="true">
+        @if (ChildContent is not null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            @Fallback
+        }
+    </span>
+</button>
+
+@code {
+    [CascadingParameter] private ShadcnBubbleReactionPicker? Owner { get; set; }
+
+    /// <summary>Gets or sets the caller-defined value returned when this reaction is selected.</summary>
+    [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
+    /// <summary>Gets or sets the accessible name of this reaction choice.</summary>
+    [Parameter, EditorRequired] public string AccessibleName { get; set; } = string.Empty;
+    /// <summary>Gets or sets fallback visual content when no child content is supplied.</summary>
+    [Parameter] public string Fallback { get; set; } = string.Empty;
+    /// <summary>Gets or sets caller-owned visual content for this reaction choice.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    /// <summary>Gets or sets whether this reaction is already selected.</summary>
+    [Parameter] public bool Selected { get; set; }
+    /// <summary>Gets or sets whether this reaction choice is disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "type", "data-slot", "aria-label", "aria-pressed", "disabled");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null)
+            throw new InvalidOperationException("ShadcnBubbleReactionOption must be inside ShadcnBubbleReactionPicker.");
+        if (string.IsNullOrWhiteSpace(Value))
+            throw new InvalidOperationException("ShadcnBubbleReactionOption requires a value.");
+        if (string.IsNullOrWhiteSpace(AccessibleName))
+            throw new InvalidOperationException("ShadcnBubbleReactionOption requires an accessible name.");
+        if (ChildContent is null && string.IsNullOrWhiteSpace(Fallback))
+            throw new InvalidOperationException("ShadcnBubbleReactionOption requires visual content or a fallback.");
+    }
+
+    private Task SelectAsync() => Disabled ? Task.CompletedTask : Owner!.SelectAsync(Value);
+}

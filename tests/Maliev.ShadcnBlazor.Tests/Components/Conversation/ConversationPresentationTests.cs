@@ -173,6 +173,48 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void BubbleReactionPickerReturnsTheChosenReactionAndCloses()
+    {
+        var overlayModule = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
+        overlayModule.SetupVoid("attachPositioned", _ => true);
+        overlayModule.SetupVoid("detachPositioned", _ => true);
+        string? selectedReaction = null;
+        bool? requestedOpen = null;
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReactionPicker>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReactionPicker.AccessibleName), "Add reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReactionPicker.ReactionSelected), EventCallback.Factory.Create<string>(this, value => selectedReaction = value));
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReactionPicker.OpenChanged), EventCallback.Factory.Create<bool>(this, value => requestedOpen = value));
+                reactions.AddAttribute(4, nameof(ShadcnBubbleReactionPicker.TriggerContent), Text("Add"));
+                reactions.AddAttribute(5, nameof(ShadcnBubbleReactionPicker.ChildContent), (RenderFragment)(options =>
+                {
+                    options.OpenComponent<ShadcnBubbleReactionOption>(0);
+                    options.AddAttribute(1, nameof(ShadcnBubbleReactionOption.Value), "heart");
+                    options.AddAttribute(2, nameof(ShadcnBubbleReactionOption.AccessibleName), "Heart");
+                    options.AddAttribute(3, nameof(ShadcnBubbleReactionOption.Fallback), "heart");
+                    options.AddAttribute(4, nameof(ShadcnBubbleReactionOption.ChildContent), Text("Heart visual"));
+                    options.CloseComponent();
+                }));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        cut.Find("button.shadcn-bubble-reaction-picker-trigger").Click();
+        Assert.Single(cut.FindAll(".shadcn-bubble-reaction-picker-content"));
+
+        cut.Find("button[data-slot='bubble-reaction-option']").Click();
+
+        Assert.Equal("heart", selectedReaction);
+        Assert.False(requestedOpen);
+        Assert.Empty(cut.FindAll(".shadcn-bubble-reaction-picker-content"));
+    }
+
+    [Fact]
     public void BubbleReactionRejectsNegativeCounts()
     {
         Assert.ThrowsAny<Exception>(() => Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>

@@ -1,0 +1,41 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+
+<ShadcnBubbleReactionPicker AccessibleName="Add reaction"
+                            ReactionSelected="ReactionSelected"
+                            data-testid="bubble-reaction-picker">
+    <TriggerContent>
+        <svg class="showcase-reaction-picker-add" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 8v8M8 12h8" />
+        </svg>
+    </TriggerContent>
+    <ChildContent>
+        @foreach (var choice in Choices)
+        {
+            <ShadcnBubbleReactionOption @key="choice.Value"
+                                        Value="@choice.Value"
+                                        AccessibleName="@choice.Name"
+                                        Fallback="@choice.Fallback"
+                                        Selected="@IsSelected(choice.Value)"
+                                        data-reaction-value="@choice.Value">
+                <ShowcaseReactionGlyph Kind="@choice.Value" />
+            </ShadcnBubbleReactionOption>
+        }
+    </ChildContent>
+</ShadcnBubbleReactionPicker>
+
+@code {
+    [Parameter, EditorRequired] public EventCallback<string> ReactionSelected { get; set; }
+    [Parameter] public Func<string, bool> IsSelected { get; set; } = _ => false;
+
+    private static readonly ReactionChoice[] Choices =
+    [
+        new("thumbs-up", "Thumbs up", "👍"),
+        new("heart", "Heart", "❤️"),
+        new("laugh", "Laughing", "😂"),
+        new("fire", "Fire", "🔥"),
+        new("eyes", "Eyes", "👀")
+    ];
+
+    private sealed record ReactionChoice(string Value, string Name, string Fallback);
+}

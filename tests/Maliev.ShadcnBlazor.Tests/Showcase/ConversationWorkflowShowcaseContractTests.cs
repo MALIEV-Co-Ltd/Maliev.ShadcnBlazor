@@ -111,7 +111,8 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Single(cut.FindAll("[data-slot='bubble-group']"));
         Assert.Equal(5, cut.FindAll("[data-slot='bubble']").Count);
         Assert.Equal(5, cut.FindAll("[data-slot='bubble-content']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='bubble-reactions']").Count);
+        Assert.Equal(3, cut.FindAll("[data-slot='bubble-reactions']").Count);
+        Assert.Equal(3, cut.FindAll("button.shadcn-bubble-reaction-picker-trigger").Count);
         var incoming = cut.FindAll("[data-bubble-role='incoming']");
         Assert.Equal(3, incoming.Count);
         Assert.All(incoming, bubble =>

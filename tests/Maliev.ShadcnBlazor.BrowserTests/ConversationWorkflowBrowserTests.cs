@@ -65,7 +65,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
         await Assertions.Expect(page.Locator("[data-slot='bubble-group']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("[data-slot='bubble']")).ToHaveCountAsync(5);
-        await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(3);
         var incomingBubbles = page.Locator("[data-bubble-role='incoming']");
         await Assertions.Expect(incomingBubbles).ToHaveCountAsync(3);
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "ghost");
@@ -321,6 +321,48 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await fireReaction.ClickAsync();
         await Assertions.Expect(fireReaction).ToHaveAttributeAsync("aria-pressed", "true");
         await Assertions.Expect(fireReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+    }
+
+    [Fact]
+    public async Task ReceivedBubblesCanAddNewAndExistingReactionsWithoutDuplicates()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
+
+        var received = page.Locator("[data-bubble-role='incoming']");
+        await Assertions.Expect(received).ToHaveCountAsync(3);
+        await Assertions.Expect(received.Locator("button.shadcn-bubble-reaction-picker-trigger")).ToHaveCountAsync(3);
+
+        var first = received.Nth(0);
+        await first.Locator("button.shadcn-bubble-reaction-picker-trigger").ClickAsync();
+        var firstPicker = page.Locator(".shadcn-bubble-reaction-picker-content");
+        await Assertions.Expect(firstPicker).ToBeVisibleAsync();
+        await firstPicker.Locator("button[data-reaction-value='heart']").ClickAsync();
+        var addedHeart = first.Locator("button[data-reaction-key='heart']");
+        await Assertions.Expect(addedHeart).ToHaveCountAsync(1);
+        await Assertions.Expect(addedHeart).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(addedHeart.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("1");
+        await Assertions.Expect(page.Locator(".shadcn-bubble-reaction-picker-content")).ToHaveCountAsync(0);
+
+        var last = received.Nth(2);
+        var existingHeart = last.Locator("button[data-reaction-key='heart']");
+        await Assertions.Expect(existingHeart).ToHaveCountAsync(1);
+        await Assertions.Expect(existingHeart.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+        await last.Locator("button.shadcn-bubble-reaction-picker-trigger").ClickAsync();
+        await page.Locator(".shadcn-bubble-reaction-picker-content button[data-reaction-value='heart']").ClickAsync();
+        await Assertions.Expect(existingHeart).ToHaveCountAsync(1);
+        await Assertions.Expect(existingHeart).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(existingHeart.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("3");
+
+        await received.Nth(1).Locator("button.shadcn-bubble-reaction-picker-trigger").ClickAsync();
+        await Assertions.Expect(page.Locator(".shadcn-bubble-reaction-picker-content")).ToBeVisibleAsync();
+        await page.GetByRole(AriaRole.Heading, new() { Name = "Conversation bubble" }).ClickAsync();
+        await Assertions.Expect(page.Locator(".shadcn-bubble-reaction-picker-content")).ToHaveCountAsync(0);
     }
 
     [Fact]
