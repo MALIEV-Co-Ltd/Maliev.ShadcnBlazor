@@ -275,25 +275,25 @@
       "maliev.shadcnblazor.icons.hugeicons": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[2.1.3, )"
+          "Maliev.ShadcnBlazor": "[2.1.4, )"
         }
       },
       "maliev.shadcnblazor.icons.lucide": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[2.1.3, )"
+          "Maliev.ShadcnBlazor": "[2.1.4, )"
         }
       },
       "maliev.shadcnblazor.icons.phosphor": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[2.1.3, )"
+          "Maliev.ShadcnBlazor": "[2.1.4, )"
         }
       },
       "maliev.shadcnblazor.icons.tabler": {
         "type": "Project",
         "dependencies": {
-          "Maliev.ShadcnBlazor": "[2.1.3, )"
+          "Maliev.ShadcnBlazor": "[2.1.4, )"
         }
       }
     },
