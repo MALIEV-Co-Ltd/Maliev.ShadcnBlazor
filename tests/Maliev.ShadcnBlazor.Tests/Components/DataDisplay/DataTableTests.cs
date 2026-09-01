@@ -141,6 +141,20 @@ public sealed class DataTableTests : BunitContext
     }
 
     [Fact]
+    public void CompactToolbarStylesOwnTouchTargetsAndNarrowViewportContainment()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        var css = File.ReadAllText(Path.Combine(directory!.FullName, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-data-display.css"));
+
+        Assert.Contains("[data-toolbar-mode=\"compact\"]", css, StringComparison.Ordinal);
+        Assert.Contains("min-block-size: 2.75rem", css, StringComparison.Ordinal);
+        Assert.Contains("max-inline-size: min(22rem, calc(100vw - 2rem))", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-data-table-toolbar__actions", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DataTableNamesItsInnerTableRemovesTheWrapperTabStopAndAnnouncesNoResults()
     {
         var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
