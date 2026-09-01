@@ -1,0 +1,121 @@
+@using Maliev.ShadcnBlazor.Components.Conversation
+@inject IJSRuntime JavaScript
+@implements IAsyncDisposable
+
+<section @ref="_root"
+         class="documentation-guide__section agentic-showcase"
+         data-testid="agentic-integration-showcase"
+         data-loop-active="fallback"
+         aria-labelledby="agentic-showcase-title">
+    <div class="agentic-showcase__intro">
+        <h2 id="agentic-showcase-title">Agentic development with Maliev</h2>
+        <p>Give your coding agent a concrete task. <code>AGENTS.md</code> sets the repository rules, while the <code>maliev-shadcnblazor</code> skill guides package-aware component selection and verification.</p>
+    </div>
+
+    <div class="agentic-loop" aria-hidden="true">
+        <div class="agentic-loop__chrome">
+            <span class="agentic-loop__window-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>AGENTS.md</span>
+            <span class="agentic-loop__skill">maliev-shadcnblazor skill</span>
+        </div>
+        <span class="agentic-loop__progress" aria-hidden="true"></span>
+
+        <div class="agentic-loop__stage">
+            <ShadcnBubbleGroup Class="agentic-loop__scene" data-agentic-scene="sidebar">
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: 0s" Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                    <ShadcnBubbleContent>Add a responsive sidebar to this application. Support icon and off-canvas collapse modes.</ShadcnBubbleContent>
+                </ShadcnBubble>
+                <ShadcnMarker Class="agentic-loop__step" Style="--agentic-delay: .48s" Variant="ShadcnMarkerVariant.Separator">
+                    <ShadcnMarkerIcon><AgenticStatusIcon /></ShadcnMarkerIcon>
+                    <ShadcnMarkerContent>Reading AGENTS.md · inspecting the installed package</ShadcnMarkerContent>
+                </ShadcnMarker>
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: .96s" Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+                    <ShadcnBubbleContent>
+                        <strong>Sidebar integrated</strong>
+                        <span>I composed the package primitives, preserved the app shell, and verified desktop collapse plus the mobile modal.</span>
+                        <span class="agentic-loop__components"><b>ShadcnSidebar</b><b>ShadcnSidebarTrigger</b><b>ShadcnTooltip</b></span>
+                    </ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnBubbleGroup>
+
+            <ShadcnBubbleGroup Class="agentic-loop__scene" data-agentic-scene="chart">
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: 6s" Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                    <ShadcnBubbleContent>Add charts to this financial dashboard: a revenue trend and an allocation breakdown.</ShadcnBubbleContent>
+                </ShadcnBubble>
+                <ShadcnMarker Class="agentic-loop__step" Style="--agentic-delay: 6.48s" Variant="ShadcnMarkerVariant.Separator">
+                    <ShadcnMarkerIcon><AgenticStatusIcon /></ShadcnMarkerIcon>
+                    <ShadcnMarkerContent>Applying maliev-shadcnblazor · checking chart semantics</ShadcnMarkerContent>
+                </ShadcnMarker>
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: 6.96s" Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+                    <ShadcnBubbleContent>
+                        <strong>Financial charts composed</strong>
+                        <span>I added responsive line and donut views with accessible labels, tooltips, and theme-aware series colors.</span>
+                        <span class="agentic-loop__components"><b>ShadcnChart</b><b>ShadcnChartTooltip</b><b>ShadcnChartLegend</b></span>
+                    </ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnBubbleGroup>
+
+            <ShadcnBubbleGroup Class="agentic-loop__scene" data-agentic-scene="form">
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: 12s" Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                    <ShadcnBubbleContent>Build a validated quotation form with process selection and a required due date.</ShadcnBubbleContent>
+                </ShadcnBubble>
+                <ShadcnMarker Class="agentic-loop__step" Style="--agentic-delay: 12.48s" Variant="ShadcnMarkerVariant.Separator">
+                    <ShadcnMarkerIcon><AgenticStatusIcon /></ShadcnMarkerIcon>
+                    <ShadcnMarkerContent>Following AGENTS.md · preserving native form semantics</ShadcnMarkerContent>
+                </ShadcnMarker>
+                <ShadcnBubble Class="agentic-loop__step" Style="--agentic-delay: 12.96s" Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+                    <ShadcnBubbleContent>
+                        <strong>Quotation form ready</strong>
+                        <span>I kept validation state caller-owned and exercised keyboard, error, disabled, and narrow-layout behavior.</span>
+                        <span class="agentic-loop__components"><b>ShadcnInput</b><b>ShadcnSelect</b><b>ShadcnDatePicker</b></span>
+                    </ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnBubbleGroup>
+        </div>
+    </div>
+</section>
+
+@code {
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _observer;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            _module = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/agentic-showcase.js");
+            _observer = await _module.InvokeAsync<IJSObjectReference>("observe", _root);
+        }
+        catch (JSException)
+        {
+            // Static rendering and bUnit do not provide an intersection surface.
+        }
+        catch (InvalidOperationException)
+        {
+            // Route transitions can dispose the component while the module loads.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_observer is not null)
+            {
+                await _observer.InvokeVoidAsync("dispose");
+                await _observer.DisposeAsync();
+            }
+
+            if (_module is not null)
+                await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The browser can disconnect before the documentation route is disposed.
+        }
+    }
+}

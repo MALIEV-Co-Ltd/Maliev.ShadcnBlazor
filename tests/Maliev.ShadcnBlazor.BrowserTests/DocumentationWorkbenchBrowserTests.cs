@@ -1,3 +1,4 @@
+using Deque.AxeCore.Playwright;
 using Maliev.ShadcnBlazor.BrowserTests.Infrastructure;
 using Microsoft.Playwright;
 
@@ -220,6 +221,47 @@ public sealed class DocumentationWorkbenchBrowserTests(
         await reducedSponsor.HoverAsync();
         Assert.Equal("none", await reducedSponsor.Locator(".documentation-kofi__cup").EvaluateAsync<string>("element => getComputedStyle(element).transform"));
         Assert.Equal("none", await reducedSponsor.Locator(".documentation-kofi__heart").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+    }
+
+    [Fact]
+    public async Task AgenticConversationLoopsOnlyWhileVisibleAndNeverBecomesInteractive()
+    {
+        await using var motionContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.NoPreference
+        });
+        var motionPage = await motionContext.NewPageAsync();
+        await motionPage.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
+        var showcase = motionPage.GetByTestId("agentic-integration-showcase");
+        await showcase.ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(showcase).ToHaveAttributeAsync("data-loop-active", "true");
+        await Assertions.Expect(showcase.Locator("[data-agentic-scene]")).ToHaveCountAsync(3);
+        await Assertions.Expect(showcase.Locator("a, button, input, select, textarea, [tabindex]")).ToHaveCountAsync(0);
+        Assert.Equal("none", await showcase.EvaluateAsync<string>("element => getComputedStyle(element).pointerEvents"));
+        Assert.Equal("default", await showcase.EvaluateAsync<string>("element => getComputedStyle(element).cursor"));
+        Assert.Equal("running", await showcase.Locator(".agentic-loop__step").First.EvaluateAsync<string>("element => getComputedStyle(element).animationPlayState"));
+
+        await motionPage.Locator("#docs-overview-title").ScrollIntoViewIfNeededAsync();
+        await Assertions.Expect(showcase).ToHaveAttributeAsync("data-loop-active", "false");
+        Assert.Equal("paused", await showcase.Locator(".agentic-loop__step").First.EvaluateAsync<string>("element => getComputedStyle(element).animationPlayState"));
+
+        await using var reducedContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var reducedPage = await reducedContext.NewPageAsync();
+        await reducedPage.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
+        var reducedShowcase = reducedPage.GetByTestId("agentic-integration-showcase");
+        await reducedShowcase.ScrollIntoViewIfNeededAsync();
+        Assert.Equal("none", await reducedShowcase.Locator(".agentic-loop__step").First.EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+        await Assertions.Expect(reducedShowcase.Locator("[data-agentic-scene='sidebar']")).ToBeVisibleAsync();
+        await Assertions.Expect(reducedShowcase.Locator("[data-agentic-scene='chart']")).ToBeHiddenAsync();
+        Assert.InRange(await reducedPage.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth"), 0, 1);
+
+        var accessibility = await reducedShowcase.RunAxe();
+        Assert.DoesNotContain(accessibility.Violations, violation => violation.Impact is "serious" or "critical");
     }
 
     [Fact]
