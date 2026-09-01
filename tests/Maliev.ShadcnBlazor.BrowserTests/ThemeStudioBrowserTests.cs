@@ -125,17 +125,30 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
         var page = await OpenAsync(context);
         var brandMark = page.Locator(".documentation-brand__mark");
         var catalogTrigger = page.GetByTestId("catalog-trigger");
+        var catalogIcon = catalogTrigger.Locator(".documentation-trigger__icon");
+        var versionLink = page.GetByTestId("documentation-version-link");
         var brandBox = await brandMark.BoundingBoxAsync();
         var triggerBox = await catalogTrigger.BoundingBoxAsync();
+        var iconBox = await catalogIcon.BoundingBoxAsync();
 
         Assert.NotNull(brandBox);
         Assert.NotNull(triggerBox);
+        Assert.NotNull(iconBox);
         Assert.InRange(Math.Abs(brandBox.Width - triggerBox.Width), 0, 0.5);
         Assert.InRange(Math.Abs(brandBox.Height - triggerBox.Height), 0, 0.5);
         Assert.InRange(
             Math.Abs((brandBox.Y + brandBox.Height / 2) - (triggerBox.Y + triggerBox.Height / 2)),
             0,
             0.5);
+        Assert.InRange(
+            Math.Abs((iconBox.X + iconBox.Width / 2) - (triggerBox.X + triggerBox.Width / 2)),
+            0,
+            0.5);
+        Assert.InRange(
+            Math.Abs((iconBox.Y + iconBox.Height / 2) - (triggerBox.Y + triggerBox.Height / 2)),
+            0,
+            0.5);
+        Assert.Equal("0px", await versionLink.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
     }
 
     [Fact]

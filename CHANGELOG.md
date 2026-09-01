@@ -36,6 +36,8 @@ All notable changes to this project are documented here. The format follows
 - Normalized native form popover borders and refreshed CodeQL workflow pins.
 - Fixed outside-press dismissal for Combobox, Select, and Date Picker without
   stealing focus from the clicked target or immediately reopening Combobox.
+- Centered the compact documentation catalog icon and removed the decorative
+  border from the package-version label.
 
 ## [2.1.3] - 2026-08-30
 

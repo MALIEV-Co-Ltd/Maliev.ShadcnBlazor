@@ -4851,6 +4851,11 @@ a {
         display: none;
     }
 
+    .documentation-trigger--catalog {
+        justify-content: center;
+        padding-inline: 0;
+    }
+
     .documentation-version-link {
         inline-size: var(--documentation-compact-control-size);
         min-inline-size: var(--documentation-compact-control-size);
@@ -6655,7 +6660,7 @@ a {
     display: inline-flex;
     min-block-size: 1.75rem;
     align-items: center;
-    border: 1px solid var(--shadcn-border);
+    border: 0;
     border-radius: 999px;
     padding-inline: .5rem;
     color: var(--shadcn-muted-foreground);
