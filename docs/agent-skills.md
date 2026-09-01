@@ -46,6 +46,31 @@ because the selected skills and lock information can be reviewed with the
 project. Use a global install when the same skill should be available across
 unrelated repositories.
 
+## Application AGENTS.md
+
+Installing a skill makes it discoverable; an application-level `AGENTS.md`
+defines when the team expects agents to use it. Add a focused rule to the
+consuming repository and preserve any stricter rules already there:
+
+```markdown
+## Maliev.ShadcnBlazor UI work
+
+- Use `$maliev-shadcnblazor` for package installation, component selection,
+  composition, theming, and consumer-side diagnosis.
+- Inspect the installed package version and existing app shell before editing.
+- Confirm public parameters from the installed assembly or official dossier;
+  do not infer React shadcn/ui or MudBlazor APIs.
+- Prefer public package components and semantic tokens over copied Showcase
+  markup, private selectors, or replacement JavaScript.
+- Build before tests and verify the affected keyboard, focus, validation,
+  responsive, theme, RTL, reduced-motion, and forced-color states.
+```
+
+The consumer skill's
+[`agentic-integration.md`](../.agents/skills/maliev-shadcnblazor/references/agentic-integration.md)
+reference expands this contract into the sidebar, financial-chart, and
+validated-form workflows demonstrated on the documentation home page.
+
 ## Install with Codex's skill installer
 
 Codex installations that include the system `skill-installer` can install

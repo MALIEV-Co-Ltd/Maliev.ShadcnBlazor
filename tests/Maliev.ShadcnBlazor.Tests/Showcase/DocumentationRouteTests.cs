@@ -99,6 +99,8 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("Agentic development with Maliev", agentic.TextContent, StringComparison.Ordinal);
         Assert.Contains("AGENTS.md", agentic.TextContent, StringComparison.Ordinal);
         Assert.Contains("maliev-shadcnblazor", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnChartTooltipContent", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnChartLegendContent", agentic.TextContent, StringComparison.Ordinal);
         Assert.Equal("fallback", agentic.GetAttribute("data-loop-active"));
         Assert.Equal(3, agentic.QuerySelectorAll("[data-agentic-scene]").Length);
         Assert.True(agentic.QuerySelectorAll("[data-slot='bubble']").Length >= 6);

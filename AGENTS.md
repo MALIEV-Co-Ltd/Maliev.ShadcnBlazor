@@ -41,6 +41,25 @@ active session or grant permission to push, deploy, publish, alter external
 state, or skip this working agreement. If a command or tool named by a skill is
 not available, use an equivalent safe workflow and report the difference.
 
+## Agent guidance synchronization
+
+The agentic workflow shown on the documentation home page is a maintained
+consumer contract, not decorative copy. When package registration, asset
+loading, component names, public APIs, repository paths, or validation commands
+change, review the affected guidance in the same change:
+
+- this working agreement and `docs/agent-skills.md`;
+- `.agents/skills/maliev-shadcnblazor/` for consumer integration;
+- `.agents/skills/maliev-shadcnblazor-maintainer/` for repository work;
+- the documentation site's agentic example and its contract tests.
+
+Update only the guidance affected by the change, but do not leave examples that
+name unavailable components or promise unverified behavior. Consumer guidance
+must resolve APIs from the installed package version and official dossier;
+maintainer guidance must stay aligned with the repository's actual boundaries
+and validation commands. Run both skill validators and the agent-skill
+repository tests whenever these instructions or skill packages change.
+
 ## Working rules
 
 Inspect `git status` and the relevant component, tests, dossier, and public API
