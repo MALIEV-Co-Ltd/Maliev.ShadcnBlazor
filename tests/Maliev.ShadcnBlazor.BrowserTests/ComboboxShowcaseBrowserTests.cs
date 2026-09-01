@@ -86,6 +86,7 @@ public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, P
         await Assertions.Expect(input).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(root.Locator("[data-slot='input-group']")).Not.ToHaveCSSAsync("box-shadow", "none");
         await page.GetByTestId("control-combobox-multiple").CheckAsync();
+        await trigger.ClickAsync();
         await Assertions.Expect(root.Locator("[data-slot='combobox-list']")).ToHaveAttributeAsync("aria-multiselectable", "true");
         await Assertions.Expect(root.Locator("[data-slot='combobox-chip']")).ToHaveCountAsync(2);
 
@@ -98,6 +99,7 @@ public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, P
 
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
+        await trigger.ClickAsync();
         var rtlContentBox = await root.Locator("[data-slot='combobox-content']").BoundingBoxAsync();
         Assert.NotNull(rtlContentBox);
         Assert.InRange(rtlContentBox!.X, 0, 390 - rtlContentBox.Width);
