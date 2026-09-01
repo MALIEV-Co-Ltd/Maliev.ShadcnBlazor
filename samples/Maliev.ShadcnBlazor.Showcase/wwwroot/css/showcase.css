@@ -4822,6 +4822,13 @@ a {
 @media (max-width: 40rem) {
     .documentation-header {
         --documentation-compact-control-size: 2.75rem;
+        gap: .25rem;
+        padding-inline: .5rem;
+    }
+
+    .documentation-header__leading,
+    .documentation-header__actions {
+        gap: .25rem;
     }
 
     .documentation-brand {
@@ -4841,6 +4848,20 @@ a {
     .documentation-brand > span:last-child,
     .documentation-trigger--catalog > span,
     .documentation-trigger--outline > span {
+        display: none;
+    }
+
+    .documentation-version-link {
+        inline-size: var(--documentation-compact-control-size);
+        min-inline-size: var(--documentation-compact-control-size);
+        block-size: var(--documentation-compact-control-size);
+        min-block-size: var(--documentation-compact-control-size);
+        justify-content: center;
+        padding-inline: 0;
+        font-size: .5625rem;
+    }
+
+    .documentation-kofi {
         display: none;
     }
 
