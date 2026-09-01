@@ -188,6 +188,6 @@
         if (EffectiveOpen && !IsObserving) { Module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Maliev.ShadcnBlazor/js/shadcn-forms.js"); SelfReference ??= DotNetObjectReference.Create(this); await Module.InvokeVoidAsync("observePopupDismissal", Root, SelfReference, "date-picker"); await Module.InvokeVoidAsync("promoteDatePickerPopup", Root); await Module.InvokeVoidAsync("focusCalendarInPopup", Root); IsObserving = true; }
         else if (!EffectiveOpen && IsObserving && Module is not null) { await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); IsObserving = false; }
     }
-    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await CloseAndFocusAsync(); }
+    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await SetOpenAsync(false); }
     public async ValueTask DisposeAsync() { if (ValidationEditContext is not null) ValidationEditContext.OnValidationStateChanged -= HandleValidationStateChanged; ReplaceParseMessageContext(null); if (Module is not null) { try { await Module.InvokeVoidAsync("disconnectValidationProxies", Root); await Module.InvokeVoidAsync("disconnectPopupDismissal", Root); } catch (JSDisconnectedException) { } try { await Module.DisposeAsync(); } catch (JSDisconnectedException) { } } SelfReference?.Dispose(); }
 }

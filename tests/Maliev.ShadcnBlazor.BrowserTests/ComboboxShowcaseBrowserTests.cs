@@ -6,6 +6,36 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 [Collection(BrowserCollection.Name)]
 public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
+    [Theory]
+    [InlineData("combobox", "forms-dossier-combobox", "combobox-content")]
+    [InlineData("select", "forms-dossier-select", "select-content")]
+    [InlineData("date-picker", "forms-dossier-date-picker", "date-picker-content")]
+    public async Task FormPopupClosesWhenTheUserPressesOutside(
+        string component,
+        string triggerTestId,
+        string contentSlot)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/{component}").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var trigger = page.GetByTestId(triggerTestId);
+        await trigger.ClickAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(page.Locator($"#preview [data-slot='{contentSlot}']")).ToBeVisibleAsync();
+
+        var outsideTarget = page.Locator("#overview h1");
+        await outsideTarget.ClickAsync();
+
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.Locator($"#preview [data-slot='{contentSlot}']")).ToHaveCountAsync(0);
+    }
+
     [Fact]
     public async Task ComboboxDossierWorksWithPointerKeyboardClearAndInvalidStates()
     {

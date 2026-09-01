@@ -34,6 +34,8 @@ All notable changes to this project are documented here. The format follows
 - Removed the Code Block toolbar seam and kept its language selector visually
   unstyled while preserving accessible option selection.
 - Normalized native form popover borders and refreshed CodeQL workflow pins.
+- Fixed outside-press dismissal for Combobox, Select, and Date Picker without
+  stealing focus from the clicked target or immediately reopening Combobox.
 
 ## [2.1.3] - 2026-08-30
 
