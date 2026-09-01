@@ -4388,6 +4388,7 @@ a {
 }
 
 .documentation-kofi {
+    position: relative;
     display: inline-flex;
     min-block-size: 2.5rem;
     align-items: center;
@@ -4405,16 +4406,71 @@ a {
     transition: border-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard), background-color var(--shadcn-motion-duration-fast) var(--shadcn-motion-easing-standard);
 }
 
+.documentation-kofi__mark {
+    position: relative;
+    display: grid;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    flex: 0 0 auto;
+    place-items: center;
+}
+
 .documentation-kofi__cup {
     display: block;
     object-fit: contain;
     inline-size: 1.125rem;
     block-size: 1.125rem;
+    transform-origin: 58% 72%;
+    transition: transform 260ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.documentation-kofi__heart {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: -.5rem;
+    inset-inline-end: -.4rem;
+    inline-size: .7rem;
+    block-size: .7rem;
+    overflow: visible;
+    color: #ff5e5b;
+    fill: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(.2rem) rotate(-12deg) scale(.3);
 }
 
 .documentation-kofi:hover {
     border-color: color-mix(in oklch, var(--shadcn-border) 72%, var(--shadcn-foreground));
     background: var(--shadcn-accent);
+}
+
+.documentation-kofi:is(:hover, :focus-visible) .documentation-kofi__cup {
+    transform: translateY(-.12rem) rotate(-10deg) scale(1.06);
+}
+
+.documentation-kofi:is(:hover, :focus-visible) .documentation-kofi__heart {
+    animation: documentation-kofi-heart-pop 560ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes documentation-kofi-heart-pop {
+    0% { opacity: 0; transform: translateY(.2rem) rotate(-12deg) scale(.3); }
+    38% { opacity: 1; transform: translateY(-.12rem) rotate(8deg) scale(1.18); }
+    68% { opacity: 1; transform: translateY(-.34rem) rotate(-4deg) scale(1); }
+    100% { opacity: 0; transform: translateY(-.72rem) rotate(4deg) scale(.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .documentation-kofi__cup {
+        transition: none;
+    }
+
+    .documentation-kofi:is(:hover, :focus-visible) .documentation-kofi__cup {
+        transform: none;
+    }
+
+    .documentation-kofi:is(:hover, :focus-visible) .documentation-kofi__heart {
+        animation: none;
+    }
 }
 
 .documentation-workbench {

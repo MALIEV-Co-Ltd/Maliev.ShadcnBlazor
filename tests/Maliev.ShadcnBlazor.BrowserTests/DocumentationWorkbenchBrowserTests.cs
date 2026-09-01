@@ -195,6 +195,34 @@ public sealed class DocumentationWorkbenchBrowserTests(
     }
 
     [Fact]
+    public async Task SponsorCupCelebratesOnHoverAndRespectsReducedMotion()
+    {
+        await using var motionContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.NoPreference
+        });
+        var motionPage = await motionContext.NewPageAsync();
+        await motionPage.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
+        var sponsor = motionPage.GetByTestId("documentation-kofi-link");
+        await sponsor.HoverAsync();
+        Assert.NotEqual("none", await sponsor.Locator(".documentation-kofi__cup").EvaluateAsync<string>("element => getComputedStyle(element).transform"));
+        Assert.Equal("documentation-kofi-heart-pop", await sponsor.Locator(".documentation-kofi__heart").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+
+        await using var reducedContext = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1440, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var reducedPage = await reducedContext.NewPageAsync();
+        await reducedPage.GotoAsync(new Uri(server.BaseUri, "/docs").ToString());
+        var reducedSponsor = reducedPage.GetByTestId("documentation-kofi-link");
+        await reducedSponsor.HoverAsync();
+        Assert.Equal("none", await reducedSponsor.Locator(".documentation-kofi__cup").EvaluateAsync<string>("element => getComputedStyle(element).transform"));
+        Assert.Equal("none", await reducedSponsor.Locator(".documentation-kofi__heart").EvaluateAsync<string>("element => getComputedStyle(element).animationName"));
+    }
+
+    [Fact]
     public async Task CalendarPreviewKeepsAnIntrinsicSquareSurface()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()

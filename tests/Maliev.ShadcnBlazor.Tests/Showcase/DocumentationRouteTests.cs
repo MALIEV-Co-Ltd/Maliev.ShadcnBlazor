@@ -96,6 +96,14 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("ShadcnButton", cut.Find("#compose").TextContent, StringComparison.Ordinal);
         Assert.Contains("Core concepts", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Troubleshooting", cut.Markup, StringComparison.Ordinal);
+        var contribute = cut.Find("#contribute");
+        Assert.Contains("Get help and contribute", contribute.TextContent, StringComparison.Ordinal);
+        var contributionLinks = contribute.QuerySelectorAll("a");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/issues/new?template=bug_report.yml");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/issues/new?template=feature_request.yml");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/discussions");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/blob/main/CONTRIBUTING.md");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/security/advisories/new");
         Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "docs/components");
         Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "theme");
     }
