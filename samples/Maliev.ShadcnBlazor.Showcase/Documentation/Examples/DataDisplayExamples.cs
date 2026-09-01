@@ -9,21 +9,22 @@ namespace Maliev.ShadcnBlazor.Showcase.Documentation.Examples;
 
 internal static class DataDisplayExamples
 {
-    private sealed record Payment(string Id, string Email, string Status, double Amount);
+    private sealed record Payment(string Id, string Email, string Status, string Method, double Amount);
     private sealed record Invoice(string Id, string Status, string Method, string Amount);
     private static readonly Payment[] Payments = [
-        new("1", "ken99@example.com", "success", 316), new("2", "abe45@example.com", "success", 242), new("3", "monserrat44@example.com", "processing", 837),
-        new("4", "silas22@example.com", "success", 874), new("5", "carmella@example.com", "failed", 721), new("6", "preecha@example.com", "pending", 590),
-        new("7", "wipada@example.com", "processing", 445), new("8", "niran@example.com", "success", 680)
+        new("1", "ken99@example.com", "success", "Card", 316), new("2", "abe45@example.com", "success", "Transfer", 242), new("3", "monserrat44@example.com", "processing", "Card", 837),
+        new("4", "silas22@example.com", "success", "PromptPay", 874), new("5", "carmella@example.com", "failed", "Transfer", 721), new("6", "preecha@example.com", "pending", "PromptPay", 590),
+        new("7", "wipada@example.com", "processing", "Card", 445), new("8", "niran@example.com", "success", "Transfer", 680)
     ];
     private static readonly Invoice[] Invoices = [
         new("INV001", "Paid", "Credit Card", "฿8,500"), new("INV002", "Pending", "PayPal", "฿3,250"), new("INV003", "Unpaid", "Bank Transfer", "฿12,400"),
         new("INV004", "Paid", "Credit Card", "฿5,900"), new("INV005", "Paid", "PayPal", "฿7,750")
     ];
     private static readonly ShadcnDataTableColumn<Payment>[] Columns = [
-        new("status", "Status", row => row.Status) { Filterable = true, MinWidth = "8rem" },
-        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, MinWidth = "14rem" },
-        new("amount", "Amount", row => row.Amount) { Sortable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
+        new("status", "Status", row => row.Status) { Filterable = true, Hideable = true, MinWidth = "8rem" },
+        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, Hideable = true, MinWidth = "14rem" },
+        new("method", "Method", row => row.Method) { Filterable = true, Hideable = true, MinWidth = "8rem" },
+        new("amount", "Amount", row => row.Amount) { Sortable = true, Filterable = true, Hideable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
     ];
 
     public static IReadOnlyList<ComponentExampleDefinition> Create(string slug) => slug switch { "table" => [Table()], "data-table" => [DataTable()], "chart" => [Chart()], _ => [] };
@@ -81,11 +82,11 @@ internal static class DataDisplayExamples
 
     private static ComponentExampleDefinition DataTable()
     {
-        var loading = false; var error = false; var manual = false; var empty = false;
+        var loading = false; var error = false; var manual = false; var empty = false; var toolbarMode = ShadcnDataTableToolbarMode.Compact;
         var state = new ShadcnDataTableState { PageSize = 5 };
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnDataTable<Payment>>(0); b.AddAttribute(1, "Class", "showcase-data-table"); b.AddAttribute(2, "Items", empty ? Array.Empty<Payment>() : Payments); b.AddAttribute(3, "Columns", Columns); b.AddAttribute(4, "RowKey", (Func<Payment, string>)(row => row.Id)); b.AddAttribute(5, "DefaultState", state); b.AddAttribute(6, "StateChanged", EventCallback.Factory.Create<ShadcnDataTableState>(typeof(DataDisplayExamples), next => state = next)); b.AddAttribute(7, "PageSizeOptions", new[] { 5, 10, 25 }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "Error", error ? "Unable to load payments." : null); b.AddAttribute(10, "Manual", manual); b.AddAttribute(11, "TotalCount", manual ? 12 : 0); b.AddAttribute(12, "FilterPlaceholder", "Filter emails..."); b.AddAttribute(13, "EmptyText", "No results."); b.AddAttribute(14, "ColumnsLabel", "Columns"); b.AddAttribute(15, "ActionsLabel", "Actions"); b.AddAttribute(16, "SelectAllLabel", "Select all payments"); b.AddAttribute(17, "SelectRowLabel", (Func<Payment, string>)(row => $"Select {row.Email}")); b.AddAttribute(18, "RowActionTemplate", (RenderFragment<Payment>)(item => x =>
+            b.OpenComponent<ShadcnDataTable<Payment>>(0); b.AddAttribute(1, "Class", "showcase-data-table"); b.AddAttribute(2, "Items", empty ? Array.Empty<Payment>() : Payments); b.AddAttribute(3, "Columns", Columns); b.AddAttribute(4, "RowKey", (Func<Payment, string>)(row => row.Id)); b.AddAttribute(5, "DefaultState", state); b.AddAttribute(6, "StateChanged", EventCallback.Factory.Create<ShadcnDataTableState>(typeof(DataDisplayExamples), next => state = next)); b.AddAttribute(7, "PageSizeOptions", new[] { 5, 10, 25 }); b.AddAttribute(8, "Loading", loading); b.AddAttribute(9, "Error", error ? "Unable to load payments." : null); b.AddAttribute(10, "Manual", manual); b.AddAttribute(11, "TotalCount", manual ? 12 : 0); b.AddAttribute(12, "FilterPlaceholder", "Search payments..."); b.AddAttribute(13, "EmptyText", "No results."); b.AddAttribute(14, "FiltersLabel", "Filters"); b.AddAttribute(15, "ColumnsLabel", "Columns"); b.AddAttribute(16, "ActionsLabel", "Actions"); b.AddAttribute(17, "SelectAllLabel", "Select all payments"); b.AddAttribute(18, "SelectRowLabel", (Func<Payment, string>)(row => $"Select {row.Email}")); b.AddAttribute(19, "ToolbarMode", toolbarMode); b.AddAttribute(20, "ToolbarStartTemplate", (RenderFragment)(x => { x.OpenElement(0, "span"); x.AddAttribute(1, "class", "showcase-data-table-toolbar-summary"); x.AddContent(2, $"{Payments.Length} payments"); x.CloseElement(); })); b.AddAttribute(21, "ToolbarEndTemplate", (RenderFragment)(x => { x.OpenElement(0, "button"); x.AddAttribute(1, "type", "button"); x.AddAttribute(2, "class", "showcase-data-table-export"); x.AddContent(3, "Export CSV"); x.CloseElement(); })); b.AddAttribute(22, "RowActionTemplate", (RenderFragment<Payment>)(item => x =>
             {
                 x.OpenComponent<ShadcnDropdownMenu>(0); x.AddAttribute(1, "ChildContent", (RenderFragment)(menu =>
                 {
@@ -109,33 +110,39 @@ internal static class DataDisplayExamples
                   DefaultState="@TableState"
                   StateChanged="OnTableStateChanged"
                   PageSizeOptions="@[5, 10, 25]"
+                  ToolbarMode="ShadcnDataTableToolbarMode.__TOOLBAR_MODE__"
 __STATE_ATTRIBUTES__
-                  FilterPlaceholder="Filter emails..."
+                  FilterPlaceholder="Search payments..."
                   EmptyText="No results."
+                  FiltersLabel="Filters"
                   ColumnsLabel="Columns"
                   ActionsLabel="Actions"
                   SelectAllLabel="Select all payments"
                   SelectRowLabel="@(row => $\"Select {row.Email}\")"
-                  RowActionTemplate="@((Payment row) => @<ShadcnDropdownMenu><ShadcnDropdownMenuTrigger Class=\"showcase-data-table-row-action\" aria-label=\"Open actions for @row.Email\"><svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"3\" cy=\"8\" r=\"1\" /><circle cx=\"8\" cy=\"8\" r=\"1\" /><circle cx=\"13\" cy=\"8\" r=\"1\" /></svg></ShadcnDropdownMenuTrigger><ShadcnDropdownMenuContent Align=\"ShadcnOverlayAlign.End\"><ShadcnDropdownMenuItem>View payment</ShadcnDropdownMenuItem><ShadcnDropdownMenuItem>Copy @row.Id</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu>)" />
+                  RowActionTemplate="@((Payment row) => @<ShadcnDropdownMenu><ShadcnDropdownMenuTrigger Class=\"showcase-data-table-row-action\" aria-label=\"Open actions for @row.Email\"><svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"3\" cy=\"8\" r=\"1\" /><circle cx=\"8\" cy=\"8\" r=\"1\" /><circle cx=\"13\" cy=\"8\" r=\"1\" /></svg></ShadcnDropdownMenuTrigger><ShadcnDropdownMenuContent Align=\"ShadcnOverlayAlign.End\"><ShadcnDropdownMenuItem>View payment</ShadcnDropdownMenuItem><ShadcnDropdownMenuItem>Copy @row.Id</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu>)">
+    <ToolbarStartTemplate><span class="showcase-data-table-toolbar-summary">8 payments</span></ToolbarStartTemplate>
+    <ToolbarEndTemplate><button type="button" class="showcase-data-table-export">Export CSV</button></ToolbarEndTemplate>
+</ShadcnDataTable>
 
 @code {
-    private sealed record Payment(string Id, string Email, string Status, double Amount);
+    private sealed record Payment(string Id, string Email, string Status, string Method, double Amount);
 
     private IReadOnlyList<Payment> Payments = [
-        new("1", "ken99@example.com", "success", 316),
-        new("2", "abe45@example.com", "success", 242),
-        new("3", "monserrat44@example.com", "processing", 837),
-        new("4", "silas22@example.com", "success", 874),
-        new("5", "carmella@example.com", "failed", 721),
-        new("6", "preecha@example.com", "pending", 590),
-        new("7", "wipada@example.com", "processing", 445),
-        new("8", "niran@example.com", "success", 680)
+        new("1", "ken99@example.com", "success", "Card", 316),
+        new("2", "abe45@example.com", "success", "Transfer", 242),
+        new("3", "monserrat44@example.com", "processing", "Card", 837),
+        new("4", "silas22@example.com", "success", "PromptPay", 874),
+        new("5", "carmella@example.com", "failed", "Transfer", 721),
+        new("6", "preecha@example.com", "pending", "PromptPay", 590),
+        new("7", "wipada@example.com", "processing", "Card", 445),
+        new("8", "niran@example.com", "success", "Transfer", 680)
     ];
 
     private IReadOnlyList<ShadcnDataTableColumn<Payment>> Columns = [
-        new("status", "Status", row => row.Status) { Filterable = true, MinWidth = "8rem" },
-        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, MinWidth = "14rem" },
-        new("amount", "Amount", row => row.Amount) { Sortable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
+        new("status", "Status", row => row.Status) { Filterable = true, Hideable = true, MinWidth = "8rem" },
+        new("email", "Email", row => row.Email) { Sortable = true, Filterable = true, Hideable = true, MinWidth = "14rem" },
+        new("method", "Method", row => row.Method) { Filterable = true, Hideable = true, MinWidth = "8rem" },
+        new("amount", "Amount", row => row.Amount) { Sortable = true, Filterable = true, Hideable = true, Alignment = ShadcnTableAlignment.End, MinWidth = "7rem" }
     ];
 
     private ShadcnDataTableState TableState = __TABLE_STATE__;
@@ -153,9 +160,10 @@ __STATE_ATTRIBUTES__
             return sourceTemplate
                 .Replace("__ITEMS__", empty ? "@(Array.Empty<Payment>())" : "@Payments", StringComparison.Ordinal)
                 .Replace("__STATE_ATTRIBUTES__", stateAttributes, StringComparison.Ordinal)
+                .Replace("__TOOLBAR_MODE__", toolbarMode.ToString(), StringComparison.Ordinal)
                 .Replace("__TABLE_STATE__", StateSource(state), StringComparison.Ordinal);
         }
-        var example = Example("data-table", "Typed payments data table", "Filter, sort, select, hide columns, and page through a realistic typed payment collection.", Source(), preview, [Toggle("data-table-loading", "Loading", v => loading = v), Toggle("data-table-error", "Error", v => error = v), Toggle("data-table-empty", "Empty", v => empty = v), Toggle("data-table-manual", "Manual paging", v => manual = v)], ["sort", "filter", "selection", "pagination", "visibility", "row-actions", "manual", "loading", "empty", "error", "rtl"]);
+        var example = Example("data-table", "Typed payments data table", "Filter, sort, select, hide columns, and page through a realistic typed payment collection.", Source(), preview, [Select("data-table-toolbar-mode", "Toolbar mode", toolbarMode.ToString(), Enum.GetNames<ShadcnDataTableToolbarMode>(), value => toolbarMode = Enum.Parse<ShadcnDataTableToolbarMode>(value)), Toggle("data-table-loading", "Loading", v => loading = v), Toggle("data-table-error", "Error", v => error = v), Toggle("data-table-empty", "Empty", v => empty = v), Toggle("data-table-manual", "Manual paging", v => manual = v)], ["sort", "filter", "selection", "pagination", "visibility", "compact-toolbar", "row-actions", "manual", "loading", "empty", "error", "rtl"]);
         return example with { RazorSourceProvider = Source };
     }
 

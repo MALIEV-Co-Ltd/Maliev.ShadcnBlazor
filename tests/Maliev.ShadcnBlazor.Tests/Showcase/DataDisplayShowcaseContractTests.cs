@@ -181,6 +181,32 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
     }
 
     [Fact]
+    public void DataTableDossierDefaultsToCompactAndDocumentsBothToolbarModes()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var mode = example.Controls.Single(control => control.Id == "data-table-toolbar-mode");
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(ComponentParameterControlKind.Select, mode.Kind);
+        Assert.Equal(nameof(ShadcnDataTableToolbarMode.Compact), mode.Value);
+        Assert.Equal(Enum.GetNames<ShadcnDataTableToolbarMode>(), mode.Options);
+        Assert.Equal("compact", rendered.Find("[data-slot='data-table-toolbar']").GetAttribute("data-toolbar-mode"));
+        Assert.Equal(2, rendered.FindAll("[data-toolbar-disclosure]").Count);
+        Assert.Contains("ToolbarMode=\"ShadcnDataTableToolbarMode.Compact\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("FiltersLabel=\"Filters\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ToolbarStartTemplate>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ToolbarEndTemplate>", example.RazorSource, StringComparison.Ordinal);
+        Assert.True(example.RazorSource.Split("Filterable = true", StringSplitOptions.None).Length - 1 >= 4);
+        Assert.True(example.RazorSource.Split("Hideable = true", StringSplitOptions.None).Length - 1 >= 4);
+
+        mode.Apply(nameof(ShadcnDataTableToolbarMode.Default));
+        rendered = Render(example.Preview);
+        Assert.Equal("default", rendered.Find("[data-slot='data-table-toolbar']").GetAttribute("data-toolbar-mode"));
+        Assert.NotEmpty(rendered.FindAll("input[data-column-filter]"));
+        Assert.Contains("ToolbarMode=\"ShadcnDataTableToolbarMode.Default\"", example.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TableExpansionUsesAnAccessibleRowTriggerAndRevealsUsefulDetail()
     {
         var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("table").Single();

@@ -5909,7 +5909,7 @@ a {
     min-inline-size: 0;
 }
 
-.showcase-data-table .shadcn-data-table-toolbar {
+.showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
@@ -5917,7 +5917,7 @@ a {
     padding-block: .25rem .75rem;
 }
 
-.showcase-data-table .shadcn-data-table-toolbar__filters {
+.showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] .shadcn-data-table-toolbar__filters {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 1fr));
     align-items: center;
@@ -5934,7 +5934,7 @@ a {
     inline-size: 100%;
 }
 
-.showcase-data-table .shadcn-data-table-visibility {
+.showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] > .shadcn-data-table-visibility {
     display: flex;
     align-items: center;
     align-self: stretch;
@@ -5950,6 +5950,28 @@ a {
 
 .showcase-data-table .shadcn-data-table-visibility label {
     color: var(--shadcn-foreground);
+}
+
+.showcase-data-table-toolbar-summary {
+    color: var(--shadcn-muted-foreground);
+    font-size: .8125rem;
+    white-space: nowrap;
+}
+
+.showcase-data-table-export {
+    min-block-size: 2.75rem;
+    border: 1px solid var(--shadcn-border);
+    border-radius: var(--shadcn-radius-md);
+    background: var(--shadcn-primary);
+    padding-inline: .75rem;
+    color: var(--shadcn-primary-foreground);
+    font: inherit;
+    cursor: pointer;
+}
+
+.showcase-data-table-export:focus-visible {
+    outline: var(--shadcn-focus-ring-width) solid var(--shadcn-ring);
+    outline-offset: var(--shadcn-focus-ring-offset);
 }
 
 .showcase-data-table .shadcn-data-table-frame {
@@ -6577,15 +6599,15 @@ a {
         padding-inline: 3.25rem;
     }
 
-    .showcase-data-table .shadcn-data-table-toolbar {
+    .showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] {
         grid-template-columns: 1fr;
     }
 
-    .showcase-data-table .shadcn-data-table-toolbar__filters {
+    .showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] .shadcn-data-table-toolbar__filters {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .showcase-data-table .shadcn-data-table-visibility {
+    .showcase-data-table .shadcn-data-table-toolbar[data-toolbar-mode="default"] > .shadcn-data-table-visibility {
         justify-content: flex-start;
     }
 

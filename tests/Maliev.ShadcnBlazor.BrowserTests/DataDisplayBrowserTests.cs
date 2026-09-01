@@ -31,9 +31,22 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await table.Locator("input[data-slot='data-table-filter']").FillAsync("niran");
         await Assertions.Expect(table.Locator("tbody tr[data-row-key='8']")).ToHaveCountAsync(1);
         await table.Locator("input[data-slot='data-table-filter']").FillAsync("");
+        var filtersTrigger = table.Locator("[data-toolbar-disclosure='filters']");
+        await filtersTrigger.ClickAsync();
+        await Assertions.Expect(filtersTrigger).ToHaveAttributeAsync("aria-expanded", "true");
         await table.Locator("input[data-column-filter='status']").FillAsync("success");
         await Assertions.Expect(table.Locator("tbody tr[data-row-key='2']")).ToHaveCountAsync(1);
         await table.Locator("input[data-column-filter='status']").FillAsync("");
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(filtersTrigger).ToHaveAttributeAsync("aria-expanded", "false");
+        var columnsTrigger = table.Locator("[data-toolbar-disclosure='columns']");
+        await columnsTrigger.ClickAsync();
+        await table.Locator("input[data-column-visibility='method']").UncheckAsync();
+        await Assertions.Expect(table.Locator("th[data-column='method']")).ToHaveCountAsync(0);
+        await page.Keyboard.PressAsync("Escape");
+        await page.ChooseOptionAsync("control-data-table-toolbar-mode", "Default");
+        await Assertions.Expect(table.Locator("[data-slot='data-table-toolbar']")).ToHaveAttributeAsync("data-toolbar-mode", "default");
+        await Assertions.Expect(table.Locator("input[data-column-filter]")).ToHaveCountAsync(4);
         await page.GetByTestId("control-data-table-manual").CheckAsync();
         await Assertions.Expect(table.Locator("button[data-slot='data-table-next']")).ToBeEnabledAsync();
         await table.Locator("button[data-slot='data-table-next']").ClickAsync();
@@ -48,6 +61,13 @@ public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, Playwr
         await page.GetByTestId("control-data-table-loading").UncheckAsync();
         await page.GetByTestId("control-data-table-error").CheckAsync();
         await Assertions.Expect(table.Locator("[role='alert']")).ToBeVisibleAsync();
+
+        await page.GetByTestId("control-data-table-error").UncheckAsync();
+        await page.ChooseOptionAsync("control-data-table-toolbar-mode", "Compact");
+        await page.SetViewportSizeAsync(320, 700);
+        Assert.False(await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+        var compactTargets = table.Locator("[data-toolbar-disclosure], .showcase-data-table-export");
+        Assert.All(await compactTargets.EvaluateAllAsync<double[]>("elements => elements.map(element => element.getBoundingClientRect().height)"), height => Assert.True(height >= 44));
     }
 
     [Fact]
