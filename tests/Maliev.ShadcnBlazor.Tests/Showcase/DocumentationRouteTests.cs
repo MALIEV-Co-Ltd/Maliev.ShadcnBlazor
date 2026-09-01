@@ -95,9 +95,47 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("ShadcnThemeProvider", cut.Find("#compose").TextContent, StringComparison.Ordinal);
         Assert.Contains("ShadcnButton", cut.Find("#compose").TextContent, StringComparison.Ordinal);
         Assert.Contains("Core concepts", cut.Markup, StringComparison.Ordinal);
+        var agentic = cut.Find("[data-testid='agentic-integration-showcase']");
+        Assert.Contains("Agentic development with Maliev", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("AGENTS.md", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("maliev-shadcnblazor", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnChartTooltipContent", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Contains("ShadcnChartLegendContent", agentic.TextContent, StringComparison.Ordinal);
+        Assert.Equal("fallback", agentic.GetAttribute("data-loop-active"));
+        Assert.Equal(3, agentic.QuerySelectorAll("[data-agentic-scene]").Length);
+        Assert.True(agentic.QuerySelectorAll("[data-slot='bubble']").Length >= 6);
+        Assert.True(agentic.QuerySelectorAll("[data-slot='marker']").Length >= 3);
+        Assert.Empty(agentic.QuerySelectorAll("a, button, input, select, textarea, [tabindex]"));
         Assert.Contains("Troubleshooting", cut.Markup, StringComparison.Ordinal);
+        var contribute = cut.Find("#contribute");
+        Assert.Contains("Get help and contribute", contribute.TextContent, StringComparison.Ordinal);
+        var contributionLinks = contribute.QuerySelectorAll("a");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/issues/new?template=bug_report.yml");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/issues/new?template=feature_request.yml");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/discussions");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/blob/main/CONTRIBUTING.md");
+        Assert.Contains(contributionLinks, link => link.GetAttribute("href") == "https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/security/advisories/new");
         Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "docs/components");
         Assert.Contains(cut.FindAll("a"), link => link.GetAttribute("href") == "theme");
+    }
+
+    [Fact]
+    public void AgenticShowcaseLoopIsVisibilityAwareAndMotionSafe()
+    {
+        var root = FindRoot();
+        var css = File.ReadAllText(Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "css", "showcase.css"));
+        var scriptPath = Path.Combine(root, "samples", "Maliev.ShadcnBlazor.Showcase", "wwwroot", "js", "agentic-showcase.js");
+
+        Assert.True(File.Exists(scriptPath), "The agentic showcase visibility observer is missing.");
+        var script = File.ReadAllText(scriptPath);
+        Assert.Contains("IntersectionObserver", script, StringComparison.Ordinal);
+        Assert.Contains("visibilitychange", script, StringComparison.Ordinal);
+        Assert.Contains("data-loop-active", script, StringComparison.Ordinal);
+        Assert.Contains(".agentic-showcase", css, StringComparison.Ordinal);
+        Assert.Contains("pointer-events: none", css, StringComparison.Ordinal);
+        Assert.Contains("cursor: default", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes agentic-message-cycle", css, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css, StringComparison.Ordinal);
     }
 
     [Fact]

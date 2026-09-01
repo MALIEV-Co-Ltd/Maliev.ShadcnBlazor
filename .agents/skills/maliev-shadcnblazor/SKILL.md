@@ -17,18 +17,21 @@ invent parameters that are not present in the installed version.
    - existing theme provider, direction, validation, and overlay setup.
 2. Read [references/setup-and-selection.md](references/setup-and-selection.md)
    when installing the package, selecting a component, or checking asset order.
-3. Confirm the component API from the installed assembly, current source, or
+3. Read [references/agentic-integration.md](references/agentic-integration.md)
+   when adding this skill to an application repository, updating its
+   `AGENTS.md`, or composing a task-oriented sidebar, chart, or form workflow.
+4. Confirm the component API from the installed assembly, current source, or
    official component dossier. Never infer a React shadcn/ui API or a MudBlazor
    API from a similar name.
-4. Make the smallest composition that solves the application workflow:
+5. Make the smallest composition that solves the application workflow:
    - prefer typed parameters, `EventCallback`, and native form semantics;
    - keep state ownership explicit;
    - pass supported attributes without replacing component-owned ARIA state;
    - use semantic theme tokens instead of styling package internals;
    - keep application DTOs, routes, and services outside the UI component.
-5. Verify the states users can reach: default, loading, empty, success, error,
+6. Verify the states users can reach: default, loading, empty, success, error,
    disabled, read-only, and validation where applicable.
-6. Build the consuming project before tests. Exercise keyboard behavior, focus,
+7. Build the consuming project before tests. Exercise keyboard behavior, focus,
    accessible names, light/dark themes, narrow layouts, and any overlay or JS
    interaction changed by the task.
 

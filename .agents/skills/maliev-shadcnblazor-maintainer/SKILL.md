@@ -20,6 +20,9 @@ routing; it does not replace repository authority or validation requirements.
    - public API snapshot and XML documentation;
    - `docs/component-catalog.json`;
    - Showcase catalog entry, dossier, examples, and route;
+   - agent guidance in `AGENTS.md`, `docs/agent-skills.md`, and both repository
+     skills when the change affects setup, component selection, public APIs,
+     repository paths, or validation commands;
    - unit, contract, repository, and Playwright coverage.
 4. Add a focused failing test for a feature or bug fix. Confirm that it fails
    for the intended reason before changing production code.
@@ -46,6 +49,10 @@ routing; it does not replace repository authority or validation requirements.
 - Keep CSS in the correct family layer and use semantic tokens plus logical
   properties. Avoid selectors that depend on Showcase-only markup.
 - Keep examples neutral, fictional, portable, and compilable.
+- Keep the documentation home's agentic workflow truthful. When it names a
+  component or promises a verification behavior, ensure the consumer skill
+  routes to the current installed-package contract and add a repository test
+  for any synchronization invariant that should not drift.
 
 ## Deliverable
 

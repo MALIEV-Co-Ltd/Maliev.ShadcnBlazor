@@ -1,0 +1,92 @@
+@using Maliev.ShadcnBlazor.Components.Overlays
+@inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
+
+<ShadcnPopover Open="@EffectiveOpen"
+               OpenChanged="SetOpenAsync"
+               CloseOnEscape="true"
+               CloseOnOutsidePress="true">
+    <ShadcnPopoverTrigger @attributes="ForwardedAttributes"
+                          Class="@MergeClass("shadcn-bubble-reaction-picker-trigger")"
+                          Style="@MergeStyle(null)"
+                          data-slot="bubble-reaction-picker-trigger"
+                          aria-label="@AccessibleName"
+                          Disabled="@Disabled">
+        @TriggerContent
+    </ShadcnPopoverTrigger>
+    <ShadcnPopoverContent Class="shadcn-bubble-reaction-picker-content"
+                          data-slot="bubble-reaction-picker-content"
+                          aria-label="@AccessibleName"
+                          Side="@Side"
+                          Align="@Align"
+                          SideOffset="@SideOffset">
+        <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+    </ShadcnPopoverContent>
+</ShadcnPopover>
+
+@code {
+    [CascadingParameter] private ShadcnBubbleReactions? Owner { get; set; }
+
+    /// <summary>Gets or sets the accessible name for the add-reaction trigger and picker.</summary>
+    [Parameter, EditorRequired] public string AccessibleName { get; set; } = string.Empty;
+    /// <summary>Gets or sets the reaction choices rendered inside the picker.</summary>
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    /// <summary>Gets or sets the visual content of the add-reaction trigger.</summary>
+    [Parameter, EditorRequired] public RenderFragment? TriggerContent { get; set; }
+    /// <summary>Gets or sets whether the picker is disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+    /// <summary>Gets or sets whether the picker is open.</summary>
+    [Parameter] public bool Open { get; set; }
+    /// <summary>Raised when the picker open state changes.</summary>
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    /// <summary>Raised with the caller-defined value of the selected reaction.</summary>
+    [Parameter] public EventCallback<string> ReactionSelected { get; set; }
+    /// <summary>Gets or sets the preferred side of the picker.</summary>
+    [Parameter] public ShadcnOverlaySide Side { get; set; } = ShadcnOverlaySide.Top;
+    /// <summary>Gets or sets the alignment of the picker relative to its trigger.</summary>
+    [Parameter] public ShadcnOverlayAlign Align { get; set; } = ShadcnOverlayAlign.Start;
+    /// <summary>Gets or sets the distance between the picker and its trigger.</summary>
+    [Parameter] public double SideOffset { get; set; } = 6;
+
+    private bool _open;
+    private bool _initialized;
+    private bool _lastSuppliedOpen;
+    private bool EffectiveOpen => _open;
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept(
+        "data-slot", "aria-label", "disabled");
+
+    protected override void OnParametersSet()
+    {
+        if (Owner is null)
+            throw new InvalidOperationException("ShadcnBubbleReactionPicker must be inside ShadcnBubbleReactions.");
+        if (string.IsNullOrWhiteSpace(AccessibleName))
+            throw new InvalidOperationException("ShadcnBubbleReactionPicker requires an accessible name.");
+        if (ChildContent is null)
+            throw new InvalidOperationException("ShadcnBubbleReactionPicker requires reaction choices.");
+        if (TriggerContent is null)
+            throw new InvalidOperationException("ShadcnBubbleReactionPicker requires trigger content.");
+        if (!ReactionSelected.HasDelegate)
+            throw new InvalidOperationException("ShadcnBubbleReactionPicker requires a reaction selection callback.");
+
+        if (!_initialized || Open != _lastSuppliedOpen)
+            _open = Open;
+
+        _lastSuppliedOpen = Open;
+        _initialized = true;
+    }
+
+    internal async Task SelectAsync(string value)
+    {
+        await ReactionSelected.InvokeAsync(value);
+        await SetOpenAsync(false);
+    }
+
+    private async Task SetOpenAsync(bool value)
+    {
+        if (_open == value)
+            return;
+
+        _open = value;
+        await OpenChanged.InvokeAsync(value);
+        await InvokeAsync(StateHasChanged);
+    }
+}

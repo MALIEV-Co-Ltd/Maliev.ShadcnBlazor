@@ -65,6 +65,46 @@ public sealed partial class AgentSkillsRepositoryTests
         Assert.Contains("A skill is reusable guidance, not authority", guide, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AgenticIntegrationGuidanceStaysAlignedWithTheAdvertisedWorkflow()
+    {
+        var root = RepositoryRoot.Find();
+        var guide = File.ReadAllText(Path.Combine(root, "AGENTS.md"));
+        var publicGuide = File.ReadAllText(Path.Combine(root, "docs", "agent-skills.md"));
+        var consumerSkillRoot = Path.Combine(root, ".agents", "skills", "maliev-shadcnblazor");
+        var consumerSkill = File.ReadAllText(Path.Combine(consumerSkillRoot, "SKILL.md"));
+        var integrationReferencePath = Path.Combine(consumerSkillRoot, "references", "agentic-integration.md");
+        var maintainerSkill = File.ReadAllText(Path.Combine(
+            root,
+            ".agents",
+            "skills",
+            "maliev-shadcnblazor-maintainer",
+            "SKILL.md"));
+
+        Assert.Contains("Agent guidance synchronization", guide, StringComparison.Ordinal);
+        Assert.Contains("references/agentic-integration.md", consumerSkill, StringComparison.Ordinal);
+        Assert.True(File.Exists(integrationReferencePath), "The consumer skill is missing its agentic-integration reference.");
+
+        var integrationReference = File.ReadAllText(integrationReferencePath);
+        foreach (var required in new[]
+        {
+            "AGENTS.md",
+            "ShadcnSidebar",
+            "ShadcnChart",
+            "ShadcnChartTooltipContent",
+            "ShadcnChartLegendContent",
+            "ShadcnInput",
+            "installed package version",
+        })
+        {
+            Assert.Contains(required, integrationReference, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("agent guidance", maintainerSkill, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("docs/agent-skills.md", maintainerSkill, StringComparison.Ordinal);
+        Assert.Contains("Application AGENTS.md", publicGuide, StringComparison.Ordinal);
+    }
+
     [GeneratedRegex(@"(?im)\b[A-Z]:\\")]
     private static partial Regex WindowsAbsolutePath();
 }

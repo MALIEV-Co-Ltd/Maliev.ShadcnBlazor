@@ -71,7 +71,7 @@ internal static class ConversationWorkflowExamples
     private static ComponentExampleDefinition Bubble()
     {
         var sentVariant = ShadcnBubbleVariant.Default;
-        var receivedVariant = ShadcnBubbleVariant.Ghost;
+        var receivedVariant = ShadcnBubbleVariant.Secondary;
         var end = false;
         var top = false;
 
@@ -91,7 +91,7 @@ internal static class ConversationWorkflowExamples
             preview,
             [
                 Select("bubble-variant", "Sent variant", "Default", Enum.GetNames<ShadcnBubbleVariant>(), v => sentVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
-                Select("bubble-received-variant", "Received variant", "Ghost", Enum.GetNames<ShadcnBubbleVariant>(), v => receivedVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-received-variant", "Received variant", "Secondary", Enum.GetNames<ShadcnBubbleVariant>(), v => receivedVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
                 Toggle("bubble-end", "Align incoming end", v => end = v),
                 Toggle("bubble-reactions-top", "Reactions top", v => top = v)
             ],
@@ -191,9 +191,9 @@ internal static class ConversationWorkflowExamples
         {
             b.OpenElement(0, "div");
             b.AddAttribute(1, "class", "showcase-marker-thread showcase-bubble-thread");
-            AddMessage(b, 2, ShadcnLogicalAlign.Start, AssistantAvatar, false, "MALIEV Assistant", "Machining is complete. Bore 4 is ready for final inspection.", bubbleVariant: ShadcnBubbleVariant.Ghost);
+            AddMessage(b, 2, ShadcnLogicalAlign.Start, AssistantAvatar, false, "MALIEV Assistant", "Machining is complete. Bore 4 is ready for final inspection.", bubbleVariant: ShadcnBubbleVariant.Secondary);
             AddMessage(b, 12, ShadcnLogicalAlign.End, OperatorAvatar, false, "Narin S.", "Probe result received. I am uploading the signed report now.", bubbleVariant: ShadcnBubbleVariant.Default);
-            AddMessage(b, 22, ShadcnLogicalAlign.Start, ReviewerAvatar, false, "Kanda T.", "Thanks. I will hold dispatch until Quality signs off.", bubbleVariant: ShadcnBubbleVariant.Ghost);
+            AddMessage(b, 22, ShadcnLogicalAlign.Start, ReviewerAvatar, false, "Kanda T.", "Thanks. I will hold dispatch until Quality signs off.", bubbleVariant: ShadcnBubbleVariant.Secondary);
             AddMarker(b, 32, variant, false, "✓", "Four inspection files verified");
             AddMarker(b, 42, ShadcnMarkerVariant.Separator, false, "•", "14:32 · WO-2418");
             AddMarker(b, 52, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "Preparing quality handoff" : "Ready for quality review");
@@ -253,7 +253,7 @@ internal static class ConversationWorkflowExamples
             {
                 AddText<ShadcnMessageHeader>(content, 0, author);
                 content.OpenComponent<ShadcnBubble>(3);
-                content.AddAttribute(4, nameof(ShadcnBubble.Variant), bubbleVariant ?? (align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted));
+                content.AddAttribute(4, nameof(ShadcnBubble.Variant), bubbleVariant ?? (align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Secondary));
                 content.AddAttribute(5, nameof(ShadcnBubble.Align), align);
                 content.AddAttribute(6, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble => AddText<ShadcnBubbleContent>(bubble, 0, message)));
                 content.CloseComponent();
@@ -442,7 +442,7 @@ internal static class ConversationWorkflowExamples
         <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="MALIEV Assistant" /></ShadcnMessageAvatar>
         <ShadcnMessageContent>
             <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
-            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                 <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
             </ShadcnBubble>
         </ShadcnMessageContent>
@@ -462,7 +462,7 @@ internal static class ConversationWorkflowExamples
         <ShadcnMessageAvatar><img src="images/avatars/reviewer-thai.png" alt="Kanda T." /></ShadcnMessageAvatar>
         <ShadcnMessageContent>
             <ShadcnMessageHeader>Kanda T.</ShadcnMessageHeader>
-            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                 <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
             </ShadcnBubble>
         </ShadcnMessageContent>
@@ -545,7 +545,7 @@ internal static class ConversationWorkflowExamples
 
 @code {
     private ShadcnBubbleVariant sentVariant = ShadcnBubbleVariant.Default;
-    private ShadcnBubbleVariant receivedVariant = ShadcnBubbleVariant.Ghost;
+    private ShadcnBubbleVariant receivedVariant = ShadcnBubbleVariant.Secondary;
     private int thumbsUpCount = 1;
     private int heartCount = 2;
     private int laughCount = 1;
@@ -675,7 +675,7 @@ internal static class ConversationWorkflowExamples
                         <ShadcnMessageContent>
                             <ShadcnMessageBody>
                                 <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
-                                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Muted">
+                                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
                                     <ShadcnBubbleContent>เริ่มตรวจสอบชิ้นงานแล้ว</ShadcnBubbleContent>
                                 </ShadcnBubble>
                             </ShadcnMessageBody>
@@ -690,7 +690,7 @@ internal static class ConversationWorkflowExamples
                             <ShadcnMessageContent>
                                 <ShadcnMessageBody>
                                     <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
-                                    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
+                                    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                                         <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
                                     </ShadcnBubble>
                                 </ShadcnMessageBody>
@@ -782,7 +782,7 @@ internal static class ConversationWorkflowExamples
         <ShadcnMessageContent>
             <ShadcnMessageBody>
                 <ShadcnMessageHeader>Operator</ShadcnMessageHeader>
-                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                     <ShadcnBubbleContent dir="auto">ตรวจสอบไฟล์แล้ว 3 รายการ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>
@@ -793,7 +793,7 @@ internal static class ConversationWorkflowExamples
     <ShadcnMessage Align="ShadcnLogicalAlign.Start" Class="message-continuation" data-sender="engineer" data-continuation="true" aria-label="Operator message 2">
         <ShadcnMessageContent>
             <ShadcnMessageBody>
-                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                     <ShadcnBubbleContent dir="auto">กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>
@@ -806,7 +806,7 @@ internal static class ConversationWorkflowExamples
         <ShadcnMessageContent>
             <ShadcnMessageBody>
                 <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
-                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
                     <ShadcnBubbleContent dir="auto">พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>

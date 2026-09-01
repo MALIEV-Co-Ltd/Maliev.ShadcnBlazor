@@ -8,18 +8,41 @@
     <ShadcnBubble Variant="ReceivedVariant" Align="IncomingAlign" data-bubble-index="1" data-bubble-role="incoming">
         <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ReactionSide" Align="IncomingAlign" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Fallback="👍"
-                                  AccessibleName="Thumbs up reaction"
-                                  Count="_thumbsUpCount"
-                                  Pressed="_thumbsUpPressed"
-                                  PressedChanged="SetThumbsUp">
-                <ShowcaseReactionGlyph Kind="thumbs-up" />
-            </ShadcnBubbleReaction>
+            @foreach (var reaction in _firstMessageReactions)
+            {
+                <ShadcnBubbleReaction @key="reaction.Key"
+                                      Fallback="@ReactionFallback(reaction.Key)"
+                                      AccessibleName="@ReactionAccessibleName(reaction.Key)"
+                                      Count="@reaction.Value.Count"
+                                      Pressed="@reaction.Value.Pressed"
+                                      PressedChanged="pressed => SetReaction(_firstMessageReactions, reaction.Key, pressed)"
+                                      data-reaction-key="@reaction.Key">
+                    <ShowcaseReactionGlyph Kind="@reaction.Key" />
+                </ShadcnBubbleReaction>
+            }
+            <ShowcaseBubbleReactionPicker ReactionSelected="value => AddReaction(_firstMessageReactions, value)"
+                                          IsSelected="_firstMessageReactions.ContainsKey" />
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
     <ShadcnBubble Variant="ReceivedVariant" Align="IncomingAlign" data-bubble-index="2" data-bubble-role="incoming">
         <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
+        <ShadcnBubbleReactions Side="ReactionSide" Align="IncomingAlign" AccessibleName="Reactions for the message">
+            @foreach (var reaction in _secondMessageReactions)
+            {
+                <ShadcnBubbleReaction @key="reaction.Key"
+                                      Fallback="@ReactionFallback(reaction.Key)"
+                                      AccessibleName="@ReactionAccessibleName(reaction.Key)"
+                                      Count="@reaction.Value.Count"
+                                      Pressed="@reaction.Value.Pressed"
+                                      PressedChanged="pressed => SetReaction(_secondMessageReactions, reaction.Key, pressed)"
+                                      data-reaction-key="@reaction.Key">
+                    <ShowcaseReactionGlyph Kind="@reaction.Key" />
+                </ShadcnBubbleReaction>
+            }
+            <ShowcaseBubbleReactionPicker ReactionSelected="value => AddReaction(_secondMessageReactions, value)"
+                                          IsSelected="_secondMessageReactions.ContainsKey" />
+        </ShadcnBubbleReactions>
     </ShadcnBubble>
 
     <ShadcnBubble Variant="SentVariant" Align="ShadcnLogicalAlign.End" data-bubble-index="3" data-bubble-role="outgoing">
@@ -29,76 +52,119 @@
     <ShadcnBubble Variant="ReceivedVariant" Align="IncomingAlign" data-bubble-index="4" data-bubble-role="incoming">
         <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ReactionSide" Align="IncomingAlign" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Fallback="❤️"
-                                  AccessibleName="Heart reaction"
-                                  Count="_heartCount"
-                                  Pressed="_heartPressed"
-                                  PressedChanged="SetHeart"
-                                  data-testid="bubble-reaction-heart">
-                <ShowcaseReactionGlyph Kind="heart" />
-            </ShadcnBubbleReaction>
-            <ShadcnBubbleReaction Fallback="😂"
-                                  AccessibleName="Laughing reaction"
-                                  Count="_laughCount"
-                                  Pressed="_laughPressed"
-                                  PressedChanged="SetLaugh">
-                <ShowcaseReactionGlyph Kind="laugh" />
-            </ShadcnBubbleReaction>
+            @foreach (var reaction in _lastMessageReactions.Take(2))
+            {
+                <ShadcnBubbleReaction @key="reaction.Key"
+                                      Fallback="@ReactionFallback(reaction.Key)"
+                                      AccessibleName="@ReactionAccessibleName(reaction.Key)"
+                                      Count="@reaction.Value.Count"
+                                      Pressed="@reaction.Value.Pressed"
+                                      PressedChanged="pressed => SetReaction(_lastMessageReactions, reaction.Key, pressed)"
+                                      data-reaction-key="@reaction.Key"
+                                      data-testid="@ReactionTestId(reaction.Key)">
+                    <ShowcaseReactionGlyph Kind="@reaction.Key" />
+                </ShadcnBubbleReaction>
+            }
             <ShadcnBubbleReactionOverflow Count="2">
-                <ShadcnBubbleReaction Fallback="🔥"
-                                      AccessibleName="Fire reaction"
-                                      Count="_fireCount"
-                                      Pressed="_firePressed"
-                                      PressedChanged="SetFire"
-                                      data-testid="bubble-reaction-fire">
-                    <ShowcaseReactionGlyph Kind="fire" />
-                </ShadcnBubbleReaction>
-                <ShadcnBubbleReaction Fallback="👀"
-                                      AccessibleName="Eyes reaction"
-                                      Count="_eyesCount"
-                                      Pressed="_eyesPressed"
-                                      PressedChanged="SetEyes"
-                                      data-testid="bubble-reaction-eyes">
-                    <ShowcaseReactionGlyph Kind="eyes" />
-                </ShadcnBubbleReaction>
+                @foreach (var reaction in _lastMessageReactions.Skip(2).Take(2))
+                {
+                    <ShadcnBubbleReaction @key="reaction.Key"
+                                          Fallback="@ReactionFallback(reaction.Key)"
+                                          AccessibleName="@ReactionAccessibleName(reaction.Key)"
+                                          Count="@reaction.Value.Count"
+                                          Pressed="@reaction.Value.Pressed"
+                                          PressedChanged="pressed => SetReaction(_lastMessageReactions, reaction.Key, pressed)"
+                                          data-reaction-key="@reaction.Key"
+                                          data-testid="@ReactionTestId(reaction.Key)">
+                        <ShowcaseReactionGlyph Kind="@reaction.Key" />
+                    </ShadcnBubbleReaction>
+                }
             </ShadcnBubbleReactionOverflow>
+            <ShowcaseBubbleReactionPicker ReactionSelected="value => AddReaction(_lastMessageReactions, value)"
+                                          IsSelected="_lastMessageReactions.ContainsKey" />
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 </ShadcnBubbleGroup>
 
 @code {
     [Parameter] public ShadcnBubbleVariant SentVariant { get; set; } = ShadcnBubbleVariant.Default;
-    [Parameter] public ShadcnBubbleVariant ReceivedVariant { get; set; } = ShadcnBubbleVariant.Ghost;
+    [Parameter] public ShadcnBubbleVariant ReceivedVariant { get; set; } = ShadcnBubbleVariant.Secondary;
     [Parameter] public bool AlignIncomingEnd { get; set; }
     [Parameter] public bool ReactionsTop { get; set; }
 
-    private int _thumbsUpCount = 1;
-    private int _heartCount = 2;
-    private int _laughCount = 1;
-    private int _fireCount = 1;
-    private int _eyesCount = 1;
-    private bool _thumbsUpPressed;
-    private bool _heartPressed;
-    private bool _laughPressed;
-    private bool _firePressed;
-    private bool _eyesPressed;
+    private readonly Dictionary<string, ReactionState> _firstMessageReactions = new()
+    {
+        ["thumbs-up"] = new(1)
+    };
+    private readonly Dictionary<string, ReactionState> _secondMessageReactions = [];
+    private readonly Dictionary<string, ReactionState> _lastMessageReactions = new()
+    {
+        ["heart"] = new(2),
+        ["laugh"] = new(1),
+        ["fire"] = new(1),
+        ["eyes"] = new(1)
+    };
 
     private ShadcnLogicalAlign IncomingAlign => AlignIncomingEnd ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start;
     private ShadcnReactionSide ReactionSide => ReactionsTop ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom;
 
-    private void SetThumbsUp(bool pressed) => SetReaction(ref _thumbsUpPressed, ref _thumbsUpCount, pressed);
-    private void SetHeart(bool pressed) => SetReaction(ref _heartPressed, ref _heartCount, pressed);
-    private void SetLaugh(bool pressed) => SetReaction(ref _laughPressed, ref _laughCount, pressed);
-    private void SetFire(bool pressed) => SetReaction(ref _firePressed, ref _fireCount, pressed);
-    private void SetEyes(bool pressed) => SetReaction(ref _eyesPressed, ref _eyesCount, pressed);
-
-    private static void SetReaction(ref bool current, ref int count, bool pressed)
+    private static void AddReaction(IDictionary<string, ReactionState> reactions, string key)
     {
-        if (current == pressed)
+        if (!reactions.TryGetValue(key, out var reaction))
+        {
+            reactions.Add(key, new(1, true));
+            return;
+        }
+
+        if (reaction.Pressed)
             return;
 
-        current = pressed;
-        count += pressed ? 1 : -1;
+        reaction.Pressed = true;
+        reaction.Count++;
+    }
+
+    private static void SetReaction(IReadOnlyDictionary<string, ReactionState> reactions, string key, bool pressed)
+    {
+        var reaction = reactions[key];
+        if (reaction.Pressed == pressed)
+            return;
+
+        reaction.Pressed = pressed;
+        reaction.Count += pressed ? 1 : -1;
+    }
+
+    private static string ReactionAccessibleName(string key) => key switch
+    {
+        "thumbs-up" => "Thumbs up reaction",
+        "heart" => "Heart reaction",
+        "laugh" => "Laughing reaction",
+        "fire" => "Fire reaction",
+        "eyes" => "Eyes reaction",
+        _ => throw new ArgumentOutOfRangeException(nameof(key), key, "Unknown reaction.")
+    };
+
+    private static string ReactionFallback(string key) => key switch
+    {
+        "thumbs-up" => "👍",
+        "heart" => "❤️",
+        "laugh" => "😂",
+        "fire" => "🔥",
+        "eyes" => "👀",
+        _ => throw new ArgumentOutOfRangeException(nameof(key), key, "Unknown reaction.")
+    };
+
+    private static string? ReactionTestId(string key) => key switch
+    {
+        "heart" => "bubble-reaction-heart",
+        "fire" => "bubble-reaction-fire",
+        "eyes" => "bubble-reaction-eyes",
+        _ => null
+    };
+
+    private sealed class ReactionState(int count, bool pressed = false)
+    {
+        public int Count { get; set; } = count;
+        public bool Pressed { get; set; } = pressed;
     }
 
     private static void Noop() { }

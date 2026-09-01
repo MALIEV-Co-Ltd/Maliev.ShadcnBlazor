@@ -230,6 +230,7 @@ public sealed class DocumentationNavigationTests : BunitContext
         var cut = Render<DocumentationHeader>(parameters => parameters.Add(component => component.State, new DocumentationNavigationState()));
         var sponsor = cut.Find("[data-testid='documentation-kofi-link']");
         var cup = sponsor.QuerySelector(".documentation-kofi__cup");
+        var heart = sponsor.QuerySelector(".documentation-kofi__heart");
         var label = sponsor.QuerySelector(".documentation-kofi__label");
 
         Assert.Equal("https://ko-fi.com/natthapolv", sponsor.GetAttribute("href"));
@@ -237,6 +238,8 @@ public sealed class DocumentationNavigationTests : BunitContext
         Assert.Equal("noopener noreferrer", sponsor.GetAttribute("rel"));
         Assert.Equal("Support my work on Ko-fi (opens in a new tab)", sponsor.GetAttribute("aria-label"));
         Assert.NotNull(cup);
+        Assert.NotNull(heart);
+        Assert.Equal("true", heart.GetAttribute("aria-hidden"));
         Assert.NotNull(label);
         Assert.Empty(sponsor.QuerySelectorAll(".documentation-kofi__badge"));
         Assert.Contains("images/brand/kofi-cup.png", cup.GetAttribute("src"), StringComparison.Ordinal);

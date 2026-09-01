@@ -255,6 +255,13 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReaction
   Boolean Pressed
   EventCallback<Boolean> PressedChanged
   String Source
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOption
+  String AccessibleName
+  RenderFragment ChildContent
+  Boolean Disabled
+  String Fallback
+  Boolean Selected
+  String Value
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
   String AccessibleName
   RenderFragment ChildContent
@@ -262,6 +269,17 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
   Boolean DefaultExpanded
   EventCallback<Boolean> ExpandedChanged
   Func<Boolean, Int32, String> LabelFormatter
+type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionPicker
+  String AccessibleName
+  ShadcnOverlayAlign Align
+  RenderFragment ChildContent
+  Boolean Disabled
+  Boolean Open
+  EventCallback<Boolean> OpenChanged
+  EventCallback<String> ReactionSelected
+  ShadcnOverlaySide Side
+  Double SideOffset
+  RenderFragment TriggerContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactions
   String AccessibleName
   ShadcnLogicalAlign Align
@@ -286,6 +304,7 @@ enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerVariant: Default, S
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessage
   ShadcnLogicalAlign Align
   RenderFragment ChildContent
+  Boolean Continuation
   Boolean ShowStreamingStatus
   Boolean Streaming
   RenderFragment StreamingContent
