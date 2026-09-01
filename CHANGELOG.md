@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-01
+
+### Added
+
+- Added a caller-owned conversation reaction picker so users can add new emoji
+  reactions as well as toggle reactions that are already present.
+- Added an animated agentic-development showcase plus synchronized `AGENTS.md`
+  and installable skills for package-aware coding-agent integration.
+- Added direct documentation paths for reporting issues and contributing to the
+  project.
+
+### Changed
+
+- Connected consecutive messages from the same sender with tighter grouping and
+  reduced adjoining corner radii while preserving avatar and action alignment.
+- Standardized received conversation bubbles on the borderless Secondary
+  treatment across component examples and Theme Studio.
+
 ## [2.1.4] - 2026-09-01
 
 ### Added
@@ -393,7 +411,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.4...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.4...v2.2.0
 [2.1.4]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.1...v2.1.2
