@@ -1,30 +1,89 @@
 @typeparam TItem
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
 <div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-data-table")" style="@MergeStyle(null)" data-slot="data-table" aria-busy="@(Loading ? "true" : null)">
-    <div class="shadcn-data-table-toolbar" data-slot="data-table-toolbar">
-        <div class="shadcn-data-table-toolbar__filters">
-            <label class="shadcn-data-table-filter-control">
-                <span class="shadcn-sr-only">@FilterPlaceholder</span>
-                <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
-            </label>
-            @foreach (var column in OrderedColumns.Where(column => column.Filterable))
+    <div class="shadcn-data-table-toolbar" data-slot="data-table-toolbar" data-toolbar-mode="@ToolbarMode.ToString().ToLowerInvariant()">
+        @if (ToolbarMode == ShadcnDataTableToolbarMode.Compact)
+        {
+            @if (ToolbarStartTemplate is not null)
             {
-                var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
-                <label class="shadcn-data-table-column-filter">
-                    <span class="shadcn-sr-only">@filterLabel</span>
-                    <input class="shadcn-data-table-filter shadcn-data-table-column-filter__input" type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
+                <div class="shadcn-data-table-toolbar__start" data-slot="data-table-toolbar-start">@ToolbarStartTemplate</div>
+            }
+            <div class="shadcn-data-table-toolbar__filters">
+                <label class="shadcn-data-table-filter-control">
+                    <span class="shadcn-sr-only">@FilterPlaceholder</span>
+                    <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
                 </label>
-            }
-        </div>
-        <fieldset class="shadcn-data-table-visibility" data-slot="data-table-visibility">
-            <legend class="shadcn-sr-only">@ColumnsLabel</legend>
-            @foreach (var column in OrderedColumns.Where(column => column.Hideable))
+            </div>
+            <div class="shadcn-data-table-toolbar__actions" data-slot="data-table-toolbar-actions">
+                @if (OrderedColumns.Any(column => column.Filterable))
+                {
+                    <ShadcnPopover Open="_filtersOpen" OpenChanged="SetFiltersOpen">
+                        <ShadcnPopoverTrigger Class="shadcn-data-table-toolbar__trigger" data-slot="data-table-toolbar-trigger" data-toolbar-disclosure="filters">@FiltersLabel</ShadcnPopoverTrigger>
+                        <ShadcnPopoverContent Class="shadcn-data-table-toolbar__popover" Align="ShadcnOverlayAlign.End">
+                            <ShadcnPopoverTitle Class="shadcn-sr-only">@FiltersLabel</ShadcnPopoverTitle>
+                            <div class="shadcn-data-table-toolbar__filter-list" data-slot="data-table-toolbar-filters">
+                                @foreach (var column in OrderedColumns.Where(column => column.Filterable))
+                                {
+                                    var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
+                                    <label class="shadcn-data-table-column-filter">
+                                        <span>@filterLabel</span>
+                                        <input class="shadcn-data-table-filter shadcn-data-table-column-filter__input" type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
+                                    </label>
+                                }
+                            </div>
+                        </ShadcnPopoverContent>
+                    </ShadcnPopover>
+                }
+                @if (OrderedColumns.Any(column => column.Hideable))
+                {
+                    <ShadcnPopover Open="_columnsOpen" OpenChanged="SetColumnsOpen">
+                        <ShadcnPopoverTrigger Class="shadcn-data-table-toolbar__trigger" data-slot="data-table-toolbar-trigger" data-toolbar-disclosure="columns">@ColumnsLabel</ShadcnPopoverTrigger>
+                        <ShadcnPopoverContent Class="shadcn-data-table-toolbar__popover" Align="ShadcnOverlayAlign.End">
+                            <ShadcnPopoverTitle Class="shadcn-sr-only">@ColumnsLabel</ShadcnPopoverTitle>
+                            <fieldset class="shadcn-data-table-visibility" data-slot="data-table-visibility">
+                                <legend>@ColumnsLabel</legend>
+                                @foreach (var column in OrderedColumns.Where(column => column.Hideable))
+                                {
+                                    var isVisible = !CurrentState.HiddenColumnKeys.Contains(column.Key);
+                                    var isLastVisibleColumn = isVisible && VisibleColumns.Count == 1;
+                                    <label><input type="checkbox" data-column-visibility="@column.Key" checked="@isVisible" disabled="@isLastVisibleColumn" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
+                                }
+                            </fieldset>
+                        </ShadcnPopoverContent>
+                    </ShadcnPopover>
+                }
+            </div>
+            @if (ToolbarEndTemplate is not null)
             {
-                var isVisible = !CurrentState.HiddenColumnKeys.Contains(column.Key);
-                var isLastVisibleColumn = isVisible && VisibleColumns.Count == 1;
-                <label><input type="checkbox" data-column-visibility="@column.Key" checked="@isVisible" disabled="@isLastVisibleColumn" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
+                <div class="shadcn-data-table-toolbar__end" data-slot="data-table-toolbar-end">@ToolbarEndTemplate</div>
             }
-        </fieldset>
+        }
+        else
+        {
+            <div class="shadcn-data-table-toolbar__filters">
+                <label class="shadcn-data-table-filter-control">
+                    <span class="shadcn-sr-only">@FilterPlaceholder</span>
+                    <input class="shadcn-data-table-filter" data-slot="data-table-filter" type="search" value="@CurrentState.Query" placeholder="@FilterPlaceholder" aria-label="@FilterPlaceholder" @oninput="OnFilterInput" />
+                </label>
+                @foreach (var column in OrderedColumns.Where(column => column.Filterable))
+                {
+                    var filterLabel = column.FilterPlaceholder ?? string.Format(ColumnFilterLabel, column.Label);
+                    <label class="shadcn-data-table-column-filter">
+                        <span class="shadcn-sr-only">@filterLabel</span>
+                        <input class="shadcn-data-table-filter shadcn-data-table-column-filter__input" type="search" data-column-filter="@column.Key" value="@(CurrentState.ColumnFilters.TryGetValue(column.Key, out var filter) ? filter : string.Empty)" placeholder="@filterLabel" aria-label="@filterLabel" @oninput="eventArgs => OnColumnFilterInput(column, eventArgs)" />
+                    </label>
+                }
+            </div>
+            <fieldset class="shadcn-data-table-visibility" data-slot="data-table-visibility">
+                <legend class="shadcn-sr-only">@ColumnsLabel</legend>
+                @foreach (var column in OrderedColumns.Where(column => column.Hideable))
+                {
+                    var isVisible = !CurrentState.HiddenColumnKeys.Contains(column.Key);
+                    var isLastVisibleColumn = isVisible && VisibleColumns.Count == 1;
+                    <label><input type="checkbox" data-column-visibility="@column.Key" checked="@isVisible" disabled="@isLastVisibleColumn" @onchange="eventArgs => OnVisibilityChanged(column, eventArgs)" /><span>@column.Label</span></label>
+                }
+            </fieldset>
+        }
     </div>
     @if (Loading)
     {
@@ -126,7 +185,11 @@
     [Parameter] public string? Error { get; set; }
     [Parameter] public RenderFragment? LoadingContent { get; set; }
     [Parameter] public RenderFragment<TItem>? RowActionTemplate { get; set; }
+    [Parameter] public ShadcnDataTableToolbarMode ToolbarMode { get; set; }
+    [Parameter] public RenderFragment? ToolbarStartTemplate { get; set; }
+    [Parameter] public RenderFragment? ToolbarEndTemplate { get; set; }
     [Parameter] public string FilterPlaceholder { get; set; } = "Filter rows...";
+    [Parameter] public string FiltersLabel { get; set; } = "Filters";
     [Parameter] public string ColumnsLabel { get; set; } = "Columns";
     [Parameter] public string ColumnFilterLabel { get; set; } = "Filter {0}";
     [Parameter] public string ActionsLabel { get; set; } = "Actions";
@@ -146,6 +209,10 @@
 
     private ShadcnDataTableState _internalState = new();
     private bool _defaultStateApplied;
+    private bool _filtersOpen;
+    private bool _columnsOpen;
+    private bool _toolbarModeInitialized;
+    private ShadcnDataTableToolbarMode _previousToolbarMode;
     private ShadcnDataTableState? _pendingReconciliation;
     private IReadOnlyList<ShadcnDataTableColumn<TItem>> _orderedColumns = [];
     private IReadOnlyList<ShadcnDataTableColumn<TItem>> _visibleColumns = [];
@@ -179,6 +246,13 @@
         if (RowKey is null) throw new InvalidOperationException("Data table RowKey is required.");
         if (State is not null && !StateChanged.HasDelegate) throw new InvalidOperationException("Controlled data-table State requires StateChanged.");
         if (State is null && !_defaultStateApplied) { _internalState = DefaultState; _defaultStateApplied = true; }
+        if (_toolbarModeInitialized && ToolbarMode != _previousToolbarMode)
+        {
+            _filtersOpen = false;
+            _columnsOpen = false;
+        }
+        _previousToolbarMode = ToolbarMode;
+        _toolbarModeInitialized = true;
         if (PageSizeOptions.Count == 0 || PageSizeOptions.Any(size => size < 1)) throw new InvalidOperationException("Page-size options must contain positive values.");
         ShadcnDataTableEngine.ValidateColumns(Columns);
         RefreshProjection();
@@ -226,6 +300,18 @@
     }
 
     private Task OnFilterInput(ChangeEventArgs args) => PublishAsync(CurrentState with { Query = args.Value?.ToString() ?? string.Empty, PageIndex = 0 });
+    private Task SetFiltersOpen(bool open)
+    {
+        _filtersOpen = open;
+        if (open) _columnsOpen = false;
+        return Task.CompletedTask;
+    }
+    private Task SetColumnsOpen(bool open)
+    {
+        _columnsOpen = open;
+        if (open) _filtersOpen = false;
+        return Task.CompletedTask;
+    }
     private Task ToggleSortAsync(ShadcnDataTableColumn<TItem> column, bool preserveExisting)
     {
         var current = CurrentState.Sorts.FirstOrDefault(sort => sort.ColumnKey == column.Key);
