@@ -6,6 +6,36 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 [Collection(BrowserCollection.Name)]
 public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
+    [Theory]
+    [InlineData("combobox", "forms-dossier-combobox", "combobox-content")]
+    [InlineData("select", "forms-dossier-select", "select-content")]
+    [InlineData("date-picker", "forms-dossier-date-picker", "date-picker-content")]
+    public async Task FormPopupClosesWhenTheUserPressesOutside(
+        string component,
+        string triggerTestId,
+        string contentSlot)
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, $"/docs/components/{component}").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+
+        var trigger = page.GetByTestId(triggerTestId);
+        await trigger.ClickAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(page.Locator($"#preview [data-slot='{contentSlot}']")).ToBeVisibleAsync();
+
+        var outsideTarget = page.Locator("#overview h1");
+        await outsideTarget.ClickAsync();
+
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
+        await Assertions.Expect(page.Locator($"#preview [data-slot='{contentSlot}']")).ToHaveCountAsync(0);
+    }
+
     [Fact]
     public async Task ComboboxDossierWorksWithPointerKeyboardClearAndInvalidStates()
     {
@@ -56,6 +86,7 @@ public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, P
         await Assertions.Expect(input).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(root.Locator("[data-slot='input-group']")).Not.ToHaveCSSAsync("box-shadow", "none");
         await page.GetByTestId("control-combobox-multiple").CheckAsync();
+        await trigger.ClickAsync();
         await Assertions.Expect(root.Locator("[data-slot='combobox-list']")).ToHaveAttributeAsync("aria-multiselectable", "true");
         await Assertions.Expect(root.Locator("[data-slot='combobox-chip']")).ToHaveCountAsync(2);
 
@@ -68,6 +99,7 @@ public sealed class ComboboxShowcaseBrowserTests(ShowcaseServerFixture server, P
 
         await page.GetByTestId("documentation-direction-toggle").ClickAsync();
         await Assertions.Expect(page.Locator(".documentation-root")).ToHaveAttributeAsync("dir", "rtl");
+        await trigger.ClickAsync();
         var rtlContentBox = await root.Locator("[data-slot='combobox-content']").BoundingBoxAsync();
         Assert.NotNull(rtlContentBox);
         Assert.InRange(rtlContentBox!.X, 0, 390 - rtlContentBox.Width);

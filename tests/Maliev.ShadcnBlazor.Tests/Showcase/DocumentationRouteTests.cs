@@ -71,7 +71,7 @@ public sealed class DocumentationRouteTests : BunitContext
         Assert.Contains("dotnet add package Maliev.ShadcnBlazor", installationCode.TextContent, StringComparison.Ordinal);
         var usageCode = cut.Find("#usage .component-code code");
         Assert.Contains("@using Maliev.ShadcnBlazor.Components.Actions", usageCode.TextContent, StringComparison.Ordinal);
-        Assert.Contains("code-token-keyword", usageCode.InnerHtml, StringComparison.Ordinal);
+        Assert.Contains("shadcn-code-token-directive", usageCode.InnerHtml, StringComparison.Ordinal);
         Assert.Contains("ShadcnButton", cut.Markup, StringComparison.Ordinal);
 
         var outline = Services.GetRequiredService<DocumentationPageState>().Sections;

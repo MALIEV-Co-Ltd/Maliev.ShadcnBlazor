@@ -13,6 +13,9 @@ public enum ShadcnSelectionState { Unchecked, Indeterminate, Checked }
 /// <summary>Defines logical cell alignment that follows the document direction.</summary>
 public enum ShadcnTableAlignment { Start, Center, End }
 
+/// <summary>Defines how data-table filters and visibility controls are presented.</summary>
+public enum ShadcnDataTableToolbarMode { Default, Compact }
+
 /// <summary>Identifies one ordered sort operation.</summary>
 public sealed record ShadcnDataTableSort(string ColumnKey, ShadcnSortDirection Direction);
 

@@ -70,23 +70,18 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Bubble()
     {
-        var variant = ShadcnBubbleVariant.Secondary;
+        var sentVariant = ShadcnBubbleVariant.Default;
+        var receivedVariant = ShadcnBubbleVariant.Ghost;
         var end = false;
         var top = false;
 
         RenderFragment preview = b =>
         {
-            b.OpenComponent<ShadcnBubbleGroup>(0);
-            b.AddAttribute(1, nameof(ShadcnBubbleGroup.Class), "showcase-bubble-thread");
-            b.AddAttribute(2, "data-reveal", "true");
-            b.AddAttribute(3, nameof(ShadcnBubbleGroup.ChildContent), (RenderFragment)(thread =>
-            {
-                AddBubble(thread, 0, null, ShadcnLogicalAlign.End, "Hey there! what's up?", false, null, top);
-                AddBubble(thread, 10, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Hey! Want to see chat bubbles?", false, "👍", top, "incoming");
-                AddBubble(thread, 20, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "I can group messages, switch sides, and keep the whole thread easy to scan.", false, null, top, "incoming");
-                AddBubble(thread, 30, null, ShadcnLogicalAlign.End, "Sure. Hit me with your best demo.", true, null, top);
-                AddBubble(thread, 40, variant, end ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start, "Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.", false, "👍 🔥 👀 +2", top, "incoming");
-            }));
+            b.OpenComponent<ConversationBubbleDossierPreview>(0);
+            b.AddAttribute(1, nameof(ConversationBubbleDossierPreview.SentVariant), sentVariant);
+            b.AddAttribute(2, nameof(ConversationBubbleDossierPreview.ReceivedVariant), receivedVariant);
+            b.AddAttribute(3, nameof(ConversationBubbleDossierPreview.AlignIncomingEnd), end);
+            b.AddAttribute(4, nameof(ConversationBubbleDossierPreview.ReactionsTop), top);
             b.CloseComponent();
         };
 
@@ -95,7 +90,8 @@ internal static class ConversationWorkflowExamples
             "Conversation bubble",
             preview,
             [
-                Select("bubble-variant", "Incoming variant", "Secondary", Enum.GetNames<ShadcnBubbleVariant>(), v => variant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-variant", "Sent variant", "Default", Enum.GetNames<ShadcnBubbleVariant>(), v => sentVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
+                Select("bubble-received-variant", "Received variant", "Ghost", Enum.GetNames<ShadcnBubbleVariant>(), v => receivedVariant = Enum.Parse<ShadcnBubbleVariant>(v)),
                 Toggle("bubble-end", "Align incoming end", v => end = v),
                 Toggle("bubble-reactions-top", "Reactions top", v => top = v)
             ],
@@ -174,35 +170,6 @@ internal static class ConversationWorkflowExamples
         return new ShadcnAttachmentFile(title, size, contentType);
     }
 
-    private static void AddBubble(RenderTreeBuilder b, int sequence, ShadcnBubbleVariant? variant, ShadcnLogicalAlign align, string text, bool interactive, string? reaction, bool reactionTop, string? role = null)
-    {
-        b.OpenComponent<ShadcnBubble>(sequence);
-        if (variant is not null)
-            b.AddAttribute(sequence + 1, nameof(ShadcnBubble.Variant), variant.Value);
-        b.AddAttribute(sequence + 2, nameof(ShadcnBubble.Align), align);
-        b.AddAttribute(sequence + 3, "data-bubble-index", Math.Max(0, sequence / 10).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        if (role is not null)
-            b.AddAttribute(sequence + 4, "data-bubble-role", role);
-        b.AddAttribute(sequence + 5, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
-        {
-            content.OpenComponent<ShadcnBubbleContent>(0);
-            if (interactive)
-                content.AddAttribute(1, nameof(ShadcnBubbleContent.OnActivate), EventCallback.Factory.Create(new object(), () => { }));
-            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
-            content.CloseComponent();
-            if (reaction is not null)
-            {
-                content.OpenComponent<ShadcnBubbleReactions>(3);
-                content.AddAttribute(4, nameof(ShadcnBubbleReactions.Side), reactionTop ? ShadcnReactionSide.Top : ShadcnReactionSide.Bottom);
-                content.AddAttribute(5, nameof(ShadcnBubbleReactions.Align), align == ShadcnLogicalAlign.End ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start);
-                content.AddAttribute(6, nameof(ShadcnBubbleReactions.AccessibleName), $"Reactions for {text}");
-                content.AddAttribute(7, nameof(ShadcnBubbleReactions.ChildContent), ReactionComponents(reaction));
-                content.CloseComponent();
-            }
-        }));
-        b.CloseComponent();
-    }
-
     private static RenderFragment Thumbnail(string artwork) => b =>
     {
         var file = artwork switch
@@ -216,36 +183,6 @@ internal static class ConversationWorkflowExamples
 
     private static RenderFragment FileIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 2.75h8l4 4v14.5H6z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M14 2.75v4h4M9 12h6M9 16h4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>");
     private static RenderFragment CloseIcon() => b => b.AddMarkupContent(0, "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m7 7 10 10M17 7 7 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>");
-    private static RenderFragment LegacyReactionMarkup(string value) => b => b.AddMarkupContent(0, value == "👍"
-        ? "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--like\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8.5 10.5v9h-3v-9zM10 10.5l3.8-7.1a1.5 1.5 0 0 1 2.8 1l-.8 4.1h4.1a2 2 0 0 1 2 2.4l-1.3 6.3a3 3 0 0 1-2.9 2.4H8.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/></svg></span>"
-        : "<span class=\"showcase-bubble-reaction-set\"><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--fire\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13.4 2.8c.5 3.2-1.4 4.1-2.4 5.7-.8 1.3-.7 2.8.2 3.7.1-1.8 1.3-2.6 2.3-3.4.9 1.5 3.4 2.7 3.4 6a5 5 0 1 1-9.8-1.4c.6-2.4 2.6-3.9 3.6-5.8.8-1.5 1.2-3.2.6-4.8 1.1.5 1.7 1.1 2.1 2.2Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18.1 5.3v3.4M16.4 7h3.4\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\"/></svg><svg class=\"showcase-bubble-reaction-icon showcase-bubble-reaction-icon--eyes\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M2.5 12s3.3-5 9.5-5 9.5 5 9.5 5-3.3 5-9.5 5-9.5-5-9.5-5Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg><span class=\"showcase-bubble-reaction-count\">+2</span></span>");
-
-    private static RenderFragment ReactionComponents(string value) => b =>
-    {
-        AddReaction(b, 0, "images/avatars/reviewer-thai.png", "ผต", "Quality reviewer reacted with approval");
-        if (value == "👍")
-            return;
-
-        AddReaction(b, 10, "images/avatars/coordinator-thai.png", "มล", "Mali reacted with support");
-        b.OpenComponent<ShadcnBubbleReactionOverflow>(20);
-        b.AddAttribute(21, nameof(ShadcnBubbleReactionOverflow.Count), 2);
-        b.AddAttribute(22, nameof(ShadcnBubbleReactionOverflow.ChildContent), (RenderFragment)(overflow =>
-        {
-            AddReaction(overflow, 0, "images/avatars/assistant-thai.png", "MA", "MALIEV Assistant reacted with attention");
-            AddReaction(overflow, 10, "images/avatars/operator-thai.png", "นท", "Natee reacted with thanks");
-        }));
-        b.CloseComponent();
-    };
-
-    private static void AddReaction(RenderTreeBuilder b, int sequence, string source, string fallback, string accessibleName)
-    {
-        b.OpenComponent<ShadcnBubbleReaction>(sequence);
-        b.AddAttribute(sequence + 1, nameof(ShadcnBubbleReaction.Source), source);
-        b.AddAttribute(sequence + 2, nameof(ShadcnBubbleReaction.Fallback), fallback);
-        b.AddAttribute(sequence + 3, nameof(ShadcnBubbleReaction.AccessibleName), accessibleName);
-        b.CloseComponent();
-    }
-
     private static ComponentExampleDefinition Marker()
     {
         var variant = ShadcnMarkerVariant.Default;
@@ -254,36 +191,34 @@ internal static class ConversationWorkflowExamples
         {
             b.OpenElement(0, "div");
             b.AddAttribute(1, "class", "showcase-marker-thread showcase-bubble-thread");
-            AddConversationBubble(b, 2, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Muted, "Machining is complete. Bore 4 is ready for final inspection.");
-            AddConversationBubble(b, 12, ShadcnLogicalAlign.End, ShadcnBubbleVariant.Default, "Probe result received. I am uploading the signed report now.");
-            AddConversationBubble(b, 22, ShadcnLogicalAlign.Start, ShadcnBubbleVariant.Ghost, "Thanks. I will hold dispatch until Quality signs off.");
+            AddMessage(b, 2, ShadcnLogicalAlign.Start, AssistantAvatar, false, "MALIEV Assistant", "Machining is complete. Bore 4 is ready for final inspection.", bubbleVariant: ShadcnBubbleVariant.Ghost);
+            AddMessage(b, 12, ShadcnLogicalAlign.End, OperatorAvatar, false, "Narin S.", "Probe result received. I am uploading the signed report now.", bubbleVariant: ShadcnBubbleVariant.Default);
+            AddMessage(b, 22, ShadcnLogicalAlign.Start, ReviewerAvatar, false, "Kanda T.", "Thanks. I will hold dispatch until Quality signs off.", bubbleVariant: ShadcnBubbleVariant.Ghost);
             AddMarker(b, 32, variant, false, "✓", "Four inspection files verified");
             AddMarker(b, 42, ShadcnMarkerVariant.Separator, false, "•", "14:32 · WO-2418");
             AddMarker(b, 52, ShadcnMarkerVariant.Border, streaming, "✦", streaming ? "Preparing quality handoff" : "Ready for quality review");
             b.CloseElement();
         };
-        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
+        return Example("marker", "Conversation marker", preview, [Select("marker-variant", "Primary variant", "Default", Enum.GetNames<ShadcnMarkerVariant>(), v => variant = Enum.Parse<ShadcnMarkerVariant>(v)), Toggle("marker-streaming", "Streaming status", v => streaming = v, true)], ["status", "separator", "border", "icon", "avatar", "streaming", "shimmer", "reduced-motion"], MarkerRazorSource);
     }
 
     private static ComponentExampleDefinition Message()
     {
-        var end = false;
         var avatar = true;
         var footer = true;
         var footerAlways = false;
         RenderFragment preview = b =>
         {
             b.OpenComponent<ConversationMessageDossierPreview>(0);
-            b.AddAttribute(1, nameof(ConversationMessageDossierPreview.AlignMiddleRowEnd), end);
-            b.AddAttribute(2, nameof(ConversationMessageDossierPreview.Avatars), avatar);
-            b.AddAttribute(3, nameof(ConversationMessageDossierPreview.FooterActions), footer);
-            b.AddAttribute(4, nameof(ConversationMessageDossierPreview.AlwaysShowActions), footerAlways);
+            b.AddAttribute(1, nameof(ConversationMessageDossierPreview.Avatars), avatar);
+            b.AddAttribute(2, nameof(ConversationMessageDossierPreview.FooterActions), footer);
+            b.AddAttribute(3, nameof(ConversationMessageDossierPreview.AlwaysShowActions), footerAlways);
             b.CloseComponent();
         };
-        return Example("message", "Message row", preview, [Toggle("message-end", "Align middle row end", v => end = v), Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "copy", "reply", "quote", "hover-actions", "bubbles", "rtl"])
+        return Example("message", "Message row", preview, [Toggle("message-avatar", "Avatars", v => avatar = v, true), Toggle("message-footer", "Footer actions", v => footer = v, true), Toggle("message-footer-always", "Always show actions", v => footerAlways = v)], ["group", "start", "end", "avatar", "header", "footer", "copy", "reply", "quote", "hover-actions", "bubbles", "rtl"])
             with
         {
-            RazorSourceProvider = () => MessageRazorSource(end, avatar, footer, footerAlways)
+            RazorSourceProvider = () => MessageRazorSource(avatar, footer, footerAlways)
         };
     }
 
@@ -306,22 +241,7 @@ internal static class ConversationWorkflowExamples
         b.CloseComponent();
     }
 
-    private static void AddConversationBubble(RenderTreeBuilder builder, int sequence, ShadcnLogicalAlign align, ShadcnBubbleVariant variant, string text)
-    {
-        builder.OpenComponent<ShadcnBubble>(sequence);
-        builder.AddAttribute(sequence + 1, nameof(ShadcnBubble.Align), align);
-        builder.AddAttribute(sequence + 2, nameof(ShadcnBubble.Variant), variant);
-        builder.AddAttribute(sequence + 3, nameof(ShadcnBubble.ChildContent), (RenderFragment)(content =>
-        {
-            content.OpenComponent<ShadcnBubbleContent>(0);
-            content.AddAttribute(1, "dir", "auto");
-            content.AddAttribute(2, nameof(ShadcnBubbleContent.ChildContent), Text(text));
-            content.CloseComponent();
-        }));
-        builder.CloseComponent();
-    }
-
-    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false)
+    private static void AddMessage(RenderTreeBuilder b, int sequence, ShadcnLogicalAlign align, AvatarProfile? avatar, bool footer, string author, string message, bool footerAlways = false, ShadcnBubbleVariant? bubbleVariant = null)
     {
         b.OpenComponent<ShadcnMessage>(sequence);
         b.AddAttribute(sequence + 1, nameof(ShadcnMessage.Align), align);
@@ -333,7 +253,7 @@ internal static class ConversationWorkflowExamples
             {
                 AddText<ShadcnMessageHeader>(content, 0, author);
                 content.OpenComponent<ShadcnBubble>(3);
-                content.AddAttribute(4, nameof(ShadcnBubble.Variant), align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted);
+                content.AddAttribute(4, nameof(ShadcnBubble.Variant), bubbleVariant ?? (align == ShadcnLogicalAlign.End ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Muted));
                 content.AddAttribute(5, nameof(ShadcnBubble.Align), align);
                 content.AddAttribute(6, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble => AddText<ShadcnBubbleContent>(bubble, 0, message)));
                 content.CloseComponent();
@@ -372,16 +292,17 @@ internal static class ConversationWorkflowExamples
 
     private static ComponentExampleDefinition Scroller()
     {
-        var auto = true; var extra = false; var position = ShadcnMessageDefaultScrollPosition.End;
+        var auto = true; var extra = false; var showStreamingStatus = true; var position = ShadcnMessageDefaultScrollPosition.End;
         RenderFragment preview = b =>
         {
             b.OpenComponent<StreamingScrollerDemo>(0);
             b.AddAttribute(1, nameof(StreamingScrollerDemo.AutoFollow), auto);
             b.AddAttribute(2, nameof(StreamingScrollerDemo.AppendUnread), extra);
             b.AddAttribute(3, nameof(StreamingScrollerDemo.OpeningPosition), position);
+            b.AddAttribute(4, nameof(StreamingScrollerDemo.ShowStreamingStatus), showStreamingStatus);
             b.CloseComponent();
         };
-        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v, true), Toggle("scroller-append", "Append unread turn", v => extra = v), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "focus", "rtl"], MessageScrollerRazorSource);
+        return Example("message-scroller", "Streaming transcript", preview, [Toggle("scroller-auto", "Auto follow", v => auto = v, true), Toggle("scroller-append", "Append unread turn", v => extra = v), Toggle("scroller-status", "Streaming status", v => showStreamingStatus = v, true), Select("scroller-position", "Opening position", "End", Enum.GetNames<ShadcnMessageDefaultScrollPosition>(), v => position = Enum.Parse<ShadcnMessageDefaultScrollPosition>(v))], ["anchor", "auto-follow", "user-intent", "unread", "jump", "prepend", "visibility", "streaming-status", "focus", "rtl"], MessageScrollerRazorSource);
     }
 
     private static ComponentExampleDefinition Questionnaire()
@@ -517,17 +438,35 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Conversation
 
 <div class="showcase-marker-thread showcase-bubble-thread">
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
-        <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="MALIEV Assistant" /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>MALIEV Assistant</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+                <ShadcnBubbleContent dir="auto">Machining is complete. Bore 4 is ready for final inspection.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
-        <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.End">
+        <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Narin S." /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Narin S.</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default">
+                <ShadcnBubbleContent dir="auto">Probe result received. I am uploading the signed report now.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
-        <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
-    </ShadcnBubble>
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+        <ShadcnMessageAvatar><img src="images/avatars/reviewer-thai.png" alt="Kanda T." /></ShadcnMessageAvatar>
+        <ShadcnMessageContent>
+            <ShadcnMessageHeader>Kanda T.</ShadcnMessageHeader>
+            <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost">
+                <ShadcnBubbleContent dir="auto">Thanks. I will hold dispatch until Quality signs off.</ShadcnBubbleContent>
+            </ShadcnBubble>
+        </ShadcnMessageContent>
+    </ShadcnMessage>
 
     <ShadcnMarker Variant="ShadcnMarkerVariant.Default">
         <ShadcnMarkerIcon>✓</ShadcnMarkerIcon>
@@ -552,37 +491,87 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Conversation
 
 <ShadcnBubbleGroup data-reveal="true">
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="@sentVariant">
         <ShadcnBubbleContent>Hey there! what's up?</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Tinted">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>Hey! Want to see chat bubbles?</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Source="images/avatars/reviewer-thai.png" Fallback="ผต" AccessibleName="Quality reviewer reacted with approval" />
+            <ShadcnBubbleReaction Fallback="👍"
+                                  AccessibleName="Thumbs up reaction"
+                                  Count="@thumbsUpCount"
+                                  Pressed="@thumbsUpPressed"
+                                  PressedChanged="SetThumbsUp" />
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>I can group messages, switch sides, and keep the whole thread easy to scan.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.End">
+    <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="@sentVariant">
         <ShadcnBubbleContent Href="/docs/components/bubble">Sure. Hit me with your best demo.</ShadcnBubbleContent>
     </ShadcnBubble>
 
-    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary">
+    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="@receivedVariant">
         <ShadcnBubbleContent>Yes. You are reading a demo that is demoing itself. Very meta. Very on-brand.</ShadcnBubbleContent>
         <ShadcnBubbleReactions Side="ShadcnReactionSide.Bottom" Align="ShadcnLogicalAlign.Start" AccessibleName="Reactions for the message">
-            <ShadcnBubbleReaction Source="images/avatars/reviewer-thai.png" Fallback="ผต" AccessibleName="Quality reviewer reacted with approval" />
-            <ShadcnBubbleReaction Source="images/avatars/coordinator-thai.png" Fallback="มล" AccessibleName="Mali reacted with support" />
+            <ShadcnBubbleReaction Fallback="❤️"
+                                  AccessibleName="Heart reaction"
+                                  Count="@heartCount"
+                                  Pressed="@heartPressed"
+                                  PressedChanged="SetHeart" />
+            <ShadcnBubbleReaction Fallback="😂"
+                                  AccessibleName="Laughing reaction"
+                                  Count="@laughCount"
+                                  Pressed="@laughPressed"
+                                  PressedChanged="SetLaugh" />
             <ShadcnBubbleReactionOverflow Count="2">
-                <ShadcnBubbleReaction Source="images/avatars/assistant-thai.png" Fallback="MA" AccessibleName="MALIEV Assistant reacted with attention" />
-                <ShadcnBubbleReaction Source="images/avatars/operator-thai.png" Fallback="นท" AccessibleName="Natee reacted with thanks" />
+                <ShadcnBubbleReaction Fallback="🔥"
+                                      AccessibleName="Fire reaction"
+                                      Count="@fireCount"
+                                      Pressed="@firePressed"
+                                      PressedChanged="SetFire" />
+                <ShadcnBubbleReaction Fallback="👀"
+                                      AccessibleName="Eyes reaction"
+                                      Count="@eyesCount"
+                                      Pressed="@eyesPressed"
+                                      PressedChanged="SetEyes" />
             </ShadcnBubbleReactionOverflow>
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 </ShadcnBubbleGroup>
+
+@code {
+    private ShadcnBubbleVariant sentVariant = ShadcnBubbleVariant.Default;
+    private ShadcnBubbleVariant receivedVariant = ShadcnBubbleVariant.Ghost;
+    private int thumbsUpCount = 1;
+    private int heartCount = 2;
+    private int laughCount = 1;
+    private int fireCount = 1;
+    private int eyesCount = 1;
+    private bool thumbsUpPressed;
+    private bool heartPressed;
+    private bool laughPressed;
+    private bool firePressed;
+    private bool eyesPressed;
+
+    private void SetThumbsUp(bool pressed) => SetReaction(ref thumbsUpPressed, ref thumbsUpCount, pressed);
+    private void SetHeart(bool pressed) => SetReaction(ref heartPressed, ref heartCount, pressed);
+    private void SetLaugh(bool pressed) => SetReaction(ref laughPressed, ref laughCount, pressed);
+    private void SetFire(bool pressed) => SetReaction(ref firePressed, ref fireCount, pressed);
+    private void SetEyes(bool pressed) => SetReaction(ref eyesPressed, ref eyesCount, pressed);
+
+    private static void SetReaction(ref bool current, ref int count, bool pressed)
+    {
+        if (current == pressed)
+            return;
+
+        current = pressed;
+        count += pressed ? 1 : -1;
+    }
+}
 """;
 
     private static void AddAvatar(RenderTreeBuilder b, int sequence, AvatarProfile profile)
@@ -694,16 +683,19 @@ internal static class ConversationWorkflowExamples
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
                 <ShadcnMessageScrollerItem MessageId="assistant-1" ScrollAnchor="true">
-                    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
-                        <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
-                        <ShadcnMessageContent>
-                            <ShadcnMessageBody>
-                                <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
-                                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
-                                    <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
-                                </ShadcnBubble>
-                            </ShadcnMessageBody>
-                        </ShadcnMessageContent>
+                    <ShadcnMessage Align="ShadcnLogicalAlign.Start" Streaming="true" ShowStreamingStatus="true">
+                        <StreamingContent>Generating…</StreamingContent>
+                        <ChildContent>
+                            <ShadcnMessageAvatar><img src="images/avatars/assistant-thai.png" alt="Assistant" /></ShadcnMessageAvatar>
+                            <ShadcnMessageContent>
+                                <ShadcnMessageBody>
+                                    <ShadcnMessageHeader>Assistant</ShadcnMessageHeader>
+                                    <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Default">
+                                        <ShadcnBubbleContent>รับทราบครับ ผมพร้อมสรุปผลการตรวจสอบให้แล้ว</ShadcnBubbleContent>
+                                    </ShadcnBubble>
+                                </ShadcnMessageBody>
+                            </ShadcnMessageContent>
+                        </ChildContent>
                     </ShadcnMessage>
                 </ShadcnMessageScrollerItem>
                 </ShadcnMessageScrollerContent>
@@ -718,7 +710,7 @@ internal static class ConversationWorkflowExamples
 </ShadcnMessageScrollerProvider>
 """;
 
-    private static string MessageRazorSource(bool middleRowEnd, bool avatars, bool footerActions, bool alwaysShowActions)
+    private static string MessageRazorSource(bool avatars, bool footerActions, bool alwaysShowActions)
     {
         var operatorAvatar = avatars ? """
         <ShadcnMessageAvatar><img src="images/avatars/operator-thai.png" alt="Operator" /></ShadcnMessageAvatar>
@@ -736,6 +728,22 @@ internal static class ConversationWorkflowExamples
                 <ShadcnMessageActions>
                     <ShadcnMessageCopyAction Text="ตรวจสอบไฟล์แล้ว 3 รายการ" />
                     <ShadcnMessageReplyAction Quote="ตรวจสอบไฟล์แล้ว 3 รายการ" OnReply="ReplyTo" />
+                </ShadcnMessageActions>
+            </ShadcnMessageFooter>
+""" : string.Empty;
+        var operatorContinuationFooter = footerActions ? $$"""
+            <ShadcnMessageFooter{{(alwaysShowActions ? " data-visibility=\"always\"" : string.Empty)}}>
+                <ShadcnMessageActions>
+                    <ShadcnMessageCopyAction Text="กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ" />
+                    <ShadcnMessageReplyAction Quote="กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ" OnReply="ReplyTo" />
+                </ShadcnMessageActions>
+            </ShadcnMessageFooter>
+""" : string.Empty;
+        var coordinatorFooter = footerActions ? $$"""
+            <ShadcnMessageFooter{{(alwaysShowActions ? " data-visibility=\"always\"" : string.Empty)}}>
+                <ShadcnMessageActions>
+                    <ShadcnMessageCopyAction Text="พร้อมส่งแบบให้ตรวจ" />
+                    <ShadcnMessageReplyAction Quote="พร้อมส่งแบบให้ตรวจ" OnReply="ReplyTo" />
                 </ShadcnMessageActions>
             </ShadcnMessageFooter>
 """ : string.Empty;
@@ -769,7 +777,7 @@ internal static class ConversationWorkflowExamples
 @using Maliev.ShadcnBlazor.Components.Content
 
 <ShadcnMessageGroup Class="message-thread">
-    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start" data-sender="engineer" aria-label="Operator message 1">
 {{operatorAvatar}}
         <ShadcnMessageContent>
             <ShadcnMessageBody>
@@ -782,15 +790,27 @@ internal static class ConversationWorkflowExamples
         </ShadcnMessageContent>
     </ShadcnMessage>
 
-    <ShadcnMessage Align="ShadcnLogicalAlign.{{(middleRowEnd ? "End" : "Start")}}">
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start" Class="message-continuation" data-sender="engineer" data-continuation="true" aria-label="Operator message 2">
+        <ShadcnMessageContent>
+            <ShadcnMessageBody>
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
+                    <ShadcnBubbleContent dir="auto">กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ</ShadcnBubbleContent>
+                </ShadcnBubble>
+            </ShadcnMessageBody>
+{{operatorContinuationFooter}}
+        </ShadcnMessageContent>
+    </ShadcnMessage>
+
+    <ShadcnMessage Align="ShadcnLogicalAlign.Start">
 {{coordinatorAvatar}}
         <ShadcnMessageContent>
             <ShadcnMessageBody>
                 <ShadcnMessageHeader>ผู้ประสานงาน</ShadcnMessageHeader>
-                <ShadcnBubble Align="ShadcnLogicalAlign.{{(middleRowEnd ? "End" : "Start")}}" Variant="ShadcnBubbleVariant.{{(middleRowEnd ? "Default" : "Muted")}}">
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Muted">
                     <ShadcnBubbleContent dir="auto">พร้อมส่งแบบให้ตรวจ</ShadcnBubbleContent>
                 </ShadcnBubble>
             </ShadcnMessageBody>
+{{coordinatorFooter}}
         </ShadcnMessageContent>
     </ShadcnMessage>
 

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Maliev.ShadcnBlazor.Icons.Lucide</PackageId>
-    <VersionPrefix>2.1.3</VersionPrefix>
+    <VersionPrefix>2.1.4</VersionPrefix>
     <Authors>MALIEV Co., Ltd.</Authors>
     <Company>MALIEV Co., Ltd.</Company>
     <Description>Complete pinned Lucide free icon catalog for Maliev.ShadcnBlazor.</Description>

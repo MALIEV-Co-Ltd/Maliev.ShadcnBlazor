@@ -1,3 +1,11 @@
 @inherits Maliev.ShadcnBlazor.Components.Primitives.ShadcnComponentBase
-<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-content")" style="@MergeStyle(null)" data-slot="message-content"><CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue></div>
+<div @attributes="ForwardedAttributes" class="@MergeClass("shadcn-message-content")" style="@MergeStyle(null)" data-slot="message-content">
+    <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+    @if (Owner?.HasStreamingStatus is true)
+    {
+        <div class="shadcn-message-streaming-status" data-slot="message-streaming-status" role="status" aria-live="polite">
+            @Owner.StreamingContent
+        </div>
+    }
+</div>
 @code { [CascadingParameter] private ShadcnMessage? Owner{get;set;} [Parameter] public RenderFragment? ChildContent{get;set;} private IReadOnlyDictionary<string,object> ForwardedAttributes=>AttributesExcept("data-slot"); protected override void OnParametersSet(){if(Owner is null)throw new InvalidOperationException("ShadcnMessageContent must be inside ShadcnMessage.");} }

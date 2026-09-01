@@ -10,7 +10,7 @@
                         @foreach (var message in _messages)
                         {
                             <ShadcnMessageScrollerItem @key="message.Id" MessageId="@message.Id" ScrollAnchor="true">
-                                <ShadcnMessage Align="@message.Align" class="@(message.Streaming ? "showcase-scroller-message--streaming" : null)" aria-busy="@(message.Streaming ? "true" : null)">
+                                <ShadcnMessage Align="@message.Align" Streaming="@message.Streaming" ShowStreamingStatus="false" class="@(message.Streaming ? "showcase-scroller-message--streaming" : null)">
                                     @if (message.Avatar is not null)
                                     {
                                         <ConversationAvatar AvatarId="@message.Avatar.Id" Source="@message.Avatar.Source" Alt="@message.Avatar.Alt" Fallback="@message.Avatar.Fallback" />

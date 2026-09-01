@@ -226,7 +226,8 @@
                     else builder.OpenElement(sequence++, "div");
                     builder.AddAttribute(sequence++, "class", "shadcn-chart-legend-item"); builder.AddAttribute(sequence++, "data-slot", "chart-legend-item"); builder.AddAttribute(sequence++, "data-legend-series", key); builder.AddAttribute(sequence++, "data-legend-point", index);
                     if (!HideLegendIcon) { builder.OpenElement(sequence++, "span"); builder.AddAttribute(sequence++, "class", "shadcn-chart-legend-icon"); builder.AddAttribute(sequence++, "style", $"background: var(--color-{colorKey})"); builder.CloseElement(); }
-                    builder.OpenElement(sequence++, "span"); builder.AddContent(sequence++, $"{Categories[index]} {SeriesLabel(key)}"); builder.CloseElement(); builder.CloseElement();
+                    var label = Categories.Count == 1 ? SeriesLabel(key) : $"{Categories[index]} {SeriesLabel(key)}";
+                    builder.OpenElement(sequence++, "span"); builder.AddContent(sequence++, label); builder.CloseElement(); builder.CloseElement();
                 }
             }
             builder.CloseElement(); return;

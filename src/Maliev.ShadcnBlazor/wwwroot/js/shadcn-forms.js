@@ -173,7 +173,12 @@ function disconnectPromotedPopup(root) {
 
 export function observePopupDismissal(root, dotnet, kind) {
     disconnectPopupDismissal(root);
-    const onPointerDown = event => { if (!root.contains(event.target)) dotnet.invokeMethodAsync('DismissPopup'); };
+    const onPointerDown = event => {
+        if (root.contains(event.target)) return;
+        const activeElement = document.activeElement;
+        if (root.contains(activeElement)) activeElement.blur();
+        dotnet.invokeMethodAsync('DismissPopup');
+    };
     const onKeyDown = event => {
         const editable = event.target?.matches?.('input, textarea, [contenteditable="true"]');
         const keys = kind === 'select'

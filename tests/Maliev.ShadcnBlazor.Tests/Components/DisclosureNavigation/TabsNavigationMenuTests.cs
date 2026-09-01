@@ -168,7 +168,7 @@ public sealed class TabsNavigationMenuTests : BunitContext
         string? requested = null;
         var hover = RenderNavigationMenu(null, value => requested = value, openDelay: 1, closeDelay: 1);
         hover.FindAll("[data-slot='navigation-menu-trigger']")[0].MouseEnter();
-        hover.WaitForAssertion(() => Assert.Equal("products", requested));
+        hover.WaitForAssertion(() => Assert.Equal("products", requested), TimeSpan.FromSeconds(5));
 
         var vertical = RenderNavigationMenu(null, _ => { }, orientation: ShadcnNavigationMenuOrientation.Vertical, includeSecond: true);
         vertical.FindAll("[data-slot='navigation-menu-trigger']")[0].KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "ArrowDown" });

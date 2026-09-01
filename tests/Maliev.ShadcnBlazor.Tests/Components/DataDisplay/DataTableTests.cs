@@ -7,6 +7,13 @@ namespace Maliev.ShadcnBlazor.Tests.Components.DataDisplay;
 
 public sealed class DataTableTests : BunitContext
 {
+    public DataTableTests()
+    {
+        var module = JSInterop.SetupModule("./_content/Maliev.ShadcnBlazor/js/shadcn-overlays-menus.js");
+        module.SetupVoid("attachPositioned", _ => true);
+        module.SetupVoid("detachPositioned", _ => true);
+    }
+
     private static readonly Payment[] Rows =
     [
         new("1", "somchai@maliev.com", "processing", 837),
@@ -67,6 +74,84 @@ public sealed class DataTableTests : BunitContext
 
         Assert.Equal(Rows.Length, predicateCalls);
         Assert.Equal(Rows.Length, cut.FindAll("tbody tr[data-slot='table-row']").Count);
+    }
+
+    [Fact]
+    public void CompactToolbarKeepsSearchVisibleAndMovesSecondaryControlsIntoDisclosures()
+    {
+        RenderFragment start = builder => builder.AddMarkupContent(0, "<button data-toolbar-start>Export</button>");
+        RenderFragment end = builder => builder.AddMarkupContent(0, "<span data-toolbar-end>2 saved views</span>");
+        var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
+            .Add(component => component.Items, Rows)
+            .Add(component => component.Columns, Columns)
+            .Add(component => component.RowKey, row => row.Id)
+            .Add(component => component.ToolbarMode, ShadcnDataTableToolbarMode.Compact)
+            .Add(component => component.FiltersLabel, "ตัวกรอง")
+            .Add(component => component.ColumnsLabel, "คอลัมน์")
+            .Add(component => component.ToolbarStartTemplate, start)
+            .Add(component => component.ToolbarEndTemplate, end));
+
+        Assert.Single(cut.FindAll("input[data-slot='data-table-filter']"));
+        Assert.Empty(cut.FindAll("input[data-column-filter]"));
+        Assert.Empty(cut.FindAll("fieldset[data-slot='data-table-visibility']"));
+        Assert.NotNull(cut.Find("[data-toolbar-start]"));
+        Assert.NotNull(cut.Find("[data-toolbar-end]"));
+        var triggers = cut.FindAll("[data-toolbar-disclosure]");
+        Assert.Equal(["ตัวกรอง", "คอลัมน์"], triggers.Select(trigger => trigger.TextContent.Trim()));
+        Assert.All(triggers, trigger => Assert.Equal("false", trigger.GetAttribute("aria-expanded")));
+    }
+
+    [Fact]
+    public void DefaultToolbarRetainsInlineColumnFiltersAndVisibilityControls()
+    {
+        var cut = RenderTable();
+
+        Assert.Equal(2, cut.FindAll("input[data-column-filter]").Count);
+        Assert.Single(cut.FindAll("fieldset[data-slot='data-table-visibility']"));
+        Assert.Empty(cut.FindAll("[data-toolbar-disclosure]"));
+    }
+
+    [Fact]
+    public void CompactDisclosuresUseTheExistingTypedStateAndManualRequestContract()
+    {
+        var states = new List<ShadcnDataTableState>();
+        ShadcnDataTableRequest? request = null;
+        var cut = Render<ShadcnDataTable<Payment>>(parameters => parameters
+            .Add(component => component.Items, Rows)
+            .Add(component => component.Columns, Columns)
+            .Add(component => component.RowKey, row => row.Id)
+            .Add(component => component.ToolbarMode, ShadcnDataTableToolbarMode.Compact)
+            .Add(component => component.Manual, true)
+            .Add(component => component.TotalCount, 8)
+            .Add(component => component.StateChanged, EventCallback.Factory.Create<ShadcnDataTableState>(this, states.Add))
+            .Add(component => component.RequestChanged, EventCallback.Factory.Create<ShadcnDataTableRequest>(this, value => request = value)));
+
+        cut.Find("[data-toolbar-disclosure='filters']").Click();
+        Assert.Equal("true", cut.Find("[data-toolbar-disclosure='filters']").GetAttribute("aria-expanded"));
+        cut.Find("input[data-column-filter='status']").Input("success");
+
+        Assert.Equal("success", states[^1].ColumnFilters["status"]);
+        Assert.NotNull(request);
+        Assert.Equal("success", request.ColumnFilters["status"]);
+
+        cut.Find("[data-toolbar-disclosure='columns']").Click();
+        cut.Find("input[data-column-visibility='amount']").Change(false);
+        Assert.Contains("amount", states[^1].HiddenColumnKeys);
+        Assert.Contains("amount", request.HiddenColumnKeys);
+    }
+
+    [Fact]
+    public void CompactToolbarStylesOwnTouchTargetsAndNarrowViewportContainment()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Maliev.ShadcnBlazor.slnx")))
+            directory = directory.Parent;
+        var css = File.ReadAllText(Path.Combine(directory!.FullName, "src", "Maliev.ShadcnBlazor", "wwwroot", "css", "shadcn-data-display.css"));
+
+        Assert.Contains("[data-toolbar-mode=\"compact\"]", css, StringComparison.Ordinal);
+        Assert.Contains("min-block-size: 2.75rem", css, StringComparison.Ordinal);
+        Assert.Contains("max-inline-size: min(22rem, calc(100vw - 2rem))", css, StringComparison.Ordinal);
+        Assert.Contains(".shadcn-data-table-toolbar__actions", css, StringComparison.Ordinal);
     }
 
     [Fact]

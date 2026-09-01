@@ -462,7 +462,8 @@ public sealed class ComponentDossierBrowserTests(
         var avatar = message.Locator("[data-slot='message-avatar']");
         Assert.Equal("end", await avatar.EvaluateAsync<string>("element => getComputedStyle(element).alignSelf"));
         await Assertions.Expect(message.Locator("img[data-avatar='operator']")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("#preview [data-slot='message']").Nth(2).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#preview img[data-avatar='assistant']")).ToHaveCountAsync(1);
         var footer = message.Locator("[data-slot='message-footer']");
         Assert.Equal("0", await footer.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
@@ -701,7 +702,8 @@ public sealed class ComponentDossierBrowserTests(
         await Assertions.Expect(sourceDisclosure.Locator("[data-slot='code-block']")).ToBeVisibleAsync();
         await Assertions.Expect(sourceDisclosure.GetByTestId("copy-source")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator("#installation").GetByTestId("copy-source")).ToHaveCountAsync(1);
-        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.Locator("#usage").GetByTestId("copy-source")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByTestId("copy-source")).ToHaveCountAsync(3);
         await Assertions.Expect(page.GetByTestId("component-api")).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByTestId("evidence-row")).ToHaveCountAsync(7);
         await Assertions.Expect(page.Locator("[data-testid='evidence-row'][data-complete='true']")).ToHaveCountAsync(7);

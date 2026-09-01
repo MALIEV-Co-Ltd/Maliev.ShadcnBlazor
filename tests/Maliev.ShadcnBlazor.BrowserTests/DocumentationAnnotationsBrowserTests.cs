@@ -22,7 +22,8 @@ public sealed class DocumentationAnnotationsBrowserTests(
 
         var usage = page.Locator("#usage");
         await Assertions.Expect(usage).ToContainTextAsync("@using Maliev.ShadcnBlazor.Components.Conversation");
-        await Assertions.Expect(usage.Locator("pre")).ToHaveCountAsync(0);
+        await Assertions.Expect(usage.Locator("[data-slot='code-block'][data-language='razor']")).ToHaveCountAsync(1);
+        await Assertions.Expect(usage.Locator("pre")).ToHaveCountAsync(1);
 
         var preview = page.GetByTestId("component-preview").First;
         var sourceDisclosure = preview.Locator("details[data-testid='example-source']");
@@ -86,7 +87,7 @@ public sealed class DocumentationAnnotationsBrowserTests(
         Assert.NotEqual("absolute", await copy.EvaluateAsync<string>("element => getComputedStyle(element).position"));
         var stableBefore = await toolbar.EvaluateAsync<double[]>("element => { const language=element.querySelector('[data-slot=select-trigger]').getBoundingClientRect(); const copy=element.querySelector('[data-testid=copy-source]').getBoundingClientRect(); const box=element.getBoundingClientRect(); return [box.height, language.x-box.x, language.width, copy.x-box.x, copy.width]; }");
         Assert.True(rtl ? stableBefore[1] > stableBefore[3] : stableBefore[1] < stableBefore[3], "The language selector must precede the copy action in logical order.");
-        Assert.InRange(stableBefore[2], 24, 96);
+        Assert.InRange(stableBefore[2], 24, accessibilityMode ? 192 : 96);
         await Assertions.Expect(copy).ToBeVisibleAsync();
         await Assertions.Expect(copy).ToHaveAccessibleNameAsync("Copy source");
         Assert.Equal("ltr", await first.Locator("pre").EvaluateAsync<string>("element => getComputedStyle(element).direction"));
@@ -107,8 +108,16 @@ public sealed class DocumentationAnnotationsBrowserTests(
             "element => { const value=getComputedStyle(element).backgroundColor; return value === 'transparent' || /^rgba\\([^)]*,\\s*0\\)$/.test(value); }"));
         Assert.Equal("0px", selectorChrome[0]);
         Assert.Equal("none", selectorChrome[1]);
+        Assert.Equal("flex-start", await select.EvaluateAsync<string>("element => getComputedStyle(element).justifyContent"));
+        Assert.Equal("0px", await select.EvaluateAsync<string>("element => getComputedStyle(element).rowGap"));
         await select.FocusAsync();
         await select.PressAsync("ArrowDown");
+        await Assertions.Expect(first.Locator("[data-slot='select-content']")).ToBeVisibleAsync();
+        var openSelectorChrome = await select.EvaluateAsync<string[]>(
+            "element => { const trigger=getComputedStyle(element); const root=getComputedStyle(element.parentElement); return [trigger.outlineStyle, trigger.boxShadow, root.boxShadow]; }");
+        Assert.Equal("none", openSelectorChrome[0]);
+        Assert.Equal("none", openSelectorChrome[1]);
+        Assert.Equal("none", openSelectorChrome[2]);
         await select.PressAsync("End");
         await select.PressAsync("Enter");
         await Assertions.Expect(first).ToHaveAttributeAsync("data-language", "csharp");
@@ -173,7 +182,7 @@ public sealed class DocumentationAnnotationsBrowserTests(
             ReducedMotion = ReducedMotion.Reduce
         });
         var page = await context.NewPageAsync();
-        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/code-block").ToString());
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
         await page.GetByTestId("component-dossier").WaitForAsync();
         if (zoom) await page.EvaluateAsync("document.documentElement.style.zoom='2'");
         if (rtl) await page.GetByTestId("documentation-direction-toggle").ClickAsync();
@@ -192,6 +201,9 @@ public sealed class DocumentationAnnotationsBrowserTests(
             Assert.NotNull(cellBox);
             Assert.True(valueBox.Width <= cellBox.Width + 1, $"API value {index} escaped its cell ({valueBox.Width}px > {cellBox.Width}px).");
             Assert.Equal("anywhere", await value.EvaluateAsync<string>("element => getComputedStyle(element).overflowWrap"));
+            Assert.Equal("normal", await value.EvaluateAsync<string>("element => getComputedStyle(element).whiteSpace"));
+            var contentOverflow = await value.EvaluateAsync<double>("element => element.scrollWidth - element.clientWidth");
+            Assert.InRange(contentOverflow, 0, 1);
         }
 
         var list = page.Locator(".component-token-guidance .documentation-prose-list");
@@ -200,5 +212,26 @@ public sealed class DocumentationAnnotationsBrowserTests(
         Assert.True(await list.EvaluateAsync<double>("element => parseFloat(getComputedStyle(element).paddingInlineStart)") >= 16);
         var pageOverflow = await page.EvaluateAsync<double>("document.documentElement.scrollWidth-document.documentElement.clientWidth");
         Assert.InRange(pageOverflow, 0, 1);
+    }
+
+    [Fact]
+    public async Task UsageCodeBlockKeepsToolbarFlushWithSourceBody()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 1280, Height = 900 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
+
+        var codeBlock = page.Locator("#usage [data-slot='code-block']");
+        await codeBlock.WaitForAsync();
+        var toolbar = await codeBlock.Locator("[data-slot='code-block-toolbar']").BoundingBoxAsync();
+        var source = await codeBlock.Locator("[data-slot='code-block-content']").BoundingBoxAsync();
+
+        Assert.NotNull(toolbar);
+        Assert.NotNull(source);
+        Assert.InRange(Math.Abs(source!.Y - (toolbar!.Y + toolbar.Height)), 0, 0.5);
     }
 }

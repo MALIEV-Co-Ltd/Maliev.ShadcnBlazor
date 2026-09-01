@@ -203,7 +203,7 @@
         }
     }
 
-    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await CloseAndFocusAsync(); }
+    [JSInvokable] public async Task DismissPopup() { if (EffectiveOpen) await SetOpenAsync(false); }
 
     public async ValueTask DisposeAsync()
     {

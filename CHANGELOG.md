@@ -6,6 +6,41 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.1.4] - 2026-09-01
+
+### Added
+
+- Added an opt-in compact DataTable toolbar with always-visible global search,
+  accessible Filters and Columns disclosures, and caller-owned start and end
+  actions while preserving the existing toolbar as the default mode.
+- Added an assembly-derived package-version badge to the documentation header
+  that links each deployed build to its matching GitHub release.
+- Added caller-owned visual content for Bubble reactions so applications can
+  provide deterministic icons while retaining accessible reaction names.
+
+### Changed
+
+- Reworked conversation examples around realistic sent and received message
+  groups, emoji reactions, reply actions, stable streaming status, avatars,
+  markers, and compact consecutive-message spacing.
+- Expanded Chart examples and rendering with mutually exclusive chart types and
+  correct two-slice pie and donut device summaries.
+- Corrected Sidebar examples so collapse controls live inside the sidebar and
+  Off canvas mode allows the workspace to reclaim the available width.
+
+### Fixed
+
+- Hardened message alignment with and without avatars, action placement beside
+  status metadata, expanded reaction behavior, and showcase startup/scroller
+  completion behavior.
+- Removed the Code Block toolbar seam and kept its language selector visually
+  unstyled while preserving accessible option selection.
+- Normalized native form popover borders and refreshed CodeQL workflow pins.
+- Fixed outside-press dismissal for Combobox, Select, and Date Picker without
+  stealing focus from the clicked target or immediately reopening Combobox.
+- Centered the compact documentation catalog icon and removed the decorative
+  border from the package-version label.
+
 ## [2.1.3] - 2026-08-30
 
 ### Added
@@ -358,7 +393,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.0...v2.1.1

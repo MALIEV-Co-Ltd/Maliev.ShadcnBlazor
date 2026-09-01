@@ -8,6 +8,7 @@ export function attach(root, dotnet) {
   let autoscrollTimer = 0
   let programmaticFocus = false
   let pendingUserMeasurement = null
+  const scrollWaiters = new Set()
   const rows = () => [...content.querySelectorAll(':scope > [data-slot="message-scroller-item"]')]
   const snapshot = () => ({
     scrollTop: viewport.scrollTop,
@@ -47,6 +48,29 @@ export function attach(root, dotnet) {
   viewport.addEventListener('pointerup', intent, { passive: true })
   viewport.addEventListener('keydown', keyIntent)
   const focusIntent = () => { if (!programmaticFocus) intent() }
+  const waitForScroll = (top, behavior) => new Promise(resolve => {
+    const target = Math.max(0, Math.min(top, viewport.scrollHeight - viewport.clientHeight))
+    let animationFrame = 0
+    let timeout = 0
+    let finished = false
+    const finish = () => {
+      if (finished) return
+      finished = true
+      cancelAnimationFrame(animationFrame)
+      clearTimeout(timeout)
+      viewport.removeEventListener('scrollend', check)
+      scrollWaiters.delete(finish)
+      resolve()
+    }
+    const check = () => {
+      if (Math.abs(viewport.scrollTop - target) <= 1) { finish(); return }
+      animationFrame = requestAnimationFrame(check)
+    }
+    scrollWaiters.add(finish)
+    viewport.addEventListener('scrollend', check)
+    timeout = setTimeout(finish, behavior === 'smooth' ? 1200 : 250)
+    animationFrame = requestAnimationFrame(check)
+  })
   viewport.addEventListener('focusin', focusIntent)
   document.addEventListener('selectionchange', selectionIntent)
   report()
@@ -56,12 +80,14 @@ export function attach(root, dotnet) {
     scrollTo(top, behavior, focusViewport = false) {
       clearTimeout(autoscrollTimer)
       root.setAttribute('data-autoscrolling', ''); viewport.setAttribute('data-autoscrolling', '')
+      const completion = waitForScroll(top, behavior)
       viewport.scrollTo({ top, behavior })
       if (focusViewport) { programmaticFocus = true; viewport.focus({ preventScroll: true }); programmaticFocus = false }
       autoscrollTimer = setTimeout(() => { root.removeAttribute('data-autoscrolling'); viewport.removeAttribute('data-autoscrolling') }, behavior === 'smooth' ? 500 : 100)
+      return completion
     },
     dispose() {
-      disposed = true; cancelAnimationFrame(frame); clearTimeout(autoscrollTimer); resizeObserver.disconnect(); intersectionObserver.disconnect(); mutationObserver.disconnect()
+      disposed = true; cancelAnimationFrame(frame); clearTimeout(autoscrollTimer); scrollWaiters.forEach(finish => finish()); resizeObserver.disconnect(); intersectionObserver.disconnect(); mutationObserver.disconnect()
       viewport.removeEventListener('scroll', scroll); viewport.removeEventListener('wheel', intent); viewport.removeEventListener('touchstart', intent); viewport.removeEventListener('touchend', intent); viewport.removeEventListener('pointerdown', intent); viewport.removeEventListener('pointerup', intent); viewport.removeEventListener('keydown', keyIntent); viewport.removeEventListener('focusin', focusIntent); document.removeEventListener('selectionchange', selectionIntent)
     }
   }

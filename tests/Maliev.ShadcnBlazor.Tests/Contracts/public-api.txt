@@ -248,7 +248,12 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleGroup
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReaction
   String AccessibleName
+  RenderFragment ChildContent
+  Nullable<Int32> Count
+  Boolean Disabled
   String Fallback
+  Boolean Pressed
+  EventCallback<Boolean> PressedChanged
   String Source
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReactionOverflow
   String AccessibleName
@@ -281,6 +286,9 @@ enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerVariant: Default, S
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessage
   ShadcnLogicalAlign Align
   RenderFragment ChildContent
+  Boolean ShowStreamingStatus
+  Boolean Streaming
+  RenderFragment StreamingContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageActions
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessageAvatar
@@ -512,6 +520,7 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableRequest
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableResult`1
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableSort
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableState
+enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTableToolbarMode: Default, Compact
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTable`1
   String ActionsLabel
   Func<TItem, Boolean> CanSelect
@@ -523,6 +532,7 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTable`1
   String Error
   String FilterPlaceholder
   Func<TItem, Boolean> FilterPredicate
+  String FiltersLabel
   String FirstLabel
   IReadOnlyList<TItem> Items
   String LastLabel
@@ -544,6 +554,9 @@ type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnDataTable`1
   Func<Int32, Int32, String> SelectionSummary
   ShadcnDataTableState State
   EventCallback<ShadcnDataTableState> StateChanged
+  RenderFragment ToolbarEndTemplate
+  ShadcnDataTableToolbarMode ToolbarMode
+  RenderFragment ToolbarStartTemplate
   Int32 TotalCount
 type Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnIdAllocator
 enum Maliev.ShadcnBlazor.Components.DataDisplay.ShadcnSelectionState: Unchecked, Indeterminate, Checked

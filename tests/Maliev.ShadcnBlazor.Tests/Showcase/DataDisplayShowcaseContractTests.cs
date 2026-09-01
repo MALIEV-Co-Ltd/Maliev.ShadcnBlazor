@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bunit;
 using Maliev.ShadcnBlazor.Showcase.Documentation;
 using Maliev.ShadcnBlazor.Showcase.Documentation.Api;
@@ -46,7 +47,14 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
                 var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug(slug).Single();
                 var control = example.Controls.Single(candidate => candidate.Id == controlId);
                 var before = Render(example.Preview).Markup;
-                control.Apply(bool.Parse(control.Value) ? "false" : "true");
+                var nextValue = control.Kind switch
+                {
+                    ComponentParameterControlKind.Toggle => bool.Parse(control.Value) ? "false" : "true",
+                    ComponentParameterControlKind.Select => control.Options.First(option => !string.Equals(option, control.Value, StringComparison.Ordinal)),
+                    ComponentParameterControlKind.Number => (double.Parse(control.Value, CultureInfo.InvariantCulture) + 1).ToString(CultureInfo.InvariantCulture),
+                    _ => throw new InvalidOperationException($"Unsupported control kind {control.Kind}.")
+                };
+                control.Apply(nextValue);
                 Assert.NotEqual(before, Render(example.Preview).Markup);
             }
     }
@@ -141,15 +149,61 @@ public sealed class DataDisplayShowcaseContractTests : BunitContext
         Assert.Contains("Error=\"Unable to load payments.\"", dataTable.RazorSource, StringComparison.Ordinal);
 
         var chart = registry.GetBySlug("chart").Single();
-        chart.Controls.Single(control => control.Id == "chart-line").Apply("true");
+        var chartType = chart.Controls.Single(control => control.Id == "chart-type");
+        Assert.Equal(ComponentParameterControlKind.Select, chartType.Kind);
+        Assert.Equal(Enum.GetNames<ShadcnChartType>(), chartType.Options);
+        Assert.DoesNotContain(chart.Controls, control => control.Id is "chart-line" or "chart-area");
+        chart.Controls.Single(control => control.Id == "chart-stacked").Apply("true");
+        chartType.Apply(nameof(ShadcnChartType.Pie));
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-stacked").IsEnabled);
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-primary-axis").IsEnabled);
+        Assert.False(chart.Controls.Single(control => control.Id == "chart-major-grid").IsEnabled);
         chart.Controls.Single(control => control.Id == "chart-loading").Apply("true");
         chart.Controls.Single(control => control.Id == "chart-legend").Apply("true");
-        Assert.Contains("Type=\"ShadcnChartType.Line\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Type=\"ShadcnChartType.Pie\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Stacked=\"false\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("Loading=\"true\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("ShowLegend=\"false\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("BarRadius=\"0\"", chart.RazorSource, StringComparison.Ordinal);
         Assert.Contains("InitialHeight=\"260\"", chart.RazorSource, StringComparison.Ordinal);
-        Assert.Contains("ShowMajorGrid=\"true\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("ShowMajorGrid=\"false\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Categories=\"@DeviceCategories\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Series=\"@DeviceSeries\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("private readonly IReadOnlyList<string> DeviceCategories = [\"Traffic\"]", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("new(\"desktop\", [1680])", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("new(\"mobile\", [982])", chart.RazorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("Categories=\"@Months\"", chart.RazorSource, StringComparison.Ordinal);
+
+        chartType.Apply(nameof(ShadcnChartType.Donut));
+        Assert.Contains("Type=\"ShadcnChartType.Donut\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Categories=\"@DeviceCategories\"", chart.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("Series=\"@DeviceSeries\"", chart.RazorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DataTableDossierDefaultsToCompactAndDocumentsBothToolbarModes()
+    {
+        var example = new ComponentExampleRegistry(new ComponentDocumentationCatalog()).GetBySlug("data-table").Single();
+        var mode = example.Controls.Single(control => control.Id == "data-table-toolbar-mode");
+        var rendered = Render(example.Preview);
+
+        Assert.Equal(ComponentParameterControlKind.Select, mode.Kind);
+        Assert.Equal(nameof(ShadcnDataTableToolbarMode.Compact), mode.Value);
+        Assert.Equal(Enum.GetNames<ShadcnDataTableToolbarMode>(), mode.Options);
+        Assert.Equal("compact", rendered.Find("[data-slot='data-table-toolbar']").GetAttribute("data-toolbar-mode"));
+        Assert.Equal(2, rendered.FindAll("[data-toolbar-disclosure]").Count);
+        Assert.Contains("ToolbarMode=\"ShadcnDataTableToolbarMode.Compact\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("FiltersLabel=\"Filters\"", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ToolbarStartTemplate>", example.RazorSource, StringComparison.Ordinal);
+        Assert.Contains("<ToolbarEndTemplate>", example.RazorSource, StringComparison.Ordinal);
+        Assert.True(example.RazorSource.Split("Filterable = true", StringSplitOptions.None).Length - 1 >= 4);
+        Assert.True(example.RazorSource.Split("Hideable = true", StringSplitOptions.None).Length - 1 >= 4);
+
+        mode.Apply(nameof(ShadcnDataTableToolbarMode.Default));
+        rendered = Render(example.Preview);
+        Assert.Equal("default", rendered.Find("[data-slot='data-table-toolbar']").GetAttribute("data-toolbar-mode"));
+        Assert.NotEmpty(rendered.FindAll("input[data-column-filter]"));
+        Assert.Contains("ToolbarMode=\"ShadcnDataTableToolbarMode.Default\"", example.RazorSource, StringComparison.Ordinal);
     }
 
     [Fact]

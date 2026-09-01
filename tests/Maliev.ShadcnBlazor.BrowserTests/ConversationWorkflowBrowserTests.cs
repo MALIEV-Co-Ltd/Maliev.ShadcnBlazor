@@ -68,11 +68,16 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(2);
         var incomingBubbles = page.Locator("[data-bubble-role='incoming']");
         await Assertions.Expect(incomingBubbles).ToHaveCountAsync(3);
-        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "secondary");
+        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "ghost");
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-align", "start");
+        var outgoingBubbles = page.Locator("[data-bubble-role='outgoing']");
+        await Assertions.Expect(outgoingBubbles).ToHaveCountAsync(2);
+        await Assertions.Expect(outgoingBubbles.First).ToHaveAttributeAsync("data-variant", "default");
         await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
+        for (var index = 0; index < await outgoingBubbles.CountAsync(); index++)
+            await Assertions.Expect(outgoingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
         for (var index = 0; index < await incomingBubbles.CountAsync(); index++)
-            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
+            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "ghost");
         await page.GetByTestId("control-bubble-end").CheckAsync();
         var selectedIncomingBubble = page.Locator("[data-bubble-role='incoming']").Filter(new() { HasTextString = "I can group messages, switch sides, and keep the whole thread easy to scan." });
         await Assertions.Expect(selectedIncomingBubble).ToHaveAttributeAsync("data-align", "end");
@@ -101,9 +106,11 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(streamingMarker.Locator("[data-slot='marker-content'][data-streaming='true']")).ToHaveCountAsync(1);
 
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
-        await page.GetByTestId("control-message-end").CheckAsync();
         await page.Locator("[data-testid='component-preview-canvas']").EvaluateAsync("el => el.dir='rtl'");
-        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(2);
+        await Assertions.Expect(page.GetByTestId("control-message-end")).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='start']")).ToHaveCountAsync(3);
+        await Assertions.Expect(page.Locator("[data-slot='message'][data-align='end']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-slot='message']").Nth(2).Locator("[data-slot='message-footer']")).ToHaveCountAsync(1);
     }
 
     [Fact]
@@ -147,13 +154,80 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(avatarImage).ToBeVisibleAsync();
 
         var outgoing = page.Locator("[data-slot='message'][data-align='end']").Last;
-        var footerGeometry = await outgoing.EvaluateAsync<double[]>("element => { const actions = element.querySelector('[data-slot=message-actions]').getBoundingClientRect(); const status = element.querySelector('[data-slot=message-status]').getBoundingClientRect(); const button = element.querySelector('[data-slot=message-reply-action]').getBoundingClientRect(); return [actions.left, status.left, button.width]; }");
+        var footerGeometry = await outgoing.EvaluateAsync<double[]>("element => { const actions = element.querySelector('[data-slot=message-actions]').getBoundingClientRect(); const status = element.querySelector('[data-slot=message-status]').getBoundingClientRect(); const button = element.querySelector('[data-slot=message-reply-action]').getBoundingClientRect(); return [actions.left, actions.right, status.left, button.width]; }");
         Assert.True(footerGeometry[0] < footerGeometry[1]);
-        Assert.InRange(footerGeometry[2], 24, 32);
+        Assert.InRange(footerGeometry[2] - footerGeometry[1], 0, 8);
+        Assert.InRange(footerGeometry[3], 24, 32);
     }
 
     [Fact]
-    public async Task BubblePreviewAppliesVariantTailRadiusAndExpandableAvatarReactions()
+    public async Task ConsecutiveMessagesFromOneSenderUseCompactGroupedSpacing()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
+
+        var engineer = page.Locator("[data-slot='message'][data-sender='engineer']");
+        await Assertions.Expect(engineer).ToHaveCountAsync(2);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-testid='engineer-message-1']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-testid='engineer-message-2']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(0).Locator("[data-slot='message-header']")).ToHaveCountAsync(1);
+        await Assertions.Expect(engineer.Nth(1)).ToHaveAttributeAsync("data-continuation", "true");
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+        await Assertions.Expect(engineer.Nth(1).Locator("[data-slot='message-header']")).ToHaveCountAsync(0);
+        await Assertions.Expect(engineer.Locator("[data-testid='message-reply']")).ToHaveCountAsync(2);
+
+        await page.GetByTestId("control-message-footer-always").CheckAsync();
+        await engineer.Nth(0).GetByTestId("message-reply").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("ตรวจสอบไฟล์แล้ว 3 รายการ");
+        await page.GetByTestId("message-reply-quote").GetByRole(AriaRole.Button, new() { Name = "Cancel reply" }).ClickAsync();
+        await engineer.Nth(1).GetByTestId("message-reply").ClickAsync();
+        await Assertions.Expect(page.GetByTestId("message-reply-quote")).ToContainTextAsync("กำลังตรวจสอบค่าความคลาดเคลื่อนต่อ");
+
+        var spacing = await page.Locator(".showcase-message-thread").EvaluateAsync<double[]>("element => { const messages = element.querySelectorAll('[data-slot=message]'); const firstBubble = messages[0].querySelector('[data-slot=bubble]').getBoundingClientRect(); const secondBubble = messages[1].querySelector('[data-slot=bubble]').getBoundingClientRect(); const coordinatorBubble = messages[2].querySelector('[data-slot=bubble]').getBoundingClientRect(); const firstFooter = messages[0].querySelector('[data-slot=message-footer]').getBoundingClientRect(); const secondFooter = messages[1].querySelector('[data-slot=message-footer]').getBoundingClientRect(); return [secondBubble.top - firstBubble.bottom, coordinatorBubble.top - secondBubble.bottom, Math.abs(firstFooter.bottom - firstBubble.bottom), firstFooter.left - firstBubble.right, secondFooter.top - secondBubble.bottom, Math.abs(secondFooter.left - secondBubble.left), Math.abs(secondBubble.left - firstBubble.left)]; }");
+        Assert.InRange(spacing[0], 3, 8);
+        Assert.InRange(spacing[1], 68, 104);
+        Assert.True(spacing[1] > spacing[0] * 4);
+        Assert.InRange(spacing[2], 0, 1);
+        Assert.InRange(spacing[3], 6, 16);
+        Assert.InRange(spacing[4], 8, 12);
+        Assert.InRange(spacing[5], 0, 1);
+        Assert.InRange(spacing[6], 0, 1);
+        Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    [Fact]
+    public async Task MessageRowsRemainAlignedWhenOptionalAvatarsAreHidden()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 640, Height = 700 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message").ToString());
+        await page.GetByTestId("control-message-avatar").UncheckAsync();
+
+        var thread = page.Locator(".showcase-message-thread");
+        await Assertions.Expect(thread.Locator("[data-slot='message-avatar']")).ToHaveCountAsync(0);
+
+        var ltrEdges = await thread.EvaluateAsync<double[]>("element => [...element.querySelectorAll('[data-slot=message][data-align=start] [data-slot=message-body]')].flatMap(body => { const rect = body.getBoundingClientRect(); return [rect.left, rect.right]; })");
+        Assert.Equal(6, ltrEdges.Length);
+        Assert.InRange(ltrEdges.Where((_, index) => index % 2 == 0).Max() - ltrEdges.Where((_, index) => index % 2 == 0).Min(), 0, 1);
+
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        var rtlEdges = await thread.EvaluateAsync<double[]>("element => [...element.querySelectorAll('[data-slot=message][data-align=start] [data-slot=message-body]')].flatMap(body => { const rect = body.getBoundingClientRect(); return [rect.left, rect.right]; })");
+        Assert.Equal(6, rtlEdges.Length);
+        Assert.InRange(rtlEdges.Where((_, index) => index % 2 == 1).Max() - rtlEdges.Where((_, index) => index % 2 == 1).Min(), 0, 1);
+    }
+
+    [Fact]
+    public async Task BubblePreviewUsesDarkOutgoingGhostIncomingAndExpandableEmojiReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -163,16 +237,33 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var page = await context.NewPageAsync();
         await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/bubble").ToString());
 
-        var defaultBubble = page.Locator("[data-slot='bubble']").First.Locator("[data-slot='bubble-content']");
+        var outgoing = page.Locator("[data-bubble-role='outgoing']");
+        await Assertions.Expect(outgoing).ToHaveCountAsync(2);
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "default");
+        var bubblePositionBeforeHover = await outgoing.First.BoundingBoxAsync();
+        Assert.NotNull(bubblePositionBeforeHover);
+        await outgoing.First.HoverAsync();
+        var bubblePositionAfterHover = await outgoing.First.BoundingBoxAsync();
+        Assert.NotNull(bubblePositionAfterHover);
+        Assert.InRange(Math.Abs(bubblePositionAfterHover.Y - bubblePositionBeforeHover.Y), 0, 0.1);
+        var defaultBubble = outgoing.First.Locator("[data-slot='bubble-content']");
         var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
-        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         var incoming = page.Locator("[data-bubble-role='incoming']").First;
-        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "tinted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "start");
         var incomingContent = incoming.Locator("[data-slot='bubble-content']");
-        var incomingBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
-        Assert.NotEqual(defaultBackground, incomingBackground);
+        var ghostBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual(defaultBackground, ghostBackground);
+
+        await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
+        await page.ChooseOptionAsync("control-bubble-received-variant", "Muted");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "muted");
+        await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
+        var sentBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+        Assert.NotEqual(defaultBackground, sentBackground);
 
         var incomingTail = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderEndStartRadius");
         var incomingTop = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).borderStartStartRadius");
@@ -187,17 +278,41 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var endTop = Math.Max(ParseCssPixels(endRadiusValues[2]), ParseCssPixels(endRadiusValues[3]));
         Assert.True(endTail < endTop, $"end tail={endTail}px, top={endTop}px");
 
-        var reactionAvatar = page.Locator("[data-slot='bubble-reactions'] [data-slot='bubble-reaction'] [data-slot='avatar']").First;
-        Assert.True(await reactionAvatar.EvaluateAsync<double>("element => element.getBoundingClientRect().width") >= 24);
-        await Assertions.Expect(reactionAvatar.Locator("[data-slot='avatar-image']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("[data-slot='bubble-reactions'] [data-slot='avatar']")).ToHaveCountAsync(0);
+        var emojiReactions = page.Locator("[data-slot='bubble-reaction-value']");
+        await Assertions.Expect(emojiReactions).ToHaveCountAsync(3);
+        await Assertions.Expect(emojiReactions.First.Locator("svg.showcase-reaction-glyph--thumbs-up")).ToHaveCountAsync(1);
+        await Assertions.Expect(emojiReactions.First.Locator("xpath=..")).ToHaveAttributeAsync("aria-label", "Thumbs up reaction, 1");
+
+        var heartReaction = page.GetByTestId("bubble-reaction-heart");
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+        Assert.Equal("pointer", await heartReaction.EvaluateAsync<string>("element => getComputedStyle(element).cursor"));
+        await heartReaction.ClickAsync();
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("3");
+        await heartReaction.ClickAsync();
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
+        await heartReaction.FocusAsync();
+        await heartReaction.PressAsync("Space");
+        await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(heartReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("3");
 
         var overflow = page.Locator("[data-slot='bubble-reaction-overflow']");
         var overflowTrigger = overflow.Locator("[data-slot='bubble-reaction-overflow-trigger']");
         await Assertions.Expect(overflowTrigger).ToHaveTextAsync("+2");
         await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "false");
         await overflowTrigger.ClickAsync();
-        await Assertions.Expect(overflowTrigger).ToHaveAttributeAsync("aria-expanded", "true");
+        await Assertions.Expect(overflowTrigger).ToHaveCountAsync(0);
         await Assertions.Expect(overflow.Locator("[data-slot='bubble-reaction-overflow-content'] [data-slot='bubble-reaction']")).ToHaveCountAsync(2);
+        await Assertions.Expect(emojiReactions).ToHaveCountAsync(5);
+        var fireReaction = page.GetByTestId("bubble-reaction-fire");
+        await Assertions.Expect(fireReaction).ToHaveAttributeAsync("aria-pressed", "false");
+        await Assertions.Expect(fireReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("1");
+        await fireReaction.ClickAsync();
+        await Assertions.Expect(fireReaction).ToHaveAttributeAsync("aria-pressed", "true");
+        await Assertions.Expect(fireReaction.Locator("[data-slot='bubble-reaction-count']")).ToHaveTextAsync("2");
     }
 
     [Fact]
@@ -316,6 +431,30 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
+    public async Task MarkerConversationLeavesReadableSpaceBetweenMessageBubbles()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 640, Height = 700 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/marker").ToString());
+
+        var bubbles = page.Locator(".showcase-marker-thread [data-slot='bubble']");
+        await Assertions.Expect(bubbles).ToHaveCountAsync(3);
+        var first = await bubbles.Nth(0).BoundingBoxAsync();
+        var second = await bubbles.Nth(1).BoundingBoxAsync();
+        var third = await bubbles.Nth(2).BoundingBoxAsync();
+
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.NotNull(third);
+        Assert.True(second!.Y - (first!.Y + first.Height) >= 12);
+        Assert.True(third!.Y - (second.Y + second.Height) >= 12);
+    }
+
+    [Fact]
     public async Task ScrollerTracksAppendUserIntentUnreadJumpAndPrepend()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 390, Height = 844 } });
@@ -327,7 +466,8 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(scroller.Locator("[data-slot='message-scroller-viewport']")).ToBeFocusedAsync();
         await Assertions.Expect(scroller).ToHaveAttributeAsync("data-autoscrolling", "");
         await Assertions.Expect(scroller.Locator("[data-slot='message-scroller-viewport']")).ToHaveAttributeAsync("data-autoscrolling", "");
-        await Assertions.Expect(page.Locator("[data-message-id='turn-3']")).ToBeInViewportAsync();
+        await Assertions.Expect(page.GetByTestId("scroll-message-result")).ToHaveTextAsync("handled");
+        Assert.True(await page.Locator("[data-message-id='turn-3']").EvaluateAsync<bool>("element => { const row = element.getBoundingClientRect(); const viewport = element.closest('[data-slot=message-scroller-viewport]').getBoundingClientRect(); return row.top >= viewport.top && row.bottom <= viewport.bottom; }"));
         await page.GetByTestId("queue-missing-message").ClickAsync();
         await Assertions.Expect(page.GetByTestId("queued-message-result")).ToHaveTextAsync("missed");
         await page.GetByTestId("queue-before-first-message").ClickAsync();
@@ -397,6 +537,58 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.Equal(1, safeGeometry[4]);
         Assert.Equal(1, safeGeometry[5]);
         Assert.True(safeGeometry[6] <= safeGeometry[7] - 12, "The message fade must stop before the vertical scrollbar gutter.");
+    }
+
+    [Fact]
+    public async Task ScrollerRendersStreamingStatusAsAStableRowBelowTheMessageBubble()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
+
+        await page.GetByTestId("scroller-send").ClickAsync();
+        var message = page.Locator("[data-slot='message-scroller-item']").Last.Locator("[data-slot='message']");
+        var bubble = message.Locator("[data-slot='bubble']");
+        var status = message.Locator("[data-slot='message-streaming-status']");
+        await Assertions.Expect(message).ToHaveAttributeAsync("aria-busy", "true");
+        await Assertions.Expect(status).ToBeVisibleAsync();
+        await Assertions.Expect(status).ToHaveAttributeAsync("role", "status");
+        await Assertions.Expect(status).ToHaveAttributeAsync("aria-live", "polite");
+        await Assertions.Expect(bubble.Locator("[data-slot='message-streaming-status']")).ToHaveCountAsync(0);
+
+        var first = await message.EvaluateAsync<double[]>("element => { const b = element.querySelector('[data-slot=bubble]').getBoundingClientRect(); const s = element.querySelector('[data-slot=message-streaming-status]').getBoundingClientRect(); return [s.x, s.width, s.top - b.bottom]; }");
+        await page.WaitForTimeoutAsync(180);
+        var later = await status.EvaluateAsync<double[]>("element => { const s = element.getBoundingClientRect(); return [s.x, s.width]; }");
+        Assert.True(first[2] >= 0, "The streaming status must render below the message bubble.");
+        Assert.InRange(Math.Abs(later[0] - first[0]), 0, 1);
+        Assert.InRange(Math.Abs(later[1] - first[1]), 0, 1);
+    }
+
+    [Fact]
+    public async Task ScrollerCanHideTheStreamingStatusWithoutLosingTheMessageBusyState()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new()
+        {
+            ViewportSize = new() { Width = 390, Height = 844 },
+            ReducedMotion = ReducedMotion.Reduce
+        });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/message-scroller").ToString());
+
+        var control = page.GetByTestId("control-scroller-status");
+        await Assertions.Expect(control).ToBeCheckedAsync();
+        await control.UncheckAsync();
+        await page.GetByTestId("scroller-send").ClickAsync();
+
+        var message = page.Locator("[data-slot='message-scroller-item']").Last.Locator("[data-slot='message']");
+        await Assertions.Expect(message).ToHaveAttributeAsync("aria-busy", "true");
+        await Assertions.Expect(message.Locator("[data-slot='message-streaming-status']")).ToHaveCountAsync(0);
+        await control.CheckAsync();
+        await Assertions.Expect(message.Locator("[data-slot='message-streaming-status']")).ToBeVisibleAsync();
     }
 
     [Fact]

@@ -136,17 +136,17 @@ public sealed class SidebarTests : BunitContext
     }
 
     [Fact]
-    public void SidebarNoneModeCannotToggleAndMenuButtonExposesVariants()
+    public void SidebarNoneModeOmitsTriggerAndCannotRequestState()
     {
         bool? requested = null;
         var cut = Render<ShadcnSidebarProvider>(p => p.Add(x => x.Open, true).Add(x => x.OpenChanged, EventCallback.Factory.Create<bool>(this, value => requested = value)).AddChildContent(builder =>
         {
             builder.OpenComponent<ShadcnSidebar>(0); builder.AddAttribute(1, nameof(ShadcnSidebar.Collapsible), ShadcnSidebarCollapsible.None); builder.CloseComponent();
             builder.OpenComponent<ShadcnSidebarTrigger>(2); builder.CloseComponent();
+            builder.OpenComponent<ShadcnSidebarRail>(4); builder.CloseComponent();
         }));
-        var trigger = cut.Find("[data-slot='sidebar-trigger']");
-        Assert.True(trigger.HasAttribute("disabled"));
-        trigger.Click(); Assert.Null(requested);
+        Assert.Empty(cut.FindAll("[data-slot='sidebar-trigger'], [data-slot='sidebar-rail']"));
+        Assert.Null(requested);
 
         var outlined = Render<ShadcnSidebarMenuButton>(p => p.Add(x => x.Variant, ShadcnSidebarMenuButtonVariant.Outline).AddChildContent("Outlined"));
         Assert.Equal("outline", outlined.Find("[data-slot='sidebar-menu-button']").GetAttribute("data-variant"));
@@ -165,9 +165,10 @@ public sealed class SidebarTests : BunitContext
         }));
 
         var triggers = cut.FindAll("[data-slot='sidebar-trigger']");
-        Assert.True(triggers[0].HasAttribute("disabled"));
-        Assert.False(triggers[1].HasAttribute("disabled"));
-        triggers[1].Click();
+        var trigger = Assert.Single(triggers);
+        Assert.Equal("tools", trigger.GetAttribute("data-target"));
+        Assert.False(trigger.HasAttribute("disabled"));
+        trigger.Click();
         Assert.False(requested);
     }
 

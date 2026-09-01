@@ -79,6 +79,7 @@ public sealed class ConversationPresentationTests : BunitContext
                 reactions.OpenComponent<ShadcnBubbleReaction>(0);
                 reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Narin reacted with thumbs up");
                 reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "NS");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Source), "/images/narin.png");
                 reactions.CloseComponent();
             }));
             builder.CloseComponent();
@@ -91,7 +92,106 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
-    public void BubbleReactionOverflowRevealsAndHidesAdditionalReactions()
+    public void BubbleReactionWithoutSourceRendersEmojiInsteadOfAvatar()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Thumbs up reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "👍");
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("[data-slot='bubble-reaction']");
+        Assert.Empty(reaction.QuerySelectorAll("[data-slot='avatar']"));
+        Assert.Equal("👍", reaction.QuerySelector("[data-slot='bubble-reaction-value']")?.TextContent);
+        Assert.Equal("Thumbs up reaction", reaction.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void BubbleReactionCanRenderCallerOwnedVisualContent()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Heart reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "heart");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.ChildContent), (RenderFragment)(visual =>
+                {
+                    visual.OpenElement(0, "svg");
+                    visual.AddAttribute(1, "data-testid", "custom-reaction-visual");
+                    visual.CloseElement();
+                }));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("[data-slot='bubble-reaction']");
+        Assert.NotNull(reaction.QuerySelector("[data-testid='custom-reaction-visual']"));
+        Assert.DoesNotContain("heart", reaction.TextContent, StringComparison.Ordinal);
+        Assert.Equal("Heart reaction", reaction.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void BubbleReactionCanRenderAsAnAccessibleControlledToggleWithCount()
+    {
+        bool? requestedState = null;
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Heart reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "❤️");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Count), 2);
+                reactions.AddAttribute(4, nameof(ShadcnBubbleReaction.Pressed), false);
+                reactions.AddAttribute(5, nameof(ShadcnBubbleReaction.PressedChanged), EventCallback.Factory.Create<bool>(this, pressed => requestedState = pressed));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("button[data-slot='bubble-reaction']");
+        Assert.Equal("button", reaction.GetAttribute("type"));
+        Assert.Equal("false", reaction.GetAttribute("aria-pressed"));
+        Assert.Equal("Heart reaction, 2", reaction.GetAttribute("aria-label"));
+        Assert.Equal("2", reaction.QuerySelector("[data-slot='bubble-reaction-count']")?.TextContent);
+
+        reaction.Click();
+
+        Assert.True(requestedState);
+    }
+
+    [Fact]
+    public void BubbleReactionRejectsNegativeCounts()
+    {
+        Assert.ThrowsAny<Exception>(() => Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Invalid reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "❤️");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.Count), -1);
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        })));
+    }
+
+    [Fact]
+    public void BubbleReactionOverflowRevealsAdditionalReactionsAndRemovesExhaustedTrigger()
     {
         var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
         {
@@ -121,13 +221,9 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
 
         trigger.Click();
-        Assert.Equal("true", trigger.GetAttribute("aria-expanded"));
         Assert.Single(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
         Assert.Contains("Mali reacted with fire", cut.Markup, StringComparison.Ordinal);
-
-        trigger.Click();
-        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
-        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-content']"));
+        Assert.Empty(cut.FindAll("[data-slot='bubble-reaction-overflow-trigger']"));
     }
 
     [Fact]
@@ -155,8 +251,6 @@ public sealed class ConversationPresentationTests : BunitContext
 
         var trigger = cut.Find("[data-slot='bubble-reaction-overflow-trigger']");
         Assert.Equal("แสดงอีก 2 รายการ", trigger.GetAttribute("aria-label"));
-        trigger.Click();
-        Assert.Equal("ซ่อนอีก 2 รายการ", trigger.GetAttribute("aria-label"));
     }
 
     [Theory]
@@ -223,6 +317,41 @@ public sealed class ConversationPresentationTests : BunitContext
         Assert.Equal("ม", cut.Find("[data-slot='message-avatar']").TextContent);
         Assert.Equal("มาลีฟ", cut.Find("[data-slot='message-header']").TextContent);
         Assert.Equal("ส่งแล้ว", cut.Find("[data-slot='message-footer']").TextContent);
+    }
+
+    [Fact]
+    public void MessageOwnsLocalizedStreamingStatusAndCanHideItWithoutClearingBusyState()
+    {
+        var visible = Render<ShadcnMessage>(parameters => parameters
+            .Add(component => component.Streaming, true)
+            .Add(component => component.StreamingContent, Text("กำลังสร้างคำตอบ…"))
+            .AddChildContent<ShadcnMessageContent>(content => content.AddChildContent<ShadcnMessageBody>(body => body.AddChildContent(builder =>
+            {
+                builder.OpenComponent<ShadcnBubble>(0);
+                builder.AddAttribute(1, nameof(ShadcnBubble.ChildContent), (RenderFragment)(bubble =>
+                {
+                    bubble.OpenComponent<ShadcnBubbleContent>(0);
+                    bubble.AddAttribute(1, nameof(ShadcnBubbleContent.ChildContent), Text("คำตอบบางส่วน"));
+                    bubble.CloseComponent();
+                }));
+                builder.CloseComponent();
+            }))));
+
+        var message = visible.Find("[data-slot='message']");
+        var status = visible.Find("[data-slot='message-streaming-status']");
+        Assert.Equal("true", message.GetAttribute("aria-busy"));
+        Assert.Equal("true", message.GetAttribute("data-streaming"));
+        Assert.Equal("status", status.GetAttribute("role"));
+        Assert.Equal("polite", status.GetAttribute("aria-live"));
+        Assert.Equal("กำลังสร้างคำตอบ…", status.TextContent.Trim());
+        Assert.Empty(visible.FindAll("[data-slot='bubble-content'] [data-slot='message-streaming-status']"));
+
+        var hidden = Render<ShadcnMessage>(parameters => parameters
+            .Add(component => component.Streaming, true)
+            .Add(component => component.ShowStreamingStatus, false)
+            .AddChildContent<ShadcnMessageContent>());
+        Assert.Equal("true", hidden.Find("[data-slot='message']").GetAttribute("aria-busy"));
+        Assert.Empty(hidden.FindAll("[data-slot='message-streaming-status']"));
     }
 
     [Fact]
