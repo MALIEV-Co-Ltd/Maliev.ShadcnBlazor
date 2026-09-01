@@ -281,7 +281,8 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator("[data-slot='bubble-reactions'] [data-slot='avatar']")).ToHaveCountAsync(0);
         var emojiReactions = page.Locator("[data-slot='bubble-reaction-value']");
         await Assertions.Expect(emojiReactions).ToHaveCountAsync(3);
-        await Assertions.Expect(emojiReactions.First).ToHaveTextAsync("👍");
+        await Assertions.Expect(emojiReactions.First.Locator("svg.showcase-reaction-glyph--thumbs-up")).ToHaveCountAsync(1);
+        await Assertions.Expect(emojiReactions.First.Locator("xpath=..")).ToHaveAttributeAsync("aria-label", "Thumbs up reaction, 1");
 
         var heartReaction = page.GetByTestId("bubble-reaction-heart");
         await Assertions.Expect(heartReaction).ToHaveAttributeAsync("aria-pressed", "false");
