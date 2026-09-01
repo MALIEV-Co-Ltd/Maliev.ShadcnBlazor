@@ -4823,7 +4823,7 @@ a {
     .documentation-header {
         --documentation-compact-control-size: 2.75rem;
         gap: .25rem;
-        padding-inline: .5rem;
+        padding-inline: .75rem;
     }
 
     .documentation-header__leading,
@@ -4871,12 +4871,6 @@ a {
 
     .documentation-panel-header {
         padding-block-start: max(1rem, env(safe-area-inset-top));
-    }
-}
-
-@media (max-width: 22rem) {
-    .documentation-kofi {
-        display: none;
     }
 }
 
@@ -6679,6 +6673,12 @@ a {
 .documentation-version-link:focus-visible {
     outline: var(--shadcn-focus-ring-width) solid var(--shadcn-ring);
     outline-offset: var(--shadcn-focus-ring-offset);
+}
+
+@media (max-width: 22rem) {
+    .documentation-version-link {
+        display: none;
+    }
 }
 
 .documentation-brand__mark svg {
