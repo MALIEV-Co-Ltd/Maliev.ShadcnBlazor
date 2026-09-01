@@ -227,6 +227,12 @@ button.shadcn-bubble-reaction:disabled { cursor:not-allowed; opacity:.5; }
     border-end-start-radius: .35rem !important;
     border-bottom-right-radius: .35rem !important;
 }
+.shadcn-message[data-continuation="true"][data-align="start"] .shadcn-bubble[data-align="start"] > .shadcn-bubble-content {
+    border-start-start-radius: var(--shadcn-radius-sm) !important;
+}
+.shadcn-message[data-continuation="true"][data-align="end"] .shadcn-bubble[data-align="end"] > .shadcn-bubble-content {
+    border-start-end-radius: var(--shadcn-radius-sm) !important;
+}
 .shadcn-bubble-group[data-reveal="true"] > [data-slot="bubble"] {
     opacity: 0;
     animation: shadcn-bubble-reveal var(--shadcn-motion-duration) var(--shadcn-motion-easing-enter) both;

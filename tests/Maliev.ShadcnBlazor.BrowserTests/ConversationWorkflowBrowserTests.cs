@@ -198,6 +198,14 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         Assert.InRange(spacing[4], 8, 12);
         Assert.InRange(spacing[5], 0, 1);
         Assert.InRange(spacing[6], 0, 1);
+
+        var continuationContent = engineer.Nth(1).Locator("[data-slot='bubble-content']");
+        var ltrRadii = await continuationContent.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); return [parseFloat(style.borderStartStartRadius), parseFloat(style.borderStartEndRadius)]; }");
+        Assert.True(ltrRadii[0] < ltrRadii[1], $"continuation start radius={ltrRadii[0]}px, opposite radius={ltrRadii[1]}px");
+
+        await page.GetByTestId("documentation-direction-toggle").ClickAsync();
+        var rtlRadii = await continuationContent.EvaluateAsync<double[]>("element => { const style = getComputedStyle(element); return [parseFloat(style.borderStartStartRadius), parseFloat(style.borderStartEndRadius)]; }");
+        Assert.True(rtlRadii[0] < rtlRadii[1], $"RTL continuation start radius={rtlRadii[0]}px, opposite radius={rtlRadii[1]}px");
         Assert.False(await page.EvaluateAsync<bool>("document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 

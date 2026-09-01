@@ -320,6 +320,24 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void MessageContinuationOwnsItsRenderedGroupingState()
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            ["Continuation"] = true,
+            [nameof(ShadcnMessage.ChildContent)] = Text("Follow-up message")
+        };
+
+        IRenderedComponent<DynamicComponent>? cut = null;
+        var exception = Record.Exception(() => cut = Render<DynamicComponent>(component => component
+            .Add(current => current.Type, typeof(ShadcnMessage))
+            .Add(current => current.Parameters, parameters)));
+
+        Assert.Null(exception);
+        Assert.Equal("true", cut!.Find("[data-slot='message']").GetAttribute("data-continuation"));
+    }
+
+    [Fact]
     public void MessageOwnsLocalizedStreamingStatusAndCanHideItWithoutClearingBusyState()
     {
         var visible = Render<ShadcnMessage>(parameters => parameters

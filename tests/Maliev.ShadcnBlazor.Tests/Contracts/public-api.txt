@@ -286,6 +286,7 @@ enum Maliev.ShadcnBlazor.Components.Conversation.ShadcnMarkerVariant: Default, S
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnMessage
   ShadcnLogicalAlign Align
   RenderFragment ChildContent
+  Boolean Continuation
   Boolean ShowStreamingStatus
   Boolean Streaming
   RenderFragment StreamingContent

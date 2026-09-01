@@ -5,6 +5,7 @@
      style="@MergeStyle(null)"
      data-slot="message"
      data-align="@AlignValue"
+     data-continuation="@(Continuation ? "true" : null)"
      data-streaming="@(Streaming ? "true" : null)"
      aria-busy="@(Streaming ? "true" : null)">
     <CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
@@ -13,6 +14,8 @@
 @code {
     [Parameter] public ShadcnLogicalAlign Align { get; set; }
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    /// <summary>Gets or sets whether this message visually continues the preceding message from the same sender.</summary>
+    [Parameter] public bool Continuation { get; set; }
     [Parameter] public bool ShowStreamingStatus { get; set; } = true;
     [Parameter] public bool Streaming { get; set; }
     [Parameter] public RenderFragment? StreamingContent { get; set; }
@@ -20,7 +23,7 @@
     internal bool HasStreamingStatus => Streaming && ShowStreamingStatus && StreamingContent is not null;
 
     private string AlignValue => ShadcnConversationValues.Align(Align);
-    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-align", "data-streaming", "aria-busy");
+    private IReadOnlyDictionary<string, object> ForwardedAttributes => AttributesExcept("data-slot", "data-align", "data-continuation", "data-streaming", "aria-busy");
 
     protected override void OnParametersSet()
     {
