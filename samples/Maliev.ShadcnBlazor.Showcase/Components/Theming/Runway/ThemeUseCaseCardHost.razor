@@ -139,8 +139,8 @@
             break;
         case "conversation-marker":
             <div class="theme-marker-conversation" aria-label="@T("Conversation before inspection milestone")">
-                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Ghost"><ShadcnBubbleContent>@T("Machining is complete. Bore 4 is ready for final inspection.")</ShadcnBubbleContent></ShadcnBubble>
-                <ShadcnBubble Align="ShadcnLogicalAlign.End"><ShadcnBubbleContent>@T("Probe result received. I am uploading the signed report now.")</ShadcnBubbleContent></ShadcnBubble>
+                <ShadcnBubble Align="ShadcnLogicalAlign.Start" Variant="ShadcnBubbleVariant.Secondary"><ShadcnBubbleContent>@T("Machining is complete. Bore 4 is ready for final inspection.")</ShadcnBubbleContent></ShadcnBubble>
+                <ShadcnBubble Align="ShadcnLogicalAlign.End" Variant="ShadcnBubbleVariant.Default"><ShadcnBubbleContent>@T("Probe result received. I am uploading the signed report now.")</ShadcnBubbleContent></ShadcnBubble>
             </div>
             <ShadcnMarker Variant="ShadcnMarkerVariant.Separator"><ShadcnMarkerContent>14:32 · WO-2418</ShadcnMarkerContent></ShadcnMarker>
             <div class="theme-runway-activity"><ShadcnAvatar Size="ShadcnAvatarSize.Small"><ShadcnAvatarImage Source="images/avatars/reviewer-thai.png" Alt="Kanda, Thai quality reviewer" /><ShadcnAvatarFallback>KT</ShadcnAvatarFallback></ShadcnAvatar><span><strong>@T("Final inspection uploaded")</strong><small>@T("Kanda attached the signed dimensional report.")</small></span><ShadcnBadge Class="theme-status-success">@T("Ready")</ShadcnBadge></div>
@@ -185,7 +185,7 @@
                                                 }
                                                 <ShadcnMessageContent><ShadcnMessageBody>
                                                     @if (turn.Assistant) { <ShadcnMessageHeader>@T("MALIEV Assistant")</ShadcnMessageHeader> }
-                                                    <ShadcnBubble Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)" Variant="@(turn.Assistant ? ShadcnBubbleVariant.Ghost : ShadcnBubbleVariant.Default)"><ShadcnBubbleContent>
+                                                    <ShadcnBubble Align="@(turn.Assistant ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)" Variant="@(turn.Assistant ? ShadcnBubbleVariant.Secondary : ShadcnBubbleVariant.Default)"><ShadcnBubbleContent>
                                                         @if (!string.IsNullOrWhiteSpace(TurnReplyText(turn)))
                                                         {
                                                             <ShadcnMessageReplyQuote Quote="@(TurnReplyText(turn)!)" Label="@T("Replying to")" />

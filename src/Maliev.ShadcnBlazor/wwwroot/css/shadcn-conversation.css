@@ -37,7 +37,7 @@
 .shadcn-bubble[data-align="end"] { align-self:flex-end; }
 .shadcn-bubble[data-variant="ghost"] { width:fit-content; max-width:80%; }
 .shadcn-bubble-content { display:block; width:fit-content; max-width:100%; min-width:0; overflow-wrap:anywhere; border:1px solid transparent; border-radius:var(--shadcn-radius-lg); padding:calc(.625rem * var(--shadcn-spacing-multiplier)) calc(.875rem * var(--shadcn-spacing-multiplier)); background:var(--shadcn-primary); color:var(--shadcn-primary-foreground); text-align:start; }
-.shadcn-bubble[data-variant="secondary"] > .shadcn-bubble-content { background:var(--shadcn-secondary); color:var(--shadcn-secondary-foreground); }
+.shadcn-bubble[data-variant="secondary"] > .shadcn-bubble-content { border:0; background:var(--shadcn-secondary); color:var(--shadcn-secondary-foreground); box-shadow:none; }
 .shadcn-bubble[data-variant="muted"] > .shadcn-bubble-content { background:var(--shadcn-muted); color:var(--shadcn-muted-foreground); }
 .shadcn-bubble[data-variant="tinted"] > .shadcn-bubble-content { background:color-mix(in srgb,var(--shadcn-primary) 10%,transparent); color:var(--shadcn-foreground); }
 .shadcn-bubble[data-variant="outline"] > .shadcn-bubble-content { border-color:var(--shadcn-border); background:var(--shadcn-background); color:var(--shadcn-foreground); }

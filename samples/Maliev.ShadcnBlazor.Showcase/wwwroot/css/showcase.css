@@ -6862,11 +6862,6 @@ a {
     max-inline-size: min(78%, 28rem);
 }
 
-.showcase-bubble-thread .shadcn-bubble-content {
-    border: 1px solid color-mix(in oklch, currentColor 14%, transparent);
-    box-shadow: 0 1px 2px color-mix(in oklch, var(--shadcn-foreground) 8%, transparent);
-}
-
 .sr-only {
     position: absolute;
     width: 1px;

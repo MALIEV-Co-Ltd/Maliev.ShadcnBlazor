@@ -1493,7 +1493,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
     }
 
     [Fact]
-    public async Task DarkGhostMessagesAndInputGroupsKeepReadableSingleBoundaries()
+    public async Task DarkSecondaryMessagesStayBorderlessAndInputGroupsKeepSingleBoundaries()
     {
         await using var context = await NewContextAsync(1440, 900, ReducedMotion.Reduce);
         var page = await OpenAsync(context);
@@ -1501,7 +1501,7 @@ public sealed class ThemeStudioBrowserTests(ShowcaseServerFixture server, Playwr
 
         var conversation = page.Locator("[data-use-case-id='assistant-conversation']");
         var assistantMessage = conversation.Locator(".shadcn-message").Filter(new() { HasText = "MALIEV Assistant" }).First;
-        Assert.True(await assistantMessage.EvaluateAsync<bool>("element => { const bubble = element.querySelector('.shadcn-bubble[data-variant=ghost]'); const header = element.querySelector('.shadcn-message-header'); const content = element.querySelector('.shadcn-bubble-content'); if (!bubble || !header || !content) return false; const style = getComputedStyle(bubble); const headerBox = header.getBoundingClientRect(); const contentBox = content.getBoundingClientRect(); return style.borderTopStyle !== 'none' && style.borderTopColor !== 'rgba(0, 0, 0, 0)' && Math.abs(headerBox.left - contentBox.left) <= 1; }"));
+        Assert.True(await assistantMessage.EvaluateAsync<bool>("element => { const bubble = element.querySelector('.shadcn-bubble[data-variant=secondary]'); const header = element.querySelector('.shadcn-message-header'); const content = element.querySelector('.shadcn-bubble-content'); if (!bubble || !header || !content) return false; const style = getComputedStyle(content); const headerBox = header.getBoundingClientRect(); const contentBox = content.getBoundingClientRect(); return style.borderTopWidth === '0px' && style.boxShadow === 'none' && Math.abs(headerBox.left - contentBox.left) <= 1; }"));
 
         var qualityConsole = page.Locator("[data-console='quality']");
         await qualityConsole.GetByRole(AriaRole.Tab, new() { Name = "Support", Exact = true }).ClickAsync();

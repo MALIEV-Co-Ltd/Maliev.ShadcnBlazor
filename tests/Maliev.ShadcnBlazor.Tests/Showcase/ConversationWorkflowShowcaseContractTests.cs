@@ -117,7 +117,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, incoming.Count);
         Assert.All(incoming, bubble =>
         {
-            Assert.Equal("ghost", bubble.GetAttribute("data-variant"));
+            Assert.Equal("secondary", bubble.GetAttribute("data-variant"));
             Assert.Equal("start", bubble.GetAttribute("data-align"));
         });
         var outgoing = cut.FindAll("[data-bubble-role='outgoing']");
@@ -183,7 +183,7 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(3, cut.FindAll("[data-slot='bubble']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='message-avatar']").Count);
-        Assert.Equal(2, cut.FindAll("[data-slot='message'][data-align='start'] [data-slot='bubble'][data-variant='ghost']").Count);
+        Assert.Equal(2, cut.FindAll("[data-slot='message'][data-align='start'] [data-slot='bubble'][data-variant='secondary']").Count);
         Assert.Single(cut.FindAll("[data-slot='message'][data-align='end'] [data-slot='bubble'][data-variant='default']"));
         Assert.Equal(3, cut.FindAll("[data-slot='marker']").Count);
         Assert.Equal(3, cut.FindAll("[data-slot='marker-icon']").Count);

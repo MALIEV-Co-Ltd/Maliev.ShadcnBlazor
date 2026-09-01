@@ -16,7 +16,7 @@
             }
             else if (Case.StartsWith("bubble", StringComparison.Ordinal))
             {
-                <ShadcnBubbleGroup><ShadcnBubble Variant="@(Case.EndsWith("end-reaction") ? ShadcnBubbleVariant.Secondary : ShadcnBubbleVariant.Default)" Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)"><ShadcnBubbleContent>The quotation is ready for review.</ShadcnBubbleContent><ShadcnBubbleReactions Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)"><button aria-label="Helpful">👍</button><button aria-label="Copy">Copy</button></ShadcnBubbleReactions></ShadcnBubble></ShadcnBubbleGroup>
+                <ShadcnBubbleGroup><ShadcnBubble Variant="@(Case.EndsWith("end-reaction") ? ShadcnBubbleVariant.Default : ShadcnBubbleVariant.Secondary)" Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.End : ShadcnLogicalAlign.Start)"><ShadcnBubbleContent>The quotation is ready for review.</ShadcnBubbleContent><ShadcnBubbleReactions Align="@(Case.EndsWith("end-reaction") ? ShadcnLogicalAlign.Start : ShadcnLogicalAlign.End)"><button aria-label="Helpful">👍</button><button aria-label="Copy">Copy</button></ShadcnBubbleReactions></ShadcnBubble></ShadcnBubbleGroup>
             }
             else if (Case.StartsWith("marker", StringComparison.Ordinal))
             {

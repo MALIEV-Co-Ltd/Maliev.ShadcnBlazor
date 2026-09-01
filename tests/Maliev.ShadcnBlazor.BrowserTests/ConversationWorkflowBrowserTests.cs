@@ -68,7 +68,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(page.Locator("[data-slot='bubble-reactions']")).ToHaveCountAsync(3);
         var incomingBubbles = page.Locator("[data-bubble-role='incoming']");
         await Assertions.Expect(incomingBubbles).ToHaveCountAsync(3);
-        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "ghost");
+        await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-variant", "secondary");
         await Assertions.Expect(incomingBubbles.First).ToHaveAttributeAsync("data-align", "start");
         var outgoingBubbles = page.Locator("[data-bubble-role='outgoing']");
         await Assertions.Expect(outgoingBubbles).ToHaveCountAsync(2);
@@ -77,7 +77,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         for (var index = 0; index < await outgoingBubbles.CountAsync(); index++)
             await Assertions.Expect(outgoingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "tinted");
         for (var index = 0; index < await incomingBubbles.CountAsync(); index++)
-            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "ghost");
+            await Assertions.Expect(incomingBubbles.Nth(index)).ToHaveAttributeAsync("data-variant", "secondary");
         await page.GetByTestId("control-bubble-end").CheckAsync();
         var selectedIncomingBubble = page.Locator("[data-bubble-role='incoming']").Filter(new() { HasTextString = "I can group messages, switch sides, and keep the whole thread easy to scan." });
         await Assertions.Expect(selectedIncomingBubble).ToHaveAttributeAsync("data-align", "end");
@@ -235,7 +235,7 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
     }
 
     [Fact]
-    public async Task BubblePreviewUsesDarkOutgoingGhostIncomingAndExpandableEmojiReactions()
+    public async Task BubblePreviewUsesDarkOutgoingBorderlessSecondaryIncomingAndExpandableEmojiReactions()
     {
         await using var context = await playwright.Browser.NewContextAsync(new()
         {
@@ -258,15 +258,18 @@ public sealed class ConversationWorkflowBrowserTests(ShowcaseServerFixture serve
         var defaultBackground = await defaultBubble.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
 
         var incoming = page.Locator("[data-bubble-role='incoming']").First;
-        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "secondary");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-align", "start");
         var incomingContent = incoming.Locator("[data-slot='bubble-content']");
-        var ghostBackground = await incomingContent.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
-        Assert.NotEqual(defaultBackground, ghostBackground);
+        var secondaryStyles = await incomingContent.EvaluateAsync<string>("element => { const style = getComputedStyle(element); return `${style.backgroundColor}|${style.borderTopWidth}|${style.boxShadow}`; }");
+        var secondaryStyleParts = secondaryStyles.Split('|');
+        Assert.NotEqual(defaultBackground, secondaryStyleParts[0]);
+        Assert.Equal("0px", secondaryStyleParts[1]);
+        Assert.Equal("none", secondaryStyleParts[2]);
 
         await page.ChooseOptionAsync("control-bubble-variant", "Tinted");
         await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");
-        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "ghost");
+        await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "secondary");
         await page.ChooseOptionAsync("control-bubble-received-variant", "Muted");
         await Assertions.Expect(incoming).ToHaveAttributeAsync("data-variant", "muted");
         await Assertions.Expect(outgoing.First).ToHaveAttributeAsync("data-variant", "tinted");

@@ -30,11 +30,11 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
-    public void BubbleDefaultsToGhostVariant()
+    public void BubbleDefaultsToSecondaryVariant()
     {
         var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent<ShadcnBubbleContent>(content => content.AddChildContent("Default bubble")));
 
-        Assert.Equal("ghost", cut.Find("[data-slot='bubble']").GetAttribute("data-variant"));
+        Assert.Equal("secondary", cut.Find("[data-slot='bubble']").GetAttribute("data-variant"));
     }
 
     [Fact]
