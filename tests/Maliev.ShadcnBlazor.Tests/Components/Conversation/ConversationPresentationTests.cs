@@ -114,6 +114,34 @@ public sealed class ConversationPresentationTests : BunitContext
     }
 
     [Fact]
+    public void BubbleReactionCanRenderCallerOwnedVisualContent()
+    {
+        var cut = Render<ShadcnBubble>(parameters => parameters.AddChildContent(builder =>
+        {
+            builder.OpenComponent<ShadcnBubbleReactions>(0);
+            builder.AddAttribute(1, nameof(ShadcnBubbleReactions.ChildContent), (RenderFragment)(reactions =>
+            {
+                reactions.OpenComponent<ShadcnBubbleReaction>(0);
+                reactions.AddAttribute(1, nameof(ShadcnBubbleReaction.AccessibleName), "Heart reaction");
+                reactions.AddAttribute(2, nameof(ShadcnBubbleReaction.Fallback), "heart");
+                reactions.AddAttribute(3, nameof(ShadcnBubbleReaction.ChildContent), (RenderFragment)(visual =>
+                {
+                    visual.OpenElement(0, "svg");
+                    visual.AddAttribute(1, "data-testid", "custom-reaction-visual");
+                    visual.CloseElement();
+                }));
+                reactions.CloseComponent();
+            }));
+            builder.CloseComponent();
+        }));
+
+        var reaction = cut.Find("[data-slot='bubble-reaction']");
+        Assert.NotNull(reaction.QuerySelector("[data-testid='custom-reaction-visual']"));
+        Assert.DoesNotContain("heart", reaction.TextContent, StringComparison.Ordinal);
+        Assert.Equal("Heart reaction", reaction.GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void BubbleReactionCanRenderAsAnAccessibleControlledToggleWithCount()
     {
         bool? requestedState = null;

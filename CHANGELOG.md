@@ -15,6 +15,8 @@ All notable changes to this project are documented here. The format follows
   actions while preserving the existing toolbar as the default mode.
 - Added an assembly-derived package-version badge to the documentation header
   that links each deployed build to its matching GitHub release.
+- Added caller-owned visual content for Bubble reactions so applications can
+  provide deterministic icons while retaining accessible reaction names.
 
 ### Changed
 

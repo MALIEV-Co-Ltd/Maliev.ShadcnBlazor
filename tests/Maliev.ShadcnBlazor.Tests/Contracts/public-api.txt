@@ -248,6 +248,7 @@ type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleGroup
   RenderFragment ChildContent
 type Maliev.ShadcnBlazor.Components.Conversation.ShadcnBubbleReaction
   String AccessibleName
+  RenderFragment ChildContent
   Nullable<Int32> Count
   Boolean Disabled
   String Fallback

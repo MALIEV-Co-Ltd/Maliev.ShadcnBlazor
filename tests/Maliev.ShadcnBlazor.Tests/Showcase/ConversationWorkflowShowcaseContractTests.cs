@@ -123,8 +123,9 @@ public sealed class ConversationWorkflowShowcaseContractTests : BunitContext
         Assert.Equal(2, outgoing.Count);
         Assert.All(outgoing, bubble => Assert.Equal("default", bubble.GetAttribute("data-variant")));
         Assert.Empty(cut.FindAll("[data-slot='bubble-reaction'] [data-slot='avatar']"));
-        Assert.Contains("👍", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
-        Assert.Contains("❤️", cut.FindAll("[data-slot='bubble-reaction-value']").Select(reaction => reaction.TextContent));
+        Assert.Equal(3, cut.FindAll("[data-slot='bubble-reaction-value'] .showcase-reaction-glyph").Count);
+        Assert.NotNull(cut.Find("[aria-label^='Thumbs up reaction'] .showcase-reaction-glyph--thumbs-up"));
+        Assert.NotNull(cut.Find("[aria-label^='Heart reaction'] .showcase-reaction-glyph--heart"));
         var heartReaction = cut.Find("button[data-testid='bubble-reaction-heart']");
         Assert.Equal("false", heartReaction.GetAttribute("aria-pressed"));
         Assert.Equal("2", heartReaction.QuerySelector("[data-slot='bubble-reaction-count']")?.TextContent);

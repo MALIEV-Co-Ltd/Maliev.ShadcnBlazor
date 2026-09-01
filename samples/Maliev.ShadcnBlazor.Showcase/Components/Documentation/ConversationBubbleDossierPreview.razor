@@ -12,7 +12,9 @@
                                   AccessibleName="Thumbs up reaction"
                                   Count="_thumbsUpCount"
                                   Pressed="_thumbsUpPressed"
-                                  PressedChanged="SetThumbsUp" />
+                                  PressedChanged="SetThumbsUp">
+                <ShowcaseReactionGlyph Kind="thumbs-up" />
+            </ShadcnBubbleReaction>
         </ShadcnBubbleReactions>
     </ShadcnBubble>
 
@@ -32,25 +34,33 @@
                                   Count="_heartCount"
                                   Pressed="_heartPressed"
                                   PressedChanged="SetHeart"
-                                  data-testid="bubble-reaction-heart" />
+                                  data-testid="bubble-reaction-heart">
+                <ShowcaseReactionGlyph Kind="heart" />
+            </ShadcnBubbleReaction>
             <ShadcnBubbleReaction Fallback="😂"
                                   AccessibleName="Laughing reaction"
                                   Count="_laughCount"
                                   Pressed="_laughPressed"
-                                  PressedChanged="SetLaugh" />
+                                  PressedChanged="SetLaugh">
+                <ShowcaseReactionGlyph Kind="laugh" />
+            </ShadcnBubbleReaction>
             <ShadcnBubbleReactionOverflow Count="2">
                 <ShadcnBubbleReaction Fallback="🔥"
                                       AccessibleName="Fire reaction"
                                       Count="_fireCount"
                                       Pressed="_firePressed"
                                       PressedChanged="SetFire"
-                                      data-testid="bubble-reaction-fire" />
+                                      data-testid="bubble-reaction-fire">
+                    <ShowcaseReactionGlyph Kind="fire" />
+                </ShadcnBubbleReaction>
                 <ShadcnBubbleReaction Fallback="👀"
                                       AccessibleName="Eyes reaction"
                                       Count="_eyesCount"
                                       Pressed="_eyesPressed"
                                       PressedChanged="SetEyes"
-                                      data-testid="bubble-reaction-eyes" />
+                                      data-testid="bubble-reaction-eyes">
+                    <ShowcaseReactionGlyph Kind="eyes" />
+                </ShadcnBubbleReaction>
             </ShadcnBubbleReactionOverflow>
         </ShadcnBubbleReactions>
     </ShadcnBubble>

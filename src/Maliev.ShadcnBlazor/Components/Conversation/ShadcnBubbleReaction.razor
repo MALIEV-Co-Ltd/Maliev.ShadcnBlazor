@@ -42,6 +42,7 @@ else
     [Parameter, EditorRequired] public string AccessibleName { get; set; } = string.Empty;
     [Parameter] public string? Source { get; set; }
     [Parameter, EditorRequired] public string Fallback { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public int? Count { get; set; }
     [Parameter] public bool Pressed { get; set; }
     [Parameter] public EventCallback<bool> PressedChanged { get; set; }
@@ -74,7 +75,10 @@ else
         builder.AddAttribute(1, "class", "shadcn-bubble-reaction-value");
         builder.AddAttribute(2, "data-slot", "bubble-reaction-value");
         builder.AddAttribute(3, "aria-hidden", "true");
-        builder.AddContent(4, Fallback);
+        if (ChildContent is not null)
+            builder.AddContent(4, ChildContent);
+        else
+            builder.AddContent(5, Fallback);
         builder.CloseElement();
     };
 
