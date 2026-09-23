@@ -8,6 +8,16 @@ Library.
 
 [Explore every component in the live interactive demo](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/).
 
+## See the components
+
+| Charts | Command palette |
+| --- | --- |
+| [![Bar chart component showing desktop and mobile data series](https://raw.githubusercontent.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/main/docs/evidence/component-catalog-baselines/chart--desktop-light.png)](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/docs/components) | [![Command palette component with search, navigation, and actions](https://raw.githubusercontent.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/main/docs/evidence/component-catalog-baselines/command--desktop-light.png)](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/docs/components) |
+
+Screenshots show components in the live Showcase. Explore the
+[full catalog](https://maliev-co-ltd.github.io/Maliev.ShadcnBlazor/)
+for interactive examples, accessibility notes, and theming options.
+
 ## Install
 
 ```bash
