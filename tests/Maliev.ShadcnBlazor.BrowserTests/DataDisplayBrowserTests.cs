@@ -8,6 +8,38 @@ namespace Maliev.ShadcnBlazor.BrowserTests;
 public sealed class DataDisplayBrowserTests(ShowcaseServerFixture server, PlaywrightFixture playwright)
 {
     [Fact]
+    public async Task ChartTooltipEscapesClippingAndStackingContext()
+    {
+        await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 900, Height = 700 }, ReducedMotion = ReducedMotion.Reduce });
+        var page = await context.NewPageAsync();
+        await page.GotoAsync(new Uri(server.BaseUri, "/docs/components/chart").ToString());
+        await page.GetByTestId("component-dossier").WaitForAsync();
+        await page.ChooseOptionAsync("control-chart-type", "Donut");
+        var chart = page.Locator("#preview [data-slot='chart']");
+        await chart.EvaluateAsync("element => { element.style.overflow = 'hidden'; element.style.isolation = 'isolate'; }");
+        await chart.Locator("path[data-chart-shape='arc']").First.FocusAsync();
+        var tooltip = chart.Locator("[data-slot='chart-tooltip-content']");
+        await Assertions.Expect(tooltip).ToBeVisibleAsync();
+        await Assertions.Expect(tooltip).ToHaveAttributeAsync("data-positioned", "true");
+        Assert.True(await tooltip.EvaluateAsync<bool>("element => element.matches(':popover-open')"),
+            "The tooltip must be in the top layer above clipping and stacking contexts.");
+        var box = await tooltip.BoundingBoxAsync();
+        Assert.NotNull(box);
+        Assert.True(box.X >= 0 && box.Y >= 0 && box.X + box.Width <= 900 && box.Y + box.Height <= 700);
+        await page.ChooseOptionAsync("control-chart-type", "Line");
+        var points = chart.Locator("[data-slot='chart-point']");
+        var lastPoint = points.Last;
+        var lastIndex = await lastPoint.GetAttributeAsync("data-point");
+        await lastPoint.DispatchEventAsync("pointerenter");
+        await Assertions.Expect(tooltip).ToHaveAttributeAsync("data-active-point", lastIndex!);
+        await points.First.DispatchEventAsync("pointerenter");
+        await Assertions.Expect(tooltip).ToHaveAttributeAsync("data-active-point", "0");
+        await chart.Locator("[data-slot='chart-surface']").FocusAsync();
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(tooltip).ToHaveCountAsync(0);
+    }
+
+    [Fact]
     public async Task DataTableSupportsSortFilterSelectVisibilityPageAndStateControls()
     {
         await using var context = await playwright.Browser.NewContextAsync(new() { ViewportSize = new() { Width = 390, Height = 844 }, ReducedMotion = ReducedMotion.Reduce });
