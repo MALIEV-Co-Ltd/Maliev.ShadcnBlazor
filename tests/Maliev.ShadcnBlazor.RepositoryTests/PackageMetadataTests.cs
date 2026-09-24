@@ -4,8 +4,8 @@ namespace Maliev.ShadcnBlazor.RepositoryTests;
 
 public sealed class PackageMetadataTests
 {
-    private const string ReleaseVersion = "2.2.0";
-    private const string PreviousReleaseVersion = "2.1.4";
+    private const string ReleaseVersion = "2.2.1";
+    private const string PreviousReleaseVersion = "2.2.0";
 
     [Fact]
     public void PackageMetadataIsReadyForPublicNuGetDistribution()

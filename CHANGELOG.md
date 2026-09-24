@@ -6,6 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-09-24
+
+### Added
+
+- Added a component preview gallery to the repository README.
+
+### Fixed
+
+- Kept chart tooltips visible when a chart is inside a clipped container.
+- Excluded hidden sidebar descendants from the mobile focus trap.
+
+### Changed
+
+- Expanded HoverCard browser coverage for the `aria-describedby` lifecycle.
+- Updated the SourceLink dependency and pinned GitHub Pages and CodeQL actions.
+
 ## [2.2.0] - 2026-09-01
 
 ### Added
@@ -411,7 +427,8 @@ All notable changes to this project are documented here. The format follows
 - Standalone component Showcase, unit tests, and real-browser regression tests.
 - Signed-source metadata, symbol package, MIT license, and third-party notices.
 
-[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.4...v2.2.0
 [2.1.4]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/MALIEV-Co-Ltd/Maliev.ShadcnBlazor/compare/v2.1.2...v2.1.3
