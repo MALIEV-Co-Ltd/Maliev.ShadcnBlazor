@@ -29,6 +29,7 @@ export function observe(element, receiver) {
         tooltip.dataset.positioned = 'true';
     };
     const schedulePosition = () => {
+        if (!activeTooltip && !element.querySelector('[data-slot="chart-tooltip-content"]')) return;
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(positionTooltip);
     };
@@ -43,7 +44,8 @@ export function observe(element, receiver) {
             const rect = (surface ?? element).getBoundingClientRect();
             element.style.setProperty("--shadcn-chart-width", `${rect.width}px`);
             element.dataset.chartMeasured = rect.width > 0 && rect.height > 0 ? "true" : "false";
-            if (rect.width > 0 && rect.height > 0) receiver.invokeMethodAsync("OnChartResize", rect.width, rect.height).then(schedulePosition);
+            if (rect.width > 0 && rect.height > 0) receiver.invokeMethodAsync("OnChartResize", rect.width, rect.height);
+            schedulePosition();
         });
     });
     observer.observe(surface ?? element);
