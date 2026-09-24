@@ -206,7 +206,8 @@ export function attachSidebarOverlay(aside, dotnet) {
     const inerted = []; let branch = aside;
     while (branch && branch !== document.body) { const parent = branch.parentElement; if (!parent) break; [...parent.children].filter(element => element !== branch && element.dataset.slot !== 'sidebar-backdrop').forEach(element => inerted.push({ element, inert: element.inert, ariaHidden: element.getAttribute('aria-hidden') })); branch = parent; }
     inerted.forEach(({ element }) => { element.inert = true; element.setAttribute('aria-hidden', 'true'); });
-    const focusable = () => [...aside.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),[tabindex]:not([tabindex="-1"])')];
+    const focusable = () => [...aside.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),[tabindex]:not([tabindex="-1"])')]
+        .filter(element => element.getClientRects().length > 0 && !element.closest('[inert], [aria-hidden="true"]') && !element.matches(':disabled'));
     const keydown = event => {
         if (event.key === 'Escape') { event.preventDefault(); releaseSidebarOverlay(aside); dotnet.invokeMethodAsync('CloseMobileFromOverlayAsync'); return; }
         if (event.key !== 'Tab') return;

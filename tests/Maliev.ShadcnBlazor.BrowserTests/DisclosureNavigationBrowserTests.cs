@@ -460,6 +460,12 @@ public sealed class DisclosureNavigationBrowserTests(ShowcaseServerFixture serve
         await Assertions.Expect(dialog).ToHaveAttributeAsync("aria-modal", "true");
         Assert.True(await dialog.EvaluateAsync<bool>("element => element.contains(document.activeElement)"));
         Assert.True(await mobileCanvas.Locator("[data-slot='sidebar-inset']").EvaluateAsync<bool>("element => element.inert"));
+        await dialog.EvaluateAsync("aside => { const content = document.createElement('div'); content.hidden = true; content.dataset.slot = 'collapsible-content'; const link = document.createElement('a'); link.href = '#hidden'; link.textContent = 'Hidden link'; content.append(link); aside.append(content); }");
+        var firstVisibleControl = dialog.Locator("button").First;
+        var lastVisibleControl = dialog.Locator("[data-slot='sidebar-footer'] [data-slot='sidebar-menu-button']").Last;
+        await firstVisibleControl.FocusAsync();
+        await mobile.Keyboard.PressAsync("Shift+Tab");
+        await Assertions.Expect(lastVisibleControl).ToBeFocusedAsync();
         await mobile.Keyboard.PressAsync("Escape");
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await Assertions.Expect(mobileTrigger).ToBeFocusedAsync();
