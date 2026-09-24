@@ -23,6 +23,7 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         var content = page.Locator("#preview [data-slot='hover-card-content']");
         await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-expanded", "false");
         await Assertions.Expect(content).ToHaveCountAsync(0);
+        Assert.Null(await trigger.GetAttributeAsync("aria-describedby"));
         var triggerBeforeOpen = await trigger.BoundingBoxAsync();
 
         await trigger.FocusAsync();
@@ -42,6 +43,7 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         await page.Keyboard.PressAsync("Escape");
         await Assertions.Expect(content).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).ToBeFocusedAsync();
+        Assert.Null(await trigger.GetAttributeAsync("aria-describedby"));
         await page.WaitForTimeoutAsync(700);
         await Assertions.Expect(content).ToHaveCountAsync(0);
 
@@ -49,6 +51,7 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         await page.GetByTestId("control-hover-card-fast").CheckAsync();
         await trigger.HoverAsync();
         await Assertions.Expect(content).ToBeVisibleAsync();
+        await Assertions.Expect(trigger).ToHaveAttributeAsync("aria-describedby", contentId!);
         await content.HoverAsync();
         await page.WaitForTimeoutAsync(350);
         await Assertions.Expect(content).ToBeVisibleAsync();
@@ -59,6 +62,7 @@ public sealed class HoverCardBrowserTests(ShowcaseServerFixture server, Playwrig
         await page.Locator("#overview").ClickAsync();
         await Assertions.Expect(content).ToHaveCountAsync(0);
         await Assertions.Expect(trigger).Not.ToBeFocusedAsync();
+        Assert.Null(await trigger.GetAttributeAsync("aria-describedby"));
     }
 
     [Fact]
